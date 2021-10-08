@@ -144,13 +144,12 @@ func TestReconcile(t *testing.T) {
 	suggestionDeploy := &appsv1.Deployment{}
 
 	// Expect that deployment with appropriate name and image is created
-	g.Eventually(func() bool {
+	g.Eventually(func() string {
 		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, suggestionDeploy); err != nil {
-			return false
+			return ""
 		}
-		return len(suggestionDeploy.Spec.Template.Spec.Containers) > 0 &&
-			suggestionDeploy.Spec.Template.Spec.Containers[0].Image == suggestionImage
-	}, timeout).Should(gomega.BeTrue())
+		return suggestionDeploy.Spec.Template.Spec.Containers[0].Image
+	}, timeout).Should(gomega.Equal(suggestionImage))
 
 	// Expect that service with appropriate name is created
 	g.Eventually(func() error {
@@ -300,8 +299,10 @@ func newFakeInstance() *suggestionsv1beta1.Suggestion {
 
 func newKatibConfigMapInstance() *corev1.ConfigMap {
 	// Create suggestion config
-	suggestionConfig := map[string]map[string]string{
-		"random": {"image": suggestionImage},
+	suggestionConfig := map[string]katibconfig.SuggestionConfig{
+		"random": {
+			Image: suggestionImage,
+		},
 	}
 	bSuggestionConfig, _ := json.Marshal(suggestionConfig)
 

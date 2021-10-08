@@ -159,7 +159,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 	// Check that metric file exists.
 	checkMetricFile(mFile)
 
-	// Get Main proccess.
+	// Get Main process.
 	_, mainProcPid, err := common.GetMainProcesses(mFile)
 	if err != nil {
 		klog.Fatalf("GetMainProcesses failed: %v", err)
@@ -271,7 +271,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				klog.Fatalf("Write to file %v error: %v", markFile, err)
 			}
 
-			// Get child proccess from main PID.
+			// Get child process from main PID.
 			childProc, err := mainProc.Children()
 			if err != nil {
 				klog.Fatalf("Get children proceses for main PID: %v failed: %v", mainProcPid, err)
@@ -291,7 +291,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 			// Report metrics to DB.
 			reportMetrics(filters)
 
-			// Wait until main proccess is completed.
+			// Wait until main process is completed.
 			timeout := 60 * time.Second
 			endTime := time.Now().Add(timeout)
 			isProcRunning := true

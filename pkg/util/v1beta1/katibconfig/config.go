@@ -19,7 +19,7 @@ package katibconfig
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -44,18 +44,18 @@ type SuggestionConfig struct {
 	PersistentVolumeLabels    map[string]string                `json:"persistentVolumeLabels,omitempty"`
 }
 
+// EarlyStoppingConfig is the JSON early stopping structure in Katib config.
+type EarlyStoppingConfig struct {
+	Image           string            `json:"image"`
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
+}
+
 // MetricsCollectorConfig is the JSON metrics collector structure in Katib config.
 type MetricsCollectorConfig struct {
 	Image            string                      `json:"image"`
 	ImagePullPolicy  corev1.PullPolicy           `json:"imagePullPolicy,omitempty"`
 	Resource         corev1.ResourceRequirements `json:"resources,omitempty"`
 	WaitAllProcesses *bool                       `json:"waitAllProcesses,omitempty"`
-}
-
-// EarlyStoppingConfig is the JSON early stopping structure in Katib config.
-type EarlyStoppingConfig struct {
-	Image           string            `json:"image"`
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 }
 
 // GetSuggestionConfigData gets the config data for the given suggestion algorithm name.
@@ -73,7 +73,7 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	// Try to find suggestion data in config map
 	config, ok := configMap.Data[consts.LabelSuggestionTag]
 	if !ok {
-		return SuggestionConfig{}, errors.New("failed to find suggestions config in ConfigMap: " + consts.KatibConfigMapName)
+		return SuggestionConfig{}, fmt.Errorf("failed to find suggestions config in ConfigMap: %s", consts.KatibConfigMapName)
 	}
 
 	// Parse suggestion data to map where key = algorithm name, value = SuggestionConfig
@@ -85,20 +85,17 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	// Try to find SuggestionConfig for the algorithm
 	suggestionConfigData, ok = suggestionsConfig[algorithmName]
 	if !ok {
-		return SuggestionConfig{}, errors.New("failed to find suggestion config for algorithm: " + algorithmName + " in ConfigMap: " + consts.KatibConfigMapName)
+		return SuggestionConfig{}, fmt.Errorf("failed to find suggestion config for algorithm: %s in ConfigMap: %s", algorithmName, consts.KatibConfigMapName)
 	}
 
 	// Get image from config
 	image := suggestionConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return SuggestionConfig{}, errors.New("required value for image configuration of algorithm name: " + algorithmName)
+		return SuggestionConfig{}, fmt.Errorf("required value for image configuration of algorithm name: %s", algorithmName)
 	}
 
-	// Get Image Pull Policy
-	imagePullPolicy := suggestionConfigData.ImagePullPolicy
-	if imagePullPolicy != corev1.PullAlways && imagePullPolicy != corev1.PullIfNotPresent && imagePullPolicy != corev1.PullNever {
-		suggestionConfigData.ImagePullPolicy = consts.DefaultImagePullPolicy
-	}
+	// Set Image Pull Policy
+	suggestionConfigData.ImagePullPolicy = setImagePullPolicy(suggestionConfigData.ImagePullPolicy)
 
 	// Set resource requirements for suggestion
 	suggestionConfigData.Resource = setResourceRequirements(suggestionConfigData.Resource)
@@ -119,9 +116,8 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	}
 
 	// Set default resources
-	defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
 	if len(pvcSpec.Resources.Requests) == 0 {
-
+		defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
 		pvcSpec.Resources.Requests = make(map[corev1.ResourceName]resource.Quantity)
 		pvcSpec.Resources.Requests[corev1.ResourceStorage] = defaultVolumeStorage
 	}
@@ -157,7 +153,7 @@ func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (Ear
 	// Try to find early stopping data in config map.
 	config, ok := configMap.Data[consts.LabelEarlyStoppingTag]
 	if !ok {
-		return EarlyStoppingConfig{}, errors.New("failed to find early stopping config in ConfigMap: " + consts.KatibConfigMapName)
+		return EarlyStoppingConfig{}, fmt.Errorf("failed to find early stopping config in ConfigMap: %s", consts.KatibConfigMapName)
 	}
 
 	// Parse early stopping data to map where key = algorithm name, value = EarlyStoppingConfig.
@@ -169,20 +165,17 @@ func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (Ear
 	// Try to find EarlyStoppingConfig for the algorithm.
 	earlyStoppingConfigData, ok = earlyStoppingsConfig[algorithmName]
 	if !ok {
-		return EarlyStoppingConfig{}, errors.New("failed to find early stopping config for algorithm: " + algorithmName + " in ConfigMap: " + consts.KatibConfigMapName)
+		return EarlyStoppingConfig{}, fmt.Errorf("failed to find early stopping config for algorithm: %s in ConfigMap: %s", algorithmName, consts.KatibConfigMapName)
 	}
 
 	// Get image from config.
 	image := earlyStoppingConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return EarlyStoppingConfig{}, errors.New("required value for image configuration of algorithm name: " + algorithmName)
+		return EarlyStoppingConfig{}, fmt.Errorf("required value for image configuration of algorithm name: %s", algorithmName)
 	}
 
-	// Get Image Pull Policy.
-	imagePullPolicy := earlyStoppingConfigData.ImagePullPolicy
-	if imagePullPolicy != corev1.PullAlways && imagePullPolicy != corev1.PullIfNotPresent && imagePullPolicy != corev1.PullNever {
-		earlyStoppingConfigData.ImagePullPolicy = consts.DefaultImagePullPolicy
-	}
+	// Set Image Pull Policy.
+	earlyStoppingConfigData.ImagePullPolicy = setImagePullPolicy(earlyStoppingConfigData.ImagePullPolicy)
 
 	return earlyStoppingConfigData, nil
 }
@@ -202,7 +195,7 @@ func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Cli
 	// Try to find metrics collector data in config map
 	config, ok := configMap.Data[consts.LabelMetricsCollectorSidecar]
 	if !ok {
-		return MetricsCollectorConfig{}, errors.New("failed to find metrics collector config in ConfigMap: " + consts.KatibConfigMapName)
+		return MetricsCollectorConfig{}, fmt.Errorf("failed to find metrics collector config in ConfigMap: %s", consts.KatibConfigMapName)
 	}
 	// Parse metrics collector data to map where key = collector kind, value = MetricsCollectorConfig
 	kind := string(cKind)
@@ -214,25 +207,29 @@ func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Cli
 	// Try to find MetricsCollectorConfig for the collector kind
 	metricsCollectorConfigData, ok = mcsConfig[kind]
 	if !ok {
-		return MetricsCollectorConfig{}, errors.New("failed to find metrics collector config for kind: " + kind + " in ConfigMap: " + consts.KatibConfigMapName)
+		return MetricsCollectorConfig{}, fmt.Errorf("failed to find metrics collector config for kind: %s in ConfigMap: %s", kind, consts.KatibConfigMapName)
 	}
 
 	// Get image from config
 	image := metricsCollectorConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return MetricsCollectorConfig{}, errors.New("required value for image configuration of metrics collector kind: " + kind)
+		return MetricsCollectorConfig{}, fmt.Errorf("required value for image configuration of metrics collector kind: %s", kind)
 	}
 
-	// Get Image Pull Policy
-	imagePullPolicy := metricsCollectorConfigData.ImagePullPolicy
-	if imagePullPolicy != corev1.PullAlways && imagePullPolicy != corev1.PullIfNotPresent && imagePullPolicy != corev1.PullNever {
-		metricsCollectorConfigData.ImagePullPolicy = consts.DefaultImagePullPolicy
-	}
+	// Set Image Pull Policy
+	metricsCollectorConfigData.ImagePullPolicy = setImagePullPolicy(metricsCollectorConfigData.ImagePullPolicy)
 
 	// Set resource requirements for metrics collector
 	metricsCollectorConfigData.Resource = setResourceRequirements(metricsCollectorConfigData.Resource)
 
 	return metricsCollectorConfigData, nil
+}
+
+func setImagePullPolicy(imagePullPolicy corev1.PullPolicy) corev1.PullPolicy {
+	if imagePullPolicy != corev1.PullAlways && imagePullPolicy != corev1.PullIfNotPresent && imagePullPolicy != corev1.PullNever {
+		return consts.DefaultImagePullPolicy
+	}
+	return imagePullPolicy
 }
 
 func setResourceRequirements(configResource corev1.ResourceRequirements) corev1.ResourceRequirements {
@@ -298,7 +295,7 @@ func setResourceRequirements(configResource corev1.ResourceRequirements) corev1.
 	}
 
 	// If user explicitly sets ephemeral-storage value to something negative, nuke it.
-	// This enables compability with the GKE nodepool autoscalers, which cannot scale
+	// This enables compatibility with the GKE nodepool autoscalers, which cannot scale
 	// pods which define ephemeral-storage resource constraints.
 	if diskLimit.Sign() == -1 && diskRequest.Sign() == -1 {
 		delete(configResource.Limits, corev1.ResourceEphemeralStorage)
