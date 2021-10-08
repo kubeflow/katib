@@ -207,6 +207,11 @@ func (g *DefaultValidator) validateParameters(parameters []experimentsv1beta1.Pa
 			if param.FeasibleSpace.Max == "" && param.FeasibleSpace.Min == "" {
 				return fmt.Errorf("feasibleSpace.max or feasibleSpace.min must be specified for parameterType: %v in spec.parameters[%v]: %v", param.ParameterType, i, param)
 			}
+			if param.ParameterType == experimentsv1beta1.ParameterTypeDouble && param.FeasibleSpace.Distribution == ""{
+			    return fmt.Errorf("feasibleSpace.distribution must be specified for parameterType: double in spec.parameters[%v]: %v", i, param)
+			}else if param.ParameterType == experimentsv1beta1.ParameterTypeDouble && param.FeasibleSpace.Distribution != "uniform" && param.FeasibleSpace.Distribution != "log-uniform"{
+			    return fmt.Errorf("feasibleSpace.distribution must be one of 'uniform', 'log-uniform' for parameterType: double in spec.parameters[%v]: %v", i, param)
+			}
 
 		} else if param.ParameterType == experimentsv1beta1.ParameterTypeCategorical || param.ParameterType == experimentsv1beta1.ParameterTypeDiscrete {
 			if param.FeasibleSpace.Max != "" || param.FeasibleSpace.Min != "" || param.FeasibleSpace.Step != "" {

@@ -199,11 +199,19 @@ const (
 	ParameterTypeCategorical ParameterType = "categorical"
 )
 
+type ParameterDistribution string
+
+const (
+	Uniform    ParameterDistribution = "uniform"
+	LogUniform ParameterDistribution = "log-uniform"
+)
+
 type FeasibleSpace struct {
 	Max  string   `json:"max,omitempty"`
 	Min  string   `json:"min,omitempty"`
 	List []string `json:"list,omitempty"`
 	Step string   `json:"step,omitempty"`
+	Distribution ParameterDistribution `json:"distribution,omitempty"`
 }
 
 // TrialTemplate describes structure of trial template

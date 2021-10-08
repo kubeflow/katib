@@ -62,10 +62,16 @@ class BaseHyperoptService(object):
                     float(param.max),
                     float(param.step))
             elif param.type == DOUBLE:
-                hyperopt_search_space[param.name] = hyperopt.hp.uniform(
-                    param.name,
-                    float(param.min),
-                    float(param.max))
+                if param.distribution == "uniform":
+                    hyperopt_search_space[param.name] = hyperopt.hp.uniform(
+                        param.name,
+                        float(param.min),
+                        float(param.max))
+                elif param.distribution == "log-uniform":
+                    hyperopt_search_space[param.name] = hyperopt.hp.loguniform(
+                        param.name,
+                        float(param.min),
+                        float(param.max))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 hyperopt_search_space[param.name] = hyperopt.hp.choice(
                     param.name, param.list)

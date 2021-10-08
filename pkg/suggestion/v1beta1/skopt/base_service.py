@@ -55,7 +55,7 @@ class BaseSkoptService(object):
                     int(param.min), int(param.max), name=param.name))
             elif param.type == DOUBLE:
                 skopt_search_space.append(skopt.space.Real(
-                    float(param.min), float(param.max), "log-uniform", name=param.name))
+                    float(param.min), float(param.max), prior=param.distribution, name=param.name))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 skopt_search_space.append(
                     skopt.space.Categorical(param.list, name=param.name))

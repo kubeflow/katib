@@ -52,7 +52,8 @@ class HyperParameterSearchSpace(object):
                 step = p.feasible_space.step
             return HyperParameter.int(p.name, p.feasible_space.min, p.feasible_space.max, step)
         elif p.parameter_type == api.DOUBLE:
-            return HyperParameter.double(p.name, p.feasible_space.min, p.feasible_space.max, p.feasible_space.step)
+            return HyperParameter.double(p.name, p.feasible_space.min, p.feasible_space.max, p.feasible_space.step,
+                                         p.feasible_space.distribution)
         elif p.parameter_type == api.CATEGORICAL:
             return HyperParameter.categorical(p.name, p.feasible_space.list)
         elif p.parameter_type == api.DISCRETE:
@@ -63,34 +64,38 @@ class HyperParameterSearchSpace(object):
 
 
 class HyperParameter(object):
-    def __init__(self, name, type_, min_, max_, list_, step):
+    def __init__(self, name, type_, min_, max_, list_, step, distribution):
         self.name = name
         self.type = type_
         self.min = min_
         self.max = max_
         self.list = list_
         self.step = step
+        self.distribution = distribution
 
     def __str__(self):
-        if self.type == INTEGER or self.type == DOUBLE:
+        if self.type == INTEGER:
             return "HyperParameter(name: {}, type: {}, min: {}, max: {}, step: {})".format(
                 self.name, self.type, self.min, self.max, self.step)
+        elif self.type == DOUBLE:
+            return "HyperParameter(name: {}, type: {}, min: {}, max: {}, step: {}, distribution: {})".format(
+                self.name, self.type, self.min, self.max, self.step, self.distribution)
         else:
             return "HyperParameter(name: {}, type: {}, list: {})".format(
                 self.name, self.type, ", ".join(self.list))
 
     @staticmethod
     def int(name, min_, max_, step):
-        return HyperParameter(name, INTEGER, min_, max_, [], step)
+        return HyperParameter(name, INTEGER, min_, max_, [], step, None)
 
     @staticmethod
-    def double(name, min_, max_, step):
-        return HyperParameter(name, DOUBLE, min_, max_, [], step)
+    def double(name, min_, max_, step, distribution):
+        return HyperParameter(name, DOUBLE, min_, max_, [], step, distribution)
 
     @staticmethod
     def categorical(name, lst):
-        return HyperParameter(name, CATEGORICAL, 0, 0, [str(e) for e in lst], 0)
+        return HyperParameter(name, CATEGORICAL, 0, 0, [str(e) for e in lst], 0, None)
 
     @staticmethod
     def discrete(name, lst):
-        return HyperParameter(name, DISCRETE, 0, 0, [str(e) for e in lst], 0)
+        return HyperParameter(name, DISCRETE, 0, 0, [str(e) for e in lst], 0, None)

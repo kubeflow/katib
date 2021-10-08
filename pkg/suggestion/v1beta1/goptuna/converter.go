@@ -122,9 +122,16 @@ func toGoptunaSearchSpace(parameters []*api_v1_beta1.ParameterSpec) (map[string]
 
 			stepstr := p.GetFeasibleSpace().GetStep()
 			if stepstr == "" {
-				searchSpace[p.Name] = goptuna.UniformDistribution{
-					High: high,
-					Low:  low,
+			    if p.GetFeasibleSpace().GetDistribution() == "uniform"{
+                    searchSpace[p.Name] = goptuna.UniformDistribution{
+                        High: high,
+                        Low:  low,
+                    }
+				}else if p.GetFeasibleSpace().GetDistribution() == "log-uniform"{
+                    searchSpace[p.Name] = goptuna.LogUniformDistribution{
+                        High: high,
+                        Low:  low,
+                    }
 				}
 			} else {
 				step, err := strconv.ParseFloat(stepstr, 64)

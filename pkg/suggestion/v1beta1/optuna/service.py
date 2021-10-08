@@ -151,7 +151,12 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             if param.type == INTEGER:
                 search_space[param.name] = optuna.distributions.IntUniformDistribution(int(param.min), int(param.max))
             elif param.type == DOUBLE:
-                search_space[param.name] = optuna.distributions.UniformDistribution(float(param.min), float(param.max))
+                if param.distribution == "uniform":
+                    search_space[param.name] = optuna.distributions.UniformDistribution(float(param.min),
+                                                                                        float(param.max))
+                elif param.distribution == "log-uniform":
+                    search_space[param.name] = optuna.distributions.LogUniformDistribution(float(param.min),
+                                                                                           float(param.max))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 search_space[param.name] = optuna.distributions.CategoricalDistribution(param.list)
         return search_space
