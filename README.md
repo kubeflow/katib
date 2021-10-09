@@ -159,10 +159,10 @@ kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib
 
 ## Release Version
 
-For the specific Katib release (for example `v0.11.1`) run this command:
+For the specific Katib release (for example `v0.12.0`) run this command:
 
 ```
-kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.11.1"
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.12.0"
 ```
 
 Make sure that all Katib components are running:
