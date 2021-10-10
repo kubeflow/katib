@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -47,16 +46,9 @@ type SuggestionConfig struct {
 
 // EarlyStoppingConfig is the JSON early stopping structure in Katib config.
 type EarlyStoppingConfig struct {
-	Image             string                                            `json:"image"`
-	ImagePullPolicy   corev1.PullPolicy                                 `json:"imagePullPolicy,omitempty"`
-	AlgorithmSettings map[string]EarlyStoppingAlgorithmSettingValueType `json:"algorithmSettings,omitempty"`
+	Image           string            `json:"image"`
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 }
-
-type EarlyStoppingAlgorithmSettingValueType string
-
-const (
-	ValueTypeInt EarlyStoppingAlgorithmSettingValueType = "int"
-)
 
 // MetricsCollectorConfig is the JSON metrics collector structure in Katib config.
 type MetricsCollectorConfig struct {
@@ -147,7 +139,7 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 }
 
 // GetEarlyStoppingConfigData gets the config data for the given early stopping algorithm name.
-func GetEarlyStoppingConfigData(earlyStoppingSpec *common.EarlyStoppingSpec, client client.Client) (EarlyStoppingConfig, error) {
+func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (EarlyStoppingConfig, error) {
 	configMap := &corev1.ConfigMap{}
 	earlyStoppingConfigData := EarlyStoppingConfig{}
 	err := client.Get(
@@ -171,46 +163,19 @@ func GetEarlyStoppingConfigData(earlyStoppingSpec *common.EarlyStoppingSpec, cli
 	}
 
 	// Try to find EarlyStoppingConfig for the algorithm.
-	earlyStoppingConfigData, ok = earlyStoppingsConfig[earlyStoppingSpec.AlgorithmName]
+	earlyStoppingConfigData, ok = earlyStoppingsConfig[algorithmName]
 	if !ok {
-		return EarlyStoppingConfig{}, fmt.Errorf("failed to find early stopping config for algorithm: %s in ConfigMap: %s", earlyStoppingSpec.AlgorithmName, consts.KatibConfigMapName)
+		return EarlyStoppingConfig{}, fmt.Errorf("failed to find early stopping config for algorithm: %s in ConfigMap: %s", algorithmName, consts.KatibConfigMapName)
 	}
 
 	// Get image from config.
 	image := earlyStoppingConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return EarlyStoppingConfig{}, fmt.Errorf("required value for image configuration of algorithm name: %s", earlyStoppingSpec.AlgorithmName)
+		return EarlyStoppingConfig{}, fmt.Errorf("required value for image configuration of algorithm name: %s", algorithmName)
 	}
 
 	// Set Image Pull Policy.
 	earlyStoppingConfigData.ImagePullPolicy = setImagePullPolicy(earlyStoppingConfigData.ImagePullPolicy)
-
-	// Early stopping service add default values.
-	if earlyStoppingSpec.AlgorithmSettings == nil || earlyStoppingConfigData.AlgorithmSettings == nil {
-		return earlyStoppingConfigData, nil
-	}
-
-	// Get algorithmSettings.
-	algorithmSettingsConfigData := earlyStoppingConfigData.AlgorithmSettings
-	for _, inputSetting := range earlyStoppingSpec.AlgorithmSettings {
-		if inputSetting.Name == "" || inputSetting.Value == "" {
-			return EarlyStoppingConfig{}, fmt.Errorf("required value for early stopping algprithm settings of algorithm name: %s", earlyStoppingSpec.AlgorithmName)
-		}
-
-		valueTypeConfigData, exist := algorithmSettingsConfigData[inputSetting.Name]
-		if !exist {
-			return EarlyStoppingConfig{}, fmt.Errorf("failed to find early stopping config for algorithm settings: %s in ConfigMap: %s", inputSetting.Name, consts.KatibConfigMapName)
-		}
-
-		switch valueTypeConfigData {
-		case ValueTypeInt:
-			if _, err = strconv.Atoi(inputSetting.Value); err != nil {
-				return EarlyStoppingConfig{}, fmt.Errorf("%s must be integer value for early stopping algorithm name: %s", inputSetting.Value, inputSetting.Name)
-			}
-		default:
-			return EarlyStoppingConfig{}, fmt.Errorf("failed to find early stopping algorithm setings value type: %s in ConfigMap: %s", valueTypeConfigData, consts.KatibConfigMapName)
-		}
-	}
 
 	return earlyStoppingConfigData, nil
 }

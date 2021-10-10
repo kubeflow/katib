@@ -38,7 +38,7 @@ type Generator interface {
 	GetTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error)
 	GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error)
 	GetSuggestionConfigData(algorithmName string) (katibconfig.SuggestionConfig, error)
-	GetEarlyStoppingConfigData(earlyStoppingSpec *commonapiv1beta1.EarlyStoppingSpec) (katibconfig.EarlyStoppingConfig, error)
+	GetEarlyStoppingConfigData(algorithmName string) (katibconfig.EarlyStoppingConfig, error)
 	GetMetricsCollectorConfigData(cKind commonapiv1beta1.CollectorKind) (katibconfig.MetricsCollectorConfig, error)
 }
 
@@ -70,8 +70,8 @@ func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (katibc
 }
 
 // GetEarlyStoppingConfigData returns early stopping configuration for a given algorithm.
-func (g *DefaultGenerator) GetEarlyStoppingConfigData(earlyStoppingSpec *commonapiv1beta1.EarlyStoppingSpec) (katibconfig.EarlyStoppingConfig, error) {
-	return katibconfig.GetEarlyStoppingConfigData(earlyStoppingSpec, g.client.GetClient())
+func (g *DefaultGenerator) GetEarlyStoppingConfigData(algorithmName string) (katibconfig.EarlyStoppingConfig, error) {
+	return katibconfig.GetEarlyStoppingConfigData(algorithmName, g.client.GetClient())
 }
 
 // GetRunSpecWithHyperParameters returns the specification for trial with hyperparameters.

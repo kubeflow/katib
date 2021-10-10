@@ -80,7 +80,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 	// If early stopping is used, get the config data.
 	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
 	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
-		earlyStoppingConfigData, err = katibconfig.GetEarlyStoppingConfigData(s.Spec.EarlyStopping, g.Client)
+		earlyStoppingConfigData, err = katibconfig.GetEarlyStoppingConfigData(s.Spec.EarlyStopping.AlgorithmName, g.Client)
 		if err != nil {
 			return nil, err
 		}

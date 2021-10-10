@@ -62,10 +62,6 @@ data:
   early-stopping: |-
     {
       "medianstop": {
-        "image": "docker.io/kubeflowkatib/earlystopping-medianstop:latest",
-        "algorithmSettings": {
-          "min_trials_required": "int",
-          "start_step": "int"
-        }
+        "image": "docker.io/kubeflowkatib/earlystopping-medianstop:latest"
       }
     }

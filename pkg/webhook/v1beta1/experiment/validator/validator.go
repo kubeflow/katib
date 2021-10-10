@@ -183,7 +183,7 @@ func (g *DefaultValidator) validateEarlyStopping(es *commonapiv1beta1.EarlyStopp
 		return fmt.Errorf("no spec.earlyStopping.algorithm.algorithmName specified")
 	}
 
-	if _, err := g.GetEarlyStoppingConfigData(es); err != nil {
+	if _, err := g.GetEarlyStoppingConfigData(es.AlgorithmName); err != nil {
 		return fmt.Errorf("unable to get EarlyStopping config data for algorithm %s: %v", es.AlgorithmName, err)
 	}
 

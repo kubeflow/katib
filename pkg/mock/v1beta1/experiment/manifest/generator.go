@@ -39,7 +39,7 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 }
 
 // GetEarlyStoppingConfigData mocks base method.
-func (m *MockGenerator) GetEarlyStoppingConfigData(arg0 *v1beta1.EarlyStoppingSpec) (katibconfig.EarlyStoppingConfig, error) {
+func (m *MockGenerator) GetEarlyStoppingConfigData(arg0 string) (katibconfig.EarlyStoppingConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetEarlyStoppingConfigData", arg0)
 	ret0, _ := ret[0].(katibconfig.EarlyStoppingConfig)

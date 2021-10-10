@@ -153,25 +153,21 @@ func TestGetSuggestionConfigData(t *testing.T) {
 
 }
 
-const (
-	testEarlyStoppingAlgorithmName        = "test-early-stopping-algorithm1"
-	testEarlyStoppingAlgorithmSettingName = "test-early-stopping-setting1"
-)
-
 func TestGetEarlyStoppingConfigData(t *testing.T) {
+	const testAlgorithmName = "test-early-stopping"
 
 	tests := []struct {
-		testDescription        string
-		katibConfig            *katibConfig
-		expected               *EarlyStoppingConfig
-		inputEarlyStoppingSpec *commonv1beta1.EarlyStoppingSpec
-		err                    bool
+		testDescription    string
+		katibConfig        *katibConfig
+		expected           *EarlyStoppingConfig
+		inputAlgorithmName string
+		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
 			katibConfig: func() *katibConfig {
-				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}}
-				kc.earlyStopping[testEarlyStoppingAlgorithmName].ImagePullPolicy = corev1.PullIfNotPresent
+				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
+				kc.earlyStopping[testAlgorithmName].ImagePullPolicy = corev1.PullIfNotPresent
 				return kc
 			}(),
 			expected: func() *EarlyStoppingConfig {
@@ -179,8 +175,8 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 				c.ImagePullPolicy = corev1.PullIfNotPresent
 				return c
 			}(),
-			inputEarlyStoppingSpec: newFakeEarlyStoppingSpec(),
-			err:                    false,
+			inputAlgorithmName: testAlgorithmName,
+			err:                false,
 		},
 		{
 			testDescription: "There is not katib-config.",
@@ -193,112 +189,38 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 			err:             true,
 		},
 		{
-			testDescription: "There is not the AlgorithmName",
-			katibConfig:     &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}},
-			inputEarlyStoppingSpec: func() *commonv1beta1.EarlyStoppingSpec {
-				es := newFakeEarlyStoppingSpec()
-				es.AlgorithmName = "invalid-algorithm-name"
-				return es
-			}(),
-			err: true,
+			testDescription:    "There is not the AlgorithmName",
+			katibConfig:        &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}},
+			inputAlgorithmName: "invalid-algorithm-name",
+			err:                true,
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
 			katibConfig: func() *katibConfig {
-				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}}
-				kc.earlyStopping[testEarlyStoppingAlgorithmName].Image = ""
+				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
+				kc.earlyStopping[testAlgorithmName].Image = ""
 				return kc
 			}(),
-			inputEarlyStoppingSpec: newFakeEarlyStoppingSpec(),
-			err:                    true,
+			inputAlgorithmName: testAlgorithmName,
+			err:                true,
 		},
 		{
 			testDescription: fmt.Sprintf("GetEarlyStoppingConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy),
 			katibConfig: func() *katibConfig {
-				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}}
-				kc.earlyStopping[testEarlyStoppingAlgorithmName].ImagePullPolicy = ""
+				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
+				kc.earlyStopping[testAlgorithmName].ImagePullPolicy = ""
 				return kc
 			}(),
-			expected:               newFakeEarlyStoppingConfig(),
-			inputEarlyStoppingSpec: newFakeEarlyStoppingSpec(),
-			err:                    false,
-		},
-		{
-			testDescription: "There is not the EarlyStoppingSettings in Experiment resource",
-			katibConfig:     &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}},
-			inputEarlyStoppingSpec: func() *commonv1beta1.EarlyStoppingSpec {
-				es := newFakeEarlyStoppingSpec()
-				es.AlgorithmSettings = nil
-				return es
-			}(),
-			err: false,
-		},
-		{
-			testDescription: "There is not the algorithmSettings field in katib-config ConfigMap",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}}
-				kc.earlyStopping[testEarlyStoppingAlgorithmName].AlgorithmSettings = nil
-				return kc
-			}(),
-			inputEarlyStoppingSpec: newFakeEarlyStoppingSpec(),
-			err:                    false,
-		},
-		{
-			testDescription: "EarlyStoppingSettings name field is empty in Experiment resource",
-			katibConfig:     &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}},
-			inputEarlyStoppingSpec: func() *commonv1beta1.EarlyStoppingSpec {
-				es := newFakeEarlyStoppingSpec()
-				es.AlgorithmSettings[0].Name = ""
-				return es
-			}(),
-			err: true,
-		},
-		{
-			testDescription: "EarlyStoppingSettings value field is empty in Experiment resource",
-			katibConfig:     &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}},
-			inputEarlyStoppingSpec: func() *commonv1beta1.EarlyStoppingSpec {
-				es := newFakeEarlyStoppingSpec()
-				es.AlgorithmSettings[0].Value = ""
-				return es
-			}(),
-			err: true,
-		},
-		{
-			testDescription: "Set invalid algorithm setting name for early stopping in Experiment resource",
-			katibConfig:     &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}},
-			inputEarlyStoppingSpec: func() *commonv1beta1.EarlyStoppingSpec {
-				es := newFakeEarlyStoppingSpec()
-				es.AlgorithmSettings[0].Name = "invalid-algorithm-setting-name"
-				return es
-			}(),
-			err: true,
-		},
-		{
-			testDescription: "Set invalid algorithm setting value for early stopping in Experiment resource",
-			katibConfig:     &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}},
-			inputEarlyStoppingSpec: func() *commonv1beta1.EarlyStoppingSpec {
-				es := newFakeEarlyStoppingSpec()
-				es.AlgorithmSettings[0].Value = "invalid-value-type"
-				return es
-			}(),
-			err: true,
-		},
-		{
-			testDescription: "Set invalid algorithm setting value for early stopping in katib-config ConfigMap",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testEarlyStoppingAlgorithmName: newFakeEarlyStoppingConfig()}}
-				kc.earlyStopping[testEarlyStoppingAlgorithmName].AlgorithmSettings[testEarlyStoppingAlgorithmSettingName] = "invalid-type"
-				return kc
-			}(),
-			inputEarlyStoppingSpec: newFakeEarlyStoppingSpec(),
-			err:                    true,
+			expected:           newFakeEarlyStoppingConfig(),
+			inputAlgorithmName: testAlgorithmName,
+			err:                false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.testDescription, func(t *testing.T) {
 			fakeKubeClient := newFakeKubeClient(newFakeKatibConfigMap(tt.katibConfig))
-			actual, err := GetEarlyStoppingConfigData(tt.inputEarlyStoppingSpec, fakeKubeClient)
+			actual, err := GetEarlyStoppingConfigData(tt.inputAlgorithmName, fakeKubeClient)
 			if (err != nil) != tt.err {
 				t.Errorf("want error: %v, actual: %v", tt.err, err)
 			} else if tt.expected != nil {
@@ -488,21 +410,6 @@ func newFakeEarlyStoppingConfig() *EarlyStoppingConfig {
 	return &EarlyStoppingConfig{
 		Image:           "early-stopping-image",
 		ImagePullPolicy: consts.DefaultImagePullPolicy,
-		AlgorithmSettings: map[string]EarlyStoppingAlgorithmSettingValueType{
-			testEarlyStoppingAlgorithmSettingName: ValueTypeInt,
-		},
-	}
-}
-
-func newFakeEarlyStoppingSpec() *commonv1beta1.EarlyStoppingSpec {
-	return &commonv1beta1.EarlyStoppingSpec{
-		AlgorithmName: testEarlyStoppingAlgorithmName,
-		AlgorithmSettings: []commonv1beta1.EarlyStoppingSetting{
-			{
-				Name:  testEarlyStoppingAlgorithmSettingName,
-				Value: "2",
-			},
-		},
 	}
 }
 
