@@ -112,12 +112,12 @@ echo -e "\nBuilding PyTorch mnist training container example...\n"
 docker build -t ${REGISTRY}/pytorch-mnist:${TAG} -f examples/${VERSION}/trial-images/pytorch-mnist/Dockerfile .
 
 echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
-docker build -t ${REGISTRY}/enas-cnn-cifar10-gpu:${TAG} -f examples/${VERSION}/nas/enas-cnn-cifar10/Dockerfile.gpu .
+docker build -t ${REGISTRY}/enas-cnn-cifar10-gpu:${TAG} -f examples/${VERSION}/trial-images/enas-cnn-cifar10/Dockerfile.gpu .
 
 echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with CPU support...\n"
-docker build -t ${REGISTRY}/enas-cnn-cifar10-cpu:${TAG} -f examples/${VERSION}/nas/enas-cnn-cifar10/Dockerfile.cpu .
+docker build -t ${REGISTRY}/enas-cnn-cifar10-cpu:${TAG} -f examples/${VERSION}/trial-images/enas-cnn-cifar10/Dockerfile.cpu .
 
 echo -e "\nBuilding PyTorch CIFAR-10 CNN training container example for DARTS...\n"
-docker build -t ${REGISTRY}/darts-cnn-cifar10:${TAG} -f examples/${VERSION}/nas/darts-cnn-cifar10/Dockerfile .
+docker build -t ${REGISTRY}/darts-cnn-cifar10:${TAG} -f examples/${VERSION}/trial-images/darts-cnn-cifar10/Dockerfile .
 
 echo -e "\nAll Katib images with ${TAG} tag have been built successfully!\n"
