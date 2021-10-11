@@ -41,6 +41,7 @@ const (
 	// loss=0.3
 	// accuracy=0.98
 	// Score=-7.53e-05
+	// Score=-7.53e+05
 	// Score=1E0
 	// Score=1.23E10
 	DefaultFilter = `([\w|-]+)\s*=\s*([+-]?\d(\.\d+)?([Ee][+-]?\d+)?)`
