@@ -1,17 +1,15 @@
 # Kubeflow Pipeline with Katib component.
 
 # In this example you will create Katib Experiment using Bayesian optimization algorithm.
-# As a Trial template you will use Kubeflow MPIJob with Horovod mnist training container.
+# As a Trial template you will use Kubeflow MPIJob with Horovod MNIST training container.
 # After that, you will compile a Kubeflow Pipeline with your Katib Experiment.
 # Use Kubeflow Pipelines UI to upload the Pipeline and create the Experiment and Run.
 
-# This Experiment is similar to this: https://github.com/kubeflow/katib/blob/master/examples/v1beta1/mpijob-horovod.yaml
+# This Experiment is similar to this: https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/mpijob-horovod.yaml
 # Check the training container source code here: https://github.com/kubeflow/mpi-operator/tree/master/examples/horovod.
 
 # Note: To run this example, your Kubernetes cluster should run MPIJob operator.
 # Follow this guide to install MPIJob on your cluster: https://www.kubeflow.org/docs/components/training/mpi/
-
-# Note: You have to install kfp>=1.1.1 and kubeflow-katib>=0.10.1 SDK to run this example.
 
 import kfp
 import kfp.dsl as dsl
@@ -173,7 +171,7 @@ def horovod_mnist_hpo(
     # Configure parameters for the Trial template.
     trial_template = V1beta1TrialTemplate(
         primary_pod_labels={
-            "mpi_job_role": "launcher"
+            "mpi-job-role": "launcher"
         },
         primary_container_name="mpi-launcher",
         success_condition='status.conditions.#(type=="Succeeded")#|#(status=="True")#',
