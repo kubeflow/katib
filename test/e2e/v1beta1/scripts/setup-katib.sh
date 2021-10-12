@@ -84,7 +84,7 @@ cat ${CONFIG_PATCH}
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 
-echo "Deploying training-operator from kubeflow/manifests master"
+echo "Deploying training-operator from kubeflow/manifests v1.4 branch"
 cd "${MANIFESTS_DIR}/apps/training-operator/upstream/overlays/kubeflow"
 kustomize build . | kubectl apply -f -
 
