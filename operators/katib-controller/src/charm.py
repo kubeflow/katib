@@ -5,12 +5,11 @@ from pathlib import Path
 from subprocess import check_call
 
 import yaml
+from oci_image import OCIImageResource, OCIImageResourceError
 from ops.charm import CharmBase
+from ops.framework import StoredState
 from ops.main import main
 from ops.model import ActiveStatus, MaintenanceStatus
-from ops.framework import StoredState
-
-from oci_image import OCIImageResource, OCIImageResourceError
 
 logger = logging.getLogger(__name__)
 
@@ -62,12 +61,10 @@ class Operator(CharmBase):
                                         "namespaces",
                                         "persistentvolumes",
                                         "persistentvolumeclaims",
+                                        "pods",
+                                        "pods/log",
+                                        "pods/status",
                                     ],
-                                    "verbs": ["*"],
-                                },
-                                {
-                                    "apiGroups": [""],
-                                    "resources": ["pods", "pods/log", "pods/status"],
                                     "verbs": ["*"],
                                 },
                                 {
@@ -76,14 +73,17 @@ class Operator(CharmBase):
                                     "verbs": ["*"],
                                 },
                                 {
-                                    "apiGroups": ["batch"],
-                                    "resources": ["jobs", "cronjobs"],
+                                    "apiGroups": ["rbac.authorization.k8s.io"],
+                                    "resources": [
+                                        "roles",
+                                        "rolebindings",
+                                    ],
                                     "verbs": ["*"],
                                 },
                                 {
-                                    "apiGroups": ["apiextensions.k8s.io"],
-                                    "resources": ["customresourcedefinitions"],
-                                    "verbs": ["create", "get"],
+                                    "apiGroups": ["batch"],
+                                    "resources": ["jobs", "cronjobs"],
+                                    "verbs": ["*"],
                                 },
                                 {
                                     "apiGroups": ["kubeflow.org"],
@@ -97,22 +97,12 @@ class Operator(CharmBase):
                                         "suggestions",
                                         "suggestions/status",
                                         "suggestions/finalizers",
+                                        "tfjobs",
+                                        "pytorchjobs",
+                                        "mpijobs",
+                                        "xgboostjobs",
+                                        "mxjobs",
                                     ],
-                                    "verbs": ["*"],
-                                },
-                                {
-                                    "apiGroups": ["kubeflow.org"],
-                                    "resources": ["tfjobs", "pytorchjobs", "mpijobs"],
-                                    "verbs": ["*"],
-                                },
-                                {
-                                    "apiGroups": ["tekton.dev"],
-                                    "resources": ["pipelineruns", "taskruns"],
-                                    "verbs": ["*"],
-                                },
-                                {
-                                    "apiGroups": ["rbac.authorization.k8s.io"],
-                                    "resources": ["roles", "rolebindings"],
                                     "verbs": ["*"],
                                 },
                             ],

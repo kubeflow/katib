@@ -1,4 +1,4 @@
-apiVersion: kubeflow.org/v1
+apiVersion: "kubeflow.org/v1"
 kind: PyTorchJob
 spec:
   pytorchReplicaSpecs:
