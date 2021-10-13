@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **failure_condition** | **str** | Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type&#x3D;&#x3D;\&quot;Failed\&quot;)#|#(status&#x3D;&#x3D;\&quot;True\&quot;)# | [optional] 
 **metrics_collector** | [**V1beta1MetricsCollectorSpec**](V1beta1MetricsCollectorSpec.md) |  | [optional] 
 **objective** | [**V1beta1ObjectiveSpec**](V1beta1ObjectiveSpec.md) |  | [optional] 
-**parameter_assignments** | [**list[V1beta1ParameterAssignment]**](V1beta1ParameterAssignment.md) | Key-value pairs for hyperparameters and assignment values. | 
+**parameter_assignments** | [**list[V1beta1ParameterAssignment]**](V1beta1ParameterAssignment.md) | Key-value pairs for hyperparameters and assignment values. | [optional] 
 **primary_container_name** | **str** | Name of training container where actual model training is running | [optional] 
 **primary_pod_labels** | **dict(str, str)** | Label that determines if pod needs to be injected by Katib sidecar container | [optional] 
 **retain_run** | **bool** | Whether to retain the trial run object after completed. | [optional] 

@@ -5,9 +5,10 @@
 package mock
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
-	reflect "reflect"
 )
 
 // MockKatibDBInterface is a mock of KatibDBInterface interface.

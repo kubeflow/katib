@@ -5,10 +5,11 @@
 package mock
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	v1beta10 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
-	reflect "reflect"
 )
 
 // MockSuggestion is a mock of Suggestion interface.

@@ -54,7 +54,7 @@ const (
 	namespace        = "default"
 	primaryContainer = "training-container"
 
-	timeout = time.Second * 40
+	timeout = time.Second * 80
 )
 
 func init() {
@@ -126,7 +126,9 @@ func TestReconcile(t *testing.T) {
 		// Try to update status until it be succeeded
 		for err != nil {
 			updatedInstance := &experimentsv1beta1.Experiment{}
-			c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, updatedInstance)
+			if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, updatedInstance); err != nil {
+				continue
+			}
 			updatedInstance.Status = instance.Status
 			err = r.updateStatus(updatedInstance)
 		}
@@ -186,7 +188,9 @@ func TestReconcile(t *testing.T) {
 			suggestion := &suggestionsv1beta1.Suggestion{}
 			// We should Get suggestion because resource version can be modified
 			for err != nil {
-				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+				if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion); err != nil {
+					continue
+				}
 				suggestion.Status.Suggestions = suggestion.Status.Suggestions[1:]
 				err = c.Status().Update(context.TODO(), suggestion)
 			}
@@ -198,7 +202,9 @@ func TestReconcile(t *testing.T) {
 			var err error = errors.NewBadRequest("fake-error")
 			suggestion := &suggestionsv1beta1.Suggestion{}
 			for err != nil {
-				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+				if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion); err != nil {
+					continue
+				}
 				suggestion.MarkSuggestionStatusSucceeded(reasonRestart, msgRestartNo)
 				err = c.Status().Update(context.TODO(), suggestion)
 			}
@@ -210,7 +216,9 @@ func TestReconcile(t *testing.T) {
 			var err error = errors.NewBadRequest("fake-error")
 			suggestion := &suggestionsv1beta1.Suggestion{}
 			for err != nil {
-				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+				if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion); err != nil {
+					continue
+				}
 				suggestion.MarkSuggestionStatusSucceeded(reasonRestart, msgRestartYes)
 				err = c.Status().Update(context.TODO(), suggestion)
 			}
@@ -222,7 +230,9 @@ func TestReconcile(t *testing.T) {
 			suggestion := &suggestionsv1beta1.Suggestion{}
 			var err error = errors.NewBadRequest("fake-error")
 			for err != nil {
-				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+				if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion); err != nil {
+					continue
+				}
 				suggestion.MarkSuggestionStatusRunning(corev1.ConditionFalse, suggestionsv1beta1.SuggestionRestartReason, msgRestarting)
 				err = c.Status().Update(context.TODO(), suggestion)
 			}
@@ -244,7 +254,9 @@ func TestReconcile(t *testing.T) {
 	// Ones redundant trial is deleted, suggestion status must be updated
 	g.Eventually(func() error {
 		suggestion := &suggestionsv1beta1.Suggestion{}
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion); err != nil {
+			return err
+		}
 		suggestion.Status.Suggestions = newFakeSuggestion().Status.Suggestions
 		errStatus := c.Status().Update(context.TODO(), suggestion)
 		return errStatus
@@ -256,7 +268,9 @@ func TestReconcile(t *testing.T) {
 	// Expect that experiment status is running
 	experiment := &experimentsv1beta1.Experiment{}
 	g.Eventually(func() bool {
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment); err != nil {
+			return false
+		}
 		return experiment.IsRunning()
 	}, timeout).Should(gomega.BeTrue())
 
@@ -266,7 +280,7 @@ func TestReconcile(t *testing.T) {
 		label := labels.Set{
 			consts.LabelExperimentName: experimentName,
 		}
-		c.List(context.TODO(), trials, &client.ListOptions{LabelSelector: label.AsSelector()})
+		g.Expect(c.List(context.TODO(), trials, &client.ListOptions{LabelSelector: label.AsSelector()})).NotTo(gomega.HaveOccurred())
 		return len(trials.Items)
 	}, timeout).Should(gomega.Equal(2))
 
@@ -276,7 +290,9 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(func() bool {
 		suggestion := &suggestionsv1beta1.Suggestion{}
 		isDeleted := true
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion); err != nil {
+			return false
+		}
 		for _, s := range suggestion.Status.Suggestions {
 			if s.Name == trialName+"-1" {
 				isDeleted = false
@@ -291,20 +307,27 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(func() bool {
 		// Update experiment
 		experiment = &experimentsv1beta1.Experiment{}
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment); err != nil {
+			return false
+		}
 		experiment.MarkExperimentStatusFailed(experimentUtil.ExperimentMaxTrialsReachedReason, "Experiment is failed")
-		c.Status().Update(context.TODO(), experiment)
+		if err = c.Status().Update(context.TODO(), experiment); err != nil {
+			return false
+		}
 
 		// Get Suggestion
 		suggestion := &suggestionsv1beta1.Suggestion{}
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, suggestion); err != nil {
+			return false
+		}
 		return suggestion.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the suggestion
+	g.Expect(c.Delete(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
+
 	// Expect that suggestion with ResumePolicy = NeverResume is deleted
 	g.Eventually(func() bool {
-		// Delete the suggestion
-		c.Delete(context.TODO(), suggestionRestartNo)
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
@@ -322,7 +345,9 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(func() bool {
 		experiment := &experimentsv1beta1.Experiment{}
 		// Update ResumePolicy and maxTrialCount for resume
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment); err != nil {
+			return false
+		}
 		experiment.Spec.ResumePolicy = experimentsv1beta1.FromVolume
 		var max int32 = 5
 		experiment.Spec.MaxTrialCount = &max
@@ -334,7 +359,9 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(func() bool {
 		experiment := &experimentsv1beta1.Experiment{}
 		// Update status to succeeded
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment); err != nil {
+			return false
+		}
 		experiment.MarkExperimentStatusSucceeded(experimentUtil.ExperimentMaxTrialsReachedReason, "Experiment is succeeded")
 		errStatus := c.Status().Update(context.TODO(), experiment)
 		return errStatus == nil
@@ -345,22 +372,26 @@ func TestReconcile(t *testing.T) {
 	// UpdateSuggestionStatus with restartYesCall call and UpdateSuggestionStatus with experimentRestartingCall call.
 	g.Eventually(func() bool {
 		experiment := &experimentsv1beta1.Experiment{}
-		c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment)
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: experimentName}, experiment); err != nil {
+			return false
+		}
 		return experiment.IsRestarting() && !experiment.IsSucceeded() && !experiment.IsFailed()
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the suggestion
+	g.Expect(c.Delete(context.TODO(), suggestionRestartYes)).NotTo(gomega.HaveOccurred())
+
 	// Expect that suggestion with ResumePolicy = FromVolume is deleted
 	g.Eventually(func() bool {
-		// Delete the suggestion
-		c.Delete(context.TODO(), suggestionRestartYes)
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the experiment
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+
 	// Expect that experiment is deleted
 	g.Eventually(func() bool {
-		// Delete the experiment
-		c.Delete(context.TODO(), instance)
 		return errors.IsNotFound(c.Get(context.TODO(),
 			types.NamespacedName{Namespace: namespace, Name: experimentName}, &experimentsv1beta1.Experiment{}))
 	}, timeout).Should(gomega.BeTrue())
@@ -427,10 +458,9 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			},
 			ResumePolicy: experimentsv1beta1.NeverResume,
 			TrialTemplate: &experimentsv1beta1.TrialTemplate{
-				PrimaryPodLabels:     experimentsv1beta1.DefaultKubeflowJobPrimaryPodLabels,
 				PrimaryContainerName: primaryContainer,
-				SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
-				FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
+				SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
+				FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
 				TrialParameters: []experimentsv1beta1.TrialParameterSpec{
 					{
 						Name:        "learningRate",

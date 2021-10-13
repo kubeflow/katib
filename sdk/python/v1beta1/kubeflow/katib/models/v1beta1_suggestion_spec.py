@@ -58,7 +58,8 @@ class V1beta1SuggestionSpec(object):
         self._resume_policy = None
         self.discriminator = None
 
-        self.algorithm = algorithm
+        if algorithm is not None:
+            self.algorithm = algorithm
         if early_stopping is not None:
             self.early_stopping = early_stopping
         if requests is not None:
@@ -84,8 +85,6 @@ class V1beta1SuggestionSpec(object):
         :param algorithm: The algorithm of this V1beta1SuggestionSpec.  # noqa: E501
         :type: V1beta1AlgorithmSpec
         """
-        if self.local_vars_configuration.client_side_validation and algorithm is None:  # noqa: E501
-            raise ValueError("Invalid value for `algorithm`, must not be `None`")  # noqa: E501
 
         self._algorithm = algorithm
 

@@ -17,7 +17,7 @@ export const RandomSearchSettings: AlgorithmSetting[] = [
   {
     name: 'random_state',
     value: null,
-    type: AlgorithmSettingType.STRING,
+    type: AlgorithmSettingType.INTEGER,
   },
 ];
 
@@ -60,7 +60,6 @@ export const TPESettings: AlgorithmSetting[] = [
     value: null,
     type: AlgorithmSettingType.STRING,
   },
-
   {
     name: 'prior_weight',
     value: null,
@@ -69,22 +68,38 @@ export const TPESettings: AlgorithmSetting[] = [
   {
     name: 'n_EI_candidates',
     value: null,
-    type: AlgorithmSettingType.STRING,
+    type: AlgorithmSettingType.INTEGER,
   },
   {
     name: 'random_state',
     value: null,
-    type: AlgorithmSettingType.STRING,
+    type: AlgorithmSettingType.INTEGER,
   },
 ];
 
-export const MultivariateTPESettings: AlgorithmSetting[] = [];
+export const MultivariateTPESettings: AlgorithmSetting[] = [
+  {
+    name: 'n_startup_trials',
+    value: null,
+    type: AlgorithmSettingType.INTEGER,
+  },
+  {
+    name: 'n_ei_candidates',
+    value: null,
+    type: AlgorithmSettingType.INTEGER,
+  },
+  {
+    name: 'random_state',
+    value: null,
+    type: AlgorithmSettingType.INTEGER,
+  },
+];
 
 export const CMAESSettings: AlgorithmSetting[] = [
   {
     name: 'random_state',
     value: null,
-    type: AlgorithmSettingType.STRING,
+    type: AlgorithmSettingType.INTEGER,
   },
   {
     name: 'sigma',

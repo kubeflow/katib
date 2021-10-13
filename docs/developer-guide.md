@@ -1,21 +1,3 @@
-# Table of Contents
-
-- [Table of Contents](#table-of-contents)
-- [Developer Guide](#developer-guide)
-  - [Requirements](#requirements)
-  - [Build from source code](#build-from-source-code)
-  - [Modify controller APIs](#modify-controller-apis)
-  - [Controller Flags](#controller-flags)
-  - [Workflow design](#workflow-design)
-  - [Katib admission webhooks](#katib-admission-webhooks)
-    - [Katib cert generator](#katib-cert-generator)
-  - [Implement a new algorithm and use it in Katib](#implement-a-new-algorithm-and-use-it-in-katib)
-  - [Algorithm settings documentation](#algorithm-settings-documentation)
-  - [Katib UI documentation](#katib-ui-documentation)
-  - [Design proposals](#design-proposals)
-
-Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
-
 # Developer Guide
 
 This developer guide is for people who want to contribute to the Katib project.
@@ -30,9 +12,11 @@ see the following user guides:
 
 ## Requirements
 
-- [Go](https://golang.org/) (1.13 or later)
-- [Docker](https://docs.docker.com/) (17.05 or later.)
-- [kustomize](https://kustomize.io/) (3.2 or later)
+- [Go](https://golang.org/) (1.17 or later)
+- [Docker](https://docs.docker.com/) (17.05 or later)
+- [Java](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) (8 or later)
+- [Python](https://www.python.org/) (3.7 or later)
+- [kustomize](https://kustomize.io/) (4.0.5 or later)
 
 ## Build from source code
 
@@ -42,17 +26,17 @@ Check source code as follows:
 make build REGISTRY=<image-registry> TAG=<image-tag>
 ```
 
-To use your custom images for the Katib component, modify
+To use your custom images for the Katib components, modify
 [Kustomization file](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/kustomization.yaml)
-and [Katib config patch](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml)
+and [Katib Config](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/controller/katib-config.yaml)
 
-You can deploy Katib v1beta1 manifests into a k8s cluster as follows:
+You can deploy Katib v1beta1 manifests into a Kubernetes cluster as follows:
 
 ```bash
 make deploy
 ```
 
-You can undeploy Katib v1beta1 manifests from a k8s cluster as follows:
+You can undeploy Katib v1beta1 manifests from a Kubernetes cluster as follows:
 
 ```bash
 make undeploy
@@ -117,10 +101,9 @@ to generate certificates for the webhooks.
 
 Once Katib is deployed in the Kubernetes cluster, the `cert-generator` Job follows these steps:
 
-- Generate a certificate using [`openssl`](https://www.openssl.org/).
+- Generate the self-signed CA certificate and private key.
 
-- Create a Kubernetes [Certificate Signing Request](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/)
-  to approve and sign the certificate.
+- Generate public certificate and private key signed with the key generated in the previous step.
 
 - Create a Kubernetes Secret with the signed certificate. Secret has
   the `katib-webhook-cert` name and `cert-generator` Job's `ownerReference` to
@@ -131,7 +114,7 @@ Once Katib is deployed in the Kubernetes cluster, the `cert-generator` Job follo
 
 - Patch the webhooks with the `CABundle`.
 
-You can find the `cert-generator` source code [here](../hack/cert-generator.sh).
+You can find the `cert-generator` source code [here](../cmd/cert-generator/v1beta1).
 
 ## Implement a new algorithm and use it in Katib
 

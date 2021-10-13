@@ -44,7 +44,7 @@ class V1beta1OptimalTrial(object):
         'parameter_assignments': 'parameterAssignments'
     }
 
-    def __init__(self, best_trial_name='', observation=None, parameter_assignments=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, best_trial_name=None, observation=None, parameter_assignments=None, local_vars_configuration=None):  # noqa: E501
         """V1beta1OptimalTrial - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -55,10 +55,12 @@ class V1beta1OptimalTrial(object):
         self._parameter_assignments = None
         self.discriminator = None
 
-        self.best_trial_name = best_trial_name
+        if best_trial_name is not None:
+            self.best_trial_name = best_trial_name
         if observation is not None:
             self.observation = observation
-        self.parameter_assignments = parameter_assignments
+        if parameter_assignments is not None:
+            self.parameter_assignments = parameter_assignments
 
     @property
     def best_trial_name(self):
@@ -80,8 +82,6 @@ class V1beta1OptimalTrial(object):
         :param best_trial_name: The best_trial_name of this V1beta1OptimalTrial.  # noqa: E501
         :type: str
         """
-        if self.local_vars_configuration.client_side_validation and best_trial_name is None:  # noqa: E501
-            raise ValueError("Invalid value for `best_trial_name`, must not be `None`")  # noqa: E501
 
         self._best_trial_name = best_trial_name
 
@@ -126,8 +126,6 @@ class V1beta1OptimalTrial(object):
         :param parameter_assignments: The parameter_assignments of this V1beta1OptimalTrial.  # noqa: E501
         :type: list[V1beta1ParameterAssignment]
         """
-        if self.local_vars_configuration.client_side_validation and parameter_assignments is None:  # noqa: E501
-            raise ValueError("Invalid value for `parameter_assignments`, must not be `None`")  # noqa: E501
 
         self._parameter_assignments = parameter_assignments
 

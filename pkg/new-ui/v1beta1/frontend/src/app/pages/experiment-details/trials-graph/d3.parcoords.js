@@ -77,7 +77,7 @@ export function parcoords(config) {
     console.warn(
       'dimensionTitles passed in config is deprecated. Add title to dimension object.',
     );
-    d3.entries(config.dimensionTitles).forEach(function(d) {
+    d3.entries(config.dimensionTitles).forEach(function (d) {
       if (__.dimensions[d.key]) {
         __.dimensions[d.key].title = __.dimensions[d.key].title
           ? __.dimensions[d.key].title
@@ -89,14 +89,14 @@ export function parcoords(config) {
       }
     });
   }
-  var pc = function(selection) {
+  var pc = function (selection) {
     selection = pc.selection = d3.select(selection);
 
     __.width = selection[0][0].clientWidth;
     __.height = selection[0][0].clientHeight;
 
     // canvas data layers
-    ['marks', 'foreground', 'brushed', 'highlight'].forEach(function(layer) {
+    ['marks', 'foreground', 'brushed', 'highlight'].forEach(function (layer) {
       canvas[layer] = selection.append('canvas').attr('class', layer)[0][0];
       ctx[layer] = canvas[layer].getContext('2d');
     });
@@ -129,10 +129,10 @@ export function parcoords(config) {
         'axesreorder',
       ].concat(d3.keys(__)),
     ),
-    w = function() {
+    w = function () {
       return __.width - __.margin.right - __.margin.left;
     },
-    h = function() {
+    h = function () {
       return __.height - __.margin.top - __.margin.bottom;
     },
     flags = {
@@ -145,10 +145,7 @@ export function parcoords(config) {
     xscale = d3.scale.ordinal(),
     dragging = {},
     line = d3.svg.line(),
-    axis = d3.svg
-      .axis()
-      .orient('left')
-      .ticks(5),
+    axis = d3.svg.axis().orient('left').ticks(5),
     g, // groups for axes, brushes
     ctx = {},
     canvas = {},
@@ -157,31 +154,31 @@ export function parcoords(config) {
   // side effects for setters
   var side_effects = d3.dispatch
     .apply(this, d3.keys(__))
-    .on('composite', function(d) {
+    .on('composite', function (d) {
       ctx.foreground.globalCompositeOperation = d.value;
       ctx.brushed.globalCompositeOperation = d.value;
     })
-    .on('alpha', function(d) {
+    .on('alpha', function (d) {
       ctx.foreground.globalAlpha = d.value;
       ctx.brushed.globalAlpha = d.value;
     })
-    .on('brushedColor', function(d) {
+    .on('brushedColor', function (d) {
       ctx.brushed.strokeStyle = d.value;
     })
-    .on('width', function(d) {
+    .on('width', function (d) {
       pc.resize();
     })
-    .on('height', function(d) {
+    .on('height', function (d) {
       pc.resize();
     })
-    .on('margin', function(d) {
+    .on('margin', function (d) {
       pc.resize();
     })
-    .on('rate', function(d) {
+    .on('rate', function (d) {
       brushedQueue.rate(d.value);
       foregroundQueue.rate(d.value);
     })
-    .on('dimensions', function(d) {
+    .on('dimensions', function (d) {
       __.dimensions = pc.applyDimensionDefaults(d3.keys(d.value));
       xscale.domain(pc.getOrderedDimensionKeys());
       pc.sortDimensions();
@@ -189,7 +186,7 @@ export function parcoords(config) {
         pc.render().updateAxes();
       }
     })
-    .on('bundleDimension', function(d) {
+    .on('bundleDimension', function (d) {
       if (!d3.keys(__.dimensions).length) pc.detectDimensions();
       pc.autoscale();
       if (typeof d.value === 'number') {
@@ -207,13 +204,13 @@ export function parcoords(config) {
         pc.render();
       }
     })
-    .on('hideAxis', function(d) {
+    .on('hideAxis', function (d) {
       pc.dimensions(pc.applyDimensionDefaults());
       pc.dimensions(without(__.dimensions, d.value));
     })
-    .on('flipAxes', function(d) {
+    .on('flipAxes', function (d) {
       if (d.value && d.value.length) {
-        d.value.forEach(function(axis) {
+        d.value.forEach(function (axis) {
           flipAxisAndUpdatePCP(axis);
         });
         pc.updateAxes(0);
@@ -232,8 +229,8 @@ export function parcoords(config) {
 
   // getter/setter with event firing
   function getset(obj, state, events) {
-    d3.keys(state).forEach(function(key) {
-      obj[key] = function(x) {
+    d3.keys(state).forEach(function (key) {
+      obj[key] = function (x) {
         if (!arguments.length) {
           return state[key];
         }
@@ -263,7 +260,7 @@ export function parcoords(config) {
   }
 
   function without(arr, items) {
-    items.forEach(function(el) {
+    items.forEach(function (el) {
       delete arr[el];
     });
     return arr;
@@ -289,52 +286,40 @@ export function parcoords(config) {
     return [h() + 1, 1];
   }
 
-  pc.autoscale = function() {
+  pc.autoscale = function () {
     // yscale
     var defaultScales = {
-      date: function(k) {
-        var extent = d3.extent(__.data, function(d) {
+      date: function (k) {
+        var extent = d3.extent(__.data, function (d) {
           return d[k] ? d[k].getTime() : null;
         });
 
         // special case if single value
         if (extent[0] === extent[1]) {
-          return d3.scale
-            .ordinal()
-            .domain([extent[0]])
-            .rangePoints(getRange());
+          return d3.scale.ordinal().domain([extent[0]]).rangePoints(getRange());
         }
 
-        return d3.time
-          .scale()
-          .domain(extent)
-          .range(getRange());
+        return d3.time.scale().domain(extent).range(getRange());
       },
-      number: function(k) {
-        var extent = d3.extent(__.data, function(d) {
+      number: function (k) {
+        var extent = d3.extent(__.data, function (d) {
           return +d[k];
         });
 
         // special case if single value
         if (extent[0] === extent[1]) {
-          return d3.scale
-            .ordinal()
-            .domain([extent[0]])
-            .rangePoints(getRange());
+          return d3.scale.ordinal().domain([extent[0]]).rangePoints(getRange());
         }
 
-        return d3.scale
-          .linear()
-          .domain(extent)
-          .range(getRange());
+        return d3.scale.linear().domain(extent).range(getRange());
       },
-      string: function(k) {
+      string: function (k) {
         var counts = {},
           domain = [];
 
         // Let's get the count for each value so that we can sort the domain based
         // on the number of items for each value.
-        __.data.map(function(p) {
+        __.data.map(function (p) {
           if (p[k] === undefined && __.nullValueSeparator !== 'undefined') {
             return; // null values will be drawn beyond the horizontal null value separator!
           }
@@ -345,18 +330,15 @@ export function parcoords(config) {
           }
         });
 
-        domain = Object.getOwnPropertyNames(counts).sort(function(a, b) {
+        domain = Object.getOwnPropertyNames(counts).sort(function (a, b) {
           return counts[a] - counts[b];
         });
 
-        return d3.scale
-          .ordinal()
-          .domain(domain)
-          .rangePoints(getRange());
+        return d3.scale.ordinal().domain(domain).rangePoints(getRange());
       },
     };
 
-    d3.keys(__.dimensions).forEach(function(k) {
+    d3.keys(__.dimensions).forEach(function (k) {
       if (!__.dimensions[k].yscale) {
         __.dimensions[k].yscale = defaultScales[__.dimensions[k].type](k);
       }
@@ -395,20 +377,20 @@ export function parcoords(config) {
     return this;
   };
 
-  pc.scale = function(d, domain) {
+  pc.scale = function (d, domain) {
     __.dimensions[d].yscale.domain(domain);
 
     return this;
   };
 
-  pc.flip = function(d) {
+  pc.flip = function (d) {
     //__.dimensions[d].yscale.domain().reverse();                               // does not work
     __.dimensions[d].yscale.domain(__.dimensions[d].yscale.domain().reverse()); // works
 
     return this;
   };
 
-  pc.commonScale = function(global, type) {
+  pc.commonScale = function (global, type) {
     var t = type || 'number';
     if (typeof global === 'undefined') {
       global = true;
@@ -421,28 +403,28 @@ export function parcoords(config) {
     pc.autoscale();
 
     // scales of the same type
-    var scales = d3.keys(__.dimensions).filter(function(p) {
+    var scales = d3.keys(__.dimensions).filter(function (p) {
       return __.dimensions[p].type == t;
     });
 
     if (global) {
       var extent = d3.extent(
         scales
-          .map(function(d, i) {
+          .map(function (d, i) {
             return __.dimensions[d].yscale.domain();
           })
-          .reduce(function(a, b) {
+          .reduce(function (a, b) {
             return a.concat(b);
           }),
       );
 
-      scales.forEach(function(d) {
+      scales.forEach(function (d) {
         __.dimensions[d].yscale.domain(extent);
       });
     } else {
-      scales.forEach(function(d) {
+      scales.forEach(function (d) {
         __.dimensions[d].yscale.domain(
-          d3.extent(__.data, function(d) {
+          d3.extent(__.data, function (d) {
             return +d[k];
           }),
         );
@@ -456,17 +438,17 @@ export function parcoords(config) {
 
     return this;
   };
-  pc.detectDimensions = function() {
+  pc.detectDimensions = function () {
     pc.dimensions(pc.applyDimensionDefaults());
     return this;
   };
 
-  pc.applyDimensionDefaults = function(dims) {
+  pc.applyDimensionDefaults = function (dims) {
     var types = pc.detectDimensionTypes(__.data);
     dims = dims ? dims : d3.keys(types);
     var newDims = {};
     var currIndex = 0;
-    dims.forEach(function(k) {
+    dims.forEach(function (k) {
       newDims[k] = __.dimensions[k] ? __.dimensions[k] : {};
       //Set up defaults
       newDims[k].orient = newDims[k].orient ? newDims[k].orient : 'left';
@@ -486,14 +468,14 @@ export function parcoords(config) {
     return newDims;
   };
 
-  pc.getOrderedDimensionKeys = function() {
-    return d3.keys(__.dimensions).sort(function(x, y) {
+  pc.getOrderedDimensionKeys = function () {
+    return d3.keys(__.dimensions).sort(function (x, y) {
       return d3.ascending(__.dimensions[x].index, __.dimensions[y].index);
     });
   };
 
   // a better "typeof" from this post: http://stackoverflow.com/questions/7390426/better-way-to-get-type-of-a-javascript-variable
-  pc.toType = function(v) {
+  pc.toType = function (v) {
     return {}.toString
       .call(v)
       .match(/\s([a-zA-Z]+)/)[1]
@@ -501,7 +483,7 @@ export function parcoords(config) {
   };
 
   // try to coerce to number before returning type
-  pc.toTypeCoerceNumbers = function(v) {
+  pc.toTypeCoerceNumbers = function (v) {
     if (parseFloat(v) == v && v != null) {
       return 'number';
     }
@@ -509,16 +491,16 @@ export function parcoords(config) {
   };
 
   // attempt to determine types of each dimension based on first row of data
-  pc.detectDimensionTypes = function(data) {
+  pc.detectDimensionTypes = function (data) {
     var types = {};
-    d3.keys(data[0]).forEach(function(col) {
+    d3.keys(data[0]).forEach(function (col) {
       types[isNaN(Number(col)) ? col : parseInt(col)] = pc.toTypeCoerceNumbers(
         data[0][col],
       );
     });
     return types;
   };
-  pc.render = function() {
+  pc.render = function () {
     // try to autodetect dimensions and create scales
     if (!d3.keys(__.dimensions).length) {
       pc.detectDimensions();
@@ -531,7 +513,7 @@ export function parcoords(config) {
     return this;
   };
 
-  pc.renderBrushed = function() {
+  pc.renderBrushed = function () {
     if (!d3.keys(__.dimensions).length) pc.detectDimensions();
 
     pc.renderBrushed[__.mode]();
@@ -553,7 +535,7 @@ export function parcoords(config) {
     return false;
   }
 
-  pc.render.default = function() {
+  pc.render.default = function () {
     pc.clear('foreground');
     pc.clear('highlight');
 
@@ -565,18 +547,18 @@ export function parcoords(config) {
   var foregroundQueue = d3
     .renderQueue(path_foreground)
     .rate(50)
-    .clear(function() {
+    .clear(function () {
       pc.clear('foreground');
       pc.clear('highlight');
     });
 
-  pc.render.queue = function() {
+  pc.render.queue = function () {
     pc.renderBrushed.queue();
 
     foregroundQueue(__.data);
   };
 
-  pc.renderBrushed.default = function() {
+  pc.renderBrushed.default = function () {
     pc.clear('brushed');
 
     if (isBrushed()) {
@@ -587,11 +569,11 @@ export function parcoords(config) {
   var brushedQueue = d3
     .renderQueue(path_brushed)
     .rate(50)
-    .clear(function() {
+    .clear(function () {
       pc.clear('brushed');
     });
 
-  pc.renderBrushed.queue = function() {
+  pc.renderBrushed.queue = function () {
     if (isBrushed()) {
       brushedQueue(__.brushed);
     } else {
@@ -602,7 +584,7 @@ export function parcoords(config) {
     var clusterCentroids = d3.map();
     var clusterCounts = d3.map();
     // determine clusterCounts
-    __.data.forEach(function(row) {
+    __.data.forEach(function (row) {
       var scaled = __.dimensions[d].yscale(row[d]);
       if (!clusterCounts.has(scaled)) {
         clusterCounts.set(scaled, 0);
@@ -611,8 +593,8 @@ export function parcoords(config) {
       clusterCounts.set(scaled, count + 1);
     });
 
-    __.data.forEach(function(row) {
-      d3.keys(__.dimensions).map(function(p, i) {
+    __.data.forEach(function (row) {
+      d3.keys(__.dimensions).map(function (p, i) {
         var scaled = __.dimensions[d].yscale(row[d]);
         if (!clusterCentroids.has(scaled)) {
           var map = d3.map();
@@ -667,7 +649,7 @@ export function parcoords(config) {
     return centroids;
   }
 
-  pc.compute_real_centroids = function(row) {
+  pc.compute_real_centroids = function (row) {
     var realCentroids = [];
 
     var p = d3.keys(__.dimensions);
@@ -712,7 +694,7 @@ export function parcoords(config) {
 
     return cps;
   }
-  pc.shadows = function() {
+  pc.shadows = function () {
     flags.shadows = true;
     pc.alphaOnBrushed(0.1);
     pc.render();
@@ -720,14 +702,14 @@ export function parcoords(config) {
   };
 
   // draw dots with radius r on the axis line where data intersects
-  pc.axisDots = function(r) {
+  pc.axisDots = function (r) {
     var r = r || 0.1;
     var ctx = pc.ctx.marks;
     var startAngle = 0;
     var endAngle = 2 * Math.PI;
     ctx.globalAlpha = d3.min([1 / Math.pow(__.data.length, 1 / 2), 1]);
-    __.data.forEach(function(d) {
-      d3.entries(__.dimensions).forEach(function(p, i) {
+    __.data.forEach(function (d) {
+      d3.entries(__.dimensions).forEach(function (p, i) {
         ctx.beginPath();
         ctx.arc(
           position(p),
@@ -784,7 +766,7 @@ export function parcoords(config) {
   function paths(data, ctx) {
     ctx.clearRect(-1, -1, w() + 2, h() + 2);
     ctx.beginPath();
-    data.forEach(function(d) {
+    data.forEach(function (d) {
       if (
         (__.bundleDimension !== null && __.bundlingStrength > 0) ||
         __.smoothness > 0
@@ -812,7 +794,7 @@ export function parcoords(config) {
   }
 
   function single_path(d, ctx) {
-    d3.entries(__.dimensions).forEach(function(p, i) {
+    d3.entries(__.dimensions).forEach(function (p, i) {
       //p isn't really p
       if (i == 0) {
         ctx.moveTo(
@@ -850,7 +832,7 @@ export function parcoords(config) {
     ctx.highlight.strokeStyle = d3.functor(__.color)(d, i);
     return color_path(d, ctx.highlight);
   }
-  pc.clear = function(layer) {
+  pc.clear = function (layer) {
     ctx[layer].clearRect(0, 0, w() + 2, h() + 2);
 
     // This will make sure that the foreground items are transparent
@@ -916,19 +898,19 @@ export function parcoords(config) {
     return __.dimensions[d].title ? __.dimensions[d].title : d; // dimension display names
   }
 
-  pc.createAxes = function() {
+  pc.createAxes = function () {
     if (g) pc.removeAxes();
 
     // Add a group element for each dimension.
     g = pc.svg
       .selectAll('.dimension')
-      .data(pc.getOrderedDimensionKeys(), function(d) {
+      .data(pc.getOrderedDimensionKeys(), function (d) {
         return d;
       })
       .enter()
       .append('svg:g')
       .attr('class', 'dimension')
-      .attr('transform', function(d) {
+      .attr('transform', function (d) {
         return 'translate(' + xscale(d) + ')';
       });
 
@@ -936,7 +918,7 @@ export function parcoords(config) {
     g.append('svg:g')
       .attr('class', 'axis')
       .attr('transform', 'translate(0,0)')
-      .each(function(d) {
+      .each(function (d) {
         var axisElement = d3
           .select(this)
           .call(pc.applyAxisConfig(axis, __.dimensions[d]));
@@ -993,13 +975,13 @@ export function parcoords(config) {
     return this;
   };
 
-  pc.removeAxes = function() {
+  pc.removeAxes = function () {
     g.remove();
     g = undefined;
     return this;
   };
 
-  pc.updateAxes = function(animationTime) {
+  pc.updateAxes = function (animationTime) {
     if (typeof animationTime === 'undefined') {
       animationTime = __.animationTime;
     }
@@ -1013,14 +995,14 @@ export function parcoords(config) {
       .enter()
       .append('svg:g')
       .attr('class', 'dimension')
-      .attr('transform', function(p) {
+      .attr('transform', function (p) {
         return 'translate(' + position(p) + ')';
       })
       .style('opacity', 0)
       .append('svg:g')
       .attr('class', 'axis')
       .attr('transform', 'translate(0,0)')
-      .each(function(d) {
+      .each(function (d) {
         var axisElement = d3
           .select(this)
           .call(pc.applyAxisConfig(axis, __.dimensions[d]));
@@ -1055,7 +1037,7 @@ export function parcoords(config) {
       .select('.axis')
       .transition()
       .duration(animationTime)
-      .each(function(d) {
+      .each(function (d) {
         d3.select(this).call(pc.applyAxisConfig(axis, __.dimensions[d]));
       });
     g_data
@@ -1074,7 +1056,7 @@ export function parcoords(config) {
     g = pc.svg.selectAll('.dimension');
     g.transition()
       .duration(animationTime)
-      .attr('transform', function(p) {
+      .attr('transform', function (p) {
         return 'translate(' + position(p) + ')';
       })
       .style('opacity', 1);
@@ -1083,7 +1065,7 @@ export function parcoords(config) {
       .selectAll('.axis')
       .transition()
       .duration(animationTime)
-      .each(function(d) {
+      .each(function (d) {
         d3.select(this).call(pc.applyAxisConfig(axis, __.dimensions[d]));
       });
 
@@ -1097,7 +1079,7 @@ export function parcoords(config) {
     return this;
   };
 
-  pc.applyAxisConfig = function(axis, dimension) {
+  pc.applyAxisConfig = function (axis, dimension) {
     return axis
       .scale(dimension.yscale)
       .orient(dimension.orient)
@@ -1110,16 +1092,16 @@ export function parcoords(config) {
   };
 
   // Jason Davies, http://bl.ocks.org/1341281
-  pc.reorderable = function() {
+  pc.reorderable = function () {
     if (!g) pc.createAxes();
 
     g.style('cursor', 'move').call(
       d3.behavior
         .drag()
-        .on('dragstart', function(d) {
+        .on('dragstart', function (d) {
           dragging[d] = this.__origin__ = xscale(d);
         })
-        .on('drag', function(d) {
+        .on('drag', function (d) {
           dragging[d] = Math.min(
             w(),
             Math.max(0, (this.__origin__ += d3.event.dx)),
@@ -1127,11 +1109,11 @@ export function parcoords(config) {
           pc.sortDimensions();
           xscale.domain(pc.getOrderedDimensionKeys());
           pc.render();
-          g.attr('transform', function(d) {
+          g.attr('transform', function (d) {
             return 'translate(' + position(d) + ')';
           });
         })
-        .on('dragend', function(d) {
+        .on('dragend', function (d) {
           // Let's see if the order has changed and send out an event if so.
           var i = 0,
             j = __.dimensions[d].index,
@@ -1179,7 +1161,7 @@ export function parcoords(config) {
   // Reorder dimensions, such that the highest value (visually) is on the left and
   // the lowest on the right. Visual values are determined by the data values in
   // the given row.
-  pc.reorder = function(rowdata) {
+  pc.reorder = function (rowdata) {
     var firstDim = pc.getOrderedDimensionKeys()[0];
 
     pc.sortDimensionsByRowData(rowdata);
@@ -1196,7 +1178,7 @@ export function parcoords(config) {
 
       g.transition()
         .duration(1500)
-        .attr('transform', function(d) {
+        .attr('transform', function (d) {
           return 'translate(' + xscale(d) + ')';
         });
       pc.render();
@@ -1208,9 +1190,9 @@ export function parcoords(config) {
     }
   };
 
-  pc.sortDimensionsByRowData = function(rowdata) {
+  pc.sortDimensionsByRowData = function (rowdata) {
     var copy = __.dimensions;
-    var positionSortedKeys = d3.keys(__.dimensions).sort(function(a, b) {
+    var positionSortedKeys = d3.keys(__.dimensions).sort(function (a, b) {
       var pixelDifference =
         __.dimensions[a].yscale(rowdata[a]) -
         __.dimensions[b].yscale(rowdata[b]);
@@ -1224,26 +1206,26 @@ export function parcoords(config) {
       return pixelDifference;
     });
     __.dimensions = {};
-    positionSortedKeys.forEach(function(p, i) {
+    positionSortedKeys.forEach(function (p, i) {
       __.dimensions[p] = copy[p];
       __.dimensions[p].index = i;
     });
   };
 
-  pc.sortDimensions = function() {
+  pc.sortDimensions = function () {
     var copy = __.dimensions;
-    var positionSortedKeys = d3.keys(__.dimensions).sort(function(a, b) {
+    var positionSortedKeys = d3.keys(__.dimensions).sort(function (a, b) {
       return position(a) - position(b);
     });
     __.dimensions = {};
-    positionSortedKeys.forEach(function(p, i) {
+    positionSortedKeys.forEach(function (p, i) {
       __.dimensions[p] = copy[p];
       __.dimensions[p].index = i;
     });
   };
 
   // pairs of adjacent dimensions
-  pc.adjacent_pairs = function(arr) {
+  pc.adjacent_pairs = function (arr) {
     var ret = [];
     for (var i = 0; i < arr.length - 1; i++) {
       ret.push([arr[i], arr[i + 1]]);
@@ -1254,19 +1236,19 @@ export function parcoords(config) {
   var brush = {
     modes: {
       None: {
-        install: function(pc) {}, // Nothing to be done.
-        uninstall: function(pc) {}, // Nothing to be done.
-        selected: function() {
+        install: function (pc) {}, // Nothing to be done.
+        uninstall: function (pc) {}, // Nothing to be done.
+        selected: function () {
           return [];
         }, // Nothing to return
-        brushState: function() {
+        brushState: function () {
           return {};
         },
       },
     },
     mode: 'None',
     predicate: 'AND',
-    currentMode: function() {
+    currentMode: function () {
       return this.modes[this.mode];
     },
   };
@@ -1298,11 +1280,11 @@ export function parcoords(config) {
     return pc;
   }
 
-  pc.brushModes = function() {
+  pc.brushModes = function () {
     return Object.getOwnPropertyNames(brush.modes);
   };
 
-  pc.brushMode = function(mode) {
+  pc.brushMode = function (mode) {
     if (arguments.length === 0) {
       return brush.mode;
     }
@@ -1337,7 +1319,7 @@ export function parcoords(config) {
 
   // brush mode: 1D-Axes
 
-  (function() {
+  (function () {
     var brushes = {};
 
     function is_brushed(p) {
@@ -1347,7 +1329,7 @@ export function parcoords(config) {
     // data within extents
     function selected() {
       var actives = d3.keys(__.dimensions).filter(is_brushed),
-        extents = actives.map(function(p) {
+        extents = actives.map(function (p) {
           return brushes[p].extent();
         });
 
@@ -1361,7 +1343,7 @@ export function parcoords(config) {
 
       // test if within range
       var within = {
-        date: function(d, p, dimension) {
+        date: function (d, p, dimension) {
           if (typeof __.dimensions[p].yscale.rangePoints === 'function') {
             // if it is ordinal
             return (
@@ -1374,7 +1356,7 @@ export function parcoords(config) {
             );
           }
         },
-        number: function(d, p, dimension) {
+        number: function (d, p, dimension) {
           if (typeof __.dimensions[p].yscale.rangePoints === 'function') {
             // if it is ordinal
             return (
@@ -1387,7 +1369,7 @@ export function parcoords(config) {
             );
           }
         },
-        string: function(d, p, dimension) {
+        string: function (d, p, dimension) {
           return (
             extents[dimension][0] <= __.dimensions[p].yscale(d[p]) &&
             __.dimensions[p].yscale(d[p]) <= extents[dimension][1]
@@ -1395,14 +1377,14 @@ export function parcoords(config) {
         },
       };
 
-      return __.data.filter(function(d) {
+      return __.data.filter(function (d) {
         switch (brush.predicate) {
           case 'AND':
-            return actives.every(function(p, dimension) {
+            return actives.every(function (p, dimension) {
               return within[__.dimensions[p].type](d, p, dimension);
             });
           case 'OR':
-            return actives.some(function(p, dimension) {
+            return actives.some(function (p, dimension) {
               return within[__.dimensions[p].type](d, p, dimension);
             });
           default:
@@ -1414,7 +1396,7 @@ export function parcoords(config) {
     function brushExtents(extents) {
       if (typeof extents === 'undefined') {
         var extents = {};
-        d3.keys(__.dimensions).forEach(function(d) {
+        d3.keys(__.dimensions).forEach(function (d) {
           var brush = brushes[d];
           if (brush !== undefined && !brush.empty()) {
             var extent = brush.extent();
@@ -1426,12 +1408,12 @@ export function parcoords(config) {
       } else {
         //first get all the brush selections
         var brushSelections = {};
-        g.selectAll('.brush').each(function(d) {
+        g.selectAll('.brush').each(function (d) {
           brushSelections[d] = d3.select(this);
         });
 
         // loop over each dimension and update appropriately (if it was passed in through extents)
-        d3.keys(__.dimensions).forEach(function(d) {
+        d3.keys(__.dimensions).forEach(function (d) {
           if (extents[d] === undefined) {
             return;
           }
@@ -1442,10 +1424,7 @@ export function parcoords(config) {
             brush.extent(extents[d]);
 
             //redraw the brush
-            brushSelections[d]
-              .transition()
-              .duration(0)
-              .call(brush);
+            brushSelections[d].transition().duration(0).call(brush);
 
             //fire some events
             brush.event(brushSelections[d]);
@@ -1464,16 +1443,16 @@ export function parcoords(config) {
 
       brush
         .y(__.dimensions[axis].yscale)
-        .on('brushstart', function() {
+        .on('brushstart', function () {
           if (d3.event.sourceEvent !== null) {
             events.brushstart.call(pc, __.brushed);
             d3.event.sourceEvent.stopPropagation();
           }
         })
-        .on('brush', function() {
+        .on('brush', function () {
           brushUpdated(selected());
         })
-        .on('brushend', function() {
+        .on('brushend', function () {
           events.brushend.call(pc, __.brushed);
         });
 
@@ -1485,22 +1464,16 @@ export function parcoords(config) {
       if (dimension === undefined) {
         __.brushed = false;
         if (g) {
-          g.selectAll('.brush').each(function(d) {
-            d3.select(this)
-              .transition()
-              .duration(0)
-              .call(brushes[d].clear());
+          g.selectAll('.brush').each(function (d) {
+            d3.select(this).transition().duration(0).call(brushes[d].clear());
           });
           pc.renderBrushed();
         }
       } else {
         if (g) {
-          g.selectAll('.brush').each(function(d) {
+          g.selectAll('.brush').each(function (d) {
             if (d != dimension) return;
-            d3.select(this)
-              .transition()
-              .duration(0)
-              .call(brushes[d].clear());
+            d3.select(this).transition().duration(0).call(brushes[d].clear());
             brushes[d].event(d3.select(this));
           });
           pc.renderBrushed();
@@ -1516,7 +1489,7 @@ export function parcoords(config) {
       var brush = g
         .append('svg:g')
         .attr('class', 'brush')
-        .each(function(d) {
+        .each(function (d) {
           d3.select(this).call(brushFor(d));
         });
 
@@ -1542,7 +1515,7 @@ export function parcoords(config) {
 
     brush.modes['1D-axes'] = {
       install: install,
-      uninstall: function() {
+      uninstall: function () {
         g.selectAll('.brush').remove();
         brushes = {};
         delete pc.brushExtents;
@@ -1555,7 +1528,7 @@ export function parcoords(config) {
   // brush mode: 2D-strums
   // bl.ocks.org/syntagmatic/5441022
 
-  (function() {
+  (function () {
     var strums = {},
       strumRect;
 
@@ -1574,23 +1547,23 @@ export function parcoords(config) {
         .attr('class', 'strum');
 
       line
-        .attr('x1', function(d) {
+        .attr('x1', function (d) {
           return d.p1[0];
         })
-        .attr('y1', function(d) {
+        .attr('y1', function (d) {
           return d.p1[1];
         })
-        .attr('x2', function(d) {
+        .attr('x2', function (d) {
           return d.p2[0];
         })
-        .attr('y2', function(d) {
+        .attr('y2', function (d) {
           return d.p2[1];
         })
         .attr('stroke', 'black')
         .attr('stroke-width', 2);
 
       drag
-        .on('drag', function(d, i) {
+        .on('drag', function (d, i) {
           var ev = d3.event;
           i = i + 1;
           strum['p' + i][0] = Math.min(
@@ -1609,20 +1582,20 @@ export function parcoords(config) {
         .attr('class', 'strum');
 
       circles
-        .attr('cx', function(d) {
+        .attr('cx', function (d) {
           return d[0];
         })
-        .attr('cy', function(d) {
+        .attr('cy', function (d) {
           return d[1];
         })
         .attr('r', 5)
-        .style('opacity', function(d, i) {
+        .style('opacity', function (d, i) {
           return activePoint !== undefined && i === activePoint ? 0.8 : 0;
         })
-        .on('mouseover', function() {
+        .on('mouseover', function () {
           d3.select(this).style('opacity', 0.8);
         })
-        .on('mouseout', function() {
+        .on('mouseout', function () {
           d3.select(this).style('opacity', 0);
         })
         .call(drag);
@@ -1630,7 +1603,7 @@ export function parcoords(config) {
 
     function dimensionsForPoint(p) {
       var dims = { i: -1, left: undefined, right: undefined };
-      d3.keys(__.dimensions).some(function(dim, i) {
+      d3.keys(__.dimensions).some(function (dim, i) {
         if (xscale(dim) < p[0]) {
           var next = d3.keys(__.dimensions)[
             pc.getOrderedDimensionKeys().indexOf(dim) + 1
@@ -1652,9 +1625,8 @@ export function parcoords(config) {
         // Event on the right side of the last axis
         dims.i = d3.keys(__.dimensions).length - 1;
         dims.right = dims.left;
-        dims.left = pc.getOrderedDimensionKeys()[
-          d3.keys(__.dimensions).length - 2
-        ];
+        dims.left =
+          pc.getOrderedDimensionKeys()[d3.keys(__.dimensions).length - 2];
       }
 
       return dims;
@@ -1665,7 +1637,7 @@ export function parcoords(config) {
       // This will determine the freedom of movement, because a strum can
       // logically only happen between two axes, so no movement outside these axes
       // should be allowed.
-      return function() {
+      return function () {
         var p = d3.mouse(strumRect[0][0]),
           dims,
           strum;
@@ -1693,7 +1665,7 @@ export function parcoords(config) {
     }
 
     function onDrag() {
-      return function() {
+      return function () {
         var ev = d3.event,
           strum = strums[strums.active];
 
@@ -1719,7 +1691,7 @@ export function parcoords(config) {
         b2 = p2[1] * (1 - m2);
 
       // test if point falls between lines
-      return function(p) {
+      return function (p) {
         var x = p[0],
           y = p[1],
           y1 = m1 * x + b1,
@@ -1738,7 +1710,7 @@ export function parcoords(config) {
         brushed = __.data;
 
       // Get the ids of the currently active strums.
-      ids = ids.filter(function(d) {
+      ids = ids.filter(function (d) {
         return !isNaN(d);
       });
 
@@ -1757,14 +1729,14 @@ export function parcoords(config) {
         return brushed;
       }
 
-      return brushed.filter(function(d) {
+      return brushed.filter(function (d) {
         switch (brush.predicate) {
           case 'AND':
-            return ids.every(function(id) {
+            return ids.every(function (id) {
               return crossesStrum(d, id);
             });
           case 'OR':
-            return ids.some(function(id) {
+            return ids.some(function (id) {
               return crossesStrum(d, id);
             });
           default:
@@ -1784,7 +1756,7 @@ export function parcoords(config) {
     }
 
     function onDragEnd() {
-      return function() {
+      return function () {
         var brushed = __.data,
           strum = strums[strums.active];
 
@@ -1807,12 +1779,12 @@ export function parcoords(config) {
     }
 
     function brushReset(strums) {
-      return function() {
-        var ids = Object.getOwnPropertyNames(strums).filter(function(d) {
+      return function () {
+        var ids = Object.getOwnPropertyNames(strums).filter(function (d) {
           return !isNaN(d);
         });
 
-        ids.forEach(function(d) {
+        ids.forEach(function (d) {
           strums.active = d;
           removeStrum(strums);
         });
@@ -1830,7 +1802,7 @@ export function parcoords(config) {
       // placed. NOTE: even though they are evenly spaced in our current
       // implementation, we keep for when non-even spaced segments are supported as
       // well.
-      strums.width = function(id) {
+      strums.width = function (id) {
         var strum = strums[id];
 
         if (strum === undefined) {
@@ -1840,15 +1812,15 @@ export function parcoords(config) {
         return strum.maxX - strum.minX;
       };
 
-      pc.on('axesreorder.strums', function() {
-        var ids = Object.getOwnPropertyNames(strums).filter(function(d) {
+      pc.on('axesreorder.strums', function () {
+        var ids = Object.getOwnPropertyNames(strums).filter(function (d) {
           return !isNaN(d);
         });
 
         // Checks if the first dimension is directly left of the second dimension.
         function consecutive(first, second) {
           var length = d3.keys(__.dimensions).length;
-          return d3.keys(__.dimensions).some(function(d, i) {
+          return d3.keys(__.dimensions).some(function (d, i) {
             return d === first
               ? i + i < length && __.dimensions[i + 1] === second
               : false;
@@ -1857,7 +1829,7 @@ export function parcoords(config) {
 
         if (ids.length > 0) {
           // We have some strums, which might need to be removed.
-          ids.forEach(function(d) {
+          ids.forEach(function (d) {
             var dims = strums[d].dims;
             strums.active = d;
             // If the two dimensions of the current strum are not next to each other
@@ -1905,22 +1877,16 @@ export function parcoords(config) {
 
     brush.modes['2D-strums'] = {
       install: install,
-      uninstall: function() {
-        pc.selection
-          .select('svg')
-          .select('g#strums')
-          .remove();
-        pc.selection
-          .select('svg')
-          .select('rect#strum-events')
-          .remove();
+      uninstall: function () {
+        pc.selection.select('svg').select('g#strums').remove();
+        pc.selection.select('svg').select('rect#strum-events').remove();
         pc.on('axesreorder.strums', undefined);
         delete pc.brushReset;
 
         strumRect = undefined;
       },
       selected: selected,
-      brushState: function() {
+      brushState: function () {
         return strums;
       },
     };
@@ -1929,7 +1895,7 @@ export function parcoords(config) {
   // brush mode: 1D-Axes with multiple extents
   // requires d3.svg.multibrush
 
-  (function() {
+  (function () {
     if (typeof d3.svg.multibrush !== 'function') {
       return;
     }
@@ -1942,7 +1908,7 @@ export function parcoords(config) {
     // data within extents
     function selected() {
       var actives = d3.keys(__.dimensions).filter(is_brushed),
-        extents = actives.map(function(p) {
+        extents = actives.map(function (p) {
           return brushes[p].extent();
         });
 
@@ -1956,7 +1922,7 @@ export function parcoords(config) {
 
       // test if within range
       var within = {
-        date: function(d, p, dimension, b) {
+        date: function (d, p, dimension, b) {
           if (typeof __.dimensions[p].yscale.rangePoints === 'function') {
             // if it is ordinal
             return (
@@ -1967,7 +1933,7 @@ export function parcoords(config) {
             return b[0] <= d[p] && d[p] <= b[1];
           }
         },
-        number: function(d, p, dimension, b) {
+        number: function (d, p, dimension, b) {
           if (typeof __.dimensions[p].yscale.rangePoints === 'function') {
             // if it is ordinal
             return (
@@ -1978,7 +1944,7 @@ export function parcoords(config) {
             return b[0] <= d[p] && d[p] <= b[1];
           }
         },
-        string: function(d, p, dimension, b) {
+        string: function (d, p, dimension, b) {
           return (
             b[0] <= __.dimensions[p].yscale(d[p]) &&
             __.dimensions[p].yscale(d[p]) <= b[1]
@@ -1986,17 +1952,17 @@ export function parcoords(config) {
         },
       };
 
-      return __.data.filter(function(d) {
+      return __.data.filter(function (d) {
         switch (brush.predicate) {
           case 'AND':
-            return actives.every(function(p, dimension) {
-              return extents[dimension].some(function(b) {
+            return actives.every(function (p, dimension) {
+              return extents[dimension].some(function (b) {
                 return within[__.dimensions[p].type](d, p, dimension, b);
               });
             });
           case 'OR':
-            return actives.some(function(p, dimension) {
-              return extents[dimension].some(function(b) {
+            return actives.some(function (p, dimension) {
+              return extents[dimension].some(function (b) {
                 return within[__.dimensions[p].type](d, p, dimension, b);
               });
             });
@@ -2009,7 +1975,7 @@ export function parcoords(config) {
     function brushExtents(extents) {
       if (typeof extents === 'undefined') {
         extents = {};
-        d3.keys(__.dimensions).forEach(function(d) {
+        d3.keys(__.dimensions).forEach(function (d) {
           var brush = brushes[d];
           if (brush !== undefined && !brush.empty()) {
             var extent = brush.extent();
@@ -2020,12 +1986,12 @@ export function parcoords(config) {
       } else {
         //first get all the brush selections
         var brushSelections = {};
-        g.selectAll('.brush').each(function(d) {
+        g.selectAll('.brush').each(function (d) {
           brushSelections[d] = d3.select(this);
         });
 
         // loop over each dimension and update appropriately (if it was passed in through extents)
-        d3.keys(__.dimensions).forEach(function(d) {
+        d3.keys(__.dimensions).forEach(function (d) {
           if (extents[d] === undefined) {
             return;
           }
@@ -2036,10 +2002,7 @@ export function parcoords(config) {
             brush.extent(extents[d]);
 
             //redraw the brush
-            brushSelections[d]
-              .transition()
-              .duration(0)
-              .call(brush);
+            brushSelections[d].transition().duration(0).call(brush);
 
             //fire some events
             brush.event(brushSelections[d]);
@@ -2070,16 +2033,16 @@ export function parcoords(config) {
 
       brush
         .y(__.dimensions[axis].yscale)
-        .on('brushstart', function() {
+        .on('brushstart', function () {
           if (d3.event.sourceEvent !== null) {
             events.brushstart.call(pc, __.brushed);
             d3.event.sourceEvent.stopPropagation();
           }
         })
-        .on('brush', function() {
+        .on('brush', function () {
           brushUpdated(selected());
         })
-        .on('brushend', function() {
+        .on('brushend', function () {
           // d3.svg.multibrush clears extents just before calling 'brushend'
           // so we have to update here again.
           // This fixes issue #103 for now, but should be changed in d3.svg.multibrush
@@ -2087,7 +2050,7 @@ export function parcoords(config) {
           brushUpdated(selected());
           events.brushend.call(pc, __.brushed);
         })
-        .extentAdaption(function(selection) {
+        .extentAdaption(function (selection) {
           selection
             .style('visibility', null)
             .attr('x', -15)
@@ -2095,7 +2058,7 @@ export function parcoords(config) {
             .style('fill', 'rgba(255,255,255,0.25)')
             .style('stroke', 'rgba(0,0,0,0.6)');
         })
-        .resizeAdaption(function(selection) {
+        .resizeAdaption(function (selection) {
           selection
             .selectAll('rect')
             .attr('x', -15)
@@ -2111,7 +2074,7 @@ export function parcoords(config) {
     function brushReset(dimension) {
       __.brushed = false;
       if (g) {
-        g.selectAll('.brush').each(function(d) {
+        g.selectAll('.brush').each(function (d) {
           d3.select(this).call(brushes[d].clear());
         });
         pc.renderBrushed();
@@ -2126,7 +2089,7 @@ export function parcoords(config) {
       var brush = g
         .append('svg:g')
         .attr('class', 'brush')
-        .each(function(d) {
+        .each(function (d) {
           d3.select(this).call(brushFor(d));
         });
 
@@ -2152,7 +2115,7 @@ export function parcoords(config) {
 
     brush.modes['1D-axes-multi'] = {
       install: install,
-      uninstall: function() {
+      uninstall: function () {
         g.selectAll('.brush').remove();
         brushes = {};
         delete pc.brushExtents;
@@ -2165,7 +2128,7 @@ export function parcoords(config) {
   // brush mode: angular
   // code based on 2D.strums.js
 
-  (function() {
+  (function () {
     var arcs = {},
       strumRect;
 
@@ -2200,23 +2163,23 @@ export function parcoords(config) {
         .attr('class', 'arc');
 
       line
-        .attr('x1', function(d) {
+        .attr('x1', function (d) {
           return d.p1[0];
         })
-        .attr('y1', function(d) {
+        .attr('y1', function (d) {
           return d.p1[1];
         })
-        .attr('x2', function(d) {
+        .attr('x2', function (d) {
           return d.p2[0];
         })
-        .attr('y2', function(d) {
+        .attr('y2', function (d) {
           return d.p2[1];
         })
         .attr('stroke', 'black')
         .attr('stroke-width', 2);
 
       drag
-        .on('drag', function(d, i) {
+        .on('drag', function (d, i) {
           var ev = d3.event,
             angle = 0;
 
@@ -2255,20 +2218,20 @@ export function parcoords(config) {
         .attr('class', 'arc');
 
       circles
-        .attr('cx', function(d) {
+        .attr('cx', function (d) {
           return d[0];
         })
-        .attr('cy', function(d) {
+        .attr('cy', function (d) {
           return d[1];
         })
         .attr('r', 5)
-        .style('opacity', function(d, i) {
+        .style('opacity', function (d, i) {
           return activePoint !== undefined && i === activePoint ? 0.8 : 0;
         })
-        .on('mouseover', function() {
+        .on('mouseover', function () {
           d3.select(this).style('opacity', 0.8);
         })
-        .on('mouseout', function() {
+        .on('mouseout', function () {
           d3.select(this).style('opacity', 0);
         })
         .call(drag);
@@ -2276,7 +2239,7 @@ export function parcoords(config) {
 
     function dimensionsForPoint(p) {
       var dims = { i: -1, left: undefined, right: undefined };
-      d3.keys(__.dimensions).some(function(dim, i) {
+      d3.keys(__.dimensions).some(function (dim, i) {
         if (xscale(dim) < p[0]) {
           var next = d3.keys(__.dimensions)[
             pc.getOrderedDimensionKeys().indexOf(dim) + 1
@@ -2298,9 +2261,8 @@ export function parcoords(config) {
         // Event on the right side of the last axis
         dims.i = d3.keys(__.dimensions).length - 1;
         dims.right = dims.left;
-        dims.left = pc.getOrderedDimensionKeys()[
-          d3.keys(__.dimensions).length - 2
-        ];
+        dims.left =
+          pc.getOrderedDimensionKeys()[d3.keys(__.dimensions).length - 2];
       }
 
       return dims;
@@ -2311,7 +2273,7 @@ export function parcoords(config) {
       // This will determine the freedom of movement, because a arc can
       // logically only happen between two axes, so no movement outside these axes
       // should be allowed.
-      return function() {
+      return function () {
         var p = d3.mouse(strumRect[0][0]),
           dims,
           arc;
@@ -2343,7 +2305,7 @@ export function parcoords(config) {
     }
 
     function onDrag() {
-      return function() {
+      return function () {
         var ev = d3.event,
           arc = arcs[arcs.active];
 
@@ -2368,22 +2330,22 @@ export function parcoords(config) {
       return Math.sqrt(a * a + b * b);
     }
 
-    var rad = (function() {
+    var rad = (function () {
       var c = Math.PI / 180;
-      return function(angle) {
+      return function (angle) {
         return angle * c;
       };
     })();
 
-    var deg = (function() {
+    var deg = (function () {
       var c = 180 / Math.PI;
-      return function(angle) {
+      return function (angle) {
         return angle * c;
       };
     })();
 
     // [0, 2*PI] -> [-PI/2, PI/2]
-    var signedAngle = function(angle) {
+    var signedAngle = function (angle) {
       var ret = angle;
       if (angle > Math.PI) {
         ret = angle - 1.5 * Math.PI;
@@ -2412,7 +2374,7 @@ export function parcoords(config) {
       }
 
       // test if segment angle is contained in angle interval
-      return function(a) {
+      return function (a) {
         if (a >= startAngle && a <= endAngle) {
           return true;
         }
@@ -2426,7 +2388,7 @@ export function parcoords(config) {
         brushed = __.data;
 
       // Get the ids of the currently active arcs.
-      ids = ids.filter(function(d) {
+      ids = ids.filter(function (d) {
         return !isNaN(d);
       });
 
@@ -2448,14 +2410,14 @@ export function parcoords(config) {
         return brushed;
       }
 
-      return brushed.filter(function(d) {
+      return brushed.filter(function (d) {
         switch (brush.predicate) {
           case 'AND':
-            return ids.every(function(id) {
+            return ids.every(function (id) {
               return crossesStrum(d, id);
             });
           case 'OR':
-            return ids.some(function(id) {
+            return ids.some(function (id) {
               return crossesStrum(d, id);
             });
           default:
@@ -2476,7 +2438,7 @@ export function parcoords(config) {
     }
 
     function onDragEnd() {
-      return function() {
+      return function () {
         var brushed = __.data,
           arc = arcs[arcs.active];
 
@@ -2506,12 +2468,12 @@ export function parcoords(config) {
     }
 
     function brushReset(arcs) {
-      return function() {
-        var ids = Object.getOwnPropertyNames(arcs).filter(function(d) {
+      return function () {
+        var ids = Object.getOwnPropertyNames(arcs).filter(function (d) {
           return !isNaN(d);
         });
 
-        ids.forEach(function(d) {
+        ids.forEach(function (d) {
           arcs.active = d;
           removeStrum(arcs);
         });
@@ -2529,7 +2491,7 @@ export function parcoords(config) {
       // placed. NOTE: even though they are evenly spaced in our current
       // implementation, we keep for when non-even spaced segments are supported as
       // well.
-      arcs.width = function(id) {
+      arcs.width = function (id) {
         var arc = arcs[id];
 
         if (arc === undefined) {
@@ -2540,7 +2502,7 @@ export function parcoords(config) {
       };
 
       // returns angles in [-PI/2, PI/2]
-      angle = function(p1, p2) {
+      angle = function (p1, p2) {
         var a = p1[0] - p2[0],
           b = p1[1] - p2[1],
           c = hypothenuse(a, b);
@@ -2549,7 +2511,7 @@ export function parcoords(config) {
       };
 
       // returns angles in [0, 2 * PI]
-      arcs.endAngle = function(id) {
+      arcs.endAngle = function (id) {
         var arc = arcs[id];
         if (arc === undefined) {
           return undefined;
@@ -2564,7 +2526,7 @@ export function parcoords(config) {
         return uAngle;
       };
 
-      arcs.startAngle = function(id) {
+      arcs.startAngle = function (id) {
         var arc = arcs[id];
         if (arc === undefined) {
           return undefined;
@@ -2580,7 +2542,7 @@ export function parcoords(config) {
         return uAngle;
       };
 
-      arcs.length = function(id) {
+      arcs.length = function (id) {
         var arc = arcs[id];
 
         if (arc === undefined) {
@@ -2594,15 +2556,15 @@ export function parcoords(config) {
         return c;
       };
 
-      pc.on('axesreorder.arcs', function() {
-        var ids = Object.getOwnPropertyNames(arcs).filter(function(d) {
+      pc.on('axesreorder.arcs', function () {
+        var ids = Object.getOwnPropertyNames(arcs).filter(function (d) {
           return !isNaN(d);
         });
 
         // Checks if the first dimension is directly left of the second dimension.
         function consecutive(first, second) {
           var length = d3.keys(__.dimensions).length;
-          return d3.keys(__.dimensions).some(function(d, i) {
+          return d3.keys(__.dimensions).some(function (d, i) {
             return d === first
               ? i + i < length && __.dimensions[i + 1] === second
               : false;
@@ -2611,7 +2573,7 @@ export function parcoords(config) {
 
         if (ids.length > 0) {
           // We have some arcs, which might need to be removed.
-          ids.forEach(function(d) {
+          ids.forEach(function (d) {
             var dims = arcs[d].dims;
             arcs.active = d;
             // If the two dimensions of the current arc are not next to each other
@@ -2659,27 +2621,21 @@ export function parcoords(config) {
 
     brush.modes['angular'] = {
       install: install,
-      uninstall: function() {
-        pc.selection
-          .select('svg')
-          .select('g#arcs')
-          .remove();
-        pc.selection
-          .select('svg')
-          .select('rect#arc-events')
-          .remove();
+      uninstall: function () {
+        pc.selection.select('svg').select('g#arcs').remove();
+        pc.selection.select('svg').select('rect#arc-events').remove();
         pc.on('axesreorder.arcs', undefined);
         delete pc.brushReset;
 
         strumRect = undefined;
       },
       selected: selected,
-      brushState: function() {
+      brushState: function () {
         return arcs;
       },
     };
   })();
-  pc.interactive = function() {
+  pc.interactive = function () {
     flags.interactive = true;
     return this;
   };
@@ -2688,13 +2644,13 @@ export function parcoords(config) {
   pc.xscale = xscale;
   pc.ctx = ctx;
   pc.canvas = canvas;
-  pc.g = function() {
+  pc.g = function () {
     return g;
   };
 
   // rescale for height, width and margins
   // TODO currently assumes chart is brushable, and destroys old brushes
-  pc.resize = function() {
+  pc.resize = function () {
     // selection size
     pc.selection
       .select('svg')
@@ -2725,7 +2681,7 @@ export function parcoords(config) {
   };
 
   // highlight an array of data
-  pc.highlight = function(data) {
+  pc.highlight = function (data) {
     if (arguments.length === 0) {
       return __.highlighted;
     }
@@ -2739,7 +2695,7 @@ export function parcoords(config) {
   };
 
   // clear highlighting
-  pc.unhighlight = function() {
+  pc.unhighlight = function () {
     __.highlighted = [];
     pc.clear('highlight');
     d3.selectAll([canvas.foreground, canvas.brushed]).classed('faded', false);
@@ -2748,7 +2704,7 @@ export function parcoords(config) {
 
   // calculate 2d intersection of line a->b with line c->d
   // points are objects with x and y properties
-  pc.intersection = function(a, b, c, d) {
+  pc.intersection = function (a, b, c, d) {
     return {
       x:
         ((a.x * b.y - a.y * b.x) * (c.x - d.x) -
@@ -2771,7 +2727,7 @@ export function parcoords(config) {
 
   // Merges the canvases and SVG elements into one canvas element which is then passed into the callback
   // (so you can choose to save it to disk, etc.)
-  pc.mergeParcoords = function(callback) {
+  pc.mergeParcoords = function (callback) {
     // Retina display, etc.
     var devicePixelRatio = window.devicePixelRatio || 1;
 
@@ -2807,7 +2763,7 @@ export function parcoords(config) {
     // Create a Data URI.
     var src = 'data:image/svg+xml;base64,' + window.btoa(svgStr);
     var img = new Image();
-    img.onload = function() {
+    img.onload = function () {
       context.drawImage(
         img,
         0,
@@ -2823,7 +2779,7 @@ export function parcoords(config) {
   };
   pc.version = '0.7.0';
   // this descriptive text should live with other introspective methods
-  pc.toString = function() {
+  pc.toString = function () {
     return (
       'Parallel Coordinates: ' +
       d3.keys(__.dimensions).length +
@@ -2838,23 +2794,23 @@ export function parcoords(config) {
   return pc;
 }
 
-d3.renderQueue = function(func) {
+d3.renderQueue = function (func) {
   var _queue = [], // data to be rendered
     _rate = 10, // number of calls per frame
-    _clear = function() {}, // clearing function
+    _clear = function () {}, // clearing function
     _i = 0; // current iteration
 
-  var rq = function(data) {
+  var rq = function (data) {
     if (data) rq.data(data);
     rq.invalidate();
     _clear();
     rq.render();
   };
 
-  rq.render = function() {
+  rq.render = function () {
     _i = 0;
     var valid = true;
-    rq.invalidate = function() {
+    rq.invalidate = function () {
       valid = false;
     };
 
@@ -2875,24 +2831,24 @@ d3.renderQueue = function(func) {
     d3.timer(doFrame);
   };
 
-  rq.data = function(data) {
+  rq.data = function (data) {
     rq.invalidate();
     _queue = data.slice(0);
     return rq;
   };
 
-  rq.rate = function(value) {
+  rq.rate = function (value) {
     if (!arguments.length) return _rate;
     _rate = value;
     return rq;
   };
 
-  rq.remaining = function() {
+  rq.remaining = function () {
     return _queue.length - _i;
   };
 
   // clear the canvas
-  rq.clear = function(func) {
+  rq.clear = function (func) {
     if (!arguments.length) {
       _clear();
       return rq;
@@ -2901,7 +2857,7 @@ d3.renderQueue = function(func) {
     return rq;
   };
 
-  rq.invalidate = function() {};
+  rq.invalidate = function () {};
 
   return rq;
 };

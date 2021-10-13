@@ -24,7 +24,7 @@
     <!--value inputs-->
     <ng-container *ngIf="!isList; else listVal">
       <!--range-->
-      <div class="range-wrapper " [formGroup]="formGroup.get('feasibleSpace')">
+      <div class="range-wrapper" [formGroup]="formGroup.get('feasibleSpace')">
         <mat-form-field appearance="outline">
           <mat-label>Min</mat-label>
           <input matInput formControlName="min" />

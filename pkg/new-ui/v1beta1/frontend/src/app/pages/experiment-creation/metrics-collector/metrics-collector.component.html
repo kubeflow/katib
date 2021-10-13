@@ -18,14 +18,14 @@
 
     <ng-container [ngSwitch]="formGroup.get('kind').value">
       <ng-container *ngSwitchCase="kind.FILE">
-        <mat-form-field appearance="outline" class="step-content ">
+        <mat-form-field appearance="outline" class="step-content">
           <mat-label>Metrics file</mat-label>
           <input formControlName="metricsFile" matInput />
         </mat-form-field>
       </ng-container>
 
       <ng-container *ngSwitchCase="kind.TFEVENT">
-        <mat-form-field appearance="outline" class="step-content ">
+        <mat-form-field appearance="outline" class="step-content">
           <mat-label>TensorFlow Events Directory</mat-label>
           <input formControlName="tfDir" matInput />
         </mat-form-field>
@@ -91,7 +91,7 @@
           Katib collects the metrics from an arbitrary file, where the Training
           Container should log them. You can also check an
           <a
-            href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/file-metricscollector-example.yaml#L15-L22"
+            href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/metrics-collector/file-metrics-collector.yaml#L15-L22"
             >example YAML </a
           >.
         </lib-step-info>
@@ -112,8 +112,8 @@
             >tf.Event</a
           >. You can also check the
           <a
-            href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/tfjob-example.yaml#L16-L22"
-            >TFJob example</a
+            href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L16-L22"
+            >TFJob MNIST with Summaries example</a
           >.
         </lib-step-info>
       </ng-container>
@@ -123,7 +123,7 @@
           You must define your own container that will be responsible for
           gathering the metrics. You can also check the
           <a
-            href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/custom-metricscollector-example.yaml#L15-L35"
+            href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/metrics-collector/custom-metrics-collector.yaml#L15-L35"
             >custom metrics collector example</a
           >.
         </lib-step-info>

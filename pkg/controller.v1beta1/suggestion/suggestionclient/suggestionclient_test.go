@@ -596,8 +596,7 @@ func newFakeTime() *metav1.Time {
 }
 
 func newFakeExperiment() *experimentsv1beta1.Experiment {
-	var testInt int32
-	testInt = 1
+	var testInt int32 = 1
 
 	fakeParameters := []experimentsv1beta1.ParameterSpec{
 		{
@@ -910,6 +909,7 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 				},
 			},
 		},
-		RequestNumber: 2,
+		RequestNumber:      2,
+		TotalRequestNumber: 6,
 	}
 }

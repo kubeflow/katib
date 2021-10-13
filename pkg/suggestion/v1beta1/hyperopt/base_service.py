@@ -166,7 +166,7 @@ class BaseHyperoptService(object):
             #       'state':2,
             #       'tid':5,
             #       'spec':{
-            #          'trial-name':'tpe-example-48xl8whg'
+            #          'trial-name':'tpe-48xl8whg'
             #       },
             #       'result':{
             #          'loss':-0.1135,

@@ -39,7 +39,9 @@ func TestMain(m *testing.M) {
 			filepath.Join("..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 		},
 	}
-	apis.AddToScheme(scheme.Scheme)
+	if err := apis.AddToScheme(scheme.Scheme); err != nil {
+		stdlog.Fatal(err)
+	}
 
 	var err error
 	if cfg, err = t.Start(); err != nil {
@@ -47,7 +49,9 @@ func TestMain(m *testing.M) {
 	}
 
 	code := m.Run()
-	t.Stop()
+	if err = t.Stop(); err != nil {
+		stdlog.Fatal(err)
+	}
 	os.Exit(code)
 }
 

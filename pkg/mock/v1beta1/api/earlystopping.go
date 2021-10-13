@@ -6,10 +6,11 @@ package mock
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	grpc "google.golang.org/grpc"
-	reflect "reflect"
 )
 
 // MockEarlyStoppingClient is a mock of EarlyStoppingClient interface.

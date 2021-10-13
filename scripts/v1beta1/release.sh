@@ -133,4 +133,5 @@ fi
 git push -u origin ${BRANCH}
 git push -u origin ${TAG}
 
-echo -e "\nKatib ${TAG} has been released"
+echo -e "\nKatib ${TAG} release has been published"
+echo "To finish the release process, follow these steps: https://github.com/kubeflow/katib/tree/master/docs/release#create-a-new-katib-release"

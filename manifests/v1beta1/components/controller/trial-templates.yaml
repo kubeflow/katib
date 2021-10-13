@@ -42,7 +42,7 @@ data:
                 - "--nn_config=\"${trialParameters.neuralNetworkConfig}\""
           restartPolicy: Never
   pytorchJobTemplate: |-
-    apiVersion: "kubeflow.org/v1"
+    apiVersion: kubeflow.org/v1
     kind: PyTorchJob
     spec:
       pytorchReplicaSpecs:

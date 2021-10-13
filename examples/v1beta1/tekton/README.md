@@ -115,4 +115,4 @@ $ kubectl logs $(kubectl get pods -n kubeflow -o name | grep katib-controller) -
 If you ran the above steps successfully, you should be able to run Tekton Pipelines examples.
 
 Learn more about using custom Kubernetes resource as a Trial template in the
-[official Kubeflow guides](https://www.kubeflow.org/docs/components/katib/trial-template/#use-custom-kubernetes-resource-as-a-trial-template)
+[official Kubeflow guides](https://www.kubeflow.org/docs/components/katib/trial-template/#use-custom-kubernetes-resource-as-a-trial-template).

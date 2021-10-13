@@ -8,9 +8,8 @@ describe('EarlyStoppingComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ EarlyStoppingComponent ]
-    })
-    .compileComponents();
+      declarations: [EarlyStoppingComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

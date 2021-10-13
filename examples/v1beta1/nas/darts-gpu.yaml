@@ -1,0 +1,89 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: darts-gpu
+spec:
+  parallelTrialCount: 1
+  maxTrialCount: 1
+  maxFailedTrialCount: 1
+  objective:
+    type: maximize
+    objectiveMetricName: Best-Genotype
+  metricsCollectorSpec:
+    collector:
+      kind: StdOut
+    source:
+      filter:
+        metricsFormat:
+          - "([\\w-]+)=(Genotype.*)"
+  algorithm:
+    algorithmName: darts
+    algorithmSettings:
+      - name: num_epochs
+        value: "3"
+  nasConfig:
+    graphConfig:
+      numLayers: 3
+    operations:
+      - operationType: separable_convolution
+        parameters:
+          - name: filter_size
+            parameterType: categorical
+            feasibleSpace:
+              list:
+                - "3"
+      - operationType: dilated_convolution
+        parameters:
+          - name: filter_size
+            parameterType: categorical
+            feasibleSpace:
+              list:
+                - "3"
+                - "5"
+      - operationType: avg_pooling
+        parameters:
+          - name: filter_size
+            parameterType: categorical
+            feasibleSpace:
+              list:
+                - "3"
+      - operationType: max_pooling
+        parameters:
+          - name: filter_size
+            parameterType: categorical
+            feasibleSpace:
+              list:
+                - "3"
+      - operationType: skip_connection
+  trialTemplate:
+    primaryContainerName: training-container
+    trialParameters:
+      - name: algorithmSettings
+        description: Algorithm settings of DARTS Experiment
+        reference: algorithm-settings
+      - name: searchSpace
+        description: Search Space of DARTS Experiment
+        reference: search-space
+      - name: numberLayers
+        description: Number of Neural Network layers
+        reference: num-layers
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
+                image: docker.io/kubeflowkatib/darts-cnn-cifar10:v1beta1-45c5727
+                command:
+                  - python3
+                  - run_trial.py
+                  - --algorithm-settings="${trialParameters.algorithmSettings}"
+                  - --search-space="${trialParameters.searchSpace}"
+                  - --num-layers="${trialParameters.numberLayers}"
+                resources:
+                  limits:
+                    nvidia.com/gpu: 1
+            restartPolicy: Never

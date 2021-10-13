@@ -133,14 +133,10 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 
 		sts.CurrentOptimalTrial.BestTrialName = bestTrial.Name
 		sts.CurrentOptimalTrial.ParameterAssignments = []commonv1beta1.ParameterAssignment{}
-		for _, parameterAssigment := range bestTrial.Spec.ParameterAssignments {
-			sts.CurrentOptimalTrial.ParameterAssignments = append(sts.CurrentOptimalTrial.ParameterAssignments, parameterAssigment)
-		}
+		sts.CurrentOptimalTrial.ParameterAssignments = append(sts.CurrentOptimalTrial.ParameterAssignments, bestTrial.Spec.ParameterAssignments...)
 
 		sts.CurrentOptimalTrial.Observation.Metrics = []commonv1beta1.Metric{}
-		for _, metric := range bestTrial.Status.Observation.Metrics {
-			sts.CurrentOptimalTrial.Observation.Metrics = append(sts.CurrentOptimalTrial.Observation.Metrics, metric)
-		}
+		sts.CurrentOptimalTrial.Observation.Metrics = append(sts.CurrentOptimalTrial.Observation.Metrics, bestTrial.Status.Observation.Metrics...)
 	}
 	return isObjectiveGoalReached
 }

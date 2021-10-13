@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
 
 
@@ -34,3 +35,11 @@ def set_katib_namespace(katib):
     katib_namespace = katib.metadata.namespace
     namespace = katib_namespace or get_default_target_namespace()
     return namespace
+
+class FakeResponse:
+    """Fake object of RESTResponse to deserialize
+    Ref) https://github.com/kubeflow/katib/pull/1630#discussion_r697877815
+    Ref) https://github.com/kubernetes-client/python/issues/977#issuecomment-592030030
+    """
+    def __init__(self, obj):
+        self.data = json.dumps(obj)
