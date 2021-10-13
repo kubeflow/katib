@@ -6,11 +6,13 @@ describe('MetadataComponent', () => {
   let component: MetadataComponent;
   let fixture: ComponentFixture<MetadataComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [MetadataComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [MetadataComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetadataComponent);

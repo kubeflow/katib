@@ -6,11 +6,13 @@ describe('AlgorithmComponent', () => {
   let component: AlgorithmComponent;
   let fixture: ComponentFixture<AlgorithmComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [AlgorithmComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [AlgorithmComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AlgorithmComponent);

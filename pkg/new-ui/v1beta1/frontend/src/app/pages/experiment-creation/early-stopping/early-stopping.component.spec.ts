@@ -6,11 +6,13 @@ describe('EarlyStoppingComponent', () => {
   let component: EarlyStoppingComponent;
   let fixture: ComponentFixture<EarlyStoppingComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [EarlyStoppingComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [EarlyStoppingComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EarlyStoppingComponent);

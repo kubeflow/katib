@@ -6,11 +6,13 @@ describe('HyperParametersComponent', () => {
   let component: HyperParametersComponent;
   let fixture: ComponentFixture<HyperParametersComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [HyperParametersComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [HyperParametersComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(HyperParametersComponent);

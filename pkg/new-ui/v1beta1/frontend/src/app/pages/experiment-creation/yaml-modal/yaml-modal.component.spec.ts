@@ -6,11 +6,13 @@ describe('YamlModalComponent', () => {
   let component: YamlModalComponent;
   let fixture: ComponentFixture<YamlModalComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [YamlModalComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [YamlModalComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(YamlModalComponent);

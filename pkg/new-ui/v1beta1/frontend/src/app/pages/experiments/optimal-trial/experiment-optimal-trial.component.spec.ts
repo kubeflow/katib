@@ -6,11 +6,13 @@ describe('ExperimentOptimalTrialComponent', () => {
   let component: ExperimentOptimalTrialComponent;
   let fixture: ComponentFixture<ExperimentOptimalTrialComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ExperimentOptimalTrialComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ExperimentOptimalTrialComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ExperimentOptimalTrialComponent);

@@ -6,11 +6,13 @@ describe('MetricsCollectorComponent', () => {
   let component: MetricsCollectorComponent;
   let fixture: ComponentFixture<MetricsCollectorComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [MetricsCollectorComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [MetricsCollectorComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MetricsCollectorComponent);

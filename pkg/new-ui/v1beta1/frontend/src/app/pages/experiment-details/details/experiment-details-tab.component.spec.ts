@@ -6,11 +6,13 @@ describe('ExperimentDetailsTabComponent', () => {
   let component: ExperimentDetailsTabComponent;
   let fixture: ComponentFixture<ExperimentDetailsTabComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ExperimentDetailsTabComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ExperimentDetailsTabComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ExperimentDetailsTabComponent);

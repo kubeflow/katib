@@ -6,11 +6,13 @@ describe('ListKeyValueComponent', () => {
   let component: ListKeyValueComponent;
   let fixture: ComponentFixture<ListKeyValueComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ListKeyValueComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ListKeyValueComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ListKeyValueComponent);

@@ -6,11 +6,13 @@ describe('ParamsListComponent', () => {
   let component: ParamsListComponent;
   let fixture: ComponentFixture<ParamsListComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ParamsListComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ParamsListComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ParamsListComponent);

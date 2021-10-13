@@ -6,11 +6,13 @@ describe('NasGraphComponent', () => {
   let component: NasGraphComponent;
   let fixture: ComponentFixture<NasGraphComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [NasGraphComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [NasGraphComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NasGraphComponent);

@@ -6,11 +6,13 @@ describe('ExperimentYamlComponent', () => {
   let component: ExperimentYamlComponent;
   let fixture: ComponentFixture<ExperimentYamlComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ExperimentYamlComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ExperimentYamlComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ExperimentYamlComponent);
