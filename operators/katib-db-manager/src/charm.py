@@ -2,11 +2,10 @@
 
 import logging
 
+from oci_image import OCIImageResource, OCIImageResourceError
 from ops.charm import CharmBase
 from ops.main import main
 from ops.model import ActiveStatus, MaintenanceStatus, WaitingStatus
-
-from oci_image import OCIImageResource, OCIImageResourceError
 
 logger = logging.getLogger(__name__)
 
@@ -99,15 +98,6 @@ class Operator(CharmBase):
                             "KATIB_MYSQL_DB_DATABASE": mysql_data["database"],
                         },
                         "kubernetes": {
-                            "readinessProbe": {
-                                "exec": {
-                                    "command": [
-                                        "/bin/grpc_health_probe",
-                                        f"-addr=:{self.model.config['port']}",
-                                    ]
-                                },
-                                "initialDelaySeconds": 5,
-                            },
                             "livenessProbe": {
                                 "exec": {
                                     "command": [
