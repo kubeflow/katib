@@ -94,7 +94,10 @@ make deploy
 
 # Wait until all Katib pods is running.
 TIMEOUT=120
-PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
+PODNUM=0;
+for replicas in $(kubectl get deploy -n kubeflow -o jsonpath='{.items[*].spec.replicas}'); do \
+  PODNUM=$(( $PODNUM + $replicas ));
+done;
 # 1 Pod for the cert-generator Job
 PODNUM=$((PODNUM + 1))
 until kubectl get pods -n kubeflow | grep -E 'Running|Completed' | [[ $(wc -l) -eq $PODNUM ]]; do
