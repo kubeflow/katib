@@ -84,16 +84,8 @@ cat ${CONFIG_PATCH}
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 
-echo "Deploying tf-operator from kubeflow/manifests master"
-cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
-kustomize build . | kubectl apply -f -
-cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
-kustomize build . | kubectl apply -f -
-
-echo "Deploying pytorch-operator from kubeflow/manifests master"
-cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
-kustomize build . | kubectl apply -f -
-cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
+echo "Deploying training-operator from kubeflow/manifests v1.4 branch"
+cd "${MANIFESTS_DIR}/apps/training-operator/upstream/overlays/kubeflow"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"

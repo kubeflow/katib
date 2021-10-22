@@ -162,7 +162,7 @@ class WorkflowBuilder(object):
             },
             {
                 "name": "EXTRA_REPOS",
-                "value": "kubeflow/testing@HEAD;kubeflow/manifests@v1.2-branch"
+                "value": "kubeflow/testing@HEAD;kubeflow/manifests@v1.4-branch"
             },
             # Set GOPATH to test_dir because Katib repo is located under /src/github.com/kubeflow/katib
             {
