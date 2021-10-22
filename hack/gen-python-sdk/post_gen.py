@@ -50,6 +50,8 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
         lines.append("from kubernetes.client import V1ListMeta\n")
         lines.append("from kubernetes.client import V1Container\n")
         lines.append("from kubernetes.client import V1HTTPGetAction\n")
+        lines.append("from kubernetes.client import V1ManagedFieldsEntry\n")
+        lines.append("from kubernetes.client import V1OwnerReference\n")
 
     with open(output_file, 'w') as f:
         f.writelines(lines)

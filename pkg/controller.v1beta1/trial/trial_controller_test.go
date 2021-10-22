@@ -51,7 +51,7 @@ const (
 	trialName       = "test-trial"
 	batchJobName    = "test-job"
 	objectiveMetric = "accuracy"
-	timeout         = time.Second * 40
+	timeout         = time.Second * 80
 )
 
 var trialKey = types.NamespacedName{Name: trialName, Namespace: namespace}
@@ -112,7 +112,9 @@ func TestReconcileBatchJob(t *testing.T) {
 		// Try to update status until it be succeeded
 		for err != nil {
 			updatedInstance := &trialsv1beta1.Trial{}
-			c.Get(context.TODO(), trialKey, updatedInstance)
+			if err = c.Get(context.TODO(), trialKey, updatedInstance); err != nil {
+				continue
+			}
 			updatedInstance.Status = instance.Status
 			err = r.updateStatus(updatedInstance)
 		}
@@ -195,14 +197,18 @@ func TestReconcileBatchJob(t *testing.T) {
 
 	// Expect that Trial status is running
 	g.Eventually(func() bool {
-		c.Get(context.TODO(), trialKey, trial)
+		if err = c.Get(context.TODO(), trialKey, trial); err != nil {
+			return false
+		}
 		return trial.IsRunning()
 	}, timeout).Should(gomega.BeTrue())
 
 	// Manually update BatchJob status to failed
 	// Expect that Trial status is failed
 	g.Eventually(func() bool {
-		c.Get(context.TODO(), batchJobKey, batchJob)
+		if err = c.Get(context.TODO(), batchJobKey, batchJob); err != nil {
+			return false
+		}
 		batchJob.Status = batchv1.JobStatus{
 			Conditions: []batchv1.JobCondition{
 				{
@@ -213,18 +219,23 @@ func TestReconcileBatchJob(t *testing.T) {
 				},
 			},
 		}
-		c.Status().Update(context.TODO(), batchJob)
+		if err = c.Status().Update(context.TODO(), batchJob); err != nil {
+			return false
+		}
 
-		c.Get(context.TODO(), trialKey, trial)
+		if err = c.Get(context.TODO(), trialKey, trial); err != nil {
+			return false
+		}
 		return trial.IsFailed()
 	}, timeout).Should(gomega.BeTrue())
+
+	// Delete the Trial
+	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
 
 	// Expect that Trial is deleted
 	// BatchJob can't be deleted because GC doesn't work in envtest and BatchJob stuck in termination phase.
 	// Ref: https://book.kubebuilder.io/reference/testing/envtest.html#testing-considerations.
 	g.Eventually(func() bool {
-		// Delete the Trial
-		c.Delete(context.TODO(), trial)
 		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 
@@ -252,7 +263,9 @@ func TestReconcileBatchJob(t *testing.T) {
 	// Expect that Trial status is succeeded and metrics are properly populated
 	// Metrics available because GetTrialObservationLog returns values
 	g.Eventually(func() bool {
-		c.Get(context.TODO(), trialKey, trial)
+		if err = c.Get(context.TODO(), trialKey, trial); err != nil {
+			return false
+		}
 		return trial.IsSucceeded() &&
 			len(trial.Status.Observation.Metrics) > 0 &&
 			trial.Status.Observation.Metrics[0].Max == "0.99" &&
@@ -260,10 +273,11 @@ func TestReconcileBatchJob(t *testing.T) {
 			trial.Status.Observation.Metrics[0].Latest == "0.11"
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the Trial
+	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+
 	// Expect that Trial is deleted
 	g.Eventually(func() bool {
-		// Delete the Trial
-		c.Delete(context.TODO(), trial)
 		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 
@@ -275,7 +289,9 @@ func TestReconcileBatchJob(t *testing.T) {
 	// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
 	// Metrics unavailable because GetTrialObservationLog returns "unavailable".
 	g.Eventually(func() bool {
-		c.Get(context.TODO(), trialKey, trial)
+		if err = c.Get(context.TODO(), trialKey, trial); err != nil {
+			return false
+		}
 		isConditionCorrect := false
 		for _, cond := range trial.Status.Conditions {
 			if cond.Type == trialsv1beta1.TrialSucceeded && cond.Status == corev1.ConditionFalse &&
@@ -287,10 +303,11 @@ func TestReconcileBatchJob(t *testing.T) {
 		return isConditionCorrect
 	}, timeout).Should(gomega.BeTrue())
 
+	// Delete the Trial
+	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+
 	// Expect that Trial is deleted
 	g.Eventually(func() bool {
-		// Delete the Trial
-		c.Delete(context.TODO(), trial)
 		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 

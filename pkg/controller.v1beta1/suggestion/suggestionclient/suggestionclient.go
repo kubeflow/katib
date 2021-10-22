@@ -357,7 +357,7 @@ func convertTrialObservation(strategies []commonapiv1beta1.MetricStrategy, obser
 	if observation != nil && observation.Metrics != nil {
 		for _, m := range observation.Metrics {
 			var value string
-			switch strategy, _ := strategyMap[m.Name]; strategy {
+			switch strategy := strategyMap[m.Name]; strategy {
 			case commonapiv1beta1.ExtractByMin:
 				if m.Min == consts.UnavailableMetricValue {
 					value = m.Latest

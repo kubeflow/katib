@@ -49,7 +49,8 @@ class V1beta1Observation(object):
         self._metrics = None
         self.discriminator = None
 
-        self.metrics = metrics
+        if metrics is not None:
+            self.metrics = metrics
 
     @property
     def metrics(self):
@@ -71,8 +72,6 @@ class V1beta1Observation(object):
         :param metrics: The metrics of this V1beta1Observation.  # noqa: E501
         :type: list[V1beta1Metric]
         """
-        if self.local_vars_configuration.client_side_validation and metrics is None:  # noqa: E501
-            raise ValueError("Invalid value for `metrics`, must not be `None`")  # noqa: E501
 
         self._metrics = metrics
 

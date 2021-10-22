@@ -30,6 +30,7 @@ spec:
             - "--trial-resources=PyTorchJob.v1.kubeflow.org"
             - "--trial-resources=MPIJob.v1.kubeflow.org"
             - "--trial-resources=XGBoostJob.v1.kubeflow.org"
+            - "--trial-resources=MXJob.v1.kubeflow.org"
           ports:
             - containerPort: 8443
               name: webhook

@@ -75,7 +75,7 @@ jobs:
       - name: Test Katib
         run: |
           set -eux
-          kubectl apply -f examples/v1beta1/random-example.yaml
+          kubectl apply -f examples/v1beta1/hp-tuning/random.yaml
 
       - name: Get pod statuses
         run: kubectl get all -A

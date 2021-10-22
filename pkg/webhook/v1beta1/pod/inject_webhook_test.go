@@ -67,9 +67,8 @@ func TestWrapWorkerContainer(t *testing.T) {
 				},
 			},
 			PrimaryContainerName: primaryContainer,
-			PrimaryPodLabels:     experimentsv1beta1.DefaultKubeflowJobPrimaryPodLabels,
-			SuccessCondition:     experimentsv1beta1.DefaultKubeflowJobSuccessCondition,
-			FailureCondition:     experimentsv1beta1.DefaultKubeflowJobFailureCondition,
+			SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
+			FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
 		},
 	}
 
@@ -241,7 +240,9 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 		},
 	}
-	apis.AddToScheme(scheme.Scheme)
+	if err := apis.AddToScheme(scheme.Scheme); err != nil {
+		t.Error(err)
+	}
 
 	cfg, err := envTest.Start()
 	if err != nil {
@@ -657,7 +658,9 @@ func TestGetKatibJob(t *testing.T) {
 			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
 		},
 	}
-	apis.AddToScheme(scheme.Scheme)
+	if err := apis.AddToScheme(scheme.Scheme); err != nil {
+		t.Error(err)
+	}
 
 	cfg, err := envTest.Start()
 	if err != nil {

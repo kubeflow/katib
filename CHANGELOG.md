@@ -1,5 +1,124 @@
 # Changelog
 
+## [v0.12.0](https://github.com/kubeflow/katib/tree/v0.12.0) (2021-10-05)
+
+## New Features
+
+### Algorithms and Components
+
+- Add Optuna based suggestion service ([#1613](https://github.com/kubeflow/katib/pull/1613) by [@g-votte](https://github.com/g-votte))
+- Support Sobol's Quasirandom Sequence using Goptuna. ([#1523](https://github.com/kubeflow/katib/pull/1523) by [@c-bata](https://github.com/c-bata))
+- Bump the Goptuna version up to v0.8.0 with IPOP-CMA-ES and BIPOP-CMA-ES support. ([#1519](https://github.com/kubeflow/katib/pull/1519) by [@c-bata](https://github.com/c-bata))
+- Validate possible operations for Grid suggestion ([#1205](https://github.com/kubeflow/katib/pull/1205) by [@andreyvelich](https://github.com/andreyvelich))
+- Validate for Bayesian Optimization algorithm settings ([#1600](https://github.com/kubeflow/katib/pull/1600) by [@anencore94](https://github.com/anencore94))
+- Add Support for Argo Workflows ([#1605](https://github.com/kubeflow/katib/pull/1605) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Support for XGBoost Operator with LightGBM example ([#1603](https://github.com/kubeflow/katib/pull/1603) by [@andreyvelich](https://github.com/andreyvelich))
+- Allow empty resources for CPU and Memory in Katib config ([#1564](https://github.com/kubeflow/katib/pull/1564) by [@andreyvelich](https://github.com/andreyvelich))
+- Add kustomization overlay: katib-openshift ([#1513](https://github.com/kubeflow/katib/pull/1513) by [@maanur](https://github.com/maanur))
+- Switch to SDI in Katib Charm ([#1555](https://github.com/kubeflow/katib/pull/1555) by [@knkski](https://github.com/knkski))
+
+### UI Features
+
+- Add Multivariate TPE to Katib UI ([#1625](https://github.com/kubeflow/katib/pull/1625) by [@andreyvelich](https://github.com/andreyvelich))
+- Update Katib UI with Optuna Algorithm Settings ([#1626](https://github.com/kubeflow/katib/pull/1626) by [@andreyvelich](https://github.com/andreyvelich))
+- Change the default image for the new Katib UI ([#1608](https://github.com/kubeflow/katib/pull/1608) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Documentation
+
+- Add Katib 2021 ROADMAP ([#1524](https://github.com/kubeflow/katib/pull/1524) by [@andreyvelich](https://github.com/andreyvelich))
+- Add AutoML and Training WG Summit July 2021 ([#1615](https://github.com/kubeflow/katib/pull/1615) by [@andreyvelich](https://github.com/andreyvelich))
+- Add the new Katib presentations 2021 ([#1539](https://github.com/kubeflow/katib/pull/1539) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Doc checklist to PR template ([#1568](https://github.com/kubeflow/katib/pull/1568) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix typo in operators/README ([#1557](https://github.com/kubeflow/katib/pull/1557) by [@evilnick](https://github.com/evilnick))
+- Adds docs on how to use Katib Charm within KF ([#1556](https://github.com/kubeflow/katib/pull/1556) by [@RFMVasconcelos](https://github.com/RFMVasconcelos))
+- Fix a link to Kustomize manifest for new Katib UI ([#1521](https://github.com/kubeflow/katib/pull/1521) by [@c-bata](https://github.com/c-bata))
+
+## Bug Fixes
+
+- Fix UI for handling missing params ([#1657](https://github.com/kubeflow/katib/pull/1657) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Reconcile semantics for Suggestion Algorithms ([#1644](https://github.com/kubeflow/katib/pull/1644) by [@johnugeorge](https://github.com/johnugeorge))
+- Fix Metrics Collector error in case of non-existing Process ([#1614](https://github.com/kubeflow/katib/pull/1614) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix mysql version in docker image ([#1594](https://github.com/kubeflow/katib/pull/1594) by [@munagekar](https://github.com/munagekar))
+- Fix grep in Tekton Experiment Doc ([#1578](https://github.com/kubeflow/katib/pull/1578) by [@andreyvelich](https://github.com/andreyvelich))
+- Error messages corrected ([#1522](https://github.com/kubeflow/katib/pull/1522) by [@himanshu007-creator](https://github.com/himanshu007-creator))
+- Install charmcraft 1.0.0 ([#1593](https://github.com/kubeflow/katib/pull/1593) by [@DomFleischmann](https://github.com/DomFleischmann))
+
+## Misc
+
+- Modify XGBoostJob example for the new Controller ([#1623](https://github.com/kubeflow/katib/pull/1623) by [@andreyvelich](https://github.com/andreyvelich))
+- Modify Labels for controller resources ([#1621](https://github.com/kubeflow/katib/pull/1621) by [@andreyvelich](https://github.com/andreyvelich))
+- Modify Labels for Katib Components ([#1611](https://github.com/kubeflow/katib/pull/1611) by [@andreyvelich](https://github.com/andreyvelich))
+- Upgrade CRDs to apiextensions.k8s.io/v1 ([#1610](https://github.com/kubeflow/katib/pull/1610) by [@andreyvelich](https://github.com/andreyvelich))
+- Update Katib SDK with OpenAPI generator ([#1572](https://github.com/kubeflow/katib/pull/1572) by [@andreyvelich](https://github.com/andreyvelich))
+- Disable default PV for Experiment with resume from volume ([#1552](https://github.com/kubeflow/katib/pull/1552) by [@andreyvelich](https://github.com/andreyvelich))
+- Remove PV from MySQL component ([#1527](https://github.com/kubeflow/katib/pull/1527) by [@andreyvelich](https://github.com/andreyvelich))
+- feat: add naming regex check on validating webhook ([#1541](https://github.com/kubeflow/katib/pull/1541) by [@anencore94](https://github.com/anencore94))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.11.1...v0.12.0)
+
+## [v0.12.0-rc.1](https://github.com/kubeflow/katib/tree/v0.12.0-rc.1) (2021-09-07)
+
+## Bug Fixes
+
+- Fix UI for handling missing params ([#1657](https://github.com/kubeflow/katib/pull/1657) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Reconcile semantics for Suggestion Algorithms ([#1644](https://github.com/kubeflow/katib/pull/1644) by [@johnugeorge](https://github.com/johnugeorge))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.12.0-rc.0...v0.12.0-rc.1)
+
+## [v0.12.0-rc.0](https://github.com/kubeflow/katib/tree/v0.12.0-rc.0) (2021-08-19)
+
+## New Features
+
+### Algorithms and Components
+
+- Add Optuna based suggestion service ([#1613](https://github.com/kubeflow/katib/pull/1613) by [@g-votte](https://github.com/g-votte))
+- Support Sobol's Quasirandom Sequence using Goptuna. ([#1523](https://github.com/kubeflow/katib/pull/1523) by [@c-bata](https://github.com/c-bata))
+- Bump the Goptuna version up to v0.8.0 with IPOP-CMA-ES and BIPOP-CMA-ES support. ([#1519](https://github.com/kubeflow/katib/pull/1519) by [@c-bata](https://github.com/c-bata))
+- Validate possible operations for Grid suggestion ([#1205](https://github.com/kubeflow/katib/pull/1205) by [@andreyvelich](https://github.com/andreyvelich))
+- Validate for Bayesian Optimization algorithm settings ([#1600](https://github.com/kubeflow/katib/pull/1600) by [@anencore94](https://github.com/anencore94))
+- Add Support for Argo Workflows ([#1605](https://github.com/kubeflow/katib/pull/1605) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Support for XGBoost Operator with LightGBM example ([#1603](https://github.com/kubeflow/katib/pull/1603) by [@andreyvelich](https://github.com/andreyvelich))
+- Allow empty resources for CPU and Memory in Katib config ([#1564](https://github.com/kubeflow/katib/pull/1564) by [@andreyvelich](https://github.com/andreyvelich))
+- Add kustomization overlay: katib-openshift ([#1513](https://github.com/kubeflow/katib/pull/1513) by [@maanur](https://github.com/maanur))
+- Switch to SDI in Katib Charm ([#1555](https://github.com/kubeflow/katib/pull/1555) by [@knkski](https://github.com/knkski))
+
+### UI Features
+
+- Add Multivariate TPE to Katib UI ([#1625](https://github.com/kubeflow/katib/pull/1625) by [@andreyvelich](https://github.com/andreyvelich))
+- Update Katib UI with Optuna Algorithm Settings ([#1626](https://github.com/kubeflow/katib/pull/1626) by [@andreyvelich](https://github.com/andreyvelich))
+- Change the default image for the new Katib UI ([#1608](https://github.com/kubeflow/katib/pull/1608) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Documentation
+
+- Add Katib 2021 ROADMAP ([#1524](https://github.com/kubeflow/katib/pull/1524) by [@andreyvelich](https://github.com/andreyvelich))
+- Add AutoML and Training WG Summit July 2021 ([#1615](https://github.com/kubeflow/katib/pull/1615) by [@andreyvelich](https://github.com/andreyvelich))
+- Add the new Katib presentations 2021 ([#1539](https://github.com/kubeflow/katib/pull/1539) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Doc checklist to PR template ([#1568](https://github.com/kubeflow/katib/pull/1568) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix typo in operators/README ([#1557](https://github.com/kubeflow/katib/pull/1557) by [@evilnick](https://github.com/evilnick))
+- Adds docs on how to use Katib Charm within KF ([#1556](https://github.com/kubeflow/katib/pull/1556) by [@RFMVasconcelos](https://github.com/RFMVasconcelos))
+- Fix a link to Kustomize manifest for new Katib UI ([#1521](https://github.com/kubeflow/katib/pull/1521) by [@c-bata](https://github.com/c-bata))
+
+## Bug Fixes
+
+- Fix Metrics Collector error in case of non-existing Process ([#1614](https://github.com/kubeflow/katib/pull/1614) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix mysql version in docker image ([#1594](https://github.com/kubeflow/katib/pull/1594) by [@munagekar](https://github.com/munagekar))
+- Fix grep in Tekton Experiment Doc ([#1578](https://github.com/kubeflow/katib/pull/1578) by [@andreyvelich](https://github.com/andreyvelich))
+- Error messages corrected ([#1522](https://github.com/kubeflow/katib/pull/1522) by [@himanshu007-creator](https://github.com/himanshu007-creator))
+- Install charmcraft 1.0.0 ([#1593](https://github.com/kubeflow/katib/pull/1593) by [@DomFleischmann](https://github.com/DomFleischmann))
+
+## Misc
+
+- Modify XGBoostJob example for the new Controller ([#1623](https://github.com/kubeflow/katib/pull/1623) by [@andreyvelich](https://github.com/andreyvelich))
+- Modify Labels for controller resources ([#1621](https://github.com/kubeflow/katib/pull/1621) by [@andreyvelich](https://github.com/andreyvelich))
+- Modify Labels for Katib Components ([#1611](https://github.com/kubeflow/katib/pull/1611) by [@andreyvelich](https://github.com/andreyvelich))
+- Upgrade CRDs to apiextensions.k8s.io/v1 ([#1610](https://github.com/kubeflow/katib/pull/1610) by [@andreyvelich](https://github.com/andreyvelich))
+- Update Katib SDK with OpenAPI generator ([#1572](https://github.com/kubeflow/katib/pull/1572) by [@andreyvelich](https://github.com/andreyvelich))
+- Disable default PV for Experiment with resume from volume ([#1552](https://github.com/kubeflow/katib/pull/1552) by [@andreyvelich](https://github.com/andreyvelich))
+- Remove PV from MySQL component ([#1527](https://github.com/kubeflow/katib/pull/1527) by [@andreyvelich](https://github.com/andreyvelich))
+- feat: add naming regex check on validating webhook ([#1541](https://github.com/kubeflow/katib/pull/1541) by [@anencore94](https://github.com/anencore94))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.11.1...v0.12.0-rc.0)
+
 ## [v0.11.1](https://github.com/kubeflow/katib/tree/v0.11.1) (2021-06-09)
 
 ## Bug fixes

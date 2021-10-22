@@ -126,7 +126,7 @@ func TestGetRunSpecWithHP(t *testing.T) {
 			Err:             true,
 			testDescription: "Number of parameter assignments is not equal to number of Trial parameters",
 		},
-		// Parameter from assignments not found in Trial paramters
+		// Parameter from assignments not found in Trial parameters
 		{
 			Instance: newFakeInstance(),
 			ParameterAssignments: func() []commonapiv1beta1.ParameterAssignment {

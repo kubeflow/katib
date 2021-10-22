@@ -116,7 +116,7 @@ dict
 List all Katib Experiments.
 If the namespace is `None`, it takes "default" namespace.
 
-Return list of Experiment names with the statuses.
+Return list of Experiment objects.
 
 ### Parameters
 
@@ -126,7 +126,7 @@ Return list of Experiment names with the statuses.
 
 ### Return type
 
-list[dict]
+list[V1beta1Experiment]
 
 ## get_experiment_status
 
@@ -175,7 +175,7 @@ bool
 List all Experiment's Trials.
 If the namespace is `None`, it takes "default" namespace.
 
-Return list of Trial names with the statuses.
+Return list of Trial objects
 
 ### Parameters
 
@@ -186,7 +186,7 @@ Return list of Trial names with the statuses.
 
 ### Return type
 
-list[dict]
+list[V1beta1Trial]
 
 ## get_success_trial_details
 

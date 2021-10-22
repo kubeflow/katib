@@ -28,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -49,7 +48,6 @@ const (
 )
 
 var (
-	log              = logf.Log.WithName("suggestion-composer")
 	ComposerRegistry = make(map[string]Composer)
 )
 
@@ -68,8 +66,7 @@ type General struct {
 
 func New(mgr manager.Manager) Composer {
 	// We assume DefaultComposer always exists in ComposerRegistry.
-	ptr, _ := ComposerRegistry[consts.DefaultComposer]
-	return ptr.CreateComposer(mgr)
+	return ComposerRegistry[consts.DefaultComposer].CreateComposer(mgr)
 }
 
 // DesiredDeployment returns desired deployment for suggestion

@@ -40,7 +40,11 @@ const (
 	// Metrics must be printed this way
 	// loss=0.3
 	// accuracy=0.98
-	DefaultFilter = `([\w|-]+)\s*=\s*((-?\d+)(\.\d+)?)`
+	// Score=-7.53e-05
+	// Score=-7.53e+05
+	// Score=1E0
+	// Score=1.23E10
+	DefaultFilter = `([\w|-]+)\s*=\s*([+-]?\d(\.\d+)?([Ee][+-]?\d+)?)`
 
 	// TODO (andreyvelich): Do we need to maintain 2 names? Should we leave only 1?
 	MetricCollectorContainerName       = "metrics-collector"

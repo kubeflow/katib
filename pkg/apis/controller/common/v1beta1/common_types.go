@@ -150,7 +150,7 @@ type Metric struct {
 // +k8s:deepcopy-gen=true
 type Observation struct {
 	// Key-value pairs for metric names and values
-	Metrics []Metric `json:"metrics"`
+	Metrics []Metric `json:"metrics,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -200,14 +200,14 @@ const (
 	StdOutCollector CollectorKind = "StdOut"
 
 	FileCollector   CollectorKind = "File"
-	DefaultFilePath               = "/var/log/katib/metrics.log"
+	DefaultFilePath string        = "/var/log/katib/metrics.log"
 
 	TfEventCollector              CollectorKind = "TensorFlowEvent"
-	DefaultTensorflowEventDirPath               = "/var/log/katib/tfevent/"
+	DefaultTensorflowEventDirPath string        = "/var/log/katib/tfevent/"
 
 	PrometheusMetricCollector CollectorKind = "PrometheusMetric"
-	DefaultPrometheusPath                   = "/metrics"
-	DefaultPrometheusPort                   = 8080
+	DefaultPrometheusPath     string        = "/metrics"
+	DefaultPrometheusPort     int           = 8080
 
 	CustomCollector CollectorKind = "Custom"
 
@@ -220,7 +220,7 @@ const (
 
 // +k8s:deepcopy-gen=true
 type CollectorSpec struct {
-	Kind CollectorKind `json:"kind"`
+	Kind CollectorKind `json:"kind,omitempty"`
 	// When kind is "customCollector", this field will be used
 	CustomCollector *v1.Container `json:"customCollector,omitempty"`
 }

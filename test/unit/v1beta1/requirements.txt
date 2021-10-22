@@ -1,0 +1,2 @@
+grpcio-testing==1.40.0
+pytest==5.1.2

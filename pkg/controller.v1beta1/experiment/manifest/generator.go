@@ -17,12 +17,10 @@ limitations under the License.
 package manifest
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -32,10 +30,6 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
-)
-
-const (
-	defaultMetricsCollectorTemplateName = "defaultMetricsCollectorTemplate.yaml"
 )
 
 // Generator is the type for manifests Generator.
@@ -206,7 +200,6 @@ func (g *DefaultGenerator) GetTrialTemplate(instance *experimentsv1beta1.Experim
 		var ok bool
 		trialTemplateString, ok = configMap[templatePath]
 		if !ok {
-			err = errors.New(string(metav1.StatusReasonNotFound))
 			return "", fmt.Errorf("TemplatePath: %v not found in configMap: %v", templatePath, configMap)
 		}
 	}

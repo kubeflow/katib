@@ -5,12 +5,13 @@
 package mock
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	v1beta10 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	v1beta11 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	v1 "k8s.io/api/core/v1"
-	reflect "reflect"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 

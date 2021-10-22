@@ -1,399 +1,145 @@
-# Simple Minikube Demo
+# Katib Examples
 
-You can deploy katib components and try a simple mnist demo on your laptop!
+Katib is an open source project which uses Kubernetes CRD to run Automated
+Machine Learning (AutoML) tasks. To know more about Katib follow the
+[official guides](https://www.kubeflow.org/docs/components/katib/overview/).
 
-## Requirement
+This directory contains examples of Katib Experiments in action. To install Katib on your
+Kubernetes cluster check the
+[setup guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-setup).
+You can use various [Katib interfaces](https://www.kubeflow.org/docs/components/katib/overview/#katib-interfaces)
+to run these examples.
 
-- [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
-- kubectl
+For a complete description of the Katib Experiment specification follow the
+[configuration guide](https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec)
 
-## Deploy katib
+## Local Cluster Example
 
-Start Katib on Minikube with [deploy.sh](./MinikubeDemo/deploy.sh).
-A Minikube cluster and Katib components will be deployed! You can check them with `kubectl -n kubeflow get pods`.
+Get started with Katib Experiments from your **local laptop** and
+[Kind](https://github.com/kubernetes-sigs/kind/) cluster by following
+[this example](./kind-cluster).
 
-Then, start port-forward for katib UI `8080 -> UI`.
+## AutoML Algorithms
 
-kubectl v1.10~:
+The following examples show various AutoML algorithms in Katib.
 
-```
-$ kubectl -n kubeflow port-forward svc/katib-ui 8080:80
-```
+### Hyperparameter Tuning
 
-kubectl ~v1.9:
+Check the [Hyperparameter Tuning](https://www.kubeflow.org/docs/components/katib/overview/#hyperparameters-and-hyperparameter-tuning)
+Experiments for the following algorithms:
 
-```
-& kubectl -n kubeflow port-forward $(kubectl -n kubeflow get pod -o=name | grep katib-ui | sed -e "s@pods\/@@") 8080:80
-```
+- [Random Search](./hp-tuning/random.yaml)
 
-## Create Experiment
+- [Grid Search](./hp-tuning/grid.yaml)
 
-#### Random Suggestion Demo
+- [Bayesian Optimization](./hp-tuning/bayesian-optimization.yaml)
 
-```
-$ kubectl apply -f random-example.yaml
-```
+- [Tree of Parzen Estimators (TPE)](./hp-tuning/tpe.yaml)
 
-#### Grid Suggestion Demo
+- [Multivariate TPE](./hp-tuning/multivariate-tpe.yaml)
 
-```
-$ kubectl apply -f grid-example.yaml
-```
+- [Covariance Matrix Adaptation Evaluation Strategy (CMA-ES)](./hp-tuning/cma-es.yaml)
 
-#### Bayesian Optimization Suggestion Demo
+- [Sobol's Quasirandom Sequence](./hp-tuning/sobol.yaml)
 
-```
-$ kubectl apply -f bayesianoptimization-example.yaml
-```
+- [HyperBand](./hp-tuning/hyperband.yaml)
 
-#### Hyperband Suggestion Demo
+### Neural Architecture Search
 
-```
-$ kubectl apply -f hyperband-example.yaml
-```
+Check the [Neural Architecture Search](https://www.kubeflow.org/docs/components/katib/overview/#neural-architecture-search)
+Experiments for the following algorithms:
 
-#### Run trial evaluation job by [PyTorchJob](https://github.com/kubeflow/pytorch-operator)
+- [Efficient Neural Architecture Search (ENAS)](./nas/enas-gpu.yaml)
 
-```
-$ kubectl apply -f pytorchjob-example.yaml
-```
+- [Differentiable Architecture Search (DARTS)](./nas/darts-gpu.yaml)
 
-#### Run trial evaluation job by [TFJob](https://github.com/kubeflow/tf-operator)
+### Early Stopping
 
-```
-$ kubectl apply -f tfjob-example.yaml
-```
+Improve your Hyperparameter Tuning Experiments with the following
+[Early Stopping](https://www.kubeflow.org/docs/components/katib/early-stopping/) algorithms:
 
-## Monitor Experiment
+- [Median Stopping Rule](./early-stopping/median-stop.yaml)
 
-#### CLI
+## Katib Python SDK Examples
 
-You can submit a new Experiment or check your Experiment results with `kubectl` CLI.  
-List experiments:
+To learn more about Katib Python SDK check [this directory](./sdk).
 
-```
-# kubectl get experiment -n kubeflow
+## Resume Katib Experiments
 
-NAME             STATUS      AGE
-random-example   Succeeded   3h
-```
+You can use different resume policies in Katib Experiments. Follow
+[this guide](https://www.kubeflow.org/docs/components/katib/resume-experiment/)
+to know more about it. Check the following examples:
 
-Check experiment result:
+- [Resume From Volume](./resume-experiment/from-volume-resume.yaml)
 
-```yaml
-$ kubectl get experiment random-experiment -n kubeflow -o yaml
+- [Never Resume](./resume-experiment/never-resume.yaml)
 
-apiVersion: kubeflow.org/v1beta1
-kind: Experiment
-metadata:
-  ...
-  name: random-example
-  namespace: kubeflow
-  ...
-spec:
-  algorithm:
-    algorithmName: random
-  maxFailedTrialCount: 3
-  maxTrialCount: 12
-  metricsCollectorSpec:
-    collector:
-      kind: StdOut
-  objective:
-    additionalMetricNames:
-    - Train-accuracy
-    goal: 0.99
-    metricStrategies:
-    - name: Validation-accuracy
-      value: max
-    - name: Train-accuracy
-      value: max
-    objectiveMetricName: Validation-accuracy
-    type: maximize
-  parallelTrialCount: 3
-  parameters:
-  - feasibleSpace:
-      max: "0.03"
-      min: "0.01"
-    name: lr
-    parameterType: double
-  - feasibleSpace:
-      max: "5"
-      min: "2"
-    name: num-layers
-    parameterType: int
-  - feasibleSpace:
-      list:
-      - sgd
-      - adam
-      - ftrl
-    name: optimizer
-    parameterType: categorical
-  resumePolicy: LongRunning
-  trialTemplate:
-    trialParameters:
-    - description: Learning rate for the training model
-      name: learningRate
-      reference: lr
-    - description: Number of training model layers
-      name: numberLayers
-      reference: num-layers
-    - description: Training model optimizer (sdg, adam or ftrl)
-      name: optimizer
-      reference: optimizer
-    trialSpec:
-      apiVersion: batch/v1
-      kind: Job
-      spec:
-        template:
-          spec:
-            containers:
-            - command:
-              - python3
-              - /opt/mxnet-mnist/mnist.py
-              - --batch-size=64
-              - --lr=${trialParameters.learningRate}
-              - --num-layers=${trialParameters.numberLayers}
-              - --optimizer=${trialParameters.optimizer}
-              image: docker.io/kubeflowkatib/mxnet-mnist
-              name: training-container
-            restartPolicy: Never
-status:
-  completionTime: "2020-07-15T15:32:56Z"
-  conditions:
-  - lastTransitionTime: "2020-07-15T15:23:58Z"
-    lastUpdateTime: "2020-07-15T15:23:58Z"
-    message: Experiment is created
-    reason: ExperimentCreated
-    status: "True"
-    type: Created
-  - lastTransitionTime: "2020-07-15T15:32:56Z"
-    lastUpdateTime: "2020-07-15T15:32:56Z"
-    message: Experiment is running
-    reason: ExperimentRunning
-    status: "False"
-    type: Running
-  - lastTransitionTime: "2020-07-15T15:32:56Z"
-    lastUpdateTime: "2020-07-15T15:32:56Z"
-    message: Experiment has succeeded because max trial count has reached
-    reason: ExperimentMaxTrialsReached
-    status: "True"
-    type: Succeeded
-  currentOptimalTrial:
-    bestTrialName: random-example-tvxz667x
-    observation:
-      metrics:
-      - latest: "0.975816"
-        max: "0.978901"
-        min: "0.955812"
-        name: Validation-accuracy
-      - latest: "0.993970"
-        max: "0.993970"
-        min: "0.913713"
-        name: Train-accuracy
-    parameterAssignments:
-    - name: lr
-      value: "0.021031758718972005"
-    - name: num-layers
-      value: "2"
-    - name: optimizer
-      value: sgd
-  startTime: "2020-07-15T15:23:58Z"
-  succeededTrialList:
-  - random-example-58tbx6xc
-  - random-example-5nkb2gz2
-  - random-example-88bdbkzr
-  - random-example-9tgjl9nt
-  - random-example-dqzjb2r9
-  - random-example-gjfdgxxn
-  - random-example-nhrx8tb8
-  - random-example-nkv76z8z
-  - random-example-pcnmzl76
-  - random-example-spmk57dw
-  - random-example-tvxz667x
-  - random-example-xpw8wnjc
-  trials: 12
-  trialsSucceeded: 12
-```
+## Metrics Collector
 
-List trials:
+Katib supports the various metrics collectors and metrics strategies.
+Check the [official guide](https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec)
+to know more about it. In this directory you can find the following examples:
 
-```
-# kubectl get trials -n kubeflow
+- [File Metrics Collector](./metrics-collector/file-metrics-collector.yaml)
 
-NAME                      TYPE        STATUS   AGE
-random-example-58tbx6xc   Succeeded   True     48m
-random-example-5nkb2gz2   Succeeded   True     54m
-random-example-88bdbkzr   Succeeded   True     53m
-random-example-9tgjl9nt   Succeeded   True     50m
-random-example-dqzjb2r9   Succeeded   True     52m
-random-example-gjfdgxxn   Succeeded   True     53m
-random-example-nhrx8tb8   Succeeded   True     49m
-random-example-nkv76z8z   Succeeded   True     51m
-random-example-pcnmzl76   Succeeded   True     54m
-random-example-spmk57dw   Succeeded   True     48m
-random-example-tvxz667x   Succeeded   True     49m
-random-example-xpw8wnjc   Succeeded   True     54m
-```
+- [Custom Metrics Collector](./metrics-collector/custom-metrics-collector.yaml)
 
-Check trial details:
+- [Metrics Collection Strategy](./metrics-collector/metrics-collection-strategy.yaml)
 
-```yaml
-$ kubectl get trials random-example-58tbx6xc -o yaml -n kubeflow
+## Trial Template
 
-apiVersion: kubeflow.org/v1beta1
-kind: Trial
-metadata:
-  ...
-  name: random-example-58tbx6xc
-  namespace: kubeflow
-  ownerReferences:
-  - apiVersion: kubeflow.org/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: Experiment
-    name: random-example
-    uid: 34349cb7-c6af-11ea-90dd-42010a9a0020
-  ...
-spec:
-  metricsCollector:
-    collector:
-      kind: StdOut
-  objective:
-    additionalMetricNames:
-    - Train-accuracy
-    goal: 0.99
-    metricStrategies:
-    - name: Validation-accuracy
-      value: max
-    - name: Train-accuracy
-      value: max
-    objectiveMetricName: Validation-accuracy
-    type: maximize
-  parameterAssignments:
-  - name: lr
-    value: "0.011911183432583596"
-  - name: num-layers
-    value: "3"
-  - name: optimizer
-    value: ftrl
-  runSpec:
-    apiVersion: batch/v1
-    kind: Job
-    metadata:
-      name: random-example-58tbx6xc
-      namespace: kubeflow
-    spec:
-      template:
-        spec:
-          containers:
-          - command:
-            - python3
-            - /opt/mxnet-mnist/mnist.py
-            - --batch-size=64
-            - --lr=0.011911183432583596
-            - --num-layers=3
-            - --optimizer=ftrl
-            image: docker.io/kubeflowkatib/mxnet-mnist
-            name: training-container
-          restartPolicy: Never
-status:
-  completionTime: "2020-07-15T15:32:12Z"
-  conditions:
-  - lastTransitionTime: "2020-07-15T15:30:42Z"
-    lastUpdateTime: "2020-07-15T15:30:42Z"
-    message: Trial is created
-    reason: TrialCreated
-    status: "True"
-    type: Created
-  - lastTransitionTime: "2020-07-15T15:32:12Z"
-    lastUpdateTime: "2020-07-15T15:32:12Z"
-    message: Trial is running
-    reason: TrialRunning
-    status: "False"
-    type: Running
-  - lastTransitionTime: "2020-07-15T15:32:12Z"
-    lastUpdateTime: "2020-07-15T15:32:12Z"
-    message: Trial has succeeded
-    reason: TrialSucceeded
-    status: "True"
-    type: Succeeded
-  observation:
-    metrics:
-    - latest: "0.113854"
-      max: "0.113854"
-      min: "0.113854"
-      name: Validation-accuracy
-    - latest: "0.112390"
-      max: "0.112423"
-      min: "0.111907"
-      name: Train-accuracy
-  startTime: "2020-07-15T15:30:42Z"
-```
+You can specify different settings for your Trial template. To know more about it
+follow [this guide](https://www.kubeflow.org/docs/components/katib/trial-template/#use-trial-template-to-submit-experiment).
+Check the following examples:
 
-#### UI
+- [Trial with ConfigMap Source](./trial-template/trial-configmap-source.yaml)
 
-You can submit a new Experiment or check your Experiment results with Web UI.
-Access to `http://127.0.0.1:8080/katib`.
+- [Trial with Metadata Substitution](./trial-template/trial-metadata-substitution.yaml)
 
-## Clean
+## Trial Images
 
-Clean up with [destroy.sh](./MinikubeDemo/destroy.sh) script.
-It will stop port-forward process and delete minikube cluster.
+Check the following images for the Trial containers:
 
-# List of current Katib training container images
+- [MXNet MNIST](./trial-images/mxnet-mnist)
 
-- Mxnet mnist example with collecting metrics time, [source](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/mxnet-mnist/mnist.py).
+- [PyTorch MNIST](./trial-images/pytorch-mnist)
 
-```
-docker.io/kubeflowkatib/mxnet-mnist
-```
+- [ENAS Keras CNN CIFAR-10](./trial-images/enas-cnn-cifar10)
 
-- Pytorch mnist example with saving metrics to the file or print them to the StdOut,
-  [source](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/pytorch-mnist/mnist.py).
+- [DARTS PyTorch CNN CIFAR-10](./trial-images/darts-cnn-cifar10)
 
-```
-docker.io/kubeflowkatib/pytorch-mnist
-```
+## Katib with Kubeflow Training Operator
 
-- Keras cifar10 CNN example for ENAS with gpu support, [source](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/nas/enas-cnn-cifar10/Dockerfile.gpu).
+Katib has out of the box support for the [Kubeflow Training Operators](https://github.com/kubeflow/training-operator) to
+perform Trial's [Worker job](https://www.kubeflow.org/docs/components/katib/overview/#trial).
+Check the following examples for the various distributed operators:
 
-```
-docker.io/kubeflowkatib/enas-cnn-cifar10-gpu
-```
+- [TFJob MNIST with summaries](./kubeflow-training-operator/tfjob-mnist-with-summaries.yaml)
 
-- Keras cifar10 CNN example for ENAS with cpu support, [source](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/nas/enas-cnn-cifar10/Dockerfile.cpu).
+- [PyTorchJob MNIST](./kubeflow-training-operator/pytorchjob-mnist.yaml)
 
-```
-docker.io/kubeflowkatib/enas-cnn-cifar10-cpu
-```
+- [MXJob BytePS](./kubeflow-training-operator/mxjob-byteps.yaml)
 
-- Pytorch cifar10 CNN example for DARTS, [source](https://github.com/kubeflow/katib/blob/master/examples/v1beta1/nas/darts-cnn-cifar10/Dockerfile)
+- [XGBoostJob LightGBM](./kubeflow-training-operator/xgboostjob-lightgbm.yaml)
 
-```
-docker.io/kubeflowkatib/darts-cnn-cifar10
-```
+- [MPIJob Horovod](./kubeflow-training-operator/mpijob-horovod.yaml)
 
-- TF operator mnist example with writing summary data,
-  [source](https://github.com/kubeflow/tf-operator/blob/master/examples/v1/mnist_with_summaries/mnist_with_summaries.py).
+## Katib with Kubeflow Pipelines
 
-```
-gcr.io/kubeflow-ci/tf-mnist-with-summaries
-```
+To run Katib with [Kubeflow Pipelines](https://github.com/kubeflow/pipelines) check
+[these examples](./kubeflow-pipelines).
 
-- FPGA XGBoost Parameter Tuning example, [source](https://github.com/inaccel/jupyter/blob/master/lab/dot/XGBoost/parameter-tuning.py).
+## Katib with Argo Workflows
 
-```
-docker.io/inaccel/jupyter:lab
-```
+To know more about using [Argo Workflows](https://github.com/argoproj/argo-workflows)
+in Katib check [this directory](./argo).
 
-- MPI operator horovod mnist example, [source](https://github.com/kubeflow/mpi-operator/tree/master/examples/horovod).
+## Katib with Tekton Pipelines
 
-```
-docker.io/kubeflow/mpi-horovod-mnist
-```
+To know more about using [Tekton Pipelines](https://github.com/tektoncd/pipeline)
+in Katib check [this directory](./tekton).
 
-- XGBoost operator LightGBM dist example, [source](https://github.com/kubeflow/xgboost-operator/tree/master/config/samples/lightgbm-dist).
+## FPGA Support in Katib Experiments
 
-```
-docker.io/kubeflowkatib/xgboost-lightgbm
-```
+You can run Katib Experiments on [FPGA](https://en.wikipedia.org/wiki/Field-programmable_gate_array)
+based instances. For more information check [these examples](./fpga).

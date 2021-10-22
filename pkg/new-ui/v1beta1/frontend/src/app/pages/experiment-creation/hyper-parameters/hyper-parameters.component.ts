@@ -52,7 +52,9 @@ export class FormHyperParametersComponent {
         }
 
         currentConfs =
-          Math.ceil((parseFloat(max) - parseFloat(min)) / parseFloat(step)) + 1;
+          Math.abs(
+            Math.ceil((parseFloat(max) - parseFloat(min)) / parseFloat(step)),
+          ) + 1;
       }
 
       if (currentConfs === 0) {

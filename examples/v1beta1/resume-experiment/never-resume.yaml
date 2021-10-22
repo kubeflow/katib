@@ -1,9 +1,7 @@
-apiVersion: "kubeflow.org/v1beta1"
+apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  labels:
-    controller-tools.k8s.io: "1.0"
   name: never-resume
 spec:
   objective:
