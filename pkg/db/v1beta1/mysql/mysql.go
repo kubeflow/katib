@@ -132,6 +132,9 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 		return fmt.Errorf("Pepare SQL statement failed: %v", err)
 	}
 
+	// Close the statement
+	defer stmt.Close()
+
 	// Execute INSERT
 	_, err = stmt.Exec(values...)
 	if err != nil {
@@ -179,6 +182,8 @@ func (d *dbConn) GetObservationLog(trialName string, metricName string, startTim
 	result := &v1beta1.ObservationLog{
 		MetricLogs: []*v1beta1.MetricLog{},
 	}
+	// Close the rows
+	defer rows.Close()
 	for rows.Next() {
 		var mname, mvalue, sqlTimeStr string
 		err := rows.Scan(&sqlTimeStr, &mname, &mvalue)
