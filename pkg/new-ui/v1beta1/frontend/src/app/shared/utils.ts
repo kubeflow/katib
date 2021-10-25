@@ -1,5 +1,13 @@
 import lowerCase from 'lodash-es/lowerCase';
-import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  Validators,
+  FormArray,
+  ValidatorFn,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import {
   ParameterSpec,
   FeasibleSpaceMinMax,
@@ -31,7 +39,7 @@ export function createFeasibleSpaceGroup(
     return new FormGroup({
       min: new FormControl(fs.min, Validators.required),
       max: new FormControl(fs.max, Validators.required),
-      step: new FormControl(fs.step, []),
+      step: new FormControl(fs.step, checkIfZero()),
     });
   }
 
@@ -133,3 +141,12 @@ export const safeMultiplication = (
   multiplicand: number,
   multiplier: number,
 ): number => Math.round(multiplicand * 10000.0 * multiplier) / 10000;
+
+export const checkIfZero = (): ValidatorFn => {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (control.value === null || control.value === '') return null;
+
+    const isZero = !/[^0.]/g.test(control.value.toString());
+    return isZero ? { mustNotBeZero: { value: control.value } } : null;
+  };
+};
