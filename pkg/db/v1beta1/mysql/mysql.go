@@ -41,6 +41,8 @@ const (
 
 	connectInterval = 5 * time.Second
 	connectTimeout  = 60 * time.Second
+
+	insertChunkSize = 1000
 )
 
 type dbConn struct {
@@ -110,7 +112,7 @@ func NewDBInterface() (common.KatibDBInterface, error) {
 func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta1.ObservationLog) error {
 	sqlQuery := "INSERT INTO observation_logs (trial_name, time, metric_name, value) VALUES "
 	values := []interface{}{}
-
+	remainToInsert := 0
 	for _, mlog := range observationLog.MetricLogs {
 		if mlog.TimeStamp == "" {
 			continue
@@ -123,21 +125,45 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 
 		sqlQuery += "(?, ?, ?, ?),"
 		values = append(values, trialName, sqlTimeStr, mlog.Metric.Name, mlog.Metric.Value)
-	}
-	sqlQuery = sqlQuery[0 : len(sqlQuery)-1]
 
-	// Prepare the statement
-	stmt, err := d.db.Prepare(sqlQuery)
-	if err != nil {
-		return fmt.Errorf("Pepare SQL statement failed: %v", err)
+		if (remainToInsert+1)%insertChunkSize == 0 {
+			sqlQuery = sqlQuery[0 : len(sqlQuery)-1]
+
+			// Prepare the statement
+			stmt, err := d.db.Prepare(sqlQuery)
+			if err != nil {
+				return fmt.Errorf("Pepare SQL statement failed: %v", err)
+			}
+
+			// Execute INSERT
+			_, err = stmt.Exec(values...)
+			if err != nil {
+				return fmt.Errorf("Execute SQL INSERT failed: %v", err)
+			}
+
+			// Reset the statement
+			values = []interface{}{}
+			sqlQuery = "INSERT INTO observation_logs (trial_name, time, metric_name, value) VALUES "
+			remainToInsert = 0
+		}
+		remainToInsert++
 	}
 
-	// Execute INSERT
-	_, err = stmt.Exec(values...)
-	if err != nil {
-		return fmt.Errorf("Execute SQL INSERT failed: %v", err)
-	}
+	if remainToInsert > 0 {
+		sqlQuery = sqlQuery[0 : len(sqlQuery)-1]
 
+		// Prepare the statement
+		stmt, err := d.db.Prepare(sqlQuery)
+		if err != nil {
+			return fmt.Errorf("Pepare SQL statement failed: %v", err)
+		}
+
+		// Execute INSERT
+		_, err = stmt.Exec(values...)
+		if err != nil {
+			return fmt.Errorf("Execute SQL INSERT failed: %v", err)
+		}
+	}
 	return nil
 }
 
