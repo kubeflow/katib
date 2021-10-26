@@ -170,22 +170,22 @@ Follow below steps to add your algorithm (Suggestion) to the Katib CI
 
 1. Update the following variables in [`argo_workflow.py`](../test/e2e/v1beta1/argo_workflow.py):
 
-   - [`KATIB_IMAGES`](../test/e2e/v1beta1/argo_workflow.py#L43) with your Suggestion Dockerfile location:
+- [`KATIB_IMAGES`](../test/e2e/v1beta1/argo_workflow.py#L43) with your Suggestion Dockerfile location:
 
-   ```diff
-     . . .
-     "suggestion-goptuna":           "cmd/suggestion/goptuna/v1beta1/Dockerfile",
-     "suggestion-optuna":            "cmd/suggestion/optuna/v1beta1/Dockerfile",
-   + "suggestion-<name>":            "cmd/suggestion/<name>/v1beta1/Dockerfile",
-     . . .
-   ```
+```diff
+  . . .
+  "suggestion-goptuna":           "cmd/suggestion/goptuna/v1beta1/Dockerfile",
+  "suggestion-optuna":            "cmd/suggestion/optuna/v1beta1/Dockerfile",
++ "suggestion-<name>":            "cmd/suggestion/<name>/v1beta1/Dockerfile",
+  . . .
+```
 
-   - [`KATIB_EXPERIMENTS`](../test/e2e/v1beta1/argo_workflow.py#L69) with your Experiment YAML location:
+- [`KATIB_EXPERIMENTS`](../test/e2e/v1beta1/argo_workflow.py#L69) with your Experiment YAML location:
 
-   ```diff
-     . . .
-     "multivariate-tpe":         "examples/v1beta1/hp-tuning/multivariate-tpe.yaml",
-     "cmaes":                    "examples/v1beta1/hp-tuning/cma-es.yaml",
-   + "<algorithm-name>:          "examples/v1beta1/hp-tuning/<algorithm-name>.yaml",
-     . . .
-   ```
+```diff
+  . . .
+  "multivariate-tpe":         "examples/v1beta1/hp-tuning/multivariate-tpe.yaml",
+  "cmaes":                    "examples/v1beta1/hp-tuning/cma-es.yaml",
++ "<algorithm-name>:          "examples/v1beta1/hp-tuning/<algorithm-name>.yaml",
+  . . .
+```
