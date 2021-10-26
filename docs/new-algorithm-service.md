@@ -183,7 +183,9 @@ Follow below steps to add your algorithm (Suggestion) to the Katib CI
    - [`KATIB_EXPERIMENTS`](../test/e2e/v1beta1/argo_workflow.py#L69) with your Experiment YAML location:
 
    ```diff
-       "multivariate-tpe":         "examples/v1beta1/hp-tuning/multivariate-tpe.yaml",
-       "cmaes":                    "examples/v1beta1/hp-tuning/cma-es.yaml",
-   +   "<algorithm-name>:          "examples/v1beta1/hp-tuning/<algorithm-name>.yaml",
+     . . .
+     "multivariate-tpe":         "examples/v1beta1/hp-tuning/multivariate-tpe.yaml",
+     "cmaes":                    "examples/v1beta1/hp-tuning/cma-es.yaml",
+   + "<algorithm-name>:          "examples/v1beta1/hp-tuning/<algorithm-name>.yaml",
+     . . .
    ```
