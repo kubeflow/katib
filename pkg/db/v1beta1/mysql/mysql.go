@@ -179,11 +179,11 @@ func (d *dbConn) GetObservationLog(trialName string, metricName string, startTim
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get ObservationLogs %v", err)
 	}
+	// Close the rows
+	defer rows.Close()
 	result := &v1beta1.ObservationLog{
 		MetricLogs: []*v1beta1.MetricLog{},
 	}
-	// Close the rows
-	defer rows.Close()
 	for rows.Next() {
 		var mname, mvalue, sqlTimeStr string
 		err := rows.Scan(&sqlTimeStr, &mname, &mvalue)
