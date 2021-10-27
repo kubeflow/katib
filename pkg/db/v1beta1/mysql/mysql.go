@@ -129,7 +129,7 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 	// Prepare the statement
 	stmt, err := d.db.Prepare(sqlQuery)
 	if err != nil {
-		return fmt.Errorf("Pepare SQL statement failed: %v", err)
+		return fmt.Errorf("Prepare SQL statement failed: %v", err)
 	}
 
 	// Close the statement
