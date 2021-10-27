@@ -6,7 +6,7 @@ metadata:
   labels:
     katib.kubeflow.org/component: controller
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       katib.kubeflow.org/component: controller
