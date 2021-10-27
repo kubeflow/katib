@@ -93,7 +93,7 @@ cd "${GOPATH}/src/github.com/kubeflow/katib"
 make deploy
 
 # Wait until all Katib pods is running.
-TIMEOUT=120
+TIMEOUT=120s
 kubectl wait --for=condition=complete --timeout=${TIMEOUT} -l katib.kubeflow.org/component=cert-generator -n kubeflow job
 kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,mysql,ui)" -n kubeflow pod
 
