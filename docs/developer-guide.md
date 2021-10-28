@@ -64,7 +64,7 @@ Below is a list of command-line flags accepted by Katib controller:
 | trial-resources                 | []schema.GroupVersionKind | null                          | The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org) |
 | webhook-inject-securitycontext  | bool                      | false                         | Inject the securityContext of container[0] in the sidecar                                                              |
 | webhook-port                    | int                       | 8443                          | The port number to be used for admission webhook server                                                                |
-| enable-leader-election          | bool                      | true                          | Enable leader election for katib-controller. Enabling this will ensure there is only one active katib-controller.      |
+| enable-leader-election          | bool                      | false                         | Enable leader election for katib-controller. Enabling this will ensure there is only one active katib-controller.      |
 | leader-election-id              | string                    | "3fbc96e9.katib.kubeflow.org" | The ID for leader election.                                                                                            |
 
 ## Workflow design

@@ -59,7 +59,7 @@ func main() {
 	flag.Var(&trialResources, "trial-resources", "The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org)")
 	flag.IntVar(&webhookPort, "webhook-port", 8443, "The port number to be used for admission webhook server.")
 	// For leader election
-	flag.BoolVar(&enableLeaderElection, "enable-leader-election", true, "Enable leader election for katib-controller. Enabling this will ensure there is only one active katib-controller.")
+	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false, "Enable leader election for katib-controller. Enabling this will ensure there is only one active katib-controller.")
 	flag.StringVar(&leaderElectionID, "leader-election-id", "3fbc96e9.katib.kubeflow.org", "The ID for leader election.")
 
 	// TODO (andreyvelich): Currently it is not possible to set different webhook service name.
