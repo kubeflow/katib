@@ -392,6 +392,7 @@ spec:
 	validTemplate2 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate3 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate4 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate5 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 
 	missedParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(missedParameterJobStr, nil)
 	oddParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(oddParameterJobStr, nil)
@@ -406,6 +407,7 @@ spec:
 		validTemplate2,
 		validTemplate3,
 		validTemplate4,
+		validTemplate5,
 		missedParameterTemplate,
 		oddParameterTemplate,
 		invalidParameterTemplate,
@@ -523,6 +525,16 @@ spec:
 			}(),
 			Err:             true,
 			testDescription: "Duplicate reference in Trial parameters",
+		},
+		// Wrong parameter reference in trialParameters
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[1].Reference = "wrong-ref"
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Wrong reference in Trial parameters",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
 		// missedParameterTemplate case
@@ -1019,6 +1031,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			},
 			Parameters: []experimentsv1beta1.ParameterSpec{
 				{
+					Name:          "lr",
 					ParameterType: experimentsv1beta1.ParameterTypeInt,
 					FeasibleSpace: experimentsv1beta1.FeasibleSpace{
 						Max: "5",
@@ -1026,6 +1039,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					},
 				},
 				{
+					Name:          "num-layers",
 					ParameterType: experimentsv1beta1.ParameterTypeCategorical,
 					FeasibleSpace: experimentsv1beta1.FeasibleSpace{
 						List: []string{"1", "2", "3"},
