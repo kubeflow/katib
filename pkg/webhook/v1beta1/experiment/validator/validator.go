@@ -265,6 +265,11 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		return fmt.Errorf("unable to parse spec.trialTemplate: %v", err)
 	}
 
+	experimentParameterNames := make(map[string]bool)
+	for _, parameter := range instance.Spec.Parameters {
+		experimentParameterNames[parameter.Name] = true
+	}
+
 	trialParametersNames := make(map[string]bool)
 	trialParametersRefs := make(map[string]bool)
 
@@ -282,6 +287,10 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		// Check if parameter references are not duplicated
 		if _, ok := trialParametersRefs[parameter.Reference]; ok {
 			return fmt.Errorf("parameter reference %v can't be duplicated in spec.trialTemplate.trialParameters: %v", parameter.Reference, trialTemplate.TrialParameters)
+		}
+		// Check if parameter references exist in experiment parameters
+		if _, ok := experimentParameterNames[parameter.Reference]; !ok {
+			return fmt.Errorf("parameter reference %v does not exists in spec.Parameters: %v", parameter.Reference, instance.Spec.Parameters)
 		}
 		trialParametersNames[parameter.Name] = true
 		trialParametersRefs[parameter.Reference] = true
