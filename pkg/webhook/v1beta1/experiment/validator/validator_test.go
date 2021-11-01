@@ -526,7 +526,7 @@ spec:
 			Err:             true,
 			testDescription: "Duplicate reference in Trial parameters",
 		},
-		// Wrong parameter reference in trialParameters
+		// Trial template contains Trial parameters which weren't referenced from spec.parameters
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -534,7 +534,7 @@ spec:
 				return i
 			}(),
 			Err:             true,
-			testDescription: "Wrong reference in Trial parameters",
+			testDescription: "Trial template contains Trial parameters which weren't referenced from spec.parameters",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
 		// missedParameterTemplate case
