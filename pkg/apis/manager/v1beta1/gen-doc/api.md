@@ -352,9 +352,9 @@ Discrete and Categorical type use List.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | experiment | [Experiment](#api.v1.beta1.Experiment) |  |  |
-| trials | [Trial](#api.v1.beta1.Trial) | repeated | all completed trials owned by the experiment. |
-| request_number | [int32](#int32) |  | The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time. |
-| total_request_number | [int32](#int32) |  | The number of Suggestions requested till now |
+| trials | [Trial](#api.v1.beta1.Trial) | repeated | All completed trials owned by the experiment. |
+| current_request_number | [int32](#int32) |  | The number of Suggestions requested at one time. When you set 3 to current_request_number, you get three Suggestions at one time. |
+| total_request_number | [int32](#int32) |  | The number of Suggestions requested till now. |
 
 
 

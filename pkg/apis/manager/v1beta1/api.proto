@@ -288,9 +288,9 @@ message DeleteObservationLogReply {
 
 message GetSuggestionsRequest {
     Experiment experiment = 1;
-    repeated Trial trials = 2; // all completed trials owned by the experiment.
-    int32 request_number = 3; ///The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time.
-    int32 total_request_number = 4;//The number of Suggestions requested till now
+    repeated Trial trials = 2; // All completed trials owned by the experiment.
+    int32 current_request_number = 3; // The number of Suggestions requested at one time. When you set 3 to current_request_number, you get three Suggestions at one time.
+    int32 total_request_number = 4; // The number of Suggestions requested till now.
 }
 
 message GetSuggestionsReply {

@@ -68,7 +68,7 @@ class BaseSkoptService(object):
             acq_optimizer=self.acq_optimizer,
             random_state=self.random_state)
 
-    def getSuggestions(self, trials, request_number):
+    def getSuggestions(self, trials, current_request_number):
         """
         Get the new suggested trials with skopt algorithm.
         """
@@ -118,13 +118,13 @@ class BaseSkoptService(object):
 
         return_trial_list = []
 
-        skopt_suggested = self.skopt_optimizer.ask(n_points=request_number)
+        skopt_suggested = self.skopt_optimizer.ask(n_points=current_request_number)
         for suggestion in skopt_suggested:
             logger.info("New suggested parameters for Trial: {}".format(suggestion))
             return_trial_list.append(
                 BaseSkoptService.convert(self.search_space, suggestion))
 
-        logger.info("GetSuggestions return {} new Trials\n\n".format(request_number))
+        logger.info("GetSuggestions returns {} new Trials\n\n".format(current_request_number))
         return return_trial_list
 
     @staticmethod

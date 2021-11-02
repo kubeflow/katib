@@ -168,7 +168,7 @@ class TestChocolate(unittest.TestCase):
         request = api_pb2.GetSuggestionsRequest(
             experiment=experiment,
             trials=trials,
-            request_number=2,
+            current_request_number=2,
             total_request_number=2,
         )
 
