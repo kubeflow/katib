@@ -48,6 +48,8 @@ func main() {
 	var injectSecurityContext bool
 	var enableGRPCProbeInSuggestion bool
 	var trialResources trialutil.GvkListFlag
+	var enableLeaderElection bool
+	var leaderElectionID string
 
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default)")
@@ -56,6 +58,9 @@ func main() {
 	flag.BoolVar(&enableGRPCProbeInSuggestion, "enable-grpc-probe-in-suggestion", true, "enable grpc probe in suggestions")
 	flag.Var(&trialResources, "trial-resources", "The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org)")
 	flag.IntVar(&webhookPort, "webhook-port", 8443, "The port number to be used for admission webhook server.")
+	// For leader election
+	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false, "Enable leader election for katib-controller. Enabling this will ensure there is only one active katib-controller.")
+	flag.StringVar(&leaderElectionID, "leader-election-id", "3fbc96e9.katib.kubeflow.org", "The ID for leader election.")
 
 	// TODO (andreyvelich): Currently it is not possible to set different webhook service name.
 	// flag.StringVar(&serviceName, "webhook-service-name", "katib-controller", "The service name which will be used in webhook")
@@ -95,6 +100,8 @@ func main() {
 	// Create a new katib controller to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
 		MetricsBindAddress: metricsAddr,
+		LeaderElection:     enableLeaderElection,
+		LeaderElectionID:   leaderElectionID,
 	})
 	if err != nil {
 		log.Error(err, "Failed to create the manager")

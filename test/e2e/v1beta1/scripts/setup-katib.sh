@@ -93,20 +93,9 @@ cd "${GOPATH}/src/github.com/kubeflow/katib"
 make deploy
 
 # Wait until all Katib pods is running.
-TIMEOUT=120
-PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
-# 1 Pod for the cert-generator Job
-PODNUM=$((PODNUM + 1))
-until kubectl get pods -n kubeflow | grep -E 'Running|Completed' | [[ $(wc -l) -eq $PODNUM ]]; do
-  echo Pod Status $(kubectl get pods -n kubeflow | grep "1/1" | wc -l)/$PODNUM
-  sleep 10
-  TIMEOUT=$((TIMEOUT - 1))
-  if [[ $TIMEOUT -eq 0 ]]; then
-    echo "NG"
-    kubectl get pods -n kubeflow
-    exit 1
-  fi
-done
+TIMEOUT=120s
+kubectl wait --for=condition=complete --timeout=${TIMEOUT} -l katib.kubeflow.org/component=cert-generator -n kubeflow job
+kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,mysql,ui)" -n kubeflow pod
 
 echo "All Katib components are running."
 echo "Katib deployments"
