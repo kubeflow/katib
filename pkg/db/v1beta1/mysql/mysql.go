@@ -129,8 +129,11 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 	// Prepare the statement
 	stmt, err := d.db.Prepare(sqlQuery)
 	if err != nil {
-		return fmt.Errorf("Pepare SQL statement failed: %v", err)
+		return fmt.Errorf("Prepare SQL statement failed: %v", err)
 	}
+
+	// Close the statement
+	defer stmt.Close()
 
 	// Execute INSERT
 	_, err = stmt.Exec(values...)
@@ -176,6 +179,8 @@ func (d *dbConn) GetObservationLog(trialName string, metricName string, startTim
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get ObservationLogs %v", err)
 	}
+	// Close the rows
+	defer rows.Close()
 	result := &v1beta1.ObservationLog{
 		MetricLogs: []*v1beta1.MetricLog{},
 	}
