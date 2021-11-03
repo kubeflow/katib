@@ -47,7 +47,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             if param.current_s < 0:
                 # Hyperband outlerloop has finished
                 return reply
-            # This is a hack to get request number.
+            # This is a hack to get current request number.
             param.n = request.current_request_number
 
             trials = self._make_bracket(experiment, param)

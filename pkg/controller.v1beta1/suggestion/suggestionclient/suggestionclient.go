@@ -113,7 +113,7 @@ func (g *General) SyncAssignments(
 	if err != nil {
 		return err
 	}
-	logger.Info("Getting suggestions", "endpoint", endpoint, "Number of request parameters", currentRequestNum, "Number of response parameters", len(responseSuggestion.ParameterAssignments))
+	logger.Info("Getting suggestions", "endpoint", endpoint, "Number of current request parameters", currentRequestNum, "Number of response parameters", len(responseSuggestion.ParameterAssignments))
 	if len(responseSuggestion.ParameterAssignments) != currentRequestNum {
 		err := fmt.Errorf("The response contains unexpected trials")
 		logger.Error(err, "The response contains unexpected trials")

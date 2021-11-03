@@ -124,7 +124,7 @@ class BaseSkoptService(object):
             return_trial_list.append(
                 BaseSkoptService.convert(self.search_space, suggestion))
 
-        logger.info("GetSuggestions returns {} new Trials\n\n".format(current_request_number))
+        logger.info("GetSuggestions returns {} new Trials\n\n".format(len(return_trial_list)))
         return return_trial_list
 
     @staticmethod
