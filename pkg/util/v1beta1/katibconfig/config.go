@@ -283,23 +283,30 @@ func setResourceRequirements(configResource corev1.ResourceRequirements) corev1.
 	}
 
 	// If user explicitly sets CPU value to -1, nuke it.
-	if cpuLimit.Sign() == -1 && cpuRequest.Sign() == -1 {
+	if cpuLimit.Sign() == -1 {
 		delete(configResource.Limits, corev1.ResourceCPU)
+	}
+	if cpuRequest.Sign() == -1 {
 		delete(configResource.Requests, corev1.ResourceCPU)
 	}
 
 	// If user explicitly sets Memory value to -1, nuke it.
-	if memLimit.Sign() == -1 && memRequest.Sign() == -1 {
+	if memLimit.Sign() == -1 {
 		delete(configResource.Limits, corev1.ResourceMemory)
+	}
+	if memRequest.Sign() == -1 {
 		delete(configResource.Requests, corev1.ResourceMemory)
 	}
 
 	// If user explicitly sets ephemeral-storage value to something negative, nuke it.
 	// This enables compatibility with the GKE nodepool autoscalers, which cannot scale
 	// pods which define ephemeral-storage resource constraints.
-	if diskLimit.Sign() == -1 && diskRequest.Sign() == -1 {
+	if diskLimit.Sign() == -1 {
 		delete(configResource.Limits, corev1.ResourceEphemeralStorage)
+	}
+	if diskRequest.Sign() == -1 {
 		delete(configResource.Requests, corev1.ResourceEphemeralStorage)
 	}
+
 	return configResource
 }
