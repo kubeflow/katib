@@ -59,7 +59,7 @@ class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             self.is_first_run = False
 
         parameter_assignments = []
-        for i in range(request.request_number):
+        for i in range(request.current_request_number):
 
             self.logger.info(">>> Generate new Darts Trial Job")
 

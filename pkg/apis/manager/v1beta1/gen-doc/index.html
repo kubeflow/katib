@@ -965,26 +965,56 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
                   <td>trials</td>
                   <td><a href="#api.v1.beta1.Trial">Trial</a></td>
                   <td>repeated</td>
-                  <td><p>all completed trials owned by the experiment. </p></td>
+                  <td><p>All completed trials owned by the experiment. </p></td>
                 </tr>
               
                 <tr>
                   <td>request_number</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p>The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time. </p></td>
+                  <td><p><strong>Deprecated.</strong> Use current_request_number instead. This API will be removed in Katib 0.14.
+The number of Suggestions requested at one time. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>current_request_number</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>The number of Suggestions requested at one time.
+When you set 3 to current_request_number, you get three Suggestions at one time. </p></td>
                 </tr>
               
                 <tr>
                   <td>total_request_number</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p>The number of Suggestions requested till now </p></td>
+                  <td><p>The number of Suggestions requested till now. </p></td>
                 </tr>
               
             </tbody>
           </table>
 
+          
+            
+            
+            <h4>Fields with deprecated option</h4>
+            <table>
+              <thead>
+                <tr>
+                  <td>Name</td>
+                  <td>Option</td>
+                </tr>
+              </thead>
+              <tbody>
+              
+                <tr>
+                  <td>request_number</td>
+                  <td><p>true</p></td>
+                </tr>
+              
+              </tbody>
+            </table>
+            
           
 
         

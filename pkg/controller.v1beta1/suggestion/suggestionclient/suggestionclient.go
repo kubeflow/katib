@@ -78,8 +78,8 @@ func (g *General) SyncAssignments(
 	e *experimentsv1beta1.Experiment,
 	ts []trialsv1beta1.Trial) error {
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	requestNum := int(instance.Spec.Requests) - int(instance.Status.SuggestionCount)
-	if requestNum <= 0 {
+	currentRequestNum := int(instance.Spec.Requests) - int(instance.Status.SuggestionCount)
+	if currentRequestNum <= 0 {
 		return nil
 	}
 
@@ -102,10 +102,12 @@ func (g *General) SyncAssignments(
 		instance.Status.AlgorithmSettings)
 
 	requestSuggestion := &suggestionapi.GetSuggestionsRequest{
-		Experiment:         g.ConvertExperiment(filledE),
-		Trials:             g.ConvertTrials(ts),
-		RequestNumber:      int32(requestNum),
-		TotalRequestNumber: int32(instance.Spec.Requests),
+		Experiment: g.ConvertExperiment(filledE),
+		Trials:     g.ConvertTrials(ts),
+		// TODO (andreyvelich): Remove this once RequestNumber is deprecated.
+		RequestNumber:        int32(currentRequestNum),
+		CurrentRequestNumber: int32(currentRequestNum),
+		TotalRequestNumber:   int32(instance.Spec.Requests),
 	}
 
 	// Get new suggestions
@@ -113,8 +115,8 @@ func (g *General) SyncAssignments(
 	if err != nil {
 		return err
 	}
-	logger.Info("Getting suggestions", "endpoint", endpoint, "Number of request parameters", requestNum, "Number of response parameters", len(responseSuggestion.ParameterAssignments))
-	if len(responseSuggestion.ParameterAssignments) != requestNum {
+	logger.Info("Getting suggestions", "endpoint", endpoint, "Number of current request parameters", currentRequestNum, "Number of response parameters", len(responseSuggestion.ParameterAssignments))
+	if len(responseSuggestion.ParameterAssignments) != currentRequestNum {
 		err := fmt.Errorf("The response contains unexpected trials")
 		logger.Error(err, "The response contains unexpected trials")
 		return err

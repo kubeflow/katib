@@ -59,8 +59,8 @@ class HyperoptService(
         trials = Trial.convert(request.trials)
         #--------------------------------------------------------------
         # Your code here
-        # Implement the logic to generate new assignments for the given request number.
-        # For example, if request.request_number is 2, you should return:
+        # Implement the logic to generate new assignments for the given current request number.
+        # For example, if request.current_request_number is 2, you should return:
         # [
         #   [Assignment(name=param-1, value=3),
         #    Assignment(name=param-2, value=cat2),
@@ -73,7 +73,7 @@ class HyperoptService(
         #    Assignment(name=param-4, value=4.32)
         #   ],
         # ]
-        list_of_assignments = your_logic(search_space, trials, request.request_number)
+        list_of_assignments = your_logic(search_space, trials, request.current_request_number)
         #--------------------------------------------------------------
         # Convert list_of_assignments to
         return api_pb2.GetSuggestionsReply(

@@ -174,7 +174,7 @@ class TestSkopt(unittest.TestCase):
         request = api_pb2.GetSuggestionsRequest(
             experiment=experiment,
             trials=trials,
-            request_number=2,
+            current_request_number=2,
         )
 
         get_suggestion = self.test_server.invoke_unary_unary(
