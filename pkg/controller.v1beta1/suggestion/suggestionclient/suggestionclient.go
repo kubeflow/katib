@@ -60,6 +60,7 @@ type SuggestionClient interface {
 		ts []trialsv1beta1.Trial) error
 
 	ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggestion, e *experimentsv1beta1.Experiment) error
+	ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Suggestion, e *experimentsv1beta1.Experiment) error
 }
 
 // General is the implementation for SuggestionClient.
@@ -228,6 +229,58 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggest
 		return nil
 	}
 	logger.Info("Algorithm settings validated")
+	return nil
+}
+
+// ValidateEarlyStoppingSettings validates if the algorithm specific configurations for early stopping are valid.
+func (g *General) ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Suggestion, e *experimentsv1beta1.Experiment) error {
+	logger := log.WithValues("EarlyStopping", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	endpoint := util.GetEarlyStoppingEndpoint(instance)
+
+	callOpts := []grpc_retry.CallOption{
+		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(consts.DefaultGRPCRetryPeriod)),
+		grpc_retry.WithMax(consts.DefaultGRPCRetryAttempts),
+	}
+	conn, err := grpc.Dial(endpoint, grpc.WithInsecure(),
+		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callOpts...)),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callOpts...)),
+	)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	rpcClient := getRPCClientEarlyStopping(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	request := &suggestionapi.ValidateEarlyStoppingSettingsRequest{
+		EarlyStoppingSpec: g.ConvertExperiment(e).Spec.EarlyStopping,
+	}
+
+	// See https://github.com/grpc/grpc-go/issues/2636
+	// See https://github.com/grpc/grpc-go/pull/2503
+	_, err = rpcClient.ValidateEarlyStoppingSettings(ctx, request, grpc.WaitForReady(true))
+	statusCode, _ := status.FromError(err)
+
+	// validation error
+	if statusCode.Code() == codes.InvalidArgument || statusCode.Code() == codes.Unknown {
+		logger.Error(err, "ValidateEarlyStoppingSettings error")
+		return fmt.Errorf("ValidateEarlyStoppingSettings Error: %v", statusCode.Message())
+	}
+
+	// Connection error
+	if statusCode.Code() == codes.Unavailable {
+		logger.Error(err, "Connection to EarlyStopping algorithm service currently unavailable")
+		return err
+	}
+
+	// Validate to true as function is not implemented
+	if statusCode.Code() == codes.Unimplemented {
+		logger.Info("Method ValidateEarlyStoppingSettings not found", "EarlyStopping service", e.Spec.EarlyStopping.AlgorithmName)
+		return nil
+	}
+	logger.Info("EarlyStopping settings validated")
 	return nil
 }
 
