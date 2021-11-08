@@ -57,9 +57,7 @@ echo -e "\nBuilding file metrics collector image...\n"
 docker build -t ${REGISTRY}/file-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/${VERSION}/file-metricscollector/Dockerfile .
 
 echo -e "\nBuilding TF Event metrics collector image...\n"
-if [ $MACHINE_ARCH == "aarch64" ]; then
-    docker build -t ${REGISTRY}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile.aarch64 .
-elif [ $MACHINE_ARCH == "ppc64le" ]; then
+if [ $MACHINE_ARCH == "ppc64le" ]; then
     docker build -t ${REGISTRY}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile.ppc64le .
 else
     docker build -t ${REGISTRY}/tfevent-metrics-collector:${TAG} -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile .
@@ -87,11 +85,7 @@ echo -e "\nBuilding optuna suggestion...\n"
 docker build -t ${REGISTRY}/suggestion-optuna:${TAG} -f ${CMD_PREFIX}/suggestion/optuna/${VERSION}/Dockerfile .
 
 echo -e "\nBuilding ENAS suggestion...\n"
-if [ $MACHINE_ARCH == "aarch64" ]; then
-    docker build -t ${REGISTRY}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/${VERSION}/Dockerfile.aarch64 .
-else
-    docker build -t ${REGISTRY}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/${VERSION}/Dockerfile .
-fi
+docker build -t ${REGISTRY}/suggestion-enas:${TAG} -f ${CMD_PREFIX}/suggestion/nas/enas/${VERSION}/Dockerfile .
 
 echo -e "\nBuilding DARTS suggestion...\n"
 docker build -t ${REGISTRY}/suggestion-darts:${TAG} -f ${CMD_PREFIX}/suggestion/nas/darts/${VERSION}/Dockerfile .

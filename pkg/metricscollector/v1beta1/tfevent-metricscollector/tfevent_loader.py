@@ -21,7 +21,6 @@
 # Check TFJob example for more information:
 # https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L16-L22
 
-
 import tensorflow as tf
 import os
 from datetime import datetime
@@ -29,7 +28,6 @@ import rfc3339
 import api_pb2
 from logging import getLogger, StreamHandler, INFO
 import const
-
 
 class TFEventFileParser:
     def find_all_files(self, directory):
@@ -40,7 +38,7 @@ class TFEventFileParser:
 
     def parse_summary(self, tfefile, metrics):
         metric_logs = []
-        for summary in tf.train.summary_iterator(tfefile):
+        for summary in tf.compat.v1.train.summary_iterator(tfefile):
             paths = tfefile.split("/")
             for v in summary.summary.value:
                 for m in metrics:

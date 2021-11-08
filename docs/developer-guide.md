@@ -15,7 +15,7 @@ see the following user guides:
 - [Go](https://golang.org/) (1.17 or later)
 - [Docker](https://docs.docker.com/) (17.05 or later)
 - [Java](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) (8 or later)
-- [Python](https://www.python.org/) (3.7 or later)
+- [Python](https://www.python.org/) (3.9 or later)
 - [kustomize](https://kustomize.io/) (4.0.5 or later)
 
 ## Build from source code

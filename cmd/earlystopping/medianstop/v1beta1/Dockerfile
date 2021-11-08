@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.9
 
 ENV TARGET_DIR /opt/katib
 ENV EARLY_STOPPING_DIR cmd/earlystopping/medianstop/v1beta1

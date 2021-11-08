@@ -1,4 +1,4 @@
-FROM ibmcom/tensorflow-ppc64le:1.14.0-py3
+FROM ibmcom/tensorflow-ppc64le:2.2.0-py3
 RUN pip install rfc3339 grpcio googleapis-common-protos
 ADD . /usr/src/app/github.com/kubeflow/katib
 WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/metricscollector/v1beta1/tfevent-metricscollector/
