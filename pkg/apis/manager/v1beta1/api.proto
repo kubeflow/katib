@@ -341,7 +341,7 @@ message EarlyStoppingRule {
 }
 
 message ValidateEarlyStoppingSettingsRequest {
-    EarlyStoppingSpec early_stopping_spec = 1;
+    EarlyStoppingSpec early_stopping = 1;
 }
 
 /**

@@ -341,7 +341,7 @@ func TestValidateEarlyStoppingSettings(t *testing.T) {
 	}
 
 	expectedRequest := &suggestionapi.ValidateEarlyStoppingSettingsRequest{
-		EarlyStoppingSpec: newFakeRequest().Experiment.Spec.EarlyStopping,
+		EarlyStopping: newFakeRequest().Experiment.Spec.EarlyStopping,
 	}
 
 	validRun := rpcClientEarlyStopping.EXPECT().ValidateEarlyStoppingSettings(gomock.Any(), k8sMatcher{expectedRequest}, gomock.Any()).Return(nil, nil)

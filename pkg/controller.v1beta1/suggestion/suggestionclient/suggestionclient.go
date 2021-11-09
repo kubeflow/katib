@@ -52,6 +52,11 @@ var (
 	getRPCClientEarlyStopping = func(conn *grpc.ClientConn) suggestionapi.EarlyStoppingClient {
 		return suggestionapi.NewEarlyStoppingClient(conn)
 	}
+
+	callValidatorOpts = []grpc_retry.CallOption{
+		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(consts.DefaultGRPCRetryPeriod)),
+		grpc_retry.WithMax(consts.DefaultGRPCRetryAttempts),
+	}
 )
 
 // SuggestionClient is the interface to communicate with algorithm services.
@@ -185,13 +190,9 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggest
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := util.GetAlgorithmEndpoint(instance)
 
-	callOpts := []grpc_retry.CallOption{
-		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(consts.DefaultGRPCRetryPeriod)),
-		grpc_retry.WithMax(consts.DefaultGRPCRetryAttempts),
-	}
 	conn, err := grpc.Dial(endpoint, grpc.WithInsecure(),
-		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callOpts...)),
-		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callOpts...)),
+		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callValidatorOpts...)),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callValidatorOpts...)),
 	)
 	if err != nil {
 		return err
@@ -237,13 +238,9 @@ func (g *General) ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Sug
 	logger := log.WithValues("EarlyStopping", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := util.GetEarlyStoppingEndpoint(instance)
 
-	callOpts := []grpc_retry.CallOption{
-		grpc_retry.WithBackoff(grpc_retry.BackoffLinear(consts.DefaultGRPCRetryPeriod)),
-		grpc_retry.WithMax(consts.DefaultGRPCRetryAttempts),
-	}
 	conn, err := grpc.Dial(endpoint, grpc.WithInsecure(),
-		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callOpts...)),
-		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callOpts...)),
+		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callValidatorOpts...)),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callValidatorOpts...)),
 	)
 	if err != nil {
 		return err
@@ -255,7 +252,7 @@ func (g *General) ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Sug
 	defer cancel()
 
 	request := &suggestionapi.ValidateEarlyStoppingSettingsRequest{
-		EarlyStoppingSpec: g.ConvertExperiment(e).Spec.EarlyStopping,
+		EarlyStopping: g.ConvertExperiment(e).Spec.EarlyStopping,
 	}
 
 	// See https://github.com/grpc/grpc-go/issues/2636

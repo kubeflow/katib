@@ -65,7 +65,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
         self.api_instance = client.CustomObjectsApi()
 
     def ValidateEarlyStoppingSettings(self, request, context):
-        is_valid, message = self.validate_early_stopping_spec(request.early_stopping_spec)
+        is_valid, message = self.validate_early_stopping_spec(request.early_stopping)
         if not is_valid:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(message)

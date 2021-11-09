@@ -717,7 +717,7 @@ Return INVALID_ARGUMENT Error if Early Stopping Settings are not Valid
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| early_stopping_spec | [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec) |  |  |
+| early_stopping | [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec) |  |  |
 
 
 

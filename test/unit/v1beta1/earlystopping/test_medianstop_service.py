@@ -41,7 +41,7 @@ class TestMedianStop(unittest.TestCase):
 
     def test_validate_early_stopping_settings(self):
         # Valid cases
-        early_stopping_spec = api_pb2.EarlyStoppingSpec(
+        early_stopping = api_pb2.EarlyStoppingSpec(
             algorithm_name="medianstop",
             algorithm_settings=[
                 api_pb2.EarlyStoppingSetting(
@@ -55,19 +55,19 @@ class TestMedianStop(unittest.TestCase):
             ],
         )
 
-        _, _, code, _ = utils.call_validate(self.test_server, early_stopping_spec)
+        _, _, code, _ = utils.call_validate(self.test_server, early_stopping)
         self.assertEqual(code, grpc.StatusCode.OK)
 
         # Invalid cases
         # Unknown algorithm name
-        early_stopping_spec = api_pb2.EarlyStoppingSpec(algorithm_name="unknown")
+        early_stopping = api_pb2.EarlyStoppingSpec(algorithm_name="unknown")
 
-        _, _, code, details = utils.call_validate(self.test_server, early_stopping_spec)
+        _, _, code, details = utils.call_validate(self.test_server, early_stopping)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, "unknown algorithm name unknown")
 
         # Unknown config name
-        early_stopping_spec = api_pb2.EarlyStoppingSpec(
+        early_stopping = api_pb2.EarlyStoppingSpec(
             algorithm_name="medianstop",
             algorithm_settings=[
                 api_pb2.EarlyStoppingSetting(
@@ -77,12 +77,12 @@ class TestMedianStop(unittest.TestCase):
             ],
         )
 
-        _, _, code, details = utils.call_validate(self.test_server, early_stopping_spec)
+        _, _, code, details = utils.call_validate(self.test_server, early_stopping)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, "unknown setting unknown_conf for algorithm medianstop")
 
         # Wrong min_trials_required
-        early_stopping_spec = api_pb2.EarlyStoppingSpec(
+        early_stopping = api_pb2.EarlyStoppingSpec(
             algorithm_name="medianstop",
             algorithm_settings=[
                 api_pb2.EarlyStoppingSetting(
@@ -92,12 +92,12 @@ class TestMedianStop(unittest.TestCase):
             ],
         )
 
-        _, _, code, details = utils.call_validate(self.test_server, early_stopping_spec)
+        _, _, code, details = utils.call_validate(self.test_server, early_stopping)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, "min_trials_required must be greater or equal than zero (>=0)")
 
         # Wrong start_step
-        early_stopping_spec = api_pb2.EarlyStoppingSpec(
+        early_stopping = api_pb2.EarlyStoppingSpec(
             algorithm_name="medianstop",
             algorithm_settings=[
                 api_pb2.EarlyStoppingSetting(
@@ -106,7 +106,7 @@ class TestMedianStop(unittest.TestCase):
                 ),
             ],
         )
-        _, _, code, details = utils.call_validate(self.test_server, early_stopping_spec)
+        _, _, code, details = utils.call_validate(self.test_server, early_stopping)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, "start_step must be greater or equal than one (>=1)")
 
