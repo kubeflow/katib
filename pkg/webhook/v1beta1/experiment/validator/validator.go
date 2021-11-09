@@ -265,6 +265,11 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		return fmt.Errorf("unable to parse spec.trialTemplate: %v", err)
 	}
 
+	experimentParameterNames := make(map[string]bool)
+	for _, parameter := range instance.Spec.Parameters {
+		experimentParameterNames[parameter.Name] = true
+	}
+
 	trialParametersNames := make(map[string]bool)
 	trialParametersRefs := make(map[string]bool)
 
@@ -285,6 +290,13 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		}
 		trialParametersNames[parameter.Name] = true
 		trialParametersRefs[parameter.Reference] = true
+
+		// Check if parameter reference exist in experiment parameters
+		if len(experimentParameterNames) > 0 {
+			if _, ok := experimentParameterNames[parameter.Reference]; !ok {
+				return fmt.Errorf("parameter reference %v does not exist in spec.parameters: %v", parameter.Reference, instance.Spec.Parameters)
+			}
+		}
 
 		// Check if trialParameters contains all substitution for Trial template
 		if !strings.Contains(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name)) {
