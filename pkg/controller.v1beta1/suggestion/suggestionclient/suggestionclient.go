@@ -229,7 +229,7 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggest
 		logger.Info("Method ValidateAlgorithmSettings not found", "Suggestion service", e.Spec.Algorithm.AlgorithmName)
 		return nil
 	}
-	logger.Info("Algorithm settings validated")
+	logger.Info("Algorithm settings are validated")
 	return nil
 }
 
@@ -277,7 +277,7 @@ func (g *General) ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Sug
 		logger.Info("Method ValidateEarlyStoppingSettings not found", "EarlyStopping service", e.Spec.EarlyStopping.AlgorithmName)
 		return nil
 	}
-	logger.Info("EarlyStopping settings validated")
+	logger.Info("EarlyStopping settings are validated")
 	return nil
 }
 

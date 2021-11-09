@@ -180,7 +180,7 @@ func (g *DefaultValidator) validateEarlyStopping(es *commonapiv1beta1.EarlyStopp
 		return nil
 	}
 	if es.AlgorithmName == "" {
-		return fmt.Errorf("no spec.earlyStopping.algorithm.algorithmName specified")
+		return fmt.Errorf("no spec.earlyStopping.algorithmName specified")
 	}
 
 	if _, err := g.GetEarlyStoppingConfigData(es.AlgorithmName); err != nil {
