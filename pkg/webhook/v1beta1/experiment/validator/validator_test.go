@@ -277,14 +277,12 @@ func TestValidateExperiment(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		t.Run(tc.testDescription, func(t *testing.T) {
-			err := g.ValidateExperiment(tc.Instance, tc.oldInstance)
-			if !tc.Err && err != nil {
-				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-			} else if tc.Err && err == nil {
-				t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-			}
-		})
+		err := g.ValidateExperiment(tc.Instance, tc.oldInstance)
+		if !tc.Err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.Err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		}
 	}
 }
 
@@ -352,14 +350,12 @@ func TestValidateParameters(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		t.Run(tc.testDescription, func(t *testing.T) {
-			err := g.(*DefaultValidator).validateParameters(tc.parameters)
-			if !tc.err && err != nil {
-				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-			} else if tc.err && err == nil {
-				t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-			}
-		})
+		err := g.(*DefaultValidator).validateParameters(tc.parameters)
+		if !tc.err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		}
 	}
 }
 
@@ -635,14 +631,12 @@ spec:
 	}
 
 	for _, tc := range tcs {
-		t.Run(tc.testDescription, func(t *testing.T) {
-			err := g.(*DefaultValidator).validateTrialTemplate(tc.Instance)
-			if !tc.Err && err != nil {
-				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-			} else if tc.Err && err == nil {
-				t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-			}
-		})
+		err := g.(*DefaultValidator).validateTrialTemplate(tc.Instance)
+		if !tc.Err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.Err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		}
 	}
 }
 
@@ -727,14 +721,12 @@ spec:
 	}
 
 	for _, tc := range tcs {
-		t.Run(tc.testDescription, func(t *testing.T) {
-			err := g.(*DefaultValidator).validateTrialJob(tc.RunSpec)
-			if !tc.Err && err != nil {
-				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-			} else if tc.Err && err == nil {
-				t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-			}
-		})
+		err := g.(*DefaultValidator).validateTrialJob(tc.RunSpec)
+		if !tc.Err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.Err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		}
 	}
 
 }
@@ -961,14 +953,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		t.Run(tc.testDescription, func(t *testing.T) {
-			err := g.(*DefaultValidator).validateMetricsCollector(tc.Instance)
-			if !tc.Err && err != nil {
-				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-			} else if tc.Err && err == nil {
-				t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-			}
-		})
+		err := g.(*DefaultValidator).validateMetricsCollector(tc.Instance)
+		if !tc.Err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.Err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		}
 	}
 
 }
@@ -1023,12 +1013,10 @@ func TestValidateConfigData(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		t.Run(tc.testDescription, func(t *testing.T) {
-			err := g.ValidateExperiment(tc.Instance, nil)
-			if err == nil {
-				t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-			}
-		})
+		err := g.ValidateExperiment(tc.Instance, nil)
+		if err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		}
 	}
 }
 
