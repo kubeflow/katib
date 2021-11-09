@@ -130,7 +130,7 @@ func (g *General) SyncAssignments(
 
 	earlyStoppingRules := []commonapiv1beta1.EarlyStoppingRule{}
 	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions.
-	if instance.Spec.EarlyStopping != nil && instance.Spec.EarlyStopping.AlgorithmName != "" {
+	if instance.Spec.EarlyStopping != nil {
 		endpoint = util.GetEarlyStoppingEndpoint(instance)
 		connEarlyStopping, err := grpc.Dial(endpoint, grpc.WithInsecure())
 		if err != nil {

@@ -87,14 +87,14 @@ class TestMedianStop(unittest.TestCase):
             algorithm_settings=[
                 api_pb2.EarlyStoppingSetting(
                     name="min_trials_required",
-                    value="-1",
+                    value="0",
                 ),
             ],
         )
 
         _, _, code, details = utils.call_validate(self.test_server, early_stopping)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
-        self.assertEqual(details, "min_trials_required must be greater or equal than zero (>=0)")
+        self.assertEqual(details, "min_trials_required must be greater than zero (>0)")
 
         # Wrong start_step
         early_stopping = api_pb2.EarlyStoppingSpec(

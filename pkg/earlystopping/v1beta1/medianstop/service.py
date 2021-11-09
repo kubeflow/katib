@@ -84,8 +84,8 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
         for setting in early_stopping_settings:
             try:
                 if setting.name == "min_trials_required":
-                    if not (int(setting.value) >= 0):
-                        return False, "min_trials_required must be greater or equal than zero (>=0)"
+                    if not (int(setting.value) > 0):
+                        return False, "min_trials_required must be greater than zero (>0)"
                 elif setting.name == "start_step":
                     if not (int(setting.value) >= 1):
                         return False, "start_step must be greater or equal than one (>=1)"
