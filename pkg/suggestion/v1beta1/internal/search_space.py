@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import logging
-from pkg.apis.manager.v1beta1.python import api_pb2 as api
 
-from pkg.suggestion.v1beta1.internal.constant import *
+from pkg.apis.manager.v1beta1.python import api_pb2 as api
+import pkg.suggestion.v1beta1.internal.constant as constant
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -31,9 +31,9 @@ class HyperParameterSearchSpace(object):
     def convert(experiment):
         search_space = HyperParameterSearchSpace()
         if experiment.spec.objective.type == api.MAXIMIZE:
-            search_space.goal = MAX_GOAL
+            search_space.goal = constant.MAX_GOAL
         elif experiment.spec.objective.type == api.MINIMIZE:
-            search_space.goal = MIN_GOAL
+            search_space.goal = constant.MIN_GOAL
         for p in experiment.spec.parameter_specs.parameters:
             search_space.params.append(
                 HyperParameterSearchSpace.convertParameter(p))
@@ -72,7 +72,7 @@ class HyperParameter(object):
         self.step = step
 
     def __str__(self):
-        if self.type == INTEGER or self.type == DOUBLE:
+        if self.type == constant.INTEGER or self.type == constant.DOUBLE:
             return "HyperParameter(name: {}, type: {}, min: {}, max: {}, step: {})".format(
                 self.name, self.type, self.min, self.max, self.step)
         else:
@@ -81,16 +81,16 @@ class HyperParameter(object):
 
     @staticmethod
     def int(name, min_, max_, step):
-        return HyperParameter(name, INTEGER, min_, max_, [], step)
+        return HyperParameter(name, constant.INTEGER, min_, max_, [], step)
 
     @staticmethod
     def double(name, min_, max_, step):
-        return HyperParameter(name, DOUBLE, min_, max_, [], step)
+        return HyperParameter(name, constant.DOUBLE, min_, max_, [], step)
 
     @staticmethod
     def categorical(name, lst):
-        return HyperParameter(name, CATEGORICAL, 0, 0, [str(e) for e in lst], 0)
+        return HyperParameter(name, constant.CATEGORICAL, 0, 0, [str(e) for e in lst], 0)
 
     @staticmethod
     def discrete(name, lst):
-        return HyperParameter(name, DISCRETE, 0, 0, [str(e) for e in lst], 0)
+        return HyperParameter(name, constant.DISCRETE, 0, 0, [str(e) for e in lst], 0)
