@@ -61,12 +61,13 @@ class BaseChocolateService(object):
 
         for param in self.search_space.params:
             key = BaseChocolateService.encode(param.name)
+            # Chocolate quantized_uniform distribution uses half-open interval: [low, high).
             if param.type == INTEGER:
                 chocolate_search_space[key] = choco.quantized_uniform(
-                    int(param.min), int(param.max), int(param.step))
+                    int(param.min), int(param.max) + int(param.step), int(param.step))
             elif param.type == DOUBLE:
                 chocolate_search_space[key] = choco.quantized_uniform(
-                    float(param.min), float(param.max), float(param.step))
+                    float(param.min), float(param.max) + float(param.step), float(param.step))
             # For Categorical and Discrete insert indexes to DB from list of values
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 chocolate_search_space[key] = choco.choice(
