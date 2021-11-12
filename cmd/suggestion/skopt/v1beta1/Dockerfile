@@ -8,8 +8,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
     apt-get -y update && \
     apt-get -y install gfortran libopenblas-dev liblapack-dev && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install cython; \
+    rm -rf /var/lib/apt/lists/*; \
     fi
 RUN if [ "$(uname -m)" = "ppc64le" ]; then \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-ppc64le; \

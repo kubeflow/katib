@@ -2,8 +2,8 @@ import keras
 import numpy as np
 from keras.datasets import cifar10
 from ModelConstructor import ModelConstructor
-from keras.utils import to_categorical
-from keras.utils import multi_gpu_model
+from tensorflow.keras.utils import to_categorical
+from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 from keras.preprocessing.image import ImageDataGenerator
 import argparse
 import time

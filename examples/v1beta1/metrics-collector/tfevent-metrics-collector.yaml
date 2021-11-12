@@ -1,0 +1,49 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: tfevent-metrics-collector
+spec:
+  parallelTrialCount: 3
+  maxTrialCount: 12
+  maxFailedTrialCount: 3
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: accuracy_1
+  algorithm:
+    algorithmName: random
+  metricsCollectorSpec:
+    source:
+      fileSystemPath:
+        path: /train
+        kind: Directory
+    collector:
+      kind: TensorFlowEvent
+  parameters:
+    - name: learning_rate
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.05"
+  trialTemplate:
+    primaryContainerName: training-container
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: learning_rate
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
+                image: docker.io/kubeflowkatib/tf-mnist-with-summaries:latest
+                command:
+                  - "python3"
+                  - "/opt/tf-mnist-with-summaries/mnist.py"
+                  - "--log_dir=/train/metrics"
+                  - "--learning_rate=${trialParameters.learningRate}"
+            restartPolicy: Never

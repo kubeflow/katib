@@ -1,6 +1,7 @@
 HAS_LINT := $(shell command -v golangci-lint;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
+CPU_ARCH ?= amd64
 
 # Run tests
 .PHONY: test
@@ -49,10 +50,10 @@ endif
 
 # Build images for the Katib v1beta1 components.
 build: generate
-ifeq ($(and $(REGISTRY),$(TAG)),)
-	$(error REGISTRY and TAG must be set. Usage: make build REGISTRY=<registry> TAG=<tag>)
+ifeq ($(and $(REGISTRY),$(TAG),$(CPU_ARCH)),)
+	$(error REGISTRY and TAG must be set. Usage: make build REGISTRY=<registry> TAG=<tag> CPU_ARCH=<cpu-architecture>)
 endif
-	bash scripts/v1beta1/build.sh $(REGISTRY) $(TAG)
+	bash scripts/v1beta1/build.sh $(REGISTRY) $(TAG) $(CPU_ARCH)
 
 # Build and push Katib images from the latest master commit.
 push-latest: generate

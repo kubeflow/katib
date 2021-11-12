@@ -9,3 +9,4 @@ googleapis-common-protos==1.6.0
 SQLAlchemy==1.4.26
 git+https://github.com/AIworx-Labs/chocolate@master
 ghalton>=0.6.2
+cython>=0.29.24

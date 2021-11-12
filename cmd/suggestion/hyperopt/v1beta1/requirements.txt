@@ -7,3 +7,4 @@ forestci==0.3
 protobuf==3.19.1
 googleapis-common-protos==1.6.0
 hyperopt==0.2.5
+cython>=0.29.24

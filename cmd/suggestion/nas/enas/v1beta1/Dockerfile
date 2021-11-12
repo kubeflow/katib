@@ -11,8 +11,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
     apt-get -y update && \
     apt-get -y install gfortran libopenblas-dev liblapack-dev && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install cython; \
+    rm -rf /var/lib/apt/lists/*; \
     fi
 
 RUN if [ "$(uname -m)" = "ppc64le" ]; then \
