@@ -36,72 +36,75 @@ echo "Image tag: ${TAG}"
 
 # Katib core images
 echo -e "\nPushing Katib controller image...\n"
-docker push ${REGISTRY}/katib-controller:${TAG}
+docker push "${REGISTRY}/katib-controller:${TAG}"
 
 echo -e "\nPushing Katib DB manager image...\n"
-docker push ${REGISTRY}/katib-db-manager:${TAG}
+docker push "${REGISTRY}/katib-db-manager:${TAG}"
 
 echo -e "\nPushing Katib UI image...\n"
-docker push ${REGISTRY}/katib-ui:${TAG}
+docker push "${REGISTRY}/katib-ui:${TAG}"
 
 echo -e "\nPushing Katib cert generator image...\n"
-docker push ${REGISTRY}/cert-generator:${TAG}
+docker push "${REGISTRY}/cert-generator:${TAG}"
 
 echo -e "\nPushing file metrics collector image...\n"
-docker push ${REGISTRY}/file-metrics-collector:${TAG}
+docker push "${REGISTRY}/file-metrics-collector:${TAG}"
 
 echo -e "\nPushing TF Event metrics collector image...\n"
-docker push ${REGISTRY}/tfevent-metrics-collector:${TAG}
+docker push "${REGISTRY}/tfevent-metrics-collector:${TAG}"
 
 # Suggestion images
 echo -e "\nPushing suggestion images..."
 
 echo -e "\nPushing hyperopt suggestion...\n"
-docker push ${REGISTRY}/suggestion-hyperopt:${TAG}
+docker push "${REGISTRY}/suggestion-hyperopt:${TAG}"
 
 echo -e "\nPushing chocolate suggestion...\n"
-docker push ${REGISTRY}/suggestion-chocolate:${TAG}
+docker push "${REGISTRY}/suggestion-chocolate:${TAG}"
 
 echo -e "\nPushing hyperband suggestion...\n"
-docker push ${REGISTRY}/suggestion-hyperband:${TAG}
+docker push "${REGISTRY}/suggestion-hyperband:${TAG}"
 
 echo -e "\nPushing skopt suggestion...\n"
-docker push ${REGISTRY}/suggestion-skopt:${TAG}
+docker push "${REGISTRY}/suggestion-skopt:${TAG}"
 
 echo -e "\nPushing goptuna suggestion...\n"
-docker push ${REGISTRY}/suggestion-goptuna:${TAG}
+docker push "${REGISTRY}/suggestion-goptuna:${TAG}"
 
 echo -e "\nPushing optuna suggestion...\n"
-docker push ${REGISTRY}/suggestion-optuna:${TAG}
+docker push "${REGISTRY}/suggestion-optuna:${TAG}"
 
 echo -e "\nPushing ENAS suggestion...\n"
-docker push ${REGISTRY}/suggestion-enas:${TAG}
+docker push "${REGISTRY}/suggestion-enas:${TAG}"
 
 echo -e "\nPushing DARTS suggestion...\n"
-docker push ${REGISTRY}/suggestion-darts:${TAG}
+docker push "${REGISTRY}/suggestion-darts:${TAG}"
 
 # Early stopping images
 echo -e "\nPushing early stopping images...\n"
 
 echo -e "\nPushing median stopping rule...\n"
-docker push ${REGISTRY}/earlystopping-medianstop:${TAG}
+docker push "${REGISTRY}/earlystopping-medianstop:${TAG}"
 
 # Training container images
 echo -e "\nPushing training container images..."
 
 echo -e "\nPushing mxnet mnist training container example...\n"
-docker push ${REGISTRY}/mxnet-mnist:${TAG}
+docker push "${REGISTRY}/mxnet-mnist:${TAG}"
+
+echo -e "\nPushing Tensorflow with summaries mnist training container example...\n"
+docker push "${REGISTRY}/tf-mnist-with-summaries:${TAG}"
 
 echo -e "\nPushing PyTorch mnist training container example...\n"
-docker push ${REGISTRY}/pytorch-mnist:${TAG}
+docker push "${REGISTRY}/pytorch-mnist:${TAG}"
 
 echo -e "\nPushing Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
-docker push ${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}
+docker push "${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}"
 
 echo -e "\nPushing Keras CIFAR-10 CNN training container example for ENAS with CPU support...\n"
-docker push ${REGISTRY}/enas-cnn-cifar10-cpu:${TAG}
+docker push "${REGISTRY}/enas-cnn-cifar10-cpu:${TAG}"
 
 echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS...\n"
-docker push ${REGISTRY}/darts-cnn-cifar10:${TAG}
+docker push "${REGISTRY}/darts-cnn-cifar10:${TAG}"
 
 echo -e "\nAll Katib images with ${TAG} tag have been pushed successfully!\n"

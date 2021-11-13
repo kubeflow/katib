@@ -24,7 +24,7 @@ TAG=$2
 ARCH=$3
 
 if [[ -z "$REGISTRY" || -z "$TAG" || -z "$ARCH" ]]; then
-    echo "Image registry, tag and architecture must be set"
+    echo "Image registry, tag and cpu-architecture must be set"
     echo "Usage: $0 <image-registry> <image-tag> <cpu-architecture>" 1>&2
     exit 1
 fi

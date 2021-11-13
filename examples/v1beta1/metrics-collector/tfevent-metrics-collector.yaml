@@ -46,5 +46,4 @@ spec:
                   - "/opt/tf-mnist-with-summaries/mnist.py"
                   - "--log_dir=/train/metrics"
                   - "--learning_rate=${trialParameters.learningRate}"
-                  - "--max_steps=1"
             restartPolicy: Never

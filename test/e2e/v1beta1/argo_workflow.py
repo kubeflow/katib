@@ -47,7 +47,7 @@ KATIB_IMAGES = {
     "katib-ui":                      "cmd/new-ui/v1beta1/Dockerfile",
     "cert-generator":                "cmd/cert-generator/v1beta1/Dockerfile",
     "file-metrics-collector":        "cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile",
-    "tfevent-metrics-collector":     "/cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile",
+    "tfevent-metrics-collector":     "cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile",
     "suggestion-hyperopt":           "cmd/suggestion/hyperopt/v1beta1/Dockerfile",
     "suggestion-chocolate":          "cmd/suggestion/chocolate/v1beta1/Dockerfile",
     "suggestion-skopt":              "cmd/suggestion/skopt/v1beta1/Dockerfile",
