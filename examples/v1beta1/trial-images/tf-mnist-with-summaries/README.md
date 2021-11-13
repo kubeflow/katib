@@ -8,4 +8,4 @@ If you want to read more about this example, visit the official
 GitHub repository.
 
 Katib uses this training container in some Experiments, for instance in the
-[TF Event Metrics Collector](../../metrics-collector/tfevent-metrics-collector.yaml#L55-L64).
+[TF Event Metrics Collector](../../metrics-collector/tfevent-metrics-collector.yaml#L42-L49).

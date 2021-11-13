@@ -123,6 +123,9 @@ else \
   echo -e "\nBuilding mxnet mnist training container example...\n"
   docker buildx build --platform linux/amd64 -t "${REGISTRY}/mxnet-mnist:${TAG}" -f examples/${VERSION}/trial-images/mxnet-mnist/Dockerfile .
 
+  echo -e "\nBuilding Tensorflow with summaries mnist training container example...\n"
+  docker buildx build --platform linux/amd64 -t "${REGISTRY}/tf-mnist-with-summaries:${TAG}" -f examples/${VERSION}/trial-images/tf-mnist-with-summaries/Dockerfile .
+
   echo -e "\nBuilding PyTorch mnist training container example...\n"
   docker buildx build --platform linux/amd64 -t "${REGISTRY}/pytorch-mnist:${TAG}" -f examples/${VERSION}/trial-images/pytorch-mnist/Dockerfile .
 

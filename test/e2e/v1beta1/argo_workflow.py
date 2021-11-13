@@ -59,7 +59,7 @@ KATIB_IMAGES = {
     "earlystopping-medianstop":      "cmd/earlystopping/medianstop/v1beta1/Dockerfile",
     "trial-mxnet-mnist":             "examples/v1beta1/trial-images/mxnet-mnist/Dockerfile",
     "trial-pytorch-mnist":           "examples/v1beta1/trial-images/pytorch-mnist/Dockerfile",
-#     "trial-tf-mnist-with-summaries": "examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile",
+    "trial-tf-mnist-with-summaries": "examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile",
     "trial-enas-cnn-cifar10-gpu":    "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu",
     "trial-enas-cnn-cifar10-cpu":    "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu",
     "trial-darts-cnn-cifar10":       "examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile",
@@ -80,7 +80,7 @@ KATIB_EXPERIMENTS = {
     "pytorchjob":               "examples/v1beta1/kubeflow-training-operator/pytorchjob-mnist.yaml",
     "tfjob":                    "examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml",
     "file-metricscollector":    "examples/v1beta1/metrics-collector/file-metrics-collector.yaml",
-#     "tfevent-metricscollector": "examples/v1beta1/metrics-collector/tfevent-metrics-collector.yaml",
+    "tfevent-metricscollector": "examples/v1beta1/metrics-collector/tfevent-metrics-collector.yaml",
     "never-resume":             "examples/v1beta1/resume-experiment/never-resume.yaml",
     "from-volume-resume":       "examples/v1beta1/resume-experiment/from-volume-resume.yaml",
     "median-stop":              "examples/v1beta1/early-stopping/median-stop.yaml"
