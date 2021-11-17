@@ -80,7 +80,6 @@ KATIB_EXPERIMENTS = {
     "pytorchjob":               "examples/v1beta1/kubeflow-training-operator/pytorchjob-mnist.yaml",
     "tfjob":                    "examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml",
     "file-metricscollector":    "examples/v1beta1/metrics-collector/file-metrics-collector.yaml",
-    "tfevent-metricscollector": "examples/v1beta1/metrics-collector/tfevent-metrics-collector.yaml",
     "never-resume":             "examples/v1beta1/resume-experiment/never-resume.yaml",
     "from-volume-resume":       "examples/v1beta1/resume-experiment/from-volume-resume.yaml",
     "median-stop":              "examples/v1beta1/early-stopping/median-stop.yaml"

@@ -26,20 +26,12 @@ spec:
       feasibleSpace:
         min: "0.01"
         max: "0.05"
-    - name: batch_size
-      parameterType: int
-      feasibleSpace:
-        min: "100"
-        max: "200"
   trialTemplate:
     primaryContainerName: tensorflow
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
         reference: learning_rate
-      - name: batchSize
-        description: Batch Size
-        reference: batch_size
     trialSpec:
       apiVersion: kubeflow.org/v1
       kind: TFJob
@@ -52,10 +44,9 @@ spec:
               spec:
                 containers:
                   - name: tensorflow
-                    image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
+                    image: docker.io/kubeflowkatib/tf-mnist-with-summaries:latest
                     command:
                       - "python"
-                      - "/var/tf_mnist/mnist_with_summaries.py"
+                      - "/opt/tf-mnist-with-summaries/mnist.py"
                       - "--log_dir=/train/metrics"
                       - "--learning_rate=${trialParameters.learningRate}"
-                      - "--batch_size=${trialParameters.batchSize}"
