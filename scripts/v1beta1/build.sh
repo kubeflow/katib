@@ -61,11 +61,7 @@ docker build --platform "linux/$ARCH" -t "${REGISTRY}/katib-db-manager:${TAG}" -
 
 # TODO (andreyvelich): Switch to ${CMD_PREFIX}/ui/${VERSION}/Dockerfile once old UI is deprecated.
 echo -e "\nBuilding Katib UI image...\n"
-if [ "$ARCH" == "ppc64le" ]; then
-  docker build --platform "linux/$ARCH" -t "${REGISTRY}/katib-ui:${TAG}" -f ${CMD_PREFIX}/new-ui/${VERSION}/Dockerfile.ppc64le .
-else \
-  docker build --platform "linux/$ARCH" -t "${REGISTRY}/katib-ui:${TAG}" -f ${CMD_PREFIX}/new-ui/${VERSION}/Dockerfile .
-fi
+docker build --platform "linux/$ARCH" -t "${REGISTRY}/katib-ui:${TAG}" -f ${CMD_PREFIX}/new-ui/${VERSION}/Dockerfile .
 
 echo -e "\nBuilding Katib cert generator image...\n"
 docker build --platform "linux/$ARCH" -t "${REGISTRY}/cert-generator:${TAG}" -f ${CMD_PREFIX}/cert-generator/${VERSION}/Dockerfile .
