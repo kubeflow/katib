@@ -5,7 +5,7 @@ It uses convolutional neural network to train the model.
 
 If you want to read more about this example, visit the official
 [tensorflow](https://www.tensorflow.org/tutorials/quickstart/advanced)
-GitHub repository.
+documentation.
 
 Katib uses this training container in some Experiments, for instance in the
-[TF Event Metrics Collector](../../kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L46-L53).
+[TFJob example](../../kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L54-L62).
