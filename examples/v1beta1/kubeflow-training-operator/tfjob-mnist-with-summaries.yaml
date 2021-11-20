@@ -10,13 +10,13 @@ spec:
   objective:
     type: maximize
     goal: 0.99
-    objectiveMetricName: accuracy_1
+    objectiveMetricName: accuracy
   algorithm:
     algorithmName: random
   metricsCollectorSpec:
     source:
       fileSystemPath:
-        path: /train
+        path: /mnist-with-summaries-logs/test
         kind: Directory
     collector:
       kind: TensorFlowEvent
@@ -26,12 +26,20 @@ spec:
       feasibleSpace:
         min: "0.01"
         max: "0.05"
+    - name: batch_size
+      parameterType: int
+      feasibleSpace:
+        min: "100"
+        max: "200"
   trialTemplate:
     primaryContainerName: tensorflow
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
         reference: learning_rate
+      - name: batchSize
+        description: Batch Size
+        reference: batch_size
     trialSpec:
       apiVersion: kubeflow.org/v1
       kind: TFJob
@@ -48,5 +56,7 @@ spec:
                     command:
                       - "python"
                       - "/opt/tf-mnist-with-summaries/mnist.py"
-                      - "--log_dir=/train/metrics"
-                      - "--learning_rate=${trialParameters.learningRate}"
+                      - "--epochs=1"
+                      - "--learning-rate=${trialParameters.learningRate}"
+                      - "--batch-size=${trialParameters.batchSize}"
+                      - "--log-path=/mnist-with-summaries-logs"

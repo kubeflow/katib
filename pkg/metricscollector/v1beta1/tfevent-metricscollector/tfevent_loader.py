@@ -30,12 +30,14 @@ from logging import getLogger, StreamHandler, INFO
 import const
 
 class TFEventFileParser:
+    @staticmethod
     def find_all_files(self, directory):
         for root, dirs, files in os.walk(directory):
             yield root
             for f in files:
                 yield os.path.join(root, f)
 
+    @staticmethod
     def parse_summary(self, tfefile, metrics):
         metric_logs = []
         for summary in tf.compat.v1.train.summary_iterator(tfefile):

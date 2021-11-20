@@ -4,8 +4,8 @@ This is Tensorflow MNIST image classification training container that outputs TF
 It uses convolutional neural network to train the model.
 
 If you want to read more about this example, visit the official
-[tensorflow](https://github.com/tensorflow/tensorflow/blob/7462dcaae1e8cfe1dfd0c62dd6083f9749a9d827/tensorflow/examples/tutorials/mnist/mnist_with_summaries.py)
+[tensorflow](https://www.tensorflow.org/tutorials/quickstart/advanced)
 GitHub repository.
 
 Katib uses this training container in some Experiments, for instance in the
-[TF Event Metrics Collector](../../metrics-collector/tfevent-metrics-collector.yaml#L42-L49).
+[TF Event Metrics Collector](../../kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L46-L53).
