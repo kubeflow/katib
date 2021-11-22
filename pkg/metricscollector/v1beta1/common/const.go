@@ -52,7 +52,7 @@ const (
 )
 
 var (
-	AutoInjectMetricsCollecterList = [...]v1beta1common.CollectorKind{
+	AutoInjectMetricsCollectorList = [...]v1beta1common.CollectorKind{
 		v1beta1common.StdOutCollector,
 		v1beta1common.TfEventCollector,
 		v1beta1common.FileCollector,
