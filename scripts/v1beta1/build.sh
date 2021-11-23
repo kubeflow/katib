@@ -38,6 +38,7 @@ function check_specified_cpu_arch() {
   done
   echo "CPU architecture '$ARCH' is not supported"
   echo "You can use '${SUPPORTED_CPU_ARCHS[*]}'"
+  echo "To get machine architecture run: uname -m"
   return 1
 }
 check_specified_cpu_arch
