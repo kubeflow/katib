@@ -29,7 +29,7 @@ After that, run below command to enable
 [Katib Metrics Collector sidecar injection](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector):
 
 ```bash
-kubectl patch namespace argo -p '{"metadata":{"labels":{"katib-metricscollector-injection":"enabled"}}}'
+kubectl patch namespace argo -p '{"metadata":{"labels":{"katib.kubeflow.org/metrics-collector-injection":"enabled"}}}'
 ```
 
 **Note:** Argo Workflows are using `docker` as a

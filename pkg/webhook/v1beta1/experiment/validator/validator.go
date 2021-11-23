@@ -392,7 +392,7 @@ func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobTy
 func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Experiment) error {
 	mcSpec := inst.Spec.MetricsCollectorSpec
 	mcKind := mcSpec.Collector.Kind
-	for _, mc := range mccommon.AutoInjectMetricsCollecterList {
+	for _, mc := range mccommon.AutoInjectMetricsCollectorList {
 		if mcKind != mc {
 			continue
 		}

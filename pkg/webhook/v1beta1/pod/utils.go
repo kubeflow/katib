@@ -129,7 +129,7 @@ func getMountPath(mc common.MetricsCollectorSpec) (string, common.FileSystemKind
 
 func needWrapWorkerContainer(mc common.MetricsCollectorSpec) bool {
 	mcKind := mc.Collector.Kind
-	for _, kind := range NeedWrapWorkerMetricsCollecterList {
+	for _, kind := range NeedWrapWorkerMetricsCollectorList {
 		if mcKind == kind {
 			return true
 		}
