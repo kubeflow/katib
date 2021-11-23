@@ -28,8 +28,8 @@ class TestTFEventMetricsCollector(unittest.TestCase):
         self.assertEqual(40, len(metric_logs))
 
         for log in metric_logs:
-            metric_name = log["metric"]["name"]
-            self.assertIn(metric_name, metric_name)
+            actual = log["metric"]["name"]
+            self.assertIn(actual, metric_names)
 
         # Metric format is "{{metrics name}}"
         metric_names = ["accuracy", "loss"]
@@ -38,8 +38,8 @@ class TestTFEventMetricsCollector(unittest.TestCase):
         self.assertEqual(20, len(metric_logs))
 
         for log in metric_logs:
-            metric_name = log["metric"]["name"]
-            self.assertIn(metric_name, metric_name)
+            actual = log["metric"]["name"]
+            self.assertIn(actual, metric_names)
 
 
 if __name__ == '__main__':
