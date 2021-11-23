@@ -34,6 +34,9 @@ jobs:
 
       - name: Run Python test
         run: |
+          # for gRPC API
           export PYTHONPATH=$(pwd):$(pwd)/pkg/apis/manager/v1beta1/python:$(pwd)/pkg/apis/manager/health/python
+          # for tfevent-metricscollector
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/pkg/metricscollector/v1beta1/common:$(pwd)/pkg/metricscollector/v1beta1/tfevent-metricscollector
           pytest ./test/unit/v1beta1/suggestion
           pytest ./test/unit/v1beta1/earlystopping
