@@ -2,7 +2,7 @@
 
 Here you can find examples of using Katib with [Argo Workflows](https://github.com/argoproj/argo-workflows).
 
-**Note:** You have to install `Argo >= v3.1.3` to use it in Katib Experiments.
+**Note:** You have to install `Argo Workflows >= v3.1.3` to use it in Katib Experiments.
 
 ## Installation
 
