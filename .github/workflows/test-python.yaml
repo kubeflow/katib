@@ -32,6 +32,11 @@ jobs:
 
           pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
 
+      - name: Generate Tensorflow Event file
+        run: |
+          LOG_PATH=test/unit/v1beta1/metricscollector/testdata/tfevent-metricscollector/logs
+          python examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py --epochs 10 --batch-size 200 --log-path $LOG_PATH
+
       - name: Run Python test
         run: |
           # for gRPC API

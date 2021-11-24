@@ -20,7 +20,8 @@ import utils
 class TestTFEventMetricsCollector(unittest.TestCase):
     def test_parse_file(self):
 
-        logs_dir = "./test/unit/v1beta1/metricscollector/testdata/tfevent-metricscollector/logs"
+        current_dir = os.getcwd()
+        logs_dir = os.path.join(current_dir, "testdata/tfevent-metricscollector/logs")
 
         # Metric format is "{{dirname}}/{{metrics name}}"
         metric_names = ["train/accuracy", "train/loss", "test/loss", "test/accuracy"]
