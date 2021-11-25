@@ -9,7 +9,7 @@ jobs:
   # Suggestion Images.
   suggestion-hyperopt:
     name: Suggestion Hyperopt
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-hyperopt
       dockerfile: cmd/suggestion/hyperopt/v1beta1/Dockerfile
@@ -19,7 +19,7 @@ jobs:
 
   suggestion-chocolate:
     name: Suggestion Chocolate
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-chocolate
       dockerfile: cmd/suggestion/chocolate/v1beta1/Dockerfile
@@ -29,7 +29,7 @@ jobs:
 
   suggestion-hyperband:
     name: Suggestion Hyperband
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-hyperband
       dockerfile: cmd/suggestion/hyperband/v1beta1/Dockerfile
@@ -39,7 +39,7 @@ jobs:
 
   suggestion-skopt:
     name: Suggestion Skopt
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-skopt
       dockerfile: cmd/suggestion/skopt/v1beta1/Dockerfile
@@ -49,7 +49,7 @@ jobs:
 
   suggestion-goptuna:
     name: Suggestion Goptuna
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-goptuna
       dockerfile: cmd/suggestion/goptuna/v1beta1/Dockerfile
@@ -59,7 +59,7 @@ jobs:
 
   suggestion-optuna:
     name: Suggestion Optuna
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-optuna
       dockerfile: cmd/suggestion/optuna/v1beta1/Dockerfile
@@ -69,7 +69,7 @@ jobs:
 
   suggestion-enas:
     name: Suggestion ENAS
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-enas
       dockerfile: cmd/suggestion/nas/enas/v1beta1/Dockerfile
@@ -79,7 +79,7 @@ jobs:
 
   suggestion-darts:
     name: Suggestion DARTS
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-darts
       dockerfile: cmd/suggestion/nas/darts/v1beta1/Dockerfile
@@ -90,7 +90,7 @@ jobs:
   # Early Stopping Images.
   earlystopping-medianstop:
     name: Early Stopping MedianStop
-    uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
+    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
     with:
       image: docker.io/kubeflowkatib/earlystopping-medianstop
       dockerfile: cmd/earlystopping/medianstop/v1beta1/Dockerfile
