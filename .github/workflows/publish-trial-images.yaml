@@ -10,7 +10,7 @@ jobs:
     name: Trial MXNet MNIST
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/mxnet-mnist
+      image: docker.io/kubeflowkatib/mxnet-mnist
       dockerfile: examples/v1beta1/trial-images/mxnet-mnist/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -20,7 +20,7 @@ jobs:
     name: Trial PyTorch MNIST
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/pytorch-mnist
+      image: docker.io/kubeflowkatib/pytorch-mnist
       dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -30,7 +30,7 @@ jobs:
     name: Trial ENAS CNN CIFAR10 for GPU
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/enas-cnn-cifar10-gpu
+      image: docker.io/kubeflowkatib/enas-cnn-cifar10-gpu
       dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -40,7 +40,7 @@ jobs:
     name: Trial ENAS CNN CIFAR10 for CPU
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/enas-cnn-cifar10-cpu
+      image: docker.io/kubeflowkatib/enas-cnn-cifar10-cpu
       dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -50,7 +50,7 @@ jobs:
     name: Trial DARTS CNN CIFAR10
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/darts-cnn-cifar10
+      image: docker.io/kubeflowkatib/darts-cnn-cifar10
       dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}

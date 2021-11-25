@@ -12,7 +12,7 @@ jobs:
     # Trigger Publish Workflow only for kubeflow/katib repository.
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/suggestion-hyperopt
+      image: docker.io/kubeflowkatib/suggestion-hyperopt
       dockerfile: cmd/suggestion/hyperopt/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -22,7 +22,7 @@ jobs:
     name: Suggestion Chocolate
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/suggestion-chocolate
+      image: docker.io/kubeflowkatib/suggestion-chocolate
       dockerfile: cmd/suggestion/chocolate/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -32,7 +32,7 @@ jobs:
     name: Suggestion Hyperband
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/suggestion-hyperband
+      image: docker.io/kubeflowkatib/suggestion-hyperband
       dockerfile: cmd/suggestion/hyperband/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -42,7 +42,7 @@ jobs:
     name: Suggestion Skopt
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/suggestion-skopt
+      image: docker.io/kubeflowkatib/suggestion-skopt
       dockerfile: cmd/suggestion/skopt/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -52,7 +52,7 @@ jobs:
     name: Suggestion Goptuna
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/suggestion-goptuna
+      image: docker.io/kubeflowkatib/suggestion-goptuna
       dockerfile: cmd/suggestion/goptuna/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -62,7 +62,7 @@ jobs:
     name: Suggestion Optuna
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/suggestion-optuna
+      image: docker.io/kubeflowkatib/suggestion-optuna
       dockerfile: cmd/suggestion/optuna/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -72,7 +72,7 @@ jobs:
     name: Suggestion ENAS
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/suggestion-enas
+      image: docker.io/kubeflowkatib/suggestion-enas
       dockerfile: cmd/suggestion/nas/enas/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -82,7 +82,7 @@ jobs:
     name: Suggestion DARTS
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/suggestion-darts
+      image: docker.io/kubeflowkatib/suggestion-darts
       dockerfile: cmd/suggestion/nas/darts/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -93,7 +93,7 @@ jobs:
     name: Early Stopping MedianStop
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/earlystopping-medianstop
+      image: docker.io/kubeflowkatib/earlystopping-medianstop
       dockerfile: cmd/earlystopping/medianstop/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}

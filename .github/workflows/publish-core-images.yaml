@@ -12,7 +12,7 @@ jobs:
     # Trigger Publish Workflow only for kubeflow/katib repository.
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/katib-controller
+      image: docker.io/kubeflowkatib/katib-controller
       dockerfile: cmd/katib-controller/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -22,7 +22,7 @@ jobs:
     name: DB Manager
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/katib-db-manager
+      image: docker.io/kubeflowkatib/katib-db-manager
       dockerfile: cmd/db-manager/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -32,7 +32,7 @@ jobs:
     name: UI
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/katib-ui
+      image: docker.io/kubeflowkatib/katib-ui
       dockerfile: cmd/new-ui/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -42,7 +42,7 @@ jobs:
     name: Cert Generator
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/cert-generator
+      image: docker.io/kubeflowkatib/cert-generator
       dockerfile: cmd/cert-generator/v1beta1/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -53,7 +53,7 @@ jobs:
     name: File Metrics Collector
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/file-metrics-collector
+      image: docker.io/kubeflowkatib/file-metrics-collector
       dockerfile: cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -63,7 +63,7 @@ jobs:
     name: TFEvent Metrics Collector
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
-      image: docker.io/andreyvelichkevich/tfevent-metrics-collector
+      image: docker.io/kubeflowkatib/tfevent-metrics-collector
       dockerfile: cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
