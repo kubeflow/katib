@@ -9,7 +9,6 @@ jobs:
   # Suggestion Images.
   suggestion-hyperopt:
     name: Suggestion Hyperopt
-    # Trigger Publish Workflow only for kubeflow/katib repository.
     uses: kubeflow/katib/.github/workflows/publish-image-template.yaml@master
     with:
       image: docker.io/kubeflowkatib/suggestion-hyperopt
