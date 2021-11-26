@@ -53,9 +53,11 @@ func TestValidateExperiment(t *testing.T) {
 	suggestionConfigData.Image = "algorithmImage"
 	metricsCollectorConfigData := katibconfig.MetricsCollectorConfig{}
 	metricsCollectorConfigData.Image = "metricsCollectorImage"
+	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
 
 	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()
 	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(metricsCollectorConfigData, nil).AnyTimes()
+	p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(earlyStoppingConfigData, nil).AnyTimes()
 
 	batchJobStr := convertBatchJobToString(newFakeBatchJob())
 	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()
@@ -78,7 +80,7 @@ func TestValidateExperiment(t *testing.T) {
 			Err:             true,
 			testDescription: "Name is invalid",
 		},
-		//Objective
+		// Objective
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -106,7 +108,7 @@ func TestValidateExperiment(t *testing.T) {
 			Err:             true,
 			testDescription: "Objective metric name is empty",
 		},
-		//Algorithm
+		// Algorithm
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -124,6 +126,25 @@ func TestValidateExperiment(t *testing.T) {
 			}(),
 			Err:             true,
 			testDescription: "Algorithm name is empty",
+		},
+		// EarlyStopping
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.EarlyStopping = nil
+				return i
+			}(),
+			Err:             false,
+			testDescription: "EarlyStopping is nil",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.EarlyStopping.AlgorithmName = ""
+				return i
+			}(),
+			Err:             true,
+			testDescription: "EarlyStopping AlgorithmName is empty",
 		},
 		// Valid Experiment
 		{
@@ -977,12 +998,20 @@ func TestValidateConfigData(t *testing.T) {
 	suggestionConfigData := katibconfig.SuggestionConfig{}
 	suggestionConfigData.Image = "algorithmImage"
 
-	validConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil)
+	validConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).Times(2)
 	invalidConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(katibconfig.SuggestionConfig{}, errors.New("GetSuggestionConfigData failed"))
 
 	gomock.InOrder(
-		invalidConfigCall,
 		validConfigCall,
+		invalidConfigCall,
+	)
+
+	validEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(katibconfig.EarlyStoppingConfig{}, nil)
+	invalidEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(katibconfig.EarlyStoppingConfig{}, errors.New("GetEarlyStoppingConfigData failed"))
+
+	gomock.InOrder(
+		validEarlyStoppingConfigCall,
+		invalidEarlyStoppingConfigCall,
 	)
 
 	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(katibconfig.MetricsCollectorConfig{}, errors.New("GetMetricsCollectorConfigData failed"))
@@ -996,11 +1025,15 @@ func TestValidateConfigData(t *testing.T) {
 	}{
 		{
 			Instance:        newFakeInstance(),
-			testDescription: "Get suggestion config data error",
+			testDescription: "Get metrics collector config data error",
 		},
 		{
 			Instance:        newFakeInstance(),
-			testDescription: "Get metrics collector config data error",
+			testDescription: "Get early stopping config data error",
+		},
+		{
+			Instance:        newFakeInstance(),
+			testDescription: "Get suggestion config data error",
 		},
 	}
 
@@ -1036,6 +1069,15 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 			Algorithm: &commonv1beta1.AlgorithmSpec{
 				AlgorithmName: "test",
 				AlgorithmSettings: []commonv1beta1.AlgorithmSetting{
+					{
+						Name:  "test1",
+						Value: "value1",
+					},
+				},
+			},
+			EarlyStopping: &commonv1beta1.EarlyStoppingSpec{
+				AlgorithmName: "test",
+				AlgorithmSettings: []commonv1beta1.EarlyStoppingSetting{
 					{
 						Name:  "test1",
 						Value: "value1",

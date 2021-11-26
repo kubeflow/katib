@@ -122,10 +122,6 @@ You can find the `cert-generator` source code [here](../cmd/cert-generator/v1bet
 
 Please see [new-algorithm-service.md](./new-algorithm-service.md).
 
-## Algorithm settings documentation
-
-Please see [algorithm-settings.md](./algorithm-settings.md).
-
 ## Katib UI documentation
 
 Please see [Katib UI README](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1).

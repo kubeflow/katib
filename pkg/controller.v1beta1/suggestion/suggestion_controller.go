@@ -223,8 +223,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	// If early stopping is used, create RBAC.
 	// If controller should reconcile RBAC,
 	// ServiceAccount name must be equal to <suggestion-name>-<suggestion-algorithm>
-	if instance.Spec.EarlyStopping != nil && instance.Spec.EarlyStopping.AlgorithmName != "" &&
-		deploy.Spec.Template.Spec.ServiceAccountName == util.GetSuggestionRBACName(instance) {
+	if instance.Spec.EarlyStopping != nil && deploy.Spec.Template.Spec.ServiceAccountName == util.GetSuggestionRBACName(instance) {
 
 		serviceAccount, role, roleBinding, err := r.DesiredRBAC(instance)
 		if err != nil {
@@ -274,6 +273,15 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 			instance.MarkSuggestionStatusFailed(SuggestionFailedReason, msg)
 			// return nil since it is a terminal condition
 			return nil
+		}
+		if instance.Spec.EarlyStopping != nil {
+			if err = r.ValidateEarlyStoppingSettings(instance, experiment); err != nil {
+				logger.Error(err, "Marking suggestion failed as early stopping settings validation failed")
+				msg := fmt.Sprintf("Validation failed: %v", err)
+				instance.MarkSuggestionStatusFailed(SuggestionFailedReason, msg)
+				// return nil since it is a terminal condition
+				return nil
+			}
 		}
 		msg := "Suggestion is running"
 		instance.MarkSuggestionStatusRunning(corev1.ConditionTrue, SuggestionRunningReason, msg)

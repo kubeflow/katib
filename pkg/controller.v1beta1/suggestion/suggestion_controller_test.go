@@ -19,6 +19,8 @@ package suggestion
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -47,12 +49,14 @@ import (
 )
 
 const (
-	suggestionName  = "test-suggestion"
-	resourceName    = "test-suggestion-random"
-	namespace       = "kubeflow"
-	suggestionImage = "test-image"
-	katibConfigName = "katib-config"
-	timeout         = time.Second * 40
+	suggestionName                             = "test-suggestion"
+	resourceName                               = "test-suggestion-random"
+	namespace                                  = "kubeflow"
+	suggestionImage                            = "test-image"
+	katibConfigName                            = "katib-config"
+	timeout                                    = time.Second * 40
+	invalidAlgorithmSettingsSuggestionName     = "invalid-algorithm-settings"
+	invalidEarlyStoppingSettingsSuggestionName = "invalid-earlystopping-settings"
 )
 
 func init() {
@@ -100,7 +104,20 @@ func TestReconcile(t *testing.T) {
 		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
 	}()
 
-	mockSuggestionClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+	mockSuggestionClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(instance *suggestionsv1beta1.Suggestion, e *experimentsv1beta1.Experiment) error {
+			if e.Name == invalidAlgorithmSettingsSuggestionName {
+				return fmt.Errorf("ValidateAlgorithmSettings Error")
+			}
+			return nil
+		}).AnyTimes()
+	mockSuggestionClient.EXPECT().ValidateEarlyStoppingSettings(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(instance *suggestionsv1beta1.Suggestion, e *experimentsv1beta1.Experiment) error {
+			if e.Name == invalidEarlyStoppingSettingsSuggestionName {
+				return fmt.Errorf("ValidateEarlyStoppingSettings Error")
+			}
+			return nil
+		}).AnyTimes()
 	mockSuggestionClient.EXPECT().SyncAssignments(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
 	instance := newFakeInstance()
@@ -130,6 +147,7 @@ func TestReconcile(t *testing.T) {
 			Name: namespace,
 		},
 	}
+
 	g.Expect(c.Create(context.TODO(), kubeflowNS)).NotTo(gomega.HaveOccurred())
 	// Test 1 - Early stopping suggestion run
 	// Create ConfigMap with suggestion and early stopping data.
@@ -264,6 +282,123 @@ func TestReconcile(t *testing.T) {
 
 	// Test 4 - Update status condition for empty experiment
 	g.Expect(r.updateStatusCondition(&suggestionsv1beta1.Suggestion{}, oldS)).To(gomega.HaveOccurred())
+
+	// Delete the experiment
+	g.Expect(c.Delete(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+
+	// Expect that experiment is deleted
+	g.Eventually(func() bool {
+		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, &experimentsv1beta1.Experiment{}))
+	}, timeout).Should(gomega.BeTrue())
+
+	// Test 5 - ValidateAlgorithmSettings returns error
+	experiment = &experimentsv1beta1.Experiment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      invalidAlgorithmSettingsSuggestionName,
+			Namespace: namespace,
+		},
+	}
+	instance = newFakeInstance()
+	instance.Name = invalidAlgorithmSettingsSuggestionName
+	invalidResourceName := strings.Join([]string{invalidAlgorithmSettingsSuggestionName, "random"}, "-")
+	suggestionDeploy = &appsv1.Deployment{}
+
+	// Create the suggestion
+	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	// Create experiment
+	g.Expect(c.Create(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+
+	// Expect deployment with appropriate name is created
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, suggestionDeploy)
+	}, timeout).Should(gomega.Succeed())
+
+	// Manually change ready deployment status
+	suggestionDeploy.Status = appsv1.DeploymentStatus{
+		Conditions: []appsv1.DeploymentCondition{
+			{
+				Type:   appsv1.DeploymentAvailable,
+				Status: corev1.ConditionTrue,
+			},
+		},
+	}
+
+	g.Expect(c.Status().Update(context.TODO(), suggestionDeploy)).NotTo(gomega.HaveOccurred())
+
+	// Expect that suggestion status is failed
+	suggestion = &suggestionsv1beta1.Suggestion{}
+	g.Eventually(func() bool {
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, suggestion); err != nil {
+			return false
+		}
+		return suggestion.IsFailed()
+	}, timeout).Should(gomega.BeTrue())
+
+	// Delete the experiment
+	g.Expect(c.Delete(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+
+	// Expect that experiment is deleted
+	g.Eventually(func() bool {
+		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, &experimentsv1beta1.Experiment{}))
+	}, timeout).Should(gomega.BeTrue())
+
+	// Delete the suggestion
+	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+
+	// Expect that suggestion is deleted
+	g.Eventually(func() bool {
+		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, &suggestionsv1beta1.Suggestion{}))
+	}, timeout).Should(gomega.BeTrue())
+
+	// Delete the deployment is deleted
+	g.Expect(c.Delete(context.TODO(), suggestionDeploy)).NotTo(gomega.HaveOccurred())
+
+	// Expect that deployment is deleted
+	g.Eventually(func() bool {
+		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, &appsv1.Deployment{}))
+	}, timeout).Should(gomega.BeTrue())
+
+	// Test 6 - ValidateEarlyStoppingSettings returns error
+	experiment = &experimentsv1beta1.Experiment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      invalidEarlyStoppingSettingsSuggestionName,
+			Namespace: namespace,
+		},
+	}
+	instance = newFakeInstance()
+	instance.Name = invalidEarlyStoppingSettingsSuggestionName
+	invalidResourceName = strings.Join([]string{invalidEarlyStoppingSettingsSuggestionName, "random"}, "-")
+
+	// Create the suggestion
+	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	// Create experiment
+	g.Expect(c.Create(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+
+	// Expect deployment with appropriate name is created
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, suggestionDeploy)
+	}, timeout).Should(gomega.Succeed())
+
+	// Manually change ready deployment status
+	suggestionDeploy.Status = appsv1.DeploymentStatus{
+		Conditions: []appsv1.DeploymentCondition{
+			{
+				Type:   appsv1.DeploymentAvailable,
+				Status: corev1.ConditionTrue,
+			},
+		},
+	}
+
+	g.Expect(c.Status().Update(context.TODO(), suggestionDeploy)).NotTo(gomega.HaveOccurred())
+
+	// Expect that suggestion status is failed
+	suggestion = &suggestionsv1beta1.Suggestion{}
+	g.Eventually(func() bool {
+		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidEarlyStoppingSettingsSuggestionName}, suggestion); err != nil {
+			return false
+		}
+		return suggestion.IsFailed()
+	}, timeout).Should(gomega.BeTrue())
 
 }
 

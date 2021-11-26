@@ -44,6 +44,8 @@
     - [TrialStatus](#api.v1.beta1.TrialStatus)
     - [ValidateAlgorithmSettingsReply](#api.v1.beta1.ValidateAlgorithmSettingsReply)
     - [ValidateAlgorithmSettingsRequest](#api.v1.beta1.ValidateAlgorithmSettingsRequest)
+    - [ValidateEarlyStoppingSettingsReply](#api.v1.beta1.ValidateEarlyStoppingSettingsReply)
+    - [ValidateEarlyStoppingSettingsRequest](#api.v1.beta1.ValidateEarlyStoppingSettingsRequest)
   
     - [ComparisonType](#api.v1.beta1.ComparisonType)
     - [ObjectiveType](#api.v1.beta1.ObjectiveType)
@@ -696,6 +698,31 @@ Return INVALID_ARGUMENT Error if Algorithm Settings are not Valid
 
 
 
+
+<a name="api.v1.beta1.ValidateEarlyStoppingSettingsReply"></a>
+
+### ValidateEarlyStoppingSettingsReply
+Return INVALID_ARGUMENT Error if Early Stopping Settings are not Valid
+
+
+
+
+
+
+<a name="api.v1.beta1.ValidateEarlyStoppingSettingsRequest"></a>
+
+### ValidateEarlyStoppingSettingsRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| early_stopping | [EarlyStoppingSpec](#api.v1.beta1.EarlyStoppingSpec) |  |  |
+
+
+
+
+
  
 
 
@@ -784,6 +811,7 @@ EarlyStopping service defines APIs to manage Katib Early Stopping algorithms
 | ----------- | ------------ | ------------- | ------------|
 | GetEarlyStoppingRules | [GetEarlyStoppingRulesRequest](#api.v1.beta1.GetEarlyStoppingRulesRequest) | [GetEarlyStoppingRulesReply](#api.v1.beta1.GetEarlyStoppingRulesReply) |  |
 | SetTrialStatus | [SetTrialStatusRequest](#api.v1.beta1.SetTrialStatusRequest) | [SetTrialStatusReply](#api.v1.beta1.SetTrialStatusReply) |  |
+| ValidateEarlyStoppingSettings | [ValidateEarlyStoppingSettingsRequest](#api.v1.beta1.ValidateEarlyStoppingSettingsRequest) | [ValidateEarlyStoppingSettingsReply](#api.v1.beta1.ValidateEarlyStoppingSettingsReply) |  |
 
 
 <a name="api.v1.beta1.Suggestion"></a>

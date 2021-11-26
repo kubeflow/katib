@@ -64,6 +64,39 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
         self.api_instance = client.CustomObjectsApi()
 
+    def ValidateEarlyStoppingSettings(self, request, context):
+        is_valid, message = self.validate_early_stopping_spec(request.early_stopping)
+        if not is_valid:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details(message)
+            logger.error(message)
+        return api_pb2.ValidateEarlyStoppingSettingsReply()
+
+    def validate_early_stopping_spec(self, early_stopping_spec):
+        algorithm_name = early_stopping_spec.algorithm_name
+        if algorithm_name == "medianstop":
+            return self.validate_medianstop_setting(early_stopping_spec.algorithm_settings)
+        else:
+            return False, "unknown algorithm name {}".format(algorithm_name)
+
+    @staticmethod
+    def validate_medianstop_setting(early_stopping_settings):
+        for setting in early_stopping_settings:
+            try:
+                if setting.name == "min_trials_required":
+                    if not (int(setting.value) > 0):
+                        return False, "min_trials_required must be greater than zero (>0)"
+                elif setting.name == "start_step":
+                    if not (int(setting.value) >= 1):
+                        return False, "start_step must be greater or equal than one (>=1)"
+                else:
+                    return False, "unknown setting {} for algorithm medianstop".format(setting.name)
+
+            except Exception as e:
+                return False, "failed to validate {}({}): {}".format(setting.name, setting.value, e)
+
+        return True, ""
+
     def GetEarlyStoppingRules(self, request, context):
         logger.info("Get new early stopping rules")
 
@@ -71,7 +104,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
         if self.is_first_run:
             self.is_first_run = False
             # Get early stopping settings.
-            self.getEarlyStoppingSettings(request.experiment.spec.early_stopping.algorithm_settings)
+            self.get_early_stopping_settings(request.experiment.spec.early_stopping.algorithm_settings)
             logger.info("Median stopping settings are: min_trials_required: {}, start_step: {}".format(
                 self.min_trials_required, self.start_step))
 
@@ -90,7 +123,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
         early_stopping_rules = []
 
-        median = self.getMedianValue(request.trials)
+        median = self.get_median_value(request.trials)
         if median is not None:
             early_stopping_rules.append(api_pb2.EarlyStoppingRule(
                 name=self.objective_metric,
@@ -104,14 +137,14 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
             early_stopping_rules=early_stopping_rules
         )
 
-    def getEarlyStoppingSettings(self, early_stopping_settings):
+    def get_early_stopping_settings(self, early_stopping_settings):
         for setting in early_stopping_settings:
             if setting.name == "min_trials_required":
                 self.min_trials_required = int(setting.value)
             elif setting.name == "start_step":
                 self.start_step = int(setting.value)
 
-    def getMedianValue(self, trials):
+    def get_median_value(self, trials):
         for trial in trials:
             # Get metrics only for the new succeeded Trials.
             if trial.name not in self.trials_avg_history and trial.status.condition == SUCCEEDED_TRIAL:
