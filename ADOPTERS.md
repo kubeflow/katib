@@ -6,6 +6,7 @@ Please keep the list in alphabetical order.
 
 | Organization | Contact | Description of Use |
 | ------------ | ------- | ------------------ |
+| [Akuity](https://akuity.io/) | [@terrytangyuan](https://github.com/terrytangyuan) | |
 | [Ant Group](https://www.antgroup.com/) |[@ohmystack](https://github.com/ohmystack) | Automatic training in Ant Group internal AI Platform |
 | [babylon health](https://www.babylonhealth.com/) |[@jeremievallee](https://github.com/jeremievallee) | Hyperparameter tuning for AIR internal AI Platform |
 | [caicloud](https://caicloud.io/) |[@gaocegege](https://github.com/gaocegege) | Hyperparameter tuning in Caicloud Cloud-Native AI Platform |
