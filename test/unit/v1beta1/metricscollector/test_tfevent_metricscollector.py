@@ -20,13 +20,13 @@ import utils
 class TestTFEventMetricsCollector(unittest.TestCase):
     def test_parse_file(self):
 
-        current_dir = os.getcwd()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
         logs_dir = os.path.join(current_dir, "testdata/tfevent-metricscollector/logs")
 
         # Metric format is "{{dirname}}/{{metrics name}}"
         metric_names = ["train/accuracy", "train/loss", "test/loss", "test/accuracy"]
         metric_logs = utils.get_metric_logs(logs_dir, metric_names)
-        self.assertEqual(40, len(metric_logs))
+        self.assertEqual(20, len(metric_logs))
 
         for log in metric_logs:
             actual = log["metric"]["name"]
@@ -36,7 +36,7 @@ class TestTFEventMetricsCollector(unittest.TestCase):
         metric_names = ["accuracy", "loss"]
         metrics_file_dir = os.path.join(logs_dir, "train")
         metric_logs = utils.get_metric_logs(metrics_file_dir, metric_names)
-        self.assertEqual(20, len(metric_logs))
+        self.assertEqual(10, len(metric_logs))
 
         for log in metric_logs:
             actual = log["metric"]["name"]

@@ -18,30 +18,5 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install Packages
-        run: |
-          pip install -r test/unit/v1beta1/requirements.txt
-
-          pip install -r cmd/suggestion/chocolate/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/skopt/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/optuna/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
-
-          pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
-
-      - name: Generate Tensorflow Event file
-        run: |
-          LOG_PATH=test/unit/v1beta1/metricscollector/testdata/tfevent-metricscollector/logs
-          python examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py --epochs 10 --batch-size 200 --log-path $LOG_PATH
-
       - name: Run Python test
-        run: |
-          # for gRPC API
-          export PYTHONPATH=$(pwd):$(pwd)/pkg/apis/manager/v1beta1/python:$(pwd)/pkg/apis/manager/health/python
-          # for tfevent-metricscollector
-          export PYTHONPATH=$PYTHONPATH:$(pwd)/pkg/metricscollector/v1beta1/common:$(pwd)/pkg/metricscollector/v1beta1/tfevent-metricscollector
-          pytest ./test/unit/v1beta1/suggestion
-          pytest ./test/unit/v1beta1/earlystopping
+        run: make pytest
