@@ -5,65 +5,38 @@ on:
     branches:
       - master
 
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
 jobs:
-  # Katib Core Images.
-  controller:
-    name: Controller
-    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
-    with:
-      image: docker.io/kubeflowkatib/katib-controller
-      dockerfile: cmd/katib-controller/v1beta1/Dockerfile
-    secrets:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+  core:
+    name: Publish Image
+    # Trigger workflow only for kubeflow/katib repository.
+    if: github.repository == 'kubeflow/katib'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-  db-manager:
-    name: DB Manager
-    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
-    with:
-      image: docker.io/kubeflowkatib/katib-db-manager
-      dockerfile: cmd/db-manager/v1beta1/Dockerfile
-    secrets:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Publish Component ${{ matrix.component-name }}
+        uses: ./.github/workflows/template-publish-image
+        with:
+          image: docker.io/kubeflowkatib/${{ matrix.component-name }}
+          dockerfile: ${{ matrix.dockerfile }}
 
-  ui:
-    name: UI
-    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
-    with:
-      image: docker.io/kubeflowkatib/katib-ui
-      dockerfile: cmd/new-ui/v1beta1/Dockerfile
-    secrets:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  cert-generator:
-    name: Cert Generator
-    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
-    with:
-      image: docker.io/kubeflowkatib/cert-generator
-      dockerfile: cmd/cert-generator/v1beta1/Dockerfile
-    secrets:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  # Metrics Collector Images.
-  metrics-collector-file:
-    name: File Metrics Collector
-    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
-    with:
-      image: docker.io/kubeflowkatib/file-metrics-collector
-      dockerfile: cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile
-    secrets:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  metrics-collector-tfevent:
-    name: TFEvent Metrics Collector
-    uses: kubeflow/katib/.github/workflows/template-publish-image.yaml@master
-    with:
-      image: docker.io/kubeflowkatib/tfevent-metrics-collector
-      dockerfile: cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile
-    secrets:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+    strategy:
+      matrix:
+        include:
+          - component-name: katib-controller
+            dockerfile: cmd/katib-controller/v1beta1/Dockerfile
+          - component-name: katib-db-manager
+            dockerfile: cmd/db-manager/v1beta1/Dockerfile
+          - component-name: katib-ui
+            dockerfile: cmd/new-ui/v1beta1/Dockerfile
+          - component-name: cert-generator
+            dockerfile: cmd/cert-generator/v1beta1/Dockerfile
+          - component-name: file-metrics-collector
+            dockerfile: cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile
+          - component-name: tfevent-metrics-collector
+            dockerfile: cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile
