@@ -51,7 +51,7 @@ vars:
     objref:
       kind: Certificate
       group: cert-manager.io
-      version: v1alpha2
+      version: v1
       name: katib-webhook-cert
     fieldref:
       fieldpath: metadata.name
