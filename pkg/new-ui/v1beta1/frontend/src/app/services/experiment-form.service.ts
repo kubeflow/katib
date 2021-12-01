@@ -240,8 +240,13 @@ export class ExperimentFormService {
       return param;
     }
 
-    if ((param.feasibleSpace as FeasibleSpaceMinMax).step === '') {
+    const step = (param.feasibleSpace as FeasibleSpaceMinMax).step;
+    if (step === '' || step === null) {
       delete (param.feasibleSpace as FeasibleSpaceMinMax).step;
+    }
+
+    for (const key in param.feasibleSpace) {
+      param.feasibleSpace[key] = param.feasibleSpace[key].toString();
     }
 
     return param;
