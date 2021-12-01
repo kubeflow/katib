@@ -14,10 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script is used to update images and tags in the Trial images for all Katib examples and manifests.
-# Run ./scripts/v1beta1/update-trial-images.sh -p <image-prefix> -t <image-tag> to execute it.
-# For example, to update image tags to the latest run:
-# ./scripts/v1beta1/update-trial-images.sh -p docker.io/kubeflowkatib/ -t latest
+# This script is used to update images and tags which are hosted by Katib community.
+#
+# The image names postfix must be equal to Katib format.
+# Please check the images format here: https://github.com/kubeflow/katib/blob/master/docs/images-location.md
+# For example, for Katib controller the image postfix is "katib-controller".
+#
+# This script updates the following images:
+# 1. Katib Core Components.
+# 2. Katib Metrics Collectors
+# 3. Katib Suggestions
+# 4. Katib Early Stopping
+# 5. Katib Trial training containers
+#
+# Run ./scripts/v1beta1/update-images.sh -p <image-prefix> -t <image-tag> to execute it.
+# For example, to update images with registry: docker.io/private/ and tag "v0.12.0", run:
+# ./scripts/v1beta1/update-images.sh -p docker.io/private/ -t latest
 
 usage() {
   echo "Usage: $0 [-p <IMAGE_PREFIX> -t <TAG>]" 1>&2
