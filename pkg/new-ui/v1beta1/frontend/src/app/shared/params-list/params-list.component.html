@@ -15,7 +15,7 @@
 
 <ng-container *ngFor="let param of paramsArray.controls; let i = index">
   <app-shared-parameter
-    [paramCtrl]="param"
+    [paramFormGroup]="param"
     (delete)="removeParam(i)"
   ></app-shared-parameter>
 </ng-container>
