@@ -58,7 +58,6 @@ ENAS_GPU="enas-cnn-cifar10-gpu"
 ENAS_CPU="enas-cnn-cifar10-cpu"
 DARTS="darts-cnn-cifar10"
 
-# MXNet mnist.
 # For MacOS we should set -i '' to avoid temp files from sed.
 if [[ $(uname) == "Darwin" ]]; then
   find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${MXNET_MNIST}:.*@${IMAGE_PREFIX}${MXNET_MNIST}:${TAG}@" {} \;
