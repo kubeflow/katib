@@ -27,18 +27,19 @@
 # 4. Katib Early Stopping
 # 5. Katib Trial training containers
 #
-# Run ./scripts/v1beta1/update-images.sh <PREFIX> <TAG> to execute it.
-# For example, to update images with registry: docker.io/private-registry/ and tag: v0.12.0, run:
-# ./scripts/v1beta1/update-images.sh docker.io/private-registry/ v0.12.0
+# Run ./scripts/v1beta1/update-images.sh <OLD_PREFIX> <NEW_PREFIX> <TAG> to execute it.
+# For example, to update images from: docker.io/kubeflowkatib/ to: docker.io/private/ registry with tag: v0.12.0, run:
+# ./scripts/v1beta1/update-images.sh docker.io/kubeflowkatib/ docker.io/private/ v0.12.0
 
-PREFIX=$1
+OLD_PREFIX=$1
+NEW_PREFIX
 TAG=$2
 
-if [[ -z "$PREFIX" || -z "$TAG" ]]; then
-  echo "Image prefix and tag must be set"
-  echo -e "Usage: $0 <PREFIX> <TAG>\n" 1>&2
-  echo "For example, to update images with registry: docker.io/private-registry/ and tag: v0.12.0, run:"
-  echo "$0 docker.io/private-registry/ v0.12.0"
+if [[ -z "$OLD_PREFIX" || -z "$NEW_PREFIX" || -z "$TAG" ]]; then
+  echo "Image old prefix, new prefix, and tag must be set"
+  echo -e "Usage: $0 <OLD_PREFIX> <NEW_PREFIX> <TAG>\n" 1>&2
+  echo "For example, to update images from: docker.io/kubeflowkatib/ to: docker.io/private/ registry with tag: v0.12.0, run:"
+  echo "$0 docker.io/kubeflowkatib/ docker.io/private/ v0.12.0"
   exit 1
 fi
 
@@ -55,9 +56,6 @@ update_yaml_files() {
   fi
 }
 
-# Base prefix for the Katib images.
-BASE_PREFIX="docker.io/kubeflowkatib/"
-
 echo "Updating Katib images..."
 echo "Image prefix: ${PREFIX}"
 echo -e "Image tag: ${TAG}\n"
@@ -66,14 +64,14 @@ exit 1
 
 # Katib Core images.
 echo -e "Updating Katib Core images\n"
-update_yaml_files "manifests/v1beta1/installs/" "newName: ${BASE_PREFIX}" "newName: ${PREFIX}"
+update_yaml_files "manifests/v1beta1/installs/" "newName: ${OLD_PREFIX}" "newName: ${PREFIX}"
 update_yaml_files "manifests/v1beta1/installs/" "newTag: .*" "newTag: ${TAG}"
 
 # Katib Config images.
 CONFIG_PATH="manifests/v1beta1/components/controller/katib-config.yaml"
 
 echo -e "Update Katib Metrics Collectors, Suggestion and EarlyStopping images\n"
-update_yaml_files "${CONFIG_PATH}" "${BASE_PREFIX}" "${PREFIX}"
+update_yaml_files "${CONFIG_PATH}" "${OLD_PREFIX}" "${PREFIX}"
 update_yaml_files "${CONFIG_PATH}" ":[^[:space:]].*\"" ":${TAG}\""
 
 # Katib Trial training container images.
@@ -86,10 +84,10 @@ ENAS_CPU="enas-cnn-cifar10-cpu"
 DARTS="darts-cnn-cifar10"
 
 echo -e "Update Katib Trial training container images\n"
-update_yaml_files "./" "${BASE_PREFIX}${MXNET_MNIST}:.*" "${PREFIX}${MXNET_MNIST}:${TAG}"
-update_yaml_files "./" "${BASE_PREFIX}${PYTORCH_MNIST}:.*" "${PREFIX}${PYTORCH_MNIST}:${TAG}"
-update_yaml_files "./" "${BASE_PREFIX}${ENAS_GPU}:.*" "${PREFIX}${ENAS_GPU}:${TAG}"
-update_yaml_files "./" "${BASE_PREFIX}${ENAS_CPU}:.*" "${PREFIX}${ENAS_CPU}:${TAG}"
-update_yaml_files "./" "${BASE_PREFIX}${DARTS}:.*" "${PREFIX}${DARTS}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${MXNET_MNIST}:.*" "${PREFIX}${MXNET_MNIST}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${PYTORCH_MNIST}:.*" "${PREFIX}${PYTORCH_MNIST}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${ENAS_GPU}:.*" "${PREFIX}${ENAS_GPU}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${ENAS_CPU}:.*" "${PREFIX}${ENAS_CPU}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${DARTS}:.*" "${PREFIX}${DARTS}:${TAG}"
 
 echo "Katib images have been updated"

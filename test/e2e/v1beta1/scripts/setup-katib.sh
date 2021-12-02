@@ -32,15 +32,11 @@ kubectl version
 kubectl cluster-info
 
 # Update Katib images with the current PULL SHA.
-make update-images PREFIX="${ECR_REGISTRY}/${REPO_NAME}/v1beta1/" TAG="${PULL_PULL_SHA}"
+make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="${ECR_REGISTRY}/${REPO_NAME}/v1beta1/" TAG="${PULL_PULL_SHA}"
 
 echo -e "\n The Katib will be deployed with the following images"
 cat "manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
 cat "manifests/v1beta1/components/controller/katib-config.yaml"
-
-# Update Trial training container images.
-make update-images PREFIX=""
-./scripts/v1beta1/update-trial-images.sh -p "${ECR_REGISTRY}/${REPO_NAME}/v1beta1/trial-" -t ${VERSION}
 
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
@@ -65,6 +61,9 @@ echo "Katib services"
 kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
+
+# We should update Trial images after Katib is deployed since they have "trial-" in private ECR image name.
+make update-images OLD_PREFIX="${ECR_REGISTRY}/${REPO_NAME}/v1beta1/" NEW_PREFIX="${ECR_REGISTRY}/${REPO_NAME}/v1beta1/trial-" TAG="${PULL_PULL_SHA}"
 
 # Check that Katib is working with 2 Experiments.
 kubectl apply -f test/e2e/v1beta1/valid-experiment.yaml
