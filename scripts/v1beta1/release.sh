@@ -68,7 +68,7 @@ fi
 
 # ------------------ Change image tag ------------------
 # Change Katib image tags to the new release tag.
-make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib" TAG="${TAG}"
+make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib/" TAG="${TAG}"
 
 # ------------------ Publish Katib SDK ------------------
 # Remove first "v" for the SDK version.
@@ -78,7 +78,7 @@ if [[ ${sdk_version} == *"-rc."* ]]; then
   # Replace "-rc." with "rc" for the SDK version.
   sdk_version=$(sed "s@-rc.@rc@" <<<${sdk_version})
 fi
-echo -e "Publishing Katib Python SDK, version: ${sdk_version}\n"
+echo -e "\nPublishing Katib Python SDK, version: ${sdk_version}\n"
 # Run generate script.
 make generate
 
