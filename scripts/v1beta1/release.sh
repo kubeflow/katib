@@ -68,24 +68,7 @@ fi
 
 # ------------------ Change image tag ------------------
 # Change Katib image tags to the new release tag.
-echo -e "\nUpdating Katib image tags to ${TAG}\n"
-# For MacOS we should set -i '' to avoid temp files from sed.
-if [[ $(uname) == "Darwin" ]]; then
-  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-external-db/kustomization.yaml
-  sed -i '' -e "s@:[^[:space:]].*\"@:${TAG}\"@" ./manifests/v1beta1/components/controller/katib-config.yaml
-  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-standalone/kustomization.yaml
-  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-with-kubeflow/kustomization.yaml
-  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-cert-manager/kustomization.yaml
-  sed -i '' -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-openshift/kustomization.yaml
-else
-  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-external-db/kustomization.yaml
-  sed -i -e "s@:[^[:space:]].*\"@:${TAG}\"@" ./manifests/v1beta1/components/controller/katib-config.yaml
-  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-standalone/kustomization.yaml
-  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-with-kubeflow/kustomization.yaml
-  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-cert-manager/kustomization.yaml
-  sed -i -e "s@newTag: .*@newTag: ${TAG}@" ./manifests/v1beta1/installs/katib-openshift/kustomization.yaml
-fi
-echo -e "Katib images have been updated\n"
+make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib" TAG="${TAG}"
 
 # ------------------ Publish Katib SDK ------------------
 # Remove first "v" for the SDK version.

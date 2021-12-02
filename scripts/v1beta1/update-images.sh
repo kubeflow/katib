@@ -32,8 +32,8 @@
 # ./scripts/v1beta1/update-images.sh docker.io/kubeflowkatib/ docker.io/private/ v0.12.0
 
 OLD_PREFIX=$1
-NEW_PREFIX
-TAG=$2
+NEW_PREFIX=$2
+TAG=$3
 
 if [[ -z "$OLD_PREFIX" || -z "$NEW_PREFIX" || -z "$TAG" ]]; then
   echo "Image old prefix, new prefix, and tag must be set"
@@ -57,21 +57,20 @@ update_yaml_files() {
 }
 
 echo "Updating Katib images..."
-echo "Image prefix: ${PREFIX}"
+echo "Image old prefix: ${OLD_PREFIX}"
+echo "Image new prefix: ${NEW_PREFIX}"
 echo -e "Image tag: ${TAG}\n"
-
-exit 1
 
 # Katib Core images.
 echo -e "Updating Katib Core images\n"
-update_yaml_files "manifests/v1beta1/installs/" "newName: ${OLD_PREFIX}" "newName: ${PREFIX}"
+update_yaml_files "manifests/v1beta1/installs/" "newName: ${OLD_PREFIX}" "newName: ${NEW_PREFIX}"
 update_yaml_files "manifests/v1beta1/installs/" "newTag: .*" "newTag: ${TAG}"
 
 # Katib Config images.
 CONFIG_PATH="manifests/v1beta1/components/controller/katib-config.yaml"
 
 echo -e "Update Katib Metrics Collectors, Suggestion and EarlyStopping images\n"
-update_yaml_files "${CONFIG_PATH}" "${OLD_PREFIX}" "${PREFIX}"
+update_yaml_files "${CONFIG_PATH}" "${OLD_PREFIX}" "${NEW_PREFIX}"
 update_yaml_files "${CONFIG_PATH}" ":[^[:space:]].*\"" ":${TAG}\""
 
 # Katib Trial training container images.
@@ -84,10 +83,10 @@ ENAS_CPU="enas-cnn-cifar10-cpu"
 DARTS="darts-cnn-cifar10"
 
 echo -e "Update Katib Trial training container images\n"
-update_yaml_files "./" "${OLD_PREFIX}${MXNET_MNIST}:.*" "${PREFIX}${MXNET_MNIST}:${TAG}"
-update_yaml_files "./" "${OLD_PREFIX}${PYTORCH_MNIST}:.*" "${PREFIX}${PYTORCH_MNIST}:${TAG}"
-update_yaml_files "./" "${OLD_PREFIX}${ENAS_GPU}:.*" "${PREFIX}${ENAS_GPU}:${TAG}"
-update_yaml_files "./" "${OLD_PREFIX}${ENAS_CPU}:.*" "${PREFIX}${ENAS_CPU}:${TAG}"
-update_yaml_files "./" "${OLD_PREFIX}${DARTS}:.*" "${PREFIX}${DARTS}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${MXNET_MNIST}:.*" "${NEW_PREFIX}${MXNET_MNIST}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${PYTORCH_MNIST}:.*" "${NEW_PREFIX}${PYTORCH_MNIST}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${ENAS_GPU}:.*" "${NEW_PREFIX}${ENAS_GPU}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${ENAS_CPU}:.*" "${NEW_PREFIX}${ENAS_CPU}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${DARTS}:.*" "${NEW_PREFIX}${DARTS}:${TAG}"
 
 echo "Katib images have been updated"
