@@ -34,7 +34,7 @@ kubectl cluster-info
 # Update Katib images with the current PULL SHA.
 make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="${ECR_REGISTRY}/${REPO_NAME}/v1beta1/" TAG="${PULL_PULL_SHA}"
 
-echo -e "\n The Katib will be deployed with the following images"
+echo -e "\n The Katib will be deployed with the following configs"
 cat "manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
 cat "manifests/v1beta1/components/controller/katib-config.yaml"
 

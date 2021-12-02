@@ -62,14 +62,16 @@ echo "Image new prefix: ${NEW_PREFIX}"
 echo -e "Image tag: ${TAG}\n"
 
 # Katib Core images.
+INSTALLS_PATH="manifests/v1beta1/installs/"
+
 echo -e "Updating Katib Core images\n"
-update_yaml_files "manifests/v1beta1/installs/" "newName: ${OLD_PREFIX}" "newName: ${NEW_PREFIX}"
-update_yaml_files "manifests/v1beta1/installs/" "newTag: .*" "newTag: ${TAG}"
+update_yaml_files "${INSTALLS_PATH}" "newName: ${OLD_PREFIX}" "newName: ${NEW_PREFIX}"
+update_yaml_files "${INSTALLS_PATH}" "newTag: .*" "newTag: ${TAG}"
 
 # Katib Config images.
 CONFIG_PATH="manifests/v1beta1/components/controller/katib-config.yaml"
 
-echo -e "Update Katib Metrics Collectors, Suggestion and EarlyStopping images\n"
+echo -e "Update Katib Metrics Collectors, Suggestions and EarlyStopping images\n"
 update_yaml_files "${CONFIG_PATH}" "${OLD_PREFIX}" "${NEW_PREFIX}"
 update_yaml_files "${CONFIG_PATH}" ":[^[:space:]].*\"" ":${TAG}\""
 
