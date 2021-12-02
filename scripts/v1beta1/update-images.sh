@@ -56,59 +56,52 @@ if [[ -z "$IMAGE_PREFIX" || -z "$TAG" ]]; then
   exit 1
 fi
 
-# This function edits files data for a given path.
-# $1 argument - regex path for files to search.
+# This function edits YAML files data for a given path.
+# $1 argument - path for files to search.
 # $2 argument - old string regex to be replaced.
 # $3 argument - new string.
-update_files() {
+update_yaml_files() {
   # For MacOS we should set -i '' to avoid temp files from sed.
   if [[ $(uname) == "Darwin" ]]; then
-    find ./ -regex "$1" -exec sed -i '' -e "s@$2@$3@" {} \;
+    find $1 -regex ".*\.yaml" -exec sed -i '' -e "s@$2@$3@" {} \;
   else
-    find ./ -regex "$1" -exec sed -i -e "s@$2@$3@" {} \;
+    find $1 -regex ".*\.yaml" -exec sed -i -e "s@$2@$3@" {} \;
   fi
 }
 
 # Base prefix for the Katib images.
-BASE_REGISTRY="docker.io/kubeflowkatib/"
+BASE_PREFIX="docker.io/kubeflowkatib/"
 
 echo "Updating Katib images..."
 echo "Image prefix: ${IMAGE_PREFIX}"
 echo -e "Image tag: ${TAG}\n"
 
-# Katib Core image names.
-CONTROLLER="katib-controller"
-DB_MANAGER="katib-db-manager"
-UI="katib-ui"
-CERT_GENERATOR="cert-generator"
+# Katib Core images.
+# echo -e "Updating Katib Core images\n"
+# update_yaml_files "manifests/v1beta1/installs/" "newName: ${BASE_PREFIX}" "newName: ${IMAGE_PREFIX}"
+# update_yaml_files "manifests/v1beta1/installs/" "newTag: .*" "newTag: ${TAG}"
 
-echo "Updating Katib Core Images"
-update_files "manifests/v1beta1/installs*\.yaml" "newName: ${BASE_REGISTRY}${CONTROLLER}" "newName: ${IMAGE_PREFIX}${CONTROLLER}"
-update_files "manifests/v1beta1/installs*\.yaml" "newTag: .*" "newTag: ${TAG}"
+# # Katib Config images.
+# CONFIG_PATH="manifests/v1beta1/components/controller/katib-config.yaml"
 
-exit 1
-FILE_METRICS_COLLECTOR="file-metrics-collector"
-TFEVENT_METRICS_COLLECTOR="tfevent-metrics-collector"
-# End of the each Trial template image.
+# echo -e "Update Katib Metrics Collectors, Suggestion and EarlyStopping images\n"
+# update_yaml_files "${CONFIG_PATH}" "${BASE_PREFIX}" "${IMAGE_PREFIX}"
+# update_yaml_files "${CONFIG_PATH}" ":[^[:space:]].*\"" ":${TAG}\""
+
+# Katib Trial training container images.
+
+# Postfix for the each Trial image.
 MXNET_MNIST="mxnet-mnist"
 PYTORCH_MNIST="pytorch-mnist"
 ENAS_GPU="enas-cnn-cifar10-gpu"
 ENAS_CPU="enas-cnn-cifar10-cpu"
 DARTS="darts-cnn-cifar10"
 
-# For MacOS we should set -i '' to avoid temp files from sed.
-if [[ $(uname) == "Darwin" ]]; then
-  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${MXNET_MNIST}:.*@${IMAGE_PREFIX}${MXNET_MNIST}:${TAG}@" {} \;
-  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${PYTORCH_MNIST}:.*@${IMAGE_PREFIX}${PYTORCH_MNIST}:${TAG}@" {} \;
-  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${ENAS_GPU}:.*@${IMAGE_PREFIX}${ENAS_GPU}:${TAG}@" {} \;
-  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${ENAS_CPU}:.*@${IMAGE_PREFIX}${ENAS_CPU}:${TAG}@" {} \;
-  find ./ -regex ".*\.yaml" -exec sed -i '' -e "s@${BASE_IMAGE_PREFIX}${DARTS}:.*@${IMAGE_PREFIX}${DARTS}:${TAG}@" {} \;
-else
-  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${MXNET_MNIST}:.*@${IMAGE_PREFIX}${MXNET_MNIST}:${TAG}@" {} \;
-  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${PYTORCH_MNIST}:.*@${IMAGE_PREFIX}${PYTORCH_MNIST}:${TAG}@" {} \;
-  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${ENAS_GPU}:.*@${IMAGE_PREFIX}${ENAS_GPU}:${TAG}@" {} \;
-  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${ENAS_CPU}:.*@${IMAGE_PREFIX}${ENAS_CPU}:${TAG}@" {} \;
-  find ./ -regex ".*\.yaml" -exec sed -i -e "s@${BASE_IMAGE_PREFIX}${DARTS}:.*@${IMAGE_PREFIX}${DARTS}:${TAG}@" {} \;
-fi
+echo -e "Update Katib Trial training container images\n"
+update_yaml_files "examples/v1beta1/" "${BASE_PREFIX}${MXNET_MNIST}:.*" "${IMAGE_PREFIX}${MXNET_MNIST}:${TAG}"
+update_yaml_files "examples/v1beta1/" "${BASE_PREFIX}${PYTORCH_MNIST}:.*" "${IMAGE_PREFIX}${PYTORCH_MNIST}:${TAG}"
+update_yaml_files "examples/v1beta1/" "${BASE_PREFIX}${ENAS_GPU}:.*" "${IMAGE_PREFIX}${ENAS_GPU}:${TAG}"
+update_yaml_files "examples/v1beta1/" "${BASE_PREFIX}${ENAS_CPU}:.*" "${IMAGE_PREFIX}${ENAS_CPU}:${TAG}"
+update_yaml_files "examples/v1beta1/" "${BASE_PREFIX}${DARTS}:.*" "${IMAGE_PREFIX}${DARTS}:${TAG}"
 
-echo "Trial template images have been updated"
+echo -e "Katib images have been updated\n"
