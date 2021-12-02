@@ -28,8 +28,8 @@
 # 5. Katib Trial training containers
 #
 # Run ./scripts/v1beta1/update-images.sh -p <image-prefix> -t <image-tag> to execute it.
-# For example, to update images with registry: docker.io/private/ and tag "v0.12.0", run:
-# ./scripts/v1beta1/update-images.sh -p docker.io/private/ -t latest
+# For example, to update images with registry "docker.io/private/" and tag "v0.12.0", run:
+# ./scripts/v1beta1/update-images.sh -p docker.io/private/ -t v0.12.0
 
 usage() {
   echo "Usage: $0 [-p <IMAGE_PREFIX> -t <TAG>]" 1>&2
@@ -56,13 +56,39 @@ if [[ -z "$IMAGE_PREFIX" || -z "$TAG" ]]; then
   exit 1
 fi
 
-echo "Updating Trial template images..."
+# This function edits files data for a given path.
+# $1 argument - regex path for files to search.
+# $2 argument - old string regex to be replaced.
+# $3 argument - new string.
+update_files() {
+  # For MacOS we should set -i '' to avoid temp files from sed.
+  if [[ $(uname) == "Darwin" ]]; then
+    find ./ -regex "$1" -exec sed -i '' -e "s@$2@$3@" {} \;
+  else
+    find ./ -regex "$1" -exec sed -i -e "s@$2@$3@" {} \;
+  fi
+}
+
+# Base prefix for the Katib images.
+BASE_REGISTRY="docker.io/kubeflowkatib/"
+
+echo "Updating Katib images..."
 echo "Image prefix: ${IMAGE_PREFIX}"
-echo "Image tag: ${TAG}"
+echo -e "Image tag: ${TAG}\n"
 
-# Base prefix for the Trial template images.
-BASE_IMAGE_PREFIX="docker.io/kubeflowkatib/"
+# Katib Core image names.
+CONTROLLER="katib-controller"
+DB_MANAGER="katib-db-manager"
+UI="katib-ui"
+CERT_GENERATOR="cert-generator"
 
+echo "Updating Katib Core Images"
+update_files "manifests/v1beta1/installs*\.yaml" "newName: ${BASE_REGISTRY}${CONTROLLER}" "newName: ${IMAGE_PREFIX}${CONTROLLER}"
+update_files "manifests/v1beta1/installs*\.yaml" "newTag: .*" "newTag: ${TAG}"
+
+exit 1
+FILE_METRICS_COLLECTOR="file-metrics-collector"
+TFEVENT_METRICS_COLLECTOR="tfevent-metrics-collector"
 # End of the each Trial template image.
 MXNET_MNIST="mxnet-mnist"
 PYTORCH_MNIST="pytorch-mnist"
