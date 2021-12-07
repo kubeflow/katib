@@ -144,6 +144,10 @@ class WorkflowBuilder(object):
                 "value": self.workflow_name
             },
             {
+                "name": "EKS_CLUSTER_VERSION",
+                "value": "1.22"
+            },
+            {
                 "name": "ECR_REGISTRY",
                 "value": self.ecr_registry
             },
