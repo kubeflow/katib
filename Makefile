@@ -78,6 +78,15 @@ ifeq ($(and $(BRANCH),$(TAG)),)
 endif
 	bash scripts/v1beta1/release.sh $(BRANCH) $(TAG)
 
+# Update all Katib images.
+update-images:
+ifeq ($(and $(OLD_PREFIX),$(NEW_PREFIX),$(TAG)),)
+	$(error OLD_PREFIX, NEW_PREFIX, and TAG must be set. \
+	Usage: make update-images OLD_PREFIX=<old-prefix> NEW_PREFIX=<new-prefix> TAG=<tag> \
+	For more information, check this file: scripts/v1beta1/update-images.sh)
+endif
+	bash scripts/v1beta1/update-images.sh $(OLD_PREFIX) $(NEW_PREFIX) $(TAG)
+
 # Prettier UI format check for Katib v1beta1.
 prettier-check:
 	npm run format:check --prefix pkg/new-ui/v1beta1/frontend

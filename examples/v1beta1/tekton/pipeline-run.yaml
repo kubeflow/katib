@@ -88,7 +88,7 @@ spec:
                     description: Number of training examples
                 steps:
                   - name: model-training
-                    image: docker.io/kubeflowkatib/mxnet-mnist:v1beta1-45c5727
+                    image: docker.io/kubeflowkatib/mxnet-mnist:latest
                     command:
                       - "python3"
                       - "/opt/mxnet-mnist/mnist.py"

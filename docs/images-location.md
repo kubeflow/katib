@@ -66,7 +66,7 @@ The following table shows images for the
     </tr>
     <tr align="center">
       <td>
-        <code>docker.io/kubeflowkatib/katib-cert-generator</code>
+        <code>docker.io/kubeflowkatib/cert-generator</code>
       </td>
       <td>
         Katib Cert Generator
