@@ -1,12 +1,10 @@
-import keras
-import numpy as np
+from tensorflow import keras
 from keras.datasets import cifar10
 from ModelConstructor import ModelConstructor
-from keras.utils import to_categorical
-from keras.utils import multi_gpu_model
+from tensorflow.keras.utils import to_categorical
+from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 from keras.preprocessing.image import ImageDataGenerator
 import argparse
-import time
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TrainingContainer')
@@ -46,7 +44,7 @@ if __name__ == "__main__":
 
     test_model.summary()
     test_model.compile(loss=keras.losses.categorical_crossentropy,
-                       optimizer=keras.optimizers.Adam(lr=1e-3, decay=1e-4),
+                       optimizer=keras.optimizers.Adam(learning_rate=1e-3, decay=1e-4),
                        metrics=['accuracy'])
 
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
@@ -67,12 +65,12 @@ if __name__ == "__main__":
 
     print(">>> Data Loaded. Training starts.")
     for e in range(num_epochs):
-        print("\nTotal Epoch {}/{}".format(e+1, num_epochs))
-        history = test_model.fit_generator(generator=aug_data_flow,
-                                           steps_per_epoch=int(len(x_train)/128)+1,
-                                           epochs=1, verbose=1,
-                                           validation_data=(x_test, y_test))
-        print("Training-Accuracy={}".format(history.history['acc'][-1]))
+        print("\nTotal Epoch {}/{}".format(e + 1, num_epochs))
+        history = test_model.fit(aug_data_flow,
+                                 steps_per_epoch=int(len(x_train) / 128) + 1,
+                                 epochs=1, verbose=1,
+                                 validation_data=(x_test, y_test))
+        print("Training-Accuracy={}".format(history.history['accuracy'][-1]))
         print("Training-Loss={}".format(history.history['loss'][-1]))
-        print("Validation-Accuracy={}".format(history.history['val_acc'][-1]))
+        print("Validation-Accuracy={}".format(history.history['val_accuracy'][-1]))
         print("Validation-Loss={}".format(history.history['val_loss'][-1]))

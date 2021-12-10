@@ -14,48 +14,55 @@
 
 # TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
 # When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
-# For example, in the Kubeflow Training Operator TFJob tutorial for mnist with summary:
-# https://github.com/kubeflow/training-operator/blob/master/examples/tensorflow/mnist_with_summaries/mnist_with_summaries.py.
-# The "accuracy" metric is saved under "train" and "test" directories.
+# For example, in the Tensorflow MNIST Classification With Summaries:
+# https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py.
+# The "accuracy" and "loss" metric is saved under "train" and "test" directories.
 # So in the Metrics Collector specification, please specify name of "train" or "test" directory.
 # Check TFJob example for more information:
 # https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L16-L22
 
-
 import tensorflow as tf
+from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 import os
 from datetime import datetime
 import rfc3339
 import api_pb2
 from logging import getLogger, StreamHandler, INFO
-import const
+from pkg.metricscollector.v1beta1.common import const
 
 
 class TFEventFileParser:
-    def find_all_files(self, directory):
+    def __init__(self, metric_names):
+        self.metric_names = metric_names
+
+    @staticmethod
+    def find_all_files(directory):
         for root, dirs, files in os.walk(directory):
-            yield root
             for f in files:
                 yield os.path.join(root, f)
 
-    def parse_summary(self, tfefile, metrics):
+    def parse_summary(self, tfefile):
         metric_logs = []
-        for summary in tf.train.summary_iterator(tfefile):
-            paths = tfefile.split("/")
-            for v in summary.summary.value:
-                for m in metrics:
-                    tag = str(v.tag)
-                    if len(paths) >= 2 and len(m.split("/")) >= 2:
-                        tag = str(paths[-2]+"/" + v.tag)
-                    if tag.startswith(m):
-                        ml = api_pb2.MetricLog(
-                            time_stamp=rfc3339.rfc3339(datetime.fromtimestamp(summary.wall_time)),
-                            metric=api_pb2.Metric(
-                                name=m,
-                                value=str(v.simple_value)
-                            )
+        event_accumulator = EventAccumulator(tfefile, size_guidance={'tensors': 0})
+        event_accumulator.Reload()
+        for tag in event_accumulator.Tags()['tensors']:
+            for m in self.metric_names:
+
+                tfefile_parent_dir = os.path.dirname(m) if len(m.split("/")) >= 2 else os.path.dirname(tfefile)
+                basedir_name = os.path.dirname(tfefile)
+                if not tag.startswith(m.split("/")[-1]) or not basedir_name.endswith(tfefile_parent_dir):
+                    continue
+
+                for wall_time, step, tensor in event_accumulator.Tensors(tag):
+                    ml = api_pb2.MetricLog(
+                        time_stamp=rfc3339.rfc3339(datetime.fromtimestamp(wall_time)),
+                        metric=api_pb2.Metric(
+                            name=m,
+                            value=str(tf.make_ndarray(tensor))
                         )
-                        metric_logs.append(ml)
+                    )
+                    metric_logs.append(ml)
+
         return metric_logs
 
 
@@ -68,7 +75,7 @@ class MetricsCollector:
         self.logger.addHandler(handler)
         self.logger.propagate = False
         self.metrics = metric_names
-        self.parser = TFEventFileParser()
+        self.parser = TFEventFileParser(self.metrics)
 
     def parse_file(self, directory):
         mls = []
@@ -77,7 +84,7 @@ class MetricsCollector:
                 continue
             try:
                 self.logger.info(f + " will be parsed.")
-                mls.extend(self.parser.parse_summary(f, self.metrics))
+                mls.extend(self.parser.parse_summary(f))
             except Exception as e:
                 self.logger.warning("Unexpected error: " + str(e))
                 continue

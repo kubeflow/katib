@@ -1,6 +1,12 @@
 HAS_LINT := $(shell command -v golangci-lint;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
+CPU_ARCH ?= amd64
+
+# for pytest
+PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
+PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/metricscollector/v1beta1/common:$(CURDIR)/pkg/metricscollector/v1beta1/tfevent-metricscollector
+TEST_TENSORFLOW_EVENT_FILE_PATH ?= $(CURDIR)/test/unit/v1beta1/metricscollector/testdata/tfevent-metricscollector/logs
 
 # Run tests
 .PHONY: test
@@ -49,10 +55,10 @@ endif
 
 # Build images for the Katib v1beta1 components.
 build: generate
-ifeq ($(and $(REGISTRY),$(TAG)),)
-	$(error REGISTRY and TAG must be set. Usage: make build REGISTRY=<registry> TAG=<tag>)
+ifeq ($(and $(REGISTRY),$(TAG),$(CPU_ARCH)),)
+	$(error REGISTRY and TAG must be set. Usage: make build REGISTRY=<registry> TAG=<tag> CPU_ARCH=<cpu-architecture>)
 endif
-	bash scripts/v1beta1/build.sh $(REGISTRY) $(TAG)
+	bash scripts/v1beta1/build.sh $(REGISTRY) $(TAG) $(CPU_ARCH)
 
 # Build and push Katib images from the latest master commit.
 push-latest: generate
@@ -94,3 +100,25 @@ prettier-check:
 # Update boilerplate for the source code.
 update-boilerplate:
 	./hack/boilerplate/update-boilerplate.sh
+
+prepare-pytest:
+	pip install -r test/unit/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/chocolate/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/skopt/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/optuna/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
+	pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
+	pip install -r cmd/metricscollector/v1beta1/tfevent-metricscollector/requirements.txt
+
+prepare-pytest-testdata:
+ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
+	python examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py --epochs 5 --batch-size 200 --log-path $(TEST_TENSORFLOW_EVENT_FILE_PATH)
+endif
+
+pytest: prepare-pytest prepare-pytest-testdata
+	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion
+	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/earlystopping
+	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/metricscollector

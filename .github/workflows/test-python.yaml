@@ -16,24 +16,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
-
-      - name: Install Packages
-        run: |
-          pip install -r test/unit/v1beta1/requirements.txt
-
-          pip install -r cmd/suggestion/chocolate/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/skopt/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/optuna/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
-          pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
-
-          pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
+          python-version: 3.9
 
       - name: Run Python test
-        run: |
-          export PYTHONPATH=$(pwd):$(pwd)/pkg/apis/manager/v1beta1/python:$(pwd)/pkg/apis/manager/health/python
-          pytest ./test/unit/v1beta1/suggestion
-          pytest ./test/unit/v1beta1/earlystopping
+        run: make pytest

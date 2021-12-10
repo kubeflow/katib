@@ -10,13 +10,13 @@ spec:
   objective:
     type: maximize
     goal: 0.99
-    objectiveMetricName: accuracy_1
+    objectiveMetricName: accuracy
   algorithm:
     algorithmName: random
   metricsCollectorSpec:
     source:
       fileSystemPath:
-        path: /train
+        path: /mnist-with-summaries-logs/test
         kind: Directory
     collector:
       kind: TensorFlowEvent
@@ -29,8 +29,8 @@ spec:
     - name: batch_size
       parameterType: int
       feasibleSpace:
-        min: "100"
-        max: "200"
+        min: "10"
+        max: "20"
   trialTemplate:
     primaryContainerName: tensorflow
     trialParameters:
@@ -52,10 +52,11 @@ spec:
               spec:
                 containers:
                   - name: tensorflow
-                    image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
+                    image: docker.io/kubeflowkatib/tf-mnist-with-summaries:latest
                     command:
                       - "python"
-                      - "/var/tf_mnist/mnist_with_summaries.py"
-                      - "--log_dir=/train/metrics"
-                      - "--learning_rate=${trialParameters.learningRate}"
-                      - "--batch_size=${trialParameters.batchSize}"
+                      - "/opt/tf-mnist-with-summaries/mnist.py"
+                      - "--epochs=1"
+                      - "--learning-rate=${trialParameters.learningRate}"
+                      - "--batch-size=${trialParameters.batchSize}"
+                      - "--log-path=/mnist-with-summaries-logs"

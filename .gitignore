@@ -6,6 +6,7 @@ __pycache__/
 *.egg-info
 build/
 *.charm
+test/unit/v1beta1/metricscollector/testdata
 
 # SDK generator JAR file
 hack/gen-python-sdk/openapi-generator-cli.jar

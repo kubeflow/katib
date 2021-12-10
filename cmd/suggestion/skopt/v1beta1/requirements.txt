@@ -1,9 +1,10 @@
-grpcio==1.23.0
+grpcio==1.41.1
 cloudpickle==0.5.6
-numpy>=1.13.3
-scikit-learn==0.22.0
-scipy>=0.19.1
+numpy>=1.20.0
+scikit-learn>=0.24.0
+scipy>=1.5.4
 forestci==0.3
-protobuf==3.9.1
+protobuf==3.19.1
 googleapis-common-protos==1.6.0
-scikit-optimize==0.5.2
+scikit-optimize>=0.9.0
+cython>=0.29.24

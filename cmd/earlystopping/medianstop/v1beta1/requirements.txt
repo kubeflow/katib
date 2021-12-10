@@ -1,4 +1,5 @@
-grpcio==1.23.0
-protobuf==3.9.1
+grpcio==1.41.1
+protobuf==3.19.1
 googleapis-common-protos==1.6.0
 kubernetes==11.0.0
+cython>=0.29.24
