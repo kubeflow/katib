@@ -188,10 +188,22 @@ const (
 	InvalidKind   FileSystemKind = "Invalid"
 )
 
+type FileSystemFileFormat string
+
+const (
+	TextFormat FileSystemFileFormat = "TEXT"
+	JsonFormat FileSystemFileFormat = "JSON"
+)
+
+func (f FileSystemFileFormat) String() string {
+	return string(f)
+}
+
 // +k8s:deepcopy-gen=true
 type FileSystemPath struct {
-	Path string         `json:"path,omitempty"`
-	Kind FileSystemKind `json:"kind,omitempty"`
+	Path       string               `json:"path,omitempty"`
+	Kind       FileSystemKind       `json:"kind,omitempty"`
+	FileFormat FileSystemFileFormat `json:"fileFormat,omitempty"`
 }
 
 type CollectorKind string

@@ -17,19 +17,24 @@ limitations under the License.
 package sidecarmetricscollector
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
+	"k8s.io/klog"
+
+	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
-	"k8s.io/klog"
 )
 
-func CollectObservationLog(fileName string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
+func CollectObservationLog(fileName string, metrics []string, filters []string, format string) (*v1beta1.ObservationLog, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -40,12 +45,17 @@ func CollectObservationLog(fileName string, metrics []string, filters []string) 
 		return nil, err
 	}
 	logs := string(content)
-	olog, err := parseLogs(strings.Split(logs, "\n"), metrics, filters)
-	return olog, err
+
+	switch format {
+	case commonv1beta1.TextFormat.String():
+		return parseLogsInTextFormat(strings.Split(logs, "\n"), metrics, filters)
+	case commonv1beta1.JsonFormat.String():
+		return parseLogsInJsonFormat(strings.Split(logs, "\n"), metrics)
+	}
+	return nil, fmt.Errorf("format must be set %s or %s", commonv1beta1.TextFormat.String(), commonv1beta1.JsonFormat.String())
 }
 
-func parseLogs(logs []string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
-	olog := &v1beta1.ObservationLog{}
+func parseLogsInTextFormat(logs []string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
 	metricRegList := GetFilterRegexpList(filters)
 	mlogs := make([]*v1beta1.MetricLog, 0, len(logs))
 
@@ -98,6 +108,51 @@ func parseLogs(logs []string, metrics []string, filters []string) (*v1beta1.Obse
 			}
 		}
 	}
+	return newObservationLog(mlogs, metrics), nil
+}
+
+func parseLogsInJsonFormat(logs []string, metrics []string) (*v1beta1.ObservationLog, error) {
+	mlogs := make([]*v1beta1.MetricLog, 0, len(logs))
+
+	for _, logline := range logs {
+		if len(logline) == 0 {
+			continue
+		}
+		var jsonObj map[string]interface{}
+		if err := json.Unmarshal([]byte(logline), &jsonObj); err != nil {
+			return nil, err
+		}
+
+		timestamp := time.Time{}.UTC().Format(time.RFC3339)
+		timestampJsonValue, exist := jsonObj[common.TimeStampJsonKey]
+		if !exist {
+			klog.Warningf("Metrics will not have timestamp since %s doesn't have the key timestamp", logline)
+		} else {
+			if parsedTimestamp := parseTimestamp(timestampJsonValue); parsedTimestamp == "" {
+				klog.Warningf("Metrics will not have timestamp since error parsing time %v", timestampJsonValue)
+			} else {
+				timestamp = parsedTimestamp
+			}
+		}
+
+		for _, m := range metrics {
+			value, exist := jsonObj[m].(string)
+			if !exist {
+				continue
+			}
+			mlogs = append(mlogs, &v1beta1.MetricLog{
+				TimeStamp: timestamp,
+				Metric: &v1beta1.Metric{
+					Name:  m,
+					Value: value,
+				},
+			})
+		}
+	}
+	return newObservationLog(mlogs, metrics), nil
+}
+
+func newObservationLog(mlogs []*v1beta1.MetricLog, metrics []string) *v1beta1.ObservationLog {
 	// Metrics logs must contain at least one objective metric value
 	// Objective metric is located at first index
 	isObjectiveMetricReported := false
@@ -109,21 +164,58 @@ func parseLogs(logs []string, metrics []string, filters []string) (*v1beta1.Obse
 	}
 	// If objective metrics were not reported, insert unavailable value in the DB
 	if !isObjectiveMetricReported {
-		olog.MetricLogs = []*v1beta1.MetricLog{
-			{
-				TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
-				Metric: &v1beta1.Metric{
-					Name:  metrics[0],
-					Value: consts.UnavailableMetricValue,
+		klog.Infof("Objective metric %v is not found in training logs, %v value is reported", metrics[0], consts.UnavailableMetricValue)
+		return &v1beta1.ObservationLog{
+			MetricLogs: []*v1beta1.MetricLog{
+				{
+					TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+					Metric: &v1beta1.Metric{
+						Name:  metrics[0],
+						Value: consts.UnavailableMetricValue,
+					},
 				},
 			},
 		}
-		klog.Infof("Objective metric %v is not found in training logs, %v value is reported", metrics[0], consts.UnavailableMetricValue)
-	} else {
-		olog.MetricLogs = mlogs
 	}
+	return &v1beta1.ObservationLog{
+		MetricLogs: mlogs,
+	}
+}
 
-	return olog, nil
+func parseTimestamp(timestamp interface{}) string {
+	if stringTimestamp, ok := timestamp.(string); ok {
+
+		if _, err := time.Parse(time.RFC3339Nano, stringTimestamp); err != nil {
+			return ""
+		} else {
+			return stringTimestamp
+		}
+
+	} else {
+		if floatTimestamp, ok := timestamp.(float64); !ok {
+			return ""
+		} else {
+
+			stringTimestamp = strconv.FormatFloat(floatTimestamp, 'f', -1, 64)
+			t := strings.Split(stringTimestamp, ".")
+
+			sec, err := strconv.ParseInt(t[0], 10, 64)
+			if err != nil {
+				return ""
+			}
+
+			var nanoSec int64 = 0
+			if len(t) == 2 {
+				nanoSec, err = strconv.ParseInt(t[1], 10, 64)
+				if err != nil {
+					return ""
+				}
+			}
+
+			return time.Unix(sec, nanoSec).UTC().Format(time.RFC3339Nano)
+
+		}
+	}
 }
 
 // GetFilterRegexpList returns Regexp array from filters string array

@@ -294,6 +294,14 @@ func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, me
 	if mc.Source != nil && mc.Source.Filter != nil && len(mc.Source.Filter.MetricsFormat) > 0 {
 		args = append(args, "-f", strings.Join(mc.Source.Filter.MetricsFormat, ";"))
 	}
+	if mc.Collector.Kind == common.FileCollector && mc.Source != nil {
+		if mc.Source.FileSystemPath != nil {
+			args = append(args, "-format", mc.Source.FileSystemPath.FileFormat.String())
+		}
+	}
+	if mc.Collector.Kind == common.StdOutCollector {
+		args = append(args, "-format", common.TextFormat.String())
+	}
 	if metricsCollectorConfigData.WaitAllProcesses != nil {
 		args = append(args, "-w", strconv.FormatBool(*metricsCollectorConfigData.WaitAllProcesses))
 	}

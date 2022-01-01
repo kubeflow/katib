@@ -5,6 +5,7 @@ WORKDIR /opt/pytorch-mnist
 
 # Add folder for the logs.
 RUN mkdir /katib
+RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chgrp -R 0 /opt/pytorch-mnist \
   && chmod -R g+rwX /opt/pytorch-mnist \

@@ -158,6 +158,9 @@ func (e *Experiment) setDefaultMetricsCollector() {
 		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path == "" {
 			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path = common.DefaultFilePath
 		}
+		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.FileFormat == "" {
+			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.FileFormat = common.TextFormat
+		}
 	case common.TfEventCollector:
 		if e.Spec.MetricsCollectorSpec.Source == nil {
 			e.Spec.MetricsCollectorSpec.Source = &common.SourceSpec{}

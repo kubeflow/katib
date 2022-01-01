@@ -207,8 +207,8 @@ func waitExperimentFinish(kclient katibclient.Client, exp *experimentsv1beta1.Ex
 		}
 
 		log.Printf("Waiting for Experiment %s to finish", exp.Name)
-		log.Printf(`Experiment is running: %v Trials, %v Pending Trials, %v Running Trials, %v Succeeded Trials, %v Failed Trials`,
-			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning, exp.Status.TrialsSucceeded, exp.Status.TrialsFailed)
+		log.Printf(`Experiment is running: %v Trials, %v Pending Trials, %v Running Trials, %v Succeeded Trials, %v Failed Trials, %v EarlyStopped Trials`,
+			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning, exp.Status.TrialsSucceeded, exp.Status.TrialsFailed, exp.Status.TrialsEarlyStopped)
 		log.Printf("Current optimal Trial: %v", exp.Status.CurrentOptimalTrial)
 		log.Printf("Experiment conditions: %v\n\n\n", exp.Status.Conditions)
 
@@ -270,8 +270,13 @@ func verifyExperimentResults(kclient katibclient.Client, exp *experimentsv1beta1
 			*exp.Spec.MaxTrialCount, exp.Status.TrialsSucceeded)
 	}
 
+	trialsSucceeded := exp.Status.TrialsSucceeded
+	if exp.Spec.EarlyStopping != nil {
+		trialsSucceeded += exp.Status.TrialsEarlyStopped
+	}
+
 	// Otherwise, Goal should be reached.
-	if exp.Status.TrialsSucceeded != *exp.Spec.MaxTrialCount &&
+	if trialsSucceeded != *exp.Spec.MaxTrialCount &&
 		((objectiveType == commonv1beta1.ObjectiveTypeMinimize && minMetric > *goal) ||
 			(objectiveType == commonv1beta1.ObjectiveTypeMaximize && maxMetric < *goal)) {
 		return fmt.Errorf(`Objective Goal is not reached and Succeeded Trials: %v != %v MaxTrialCount.

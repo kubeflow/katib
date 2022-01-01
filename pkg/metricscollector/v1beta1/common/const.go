@@ -46,6 +46,8 @@ const (
 	// Score=1.23E10
 	DefaultFilter = `([\w|-]+)\s*=\s*([+-]?\d*(\.\d+)?([Ee][+-]?\d+)?)`
 
+	TimeStampJsonKey = "timestamp"
+
 	// TODO (andreyvelich): Do we need to maintain 2 names? Should we leave only 1?
 	MetricCollectorContainerName       = "metrics-collector"
 	MetricLoggerCollectorContainerName = "metrics-logger-and-collector"

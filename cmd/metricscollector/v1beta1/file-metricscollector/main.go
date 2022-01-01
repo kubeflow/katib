@@ -39,11 +39,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -102,6 +104,7 @@ var (
 	earlyStopServiceAddr = flag.String("s-earlystop", "", "Katib Early Stopping service endpoint")
 	trialName            = flag.String("t", "", "Trial Name")
 	metricsFilePath      = flag.String("path", "", "Metrics File Path")
+	metricsFileFormat    = flag.String("format", "", "Metrics File Format")
 	metricNames          = flag.String("m", "", "Metric names")
 	objectiveType        = flag.String("o-type", "", "Objective type")
 	metricFilters        = flag.String("f", "", "Metric filters")
@@ -170,7 +173,10 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 	}
 
 	// Get list of regural expressions from filters.
-	metricRegList := filemc.GetFilterRegexpList(filters)
+	var metricRegList []*regexp.Regexp
+	if *metricsFileFormat == commonv1beta1.TextFormat.String() {
+		metricRegList = filemc.GetFilterRegexpList(filters)
+	}
 
 	// Start watch log lines.
 	t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
@@ -179,78 +185,78 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 		// Print log line
 		klog.Info(logText)
 
-		// Check if log line contains metric from stop rules.
-		isRuleLine := false
-		for _, rule := range stopRules {
-			if strings.Contains(logText, rule.Name) {
-				isRuleLine = true
-				break
+		switch *metricsFileFormat {
+		case commonv1beta1.TextFormat.String():
+			// Check if log line contains metric from stop rules.
+			isRuleLine := false
+			for _, rule := range stopRules {
+				if strings.Contains(logText, rule.Name) {
+					isRuleLine = true
+					break
+				}
 			}
-		}
-		// If log line doesn't contain appropriate metric, continue track file.
-		if !isRuleLine {
-			continue
-		}
+			// If log line doesn't contain appropriate metric, continue track file.
+			if !isRuleLine {
+				continue
+			}
 
-		// If log line contains appropriate metric, find all submatches from metric filters.
-		for _, metricReg := range metricRegList {
-			matchStrings := metricReg.FindAllStringSubmatch(logText, -1)
-			for _, subMatchList := range matchStrings {
-				if len(subMatchList) < 3 {
-					continue
-				}
-				// Submatch must have metric name and float value
-				metricName := strings.TrimSpace(subMatchList[1])
-				metricValue, err := strconv.ParseFloat(strings.TrimSpace(subMatchList[2]), 64)
-				if err != nil {
-					klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, metricName)
-				}
-
-				// stopRules contains array of EarlyStoppingRules that has not been reached yet.
-				// After rule is reached we delete appropriate element from the array.
-				for idx, rule := range stopRules {
-					if metricName != rule.Name {
+			// If log line contains appropriate metric, find all submatches from metric filters.
+			for _, metricReg := range metricRegList {
+				matchStrings := metricReg.FindAllStringSubmatch(logText, -1)
+				for _, subMatchList := range matchStrings {
+					if len(subMatchList) < 3 {
 						continue
 					}
-
-					// Calculate optimalObjValue.
-					if metricName == objMetric {
-						if optimalObjValue == nil {
-							optimalObjValue = &metricValue
-						} else if objType == commonv1beta1.ObjectiveTypeMaximize && metricValue > *optimalObjValue {
-							optimalObjValue = &metricValue
-						} else if objType == commonv1beta1.ObjectiveTypeMinimize && metricValue < *optimalObjValue {
-							optimalObjValue = &metricValue
-						}
-						// Assign best optimal value to metric value.
-						metricValue = *optimalObjValue
+					// Submatch must have metric name and float value
+					metricName := strings.TrimSpace(subMatchList[1])
+					metricValue, err := strconv.ParseFloat(strings.TrimSpace(subMatchList[2]), 64)
+					if err != nil {
+						klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, metricName)
 					}
 
-					// Reduce steps if appropriate metric is reported.
-					// Once rest steps are empty we apply early stopping rule.
-					if _, ok := metricStartStep[metricName]; ok {
-						metricStartStep[metricName]--
-						if metricStartStep[metricName] != 0 {
+					// stopRules contains array of EarlyStoppingRules that has not been reached yet.
+					// After rule is reached we delete appropriate element from the array.
+					for idx, rule := range stopRules {
+						if metricName != rule.Name {
 							continue
 						}
-					}
-
-					ruleValue, err := strconv.ParseFloat(rule.Value, 64)
-					if err != nil {
-						klog.Fatalf("Unable to parse value %v to float for rule metric %v", rule.Value, rule.Name)
-					}
-
-					// Metric value can be equal, less or greater than stop rule.
-					// Deleting suitable stop rule from the array.
-					if rule.Comparison == commonv1beta1.ComparisonTypeEqual && metricValue == ruleValue {
-						stopRules = deleteStopRule(stopRules, idx)
-					} else if rule.Comparison == commonv1beta1.ComparisonTypeLess && metricValue < ruleValue {
-						stopRules = deleteStopRule(stopRules, idx)
-					} else if rule.Comparison == commonv1beta1.ComparisonTypeGreater && metricValue > ruleValue {
-						stopRules = deleteStopRule(stopRules, idx)
+						stopRules = updateStopRules(objMetric, stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
 					}
 				}
 			}
+		case commonv1beta1.JsonFormat.String():
+			var logJsonObj map[string]interface{}
+			if err = json.Unmarshal([]byte(logText), &logJsonObj); err != nil {
+				klog.Fatalf("Failed to unmarshal logs in JSON format, log: %s, error: %v", logText, err)
+			}
+			// Check if log line contains metric from stop rules.
+			isRuleLine := false
+			for _, rule := range stopRules {
+				if _, exist := logJsonObj[rule.Name]; exist {
+					isRuleLine = true
+					break
+				}
+			}
+			// If log line doesn't contain appropriate metric, continue track file.
+			if !isRuleLine {
+				continue
+			}
+
+			// stopRules contains array of EarlyStoppingRules that has not been reached yet.
+			// After rule is reached we delete appropriate element from the array.
+			for idx, rule := range stopRules {
+				value, exist := logJsonObj[rule.Name].(string)
+				if !exist {
+					continue
+				}
+				metricValue, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+				if err != nil {
+					klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, rule.Name)
+				}
+				stopRules = updateStopRules(objMetric, stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
+			}
+		default:
+			klog.Fatalf("format must be set %s or %s", commonv1beta1.TextFormat.String(), commonv1beta1.JsonFormat.String())
 		}
 
 		// If stopRules array is empty, Trial is early stopped.
@@ -326,6 +332,55 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 	}
 }
 
+func updateStopRules(
+	objMetric string,
+	stopRules []commonv1beta1.EarlyStoppingRule,
+	optimalObjValue *float64,
+	metricValue float64,
+	objType commonv1beta1.ObjectiveType,
+	metricStartStep map[string]int,
+	rule commonv1beta1.EarlyStoppingRule,
+	ruleIdx int,
+) []commonv1beta1.EarlyStoppingRule {
+	// Calculate optimalObjValue.
+	if rule.Name == objMetric {
+		if optimalObjValue == nil {
+			optimalObjValue = &metricValue
+		} else if objType == commonv1beta1.ObjectiveTypeMaximize && metricValue > *optimalObjValue {
+			optimalObjValue = &metricValue
+		} else if objType == commonv1beta1.ObjectiveTypeMinimize && metricValue < *optimalObjValue {
+			optimalObjValue = &metricValue
+		}
+		// Assign best optimal value to metric value.
+		metricValue = *optimalObjValue
+	}
+
+	// Reduce steps if appropriate metric is reported.
+	// Once rest steps are empty we apply early stopping rule.
+	if _, ok := metricStartStep[rule.Name]; ok {
+		metricStartStep[rule.Name]--
+		if metricStartStep[rule.Name] != 0 {
+			return stopRules
+		}
+	}
+
+	ruleValue, err := strconv.ParseFloat(rule.Value, 64)
+	if err != nil {
+		klog.Fatalf("Unable to parse value %v to float for rule metric %v", rule.Value, rule.Name)
+	}
+
+	// Metric value can be equal, less or greater than stop rule.
+	// Deleting suitable stop rule from the array.
+	if rule.Comparison == commonv1beta1.ComparisonTypeEqual && metricValue == ruleValue {
+		return deleteStopRule(stopRules, ruleIdx)
+	} else if rule.Comparison == commonv1beta1.ComparisonTypeLess && metricValue < ruleValue {
+		return deleteStopRule(stopRules, ruleIdx)
+	} else if rule.Comparison == commonv1beta1.ComparisonTypeGreater && metricValue > ruleValue {
+		return deleteStopRule(stopRules, ruleIdx)
+	}
+	return stopRules
+}
+
 func deleteStopRule(stopRules []commonv1beta1.EarlyStoppingRule, idx int) []commonv1beta1.EarlyStoppingRule {
 	if idx >= len(stopRules) {
 		klog.Fatalf("Index %v out of range stopRules: %v", idx, stopRules)
@@ -383,7 +438,7 @@ func reportMetrics(filters []string) {
 	if len(*metricNames) != 0 {
 		metricList = strings.Split(*metricNames, ";")
 	}
-	olog, err := filemc.CollectObservationLog(*metricsFilePath, metricList, filters)
+	olog, err := filemc.CollectObservationLog(*metricsFilePath, metricList, filters, *metricsFileFormat)
 	if err != nil {
 		klog.Fatalf("Failed to collect logs: %v", err)
 	}

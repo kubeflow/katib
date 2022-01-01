@@ -33,29 +33,55 @@ class V1beta1FileSystemPath(object):
                             and the value is json key in definition.
     """
     openapi_types = {
+        'file_format': 'str',
         'kind': 'str',
         'path': 'str'
     }
 
     attribute_map = {
+        'file_format': 'fileFormat',
         'kind': 'kind',
         'path': 'path'
     }
 
-    def __init__(self, kind=None, path=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, file_format=None, kind=None, path=None, local_vars_configuration=None):  # noqa: E501
         """V1beta1FileSystemPath - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
+        self._file_format = None
         self._kind = None
         self._path = None
         self.discriminator = None
 
+        if file_format is not None:
+            self.file_format = file_format
         if kind is not None:
             self.kind = kind
         if path is not None:
             self.path = path
+
+    @property
+    def file_format(self):
+        """Gets the file_format of this V1beta1FileSystemPath.  # noqa: E501
+
+
+        :return: The file_format of this V1beta1FileSystemPath.  # noqa: E501
+        :rtype: str
+        """
+        return self._file_format
+
+    @file_format.setter
+    def file_format(self, file_format):
+        """Sets the file_format of this V1beta1FileSystemPath.
+
+
+        :param file_format: The file_format of this V1beta1FileSystemPath.  # noqa: E501
+        :type: str
+        """
+
+        self._file_format = file_format
 
     @property
     def kind(self):
