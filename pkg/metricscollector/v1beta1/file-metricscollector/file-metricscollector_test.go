@@ -38,7 +38,7 @@ func TestCollectObservationLog(t *testing.T) {
 		fileName    string
 		metrics     []string
 		filters     []string
-		format      string
+		fileFormat  commonv1beta1.FileSystemFileFormat
 		err         bool
 		expected    *v1beta1.ObservationLog
 	}{
@@ -46,7 +46,7 @@ func TestCollectObservationLog(t *testing.T) {
 			description: "Positive case for logs in JSON format",
 			fileName:    path.Join(testJsonDataPath, "good.json"),
 			metrics:     []string{"acc", "loss"},
-			format:      commonv1beta1.JsonFormat.String(),
+			fileFormat:  commonv1beta1.JsonFormat,
 			expected: &v1beta1.ObservationLog{
 				MetricLogs: []*v1beta1.MetricLog{
 					{
@@ -95,19 +95,19 @@ func TestCollectObservationLog(t *testing.T) {
 		{
 			description: "Invalid file format",
 			fileName:    path.Join(testJsonDataPath, "good.json"),
-			format:      "invalid",
+			fileFormat:  "invalid",
 			err:         true,
 		},
 		{
 			description: "Invalid formatted file for logs in JSON format",
 			fileName:    path.Join(testJsonDataPath, "invalid-format.json"),
-			format:      commonv1beta1.JsonFormat.String(),
+			fileFormat:  commonv1beta1.JsonFormat,
 			err:         true,
 		},
 		{
 			description: "Invalid timestamp for logs in JSON format",
 			fileName:    path.Join(testJsonDataPath, "invalid-timestamp.json"),
-			format:      commonv1beta1.JsonFormat.String(),
+			fileFormat:  commonv1beta1.JsonFormat,
 			metrics:     []string{"acc", "loss"},
 			expected: &v1beta1.ObservationLog{
 				MetricLogs: []*v1beta1.MetricLog{
@@ -131,7 +131,7 @@ func TestCollectObservationLog(t *testing.T) {
 		{
 			description: "Missing objective metric in training logs",
 			fileName:    path.Join(testJsonDataPath, "missing-objective-metric.json"),
-			format:      commonv1beta1.JsonFormat.String(),
+			fileFormat:  commonv1beta1.JsonFormat,
 			metrics:     []string{"acc", "loss"},
 			expected: &v1beta1.ObservationLog{
 				MetricLogs: []*v1beta1.MetricLog{
@@ -149,7 +149,7 @@ func TestCollectObservationLog(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.description, func(t *testing.T) {
-			actual, err := CollectObservationLog(test.fileName, test.metrics, test.filters, test.format)
+			actual, err := CollectObservationLog(test.fileName, test.metrics, test.filters, test.fileFormat)
 			if (err != nil) != test.err {
 				t.Errorf("\nGOT: \n%v\nWANT: %v\n", err, test.err)
 			} else {

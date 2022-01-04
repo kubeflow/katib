@@ -140,7 +140,7 @@ func printMetricsFile(mFile string) {
 	}
 }
 
-func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
+func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, fileFormat commonv1beta1.FileSystemFileFormat) {
 
 	// metricStartStep is the dict where key = metric name, value = start step.
 	// We should apply early stopping rule only if metric is reported at least "start_step" times.
@@ -174,7 +174,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 
 	// Get list of regural expressions from filters.
 	var metricRegList []*regexp.Regexp
-	if *metricsFileFormat == commonv1beta1.TextFormat.String() {
+	if fileFormat == commonv1beta1.TextFormat {
 		metricRegList = filemc.GetFilterRegexpList(filters)
 	}
 
@@ -185,8 +185,8 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 		// Print log line
 		klog.Info(logText)
 
-		switch *metricsFileFormat {
-		case commonv1beta1.TextFormat.String():
+		switch fileFormat {
+		case commonv1beta1.TextFormat:
 			// Check if log line contains metric from stop rules.
 			isRuleLine := false
 			for _, rule := range stopRules {
@@ -224,7 +224,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 					}
 				}
 			}
-		case commonv1beta1.JsonFormat.String():
+		case commonv1beta1.JsonFormat:
 			var logJsonObj map[string]interface{}
 			if err = json.Unmarshal([]byte(logText), &logJsonObj); err != nil {
 				klog.Fatalf("Failed to unmarshal logs in JSON format, log: %s, error: %v", logText, err)
@@ -256,7 +256,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 				stopRules = updateStopRules(objMetric, stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
 			}
 		default:
-			klog.Fatalf("format must be set %s or %s", commonv1beta1.TextFormat.String(), commonv1beta1.JsonFormat.String())
+			klog.Fatalf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
 		}
 
 		// If stopRules array is empty, Trial is early stopped.
@@ -295,7 +295,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string) {
 			}
 
 			// Report metrics to DB.
-			reportMetrics(filters)
+			reportMetrics(filters, fileFormat)
 
 			// Wait until main process is completed.
 			timeout := 60 * time.Second
@@ -400,9 +400,11 @@ func main() {
 		filters = strings.Split(*metricFilters, ";")
 	}
 
+	fileFormat := commonv1beta1.FileSystemFileFormat(*metricsFileFormat)
+
 	// If stop rule is set we need to parse metrics during run.
 	if len(stopRules) != 0 {
-		go watchMetricsFile(*metricsFilePath, stopRules, filters)
+		go watchMetricsFile(*metricsFilePath, stopRules, filters, fileFormat)
 	} else {
 		go printMetricsFile(*metricsFilePath)
 	}
@@ -421,11 +423,11 @@ func main() {
 
 	// If training was not early stopped, report the metrics.
 	if !isEarlyStopped {
-		reportMetrics(filters)
+		reportMetrics(filters, fileFormat)
 	}
 }
 
-func reportMetrics(filters []string) {
+func reportMetrics(filters []string, fileFormat commonv1beta1.FileSystemFileFormat) {
 
 	conn, err := grpc.Dial(*dbManagerServiceAddr, grpc.WithInsecure())
 	if err != nil {
@@ -438,7 +440,7 @@ func reportMetrics(filters []string) {
 	if len(*metricNames) != 0 {
 		metricList = strings.Split(*metricNames, ";")
 	}
-	olog, err := filemc.CollectObservationLog(*metricsFilePath, metricList, filters, *metricsFileFormat)
+	olog, err := filemc.CollectObservationLog(*metricsFilePath, metricList, filters, fileFormat)
 	if err != nil {
 		klog.Fatalf("Failed to collect logs: %v", err)
 	}

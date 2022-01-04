@@ -34,7 +34,7 @@ import (
 	"github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
 
-func CollectObservationLog(fileName string, metrics []string, filters []string, format string) (*v1beta1.ObservationLog, error) {
+func CollectObservationLog(fileName string, metrics []string, filters []string, fileFormat commonv1beta1.FileSystemFileFormat) (*v1beta1.ObservationLog, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -46,13 +46,13 @@ func CollectObservationLog(fileName string, metrics []string, filters []string, 
 	}
 	logs := string(content)
 
-	switch format {
-	case commonv1beta1.TextFormat.String():
+	switch fileFormat {
+	case commonv1beta1.TextFormat:
 		return parseLogsInTextFormat(strings.Split(logs, "\n"), metrics, filters)
-	case commonv1beta1.JsonFormat.String():
+	case commonv1beta1.JsonFormat:
 		return parseLogsInJsonFormat(strings.Split(logs, "\n"), metrics)
 	}
-	return nil, fmt.Errorf("format must be set %s or %s", commonv1beta1.TextFormat.String(), commonv1beta1.JsonFormat.String())
+	return nil, fmt.Errorf("format must be set %v or %s", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
 }
 
 func parseLogsInTextFormat(logs []string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
