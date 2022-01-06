@@ -1,0 +1,5 @@
+opencv-python==4.5.5.62
+tensorboard==2.5.0
+tensorflow==2.5.0
+pandas==1.2.4
+scikit-learn==0.24.2
