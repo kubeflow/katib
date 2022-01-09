@@ -6,30 +6,32 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - configmaps
-      - serviceaccounts
       - services
       - events
-      - namespaces
-      - persistentvolumes
       - persistentvolumeclaims
       - pods
       - pods/log
       - pods/status
-      - secrets
-    verbs:
-      - "*"
-  - apiGroups:
-      - apps
-    resources:
       - deployments
     verbs:
       - "*"
   - apiGroups:
-      - rbac.authorization.k8s.io
+      - ""
     resources:
+      - configmaps
+      - persistentvolumes
+      - serviceaccounts
+      - namespaces
       - roles
       - rolebindings
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
     verbs:
       - "*"
   - apiGroups:
