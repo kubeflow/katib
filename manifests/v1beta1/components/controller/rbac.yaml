@@ -9,6 +9,7 @@ rules:
       - services
       - events
       - persistentvolumeclaims
+      - persistentvolumes # insecure, but i want to see where the test fails.
       - pods
       - pods/log
       - pods/status
