@@ -9,7 +9,6 @@ rules:
       - services
       - events
       - persistentvolumeclaims
-      - persistentvolumes # insecure, but i want to see where the test fails.
       - pods
       - pods/log
       - pods/status
@@ -18,6 +17,7 @@ rules:
       - "*"
   - apiGroups:
       - ""
+      - rbac.authorization.k8s.io
     resources:
       - configmaps
       - persistentvolumes
@@ -29,6 +29,18 @@ rules:
       - get
       - list
       - watch
+# early stopping currently creates a serviceaccount, role and rolebidnign to manage trials and trails/status
+# we only need creation because those things are owned by the suggestion and the suggestion is owned by the experiment
+# so everything is cascade-deleted on experiment deletion
+  - apiGroups:
+      - ''
+      - rbac.authorization.k8s.io
+    resources:
+      - serviceaccounts
+      - roles
+      - rolebindings 
+    verbs:
+      - create
   - apiGroups:
       - apps
     resources:
