@@ -29,8 +29,8 @@ rules:
       - get
       - list
       - watch
-# early stopping currently creates a serviceaccount, role and rolebidnign to manage trials and trails/status
-# we only need creation because those things are owned by the suggestion and the suggestion is owned by the experiment
+# early stopping currently creates a serviceaccount, role and rolebinding to manage trials and trails/status
+# we only need the verb create because those three things are owned by the suggestion and the suggestion is owned by the experiment
 # so everything is cascade-deleted on experiment deletion
   - apiGroups:
       - ''
