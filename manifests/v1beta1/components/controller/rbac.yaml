@@ -1,3 +1,4 @@
+```
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -19,8 +20,8 @@ rules:
       - persistentvolumeclaims # maybe katib creates volumes, i am not sure
       - deployments # the main deployment that serves suggestion-api and earlystopping-api
       - pods # maybe to tfjobs etc. I  am not sure
-      - pods/log maybe to tfjobs etc. I  am not sure
-      - pods/status maybe to tfjobs etc. I  am not sure
+      - pods/log # maybe to tfjobs etc. I  am not sure
+      - pods/status # maybe to tfjobs etc. I  am not sure
       - jobs # trials are executed via jobs
       - cronjobs # i do not know why it is there. maybe you can delay trials
       - serviceaccounts # earlystopping
@@ -73,6 +74,7 @@ rules:
       - mxjobs
     verbs:
       - "*"
+ ```
 ---
 apiVersion: v1
 kind: ServiceAccount
