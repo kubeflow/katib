@@ -10,15 +10,17 @@ metadata:
 # could become compromised if katib-controller is compromised.
 rules:
   - apiGroups:
-    - ""
-    - batch
-    - apps
-    - rbac.authorization.k8s.io
+      - ""
+      - apps
+      - rbac.authorization.k8s.io
     resources:
       - services # suggestion-api and earlystopping-api
       - events # katib cries is you remove it for unknown reasons
       - persistentvolumeclaims # maybe katib creates volumes, i am not sure
       - deployments # the main deployment that serves suggestion-api and earlystopping-api
+      - pods # maybe to tfjobs etc. I  am not sure
+      - pods/log maybe to tfjobs etc. I  am not sure
+      - pods/status maybe to tfjobs etc. I  am not sure
       - jobs # trials are executed via jobs
       - cronjobs # i do not know why it is there. maybe you can delay trials
       - serviceaccounts # earlystopping
@@ -30,6 +32,18 @@ rules:
       - watch
       - patch
       - create
+  - apiGroups:
+      - batch
+    resources:
+      - jobs # trials are executed via jobs
+      - cronjobs # i do not know why it is there. maybe you can delay trials
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - create
+      - delete # this is essential
   - apiGroups:
       - ""
     resources:
