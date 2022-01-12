@@ -2,61 +2,47 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: katib-controller
+# We only need the verb create and not delete because all things are owned transitively by the
+# experiment, so everything is cascade-deleted on experiment deletion.
+# Early stopping currently creates a serviceaccount, role and rolebinding to manage trials and trails/status.
+# The roles and rolebinding creation is the most important potential security issue now.
+# Via new roles, rolebindings and pods in kubernetes system namespaces the cluster 
+# could become compromised if katib-controller is compromised.
 rules:
   - apiGroups:
-      - ""
+    - ""
+    - batch
+    - apps
+    - rbac.authorization.k8s.io
     resources:
-      - services
-      - events
-      - persistentvolumeclaims
-      - pods
-      - pods/log
-      - pods/status
-      - deployments
-    verbs:
-      - "*"
-  - apiGroups:
-      - ""
-      - rbac.authorization.k8s.io
-    resources:
-      - configmaps
-      - persistentvolumes
-      - serviceaccounts
-      - namespaces
-      - roles
-      - rolebindings
+      - services # suggestion-api and earlystopping-api
+      - events # katib cries is you remove it for unknown reasons
+      - persistentvolumeclaims # maybe katib creates volumes, i am not sure
+      - deployments # the main deployment that serves suggestion-api and earlystopping-api
+      - jobs # trials are executed via jobs
+      - cronjobs # i do not know why it is there. maybe you can delay trials
+      - serviceaccounts # earlystopping
+      - roles # earlystopping
+      - rolebindings # earlystopping
     verbs:
       - get
       - list
       - watch
-# early stopping currently creates a serviceaccount, role and rolebinding to manage trials and trails/status
-# we only need the verb create because those three things are owned by the suggestion and the suggestion is owned by the experiment
-# so everything is cascade-deleted on experiment deletion
-  - apiGroups:
-      - ''
-      - rbac.authorization.k8s.io
-    resources:
-      - serviceaccounts
-      - roles
-      - rolebindings 
-    verbs:
+      - patch
       - create
   - apiGroups:
-      - apps
+      - ""
     resources:
-      - deployments
+      - configmaps # i do not have a clue
+      - persistentvolumes # i do not have a clue
+      - namespaces 
     verbs:
-      - "*"
-  - apiGroups:
-      - batch
-    resources:
-      - jobs
-      - cronjobs
-    verbs:
-      - "*"
+      - get
+      - list
+      - watch
   - apiGroups:
       - kubeflow.org
-    resources:
+    resources: # everything here is obvious
       - experiments
       - experiments/status
       - experiments/finalizers
