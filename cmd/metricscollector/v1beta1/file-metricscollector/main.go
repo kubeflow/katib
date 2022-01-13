@@ -151,8 +151,6 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 		}
 	}
 
-	// First metric is objective in metricNames array.
-	objMetric := strings.Split(*metricNames, ";")[0]
 	objType := commonv1beta1.ObjectiveType(*objectiveType)
 	// For objective metric we calculate best optimal value from the recorded metrics.
 	// This is workaround for Median Stop algorithm.
@@ -172,12 +170,6 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 		klog.Fatalf("Failed to create new Process from pid %v, error: %v", mainProcPid, err)
 	}
 
-	// Get list of regural expressions from filters.
-	var metricRegList []*regexp.Regexp
-	if fileFormat == commonv1beta1.TextFormat {
-		metricRegList = filemc.GetFilterRegexpList(filters)
-	}
-
 	// Start watch log lines.
 	t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
 	for line := range t.Lines {
@@ -187,6 +179,10 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 
 		switch fileFormat {
 		case commonv1beta1.TextFormat:
+			// Get list of regural expressions from filters.
+			var metricRegList []*regexp.Regexp
+			metricRegList = filemc.GetFilterRegexpList(filters)
+
 			// Check if log line contains metric from stop rules.
 			isRuleLine := false
 			for _, rule := range stopRules {
@@ -220,7 +216,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 						if metricName != rule.Name {
 							continue
 						}
-						stopRules = updateStopRules(objMetric, stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
+						stopRules = updateStopRules(stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
 					}
 				}
 			}
@@ -253,7 +249,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 				if err != nil {
 					klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, rule.Name)
 				}
-				stopRules = updateStopRules(objMetric, stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
+				stopRules = updateStopRules(stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
 			}
 		default:
 			klog.Fatalf("Format must be set to %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
@@ -333,7 +329,6 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 }
 
 func updateStopRules(
-	objMetric string,
 	stopRules []commonv1beta1.EarlyStoppingRule,
 	optimalObjValue *float64,
 	metricValue float64,
@@ -342,6 +337,9 @@ func updateStopRules(
 	rule commonv1beta1.EarlyStoppingRule,
 	ruleIdx int,
 ) []commonv1beta1.EarlyStoppingRule {
+	// First metric is objective in metricNames array.
+	objMetric := strings.Split(*metricNames, ";")[0]
+
 	// Calculate optimalObjValue.
 	if rule.Name == objMetric {
 		if optimalObjValue == nil {
