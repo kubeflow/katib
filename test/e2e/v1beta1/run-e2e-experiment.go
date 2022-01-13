@@ -270,13 +270,13 @@ func verifyExperimentResults(kclient katibclient.Client, exp *experimentsv1beta1
 			*exp.Spec.MaxTrialCount, exp.Status.TrialsSucceeded)
 	}
 
-	trialsSucceeded := exp.Status.TrialsSucceeded
+	trialsCompleted := exp.Status.TrialsSucceeded
 	if exp.Spec.EarlyStopping != nil {
-		trialsSucceeded += exp.Status.TrialsEarlyStopped
+		trialsCompleted += exp.Status.TrialsEarlyStopped
 	}
 
 	// Otherwise, Goal should be reached.
-	if trialsSucceeded != *exp.Spec.MaxTrialCount &&
+	if trialsCompleted != *exp.Spec.MaxTrialCount &&
 		((objectiveType == commonv1beta1.ObjectiveTypeMinimize && minMetric > *goal) ||
 			(objectiveType == commonv1beta1.ObjectiveTypeMaximize && maxMetric < *goal)) {
 		return fmt.Errorf(`Objective Goal is not reached and Succeeded Trials: %v != %v MaxTrialCount.
