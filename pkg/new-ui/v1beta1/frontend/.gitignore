@@ -47,3 +47,6 @@ Thumbs.db
 
 # Rok files
 **/browse-in-rok*
+
+# Font files (automatically generating)
+/src/assets/fonts
