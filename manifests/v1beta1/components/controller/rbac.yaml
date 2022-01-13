@@ -2,6 +2,7 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: katib-controller
+# Please fix your infrastructure. A lot of workflows fail because of docker rate limits.
 # We only need the verb create and not delete because all things are owned transitively by the
 # experiment, so everything is cascade-deleted on experiment deletion.
 # Early stopping currently creates a serviceaccount, role and rolebinding to manage trials and trails/status.
