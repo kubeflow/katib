@@ -18,10 +18,9 @@ package sidecarmetricscollector
 
 import (
 	"path"
+	"reflect"
 	"testing"
 	"time"
-
-	"github.com/google/go-cmp/cmp"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
@@ -153,8 +152,8 @@ func TestCollectObservationLog(t *testing.T) {
 			if (err != nil) != test.err {
 				t.Errorf("\nGOT: \n%v\nWANT: %v\n", err, test.err)
 			} else {
-				if diff := cmp.Diff(actual, test.expected); diff != "" {
-					t.Errorf("\nDIFF: \n%v\n", diff)
+				if !reflect.DeepEqual(actual, test.expected) {
+					t.Errorf("Expected %v\n got %v", test.expected, actual)
 				}
 			}
 		})
