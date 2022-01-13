@@ -223,7 +223,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 		case commonv1beta1.JsonFormat:
 			var logJsonObj map[string]interface{}
 			if err = json.Unmarshal([]byte(logText), &logJsonObj); err != nil {
-				klog.Fatalf("Failed to unmarshal logs in JSON format, log: %s, error: %v", logText, err)
+				klog.Fatalf("Failed to unmarshal logs in %v format, log: %s, error: %v", commonv1beta1.JsonFormat, logText, err)
 			}
 			// Check if log line contains metric from stop rules.
 			isRuleLine := false

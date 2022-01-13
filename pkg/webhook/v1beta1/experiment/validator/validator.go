@@ -434,7 +434,7 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 			return fmt.Errorf("format of metrics file is required by .spec.metricsCollectorSpec.source.fileSystemPath.fileFormat")
 		}
 		if fileFormat == commonapiv1beta1.JsonFormat && mcSpec.Source.Filter != nil {
-			return fmt.Errorf(".spec.metricsCollectorSpec.source.filter must be nil when format of metrics file is `JSON`")
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.filter must be nil when format of metrics file is %v", commonapiv1beta1.JsonFormat)
 		}
 	case commonapiv1beta1.TfEventCollector:
 		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||

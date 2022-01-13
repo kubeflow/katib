@@ -52,7 +52,7 @@ func CollectObservationLog(fileName string, metrics []string, filters []string, 
 	case commonv1beta1.JsonFormat:
 		return parseLogsInJsonFormat(strings.Split(logs, "\n"), metrics)
 	}
-	return nil, fmt.Errorf("format must be set %v or %s", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
+	return nil, fmt.Errorf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
 }
 
 func parseLogsInTextFormat(logs []string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
