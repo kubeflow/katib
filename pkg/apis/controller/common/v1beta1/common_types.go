@@ -195,10 +195,6 @@ const (
 	JsonFormat FileSystemFileFormat = "JSON"
 )
 
-func (f FileSystemFileFormat) String() string {
-	return string(f)
-}
-
 // +k8s:deepcopy-gen=true
 type FileSystemPath struct {
 	Path       string               `json:"path,omitempty"`
