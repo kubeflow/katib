@@ -256,7 +256,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 				stopRules = updateStopRules(objMetric, stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
 			}
 		default:
-			klog.Fatalf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
+			klog.Fatalf("Format must be set to %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
 		}
 
 		// If stopRules array is empty, Trial is early stopped.
