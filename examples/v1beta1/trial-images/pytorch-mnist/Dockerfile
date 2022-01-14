@@ -5,7 +5,7 @@ WORKDIR /opt/pytorch-mnist
 
 # Add folder for the logs.
 RUN mkdir /katib
-RUN pip install cloudml-hypertune
+RUN pip install cloudml-hypertune==0.1.0.dev6
 
 RUN chgrp -R 0 /opt/pytorch-mnist \
   && chmod -R g+rwX /opt/pytorch-mnist \
