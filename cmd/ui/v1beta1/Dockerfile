@@ -31,7 +31,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
     fi
 
 # Copy the backend and frontend into a thin image.
-FROM alpine:3.7
+FROM alpine:3.15
 WORKDIR /app
 COPY --from=go-build /go/src/github.com/kubeflow/katib/katib-ui /app/
 COPY --from=npm-build /frontend/build /app/build
