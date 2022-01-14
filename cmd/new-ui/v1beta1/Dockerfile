@@ -56,7 +56,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
     fi
 
 # --- Compose the web app ---
-FROM alpine:3.7
+FROM alpine:3.15
 WORKDIR /app
 COPY --from=go-build /go/src/github.com/kubeflow/katib/katib-ui /app/
 COPY --from=frontend /src/dist/static /app/build/static/

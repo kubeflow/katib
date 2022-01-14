@@ -34,7 +34,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
   chmod +x /bin/grpc_health_probe
 
 # Copy the Goptuna suggestion into a thin image.
-FROM alpine:3.7
+FROM alpine:3.15
 
 ENV TARGET_DIR /opt/katib
 
