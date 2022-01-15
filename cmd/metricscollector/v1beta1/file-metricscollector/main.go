@@ -151,7 +151,6 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 		}
 	}
 
-	objType := commonv1beta1.ObjectiveType(*objectiveType)
 	// For objective metric we calculate best optimal value from the recorded metrics.
 	// This is workaround for Median Stop algorithm.
 	// TODO (andreyvelich): Think about it, maybe define latest, max or min strategy type in stop-rule as well ?
@@ -216,7 +215,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 						if metricName != rule.Name {
 							continue
 						}
-						stopRules = updateStopRules(stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
+						stopRules = updateStopRules(stopRules, optimalObjValue, metricValue, metricStartStep, rule, idx)
 					}
 				}
 			}
@@ -249,7 +248,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 				if err != nil {
 					klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, rule.Name)
 				}
-				stopRules = updateStopRules(stopRules, optimalObjValue, metricValue, objType, metricStartStep, rule, idx)
+				stopRules = updateStopRules(stopRules, optimalObjValue, metricValue, metricStartStep, rule, idx)
 			}
 		default:
 			klog.Fatalf("Format must be set to %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
@@ -332,13 +331,13 @@ func updateStopRules(
 	stopRules []commonv1beta1.EarlyStoppingRule,
 	optimalObjValue *float64,
 	metricValue float64,
-	objType commonv1beta1.ObjectiveType,
 	metricStartStep map[string]int,
 	rule commonv1beta1.EarlyStoppingRule,
 	ruleIdx int,
 ) []commonv1beta1.EarlyStoppingRule {
 	// First metric is objective in metricNames array.
 	objMetric := strings.Split(*metricNames, ";")[0]
+	objType := commonv1beta1.ObjectiveType(*objectiveType)
 
 	// Calculate optimalObjValue.
 	if rule.Name == objMetric {
