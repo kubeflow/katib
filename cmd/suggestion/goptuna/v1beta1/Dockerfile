@@ -1,7 +1,7 @@
 # Build the Goptuna Suggestion.
 FROM golang:alpine AS build-env
 
-ENV GRPC_HEALTH_PROBE_VERSION v0.3.1
+ENV GRPC_HEALTH_PROBE_VERSION v0.4.6
 
 WORKDIR /go/src/github.com/kubeflow/katib
 
