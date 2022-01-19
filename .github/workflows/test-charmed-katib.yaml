@@ -75,6 +75,8 @@ jobs:
           juju bundle deploy --build --destructive-mode --serial
           juju wait -wvt 300
 
+          kubectl label namespace kubeflow katib-metricscollector-injection=enabled
+
       - name: Test Katib
         run: kubectl apply -f examples/v1beta1/hp-tuning/random.yaml
 

@@ -5,7 +5,6 @@ metadata:
 webhooks:
   - name: validator.experiment.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Fail
     # TODO (andreyvelich): Migrate to v1 ?
     admissionReviewVersions:
       - v1beta1
@@ -34,7 +33,6 @@ metadata:
 webhooks:
   - name: defaulter.experiment.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Fail
     admissionReviewVersions:
       - v1beta1
     clientConfig:
@@ -56,7 +54,6 @@ webhooks:
           - experiments
   - name: mutator.pod.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Fail
     admissionReviewVersions:
       - v1beta1
     clientConfig:

@@ -1,3 +1,4 @@
+name: katib
 bundle: kubernetes
 applications:
   katib-controller: { charm: katib-controller,            scale: 1 }
