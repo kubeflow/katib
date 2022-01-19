@@ -397,3 +397,27 @@ func (k *KatibUIHandler) FetchSuggestion(w http.ResponseWriter, r *http.Request)
 		return
 	}
 }
+
+// FetchTrial gets trial in specific namespace.
+func (k *KatibUIHandler) FetchTrial(w http.ResponseWriter, r *http.Request) {
+	trialName := r.URL.Query()["trialName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+
+	trial, err := k.katibClient.GetTrial(trialName, namespace)
+	if err != nil {
+		log.Printf("GetTrial failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(trial)
+	if err != nil {
+		log.Printf("Marshal Trial failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write trial failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}

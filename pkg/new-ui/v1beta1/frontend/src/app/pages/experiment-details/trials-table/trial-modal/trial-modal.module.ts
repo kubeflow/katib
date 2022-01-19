@@ -5,14 +5,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-import { TrialsTableComponent } from './trials-table.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TrialModalComponent } from './trial-modal/trial-modal.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { TrialModalOverviewModule } from './overview/trial-modal-overview.module';
+import { TrialModalComponent } from './trial-modal.component';
+
+import {
+  TitleActionsToolbarModule,
+  LoadingSpinnerModule,
+  PanelModule,
+} from 'kubeflow';
 
 @NgModule({
-  declarations: [TrialsTableComponent],
+  declarations: [TrialModalComponent],
   imports: [
+    TrialModalOverviewModule,
     CommonModule,
     MatTableModule,
     MatProgressSpinnerModule,
@@ -20,8 +27,11 @@ import { TrialModalComponent } from './trial-modal/trial-modal.component';
     MatIconModule,
     NgxChartsModule,
     MatTooltipModule,
+    MatTabsModule,
+    TitleActionsToolbarModule,
+    LoadingSpinnerModule,
+    PanelModule,
   ],
-  entryComponents: [TrialModalComponent],
-  exports: [TrialsTableComponent],
+  exports: [TrialModalComponent],
 })
-export class TrialsTableModule {}
+export class TrialModalModule {}
