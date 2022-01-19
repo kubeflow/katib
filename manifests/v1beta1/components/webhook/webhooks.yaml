@@ -5,7 +5,7 @@ metadata:
 webhooks:
   - name: validator.experiment.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Ignore
+    failurePolicy: Fail
     admissionReviewVersions:
       - v1
     clientConfig:
@@ -32,7 +32,7 @@ metadata:
 webhooks:
   - name: defaulter.experiment.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Ignore
+    failurePolicy: Fail
     admissionReviewVersions:
       - v1
     clientConfig:
@@ -53,7 +53,7 @@ webhooks:
           - experiments
   - name: mutator.pod.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Ignore
+    failurePolicy: Fail
     admissionReviewVersions:
       - v1
     clientConfig:

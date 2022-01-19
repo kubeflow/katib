@@ -5,15 +5,16 @@ metadata:
 webhooks:
   - name: validator.experiment.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Ignore
+    failurePolicy: Fail
     # TODO (andreyvelich): Migrate to v1 ?
     admissionReviewVersions:
       - v1beta1
     clientConfig:
-      caBundle: Cg==
+      caBundle: {{ ca_bundle }}
       service:
-        name: katib-controller
-        namespace: kubeflow
+        name: {{ name }}
+        namespace: {{ namespace }}
+        port: {{ port }}
         path: /validate-experiment
     rules:
       - apiGroups:
@@ -33,14 +34,15 @@ metadata:
 webhooks:
   - name: defaulter.experiment.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Ignore
+    failurePolicy: Fail
     admissionReviewVersions:
       - v1beta1
     clientConfig:
-      caBundle: Cg==
+      caBundle: {{ ca_bundle }}
       service:
-        name: katib-controller
-        namespace: kubeflow
+        name: {{ name }}
+        namespace: {{ namespace }}
+        port: {{ port }}
         path: /mutate-experiment
     rules:
       - apiGroups:
@@ -54,14 +56,15 @@ webhooks:
           - experiments
   - name: mutator.pod.katib.kubeflow.org
     sideEffects: None
-    failurePolicy: Ignore
+    failurePolicy: Fail
     admissionReviewVersions:
       - v1beta1
     clientConfig:
-      caBundle: Cg==
+      caBundle: {{ ca_bundle }}
       service:
-        name: katib-controller
-        namespace: kubeflow
+        name: {{ name }}
+        namespace: {{ namespace }}
+        port: {{ port }}
         path: /mutate-pod
     namespaceSelector:
       matchLabels:

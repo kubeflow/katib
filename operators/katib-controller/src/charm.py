@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import logging
+from base64 import b64encode
 from pathlib import Path
 from subprocess import check_call
 
 import yaml
+from jinja2 import Environment, FileSystemLoader
 from oci_image import OCIImageResource, OCIImageResourceError
 from ops.charm import CharmBase
 from ops.framework import StoredState
@@ -49,7 +51,16 @@ class Operator(CharmBase):
             self.model.unit.status = check_failed.status
             return
 
-        validating, mutating = yaml.safe_load_all(Path("src/webhooks.yaml").read_text())
+        ca_bundle = b64encode(self._stored.cert.encode("utf-8")).decode("utf-8")
+        env = Environment(loader=FileSystemLoader("src"))
+        t = env.get_template("webhooks.yaml.j2")
+        rendered = t.render(
+            ca_bundle=ca_bundle,
+            name=self.model.app.name,
+            namespace=self.model.name,
+            port=self.model.config["webhook-port"],
+        )
+        validating, mutating = yaml.safe_load_all(rendered)
 
         self.model.pod.set_spec(
             {
