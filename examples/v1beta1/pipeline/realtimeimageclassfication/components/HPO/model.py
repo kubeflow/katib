@@ -65,10 +65,6 @@ def build_model(learning_rate,data_augmentation,opt):
     model.compile(optimizer=optimizer,
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
-    
-
-      
-   
     return model
 
     
@@ -84,10 +80,8 @@ def get_callbacks():
             logging.info('loss={:.4f}'.format(logs['loss']))
             logging.info('accuracy={:.4f}'.format(logs['accuracy']))
             logging.info('val_accuracy={:.4f}'.format(logs['val_accuracy']))
-    #logging.info("{{metricName: accuracy, metricValue: {:.4f}}};{{metricName: loss, metricValue: {:.4f}}}\n".format())
 
     callbacks = [
-        #tf.keras.callbacks.TensorBoard(logdir),
         tf.keras.callbacks.ModelCheckpoint(filepath=checkpointdir),
         customLog()
     ]
@@ -191,14 +185,14 @@ def main():
   
     history=model.fit(train_ds, 
             epochs=15,
-            #steps_per_epoch=TF_STEPS_PER_EPOCHS, 
+            steps_per_epoch=20, 
             validation_data=val_ds,
             validation_steps=1,
             callbacks=get_callbacks())
 
     logging.info("Training completed.")
     # successful completion
-    exit(0)
+
   
 
 if __name__ == "__main__":

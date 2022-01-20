@@ -64,9 +64,6 @@ class KFServingSampleModel(kfserving.KFModel):
                     image_nm='/tmp/' + key
                     image = cv2.imread(image_nm)
                     cv2.imwrite(imagepath,image)
-                    #img = cv2.imread(image_nm, cv2.IMREAD_COLOR)
-                    #image_expanded = np.expand_dims(image, axis=0)
-                  
 
             class_names= ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
             img_height = 180

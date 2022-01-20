@@ -26,7 +26,7 @@
 
 
 ## Building Real time Image classification with Kubeflow Orchestrator 
-![](img.png)
+![](./image/img.png)
 
 ## Deploy Kafka
 If you do not have an existing kafka cluster, you can run the following commands to install in-cluster kafka using [helm3](https://helm.sh)
@@ -38,8 +38,10 @@ helm repo update
 helm install my-kafka -f values.yaml --set cp-schema-registry.enabled=false,cp-kafka-rest.enabled=false,cp-kafka-connect.enabled=false confluentinc/cp-helm-charts
 ```
 
-after successful install you are expected to see the running kafka cluster
+After successful install you are expected to see the running kafka cluster
 ```bash
+$ kubectl get pods -n <kafka-namespace>
+
 NAME                      READY   STATUS    RESTARTS   AGE
 my-kafka-cp-kafka-0       2/2     Running   0          126m
 my-kafka-cp-kafka-1       2/2     Running   1          126m
@@ -48,7 +50,7 @@ my-kafka-cp-zookeeper-0   2/2     Running   0          127m
 ```
 
 ## Install Knative Eventing and Kafka Event Source
-- Install [Knative Eventing Core >= 0.18](https://knative.dev/docs/install/any-kubernetes-cluster/#installing-the-eventing-component)
+- Install [Knative Eventing Core >= 0.18](https://knative.dev/docs/install)
 - Install [Kafka Event Source](https://github.com/knative-sandbox/eventing-kafka/releases).
 - Install `InferenceService` addressable cluster role
 
@@ -64,7 +66,7 @@ kubectl apply -f https://storage.googleapis.com/knative-releases/eventing-contri
 kubectl apply -f addressable-resolver.yaml
 ```
 
-### KAFKA
+### Kafka Event Sources
 ```
 kubectl apply -f kafka-client.yaml
 kubectl exec -it kafka-client -- /bin/bash
@@ -77,13 +79,13 @@ kafka-console-consumer --bootstrap-server my-kafka-cp-kafka-headless:9092 --topi
 ## Deploy Minio
 - If you do not have Minio setup in your cluster, you can run following command to install Minio test instance.
 ```bash
-cd pipeline/MINIO
+cd components/MINIO
 kubectl apply -f minio.yaml
 ```
 
 - Install Minio client [mc](https://docs.min.io/docs/minio-client-complete-guide)
 
-### MINIO
+### Minio
 
 ```
 kubectl port-forward svc/minio-service -n default 9000:9000
@@ -102,22 +104,93 @@ mc admin service restart myminio
 # Setup event notification when putting images to the bucket
 mc event add myminio/rawimage arn:minio:sqs:us-east-1:1:kafka -p --event put --suffix .jpg
 ```
+ 
+
+## Building the  End-To-End Pipeline
+
+
+1. set working directory 
+
+Connect to GCP via Local
+```bash
+gcloud init
+gcloud auth application-default login
+```
+
+2. Build the container for Data preprocessing
+
+```bash
+cd components/HPO
+PROJECT_ID=$(gcloud config get-value core/project)
+IMAGE_NAME=kubeflow/hpo
+IMAGE_VERSION=v1
+IMAGE_NAME=gcr.io/$PROJECT_ID/$IMAGE_NAME
+```
+Building docker image. 
+```
+docker build -t $IMAGE_NAME:$IMAGE_VERSION .
+```
+Push training image to GCR
+```
+docker push $IMAGE_NAME:$IMAGE_VERSION
+```
+
+3. Build the container for Training Model
+
+```bash
+cd components/TRAIN
+PROJECT_ID=$(gcloud config get-value core/project)
+IMAGE_NAME=kubeflow/train
+IMAGE_VERSION=v1
+IMAGE_NAME=gcr.io/$PROJECT_ID/$IMAGE_NAME
+```
+
+Building docker image. 
+```
+docker build -t $IMAGE_NAME:$IMAGE_VERSION .
+```
+Push training image to GCR
+```
+docker push $IMAGE_NAME:$IMAGE_VERSION
+```
+
+4. Build the container for Serving Model
+
+```bash
+cd components/SERVING
+PROJECT_ID=$(gcloud config get-value core/project)
+IMAGE_NAME=kubeflow/serving
+IMAGE_VERSION=v1 
+IMAGE_NAME=gcr.io/$PROJECT_ID/$IMAGE_NAME
+
+```
+
+Building docker image. 
+```
+docker build -t $IMAGE_NAME:$IMAGE_VERSION .
+```
+Push training image to GCR
+```
+docker push $IMAGE_NAME:$IMAGE_VERSION
+```
+Provide the docker image in the kubeflowpipelinedag.ipynb and run the pipeline.
 
 ## Create the InferenceService
-![](serving.png)
-Specify the built image on `Transformer` spec and apply the inference service CRD.
-```bash
-cd pipeline/SERVING
-kubectl apply -f minio_serving.yaml 
-```
+![](./image/serving.png)
+Specify the built image on `Transformer` spec and apply the inference service CRD and please see the kubeflowpipelinedag.ipynb
+
 
 ## Create kafka event source
 Apply kafka event source which creates the kafka consumer pod to pull the events from kafka and deliver to inference service.
 ```bash
+cd components/MINIO
 kubectl apply -f kafka-source.yaml
 ```
 This creates the kafka source pod which consumers the events from `realtime` topic
+
 ```bash
+$ kubectl get pods -n <kafka-namespace>
+
 kafkasource-kafka-source-3d809fe2-1267-11ea-99d0-42010af00zbn5h   1/1     Running   0          8h
 ```
 ## Upload a flower image to Minio RawImage bucket
@@ -125,18 +198,22 @@ The last step is to upload the image `images/flower.jpg`, image then should be m
 ```bash
 mc cp images/flower.jpg myminio/rawimage
 ```
-## Launch grafana dashboard
-![](grafana.png)
-### Knative Monitoring
+## Launch Grafana dashboard with Knative Monitoring
+
+To view metrics in Grafana run the following:
+
 ```bash
 #create namespace
 kubectl create namespace knative-monitoring
 #setup monitoring components
 kubectl apply  --filename https://github.com/knative/serving/releases/download/v0.13.0/monitoring-metrics-prometheus.yaml
 ```
+Port forward the knative-monitoring pod:
 
 ```bash
 # use port-forcd warding
 kubectl port-forward --namespace knative-monitoring $(kubectl get pod --namespace knative-monitoring --selector="app=grafana" --output jsonpath='{.items[0].metadata.name}') 8080:3000
 ```
+You can access the Grafana Dashboard using this URL: http://localhost:8080/
 
+![](./image/grafana.png)

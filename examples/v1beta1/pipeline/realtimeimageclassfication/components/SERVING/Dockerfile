@@ -45,11 +45,5 @@ RUN pip install opencv-contrib-python
 ADD serving.py /app/serving.py
 RUN chmod +x /app/serving.py
 
-
-
 ENTRYPOINT ["python"]
 CMD ["/app/serving.py"]
-
-
-
-
