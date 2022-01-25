@@ -62,8 +62,8 @@ endif
 
 # Build and push Katib images from the latest master commit.
 push-latest: generate
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) latest
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) latest $(CPU_ARCH)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT) $(CPU_ARCH)
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) latest
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
 
@@ -72,8 +72,8 @@ push-tag: generate
 ifeq ($(TAG),)
 	$(error TAG must be set. Usage: make push-tag TAG=<release-tag>)
 endif
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(TAG)
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(TAG) $(CPU_ARCH)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT) $(CPU_ARCH)
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(TAG)
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
 

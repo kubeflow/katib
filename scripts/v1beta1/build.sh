@@ -24,17 +24,17 @@ TAG=$2
 ARCH=$3
 
 if [[ -z "$REGISTRY" || -z "$TAG" || -z "$ARCH" ]]; then
-    echo "Image registry, tag and cpu-architecture must be set"
-    echo "Usage: $0 <image-registry> <image-tag> <cpu-architecture>" 1>&2
-    exit 1
+  echo "Image registry, tag and cpu-architecture must be set"
+  echo "Usage: $0 <image-registry> <image-tag> <cpu-architecture>" 1>&2
+  exit 1
 fi
 
 SUPPORTED_CPU_ARCHS=(amd64 arm64 ppc64le)
 function check_specified_cpu_arch() {
-  for SUPPORTED_ARCH in "${SUPPORTED_CPU_ARCHS[@]}"; do \
-    if [ "$ARCH" = "$SUPPORTED_ARCH" ]; then \
+  for SUPPORTED_ARCH in "${SUPPORTED_CPU_ARCHS[@]}"; do
+    if [ "$ARCH" = "$SUPPORTED_ARCH" ]; then
       return 0
-    fi;
+    fi
   done
   echo "CPU architecture '$ARCH' is not supported"
   echo "You can use '${SUPPORTED_CPU_ARCHS[*]}'"
@@ -49,6 +49,7 @@ CMD_PREFIX="cmd"
 echo "Building images for Katib ${VERSION}..."
 echo "Image registry: ${REGISTRY}"
 echo "Image tag: ${TAG}"
+echo "CPU architecture: ${ARCH}"
 
 SCRIPT_ROOT=$(dirname "$0")/../..
 cd "${SCRIPT_ROOT}"
@@ -72,9 +73,9 @@ docker build --platform "linux/$ARCH" -t "${REGISTRY}/file-metrics-collector:${T
 
 echo -e "\nBuilding TF Event metrics collector image...\n"
 if [ "$ARCH" == "ppc64le" ]; then
-    docker build --platform "linux/$ARCH" -t "${REGISTRY}/tfevent-metrics-collector:${TAG}" -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile.ppc64le .
-else \
-    docker build --platform "linux/$ARCH" -t "${REGISTRY}/tfevent-metrics-collector:${TAG}" -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile .
+  docker build --platform "linux/$ARCH" -t "${REGISTRY}/tfevent-metrics-collector:${TAG}" -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile.ppc64le .
+else
+  docker build --platform "linux/$ARCH" -t "${REGISTRY}/tfevent-metrics-collector:${TAG}" -f ${CMD_PREFIX}/metricscollector/${VERSION}/tfevent-metricscollector/Dockerfile .
 fi
 
 # Suggestion images
@@ -111,9 +112,9 @@ echo -e "\nBuilding median stopping rule...\n"
 docker build --platform "linux/$ARCH" -t "${REGISTRY}/earlystopping-medianstop:${TAG}" -f ${CMD_PREFIX}/earlystopping/medianstop/${VERSION}/Dockerfile .
 
 # Training container images
-if [ ! "$ARCH" = "amd64" ]; then \
+if [ ! "$ARCH" = "amd64" ]; then
   echo -e "\nTraining container images are supported only amd64."
-else \
+else
 
   echo -e "\nBuilding training container images..."
 
