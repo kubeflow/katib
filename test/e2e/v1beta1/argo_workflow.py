@@ -145,7 +145,7 @@ class WorkflowBuilder(object):
             },
             {
                 "name": "EKS_CLUSTER_VERSION",
-                "value": "1.21"
+                "value": "1.19"
             },
             {
                 "name": "ECR_REGISTRY",
