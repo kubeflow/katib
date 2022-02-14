@@ -42,7 +42,7 @@ echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 
 cd "${MANIFESTS_DIR}/apps/training-operator/upstream/overlays/kubeflow"
-echo "Deploying Training Operator from kubeflow/manifests $(git branch --show-current)"
+echo "Deploying Training Operator from kubeflow/manifests $(git rev-parse --abbrev-ref HEAD)"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
