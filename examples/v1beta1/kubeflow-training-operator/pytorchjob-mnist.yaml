@@ -45,7 +45,7 @@ spec:
               spec:
                 containers:
                   - name: pytorch
-                    image: docker.io/kubeflowkatib/pytorch-mnist:v0.13.0-rc.0
+                    image: docker.io/kubeflowkatib/pytorch-mnist:v0.13.0-rc.1
                     command:
                       - "python3"
                       - "/opt/pytorch-mnist/mnist.py"
@@ -59,7 +59,7 @@ spec:
               spec:
                 containers:
                   - name: pytorch
-                    image: docker.io/kubeflowkatib/pytorch-mnist:v0.13.0-rc.0
+                    image: docker.io/kubeflowkatib/pytorch-mnist:v0.13.0-rc.1
                     command:
                       - "python3"
                       - "/opt/pytorch-mnist/mnist.py"

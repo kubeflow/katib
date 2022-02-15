@@ -9,7 +9,7 @@ spec:
         spec:
           containers:
             - name: pytorch
-              image: docker.io/kubeflowkatib/pytorch-mnist:v0.13.0-rc.0
+              image: docker.io/kubeflowkatib/pytorch-mnist:v0.13.0-rc.1
               imagePullPolicy: Always
               command:
                 - "python3"
@@ -24,7 +24,7 @@ spec:
         spec:
           containers:
             - name: pytorch
-              image: docker.io/kubeflowkatib/pytorch-mnist:v0.13.0-rc.0
+              image: docker.io/kubeflowkatib/pytorch-mnist:v0.13.0-rc.1
               imagePullPolicy: Always
               command:
                 - "python3"

@@ -76,7 +76,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/darts-cnn-cifar10:v0.13.0-rc.0
+                image: docker.io/kubeflowkatib/darts-cnn-cifar10:v0.13.0-rc.1
                 command:
                   - python3
                   - run_trial.py
