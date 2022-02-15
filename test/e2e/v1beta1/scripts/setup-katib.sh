@@ -41,8 +41,8 @@ cat "manifests/v1beta1/components/controller/katib-config.yaml"
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 
-echo "Deploying training-operator from kubeflow/manifests v1.4 branch"
 cd "${MANIFESTS_DIR}/apps/training-operator/upstream/overlays/kubeflow"
+echo "Deploying Training Operator from kubeflow/manifests $(git rev-parse --abbrev-ref HEAD)"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
