@@ -4,7 +4,7 @@
 
 ## Bug fixes
 
-- Fix default label for Training Operators on release-0.13 ([#1813](https://github.com/kubeflow/katib/pull/1813) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix default label for Training Operators ([#1813](https://github.com/kubeflow/katib/pull/1813) by [@andreyvelich](https://github.com/andreyvelich))
 - Update supported Python version for Katib SDK ([#1798](https://github.com/kubeflow/katib/pull/1798) by [@tenzen-y](https://github.com/tenzen-y))
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.13.0-rc.0...v0.13.0-rc.1)
