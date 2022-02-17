@@ -6,6 +6,7 @@ list in reverse chronological order.
 
 | Presentation or Demo title | Presenters | Date |
 | --- | --- | --- |
+| [Cloud Native AutoML with Argo Workflows and Katib](https://youtu.be/KjHqmS4gIxM?t=181) | Andrey Velichkevich, Johnu George | 2022-02-16 |
 | [When Machine Learning Toolkit for Kubernetes Meets PaddlePaddle](https://github.com/terrytangyuan/public-talks/tree/main/talks/when-machine-learning-toolkit-for-kubernetes-meets-paddlepaddle-wave-summit-2021) | [Yuan Tang](https://terrytangyuan.github.io/about/) | 2021-12-12 |
 | [Bridging into Python Ecosystem with Cloud-Native Distributed Machine Learning Pipelines](https://github.com/terrytangyuan/public-talks/tree/main/talks/bridging-into-python-ecosystem-with-cloud-native-distributed-machine-learning-pipelines-argocon-2021) | [Yuan Tang](https://terrytangyuan.github.io/about/) | 2021-12-08 |
 | [Towards Cloud-Native Distributed Machine Learning Pipelines at Scale](https://github.com/terrytangyuan/public-talks/tree/main/talks/towards-cloud-native-distributed-machine-learning-pipelines-at-scale-pydata-global-2021) | [Yuan Tang](https://terrytangyuan.github.io/about/) | 2021-10-29 |
