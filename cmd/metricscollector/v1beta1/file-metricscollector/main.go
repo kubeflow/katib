@@ -215,7 +215,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 						if metricName != rule.Name {
 							continue
 						}
-						stopRules = updateStopRules(stopRules, optimalObjValue, metricValue, metricStartStep, rule, idx)
+						stopRules, optimalObjValue = updateStopRules(stopRules, optimalObjValue, metricValue, metricStartStep, rule, idx)
 					}
 				}
 			}
@@ -248,7 +248,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 				if err != nil {
 					klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, rule.Name)
 				}
-				stopRules = updateStopRules(stopRules, optimalObjValue, metricValue, metricStartStep, rule, idx)
+				stopRules, optimalObjValue = updateStopRules(stopRules, optimalObjValue, metricValue, metricStartStep, rule, idx)
 			}
 		default:
 			klog.Fatalf("Format must be set to %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
@@ -334,7 +334,8 @@ func updateStopRules(
 	metricStartStep map[string]int,
 	rule commonv1beta1.EarlyStoppingRule,
 	ruleIdx int,
-) []commonv1beta1.EarlyStoppingRule {
+) ([]commonv1beta1.EarlyStoppingRule, *float64) {
+
 	// First metric is objective in metricNames array.
 	objMetric := strings.Split(*metricNames, ";")[0]
 	objType := commonv1beta1.ObjectiveType(*objectiveType)
@@ -357,7 +358,7 @@ func updateStopRules(
 	if _, ok := metricStartStep[rule.Name]; ok {
 		metricStartStep[rule.Name]--
 		if metricStartStep[rule.Name] != 0 {
-			return stopRules
+			return stopRules, optimalObjValue
 		}
 	}
 
@@ -369,13 +370,13 @@ func updateStopRules(
 	// Metric value can be equal, less or greater than stop rule.
 	// Deleting suitable stop rule from the array.
 	if rule.Comparison == commonv1beta1.ComparisonTypeEqual && metricValue == ruleValue {
-		return deleteStopRule(stopRules, ruleIdx)
+		return deleteStopRule(stopRules, ruleIdx), optimalObjValue
 	} else if rule.Comparison == commonv1beta1.ComparisonTypeLess && metricValue < ruleValue {
-		return deleteStopRule(stopRules, ruleIdx)
+		return deleteStopRule(stopRules, ruleIdx), optimalObjValue
 	} else if rule.Comparison == commonv1beta1.ComparisonTypeGreater && metricValue > ruleValue {
-		return deleteStopRule(stopRules, ruleIdx)
+		return deleteStopRule(stopRules, ruleIdx), optimalObjValue
 	}
-	return stopRules
+	return stopRules, optimalObjValue
 }
 
 func deleteStopRule(stopRules []commonv1beta1.EarlyStoppingRule, idx int) []commonv1beta1.EarlyStoppingRule {
