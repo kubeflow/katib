@@ -242,6 +242,29 @@ export const DartsSettings: AlgorithmSetting[] = [
   },
 ];
 
+export const PbtSettings: AlgorithmSetting[] = [
+  {
+    name: 'checkpoint_dir',
+    value: '/var/log/katib/checkpoints/',
+    type: AlgorithmSettingType.STRING,
+  },
+  {
+    name: 'n_population',
+    value: 40,
+    type: AlgorithmSettingType.INTEGER,
+  },
+  {
+    name: 'resample_probability',
+    value: null,
+    type: AlgorithmSettingType.FLOAT,
+  },
+  {
+    name: 'truncation_threshold',
+    value: 0.2,
+    type: AlgorithmSettingType.FLOAT,
+  },
+];
+
 export const EarlyStoppingSettings: AlgorithmSetting[] = [
   {
     name: 'min_trials_required',
@@ -271,4 +294,5 @@ export const AlgorithmSettingsMap: { [key: string]: AlgorithmSetting[] } = {
   [AlgorithmsEnum.SOBOL]: SOBOLSettings,
   [AlgorithmsEnum.ENAS]: ENASSettings,
   [AlgorithmsEnum.DARTS]: DartsSettings,
+  [AlgorithmsEnum.PBT]: PbtSettings,
 };
