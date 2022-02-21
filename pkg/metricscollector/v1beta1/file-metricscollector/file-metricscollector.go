@@ -185,36 +185,42 @@ func newObservationLog(mlogs []*v1beta1.MetricLog, metrics []string) *v1beta1.Ob
 func parseTimestamp(timestamp interface{}) string {
 	if stringTimestamp, ok := timestamp.(string); ok {
 
-		if _, err := time.Parse(time.RFC3339Nano, stringTimestamp); err != nil {
+		if stringTimestamp == "" {
+			klog.Warningln("Timestamp is empty")
 			return ""
-		} else {
-			return stringTimestamp
+		} else if _, err := time.Parse(time.RFC3339Nano, stringTimestamp); err != nil {
+			klog.Warningf("Failed to parse timestamp since %s is not RFC3339Nano format", stringTimestamp)
+			return ""
 		}
+		return stringTimestamp
 
 	} else {
-		if floatTimestamp, ok := timestamp.(float64); !ok {
+
+		floatTimestamp, ok := timestamp.(float64)
+		if !ok {
+			klog.Warningf("Failed to parse timestamp since the type of %v is neither string nor float64", timestamp)
 			return ""
-		} else {
+		}
 
-			stringTimestamp = strconv.FormatFloat(floatTimestamp, 'f', -1, 64)
-			t := strings.Split(stringTimestamp, ".")
+		stringTimestamp = strconv.FormatFloat(floatTimestamp, 'f', -1, 64)
+		t := strings.Split(stringTimestamp, ".")
 
-			sec, err := strconv.ParseInt(t[0], 10, 64)
+		sec, err := strconv.ParseInt(t[0], 10, 64)
+		if err != nil {
+			klog.Warningf("Failed to parse timestamp; %v", err)
+			return ""
+		}
+
+		var nanoSec int64 = 0
+		if len(t) == 2 {
+			nanoSec, err = strconv.ParseInt(t[1], 10, 64)
 			if err != nil {
+				klog.Warningf("Failed to parse timestamp; %v", err)
 				return ""
 			}
-
-			var nanoSec int64 = 0
-			if len(t) == 2 {
-				nanoSec, err = strconv.ParseInt(t[1], 10, 64)
-				if err != nil {
-					return ""
-				}
-			}
-
-			return time.Unix(sec, nanoSec).UTC().Format(time.RFC3339Nano)
-
 		}
+
+		return time.Unix(sec, nanoSec).UTC().Format(time.RFC3339Nano)
 	}
 }
 
