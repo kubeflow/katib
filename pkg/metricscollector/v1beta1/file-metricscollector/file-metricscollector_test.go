@@ -17,7 +17,8 @@ limitations under the License.
 package sidecarmetricscollector
 
 import (
-	"path"
+	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -27,14 +28,20 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
+var testJsonDataPath = filepath.Join("testdata", "JSON")
+
 func TestCollectObservationLog(t *testing.T) {
-	const testJsonDataPath = "testdata/JSON"
+
+	if err := generateTestFiles(); err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(filepath.Dir(testJsonDataPath))
 
 	// TODO (tenzen-y): We should add tests for logs in TEXT format.
 	// Ref: https://github.com/kubeflow/katib/issues/1756
 	testCases := []struct {
 		description string
-		fileName    string
+		filePath    string
 		metrics     []string
 		filters     []string
 		fileFormat  commonv1beta1.FileSystemFileFormat
@@ -43,7 +50,7 @@ func TestCollectObservationLog(t *testing.T) {
 	}{
 		{
 			description: "Positive case for logs in JSON format",
-			fileName:    path.Join(testJsonDataPath, "good.json"),
+			filePath:    filepath.Join(testJsonDataPath, "good.json"),
 			metrics:     []string{"acc", "loss"},
 			fileFormat:  commonv1beta1.JsonFormat,
 			expected: &v1beta1.ObservationLog{
@@ -88,24 +95,24 @@ func TestCollectObservationLog(t *testing.T) {
 		},
 		{
 			description: "Invalid file name",
-			fileName:    "invalid",
+			filePath:    "invalid",
 			err:         true,
 		},
 		{
 			description: "Invalid file format",
-			fileName:    path.Join(testJsonDataPath, "good.json"),
+			filePath:    filepath.Join(testJsonDataPath, "good.json"),
 			fileFormat:  "invalid",
 			err:         true,
 		},
 		{
 			description: "Invalid formatted file for logs in JSON format",
-			fileName:    path.Join(testJsonDataPath, "invalid-format.json"),
+			filePath:    filepath.Join(testJsonDataPath, "invalid-format.json"),
 			fileFormat:  commonv1beta1.JsonFormat,
 			err:         true,
 		},
 		{
 			description: "Invalid timestamp for logs in JSON format",
-			fileName:    path.Join(testJsonDataPath, "invalid-timestamp.json"),
+			filePath:    filepath.Join(testJsonDataPath, "invalid-timestamp.json"),
 			fileFormat:  commonv1beta1.JsonFormat,
 			metrics:     []string{"acc", "loss"},
 			expected: &v1beta1.ObservationLog{
@@ -129,7 +136,7 @@ func TestCollectObservationLog(t *testing.T) {
 		},
 		{
 			description: "Missing objective metric in training logs",
-			fileName:    path.Join(testJsonDataPath, "missing-objective-metric.json"),
+			filePath:    filepath.Join(testJsonDataPath, "missing-objective-metric.json"),
 			fileFormat:  commonv1beta1.JsonFormat,
 			metrics:     []string{"acc", "loss"},
 			expected: &v1beta1.ObservationLog{
@@ -148,7 +155,7 @@ func TestCollectObservationLog(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.description, func(t *testing.T) {
-			actual, err := CollectObservationLog(test.fileName, test.metrics, test.filters, test.fileFormat)
+			actual, err := CollectObservationLog(test.filePath, test.metrics, test.filters, test.fileFormat)
 			if (err != nil) != test.err {
 				t.Errorf("\nGOT: \n%v\nWANT: %v\n", err, test.err)
 			} else {
@@ -158,4 +165,53 @@ func TestCollectObservationLog(t *testing.T) {
 			}
 		})
 	}
+}
+
+func generateTestFiles() error {
+	if _, err := os.Stat(testJsonDataPath); err != nil {
+		if err = os.MkdirAll(testJsonDataPath, 0700); err != nil {
+			return err
+		}
+	}
+
+	testData := []struct {
+		fileName string
+		data     string
+	}{
+		{
+			fileName: "good.json",
+			data: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"}
+{"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847.287801, "trial": "0"}
+{"checkpoint_path": "", "global_step": "1", "loss": "0.1414974331855774", "timestamp": "2021-12-02T14:27:50.000035161Z", "trial": "0"}
+{"acc": "0.9586416482925415", "checkpoint_path": "", "global_step": "1", "timestamp": "2021-12-02T14:27:50.000037459Z", "trial": "0"}
+{"checkpoint_path": "", "global_step": "2", "loss": "0.10683439671993256", "trial": "0"}
+`,
+		},
+		{
+			fileName: "invalid-format.json",
+			data: `"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"
+{"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847.287801, "trial": "0
+`,
+		},
+		{
+			fileName: "invalid-timestamp.json",
+			data: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": "invalid", "trial": "0"}
+{"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847, "trial": "0"}
+`,
+		}, {
+			fileName: "missing-objective-metric.json",
+			data: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"}
+{"checkpoint_path": "", "global_step": "1", "loss": "0.1414974331855774", "timestamp": "2021-12-02T14:27:50.000035161+09:00", "trial": "0"}
+{"checkpoint_path": "", "global_step": "2", "loss": "0.10683439671993256", "trial": "0"}`,
+		},
+	}
+
+	for _, td := range testData {
+		filePath := filepath.Join(testJsonDataPath, td.fileName)
+		if err := os.WriteFile(filePath, []byte(td.data), 0600); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
