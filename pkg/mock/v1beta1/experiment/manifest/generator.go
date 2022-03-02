@@ -38,6 +38,21 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 	return m.recorder
 }
 
+// GetEarlyStoppingConfigData mocks base method.
+func (m *MockGenerator) GetEarlyStoppingConfigData(arg0 string) (katibconfig.EarlyStoppingConfig, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEarlyStoppingConfigData", arg0)
+	ret0, _ := ret[0].(katibconfig.EarlyStoppingConfig)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEarlyStoppingConfigData indicates an expected call of GetEarlyStoppingConfigData.
+func (mr *MockGeneratorMockRecorder) GetEarlyStoppingConfigData(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEarlyStoppingConfigData", reflect.TypeOf((*MockGenerator)(nil).GetEarlyStoppingConfigData), arg0)
+}
+
 // GetMetricsCollectorConfigData mocks base method.
 func (m *MockGenerator) GetMetricsCollectorConfigData(arg0 v1beta1.CollectorKind) (katibconfig.MetricsCollectorConfig, error) {
 	m.ctrl.T.Helper()

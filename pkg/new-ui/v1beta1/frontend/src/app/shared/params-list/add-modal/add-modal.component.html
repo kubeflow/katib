@@ -27,17 +27,17 @@
       <div class="range-wrapper" [formGroup]="formGroup.get('feasibleSpace')">
         <mat-form-field appearance="outline">
           <mat-label>Min</mat-label>
-          <input matInput formControlName="min" />
+          <input matInput formControlName="min" type="number" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Max</mat-label>
-          <input matInput formControlName="max" />
+          <input matInput formControlName="max" type="number" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Step (optional)</mat-label>
-          <input matInput formControlName="step" />
+          <input matInput formControlName="step" type="number" />
         </mat-form-field>
       </div>
     </ng-container>

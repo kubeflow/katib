@@ -48,7 +48,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
             if len(trials) != 0:
                 self._tell(trials)
-            list_of_assignments = self._ask(request.request_number)
+            list_of_assignments = self._ask(request.current_request_number)
 
             return api_pb2.GetSuggestionsReply(
                 parameter_assignments=Assignment.generate(list_of_assignments)
@@ -112,9 +112,9 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
         return sampler
 
-    def _ask(self, request_number):
+    def _ask(self, current_request_number):
         list_of_assignments = []
-        for _ in range(request_number):
+        for _ in range(current_request_number):
             optuna_trial = self.study.ask(fixed_distributions=self._get_optuna_search_space())
 
             assignments = [Assignment(k, v) for k, v in optuna_trial.params.items()]

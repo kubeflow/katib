@@ -66,7 +66,7 @@ The following table shows images for the
     </tr>
     <tr align="center">
       <td>
-        <code>docker.io/kubeflowkatib/katib-cert-generator</code>
+        <code>docker.io/kubeflowkatib/cert-generator</code>
       </td>
       <td>
         Katib Cert Generator
@@ -284,13 +284,13 @@ The following table shows images for training containers which are used in the
     </tr>
     <tr align="center">
       <td>
-        <code>gcr.io/kubeflow-ci/tf-mnist-with-summaries</code>
+        <code>docker.io/kubeflowkatib/tf-mnist-with-summaries</code>
       </td>
       <td>
         Tensorflow MNIST example with saving metrics in the summaries
       </td>
       <td>
-        <a href="https://github.com/kubeflow/training-operator/blob/2712f5667ec78f17d22288630f8719f0c08990ba/examples/tensorflow/mnist_with_summaries/Dockerfile">Dockerfile</a>
+        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile">Dockerfile</a>
       </td>
     </tr>
     <tr align="center">

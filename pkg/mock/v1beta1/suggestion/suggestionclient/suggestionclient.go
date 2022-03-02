@@ -63,3 +63,17 @@ func (mr *MockSuggestionClientMockRecorder) ValidateAlgorithmSettings(arg0, arg1
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAlgorithmSettings", reflect.TypeOf((*MockSuggestionClient)(nil).ValidateAlgorithmSettings), arg0, arg1)
 }
+
+// ValidateEarlyStoppingSettings mocks base method.
+func (m *MockSuggestionClient) ValidateEarlyStoppingSettings(arg0 *v1beta10.Suggestion, arg1 *v1beta1.Experiment) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateEarlyStoppingSettings", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ValidateEarlyStoppingSettings indicates an expected call of ValidateEarlyStoppingSettings.
+func (mr *MockSuggestionClientMockRecorder) ValidateEarlyStoppingSettings(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateEarlyStoppingSettings", reflect.TypeOf((*MockSuggestionClient)(nil).ValidateEarlyStoppingSettings), arg0, arg1)
+}

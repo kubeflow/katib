@@ -72,9 +72,9 @@ func (s *SuggestionService) GetSuggestions(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	requestNumber := int(req.GetRequestNumber())
-	parameterAssignments := make([]*api_v1_beta1.GetSuggestionsReply_ParameterAssignments, requestNumber)
-	for i := 0; i < requestNumber; i++ {
+	currentRequestNumber := int(req.GetCurrentRequestNumber())
+	parameterAssignments := make([]*api_v1_beta1.GetSuggestionsReply_ParameterAssignments, currentRequestNumber)
+	for i := 0; i < currentRequestNumber; i++ {
 		trialID, assignments, err := sampleNextParam(s.study, s.searchSpace)
 		if err != nil {
 			klog.Errorf("Failed to sample next param: trialID=%d, err=%s", trialID, err)

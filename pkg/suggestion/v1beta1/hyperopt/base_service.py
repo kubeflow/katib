@@ -84,7 +84,7 @@ class BaseHyperoptService(object):
 
         self.fmin.catch_eval_exceptions = False
 
-    def getSuggestions(self, trials, request_number):
+    def getSuggestions(self, trials, current_request_number):
         """
         Get the new suggested trials with the given algorithm.
         """
@@ -192,8 +192,8 @@ class BaseHyperoptService(object):
             self.fmin.trials.insert_trial_docs(hyperopt_trials)
             self.fmin.trials.refresh()
 
-        # Produce new request_number ids to make new Suggestion
-        hyperopt_trial_new_ids = self.fmin.trials.new_trial_ids(request_number)
+        # Produce new current_request_number ids to make new Suggestion
+        hyperopt_trial_new_ids = self.fmin.trials.new_trial_ids(current_request_number)
         random_state = self.fmin.rstate.randint(2**31 - 1)
 
         # Trial list that must be deployed
@@ -206,7 +206,7 @@ class BaseHyperoptService(object):
                 seed=random_state)
         elif self.algorithm_name == TPE_ALGORITHM_NAME:
             # n_startup_jobs indicates for how many Trials we run random suggestion
-            # This must be request_number value
+            # This must be current_request_number value
             # After this tpe suggestion starts analyse Trial info.
             # On the first run we can run suggest just once with n_startup_jobs
             # Next suggest runs must be for each new Trial generation
@@ -216,18 +216,18 @@ class BaseHyperoptService(object):
                     domain=self.fmin.domain,
                     trials=self.fmin.trials,
                     seed=random_state,
-                    n_startup_jobs=request_number,
+                    n_startup_jobs=current_request_number,
                     **self.algorithm_conf)
                 self.is_first_run = False
             else:
-                for i in range(request_number):
+                for i in range(current_request_number):
                     # hyperopt_algorithm always returns one new Trial
                     new_trials.append(self.hyperopt_algorithm(
                         new_ids=[hyperopt_trial_new_ids[i]],
                         domain=self.fmin.domain,
                         trials=self.fmin.trials,
                         seed=random_state,
-                        n_startup_jobs=request_number,
+                        n_startup_jobs=current_request_number,
                         **self.algorithm_conf)[0])
 
         # Construct return advisor Trials from new hyperopt Trials

@@ -94,7 +94,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 						ParameterSpecs: parameterSpecs,
 					},
 				},
-				RequestNumber: 2,
+				CurrentRequestNumber: 2,
 			},
 			expectedCode: codes.OK,
 		},
@@ -122,7 +122,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 						ParameterSpecs: parameterSpecs,
 					},
 				},
-				RequestNumber: 2,
+				CurrentRequestNumber: 2,
 			},
 		},
 		{
@@ -149,7 +149,7 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 						ParameterSpecs: parameterSpecs,
 					},
 				},
-				RequestNumber: 2,
+				CurrentRequestNumber: 2,
 			},
 		},
 	} {
@@ -169,8 +169,8 @@ func TestSuggestionService_GetSuggestions(t *testing.T) {
 				return
 			}
 
-			if len(reply.ParameterAssignments) != int(tt.req.RequestNumber) {
-				t.Errorf("GetSuggestions() should return %d suggestions, but got %#v", tt.req.RequestNumber, reply.ParameterAssignments)
+			if len(reply.ParameterAssignments) != int(tt.req.CurrentRequestNumber) {
+				t.Errorf("GetSuggestions() should return %d suggestions, but got %#v", tt.req.CurrentRequestNumber, reply.ParameterAssignments)
 				return
 			}
 

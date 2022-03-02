@@ -50,14 +50,14 @@ const initialState = {
       value: 'status.conditions.#(type=="Complete")#|#(status=="True")#',
       description: `Condition when Trial custom resource is succeeded.
       Default value for k8s BatchJob: status.conditions.#(type=="Complete")#|#(status=="True")#.
-      Default value for Kubeflow Job (TFJob, PyTorchJob, XGBoostJob, MXJob): status.conditions.#(type=="Succeeded")#|#(status=="True")#.`,
+      Default value for Kubeflow Job (TFJob, PyTorchJob, XGBoostJob, MXJob, MPIJob): status.conditions.#(type=="Succeeded")#|#(status=="True")#.`,
     },
     {
       name: 'FailureCondition',
       value: 'status.conditions.#(type=="Failed")#|#(status=="True")#',
       description: `Condition when Trial custom resource is failed.
       Default value for k8s BatchJob: status.conditions.#(type=="Failed")#|#(status=="True")#.
-      Default value for Kubeflow Job (TFJob, PyTorchJob, XGBoostJob, MXJob): status.conditions.#(type=="Failed")#|#(status=="True")#.`,
+      Default value for Kubeflow Job (TFJob, PyTorchJob, XGBoostJob, MXJob, MPIJob): status.conditions.#(type=="Failed")#|#(status=="True")#.`,
     },
     {
       name: 'Retain',

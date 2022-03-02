@@ -30,7 +30,7 @@ const (
 )
 
 var (
-	NeedWrapWorkerMetricsCollecterList = [...]common.CollectorKind{
+	NeedWrapWorkerMetricsCollectorList = [...]common.CollectorKind{
 		common.StdOutCollector,
 		common.TfEventCollector,
 		common.FileCollector,

@@ -38,7 +38,7 @@ const (
 
 var (
 	// DefaultKubeflowJobPrimaryPodLabels is the default value of spec.trialTemplate.primaryPodLabels for Kubeflow Training Job.
-	DefaultKubeflowJobPrimaryPodLabels = map[string]string{"job-role": "master"}
+	DefaultKubeflowJobPrimaryPodLabels = map[string]string{"training.kubeflow.org/job-role": "master"}
 
 	// KubeflowJobKinds is the list of Kubeflow Training Job kinds.
 	KubeflowJobKinds = map[string]bool{
@@ -46,5 +46,6 @@ var (
 		"PyTorchJob": true,
 		"XGBoostJob": true,
 		"MXJob":      true,
+		"MPIJob":     true,
 	}
 )

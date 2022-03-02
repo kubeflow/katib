@@ -75,3 +75,23 @@ func (mr *MockEarlyStoppingClientMockRecorder) SetTrialStatus(arg0, arg1 interfa
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTrialStatus", reflect.TypeOf((*MockEarlyStoppingClient)(nil).SetTrialStatus), varargs...)
 }
+
+// ValidateEarlyStoppingSettings mocks base method.
+func (m *MockEarlyStoppingClient) ValidateEarlyStoppingSettings(arg0 context.Context, arg1 *api_v1_beta1.ValidateEarlyStoppingSettingsRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.ValidateEarlyStoppingSettingsReply, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ValidateEarlyStoppingSettings", varargs...)
+	ret0, _ := ret[0].(*api_v1_beta1.ValidateEarlyStoppingSettingsReply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateEarlyStoppingSettings indicates an expected call of ValidateEarlyStoppingSettings.
+func (mr *MockEarlyStoppingClientMockRecorder) ValidateEarlyStoppingSettings(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateEarlyStoppingSettings", reflect.TypeOf((*MockEarlyStoppingClient)(nil).ValidateEarlyStoppingSettings), varargs...)
+}

@@ -6,7 +6,6 @@ import {
   ConfigMapResponse,
   ConfigMapBody,
 } from 'src/app/models/trial-templates.model';
-import { temporaryDeclaration } from '@angular/compiler/src/compiler_util/expression_converter';
 import { Subscription } from 'rxjs';
 
 @Component({

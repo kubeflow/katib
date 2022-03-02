@@ -6,6 +6,10 @@ list in reverse chronological order.
 
 | Presentation or Demo title | Presenters | Date |
 | --- | --- | --- |
+| [Cloud Native AutoML with Argo Workflows and Katib](https://youtu.be/KjHqmS4gIxM?t=181) | Andrey Velichkevich, Johnu George | 2022-02-16 |
+| [When Machine Learning Toolkit for Kubernetes Meets PaddlePaddle](https://github.com/terrytangyuan/public-talks/tree/main/talks/when-machine-learning-toolkit-for-kubernetes-meets-paddlepaddle-wave-summit-2021) | [Yuan Tang](https://terrytangyuan.github.io/about/) | 2021-12-12 |
+| [Bridging into Python Ecosystem with Cloud-Native Distributed Machine Learning Pipelines](https://github.com/terrytangyuan/public-talks/tree/main/talks/bridging-into-python-ecosystem-with-cloud-native-distributed-machine-learning-pipelines-argocon-2021) | [Yuan Tang](https://terrytangyuan.github.io/about/) | 2021-12-08 |
+| [Towards Cloud-Native Distributed Machine Learning Pipelines at Scale](https://github.com/terrytangyuan/public-talks/tree/main/talks/towards-cloud-native-distributed-machine-learning-pipelines-at-scale-pydata-global-2021) | [Yuan Tang](https://terrytangyuan.github.io/about/) | 2021-10-29 |
 | [AutoML and Training WG Summit July 2021](https://youtube.com/playlist?list=PL2gwy7BdKoGd9HQBCz1iC7vyFVN7Wa9N2) | Kubeflow Community | 2021-07-16 |
 | [MLREPA 2021: MLOps and AutoML in Cloud-Native Way with Kubeflow and Katib](https://youtu.be/33VJ6KNBBvU) | Andrey Velichkevich | 2021-04-25 |
 | [KF Community: A Tour of Katib's new UI for Kubeflow 1.3](https://youtu.be/1DtjB_boWcQ) | Kimonas Sotirchos | 2021-03-30 |

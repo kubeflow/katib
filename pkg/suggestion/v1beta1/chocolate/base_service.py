@@ -46,9 +46,11 @@ class BaseChocolateService(object):
         self.chocolate_optimizer = None
         self.create_optimizer(algorithm_name)
         # created_trials is the list of dicts with all created trials assignments, loss and trial name
-        # _chocolate_id is the ID of the trial, Assignment names are encoded, _loss is the target metric, _trial_name is the Trial name
+        # _chocolate_id is the ID of the trial, Assignment names are encoded,
+        # _loss is the target metric, _trial_name is the Trial name
         # One row example:
-        # {'_chocolate_id': 0, 'LS1scg==': 0.001, 'LS1udW0tZXBvY2hz': 1, 'LS1udW0tbGF5ZXJz': 2, "_loss": "0.97", "_trial_name": "grid-hsdvfdwl"}
+        # {'_chocolate_id': 0, 'LS1scg==': 0.001, 'LS1udW0tZXBvY2hz': 1, 'LS1udW0tbGF5ZXJz': 2,
+        #   "_loss": "0.97", "_trial_name": "grid-hsdvfdwl"}
         self.created_trials = []
         self.recorded_trials_names = []
 
@@ -59,12 +61,13 @@ class BaseChocolateService(object):
 
         for param in self.search_space.params:
             key = BaseChocolateService.encode(param.name)
+            # Chocolate quantized_uniform distribution uses half-open interval: [low, high).
             if param.type == INTEGER:
                 chocolate_search_space[key] = choco.quantized_uniform(
-                    int(param.min), int(param.max), int(param.step))
+                    int(param.min), int(param.max) + int(param.step), int(param.step))
             elif param.type == DOUBLE:
                 chocolate_search_space[key] = choco.quantized_uniform(
-                    float(param.min), float(param.max), float(param.step))
+                    float(param.min), float(param.max) + float(param.step), float(param.step))
             # For Categorical and Discrete insert indexes to DB from list of values
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 chocolate_search_space[key] = choco.choice(
@@ -103,13 +106,13 @@ class BaseChocolateService(object):
             raise Exception(
                 '"Failed to create Chocolate optimizer for the algorithm: {}'.format(algorithm_name))
 
-    def getSuggestions(self, trials, request_number, total_request_number):
+    def getSuggestions(self, trials, current_request_number, total_request_number):
         """
         Get the new suggested trials with chocolate algorithm.
         """
         logger.info("-" * 100 + "\n")
         logger.info("New GetSuggestions call with total requested {} and currently requesting {} \n".format(
-            total_request_number, request_number))
+            total_request_number, current_request_number))
         for _, trial in enumerate(trials):
             if trial.name not in self.recorded_trials_names:
                 loss_for_choco = float(trial.target_metric.value)
@@ -137,8 +140,10 @@ class BaseChocolateService(object):
                 i = 0
                 while new_trial_loss_idx == -1 and i < len(self.created_trials):
                     # Created Trial must not include loss and must have the same param assignment
-                    if ((DB_FIELD_LOSS not in self.created_trials[i] or self.created_trials[i][DB_FIELD_LOSS] is None) and
-                            len(trial_assignments_dict.items() & self.created_trials[i].items()) == len(self.search_space.params)):
+                    if ((DB_FIELD_LOSS not in self.created_trials[i] or
+                         self.created_trials[i][DB_FIELD_LOSS] is None) and
+                            len(trial_assignments_dict.items() & self.created_trials[i].items()) ==
+                            len(self.search_space.params)):
                         new_trial_loss_idx = i
                     i += 1
 
@@ -161,12 +166,13 @@ class BaseChocolateService(object):
         # Assuming that created_trials are already populated
         # TODO: Handle Restart of algorithm pod
         logger.info("{} Trials created in DB".format(len(self.created_trials)))
-        if total_request_number != len(self.created_trials) + request_number:
+        if total_request_number != len(self.created_trials) + current_request_number:
             logger.info("Mismatch in generated trials with k8s suggestions trials")
         new_actual_requested_no = total_request_number - len(self.created_trials)
-        prev_generated_no = request_number - new_actual_requested_no
-        logger.info("In this call, New {} Trials will be generated, {} Trials will be reused from previously generated".format(
-            new_actual_requested_no, prev_generated_no))
+        prev_generated_no = current_request_number - new_actual_requested_no
+        logger.info(
+            "In this call, New {} Trials will be generated, {} Trials will be reused from previously generated".format(
+                new_actual_requested_no, prev_generated_no))
 
         list_of_assignments = []
         if prev_generated_no > 0:
@@ -199,8 +205,8 @@ class BaseChocolateService(object):
                     "Chocolate db is exhausted, increase Search Space or decrease maxTrialCount!")
 
         if len(list_of_assignments) > 0:
-            logger.info(
-                "GetSuggestions returns {} Trials from requested {} Trials\n\n".format(len(list_of_assignments), request_number))
+            logger.info("GetSuggestions returns {} Trials from requested {} Trials\n\n".format(
+                len(list_of_assignments), current_request_number))
 
         return list_of_assignments
 

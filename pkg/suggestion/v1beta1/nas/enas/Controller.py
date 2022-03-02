@@ -54,7 +54,7 @@ class Controller(object):
     def _build_params(self):
         """Create TF parameters"""
         self.logger.info(">>> Building Controller Parameters\n")
-        initializer = tf.random_uniform_initializer(minval=-0.01, maxval=0.01)
+        initializer = tf.compat.v1.random_uniform_initializer(minval=-0.01, maxval=0.01)
         hidden_size = self.controller_hidden_size
 
         with tf.compat.v1.variable_scope(self.controller_name, initializer=initializer):
@@ -127,7 +127,7 @@ class Controller(object):
             entropy = log_prob * tf.exp(-log_prob)
             entropy = tf.stop_gradient(entropy)
             sample_entropies.append(entropy)
-            inputs = tf.nn.embedding_lookup(self.w_emb, func)
+            inputs = tf.nn.embedding_lookup(params=self.w_emb, ids=func)
 
             next_c, next_h = _lstm(inputs, prev_c, prev_h, self.w_lstm)
             prev_c, prev_h = next_c, next_h
@@ -154,26 +154,26 @@ class Controller(object):
 
                 skip_prob = tf.sigmoid(logits)
                 kl = skip_prob * tf.math.log(skip_prob/skip_targets)
-                kl = tf.reduce_sum(kl)
+                kl = tf.reduce_sum(input_tensor=kl)
                 skip_penalties.append(kl)
 
                 log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(
                     logits=logits, labels=skip_index)
 
-                sample_log_probs.append(tf.reduce_sum(log_prob, keepdims=True))
+                sample_log_probs.append(tf.reduce_sum(input_tensor=log_prob, keepdims=True))
 
                 entropy = tf.stop_gradient(
-                    tf.reduce_sum(log_prob * tf.exp(-log_prob), keepdims=True))
+                    tf.reduce_sum(input_tensor=log_prob * tf.exp(-log_prob), keepdims=True))
                 sample_entropies.append(entropy)
 
                 skip_index = tf.dtypes.cast(skip_index, tf.float32)
                 skip_index = tf.reshape(skip_index, [1, layer_id])
 
-                skip_count.append(tf.reduce_sum(skip_index))
+                skip_count.append(tf.reduce_sum(input_tensor=skip_index))
 
                 inputs = tf.matmul(skip_index, tf.concat(all_h, axis=0))
 
-                inputs /= (1.0 + tf.reduce_sum(skip_index))
+                inputs /= (1.0 + tf.reduce_sum(input_tensor=skip_index))
             else:
                 inputs = self.g_emb
 
@@ -184,16 +184,16 @@ class Controller(object):
         self.sample_arc = tf.reshape(arc_seq, [-1])
 
         sample_entropies = tf.stack(sample_entropies)
-        self.sample_entropy = tf.reduce_sum(sample_entropies)
+        self.sample_entropy = tf.reduce_sum(input_tensor=sample_entropies)
 
         sample_log_probs = tf.stack(sample_log_probs, axis=0)
-        self.sample_log_probs = tf.reduce_sum(sample_log_probs)
+        self.sample_log_probs = tf.reduce_sum(input_tensor=sample_log_probs)
 
         skip_penalties = tf.stack(skip_penalties)
-        self.skip_penalties = tf.reduce_mean(skip_penalties)
+        self.skip_penalties = tf.reduce_mean(input_tensor=skip_penalties)
 
         skip_count = tf.stack(skip_count)
-        self.skip_count = tf.reduce_sum(skip_count)
+        self.skip_count = tf.reduce_sum(input_tensor=skip_count)
 
     def build_trainer(self):
         """Build the train ops by connecting Controller with candidate."""
@@ -207,7 +207,7 @@ class Controller(object):
         if self.controller_entropy_weight is not None:
             self.reward += self.controller_entropy_weight * self.sample_entropy
 
-        self.sample_log_probs = tf.reduce_sum(self.sample_log_probs)
+        self.sample_log_probs = tf.reduce_sum(input_tensor=self.sample_log_probs)
         self.baseline = tf.Variable(0.0, dtype=tf.float32, trainable=False)
         baseline_update = tf.compat.v1.assign_sub(
             self.baseline, (1 - self.controller_baseline_decay) * (self.baseline - self.reward))
@@ -249,7 +249,7 @@ def _lstm(x, prev_c, prev_h, w_lstm):
 def _build_train_op(loss, tf_variables, train_step, learning_rate):
     """Build training ops from `loss` tensor."""
     optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate)
-    grads = tf.gradients(loss, tf_variables)
+    grads = tf.gradients(ys=loss, xs=tf_variables)
 
     grad_norm = tf.linalg.global_norm(grads)
     train_op = optimizer.apply_gradients(zip(grads, tf_variables), global_step=train_step)

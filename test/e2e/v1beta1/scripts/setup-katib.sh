@@ -20,11 +20,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-CLUSTER_NAME="${CLUSTER_NAME}"
-AWS_REGION="${AWS_REGION}"
-ECR_REGISTRY="${ECR_REGISTRY}"
-VERSION="${PULL_PULL_SHA}"
-
 echo "Start to install Katib"
 echo "CLUSTER_NAME: ${CLUSTER_NAME}"
 echo "AWS_REGION: ${AWS_REGION}"
@@ -36,64 +31,18 @@ aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
 kubectl version
 kubectl cluster-info
 
-# Update images with current pull sha.
-echo "Updating Katib images with the current PR SHA: ${VERSION}"
-KUSTOMIZE_PATH="manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
-CONFIG_PATCH="manifests/v1beta1/components/controller/katib-config.yaml"
+# Update Katib images with the current PULL SHA.
+make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="${ECR_REGISTRY}/${REPO_NAME}/v1beta1/" TAG="${PULL_PULL_SHA}"
 
-# Change tag to all images in kustomization and katib-config patch files.
-sed -i -e "s@newTag: .*@newTag: ${VERSION}@" ${KUSTOMIZE_PATH}
-sed -i -e "s@:[^[:space:]].*\"@:${VERSION}\"@" ${CONFIG_PATCH}
-
-# Change Katib controller image.
-sed -i -e "s@newName: docker.io/kubeflowkatib/katib-controller@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-controller@" ${KUSTOMIZE_PATH}
-
-# Change Katib DB manager image.
-sed -i -e "s@newName: docker.io/kubeflowkatib/katib-db-manager@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-db-manager@" ${KUSTOMIZE_PATH}
-
-# Change Katib UI image.
-sed -i -e "s@newName: docker.io/kubeflowkatib/katib-ui@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/katib-ui@" ${KUSTOMIZE_PATH}
-
-# Change Katib cert generator image.
-sed -i -e "s@newName: docker.io/kubeflowkatib/cert-generator@newName: ${ECR_REGISTRY}/${REPO_NAME}/v1beta1/cert-generator@" ${KUSTOMIZE_PATH}
-
-# Change Katib metrics collector images.
-sed -i -e "s@docker.io/kubeflowkatib/file-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/file-metrics-collector@" ${CONFIG_PATCH}
-sed -i -e "s@docker.io/kubeflowkatib/tfevent-metrics-collector@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/tfevent-metrics-collector@" ${CONFIG_PATCH}
-
-# Change Katib Suggestion images.
-sed -i -e "s@docker.io/kubeflowkatib/suggestion-hyperopt@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-hyperopt@" ${CONFIG_PATCH}
-sed -i -e "s@docker.io/kubeflowkatib/suggestion-chocolate@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-chocolate@" ${CONFIG_PATCH}
-sed -i -e "s@docker.io/kubeflowkatib/suggestion-hyperband@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-hyperband@" ${CONFIG_PATCH}
-sed -i -e "s@docker.io/kubeflowkatib/suggestion-skopt@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-skopt@" ${CONFIG_PATCH}
-sed -i -e "s@docker.io/kubeflowkatib/suggestion-goptuna@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-goptuna@" ${CONFIG_PATCH}
-sed -i -e "s@docker.io/kubeflowkatib/suggestion-optuna@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-optuna@" ${CONFIG_PATCH}
-sed -i -e "s@docker.io/kubeflowkatib/suggestion-enas@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-enas@" ${CONFIG_PATCH}
-sed -i -e "s@docker.io/kubeflowkatib/suggestion-darts@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-darts@" ${CONFIG_PATCH}
-
-# Change Katib Early Stopping images.
-sed -i -e "s@docker.io/kubeflowkatib/earlystopping-medianstop@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/earlystopping-medianstop@" ${CONFIG_PATCH}
-
-echo "Katib images have been updated"
-cat ${KUSTOMIZE_PATH}
-cat ${CONFIG_PATCH}
-
-# Update Trial template images in the examples.
-./scripts/v1beta1/update-trial-images.sh -p "${ECR_REGISTRY}/${REPO_NAME}/v1beta1/trial-" -t ${VERSION}
+echo -e "\n The Katib will be deployed with the following configs"
+cat "manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
+cat "manifests/v1beta1/components/controller/katib-config.yaml"
 
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 
-echo "Deploying tf-operator from kubeflow/manifests master"
-cd "${MANIFESTS_DIR}/tf-training/tf-job-crds/base"
-kustomize build . | kubectl apply -f -
-cd "${MANIFESTS_DIR}/tf-training/tf-job-operator/base"
-kustomize build . | kubectl apply -f -
-
-echo "Deploying pytorch-operator from kubeflow/manifests master"
-cd "${MANIFESTS_DIR}/pytorch-job/pytorch-job-crds/base"
-kustomize build . | kubectl apply -f -
-cd "${MANIFESTS_DIR}/pytorch-job/pytorch-operator/base/"
+cd "${MANIFESTS_DIR}/apps/training-operator/upstream/overlays/kubeflow"
+echo "Deploying Training Operator from kubeflow/manifests $(git rev-parse --abbrev-ref HEAD)"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
@@ -101,20 +50,9 @@ cd "${GOPATH}/src/github.com/kubeflow/katib"
 make deploy
 
 # Wait until all Katib pods is running.
-TIMEOUT=120
-PODNUM=$(kubectl get deploy -n kubeflow | grep -v NAME | wc -l)
-# 1 Pod for the cert-generator Job
-PODNUM=$((PODNUM + 1))
-until kubectl get pods -n kubeflow | grep -E 'Running|Completed' | [[ $(wc -l) -eq $PODNUM ]]; do
-  echo Pod Status $(kubectl get pods -n kubeflow | grep "1/1" | wc -l)/$PODNUM
-  sleep 10
-  TIMEOUT=$((TIMEOUT - 1))
-  if [[ $TIMEOUT -eq 0 ]]; then
-    echo "NG"
-    kubectl get pods -n kubeflow
-    exit 1
-  fi
-done
+TIMEOUT=120s
+kubectl wait --for=condition=complete --timeout=${TIMEOUT} -l katib.kubeflow.org/component=cert-generator -n kubeflow job
+kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,mysql,ui)" -n kubeflow pod
 
 echo "All Katib components are running."
 echo "Katib deployments"
@@ -123,6 +61,9 @@ echo "Katib services"
 kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
+
+# We should update Trial images after Katib is deployed since they have "trial-" in private ECR image name.
+make update-images OLD_PREFIX="${ECR_REGISTRY}/${REPO_NAME}/v1beta1/" NEW_PREFIX="${ECR_REGISTRY}/${REPO_NAME}/v1beta1/trial-" TAG="${PULL_PULL_SHA}"
 
 # Check that Katib is working with 2 Experiments.
 kubectl apply -f test/e2e/v1beta1/valid-experiment.yaml

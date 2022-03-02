@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import grpc
 import grpc_testing
 import unittest
+import pytest
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 
@@ -168,7 +171,7 @@ class TestChocolate(unittest.TestCase):
         request = api_pb2.GetSuggestionsRequest(
             experiment=experiment,
             trials=trials,
-            request_number=2,
+            current_request_number=2,
             total_request_number=2,
         )
 
@@ -280,6 +283,17 @@ class TestChocolate(unittest.TestCase):
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, 'Max Trial Count: 15 > all possible search space combinations: 12')
+
+
+@pytest.fixture(scope='function', autouse=True)
+def tear_down():
+    yield
+    working_dir = os.getcwd()
+    db_file = ["my_db.db", "my_db.db?check_same_thread=False.lock", "my_db.db-shm", "my_db.db-wal"]
+    for fname in db_file:
+        target_path = os.path.join(working_dir, fname)
+        if os.path.isfile(target_path):
+            os.remove(target_path)
 
 
 if __name__ == '__main__':

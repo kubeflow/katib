@@ -1,5 +1,4 @@
 name: katib-controller
-display-name: Katib Controller
 summary: A Kubernetes-native project for automated machine learning (AutoML)
 description: |
   Katib supports Hyperparameter Tuning, Early Stopping and Neural Architecture Search
@@ -7,18 +6,14 @@ description: |
   Katib is the project which is agnostic to machine learning (ML) frameworks. It can tune
   hyperparameters of applications written in any language of the users’ choice and natively
   supports many ML frameworks, such as TensorFlow, MXNet, PyTorch, XGBoost, and others.
-tags: [ai, bigdata, katib, kubeflow, machine-learning, hyperparameter]
-maintainers:
-  - Dominik Fleischmann <dominik.fleischmann@canonical.com>
-  - Kenneth Koski <kenneth.koski@canonical.com>
+min-juju-version: "2.9.0"
 series: [kubernetes]
 resources:
   oci-image:
     type: oci-image
     description: Backing OCI image
     auto-fetch: true
-    upstream-source: docker.io/kubeflowkatib/katib-controller:v1beta1-c6c9172
+    upstream-source: docker.io/kubeflowkatib/katib-controller:v0.12.0
 provides:
   katib-controller:
     interface: http
-min-juju-version: 2.8.6

@@ -78,7 +78,7 @@ class TestDarts(unittest.TestCase):
 
         request = api_pb2.GetSuggestionsRequest(
             experiment=experiment,
-            request_number=1,
+            current_request_number=1,
         )
 
         get_suggestion = self.test_server.invoke_unary_unary(

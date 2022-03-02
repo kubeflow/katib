@@ -36,6 +36,7 @@ The sidecar collects metrics of the master and then store them on the persistent
 <img src="../images/metrics-collector-design.png" width="80%">
 
 Fig. 1 Architecture of the new design
+
 </center>
 
 ## Goal
@@ -117,13 +118,12 @@ For more detail, see [here](https://github.com/kubeflow/katib/pull/697#issuecomm
 
 To avoid collecting duplicated metrics, as we discuss in [kubeflow/katib#685](https://github.com/kubeflow/katib/issues/685), only one metrics collector sidecar will be injected into the master pod during one Experiment.
 In the new design, there are two modes for Katib mutating webhook to inject the sidecar: **Pod Level Injecting** and **Job Level Injecting**.
-
-The webhook decides which mode to be used based on the `katib-metricscollector-injection=enabled` label tagged on the namespace.
-In the namespace with `katib-metricscollector-injection=enabled` label, the webhook inject the sidecar in the pod level. Otherwise, without this label, injecting in the job level.
+The webhook decides which mode to be used based on the `katib.kubeflow.org/metrics-collector-injection=enabled` label tagged on the namespace.
+In the namespace with `katib.kubeflow.org/metrics-collector-injection=enabled` label, the webhook inject the sidecar in the pod level. Otherwise, without this label, injecting in the job level.
 
 In **Pod Level Injecting**,
 
-1. Job operators (_e.x. TFjob/PyTorchjob_) tag the `job-role: master` ([#1064](https://github.com/kubeflow/tf-operator/pull/1064)) label on the master pod.
+1. Job operators (_e.x. TFjob/PyTorchjob_) tag the `training.kubeflow.org/job-role: master` ([#1064](https://github.com/kubeflow/tf-operator/pull/1064)) label on the master pod.
 2. The webhook inject the metric collector only if the webhook recognizes this label.
 3. The webhook uses [ObjectSelector](https://github.com/kubernetes/kubernetes/pull/78505) to skip on irrelevant objects in order to optimize the performance.
 4. ObjectSelector is only supported above _Kubernetes v1.15_. Without this new feature, there may be a [performance issue](https://github.com/kubeflow/katib/issues/685#issuecomment-516226070) in webhook. In this situation, the following **Job Level Injecting** mode may be a better option.

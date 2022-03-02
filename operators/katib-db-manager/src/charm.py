@@ -2,13 +2,23 @@
 
 import logging
 
+from oci_image import OCIImageResource, OCIImageResourceError
 from ops.charm import CharmBase
 from ops.main import main
 from ops.model import ActiveStatus, MaintenanceStatus, WaitingStatus
 
-from oci_image import OCIImageResource, OCIImageResourceError
-
 logger = logging.getLogger(__name__)
+
+
+class CheckFailed(Exception):
+    """ Raise this exception if one of the checks in main fails. """
+
+    def __init__(self, msg, status_type=None):
+        super().__init__()
+
+        self.msg = msg
+        self.status_type = status_type
+        self.status = status_type(msg)
 
 
 class Operator(CharmBase):
@@ -16,11 +26,6 @@ class Operator(CharmBase):
 
     def __init__(self, framework):
         super().__init__(framework)
-
-        if not self.model.unit.is_leader():
-            logger.info("Not a leader, skipping any work")
-            self.model.unit.status = ActiveStatus()
-            return
 
         self.image = OCIImageResource(self, "oci-image")
         self.framework.observe(self.on.install, self.set_pod_spec)
@@ -30,25 +35,17 @@ class Operator(CharmBase):
         self.framework.observe(self.on["mysql"].relation_changed, self.set_pod_spec)
 
     def set_pod_spec(self, event):
+        try:
+            self._check_leader()
+
+            image_details = self._check_image_details()
+
+            mysql_data = self._check_mysql()
+        except CheckFailed as check_failed:
+            self.model.unit.status = check_failed.status
+            return
+
         self.model.unit.status = MaintenanceStatus("Setting pod spec")
-
-        try:
-            image_details = self.image.fetch()
-        except OCIImageResourceError as e:
-            self.model.unit.status = e.status
-            return
-
-        try:
-            relation = self.model.relations["mysql"][0]
-            unit = next(iter(relation.units))
-            mysql_data = relation.data[unit]
-            # Ensure we've got some data sent over the relation
-            mysql_data["root_password"]
-        except (IndexError, StopIteration, KeyError):
-            self.model.unit.status = WaitingStatus(
-                "Waiting for mysql connection information"
-            )
-            return
 
         self.model.pod.set_spec(
             {
@@ -99,15 +96,6 @@ class Operator(CharmBase):
                             "KATIB_MYSQL_DB_DATABASE": mysql_data["database"],
                         },
                         "kubernetes": {
-                            "readinessProbe": {
-                                "exec": {
-                                    "command": [
-                                        "/bin/grpc_health_probe",
-                                        f"-addr=:{self.model.config['port']}",
-                                    ]
-                                },
-                                "initialDelaySeconds": 5,
-                            },
                             "livenessProbe": {
                                 "exec": {
                                     "command": [
@@ -126,6 +114,30 @@ class Operator(CharmBase):
         )
 
         self.model.unit.status = ActiveStatus()
+
+    def _check_leader(self):
+        if not self.unit.is_leader():
+            # We can't do anything useful when not the leader, so do nothing.
+            raise CheckFailed("Waiting for leadership", WaitingStatus)
+
+    def _check_image_details(self):
+        try:
+            image_details = self.image.fetch()
+        except OCIImageResourceError as e:
+            raise CheckFailed(f"{e.status.message}", e.status_type)
+        return image_details
+
+    def _check_mysql(self):
+        try:
+            relation = self.model.relations["mysql"][0]
+            unit = next(iter(relation.units))
+            mysql_data = relation.data[unit]
+            # Ensure we've got some data sent over the relation
+            mysql_data["root_password"]
+        except (IndexError, StopIteration, KeyError):
+            raise CheckFailed("Waiting for mysql connection information", WaitingStatus)
+
+        return mysql_data
 
 
 if __name__ == "__main__":

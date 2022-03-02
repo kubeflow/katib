@@ -1,12 +1,13 @@
-FROM python:3.6
+FROM python:3.9
 
 ENV TARGET_DIR /opt/katib
 ENV EARLY_STOPPING_DIR cmd/earlystopping/medianstop/v1beta1
 
 RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
-  apt-get -y update && \
-  apt-get -y install gfortran libopenblas-dev liblapack-dev && \
-  pip install cython; \
+    apt-get -y update && \
+    apt-get -y install gfortran libopenblas-dev liblapack-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*; \
   fi
 
 ADD ./pkg/ ${TARGET_DIR}/pkg/

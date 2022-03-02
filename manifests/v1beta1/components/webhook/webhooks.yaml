@@ -64,7 +64,7 @@ webhooks:
         path: /mutate-pod
     namespaceSelector:
       matchLabels:
-        katib-metricscollector-injection: enabled
+        katib.kubeflow.org/metrics-collector-injection: enabled
     rules:
       - apiGroups:
           - ""

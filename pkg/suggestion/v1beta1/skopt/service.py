@@ -52,7 +52,7 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             self.is_first_run = False
 
         trials = Trial.convert(request.trials)
-        new_trials = self.base_service.getSuggestions(trials, request.request_number)
+        new_trials = self.base_service.getSuggestions(trials, request.current_request_number)
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=Assignment.generate(new_trials)
         )

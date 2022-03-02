@@ -330,6 +330,85 @@ func TestValidateAlgorithmSettings(t *testing.T) {
 	}
 }
 
+func TestValidateEarlyStoppingSettings(t *testing.T) {
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	rpcClientEarlyStopping := suggestionapimock.NewMockEarlyStoppingClient(mockCtrl)
+
+	getRPCClientEarlyStopping = func(conn *grpc.ClientConn) suggestionapi.EarlyStoppingClient {
+		return rpcClientEarlyStopping
+	}
+
+	expectedRequest := &suggestionapi.ValidateEarlyStoppingSettingsRequest{
+		EarlyStopping: newFakeRequest().Experiment.Spec.EarlyStopping,
+	}
+
+	validRun := rpcClientEarlyStopping.EXPECT().ValidateEarlyStoppingSettings(gomock.Any(), k8sMatcher{expectedRequest}, gomock.Any()).Return(nil, nil)
+
+	invalidExperiment := rpcClientEarlyStopping.EXPECT().ValidateEarlyStoppingSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
+		status.Error(codes.InvalidArgument, "Invalid experiment parameter"))
+	connectionError := rpcClientEarlyStopping.EXPECT().ValidateEarlyStoppingSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
+		status.Error(codes.Unavailable, "Unable to connect"))
+	unimplementedMethod := rpcClientEarlyStopping.EXPECT().ValidateEarlyStoppingSettings(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil,
+		status.Error(codes.Unimplemented, "Method not implemented"))
+
+	suggestionClient := New()
+
+	exp := newFakeExperiment()
+	sug := newFakeSuggestion()
+
+	gomock.InOrder(
+		validRun,
+		invalidExperiment,
+		connectionError,
+		unimplementedMethod)
+
+	tcs := []struct {
+		Experiment      *experimentsv1beta1.Experiment
+		Suggestion      *suggestionsv1beta1.Suggestion
+		Err             bool
+		TestDescription string
+	}{
+		// validRun case
+		{
+			Experiment:      exp,
+			Suggestion:      sug,
+			Err:             false,
+			TestDescription: "ValidateEarlyStoppingSettings valid run",
+		},
+		// invalidExperiment case
+		{
+			Experiment:      exp,
+			Suggestion:      sug,
+			Err:             true,
+			TestDescription: "Invalid argument return in Experiment validation",
+		},
+		// connectionError case
+		{
+			Experiment:      exp,
+			Suggestion:      sug,
+			Err:             true,
+			TestDescription: "Connection to early stopping service error",
+		},
+		// unimplementedMethod case
+		{
+			Experiment:      exp,
+			Suggestion:      sug,
+			Err:             false,
+			TestDescription: "Unimplemented ValidateEarlyStoppingSettings method",
+		},
+	}
+	for _, tc := range tcs {
+		err := suggestionClient.ValidateEarlyStoppingSettings(tc.Suggestion, tc.Experiment)
+		if !tc.Err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.TestDescription, err)
+		} else if tc.Err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.TestDescription)
+		}
+	}
+}
+
 func TestConvertTrialConditionType(t *testing.T) {
 
 	tcs := []struct {
@@ -909,7 +988,8 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 				},
 			},
 		},
-		RequestNumber:      2,
-		TotalRequestNumber: 6,
+		RequestNumber:        2,
+		CurrentRequestNumber: 2,
+		TotalRequestNumber:   6,
 	}
 }

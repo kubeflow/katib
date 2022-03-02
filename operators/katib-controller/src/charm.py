@@ -5,14 +5,24 @@ from pathlib import Path
 from subprocess import check_call
 
 import yaml
-from ops.charm import CharmBase
-from ops.main import main
-from ops.model import ActiveStatus, MaintenanceStatus
-from ops.framework import StoredState
-
 from oci_image import OCIImageResource, OCIImageResourceError
+from ops.charm import CharmBase
+from ops.framework import StoredState
+from ops.main import main
+from ops.model import ActiveStatus, MaintenanceStatus, WaitingStatus
 
 logger = logging.getLogger(__name__)
+
+
+class CheckFailed(Exception):
+    """ Raise this exception if one of the checks in main fails. """
+
+    def __init__(self, msg, status_type=None):
+        super().__init__()
+
+        self.msg = msg
+        self.status_type = status_type
+        self.status = status_type(msg)
 
 
 class Operator(CharmBase):
@@ -23,11 +33,6 @@ class Operator(CharmBase):
     def __init__(self, framework):
         super().__init__(framework)
 
-        if not self.model.unit.is_leader():
-            logger.info("Not a leader, skipping any work")
-            self.model.unit.status = ActiveStatus()
-            return
-
         self._stored.set_default(**self.gen_certs())
         self.image = OCIImageResource(self, "oci-image")
         self.framework.observe(self.on.install, self.set_pod_spec)
@@ -37,9 +42,11 @@ class Operator(CharmBase):
         self.model.unit.status = MaintenanceStatus("Setting pod spec")
 
         try:
-            image_details = self.image.fetch()
-        except OCIImageResourceError as e:
-            self.model.unit.status = e.status
+            self._check_leader()
+
+            image_details = self._check_image_details()
+        except CheckFailed as check_failed:
+            self.model.unit.status = check_failed.status
             return
 
         validating, mutating = yaml.safe_load_all(Path("src/webhooks.yaml").read_text())
@@ -62,12 +69,10 @@ class Operator(CharmBase):
                                         "namespaces",
                                         "persistentvolumes",
                                         "persistentvolumeclaims",
+                                        "pods",
+                                        "pods/log",
+                                        "pods/status",
                                     ],
-                                    "verbs": ["*"],
-                                },
-                                {
-                                    "apiGroups": [""],
-                                    "resources": ["pods", "pods/log", "pods/status"],
                                     "verbs": ["*"],
                                 },
                                 {
@@ -76,14 +81,17 @@ class Operator(CharmBase):
                                     "verbs": ["*"],
                                 },
                                 {
-                                    "apiGroups": ["batch"],
-                                    "resources": ["jobs", "cronjobs"],
+                                    "apiGroups": ["rbac.authorization.k8s.io"],
+                                    "resources": [
+                                        "roles",
+                                        "rolebindings",
+                                    ],
                                     "verbs": ["*"],
                                 },
                                 {
-                                    "apiGroups": ["apiextensions.k8s.io"],
-                                    "resources": ["customresourcedefinitions"],
-                                    "verbs": ["create", "get"],
+                                    "apiGroups": ["batch"],
+                                    "resources": ["jobs", "cronjobs"],
+                                    "verbs": ["*"],
                                 },
                                 {
                                     "apiGroups": ["kubeflow.org"],
@@ -97,22 +105,12 @@ class Operator(CharmBase):
                                         "suggestions",
                                         "suggestions/status",
                                         "suggestions/finalizers",
+                                        "tfjobs",
+                                        "pytorchjobs",
+                                        "mpijobs",
+                                        "xgboostjobs",
+                                        "mxjobs",
                                     ],
-                                    "verbs": ["*"],
-                                },
-                                {
-                                    "apiGroups": ["kubeflow.org"],
-                                    "resources": ["tfjobs", "pytorchjobs", "mpijobs"],
-                                    "verbs": ["*"],
-                                },
-                                {
-                                    "apiGroups": ["tekton.dev"],
-                                    "resources": ["pipelineruns", "taskruns"],
-                                    "verbs": ["*"],
-                                },
-                                {
-                                    "apiGroups": ["rbac.authorization.k8s.io"],
-                                    "resources": ["roles", "rolebindings"],
                                     "verbs": ["*"],
                                 },
                             ],
@@ -303,6 +301,18 @@ subjectAltName=@alt_names"""
             "key": Path("/run/server.key").read_text(),
             "ca": Path("/run/ca.crt").read_text(),
         }
+
+    def _check_leader(self):
+        if not self.unit.is_leader():
+            # We can't do anything useful when not the leader, so do nothing.
+            raise CheckFailed("Waiting for leadership", WaitingStatus)
+
+    def _check_image_details(self):
+        try:
+            image_details = self.image.fetch()
+        except OCIImageResourceError as e:
+            raise CheckFailed(f"{e.status.message}", e.status_type)
+        return image_details
 
 
 if __name__ == "__main__":

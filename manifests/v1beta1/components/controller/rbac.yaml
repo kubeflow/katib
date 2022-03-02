@@ -16,6 +16,7 @@ rules:
       - pods
       - pods/log
       - pods/status
+      - secrets
     verbs:
       - "*"
   - apiGroups:

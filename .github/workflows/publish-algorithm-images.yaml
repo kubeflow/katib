@@ -1,0 +1,48 @@
+name: Publish AutoML Algorithm Images
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  algorithm:
+    name: Publish Image
+    # Trigger workflow only for kubeflow/katib repository.
+    if: github.repository == 'kubeflow/katib'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Publish Component ${{ matrix.component-name }}
+        uses: ./.github/workflows/template-publish-image
+        with:
+          image: docker.io/kubeflowkatib/${{ matrix.component-name }}
+          dockerfile: ${{ matrix.dockerfile }}
+
+    strategy:
+      matrix:
+        include:
+          - component-name: suggestion-hyperopt
+            dockerfile: cmd/suggestion/hyperopt/v1beta1/Dockerfile
+          - component-name: suggestion-chocolate
+            dockerfile: cmd/suggestion/chocolate/v1beta1/Dockerfile
+          - component-name: suggestion-hyperband
+            dockerfile: cmd/suggestion/hyperband/v1beta1/Dockerfile
+          - component-name: suggestion-skopt
+            dockerfile: cmd/suggestion/skopt/v1beta1/Dockerfile
+          - component-name: suggestion-goptuna
+            dockerfile: cmd/suggestion/goptuna/v1beta1/Dockerfile
+          - component-name: suggestion-optuna
+            dockerfile: cmd/suggestion/optuna/v1beta1/Dockerfile
+          - component-name: suggestion-enas
+            dockerfile: cmd/suggestion/nas/enas/v1beta1/Dockerfile
+          - component-name: suggestion-darts
+            dockerfile: cmd/suggestion/nas/darts/v1beta1/Dockerfile
+          - component-name: earlystopping-medianstop
+            dockerfile: cmd/earlystopping/medianstop/v1beta1/Dockerfile

@@ -42,6 +42,7 @@ service Suggestion {
 service EarlyStopping {
     rpc GetEarlyStoppingRules(GetEarlyStoppingRulesRequest) returns (GetEarlyStoppingRulesReply);
     rpc SetTrialStatus(SetTrialStatusRequest) returns (SetTrialStatusReply);
+    rpc ValidateEarlyStoppingSettings(ValidateEarlyStoppingSettingsRequest) returns (ValidateEarlyStoppingSettingsReply);
 }
 
 /**
@@ -288,9 +289,14 @@ message DeleteObservationLogReply {
 
 message GetSuggestionsRequest {
     Experiment experiment = 1;
-    repeated Trial trials = 2; // all completed trials owned by the experiment.
-    int32 request_number = 3; ///The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time.
-    int32 total_request_number = 4;//The number of Suggestions requested till now
+    repeated Trial trials = 2; // All completed trials owned by the experiment.
+    // Use current_request_number instead. This API will be removed in Katib 0.14.
+    // The number of Suggestions requested at one time.
+    int32 request_number = 3 [deprecated=true];
+    // The number of Suggestions requested at one time.
+    // When you set 3 to current_request_number, you get three Suggestions at one time.
+    int32 current_request_number = 4; 
+    int32 total_request_number = 5; // The number of Suggestions requested till now.
 }
 
 message GetSuggestionsReply {
@@ -332,6 +338,16 @@ message EarlyStoppingRule {
     // Defines quantity of intermediate results that should be received before applying the rule.
     // If start step is empty, rule is applied from the first recorded metric.
     int32 start_step = 4; 
+}
+
+message ValidateEarlyStoppingSettingsRequest {
+    EarlyStoppingSpec early_stopping = 1;
+}
+
+/**
+ * Return INVALID_ARGUMENT Error if Early Stopping Settings are not Valid
+ */
+message ValidateEarlyStoppingSettingsReply {
 }
 
 enum ComparisonType {

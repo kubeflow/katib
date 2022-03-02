@@ -53,9 +53,11 @@ func TestValidateExperiment(t *testing.T) {
 	suggestionConfigData.Image = "algorithmImage"
 	metricsCollectorConfigData := katibconfig.MetricsCollectorConfig{}
 	metricsCollectorConfigData.Image = "metricsCollectorImage"
+	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
 
 	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()
 	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(metricsCollectorConfigData, nil).AnyTimes()
+	p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(earlyStoppingConfigData, nil).AnyTimes()
 
 	batchJobStr := convertBatchJobToString(newFakeBatchJob())
 	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()
@@ -78,7 +80,7 @@ func TestValidateExperiment(t *testing.T) {
 			Err:             true,
 			testDescription: "Name is invalid",
 		},
-		//Objective
+		// Objective
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -106,7 +108,7 @@ func TestValidateExperiment(t *testing.T) {
 			Err:             true,
 			testDescription: "Objective metric name is empty",
 		},
-		//Algorithm
+		// Algorithm
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -124,6 +126,25 @@ func TestValidateExperiment(t *testing.T) {
 			}(),
 			Err:             true,
 			testDescription: "Algorithm name is empty",
+		},
+		// EarlyStopping
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.EarlyStopping = nil
+				return i
+			}(),
+			Err:             false,
+			testDescription: "EarlyStopping is nil",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.EarlyStopping.AlgorithmName = ""
+				return i
+			}(),
+			Err:             true,
+			testDescription: "EarlyStopping AlgorithmName is empty",
 		},
 		// Valid Experiment
 		{
@@ -392,6 +413,8 @@ spec:
 	validTemplate2 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate3 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate4 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate5 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate6 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 
 	missedParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(missedParameterJobStr, nil)
 	oddParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(oddParameterJobStr, nil)
@@ -406,6 +429,8 @@ spec:
 		validTemplate2,
 		validTemplate3,
 		validTemplate4,
+		validTemplate5,
+		validTemplate6,
 		missedParameterTemplate,
 		oddParameterTemplate,
 		invalidParameterTemplate,
@@ -523,6 +548,27 @@ spec:
 			}(),
 			Err:             true,
 			testDescription: "Duplicate reference in Trial parameters",
+		},
+		// Trial template contains Trial parameters which weren't referenced from spec.parameters
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[1].Reference = "wrong-ref"
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Trial template contains Trial parameters which weren't referenced from spec.parameters",
+		},
+		// Trial template contains Trial parameters when spec.parameters is empty
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Parameters = nil
+				i.Spec.TrialTemplate.TrialParameters[1].Reference = "wrong-ref"
+				return i
+			}(),
+			Err:             false,
+			testDescription: "Trial template contains Trial parameters when spec.parameters is empty",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
 		// missedParameterTemplate case
@@ -952,12 +998,20 @@ func TestValidateConfigData(t *testing.T) {
 	suggestionConfigData := katibconfig.SuggestionConfig{}
 	suggestionConfigData.Image = "algorithmImage"
 
-	validConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil)
+	validConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).Times(2)
 	invalidConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(katibconfig.SuggestionConfig{}, errors.New("GetSuggestionConfigData failed"))
 
 	gomock.InOrder(
-		invalidConfigCall,
 		validConfigCall,
+		invalidConfigCall,
+	)
+
+	validEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(katibconfig.EarlyStoppingConfig{}, nil)
+	invalidEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(katibconfig.EarlyStoppingConfig{}, errors.New("GetEarlyStoppingConfigData failed"))
+
+	gomock.InOrder(
+		validEarlyStoppingConfigCall,
+		invalidEarlyStoppingConfigCall,
 	)
 
 	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(katibconfig.MetricsCollectorConfig{}, errors.New("GetMetricsCollectorConfigData failed"))
@@ -971,11 +1025,15 @@ func TestValidateConfigData(t *testing.T) {
 	}{
 		{
 			Instance:        newFakeInstance(),
-			testDescription: "Get suggestion config data error",
+			testDescription: "Get metrics collector config data error",
 		},
 		{
 			Instance:        newFakeInstance(),
-			testDescription: "Get metrics collector config data error",
+			testDescription: "Get early stopping config data error",
+		},
+		{
+			Instance:        newFakeInstance(),
+			testDescription: "Get suggestion config data error",
 		},
 	}
 
@@ -1017,8 +1075,18 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					},
 				},
 			},
+			EarlyStopping: &commonv1beta1.EarlyStoppingSpec{
+				AlgorithmName: "test",
+				AlgorithmSettings: []commonv1beta1.EarlyStoppingSetting{
+					{
+						Name:  "test1",
+						Value: "value1",
+					},
+				},
+			},
 			Parameters: []experimentsv1beta1.ParameterSpec{
 				{
+					Name:          "lr",
 					ParameterType: experimentsv1beta1.ParameterTypeInt,
 					FeasibleSpace: experimentsv1beta1.FeasibleSpace{
 						Max: "5",
@@ -1026,6 +1094,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					},
 				},
 				{
+					Name:          "num-layers",
 					ParameterType: experimentsv1beta1.ParameterTypeCategorical,
 					FeasibleSpace: experimentsv1beta1.FeasibleSpace{
 						List: []string{"1", "2", "3"},

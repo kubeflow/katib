@@ -17,6 +17,6 @@ limitations under the License.
 package common
 
 const (
-	KatibMetricsCollectorInjection        = "katib-metricscollector-injection"
+	KatibMetricsCollectorInjection        = "katib.kubeflow.org/metrics-collector-injection"
 	KatibMetricsCollectorInjectionEnabled = "enabled"
 )

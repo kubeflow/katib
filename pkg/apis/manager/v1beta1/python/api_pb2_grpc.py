@@ -170,6 +170,11 @@ class EarlyStoppingStub(object):
         request_serializer=api__pb2.SetTrialStatusRequest.SerializeToString,
         response_deserializer=api__pb2.SetTrialStatusReply.FromString,
         )
+    self.ValidateEarlyStoppingSettings = channel.unary_unary(
+        '/api.v1.beta1.EarlyStopping/ValidateEarlyStoppingSettings',
+        request_serializer=api__pb2.ValidateEarlyStoppingSettingsRequest.SerializeToString,
+        response_deserializer=api__pb2.ValidateEarlyStoppingSettingsReply.FromString,
+        )
 
 
 class EarlyStoppingServicer(object):
@@ -191,6 +196,13 @@ class EarlyStoppingServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def ValidateEarlyStoppingSettings(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_EarlyStoppingServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -203,6 +215,11 @@ def add_EarlyStoppingServicer_to_server(servicer, server):
           servicer.SetTrialStatus,
           request_deserializer=api__pb2.SetTrialStatusRequest.FromString,
           response_serializer=api__pb2.SetTrialStatusReply.SerializeToString,
+      ),
+      'ValidateEarlyStoppingSettings': grpc.unary_unary_rpc_method_handler(
+          servicer.ValidateEarlyStoppingSettings,
+          request_deserializer=api__pb2.ValidateEarlyStoppingSettingsRequest.FromString,
+          response_serializer=api__pb2.ValidateEarlyStoppingSettingsReply.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

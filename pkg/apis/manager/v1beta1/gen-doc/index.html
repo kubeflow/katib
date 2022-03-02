@@ -338,6 +338,14 @@
                   <a href="#api.v1.beta1.ValidateAlgorithmSettingsRequest"><span class="badge">M</span>ValidateAlgorithmSettingsRequest</a>
                 </li>
               
+                <li>
+                  <a href="#api.v1.beta1.ValidateEarlyStoppingSettingsReply"><span class="badge">M</span>ValidateEarlyStoppingSettingsReply</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.ValidateEarlyStoppingSettingsRequest"><span class="badge">M</span>ValidateEarlyStoppingSettingsRequest</a>
+                </li>
+              
               
                 <li>
                   <a href="#api.v1.beta1.ComparisonType"><span class="badge">E</span>ComparisonType</a>
@@ -965,26 +973,56 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
                   <td>trials</td>
                   <td><a href="#api.v1.beta1.Trial">Trial</a></td>
                   <td>repeated</td>
-                  <td><p>all completed trials owned by the experiment. </p></td>
+                  <td><p>All completed trials owned by the experiment. </p></td>
                 </tr>
               
                 <tr>
                   <td>request_number</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p>The number of Suggestion you request at one time. When you set 3 to request_number, you can get three Suggestions at one time. </p></td>
+                  <td><p><strong>Deprecated.</strong> Use current_request_number instead. This API will be removed in Katib 0.14.
+The number of Suggestions requested at one time. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>current_request_number</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>The number of Suggestions requested at one time.
+When you set 3 to current_request_number, you get three Suggestions at one time. </p></td>
                 </tr>
               
                 <tr>
                   <td>total_request_number</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p>The number of Suggestions requested till now </p></td>
+                  <td><p>The number of Suggestions requested till now. </p></td>
                 </tr>
               
             </tbody>
           </table>
 
+          
+            
+            
+            <h4>Fields with deprecated option</h4>
+            <table>
+              <thead>
+                <tr>
+                  <td>Name</td>
+                  <td>Option</td>
+                </tr>
+              </thead>
+              <tbody>
+              
+                <tr>
+                  <td>request_number</td>
+                  <td><p>true</p></td>
+                </tr>
+              
+              </tbody>
+            </table>
+            
           
 
         
@@ -1600,6 +1638,37 @@ This can be empty if we only care about the objective metric. </p></td>
 
         
       
+        <h3 id="api.v1.beta1.ValidateEarlyStoppingSettingsReply">ValidateEarlyStoppingSettingsReply</h3>
+        <p>Return INVALID_ARGUMENT Error if Early Stopping Settings are not Valid</p>
+
+        
+
+        
+      
+        <h3 id="api.v1.beta1.ValidateEarlyStoppingSettingsRequest">ValidateEarlyStoppingSettingsRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>early_stopping</td>
+                  <td><a href="#api.v1.beta1.EarlyStoppingSpec">EarlyStoppingSpec</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
 
       
         <h3 id="api.v1.beta1.ComparisonType">ComparisonType</h3>
@@ -1819,6 +1888,13 @@ You can see accuracy curve or other metric logs on UI.</p></td>
                 <td>SetTrialStatus</td>
                 <td><a href="#api.v1.beta1.SetTrialStatusRequest">SetTrialStatusRequest</a></td>
                 <td><a href="#api.v1.beta1.SetTrialStatusReply">SetTrialStatusReply</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>ValidateEarlyStoppingSettings</td>
+                <td><a href="#api.v1.beta1.ValidateEarlyStoppingSettingsRequest">ValidateEarlyStoppingSettingsRequest</a></td>
+                <td><a href="#api.v1.beta1.ValidateEarlyStoppingSettingsReply">ValidateEarlyStoppingSettingsReply</a></td>
                 <td><p></p></td>
               </tr>
             

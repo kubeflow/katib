@@ -1,0 +1,42 @@
+name: Publish Katib Core Images
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  core:
+    name: Publish Image
+    # Trigger workflow only for kubeflow/katib repository.
+    if: github.repository == 'kubeflow/katib'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Publish Component ${{ matrix.component-name }}
+        uses: ./.github/workflows/template-publish-image
+        with:
+          image: docker.io/kubeflowkatib/${{ matrix.component-name }}
+          dockerfile: ${{ matrix.dockerfile }}
+
+    strategy:
+      matrix:
+        include:
+          - component-name: katib-controller
+            dockerfile: cmd/katib-controller/v1beta1/Dockerfile
+          - component-name: katib-db-manager
+            dockerfile: cmd/db-manager/v1beta1/Dockerfile
+          - component-name: katib-ui
+            dockerfile: cmd/new-ui/v1beta1/Dockerfile
+          - component-name: cert-generator
+            dockerfile: cmd/cert-generator/v1beta1/Dockerfile
+          - component-name: file-metrics-collector
+            dockerfile: cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile
+          - component-name: tfevent-metrics-collector
+            dockerfile: cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile

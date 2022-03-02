@@ -12,9 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import shutil
+
 import grpc
 import grpc_testing
 import unittest
+
+import pytest
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 
@@ -175,7 +180,7 @@ class TestEnas(unittest.TestCase):
         request = api_pb2.GetSuggestionsRequest(
             experiment=experiment,
             trials=trials,
-            request_number=2,
+            current_request_number=2,
         )
 
         get_suggestion = self.test_server.invoke_unary_unary(
@@ -189,6 +194,15 @@ class TestEnas(unittest.TestCase):
         print(response.parameter_assignments)
         self.assertEqual(code, grpc.StatusCode.OK)
         self.assertEqual(2, len(response.parameter_assignments))
+
+
+@pytest.fixture(scope='function', autouse=True)
+def tear_down():
+    yield
+    working_dir = os.getcwd()
+    target_path = os.path.join(working_dir, "ctrl_cache")
+    if os.path.isdir(target_path):
+        shutil.rmtree(target_path)
 
 
 if __name__ == '__main__':

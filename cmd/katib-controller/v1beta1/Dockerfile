@@ -22,7 +22,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
     fi
 
 # Copy the controller-manager into a thin image.
-FROM alpine:3.7
+FROM alpine:3.15
 WORKDIR /app
 COPY --from=build-env /go/src/github.com/kubeflow/katib/katib-controller .
 ENTRYPOINT ["./katib-controller"]

@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install git -y
 WORKDIR /kf
 RUN git clone https://github.com/kubeflow/kubeflow.git && \
     cd kubeflow && \
-    git checkout 24bcb8e
+    git checkout ecb72c2
 
 # --- Build the frontend kubeflow library ---
 FROM node:12 AS frontend-kubeflow-lib
@@ -56,7 +56,7 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
     fi
 
 # --- Compose the web app ---
-FROM alpine:3.7
+FROM alpine:3.15
 WORKDIR /app
 COPY --from=go-build /go/src/github.com/kubeflow/katib/katib-ui /app/
 COPY --from=frontend /src/dist/static /app/build/static/

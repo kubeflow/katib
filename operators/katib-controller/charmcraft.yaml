@@ -1,0 +1,11 @@
+type: charm
+bases:
+  - build-on:
+    - name: "ubuntu"
+      channel: "20.04"
+    run-on:
+    - name: "ubuntu"
+      channel: "20.04"
+parts:
+  charm:
+    charm-python-packages: [setuptools, pip]

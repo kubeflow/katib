@@ -41,27 +41,28 @@ EXIT_HANDLER = "exit-handler"
 # Dict with all Katib images.
 # Key - image name, Value - dockerfile location.
 KATIB_IMAGES = {
-    "katib-controller":             "cmd/katib-controller/v1beta1/Dockerfile",
-    "katib-db-manager":             "cmd/db-manager/v1beta1/Dockerfile",
+    "katib-controller":              "cmd/katib-controller/v1beta1/Dockerfile",
+    "katib-db-manager":              "cmd/db-manager/v1beta1/Dockerfile",
     # TODO (andreyvelich): Change it to /cmd/ui/v1beta1/Dockerfile once old UI is deprecated.
-    "katib-ui":                     "cmd/new-ui/v1beta1/Dockerfile",
-    "cert-generator":               "cmd/cert-generator/v1beta1/Dockerfile",
-    "file-metrics-collector":       "cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile",
-    "tfevent-metrics-collector":    "/cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile",
-    "suggestion-hyperopt":          "cmd/suggestion/hyperopt/v1beta1/Dockerfile",
-    "suggestion-chocolate":         "cmd/suggestion/chocolate/v1beta1/Dockerfile",
-    "suggestion-skopt":             "cmd/suggestion/skopt/v1beta1/Dockerfile",
-    "suggestion-hyperband":         "cmd/suggestion/hyperband/v1beta1/Dockerfile",
-    "suggestion-goptuna":           "cmd/suggestion/goptuna/v1beta1/Dockerfile",
-    "suggestion-optuna":            "cmd/suggestion/optuna/v1beta1/Dockerfile",
-    "suggestion-enas":              "cmd/suggestion/nas/enas/v1beta1/Dockerfile",
-    "suggestion-darts":             "cmd/suggestion/nas/darts/v1beta1/Dockerfile",
-    "earlystopping-medianstop":     "cmd/earlystopping/medianstop/v1beta1/Dockerfile",
-    "trial-mxnet-mnist":            "examples/v1beta1/trial-images/mxnet-mnist/Dockerfile",
-    "trial-pytorch-mnist":          "examples/v1beta1/trial-images/pytorch-mnist/Dockerfile",
-    "trial-enas-cnn-cifar10-gpu":   "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu",
-    "trial-enas-cnn-cifar10-cpu":   "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu",
-    "trial-darts-cnn-cifar10":      "examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile",
+    "katib-ui":                      "cmd/new-ui/v1beta1/Dockerfile",
+    "cert-generator":                "cmd/cert-generator/v1beta1/Dockerfile",
+    "file-metrics-collector":        "cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile",
+    "tfevent-metrics-collector":     "cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile",
+    "suggestion-hyperopt":           "cmd/suggestion/hyperopt/v1beta1/Dockerfile",
+    "suggestion-chocolate":          "cmd/suggestion/chocolate/v1beta1/Dockerfile",
+    "suggestion-skopt":              "cmd/suggestion/skopt/v1beta1/Dockerfile",
+    "suggestion-hyperband":          "cmd/suggestion/hyperband/v1beta1/Dockerfile",
+    "suggestion-goptuna":            "cmd/suggestion/goptuna/v1beta1/Dockerfile",
+    "suggestion-optuna":             "cmd/suggestion/optuna/v1beta1/Dockerfile",
+    "suggestion-enas":               "cmd/suggestion/nas/enas/v1beta1/Dockerfile",
+    "suggestion-darts":              "cmd/suggestion/nas/darts/v1beta1/Dockerfile",
+    "earlystopping-medianstop":      "cmd/earlystopping/medianstop/v1beta1/Dockerfile",
+    "trial-mxnet-mnist":             "examples/v1beta1/trial-images/mxnet-mnist/Dockerfile",
+    "trial-pytorch-mnist":           "examples/v1beta1/trial-images/pytorch-mnist/Dockerfile",
+    "trial-tf-mnist-with-summaries": "examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile",
+    "trial-enas-cnn-cifar10-gpu":    "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu",
+    "trial-enas-cnn-cifar10-cpu":    "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu",
+    "trial-darts-cnn-cifar10":       "examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile",
 }
 
 # Dict with Katib Experiments to run during the test.
@@ -144,6 +145,10 @@ class WorkflowBuilder(object):
                 "value": self.workflow_name
             },
             {
+                "name": "EKS_CLUSTER_VERSION",
+                "value": "1.19"
+            },
+            {
                 "name": "ECR_REGISTRY",
                 "value": self.ecr_registry
             },
@@ -162,7 +167,7 @@ class WorkflowBuilder(object):
             },
             {
                 "name": "EXTRA_REPOS",
-                "value": "kubeflow/testing@HEAD;kubeflow/manifests@v1.2-branch"
+                "value": "kubeflow/testing@HEAD;kubeflow/manifests@v1.5-branch"
             },
             # Set GOPATH to test_dir because Katib repo is located under /src/github.com/kubeflow/katib
             {

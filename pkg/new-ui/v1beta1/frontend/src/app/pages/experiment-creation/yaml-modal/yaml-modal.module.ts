@@ -8,6 +8,5 @@ import { AceEditorModule } from 'ng2-ace-editor';
 @NgModule({
   declarations: [YamlModalComponent],
   imports: [CommonModule, MatDialogModule, FormModule, AceEditorModule],
-  entryComponents: [YamlModalComponent],
 })
 export class YamlModalModule {}

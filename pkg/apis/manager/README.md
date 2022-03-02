@@ -8,7 +8,7 @@ Katib offers the following APIs:
 
 ## GRPC API documentation
 
-See the [Katib v1beta1 API reference docs](https://www.kubeflow.org/docs/reference/katib/v1beta1/katib/).
+See the [Katib v1beta1 API reference docs](./v1beta1/gen-doc/api.md).
 
 ## Update API and generate documents
 
@@ -22,12 +22,3 @@ generate the API docs from `api.proto`.
 Run `build.sh` to update every file from `api.proto` and generate the docs:
 
 - [v1beta1/build.sh](./v1beta1/build.sh) for v1beta1.
-
-After running `build.sh`, follow these steps to update the docs:
-
-1. Copy the updated content from your generated file
-   `pkg/apis/manager/<version>/gen-doc/api.md` to the doc page in the
-   `kubeflow/website` repository:
-   `kubeflow/website/blob/master/content/docs/reference/katib/<version>/katib.md`.
-1. Create a PR in the `kubeflow/website` repository.
-   (See [example PR](https://github.com/kubeflow/website/pull/1531).)

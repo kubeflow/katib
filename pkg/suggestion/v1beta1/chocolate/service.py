@@ -84,7 +84,7 @@ class ChocolateService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
         trials = Trial.convert(request.trials)
         new_assignments = self.base_service.getSuggestions(
-            trials, request.request_number, request.total_request_number)
+            trials, request.current_request_number, request.total_request_number)
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=Assignment.generate(new_assignments)
         )

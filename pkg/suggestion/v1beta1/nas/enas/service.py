@@ -144,7 +144,7 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         super(EnasService, self).__init__()
         self.is_first_run = True
         self.experiment = None
-        if logger == None:
+        if logger is None:
             self.logger = getLogger(__name__)
             FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
             logging.basicConfig(format=FORMAT)
@@ -183,11 +183,13 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
             # Check OperationType
             if not operation.operation_type:
-                return self.SetValidateContextError(context, "Missing operationType in Operation:\n{}".format(operation))
+                return self.SetValidateContextError(context, "Missing operationType in Operation:\n{}".format(
+                    operation))
 
             # Check ParameterConfigs
             if not operation.parameter_specs.parameters:
-                return self.SetValidateContextError(context, "Missing ParameterConfigs in Operation:\n{}".format(operation))
+                return self.SetValidateContextError(context, "Missing ParameterConfigs in Operation:\n{}".format(
+                    operation))
 
             # Validate each ParameterConfig in Operation
             parameters_list = list(operation.parameter_specs.parameters)
@@ -195,24 +197,31 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
                 # Check Name
                 if not parameter.name:
-                    return self.SetValidateContextError(context, "Missing Name in ParameterConfig:\n{}".format(parameter))
+                    return self.SetValidateContextError(context, "Missing Name in ParameterConfig:\n{}".format(
+                        parameter))
 
                 # Check ParameterType
                 if not parameter.parameter_type:
-                    return self.SetValidateContextError(context, "Missing ParameterType in ParameterConfig:\n{}".format(parameter))
+                    return self.SetValidateContextError(context, "Missing ParameterType in ParameterConfig:\n{}".format(
+                        parameter))
 
                 # Check List in Categorical or Discrete Type
                 if parameter.parameter_type == api_pb2.CATEGORICAL or parameter.parameter_type == api_pb2.DISCRETE:
                     if not parameter.feasible_space.list:
-                        return self.SetValidateContextError(context, "Missing List in ParameterConfig.feasibleSpace:\n{}".format(parameter))
+                        return self.SetValidateContextError(
+                            context, "Missing List in ParameterConfig.feasibleSpace:\n{}".format(parameter))
 
                 # Check Max, Min, Step in Int or Double Type
                 elif parameter.parameter_type == api_pb2.INT or parameter.parameter_type == api_pb2.DOUBLE:
                     if not parameter.feasible_space.min and not parameter.feasible_space.max:
-                        return self.SetValidateContextError(context, "Missing Max and Min in ParameterConfig.feasibleSpace:\n{}".format(parameter))
+                        return self.SetValidateContextError(
+                            context, "Missing Max and Min in ParameterConfig.feasibleSpace:\n{}".format(parameter))
 
-                    if parameter.parameter_type == api_pb2.DOUBLE and (not parameter.feasible_space.step or float(parameter.feasible_space.step) <= 0):
-                        return self.SetValidateContextError(context, "Step parameter should be > 0 in ParameterConfig.feasibleSpace:\n{}".format(parameter))
+                    if (parameter.parameter_type == api_pb2.DOUBLE and
+                            (not parameter.feasible_space.step or float(parameter.feasible_space.step) <= 0)):
+                        return self.SetValidateContextError(
+                            context, "Step parameter should be > 0 in ParameterConfig.feasibleSpace:\n{}".format(
+                                parameter))
 
         # Validate Algorithm Settings
         settings_raw = request.experiment.spec.algorithm.algorithm_settings
@@ -224,19 +233,31 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 setting_range = algorithmSettingsValidator[setting.name][1]
                 try:
                     converted_value = setting_type(setting.value)
-                except:
-                    return self.SetValidateContextError(context, "Algorithm Setting {} must be {} type".format(setting.name, setting_type.__name__))
+                except Exception:
+                    return self.SetValidateContextError(context, "Algorithm Setting {} must be {} type".format(
+                        setting.name, setting_type.__name__))
 
                 if setting_type == float:
-                    if converted_value <= setting_range[0] or (setting_range[1] != 'inf' and converted_value > setting_range[1]):
-                        return self.SetValidateContextError(context, "Algorithm Setting {}: {} with {} type must be in range ({}, {}]".format(
-                            setting.name, converted_value, setting_type.__name__, setting_range[0], setting_range[1]
-                        ))
+                    if (converted_value <= setting_range[0] or
+                            (setting_range[1] != 'inf' and converted_value > setting_range[1])):
+                        return self.SetValidateContextError(
+                            context, "Algorithm Setting {}: {} with {} type must be in range ({}, {}]".format(
+                                setting.name,
+                                converted_value,
+                                setting_type.__name__,
+                                setting_range[0],
+                                setting_range[1])
+                        )
 
                 elif converted_value < setting_range[0]:
-                    return self.SetValidateContextError(context, "Algorithm Setting {}: {} with {} type must be in range [{}, {})".format(
-                        setting.name, converted_value, setting_type.__name__, setting_range[0], setting_range[1]
-                    ))
+                    return self.SetValidateContextError(
+                        context, "Algorithm Setting {}: {} with {} type must be in range [{}, {})".format(
+                            setting.name,
+                            converted_value,
+                            setting_type.__name__,
+                            setting_range[0],
+                            setting_range[1])
+                    )
             else:
                 return self.SetValidateContextError(context, "Unknown Algorithm Setting name: {}".format(setting.name))
 
@@ -253,13 +274,13 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         if self.is_first_run:
             self.experiment = EnasExperiment(request, self.logger)
         experiment = self.experiment
-        if request.request_number > 0:
-            experiment.num_trials = request.request_number
+        if request.current_request_number > 0:
+            experiment.num_trials = request.current_request_number
         self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(
             experiment.suggestion_step, experiment.experiment_name) + "-" * 100)
 
         self.logger.info("")
-        self.logger.info(">>> RequestNumber:\t\t{}".format(experiment.num_trials))
+        self.logger.info(">>> Current Request Number:\t\t{}".format(experiment.num_trials))
         self.logger.info("")
 
         with experiment.tf_graph.as_default():
@@ -361,9 +382,9 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             arc = candidates[i].tolist()
             organized_arc = [0 for _ in range(experiment.num_layers)]
             record = 0
-            for l in range(experiment.num_layers):
-                organized_arc[l] = arc[record: record + l + 1]
-                record += l + 1
+            for layer in range(experiment.num_layers):
+                organized_arc[layer] = arc[record: record + layer + 1]
+                record += layer + 1
             organized_candidates.append(organized_arc)
 
             nn_config = dict()
@@ -371,8 +392,8 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             nn_config['input_sizes'] = experiment.input_sizes
             nn_config['output_sizes'] = experiment.output_sizes
             nn_config['embedding'] = dict()
-            for l in range(experiment.num_layers):
-                opt = organized_arc[l][0]
+            for layer in range(experiment.num_layers):
+                opt = organized_arc[layer][0]
                 nn_config['embedding'][opt] = experiment.search_space[opt].get_dict()
 
             organized_arc_json = json.dumps(organized_arc)

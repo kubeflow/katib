@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: kubeflow
   labels:
-    katib-metricscollector-injection: enabled
+    katib.kubeflow.org/metrics-collector-injection: enabled

@@ -59,8 +59,8 @@ class HyperoptService(
         trials = Trial.convert(request.trials)
         #--------------------------------------------------------------
         # Your code here
-        # Implement the logic to generate new assignments for the given request number.
-        # For example, if request.request_number is 2, you should return:
+        # Implement the logic to generate new assignments for the given current request number.
+        # For example, if request.current_request_number is 2, you should return:
         # [
         #   [Assignment(name=param-1, value=3),
         #    Assignment(name=param-2, value=cat2),
@@ -73,7 +73,7 @@ class HyperoptService(
         #    Assignment(name=param-4, value=4.32)
         #   ],
         # ]
-        list_of_assignments = your_logic(search_space, trials, request.request_number)
+        list_of_assignments = your_logic(search_space, trials, request.current_request_number)
         #--------------------------------------------------------------
         # Convert list_of_assignments to
         return api_pb2.GetSuggestionsReply(
@@ -119,7 +119,7 @@ e2e test for it in the CI and submit a PR.
 
 #### Unit Test
 
-Here is an example [test_hyperopt_service.py](../test/suggestion/v1beta1/test_hyperopt_service.py):
+Here is an example [test_hyperopt_service.py](../test/unit/v1beta1/suggestion/test_hyperopt_service.py):
 
 ```python
 import grpc
@@ -149,7 +149,7 @@ You can setup the GRPC server using `grpc_testing`, then define your own test ca
 
 #### E2E Test (Optional)
 
-E2e tests help Katib verify that the algorithm works well.
+E2E tests help Katib verify that the algorithm works well.
 Follow below steps to add your algorithm (Suggestion) to the Katib CI
 (replace `<name>` with your Suggestion name):
 
@@ -160,7 +160,7 @@ Follow below steps to add your algorithm (Suggestion) to the Katib CI
 1. Create a new Experiment YAML in the [examples/v1beta1](../examples/v1beta1)
    with the new algorithm.
 
-1. Update [`setup-katib.sh`](../test/scripts/v1beta1/setup-katib.sh)
+1. Update [`setup-katib.sh`](../test/e2e/v1beta1/scripts/setup-katib.sh)
    script to modify `katib-config.yaml` with the new test Suggestion image name.
    For example:
 
@@ -168,68 +168,24 @@ Follow below steps to add your algorithm (Suggestion) to the Katib CI
    sed -i -e "s@docker.io/kubeflowkatib/suggestion-<name>@${ECR_REGISTRY}/${REPO_NAME}/v1beta1/suggestion-<name>@" ${CONFIG_PATCH}
    ```
 
-1. Add a new two steps in the CI workflow
-   ([test/workflows/components/workflows-v1beta1.libsonnet](../test/workflows/components/workflows-v1beta1.libsonnet))
-   to build and run the new Suggestion:
+1. Update the following variables in [`argo_workflow.py`](../test/e2e/v1beta1/argo_workflow.py):
+
+- [`KATIB_IMAGES`](../test/e2e/v1beta1/argo_workflow.py#L43) with your Suggestion Dockerfile location:
 
 ```diff
-. . .
-                  {
-                    name: "build-suggestion-hyperopt",
-                    template: "build-suggestion-hyperopt",
-                  },
-                  {
-                    name: "build-suggestion-chocolate",
-                    template: "build-suggestion-chocolate",
-                  },
-+                 {
-+                   name: "build-suggestion-<name>",
-+                   template: "build-suggestion-<name>",
-+                 },
-. . .
-                  {
-                    name: "run-tpe-e2e-tests",
-                    template: "run-tpe-e2e-tests",
-                  },
-                  {
-                    name: "run-grid-e2e-tests",
-                    template: "run-grid-e2e-tests",
-                  },
-+                 {
-+                   name: "run-<name>-e2e-tests",
-+                   template: "run-<name>-e2e-tests",
-+                 },
-. . .
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-hyperopt", kanikoExecutorImage, [
-              "/kaniko/executor",
-              "--dockerfile=" + katibDir + "/cmd/suggestion/hyperopt/v1beta1/Dockerfile",
-              "--context=dir://" + katibDir,
-              "--destination=" + registry + "/katib/v1beta1/suggestion-hyperopt:$(PULL_BASE_SHA)",
-            ]),  // build suggestion hyperopt
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-chocolate", kanikoExecutorImage, [
-              "/kaniko/executor",
-              "--dockerfile=" + katibDir + "/cmd/suggestion/chocolate/v1beta1/Dockerfile",
-              "--context=dir://" + katibDir,
-              "--destination=" + registry + "/katib/v1beta1/suggestion-chocolate:$(PULL_BASE_SHA)",
-            ]),  // build suggestion chocolate
-+           $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("build-suggestion-<name>", kanikoExecutorImage, [
-+             "/kaniko/executor",
-+             "--dockerfile=" + katibDir + "/cmd/suggestion/<name>/v1beta1/Dockerfile",
-+             "--context=dir://" + katibDir,
-+             "--destination=" + registry + "/katib/v1beta1/suggestion-<name>:$(PULL_BASE_SHA)",
-+           ]),  // build suggestion <name>
-. . .
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-tpe-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-e2e-experiment.sh",
-              "examples/v1beta1/tpe-example.yaml",
-            ]),  // run TPE algorithm
-            $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-grid-e2e-tests", testWorkerImage, [
-              "test/scripts/v1beta1/run-e2e-experiment.sh",
-              "examples/v1beta1/grid-example.yaml",
-            ]),  // run grid algorithm
-+           $.parts(namespace, name, overrides).e2e(prow_env, bucket).buildTemplate("run-<name>-e2e-tests", testWorkerImage, [
-+             "test/scripts/v1beta1/run-e2e-experiment.sh",
-+             "examples/v1beta1/<name>-example.yaml",
-+           ]),  // run <name> algorithm
-. . .
+  . . .
+  "suggestion-goptuna":           "cmd/suggestion/goptuna/v1beta1/Dockerfile",
+  "suggestion-optuna":            "cmd/suggestion/optuna/v1beta1/Dockerfile",
++ "suggestion-<name>":            "cmd/suggestion/<name>/v1beta1/Dockerfile",
+  . . .
+```
+
+- [`KATIB_EXPERIMENTS`](../test/e2e/v1beta1/argo_workflow.py#L69) with your Experiment YAML location:
+
+```diff
+  . . .
+  "multivariate-tpe":         "examples/v1beta1/hp-tuning/multivariate-tpe.yaml",
+  "cmaes":                    "examples/v1beta1/hp-tuning/cma-es.yaml",
++ "<algorithm-name>:          "examples/v1beta1/hp-tuning/<algorithm-name>.yaml",
+  . . .
 ```

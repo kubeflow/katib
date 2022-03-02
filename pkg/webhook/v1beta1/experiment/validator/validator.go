@@ -116,6 +116,9 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 	if err := g.validateAlgorithm(instance.Spec.Algorithm); err != nil {
 		return err
 	}
+	if err := g.validateEarlyStopping(instance.Spec.EarlyStopping); err != nil {
+		return err
+	}
 	if err := g.validateResumePolicy(instance.Spec.ResumePolicy); err != nil {
 		return err
 	}
@@ -167,6 +170,21 @@ func (g *DefaultValidator) validateAlgorithm(ag *commonapiv1beta1.AlgorithmSpec)
 
 	if _, err := g.GetSuggestionConfigData(ag.AlgorithmName); err != nil {
 		return fmt.Errorf("unable to get Suggestion config data for algorithm %s: %v", ag.AlgorithmName, err)
+	}
+
+	return nil
+}
+
+func (g *DefaultValidator) validateEarlyStopping(es *commonapiv1beta1.EarlyStoppingSpec) error {
+	if es == nil {
+		return nil
+	}
+	if es.AlgorithmName == "" {
+		return fmt.Errorf("no spec.earlyStopping.algorithmName specified")
+	}
+
+	if _, err := g.GetEarlyStoppingConfigData(es.AlgorithmName); err != nil {
+		return fmt.Errorf("unable to get EarlyStopping config data for algorithm %s: %v", es.AlgorithmName, err)
 	}
 
 	return nil
@@ -265,6 +283,11 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		return fmt.Errorf("unable to parse spec.trialTemplate: %v", err)
 	}
 
+	experimentParameterNames := make(map[string]bool)
+	for _, parameter := range instance.Spec.Parameters {
+		experimentParameterNames[parameter.Name] = true
+	}
+
 	trialParametersNames := make(map[string]bool)
 	trialParametersRefs := make(map[string]bool)
 
@@ -285,6 +308,13 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 		}
 		trialParametersNames[parameter.Name] = true
 		trialParametersRefs[parameter.Reference] = true
+
+		// Check if parameter reference exist in experiment parameters
+		if len(experimentParameterNames) > 0 {
+			if _, ok := experimentParameterNames[parameter.Reference]; !ok {
+				return fmt.Errorf("parameter reference %v does not exist in spec.parameters: %v", parameter.Reference, instance.Spec.Parameters)
+			}
+		}
 
 		// Check if trialParameters contains all substitution for Trial template
 		if !strings.Contains(trialTemplateStr, fmt.Sprintf(consts.TrialTemplateParamReplaceFormat, parameter.Name)) {
@@ -380,7 +410,7 @@ func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobTy
 func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Experiment) error {
 	mcSpec := inst.Spec.MetricsCollectorSpec
 	mcKind := mcSpec.Collector.Kind
-	for _, mc := range mccommon.AutoInjectMetricsCollecterList {
+	for _, mc := range mccommon.AutoInjectMetricsCollectorList {
 		if mcKind != mc {
 			continue
 		}

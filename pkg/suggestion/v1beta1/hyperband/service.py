@@ -47,8 +47,8 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             if param.current_s < 0:
                 # Hyperband outlerloop has finished
                 return reply
-            # This is a hack to get request number.
-            param.n = request.request_number
+            # This is a hack to get current request number.
+            param.n = request.current_request_number
 
             trials = self._make_bracket(experiment, param)
             for trial in trials:
@@ -212,7 +212,7 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             return self._set_validate_context_error(context, "r_l and resource_name must be set.")
         try:
             rl = float(setting_dict["r_l"])
-        except:
+        except Exception:
             return self._set_validate_context_error(context, "r_l must be a positive float number.")
         else:
             if rl < 0:
