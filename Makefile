@@ -1,4 +1,5 @@
 HAS_LINT := $(shell command -v golangci-lint;)
+HAS_CONTROLLER_GEN := $(shell command -v controller-gen)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= amd64
@@ -13,7 +14,7 @@ TEST_TENSORFLOW_EVENT_FILE_PATH ?= $(CURDIR)/test/unit/v1beta1/metricscollector/
 test:
 	go test ./pkg/... ./cmd/... -coverprofile coverage.out
 
-check: generate fmt vet lint
+check: generate manifests fmt vet lint
 
 fmt:
 	hack/verify-gofmt.sh
@@ -53,8 +54,15 @@ endif
 	cd ./pkg/apis/manager/v1beta1 && ./build.sh
 	cd ./pkg/apis/manager/health && ./build.sh
 
+manifests:
+ifndef
+	go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0
+	echo "controller-gen has been installed"
+endif
+	controller-gen +rbac:roleName=katib-controller +paths=./pkg/controller.v1beta1/... +output:dir=./manifests/v1beta1/components/controller
+
 # Build images for the Katib v1beta1 components.
-build: generate
+build: generate manifests
 ifeq ($(and $(REGISTRY),$(TAG),$(CPU_ARCH)),)
 	$(error REGISTRY and TAG must be set. Usage: make build REGISTRY=<registry> TAG=<tag> CPU_ARCH=<cpu-architecture>)
 endif

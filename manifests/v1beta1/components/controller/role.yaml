@@ -1,0 +1,87 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: katib-controller
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - experiments.kubeflow.org
+  resources:
+  - experiments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - experiments.kubeflow.org
+  resources:
+  - experiments/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - katib.kubeflow.org
+  resources:
+  - suggestions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - katib.kubeflow.org
+  resources:
+  - suggestions/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - trials.kubeflow.org
+  resources:
+  - trials
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - trials.kubeflow.org
+  resources:
+  - trials/status
+  verbs:
+  - get
+  - patch
+  - update

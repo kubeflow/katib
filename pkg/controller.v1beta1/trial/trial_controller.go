@@ -146,10 +146,11 @@ type ReconcileTrial struct {
 	collector *trialutil.TrialsCollector
 }
 
-// Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read
-// and what is in the Trial.Spec
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials/status,verbs=get;update;patch
+
+// Reconcile reads that state of the cluster for a Trial object and makes changes based on the state read
+// and what is in the Trial.Spec
 func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Trial instance
 	logger := log.WithValues("Trial", request.NamespacedName)

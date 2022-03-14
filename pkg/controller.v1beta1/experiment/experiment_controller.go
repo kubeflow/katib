@@ -111,6 +111,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
+// +kubebuilder:rbac:groups=experiments.kubeflow.org,resources=experiments,verbs=get;list;watch
+// +kubebuilder:rbac:groups=trials.kubeflow.org,resources=trials,verbs=get;list;watch
+// +kubebuilder:rbac:groups=suggestions.kubeflow.org,resources=suggestions,verbs=get;list;watch
+
 // addWatch adds a new Controller to mgr with r as the reconcile.Reconciler
 func addWatch(mgr manager.Manager, c controller.Controller) error {
 	// Watch for changes to Experiment
@@ -163,10 +167,11 @@ type ReconcileExperiment struct {
 	collector *util.ExperimentsCollector
 }
 
-// Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read
-// and what is in the Experiment.Spec
 // +kubebuilder:rbac:groups=experiments.kubeflow.org,resources=experiments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=experiments.kubeflow.org,resources=experiments/status,verbs=get;update;patch
+
+// Reconcile reads that state of the cluster for a Experiment object and makes changes based on the state read
+// and what is in the Experiment.Spec
 func (r *ReconcileExperiment) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the Experiment instance
 	logger := log.WithValues("Experiment", request.NamespacedName)
