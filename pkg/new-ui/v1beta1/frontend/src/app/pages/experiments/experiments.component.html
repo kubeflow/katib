@@ -1,11 +1,18 @@
-<lib-namespace-select
-  *ngIf="(ns.dashboardConnected$ | async) === dashboardDisconnectedState"
-  namespacesUrl="/katib/fetch_namespaces"
-></lib-namespace-select>
+<div class="lib-content-wrapper">
+  <lib-title-actions-toolbar title="Experiments" [buttons]="buttons" i18n-title>
+    <lib-namespace-select
+      *ngIf="(ns.dashboardConnected$ | async) === dashboardDisconnectedState"
+      namespacesUrl="/katib/fetch_namespaces"
+    ></lib-namespace-select>
+  </lib-title-actions-toolbar>
 
-<lib-resource-table
-  [config]="config"
-  [data]="experiments"
-  [trackByFn]="trackByFn"
-  (actionsEmitter)="reactToAction($event)"
-></lib-resource-table>
+  <div class="page-padding lib-flex-grow lib-overflow-auto">
+    <lib-table
+      [config]="config"
+      [data]="experiments"
+      [trackByFn]="trackByFn"
+      (actionsEmitter)="reactToAction($event)"
+    >
+    </lib-table>
+  </div>
+</div>
