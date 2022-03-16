@@ -78,12 +78,15 @@ type TrialAssignment struct {
 	// Suggestion results with Trial parameters
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
 
-	//Name of the suggestion
+	// Name of the suggestion
 	Name string `json:"name,omitempty"`
 
 	// Rules for early stopping techniques
 	// Contains rule name, value and comparison type
 	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
+
+	// Suggestion metadata to attach to Trial job
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // SuggestionCondition describes the state of the Suggestion at a certain point.

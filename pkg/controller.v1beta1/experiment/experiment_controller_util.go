@@ -44,6 +44,10 @@ func (r *ReconcileExperiment) getTrialInstance(expInstance *experimentsv1beta1.E
 	trial.Namespace = expInstance.GetNamespace()
 	trial.Labels = util.TrialLabels(expInstance)
 
+	if trialAssignment.Annotations != nil {
+		trial.Spec.Annotations = trialAssignment.Annotations
+	}
+
 	if err := controllerutil.SetControllerReference(expInstance, trial, r.scheme); err != nil {
 		logger.Error(err, "Set controller reference error")
 		return nil, err

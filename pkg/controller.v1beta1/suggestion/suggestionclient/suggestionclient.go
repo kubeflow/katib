@@ -128,6 +128,11 @@ func (g *General) SyncAssignments(
 		logger.Error(err, "The response contains unexpected trials")
 		return err
 	}
+	if responseSuggestion.Annotations != nil && len(responseSuggestion.Annotations) != len(responseSuggestion.ParameterAssignments) {
+		err := fmt.Errorf("The response contains unexpected annotations")
+		logger.Error(err, "The response contains unexpected annotations")
+		return err
+	}
 
 	earlyStoppingRules := []commonapiv1beta1.EarlyStoppingRule{}
 	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions.
@@ -170,14 +175,20 @@ func (g *General) SyncAssignments(
 		}
 	}
 
-	for _, t := range responseSuggestion.ParameterAssignments {
-		instance.Status.Suggestions = append(instance.Status.Suggestions,
-			suggestionsv1beta1.TrialAssignment{
-				Name:                 fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8)),
-				ParameterAssignments: composeParameterAssignments(t.Assignments),
-				EarlyStoppingRules:   earlyStoppingRules,
-			})
+	trialAssignments := []suggestionsv1beta1.TrialAssignment{}
+	for n, t := range responseSuggestion.ParameterAssignments {
+		assignment := suggestionsv1beta1.TrialAssignment{
+			Name:                 fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8)),
+			ParameterAssignments: composeParameterAssignments(t.Assignments),
+			EarlyStoppingRules:   earlyStoppingRules,
+		}
+		if responseSuggestion.Annotations != nil {
+			assignment.Annotations = responseSuggestion.Annotations[n].Annotations
+		}
+		trialAssignments = append(trialAssignments, assignment)		
 	}
+
+	instance.Status.Suggestions = append(instance.Status.Suggestions, trialAssignments...)
 	instance.Status.SuggestionCount = int32(len(instance.Status.Suggestions))
 
 	if responseSuggestion.Algorithm != nil {
@@ -348,6 +359,9 @@ func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial
 				CompletionTime: convertTrialStatusTime(t.Status.CompletionTime),
 				Observation:    convertTrialObservation(t.Spec.Objective.MetricStrategies, t.Status.Observation),
 			},
+		}
+		if t.Spec.Annotations != nil {
+			trial.Spec.Annotations = t.Spec.Annotations
 		}
 		if t.Spec.Objective.Goal != nil {
 			trial.Spec.Objective.Goal = *t.Spec.Objective.Goal

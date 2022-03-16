@@ -21,12 +21,13 @@ logger = logging.getLogger(__name__)
 
 
 class Trial(object):
-    def __init__(self, name, assignments, target_metric, metric_name, additional_metrics):
+    def __init__(self, name, assignments, target_metric, metric_name, additional_metrics, annotations):
         self.name = name
         self.assignments = assignments
         self.target_metric = target_metric
         self.metric_name = metric_name
         self.additional_metrics = additional_metrics
+        self.annotations = annotations
 
     @staticmethod
     def convert(trials):
@@ -46,10 +47,11 @@ class Trial(object):
         metric_name = trial.spec.objective.objective_metric_name
         target_metric, additional_metrics = Metric.convert(
             trial.status.observation, metric_name)
+        annotations = trial.spec.annotations
         # If the target_metric is none, ignore the trial.
         if target_metric is not None:
             trial = Trial(trial.name, assignments, target_metric,
-                          metric_name, additional_metrics)
+                          metric_name, additional_metrics, annotations)
             return trial
         return None
 
@@ -87,6 +89,24 @@ class Assignment(object):
 
     def __str__(self):
         return "Assignment(name={}, value={})".format(self.name, self.value)
+
+
+class Annotations(object):
+    def __init__(self, annotations):
+        self.annotations = {k:str(v) for k,v in annotations.items()}
+
+    @staticmethod
+    def generate(list_of_annotations):
+        ret = []
+        for annotations in list_of_annotations:
+            str_annotations = {k:str(v) for k,v in annotations.items()}
+            ret.append(api.GetSuggestionsReply.Annotations(annotations=str_annotations))
+        return ret
+
+    def __str__(self):
+        strfmt = "Annotation(name={}, value={})"
+        strlist = [strfmt.format(name,value) for name,value in annotations.items()]
+        return "; ".join(strlist)
 
 
 class Metric(object):
