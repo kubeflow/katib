@@ -243,6 +243,14 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.beta1.GetSuggestionsReply.Annotations"><span class="badge">M</span>GetSuggestionsReply.Annotations</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.GetSuggestionsReply.Annotations.AnnotationsEntry"><span class="badge">M</span>GetSuggestionsReply.Annotations.AnnotationsEntry</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.beta1.GetSuggestionsReply.ParameterAssignments"><span class="badge">M</span>GetSuggestionsReply.ParameterAssignments</a>
                 </li>
               
@@ -320,6 +328,10 @@
               
                 <li>
                   <a href="#api.v1.beta1.TrialSpec"><span class="badge">M</span>TrialSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.TrialSpec.AnnotationsEntry"><span class="badge">M</span>TrialSpec.AnnotationsEntry</a>
                 </li>
               
                 <li>
@@ -918,6 +930,68 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
                   <td>early_stopping_rules</td>
                   <td><a href="#api.v1.beta1.EarlyStoppingRule">EarlyStoppingRule</a></td>
                   <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>annotations</td>
+                  <td><a href="#api.v1.beta1.GetSuggestionsReply.Annotations">GetSuggestionsReply.Annotations</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetSuggestionsReply.Annotations">GetSuggestionsReply.Annotations</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>annotations</td>
+                  <td><a href="#api.v1.beta1.GetSuggestionsReply.Annotations.AnnotationsEntry">GetSuggestionsReply.Annotations.AnnotationsEntry</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetSuggestionsReply.Annotations.AnnotationsEntry">GetSuggestionsReply.Annotations.AnnotationsEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
                   <td><p> </p></td>
                 </tr>
               
@@ -1529,6 +1603,44 @@ This can be empty if we only care about the objective metric. </p></td>
                   <td><a href="#api.v1.beta1.TrialSpec.ParameterAssignments">TrialSpec.ParameterAssignments</a></td>
                   <td></td>
                   <td><p>List of assignments generated for the Trial. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>annotations</td>
+                  <td><a href="#api.v1.beta1.TrialSpec.AnnotationsEntry">TrialSpec.AnnotationsEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>Map of annotations assigned to the Trial </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.TrialSpec.AnnotationsEntry">TrialSpec.AnnotationsEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
                 </tr>
               
             </tbody>

@@ -213,8 +213,10 @@ message TrialSpec {
     message ParameterAssignments {
         repeated ParameterAssignment assignments = 1;
     }
+
     ObjectiveSpec objective = 2; // Objective specification for the Trial.
     ParameterAssignments parameter_assignments = 3; // List of assignments generated for the Trial.
+    map<string, string> annotations = 4; // Map of annotations assigned to the Trial
 }
 
 message ParameterAssignment {
@@ -304,9 +306,15 @@ message GetSuggestionsReply {
     message ParameterAssignments {
         repeated ParameterAssignment assignments = 1;
     }
+    message Annotations {
+        map<string, string> annotations = 1;
+    }
+
     repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
     repeated EarlyStoppingRule early_stopping_rules = 3;
+
+    repeated Annotations annotations = 4;
 }
 
 message ValidateAlgorithmSettingsRequest {
