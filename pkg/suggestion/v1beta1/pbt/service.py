@@ -17,12 +17,13 @@ import logging
 import numpy as np
 import os
 import shutil
+import uuid
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
 from pkg.suggestion.v1beta1.internal.search_space import HyperParameter, HyperParameterSearchSpace
 import pkg.suggestion.v1beta1.internal.constant as constant
-from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
+from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment, Annotations
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,6 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             objective_metric = request.experiment.spec.objective.objective_metric_name
             # Create Job Manager
             self.job_queue = PbtJobQueue(
-                request.experiment.name,
                 int(settings["n_population"]),
                 float(settings["truncation_threshold"]),
                 None if not "resample_probability" in settings else float(settings["resample_probability"]),
@@ -80,27 +80,28 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
         # Update states for completed trials
         for trial in request.trials:
-            if not trial.status.condition in (
-                api_pb2.TrialStatus.TrialConditionType.CREATED,
-                api_pb2.TrialStatus.TrialConditionType.RUNNING,
-            ) and not self.job_queue.is_processed(trial.name):
-                self.job_queue.update(trial)
+            self.job_queue.update(trial)
 
         # Synchronize generation
         request_count = request.current_request_number
         if len(self.job_queue) < request_count:
             if len(self.job_queue) > 0:
+                logger.info("Job queue < request count; flushing queue before spawning...")
                 request_count = len(self.job_queue)
             elif len(self.job_queue.running) > 0:
-                logger.info("Waiting for trials to complete before spawning next generation...")
+                logger.info("Waiting for trials to complete before spawning next generation: {}".format(list(self.job_queue.running.keys())))
+                self.job_queue.verify_running(request.trials)
                 return api_pb2.GetSuggestionsReply(parameter_assignments=[])
             else:
                 logger.info("Spawning next generation...")
                 self.job_queue.generate()
 
-        parameter_assignments = Assignment.generate([self.job_queue.get() for _ in range(request_count)])
-        logger.info("Transmiting suggestion...")
-        return api_pb2.GetSuggestionsReply(parameter_assignments=parameter_assignments)
+        jobs = [self.job_queue.get() for _ in range(request_count)]
+        parameter_assignments = Assignment.generate([j[0] for j in jobs])
+        annotations = Annotations.generate([j[1] for j in jobs])
+        logger.info("Transmitting suggestion...")
+
+        return api_pb2.GetSuggestionsReply(parameter_assignments=parameter_assignments, annotations=annotations)
 
     def _set_validate_context_error(self, context, error_message):
         context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
@@ -122,7 +123,7 @@ class HyperParameterSampler(HyperParameter):
     def sample(self):
         return np.random.choice(self.sample_list, 1)[0]
 
-    def perterb(self, value):
+    def perturb(self, value):
         if self.type == constant.INTEGER:
             new_value = int(int(value) * np.random.choice([0.8, 1.2], 1)[0])
             return max(float(self.min), min(float(self.max), new_value))
@@ -142,26 +143,34 @@ class HyperParameterSampler(HyperParameter):
 
 
 class PbtJob(object):
-    def __init__(self, assignment_list, index=None, generation=0, previous_index=None):
+    def __init__(self, assignment_list, generation=0, parent=None, uid=None):
+        if uid is None:
+            self.uid = str(uuid.uuid4())
+        else:
+            self.uid = uid
         self.params = {a.name: str(a.value) for a in assignment_list}  # all assignments transmitted as str
-        self.index = index
         self.generation = generation
-        self.previous_index = previous_index
+        self.parent = parent
         self.metric_value = None
 
-    def assignments(self):
-        return [Assignment(k, v) for k, v in self.params.items()]
+    def get(self):
+        assignments = [Assignment(k, v) for k, v in self.params.items()]
+        annotations = {
+            "pbt.suggestion.katib.kubeflow.org/uid": self.uid,
+            "pbt.suggestion.katib.kubeflow.org/generation": self.generation
+        }
+        if not self.parent is None:
+            annotations["pbt.suggestion.katib.kubeflow.org/parent"] = self.parent
+        return assignments, annotations
 
     def __repr__(self):
-        return "({}|{})<-({}) : {}".format(self.index, self.generation, self.previous_index, self.params)
+        return "generation: {}, uid: {}, parent: {}".format(self.generation, self.uid, self.parent)
 
 
 class PbtJobQueue(object):
     def __init__(
-        self, experiment_name, population_size, truncation_threshold, resample_probability, search_space, metric_name, metric_scaler
+        self, population_size, truncation_threshold, resample_probability, search_space, metric_name, metric_scaler
     ):
-        self.name = experiment_name
-
         self.population_size = population_size
         self.truncation_threshold = truncation_threshold
         self.resample_probability = resample_probability
@@ -171,11 +180,9 @@ class PbtJobQueue(object):
         self.metric_scaler = metric_scaler
 
         self.pending = []
-        self.running = []
+        self.running = {}
         self.generation = 0
         self.completed = [{}]
-
-        self.total_trial_count = 0
 
         # Seed the initial population
         for n in range(self.population_size):
@@ -184,78 +191,69 @@ class PbtJobQueue(object):
     def __len__(self):
         return len(self.pending)
 
-    def _min_generation_indices(self):
-        # find minimum generation
-        min_gen = min([i.generation for i in self.pending if not i is None])
-        # find indices of minimum generation
-        return [n for n, i in enumerate(self.pending) if i.generation == min_gen]
-
     def _get_objective_value(self, trial):
         for m in trial.status.observation.metrics:
             if m.name == self.metric_name:
                 return self.metric_scaler * float(m.value)
         logger.error("Objective metric value could not be found for {}".format(trial.name))
 
-    def is_processed(self, trial_name):
-        for i in range(self.generation + 1):
-            if trial_name in self.completed[i]:
-                return True
-        return False
 
-    def append(self, assignments, generation, link_idx=None):
-        if generation > 0 and link_idx is None:
+    def append(self, assignments, generation, parent=None):
+        if generation > 0 and parent is None:
             logger.warning("Trial generation >0 but no previous checkpoint trial provided")
-        obj = PbtJob(assignments, self.total_trial_count, generation, link_idx)
+        obj = PbtJob(assignments, generation, parent)
         self.pending.append(obj)
-        new_trial_dir = os.path.join(_DATA_PATH, "{}-{}".format(self.name, self.total_trial_count))
-        if link_idx is None:
+        new_trial_dir = os.path.join(_DATA_PATH, obj.uid)
+        if parent is None:
             os.makedirs(new_trial_dir, exist_ok=True)
         else:
-            previous_trial_dir = os.path.join(_DATA_PATH, "{}-{}".format(self.name, link_idx))
+            previous_trial_dir = os.path.join(_DATA_PATH, obj.parent)
             shutil.copytree(previous_trial_dir, new_trial_dir)
 
         logger.info("PbtJob enqueued: {}".format(obj))
-        self.total_trial_count += 1
+        return obj.uid
 
     def get(self):
         if len(self.pending) == 0:
             raise RuntimeError("Pending queue is empty!")
 
-        # Attempt to minimze collisions on update()
-        pop_idx = None
-        min_gen_indices = self._min_generation_indices()
-        for n in min_gen_indices:
-            compare_job = self.pending[n]
-            if sum([r.params == compare_job.params for r in self.running]) == 0:
-                pop_idx = n
-                break
-        if pop_idx is None:
-            logger.warn("Multiple jobs running with same assignment list; collision possible")
-            pop_idx = min_gen_indices[0]
-
         # Move job to running queue
-        obj = self.pending.pop(pop_idx)
+        obj = self.pending.pop(0)
         logger.info("PbtJob submitted: {}".format(obj))
-        self.running.append(obj)
+        self.running[obj.uid] = obj
 
-        return obj.assignments()
+        return obj.get()
+
+    def verify_running(self, trials):
+        nospawn_uids = list(self.running.keys())
+        for trial in trials:
+            trial_annotations = trial.spec.annotations
+            uid = trial_annotations["pbt.suggestion.katib.kubeflow.org/uid"]
+            if uid in nospawn_uids:
+                nospawn_uids.remove(uid)
+        for uid in nospawn_uids:
+            logger.info("PbtJob requeued: {}".format(uid))
+            self.pending.append(self.running.pop(uid))
 
     def update(self, trial):
         trial_assignments = [Assignment.convert(assignment) for assignment in trial.spec.parameter_assignments.assignments]
-        trial_job = PbtJob(trial_assignments)
+        trial_annotations = trial.spec.annotations
+        uid = trial_annotations["pbt.suggestion.katib.kubeflow.org/uid"]
+        generation = trial_annotations["pbt.suggestion.katib.kubeflow.org/generation"]
 
-        # Find first match in running and move to completed with metrics
-        pop_idx = None
-        for n, i in enumerate(self.running):
-            if i.params == trial_job.params:
-                pop_idx = n
-                break
-        if pop_idx is None:
+        # Do not update active/pending or already processed trials
+        if trial.status.condition in (api_pb2.TrialStatus.TrialConditionType.CREATED, api_pb2.TrialStatus.TrialConditionType.RUNNING):
+            return
+        for i in range(self.generation + 1):
+            if uid in self.completed[i]:
+                return
+
+        if not uid in self.running:
             logger.error("Unable to find trial match in PbtJobQueue.running!")
             return
-        obj = self.running.pop(pop_idx)
+        obj = self.running.pop(uid)
         obj.metric_value = self._get_objective_value(trial)
-        self.completed[self.generation][trial.name] = obj
+        self.completed[self.generation][obj.uid] = obj
 
         # Generate next trial if necessary
         if (
@@ -265,46 +263,48 @@ class PbtJobQueue(object):
         ):
             # Trial invalid, retry
             logger.error("Unable to convert trial {} (status: {}), re-adding to task queue".format(trial.name, trial.status.condition))
-            self.append(trial_assignments, obj.generation, obj.previous_index)
+            self.append(trial_assignments, obj.generation, obj.parent)
         elif trial.status.condition in (api_pb2.TrialStatus.TrialConditionType.KILLED, api_pb2.TrialStatus.TrialConditionType.FAILED):
             # Trial error, retry
             logger.warning("Trial failed {} (status: {}), re-adding to task queue".format(trial.name, trial.status.condition))
-            self.append(trial_assignments, obj.generation, obj.previous_index)
+            self.append(trial_assignments, obj.generation, obj.parent)
 
     def generate(self):
         values = [job.metric_value for _, job in self.completed[self.generation].items() if not job.metric_value is None]
         trunc_bounds = np.quantile(values, (self.truncation_threshold, 1 - self.truncation_threshold))
         exploit_names, explore_names, upper_names = [], [], []
-        for trial_name, job in self.completed[self.generation].items():
+        for trial_uid, job in self.completed[self.generation].items():
             if job.metric_value is None:
                 continue
             if job.metric_value < trunc_bounds[0]:
-                exploit_names.append(trial_name)
+                exploit_names.append(trial_uid)
             else:
-                explore_names.append(trial_name)
+                explore_names.append(trial_uid)
                 if job.metric_value >= trunc_bounds[1]:
-                    upper_names.append(trial_name)
+                    upper_names.append(trial_uid)
 
         # Generate exploit jobs
         exploit_replacements = np.random.choice(upper_names, len(exploit_names))
-        for n, trial_name in enumerate(exploit_names):
-            job = self.completed[self.generation][trial_name]
-            self.append(self.completed[self.generation][exploit_replacements[n]].assignments(), job.generation + 1, job.index)
+        for n, trial_uid in enumerate(exploit_names):
+            job = self.completed[self.generation][trial_uid]
+            self.append(self.completed[self.generation][exploit_replacements[n]].get()[0], job.generation + 1, job.uid)
 
-        # Generate perterbed trials
-        for trial_name in explore_names:
-            job = self.completed[self.generation][trial_name]
+        # Generate perturbed trials
+        for trial_uid in explore_names:
+            job = self.completed[self.generation][trial_uid]
             assignment_list = []
             for param in self.search_space:
                 if self.resample_probability is None:
                     value = job.params[param.name]
-                    new_value = param.perterb(value)
+                    new_value = param.perturb(value)
                 elif np.random.random() < self.resample_probability:
                     new_value = param.sample()
                 else:
                     new_value = job.params[param.name]
                 assignment_list.append(Assignment(param.name, new_value))
-            self.append(assignment_list, job.generation + 1, job.index)
+            self.append(assignment_list, job.generation + 1, job.uid)
+
+        # TODO: generate() should enforce number of spawn with self.population_size
 
         self.completed.append({})
         self.generation += 1
