@@ -65,9 +65,9 @@ func (k *KatibUIHandler) getExperiments(namespace []string) ([]ExperimentView, e
 	return experiments, nil
 }
 
-func havePipelineUID(trials []trialv1beta1.Trial) bool {
+func hasAnnotation(trials []trialv1beta1.Trial, annotation string)  bool{
 	for _, t := range trials {
-		_, ok := t.GetAnnotations()[kfpRunIDAnnotation]
+		_, ok := t.Spec.Annotations[annotation]
 		if ok {
 			return true
 		}

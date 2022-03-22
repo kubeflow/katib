@@ -72,13 +72,13 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	log.Printf("Got Trial List")
 
 	// append a column for the Pipeline UID associated with the Trial
-	if havePipelineUID(trialList.Items) {
+	if hasAnnotation(trialList.Items, kfpRunIDAnnotation) {
 		resultText += ",KFP Run"
 	}
 
 	foundPipelineUID := false
 	for _, t := range trialList.Items {
-		runUid, ok := t.GetAnnotations()[kfpRunIDAnnotation]
+		runUid, ok := t.Spec.Annotations[kfpRunIDAnnotation]
 		if !ok {
 			log.Printf("Trial %s has no pipeline run.", t.Name)
 			runUid = ""
@@ -241,6 +241,65 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	}
 	if _, err = w.Write(response); err != nil {
 		log.Printf("Write result text in Trial info failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (k *KatibUIHandler) FetchHPJobAnnotationInfo(w http.ResponseWriter, r *http.Request) {
+	//enableCors(&w)
+	experimentName := r.URL.Query()["experimentName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+
+	resultText := "trialName"
+
+	trialList, err := k.katibClient.GetTrialList(experimentName, namespace)
+	if err != nil {
+		log.Printf("GetTrialList from HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("Got Trial List")
+
+	// Find set(annotations)
+	annotations := map[string]int{}
+	for _, t := range trialList.Items {
+		for a := range t.Spec.Annotations {
+			annotations[a] = 0
+		}
+	}
+
+	// Set the index of each annotation
+	a_index := 0
+	for a, _ := range annotations {
+		annotations[a] = a_index
+		resultText += "," + a
+		a_index++
+	}
+	log.Printf("Got Annotations List")
+
+	for _, t := range trialList.Items {
+		trialResText := make([]string, len(annotations))
+		for a, n := range annotations {
+			a_value, ok := t.Spec.Annotations[a]
+			if !ok {
+				log.Printf("Trial %s has no annotation value for %s", t.Name, a)
+				a_value = ""
+			}
+			trialResText[n] = a_value
+		}
+		resultText += "\n" + t.Name + "," + strings.Join(trialResText, ",")
+	}
+
+	log.Printf("Logs parsed, results:\n %v", resultText)
+	response, err := json.Marshal(resultText)
+	if err != nil {
+		log.Printf("Marshal result text for HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write result text for HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
