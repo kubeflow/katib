@@ -1,0 +1,5 @@
+"""prometheus_alert_rules folder is only added to .charm file 
+if there is any relevant content.
+Adding this file only to ensure the folder is added to the
+charm and MetricsEndpointProvider does not complain.
+"""

@@ -10,6 +10,8 @@ from ops.charm import CharmBase
 from ops.framework import StoredState
 from ops.main import main
 from ops.model import ActiveStatus, MaintenanceStatus, WaitingStatus
+from charms.prometheus_k8s.v0.prometheus_scrape import MetricsEndpointProvider
+from charms.grafana_k8s.v0.grafana_dashboard import GrafanaDashboardProvider
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +37,32 @@ class Operator(CharmBase):
 
         self._stored.set_default(**self.gen_certs())
         self.image = OCIImageResource(self, "oci-image")
-        self.framework.observe(self.on.install, self.set_pod_spec)
-        self.framework.observe(self.on.upgrade_charm, self.set_pod_spec)
+
+        self.prometheus_provider = MetricsEndpointProvider(
+            charm=self,
+            relation_name="monitoring",
+            jobs=[
+                {
+                    "job_name": "katib_controller_metrics",
+                    "scrape_interval": "30s",
+                    "metrics_path": "/metrics",
+                    "static_configs": [
+                        {"targets": ["*:{}".format(self.config["metrics-port"])]}
+                    ],
+                }
+            ],
+        )
+        self.dashboard_provider = GrafanaDashboardProvider(self)
+
+        for event in [
+            self.on.config_changed,
+            self.on.install,
+            self.on.upgrade_charm,
+            self.on["monitoring"].relation_changed,
+            self.on["monitoring"].relation_broken,
+            self.on["monitoring"].relation_departed,
+        ]:
+            self.framework.observe(event, self.set_pod_spec)
 
     def set_pod_spec(self, event):
         self.model.unit.status = MaintenanceStatus("Setting pod spec")
