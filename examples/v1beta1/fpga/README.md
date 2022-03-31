@@ -10,9 +10,9 @@ visit the [InAccel](https://docs.inaccel.com) documentation.
 ## Simplifying FPGA management in EKS\* (Elastic Kubernetes Service)
 
 \*_For development and testing purposes you can still [deploy Kubeflow Katib
-using Minikube](https://kubeflow.org/docs/started/workstation/minikube-linux) in
-a single AMI instance. In production environments, Amazon's managed Kubernetes
-service ([EKS](https://aws.amazon.com/eks)) is recommended._
+using MicroK8s](https://ubuntu.com/tutorials/accelerated-ml-experiments-on-microk8s-with-inaccel-fpga-operator-and-kubeflow-katib)
+in a single AMI instance. In production environments, Amazon's managed
+Kubernetes service ([EKS](https://aws.amazon.com/eks)) is recommended._
 
 The InAccel FPGA Operator allows administrators of Kubernetes clusters to manage
 FPGA nodes just like CPU nodes in the cluster. Instead of provisioning a special
