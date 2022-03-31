@@ -37,7 +37,7 @@ Kubernetes, as a Helm app on your cluster, with the following command.
 ```sh
 helm repo add inaccel https://setup.inaccel.com/helm
 
-helm install inaccel inaccel/fpga-operator
+helm install -n kube-system inaccel inaccel/fpga-operator
 ```
 
 You can verify that your nodes have available FPGAs with the following command:
