@@ -357,8 +357,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				},
 				Source: &common.SourceSpec{
 					FileSystemPath: &common.FileSystemPath{
-						Path:       testPath,
-						FileFormat: common.TextFormat,
+						Path:   testPath,
+						Format: common.TextFormat,
 					},
 					Filter: &common.FilterSpec{
 						MetricsFormat: []string{
@@ -389,8 +389,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				},
 				Source: &common.SourceSpec{
 					FileSystemPath: &common.FileSystemPath{
-						Path:       testPath,
-						FileFormat: common.JsonFormat,
+						Path:   testPath,
+						Format: common.JsonFormat,
 					},
 				},
 			},

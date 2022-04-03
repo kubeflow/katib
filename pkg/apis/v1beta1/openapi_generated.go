@@ -285,7 +285,7 @@ func schema_apis_controller_common_v1beta1_FileSystemPath(ref common.ReferenceCa
 							Format: "",
 						},
 					},
-					"fileFormat": {
+					"format": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "",

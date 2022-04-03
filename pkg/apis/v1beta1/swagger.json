@@ -779,7 +779,7 @@
     "v1beta1.FileSystemPath": {
       "type": "object",
       "properties": {
-        "fileFormat": {
+        "format": {
           "type": "string"
         },
         "kind": {

@@ -296,7 +296,7 @@ func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, me
 	}
 	if mc.Collector.Kind == common.FileCollector && mc.Source != nil {
 		if mc.Source.FileSystemPath != nil {
-			args = append(args, "-format", string(mc.Source.FileSystemPath.FileFormat))
+			args = append(args, "-format", string(mc.Source.FileSystemPath.Format))
 		}
 	}
 	if mc.Collector.Kind == common.StdOutCollector {

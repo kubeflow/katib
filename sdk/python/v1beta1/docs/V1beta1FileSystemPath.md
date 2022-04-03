@@ -3,7 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**file_format** | **str** |  | [optional] 
+**format** | **str** |  | [optional] 
 **kind** | **str** |  | [optional] 
 **path** | **str** |  | [optional] 
 

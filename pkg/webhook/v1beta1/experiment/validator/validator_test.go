@@ -798,8 +798,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 					},
 					Source: &commonv1beta1.SourceSpec{
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path:       "not/absolute/path",
-							FileFormat: commonv1beta1.TextFormat,
+							Path:   "not/absolute/path",
+							Format: commonv1beta1.TextFormat,
 						},
 					},
 				}
@@ -837,9 +837,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 					},
 					Source: &commonv1beta1.SourceSpec{
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path:       "/absolute/path",
-							FileFormat: commonv1beta1.JsonFormat,
-							Kind:       commonv1beta1.DirectoryKind,
+							Path:   "/absolute/path",
+							Format: commonv1beta1.JsonFormat,
+							Kind:   commonv1beta1.DirectoryKind,
 						},
 					},
 				}
@@ -942,9 +942,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 							},
 						},
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path:       "/absolute/path",
-							Kind:       commonv1beta1.FileKind,
-							FileFormat: commonv1beta1.TextFormat,
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: commonv1beta1.TextFormat,
 						},
 					},
 				}
@@ -968,9 +968,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 							},
 						},
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path:       "/absolute/path",
-							Kind:       commonv1beta1.FileKind,
-							FileFormat: commonv1beta1.TextFormat,
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: commonv1beta1.TextFormat,
 						},
 					},
 				}
@@ -989,9 +989,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 					},
 					Source: &commonv1beta1.SourceSpec{
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path:       "/absolute/path",
-							Kind:       commonv1beta1.FileKind,
-							FileFormat: "invalid",
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: "invalid",
 						},
 					},
 				}
@@ -1011,9 +1011,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 					Source: &commonv1beta1.SourceSpec{
 						Filter: &commonv1beta1.FilterSpec{},
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path:       "/absolute/path",
-							Kind:       commonv1beta1.FileKind,
-							FileFormat: commonv1beta1.JsonFormat,
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: commonv1beta1.JsonFormat,
 						},
 					},
 				}
@@ -1032,9 +1032,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 					},
 					Source: &commonv1beta1.SourceSpec{
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path:       "/absolute/path",
-							Kind:       commonv1beta1.FileKind,
-							FileFormat: commonv1beta1.JsonFormat,
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: commonv1beta1.JsonFormat,
 						},
 					},
 				}

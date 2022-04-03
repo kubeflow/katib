@@ -140,7 +140,7 @@ func printMetricsFile(mFile string) {
 	}
 }
 
-func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, fileFormat commonv1beta1.FileSystemFileFormat) {
+func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, fileFormat commonv1beta1.FileFormat) {
 
 	// metricStartStep is the dict where key = metric name, value = start step.
 	// We should apply early stopping rule only if metric is reported at least "start_step" times.
@@ -398,7 +398,7 @@ func main() {
 		filters = strings.Split(*metricFilters, ";")
 	}
 
-	fileFormat := commonv1beta1.FileSystemFileFormat(*metricsFileFormat)
+	fileFormat := commonv1beta1.FileFormat(*metricsFileFormat)
 
 	// If stop rule is set we need to parse metrics during run.
 	if len(stopRules) != 0 {
@@ -425,7 +425,7 @@ func main() {
 	}
 }
 
-func reportMetrics(filters []string, fileFormat commonv1beta1.FileSystemFileFormat) {
+func reportMetrics(filters []string, fileFormat commonv1beta1.FileFormat) {
 
 	conn, err := grpc.Dial(*dbManagerServiceAddr, grpc.WithInsecure())
 	if err != nil {

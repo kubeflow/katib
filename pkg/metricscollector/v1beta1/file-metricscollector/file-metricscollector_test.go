@@ -44,7 +44,7 @@ func TestCollectObservationLog(t *testing.T) {
 		filePath    string
 		metrics     []string
 		filters     []string
-		fileFormat  commonv1beta1.FileSystemFileFormat
+		fileFormat  commonv1beta1.FileFormat
 		err         bool
 		expected    *v1beta1.ObservationLog
 	}{

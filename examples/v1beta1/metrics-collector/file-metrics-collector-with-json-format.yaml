@@ -15,7 +15,7 @@ spec:
       fileSystemPath:
         path: "/katib/mnist.json"
         kind: File
-        fileFormat: JSON
+        format: JSON
     collector:
       kind: File
   algorithm:

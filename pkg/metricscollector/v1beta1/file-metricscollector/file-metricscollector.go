@@ -34,7 +34,7 @@ import (
 	"github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
 
-func CollectObservationLog(fileName string, metrics []string, filters []string, fileFormat commonv1beta1.FileSystemFileFormat) (*v1beta1.ObservationLog, error) {
+func CollectObservationLog(fileName string, metrics []string, filters []string, fileFormat commonv1beta1.FileFormat) (*v1beta1.ObservationLog, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
