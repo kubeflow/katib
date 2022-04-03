@@ -1,0 +1,18 @@
+<div class="pbt-wrapper">
+
+  <div class="pbt-options-wrapper">
+    <mat-form-field appearance="fill" class="pbt-option">
+      <mat-label>Y-Axis</mat-label>
+      <mat-select [(ngModel)]="selectedName" (ngModelChange)="onDropdownChange()">
+        <mat-option *ngFor="let name of selectableNames" [value]="name">
+          {{name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-checkbox [(ngModel)]="displayTrace" (ngModelChange)="onTraceChange()">Display Seed Traces</mat-checkbox>
+  </div>
+
+  <div #pbtGraph id="pbt-graph" class="d3-tab-graph"></div>
+
+</div>

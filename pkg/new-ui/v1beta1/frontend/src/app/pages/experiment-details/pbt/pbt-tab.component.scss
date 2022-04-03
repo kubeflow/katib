@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+.pbt-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.pbt-options-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.pbt-option {
+  margin: 10px
+}
+
+.d3-tab-graph {
+  width: 400px;
+  text-align: center;
+
+  @media (min-width: 768px) {
+    width: 700px;
+  }
+
+  @media (min-width: 1024px) {
+    width: 1000px;
+  }
+
+  @media (min-width: 1400px) {
+    width: 1300px;
+  }
+
+  @media (min-width: 1650px) {
+    width: 1600px;
+  }
+
+  @media (min-width: 2000px) {
+    width: 1900px;
+  }
+
+  height: 600px;
+}
