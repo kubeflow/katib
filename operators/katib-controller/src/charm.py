@@ -40,14 +40,11 @@ class Operator(CharmBase):
 
         self.prometheus_provider = MetricsEndpointProvider(
             charm=self,
-            relation_name="monitoring",
             jobs=[
                 {
                     "job_name": "katib_controller_metrics",
-                    "scrape_interval": "30s",
-                    "metrics_path": "/metrics",
                     "static_configs": [
-                        {"targets": ["*:{}".format(self.config["metrics-port"])]}
+                        {"targets": [f"*:{self.config['metrics-port']}"]}
                     ],
                 }
             ],
