@@ -21,10 +21,10 @@ jobs:
           sudo pip3 install black flake8
 
       - name: Check black
-        run: black --check operators
+        run: black --check operators/*/src
 
       - name: Check flake8
-        run: cd operators && flake8
+        run: cd operators && flake8 ./katib*/src
 
   build:
     name: Test
