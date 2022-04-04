@@ -55,9 +55,6 @@ class Operator(CharmBase):
             self.on.config_changed,
             self.on.install,
             self.on.upgrade_charm,
-            self.on["monitoring"].relation_changed,
-            self.on["monitoring"].relation_broken,
-            self.on["monitoring"].relation_departed,
         ]:
             self.framework.observe(event, self.set_pod_spec)
 
