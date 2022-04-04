@@ -18,7 +18,7 @@ jobs:
           set -eux
           sudo apt update
           sudo apt install python3-setuptools
-          sudo pip3 install black==22.3.0 flake8
+          sudo pip3 install black flake8
 
       - name: Check black
         run: black --check operators
