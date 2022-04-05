@@ -779,6 +779,9 @@
     "v1beta1.FileSystemPath": {
       "type": "object",
       "properties": {
+        "format": {
+          "type": "string"
+        },
         "kind": {
           "type": "string"
         },

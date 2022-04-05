@@ -428,10 +428,21 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 			mcSpec.Source.FileSystemPath.Kind != commonapiv1beta1.FileKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
 			return fmt.Errorf("file path where metrics file exists is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
 		}
+		// Format
+		fileFormat := mcSpec.Source.FileSystemPath.Format
+		if fileFormat != commonapiv1beta1.TextFormat && fileFormat != commonapiv1beta1.JsonFormat {
+			return fmt.Errorf("format of metrics file is required by .spec.metricsCollectorSpec.source.fileSystemPath.format")
+		}
+		if fileFormat == commonapiv1beta1.JsonFormat && mcSpec.Source.Filter != nil {
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.filter must be nil when format of metrics file is %v", commonapiv1beta1.JsonFormat)
+		}
 	case commonapiv1beta1.TfEventCollector:
 		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||
 			mcSpec.Source.FileSystemPath.Kind != commonapiv1beta1.DirectoryKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
 			return fmt.Errorf("directory path where tensorflow event files exist is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
+		}
+		if mcSpec.Source.FileSystemPath.Format != "" {
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.fileSystemPath.format must be empty")
 		}
 	case commonapiv1beta1.PrometheusMetricCollector:
 		i, err := strconv.Atoi(mcSpec.Source.HttpGet.Port.String())
