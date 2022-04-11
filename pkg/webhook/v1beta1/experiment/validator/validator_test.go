@@ -810,7 +810,8 @@ func TestValidateMetricsCollector(t *testing.T) {
 					},
 					Source: &commonv1beta1.SourceSpec{
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path: "not/absolute/path",
+							Path:   "not/absolute/path",
+							Format: commonv1beta1.TextFormat,
 						},
 					},
 				}
@@ -837,6 +838,27 @@ func TestValidateMetricsCollector(t *testing.T) {
 			}(),
 			Err:             true,
 			testDescription: "Invalid path for TF event metrics collector",
+		},
+		// TfEventCollector invalid file format
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
+					Collector: &commonv1beta1.CollectorSpec{
+						Kind: commonv1beta1.TfEventCollector,
+					},
+					Source: &commonv1beta1.SourceSpec{
+						FileSystemPath: &commonv1beta1.FileSystemPath{
+							Path:   "/absolute/path",
+							Format: commonv1beta1.JsonFormat,
+							Kind:   commonv1beta1.DirectoryKind,
+						},
+					},
+				}
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Invalid file format for TF event metrics collector",
 		},
 		// PrometheusMetricCollector invalid Port
 		{
@@ -932,8 +954,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 							},
 						},
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path: "/absolute/path",
-							Kind: commonv1beta1.FileKind,
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: commonv1beta1.TextFormat,
 						},
 					},
 				}
@@ -957,8 +980,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 							},
 						},
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path: "/absolute/path",
-							Kind: commonv1beta1.FileKind,
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: commonv1beta1.TextFormat,
 						},
 					},
 				}
@@ -966,6 +990,49 @@ func TestValidateMetricsCollector(t *testing.T) {
 			}(),
 			Err:             true,
 			testDescription: "One subexpression in metrics format",
+		},
+		// FileMetricCollector invalid file format
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
+					Collector: &commonv1beta1.CollectorSpec{
+						Kind: commonv1beta1.FileCollector,
+					},
+					Source: &commonv1beta1.SourceSpec{
+						FileSystemPath: &commonv1beta1.FileSystemPath{
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: "invalid",
+						},
+					},
+				}
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Invalid file format for File metrics collector",
+		},
+		// FileMetricCollector invalid metrics filter
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
+					Collector: &commonv1beta1.CollectorSpec{
+						Kind: commonv1beta1.FileCollector,
+					},
+					Source: &commonv1beta1.SourceSpec{
+						Filter: &commonv1beta1.FilterSpec{},
+						FileSystemPath: &commonv1beta1.FileSystemPath{
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: commonv1beta1.JsonFormat,
+						},
+					},
+				}
+				return i
+			}(),
+			Err:             true,
+			testDescription: "Invalid metrics filer for File metrics collector when file format is `JSON`",
 		},
 		// Valid FileMetricCollector
 		{
@@ -977,8 +1044,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 					},
 					Source: &commonv1beta1.SourceSpec{
 						FileSystemPath: &commonv1beta1.FileSystemPath{
-							Path: "/absolute/path",
-							Kind: commonv1beta1.FileKind,
+							Path:   "/absolute/path",
+							Kind:   commonv1beta1.FileKind,
+							Format: commonv1beta1.JsonFormat,
 						},
 					},
 				}
