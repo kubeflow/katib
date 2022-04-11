@@ -311,8 +311,13 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 
 		// Check if parameter reference exist in experiment parameters
 		if len(experimentParameterNames) > 0 {
-			if _, ok := experimentParameterNames[parameter.Reference]; !ok {
-				return fmt.Errorf("parameter reference %v does not exist in spec.parameters: %v", parameter.Reference, instance.Spec.Parameters)
+			// Check if parameter is trial metadata
+			regex := regexp.MustCompile(consts.TrialTemplateMetaReplaceFormatRegex)
+			match := regex.FindStringSubmatch(parameter.Reference)
+			if !(len(match) > 0 && contains(consts.TrialTemplateMetaKeys, match[1])) {
+				if _, ok := experimentParameterNames[parameter.Reference]; !ok {
+					return fmt.Errorf("parameter reference %v does not exist in spec.parameters: %v", parameter.Reference, instance.Spec.Parameters)
+				}
 			}
 		}
 
@@ -480,4 +485,13 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 	}
 
 	return nil
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
