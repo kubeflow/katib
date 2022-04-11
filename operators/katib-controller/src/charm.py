@@ -54,6 +54,7 @@ class Operator(CharmBase):
         for event in [
             self.on.config_changed,
             self.on.install,
+            self.on.leader_elected,
             self.on.upgrade_charm,
         ]:
             self.framework.observe(event, self.set_pod_spec)
