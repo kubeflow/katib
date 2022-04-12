@@ -415,6 +415,7 @@ spec:
 	validTemplate4 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate5 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate6 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate7 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 
 	missedParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(missedParameterJobStr, nil)
 	oddParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(oddParameterJobStr, nil)
@@ -431,6 +432,7 @@ spec:
 		validTemplate4,
 		validTemplate5,
 		validTemplate6,
+		validTemplate7,
 		missedParameterTemplate,
 		oddParameterTemplate,
 		invalidParameterTemplate,
@@ -569,6 +571,16 @@ spec:
 			}(),
 			Err:             false,
 			testDescription: "Trial template contains Trial parameters when spec.parameters is empty",
+		},
+		// Trial template contains Trial metadata parameter substitution
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Name}"
+				return i
+			}(),
+			Err:             false,
+			testDescription: "Trial template contains Trial metadata reference as parameter",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
 		// missedParameterTemplate case
