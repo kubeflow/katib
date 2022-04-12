@@ -18,13 +18,13 @@ jobs:
           set -eux
           sudo apt update
           sudo apt install python3-setuptools
-          sudo pip3 install black==20.8b1 flake8
+          sudo pip3 install black flake8
 
       - name: Check black
-        run: black --check operators
+        run: black --check operators/*/src
 
       - name: Check flake8
-        run: cd operators && flake8
+        run: cd operators && flake8 ./katib*/src
 
   build:
     name: Test

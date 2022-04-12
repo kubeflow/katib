@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class CheckFailed(Exception):
-    """ Raise this exception if one of the checks in main fails. """
+    """Raise this exception if one of the checks in main fails."""
 
     def __init__(self, msg, status_type=None):
         super().__init__()
@@ -40,14 +40,11 @@ class Operator(CharmBase):
 
         self.prometheus_provider = MetricsEndpointProvider(
             charm=self,
-            relation_name="monitoring",
             jobs=[
                 {
                     "job_name": "katib_controller_metrics",
-                    "scrape_interval": "30s",
-                    "metrics_path": "/metrics",
                     "static_configs": [
-                        {"targets": ["*:{}".format(self.config["metrics-port"])]}
+                        {"targets": [f"*:{self.config['metrics-port']}"]}
                     ],
                 }
             ],
@@ -57,10 +54,8 @@ class Operator(CharmBase):
         for event in [
             self.on.config_changed,
             self.on.install,
+            self.on.leader_elected,
             self.on.upgrade_charm,
-            self.on["monitoring"].relation_changed,
-            self.on["monitoring"].relation_broken,
-            self.on["monitoring"].relation_departed,
         ]:
             self.framework.observe(event, self.set_pod_spec)
 
