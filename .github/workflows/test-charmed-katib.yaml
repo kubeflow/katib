@@ -73,7 +73,7 @@ jobs:
           sg microk8s -c 'juju bootstrap microk8s uk8s'
           juju add-model kubeflow
           juju bundle deploy --build --destructive-mode --serial
-          juju wait -wvt 300
+          juju wait -wvt 600
 
       - name: Test Katib
         run: kubectl apply -f examples/v1beta1/hp-tuning/random.yaml
