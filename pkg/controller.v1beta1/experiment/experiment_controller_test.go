@@ -147,7 +147,7 @@ func TestReconcileSuggestions(t *testing.T) {
 				Spec: trialsv1beta1.TrialSpec{},
 			},
 		},
-		3,
+		1,
 	)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(len(assignments)).To(gomega.Equal(1))
