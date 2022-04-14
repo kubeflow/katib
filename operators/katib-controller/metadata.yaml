@@ -17,3 +17,7 @@ resources:
 provides:
   katib-controller:
     interface: http
+  metrics-endpoint:
+    interface: prometheus_scrape
+  grafana-dashboard:
+    interface: grafana_dashboard
