@@ -593,7 +593,7 @@ spec:
 				return i
 			}(),
 			Err:             false,
-			testDescription: "Trial template contains Trial metadata reference as parameter",
+			testDescription: "Trial template contains Trial annotation reference as parameter",
 		},
 		{
 			Instance: func() *experimentsv1beta1.Experiment {
@@ -602,7 +602,7 @@ spec:
 				return i
 			}(),
 			Err:             false,
-			testDescription: "Trial template contains Trial metadata reference as parameter",
+			testDescription: "Trial template contains Trial's label reference as parameter",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
 		// missedParameterTemplate case
