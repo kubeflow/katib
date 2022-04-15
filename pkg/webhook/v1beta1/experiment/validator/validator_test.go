@@ -416,6 +416,8 @@ spec:
 	validTemplate5 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate6 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate7 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate8 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate9 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 
 	missedParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(missedParameterJobStr, nil)
 	oddParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(oddParameterJobStr, nil)
@@ -433,6 +435,8 @@ spec:
 		validTemplate5,
 		validTemplate6,
 		validTemplate7,
+		validTemplate8,
+		validTemplate9,
 		missedParameterTemplate,
 		oddParameterTemplate,
 		invalidParameterTemplate,
@@ -581,6 +585,24 @@ spec:
 			}(),
 			Err:             false,
 			testDescription: "Trial template contains Trial metadata reference as parameter",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Annotations[test-annotation]}"
+				return i
+			}(),
+			Err:             false,
+			testDescription: "Trial template contains Trial annotation reference as parameter",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Labels[test-label]}"
+				return i
+			}(),
+			Err:             false,
+			testDescription: "Trial template contains Trial's label reference as parameter",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
 		// missedParameterTemplate case
