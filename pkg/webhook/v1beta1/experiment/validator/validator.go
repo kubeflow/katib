@@ -311,8 +311,10 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 
 		// Check if parameter reference exist in experiment parameters
 		if len(experimentParameterNames) > 0 {
-			if _, ok := experimentParameterNames[parameter.Reference]; !ok {
-				return fmt.Errorf("parameter reference %v does not exist in spec.parameters: %v", parameter.Reference, instance.Spec.Parameters)
+			if !isMetaKey(parameter.Reference) {
+				if _, ok := experimentParameterNames[parameter.Reference]; !ok {
+					return fmt.Errorf("parameter reference %v does not exist in spec.parameters: %v", parameter.Reference, instance.Spec.Parameters)
+				}
 			}
 		}
 
@@ -480,4 +482,32 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 	}
 
 	return nil
+}
+
+func isMetaKey(parameter string) bool {
+	// Check if parameter is trial metadata reference as ${trailSpec.Name}, ${trialSpec.Labels[label]}, etc. used for substitution
+	match := regexp.MustCompile(consts.TrialTemplateMetaReplaceFormatRegex).FindStringSubmatch(parameter)
+	isMeta := false
+	if len(match) > 0 {
+		matchedKey := match[1]
+		if contains(consts.TrialTemplateMetaKeys, matchedKey) {
+			isMeta = true
+		} else {
+			// Check if it's Labels[label] or Annotations[annotation]
+			subMatch := regexp.MustCompile(consts.TrialTemplateMetaParseFormatRegex).FindStringSubmatch(matchedKey)
+			if len(subMatch) == 3 && contains(consts.TrialTemplateMetaKeys, subMatch[1]) {
+				isMeta = true
+			}
+		}
+	}
+	return isMeta
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
