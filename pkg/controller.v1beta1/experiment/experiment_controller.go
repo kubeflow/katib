@@ -346,9 +346,8 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1beta1.Exper
 func (r *ReconcileExperiment) createTrials(instance *experimentsv1beta1.Experiment, trialList []trialsv1beta1.Trial, addCount int32) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	currentCount := int32(len(trialList))
 	logger.Info("Reconcile Suggestion", "addCount", addCount)
-	trials, err := r.ReconcileSuggestions(instance, currentCount, addCount)
+	trials, err := r.ReconcileSuggestions(instance, trialList, addCount)
 	if err != nil {
 		logger.Error(err, "Get suggestions error")
 		return err
@@ -457,9 +456,15 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1beta1.Experime
 }
 
 // ReconcileSuggestions gets or creates the suggestion if needed.
-func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1beta1.Experiment, currentCount, addCount int32) ([]suggestionsv1beta1.TrialAssignment, error) {
+func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1beta1.Experiment, trialList []trialsv1beta1.Trial, addCount int32) ([]suggestionsv1beta1.TrialAssignment, error) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	var assignments []suggestionsv1beta1.TrialAssignment
+	currentCount := int32(len(trialList))
+	trialNames := map[string]bool{}
+	for _, trial := range trialList {
+		trialNames[trial.Name] = true
+	}
+
 	suggestionRequestsCount := currentCount + addCount
 
 	logger.Info("GetOrCreateSuggestion", "name", instance.Name, "Suggestion Requests", suggestionRequestsCount)
@@ -476,7 +481,11 @@ func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1beta1.
 				suggestion := original.DeepCopy()
 				if len(suggestion.Status.Suggestions) > int(currentCount) {
 					suggestions := suggestion.Status.Suggestions
-					assignments = suggestions[currentCount:]
+					for _, suggestion := range suggestions {
+						if !trialNames[suggestion.Name] {
+							assignments = append(assignments, suggestion)
+						}
+					}
 				}
 				if suggestion.Spec.Requests != suggestionRequestsCount {
 					suggestion.Spec.Requests = suggestionRequestsCount

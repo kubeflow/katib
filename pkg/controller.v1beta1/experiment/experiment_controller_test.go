@@ -96,6 +96,64 @@ func TestAdd(t *testing.T) {
 	g.Expect(Add(mgr)).NotTo(gomega.HaveOccurred())
 }
 
+func TestReconcileSuggestions(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockSuggestion := suggestionmock.NewMockSuggestion(mockCtrl)
+
+	mockCtrl2 := gomock.NewController(t)
+	defer mockCtrl2.Finish()
+	mockGenerator := manifestmock.NewMockGenerator(mockCtrl2)
+
+	// Setup the Manager and Controller. Wrap the Controller Reconcile function so it writes each request to a
+	// channel when it is finished.
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	r := &ReconcileExperiment{
+		Client:     mgr.GetClient(),
+		scheme:     mgr.GetScheme(),
+		Suggestion: mockSuggestion,
+		Generator:  mockGenerator,
+		collector:  experimentUtil.NewExpsCollector(mgr.GetCache(), prometheus.NewRegistry()),
+		recorder:   mgr.GetEventRecorderFor(ControllerName),
+	}
+
+	suggestionRestartNo := newFakeSuggestion()
+	mockSuggestion.EXPECT().GetOrCreateSuggestion(gomock.Any(), gomock.Any()).Return(
+		suggestionRestartNo, nil).AnyTimes()
+	mockSuggestion.EXPECT().UpdateSuggestion(gomock.Any()).Return(nil).AnyTimes()
+
+	instance := newFakeInstance()
+
+	// ReconcileSuggestions should return the missing trial assignments
+	assignments, err := r.ReconcileSuggestions(
+		instance,
+		[]trialsv1beta1.Trial{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      trialName + "-1",
+					Namespace: namespace,
+				},
+				Spec: trialsv1beta1.TrialSpec{},
+			},
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      trialName + "-3",
+					Namespace: namespace,
+				},
+				Spec: trialsv1beta1.TrialSpec{},
+			},
+		},
+		1,
+	)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(len(assignments)).To(gomega.Equal(1))
+	g.Expect(assignments[0].Name).To(gomega.Equal(trialName + "-2"))
+}
+
 func TestReconcile(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
