@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@ set -o pipefail
 
 cd "$(dirname "$0")/.."
 
-if ! which golangci-lint >/dev/null; then
-	echo 'Can not find golangci-lint, install with: make lint'
-	exit 1
-fi
+shell_scripts=()
+while IFS='' read -r script;
+  do git check-ignore -q "$script" || shell_scripts+=("$script");
+done < <(find . -name "*.sh" \
+  -not \( \
+    -path ./_\* -o \
+    -path ./.git\* \
+  \))
 
-echo 'Running golangci-lint'
-golangci-lint run --timeout 5m
+shellcheck "${shell_scripts[@]}"

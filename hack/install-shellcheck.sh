@@ -17,12 +17,15 @@
 set -o errexit
 set -o pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")"
 
-if ! which golangci-lint >/dev/null; then
-	echo 'Can not find golangci-lint, install with: make lint'
-	exit 1
-fi
+ARCH=$(uname -m)
+OS=$(uname)
+SHELLCHECK_VERSION=v0.8.0
 
-echo 'Running golangci-lint'
-golangci-lint run --timeout 5m
+curl -sSL "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.${OS,,}.${ARCH}.tar.xz" \
+  | tar Jxf - -C /tmp
+mv /tmp/shellcheck-$SHELLCHECK_VERSION/shellcheck /usr/local/bin/shellcheck
+chmod +x /usr/local/bin/shellcheck
+
+rm -rf /tmp/shellcheck-$SHELLCHECK_VERSION
