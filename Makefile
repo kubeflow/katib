@@ -58,8 +58,8 @@ ifndef GOPATH
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
-	cd ./pkg/apis/manager/v1beta1 && ./build.sh
-	cd ./pkg/apis/manager/health && ./build.sh
+	pkg/apis/manager/v1beta1/build.sh
+	pkg/apis/manager/health/build.sh
 
 # Build images for the Katib v1beta1 components.
 build: generate
