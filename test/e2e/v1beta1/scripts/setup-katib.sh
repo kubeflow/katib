@@ -27,7 +27,7 @@ echo "ECR_REGISTRY: ${ECR_REGISTRY}"
 echo "VERSION: ${PULL_PULL_SHA}"
 
 echo "Configuring kubeconfig.."
-aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
+aws eks update-kubeconfig --region="${AWS_REGION}" --name="${CLUSTER_NAME}"
 kubectl version
 kubectl cluster-info
 
