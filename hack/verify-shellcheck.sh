@@ -23,9 +23,8 @@ shell_scripts=()
 while IFS='' read -r script;
   do git check-ignore -q "$script" || shell_scripts+=("$script");
 done < <(find . -name "*.sh" \
-  -not \( \
-    -path ./_\* -o \
-    -path ./.git\* \
-  \))
+  ! -path ./_\* \
+  ! -path ./.git\*
+)
 
 shellcheck "${shell_scripts[@]}"
