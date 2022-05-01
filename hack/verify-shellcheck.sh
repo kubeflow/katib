@@ -19,12 +19,18 @@ set -o pipefail
 
 cd "$(dirname "$0")/.."
 
+if ! which shellcheck >/dev/null; then
+	echo 'Can not find shellcheck, install with: make shellcheck'
+	exit 1
+fi
+
 shell_scripts=()
 while IFS='' read -r script;
   do git check-ignore -q "$script" || shell_scripts+=("$script");
 done < <(find . -name "*.sh" \
-  ! -path ./_\* \
-  ! -path ./.git\*
+  ! -path "./_*" \
+  ! -path "./.git/*"
 )
 
+echo 'Running shellcheck'
 shellcheck "${shell_scripts[@]}"

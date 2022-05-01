@@ -32,7 +32,7 @@ for i in ${find_go_files}; do
   if [[ $(sed -n 2p "$i") =~ "Copyright" ]]; then
     echo "Remove the current boilerplate and add the new boilerplate to $i"
     tail -n +17 "$i" >"$i.tmp"
-  # If the 1st line starts with "//go:build" and the 2nd line starts with "Copyright", remove the current boilerplate and copy the marker for Go.
+  # If the 1st line starts with "//go:build" and the 4th line starts with "Copyright", remove the current boilerplate and copy the marker.
   elif [[ $(sed -n 1p "$i") =~ "//go:build" ]] && [[ $(sed -n 4p "$i") =~ "Copyright" ]]; then
     echo "Remove the current boilerplate, copy the marker for Go, and add the new boilerplate to $i"
     sed -e "2,17d" "$i" > "$i.tmp"
@@ -42,7 +42,7 @@ for i in ${find_go_files}; do
     cat "$i" >"$i.tmp"
   fi
 
-  # If the 1st line starts with "//go:build", copy the marker for Go and add the new boilerplate to the file.
+  # If the 1st line starts with "//go:build", copy the marker and add the new boilerplate to the file.
   if [[ $(sed -n 1p "$i.tmp") =~ "//go:build" ]]; then
     (head -2 "$i.tmp" && cat ./hack/boilerplate/boilerplate.go.txt && tail -n +3 "$i.tmp") >"$i" && rm "$i.tmp"
   # Otherwise, add the new boilerplate to the file.
