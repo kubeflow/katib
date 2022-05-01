@@ -54,7 +54,7 @@ done
 # ------------------ Python files ------------------
 # Exclude gRPC manager and __init__.py files from the search.
 find_python_files=$(
-  find ./cmd ./pkg ./hack ./test ./examples/v1beta1/trial-images -name "*.py" \
+  find ./cmd ./pkg ./hack ./test ./examples -name "*.py" \
     ! -path "./pkg/apis/manager/*" \
     ! -path "*__init__.py" \
     ! -path "./examples/v1beta1/trial-images/mxnet-mnist/*"
@@ -75,7 +75,7 @@ for i in ${find_python_files}; do
 done
 
 # ------------------ Shell files ------------------
-find_shell_files=$(find ./pkg ./hack ./scripts ./test ./examples/v1beta1/kind-cluster -name "*.sh")
+find_shell_files=$(find ./pkg ./hack ./scripts ./test ./examples -name "*.sh")
 
 for i in ${find_shell_files}; do
   # If the 3rd line starts with "# Copyright", remove the boilerplate.

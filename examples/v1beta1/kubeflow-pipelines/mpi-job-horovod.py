@@ -1,3 +1,17 @@
+# Copyright 2022 The Kubeflow Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Kubeflow Pipeline with Katib component.
 
 # In this example you will create Katib Experiment using Bayesian optimization algorithm.
@@ -5,7 +19,8 @@
 # After that, you will compile a Kubeflow Pipeline with your Katib Experiment.
 # Use Kubeflow Pipelines UI to upload the Pipeline and create the Experiment and Run.
 
-# This Experiment is similar to this: https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/mpijob-horovod.yaml
+# This Experiment is similar to this:
+# https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/mpijob-horovod.yaml
 # Check the training container source code here: https://github.com/kubeflow/mpi-operator/tree/master/examples/horovod.
 
 # Note: To run this example, your Kubernetes cluster should run MPIJob operator.
