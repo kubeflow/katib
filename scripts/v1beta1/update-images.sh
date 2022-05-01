@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2021 The Kubeflow Authors.
 #
@@ -50,9 +50,9 @@ fi
 update_yaml_files() {
   # For MacOS we should set -i '' to avoid temp files from sed.
   if [[ $(uname) == "Darwin" ]]; then
-    find $1 -regex ".*\.yaml" -exec sed -i '' -e "s@$2@$3@" {} \;
+    find "$1" -regex ".*\.yaml" -exec sed -i '' -e "s@$2@$3@" {} \;
   else
-    find $1 -regex ".*\.yaml" -exec sed -i -e "s@$2@$3@" {} \;
+    find "$1" -regex ".*\.yaml" -exec sed -i -e "s@$2@$3@" {} \;
   fi
 }
 
