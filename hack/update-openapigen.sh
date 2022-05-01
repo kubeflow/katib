@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2021 The Kubeflow Authors.
 #
@@ -21,12 +21,13 @@ set -o pipefail
 echo "Generate open-api for the APIs"
 
 if [[ -z "${GOPATH:-}" ]]; then
-  export GOPATH=$(go env GOPATH)
+  GOPATH=$(go env GOPATH)
+  export GOPATH
 fi
 
 # Grab code-generator version from go.mod
 CODEGEN_VERSION=$(cd ../../.. && grep 'k8s.io/code-generator' go.mod | awk '{print $2}')
-CODEGEN_PKG=$(echo $(go env GOPATH)"/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}")
+CODEGEN_PKG="${GOPATH}/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}"
 
 if [[ ! -d ${CODEGEN_PKG} ]]; then
   echo "${CODEGEN_PKG} is missing. Please run 'go mod download'."
@@ -36,22 +37,24 @@ fi
 echo ">> Using ${CODEGEN_PKG} for the code generator"
 
 # Ensure we can execute.
-chmod +x ${CODEGEN_PKG}/generate-groups.sh
+chmod +x "${CODEGEN_PKG}/generate-groups.sh"
 
 PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
 VERSION_LIST=(v1beta1)
 SWAGGER_VERSION="0.1"
 
-for VERSION in ${VERSION_LIST[@]}; do
+for VERSION in "${VERSION_LIST[@]}"; do
   SWAGGER_CODEGEN_FILE=${PROJECT_ROOT}/pkg/apis/${VERSION}/swagger.json
 
   echo "Generating OpenAPI specification for ${VERSION} ..."
-  go run ${CODEGEN_PKG}/cmd/openapi-gen/main.go \
-    --go-header-file ${PROJECT_ROOT}/hack/boilerplate/boilerplate.go.txt \
-    --input-dirs github.com/kubeflow/katib/pkg/apis/controller/common/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/experiments/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/suggestions/${VERSION},github.com/kubeflow/katib/pkg/apis/controller/trials/${VERSION} \
-    --output-package github.com/kubeflow/katib/pkg/apis/${VERSION} \
-    $@
+
+  # shellcheck disable=SC2140
+  go run "${CODEGEN_PKG}/cmd/openapi-gen/main.go" \
+    --go-header-file "${PROJECT_ROOT}/hack/boilerplate/boilerplate.go.txt" \
+    --input-dirs "github.com/kubeflow/katib/pkg/apis/controller/common/$VERSION","github.com/kubeflow/katib/pkg/apis/controller/experiments/$VERSION","github.com/kubeflow/katib/pkg/apis/controller/suggestions/${VERSION}","github.com/kubeflow/katib/pkg/apis/controller/trials/${VERSION}" \
+    --output-package "github.com/kubeflow/katib/pkg/apis/${VERSION}" \
+    "$@"
 
   echo "Generating swagger file for ${VERSION} ..."
-  go run ${PROJECT_ROOT}/hack/swagger/main.go ${VERSION}-${SWAGGER_VERSION} ${VERSION} >${SWAGGER_CODEGEN_FILE}
+  go run "${PROJECT_ROOT}/hack/swagger/main.go" "${VERSION}-${SWAGGER_VERSION}" "${VERSION}" >"${SWAGGER_CODEGEN_FILE}"
 done
