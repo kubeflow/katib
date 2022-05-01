@@ -15,7 +15,7 @@
 # limitations under the License.
 
 set -o xtrace
-set -eo pipefail
+set -o errexit
 
 SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/../.."
 

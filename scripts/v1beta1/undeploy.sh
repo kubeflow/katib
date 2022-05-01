@@ -15,7 +15,7 @@
 # limitations under the License.
 
 set -o xtrace
-set -eo pipefail
+set -o errexit
 
 # Delete all Katib Experiment in all namespaces.
 kubectl delete experiment --all --all-namespaces
