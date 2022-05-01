@@ -30,17 +30,17 @@ POST_GEN_PYTHON_HANDLER="hack/gen-python-sdk/post_gen.py"
 KATIB_VERSIONS=(v1beta1)
 
 # Download JAR package if file doesn't exist.
-if ! test -f ${SWAGGER_CODEGEN_JAR}; then
+if ! test -f "${SWAGGER_CODEGEN_JAR}"; then
     echo "Downloading the openapi generator JAR package ..."
-    wget -O ${SWAGGER_CODEGEN_JAR} ${SWAGGER_JAR_URL}
+    wget -O "${SWAGGER_CODEGEN_JAR}" "${SWAGGER_JAR_URL}"
 fi
 
-for VERSION in ${KATIB_VERSIONS[@]}; do
+for VERSION in "${KATIB_VERSIONS[@]}"; do
     echo "Generating Python SDK for Kubeflow Katib ${VERSION} ..."
-    SWAGGER_FILE=${SWAGGER_CODEGEN_FILE/KATIB_VERSION/$VERSION}
-    TMP_PATH=${TMP_CODEGEN_PATH/KATIB_VERSION/$VERSION}
-    java -jar ${SWAGGER_CODEGEN_JAR} generate -i ${SWAGGER_FILE} -g python -o ${TMP_PATH} -c ${SWAGGER_CODEGEN_CONF}
+    SWAGGER_FILE="${SWAGGER_CODEGEN_FILE/KATIB_VERSION/$VERSION}"
+    TMP_PATH="${TMP_CODEGEN_PATH/KATIB_VERSION/$VERSION}"
+    java -jar "${SWAGGER_CODEGEN_JAR}" generate -i "${SWAGGER_FILE}" -g python -o "${TMP_PATH}" -c "${SWAGGER_CODEGEN_CONF}"
 
     # Run post gen script.
-    python ${POST_GEN_PYTHON_HANDLER} ${TMP_PATH} ${SDK_OUTPUT_PATH}/${VERSION}
+    python "${POST_GEN_PYTHON_HANDLER}" "${TMP_PATH}" "${SDK_OUTPUT_PATH}/${VERSION}"
 done
