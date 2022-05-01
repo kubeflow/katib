@@ -21,12 +21,10 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-CLUSTER_NAME="${CLUSTER_NAME}"
-AWS_REGION="${AWS_REGION}"
 EXPERIMENT_FILE=$1
 
 echo "Configuring kubeconfig.."
-aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
+aws eks update-kubeconfig --region="${AWS_REGION}" --name="${CLUSTER_NAME}"
 
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
@@ -40,6 +38,6 @@ echo "Available CRDs"
 kubectl get crd
 
 echo "Running Experiment from ${EXPERIMENT_FILE} file"
-./run-e2e-experiment ${EXPERIMENT_FILE}
+./run-e2e-experiment "${EXPERIMENT_FILE}"
 
 exit 0
