@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ set -o pipefail
 echo "Generate deepcopy, clientset, listers, informers for the APIs"
 
 if [[ -z "${GOPATH:-}" ]]; then
-    export GOPATH=$(go env GOPATH)
+    GOPATH=$(go env GOPATH)
+    export GOPATH
 fi
 
 # Grab code-generator version from go.mod
 CODEGEN_VERSION=$(cd ../../.. && grep 'k8s.io/code-generator' go.mod | awk '{print $2}')
-CODEGEN_PKG=$(echo $(go env GOPATH)"/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}")
+CODEGEN_PKG="$GOPATH/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}"
 
-if [[ ! -d ${CODEGEN_PKG} ]]; then
+if [[ ! -d "${CODEGEN_PKG}" ]]; then
     echo "${CODEGEN_PKG} is missing. Please run 'go mod download'."
     exit 0
 fi
@@ -36,9 +37,8 @@ fi
 echo ">> Using ${CODEGEN_PKG} for the code generator"
 
 # Ensure we can execute.
-chmod +x ${CODEGEN_PKG}/generate-groups.sh
+chmod +x "${CODEGEN_PKG}/generate-groups.sh"
 
-VERSION_LIST=(v1beta1)
 PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
 
 modules=(experiments suggestions trials common)
@@ -47,9 +47,9 @@ versionStr=$(printf ",%s" "${versions[@]}")
 GROUP_VERSIONS=$(printf "%s:${versionStr:1} " "${modules[@]}")
 
 echo "Generating clients for ${GROUP_VERSIONS} ..."
-${CODEGEN_PKG}/generate-groups.sh \
+"${CODEGEN_PKG}/generate-groups.sh" \
     all \
     github.com/kubeflow/katib/pkg/client/controller \
     github.com/kubeflow/katib/pkg/apis/controller \
     "${GROUP_VERSIONS}" \
-    --go-header-file ${PROJECT_ROOT}/hack/boilerplate/boilerplate.go.txt
+    --go-header-file "${PROJECT_ROOT}/hack/boilerplate/boilerplate.go.txt"

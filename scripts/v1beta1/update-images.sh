@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ fi
 update_yaml_files() {
   # For MacOS we should set -i '' to avoid temp files from sed.
   if [[ $(uname) == "Darwin" ]]; then
-    find $1 -regex ".*\.yaml" -exec sed -i '' -e "s@$2@$3@" {} \;
+    find "$1" -regex ".*\.yaml" -exec sed -i '' -e "s@$2@$3@" {} \;
   else
-    find $1 -regex ".*\.yaml" -exec sed -i -e "s@$2@$3@" {} \;
+    find "$1" -regex ".*\.yaml" -exec sed -i -e "s@$2@$3@" {} \;
   fi
 }
 

@@ -1,4 +1,5 @@
 HAS_LINT := $(shell command -v golangci-lint;)
+HAS_SHELLCHECK := $(shell command shellcheck --version)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= amd64
@@ -28,6 +29,13 @@ endif
 vet:
 	go vet ./pkg/... ./cmd/...
 
+shellcheck:
+ifndef HAS_SHELLCHECK
+	bash hack/install-shellcheck.sh
+	echo "shellcheck has been installed"
+endif
+	hack/verify-shellcheck.sh
+
 update:
 	hack/update-gofmt.sh
 
@@ -50,8 +58,8 @@ ifndef GOPATH
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
-	cd ./pkg/apis/manager/v1beta1 && ./build.sh
-	cd ./pkg/apis/manager/health && ./build.sh
+	pkg/apis/manager/v1beta1/build.sh
+	pkg/apis/manager/health/build.sh
 
 # Build images for the Katib v1beta1 components.
 build: generate

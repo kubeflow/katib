@@ -14,10 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o xtrace
 set -o errexit
+set -o pipefail
 
-SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/../.."
+cd "$(dirname "$0")"
 
-cd "${SCRIPT_ROOT}"
-kustomize build manifests/v1beta1/installs/katib-standalone | kubectl apply -f -
+ARCH=$(uname -m)
+OS=$(uname)
+SHELLCHECK_VERSION=v0.8.0
+
+curl -sSL "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.${OS,,}.${ARCH}.tar.xz" \
+  | tar Jxf - -C /tmp
+mv /tmp/shellcheck-$SHELLCHECK_VERSION/shellcheck /usr/local/bin/shellcheck
+chmod +x /usr/local/bin/shellcheck
+
+rm -rf /tmp/shellcheck-$SHELLCHECK_VERSION

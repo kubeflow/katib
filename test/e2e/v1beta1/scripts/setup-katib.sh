@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ echo "ECR_REGISTRY: ${ECR_REGISTRY}"
 echo "VERSION: ${PULL_PULL_SHA}"
 
 echo "Configuring kubeconfig.."
-aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
+aws eks update-kubeconfig --region="${AWS_REGION}" --name="${CLUSTER_NAME}"
 kubectl version
 kubectl cluster-info
 

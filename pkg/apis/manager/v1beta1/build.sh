@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 set -x
 set -e
 
-for proto in api.proto; do
-  docker run -i --rm -v $PWD:$(pwd) -w $(pwd) znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
-  docker run -i --rm -v $PWD:$(pwd) -w $(pwd) znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto
-done
+cd "$(dirname "$0")"
+
+proto="api.proto"
+
+docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
+docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto
+
 docker build -t protoc-gen-doc gen-doc/
-docker run --rm -v $PWD/gen-doc:/out -v $PWD:/apiprotos protoc-gen-doc --doc_opt=markdown,api.md -I /protobuf -I /apiprotos api.proto
-docker run --rm -v $PWD/gen-doc:/out -v $PWD:/apiprotos protoc-gen-doc --doc_opt=html,index.html -I /protobuf -I /apiprotos api.proto
+docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=markdown,api.md -I /protobuf -I /apiprotos $proto
+docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=html,index.html -I /protobuf -I /apiprotos $proto

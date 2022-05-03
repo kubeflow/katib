@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
+SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
 
-cd ${SCRIPT_ROOT}
+cd "${SCRIPT_ROOT}"
 
 # Grab mockgen version from go.mod
 MOCKGEN_VERSION=$(grep 'github.com/golang/mock' go.mod | awk '{print $2}')
 
-if [[ ! $(mockgen -version) == ${MOCKGEN_VERSION} ]]; then
+if [[ ! $(mockgen -version) == "${MOCKGEN_VERSION}" ]]; then
   echo "You must use ${MOCKGEN_VERSION} mockgen version to run this script"
   echo "To install mockgen follow this doc: https://github.com/golang/mock/tree/master#installation"
   echo "Run 'mockgen -version' to check the installed version"

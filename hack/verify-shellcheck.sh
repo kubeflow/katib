@@ -14,10 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o xtrace
 set -o errexit
+set -o pipefail
 
-SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/../.."
+cd "$(dirname "$0")/.."
 
-cd "${SCRIPT_ROOT}"
-kustomize build manifests/v1beta1/installs/katib-standalone | kubectl apply -f -
+if ! which shellcheck >/dev/null; then
+	echo 'Can not find shellcheck, install with: make shellcheck'
+	exit 1
+fi
+
+shell_scripts=()
+while IFS='' read -r script;
+  do git check-ignore -q "$script" || shell_scripts+=("$script");
+done < <(find . -name "*.sh" \
+  ! -path "./_*" \
+  ! -path "./.git/*"
+)
+
+echo 'Running shellcheck'
+shellcheck "${shell_scripts[@]}"
