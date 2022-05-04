@@ -8,8 +8,11 @@ import numpy as np
 import os
 import pickle
 import random
-import tensorflow as tf
 import time
+
+# Ensure job runs for at least this long (secs) to allow metrics collector to
+# read PID correctly before cleanup
+_METRICS_COLLECTOR_SPAWN_LATENCY = 7
 
 
 class PBTBenchmarkExample:
@@ -30,11 +33,7 @@ class PBTBenchmarkExample:
     faster convergence. Training will not converge without PBT.
     """
 
-    def __init__(self, lr, log_dir: str, log_interval: int, checkpoint: str):
-        # Allow lazy creation of tfevent file
-        self._log_dir = log_dir
-        self._writer = None
-        self._log_interval = log_interval
+    def __init__(self, lr, checkpoint: str):
         self._lr = lr
 
         self._checkpoint_file = os.path.join(checkpoint, "training.ckpt")
@@ -53,7 +52,7 @@ class PBTBenchmarkExample:
             pickle.dump({"step": self._step, "accuracy": self._accuracy}, fout)
 
     def step(self):
-        midpoint = 100  # lr starts decreasing after acc > midpoint
+        midpoint = 50  # lr starts decreasing after acc > midpoint
         q_tolerance = 3  # penalize exceeding lr by more than this multiple
         noise_level = 2  # add gaussian noise to the acc increase
         # triangle wave:
@@ -67,30 +66,21 @@ class PBTBenchmarkExample:
         optimal_lr = min(0.01, max(0.001, optimal_lr))
 
         # compute accuracy increase
-        q_err = max(self._lr, optimal_lr) / min(self._lr, optimal_lr)
+        q_err = max(self._lr, optimal_lr) / (
+            min(self._lr, optimal_lr) + np.finfo(float).eps
+        )
         if q_err < q_tolerance:
             self._accuracy += (1.0 / q_err) * random.random()
         elif self._lr > optimal_lr:
             self._accuracy -= (q_err - q_tolerance) * random.random()
         self._accuracy += noise_level * np.random.normal()
-        self._accuracy = max(0, self._accuracy)
-
-        if self._step == 1 or self._step % self._log_interval == 0:
-            self.save_checkpoint()
-            if not self._writer:
-                self._writer = tf.summary.create_file_writer(self._log_dir)
-            with self._writer.as_default():
-                tf.summary.scalar(
-                    "Validation-accuracy", self._accuracy, step=self._step
-                )
-                tf.summary.scalar("lr", self._lr, step=self._step)
-                self._writer.flush()
+        self._accuracy = max(0, min(100, self._accuracy))
 
         self._step += 1
 
     def __repr__(self):
         return "epoch {}:\nlr={:0.4f}\nValidation-accuracy={:0.4f}".format(
-            self._step, self._lr, self._accuracy
+            self._step, self._lr, self._accuracy / 100
         )
 
 
@@ -104,19 +94,6 @@ if __name__ == "__main__":
         "--epochs", type=int, default=20, help="number of epochs to train (default: 20)"
     )
     parser.add_argument(
-        "--log-interval",
-        type=int,
-        default=10,
-        metavar="N",
-        help="how many batches to wait before logging training status (default: 1)",
-    )
-    parser.add_argument(
-        "--log-path",
-        type=str,
-        default="/var/log/katib/tfevent/",
-        help="tfevent output path (default: /var/log/katib/tfevent/)",
-    )
-    parser.add_argument(
         "--checkpoint",
         type=str,
         default="/var/log/katib/checkpoints/",
@@ -124,10 +101,14 @@ if __name__ == "__main__":
     )
     opt = parser.parse_args()
 
-    benchmark = PBTBenchmarkExample(
-        opt.lr, opt.log_path, opt.log_interval, opt.checkpoint
-    )
+    benchmark = PBTBenchmarkExample(opt.lr, opt.checkpoint)
+
+    start_time = time.time()
     for i in range(opt.epochs):
         benchmark.step()
-        time.sleep(0.2)
+    exec_time_thresh = time.time() - start_time - _METRICS_COLLECTOR_SPAWN_LATENCY
+    if exec_time_thresh < 0:
+        time.sleep(abs(exec_time_thresh))
+    benchmark.save_checkpoint()
+
     print(benchmark)

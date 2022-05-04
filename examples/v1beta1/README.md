@@ -110,6 +110,8 @@ Check the following images for the Trial containers:
 
 - [DARTS PyTorch CNN CIFAR-10](./trial-images/darts-cnn-cifar10)
 
+- [PBT proof of concept](./trial-images/simple-pbt)
+
 ## Katib with Kubeflow Training Operator
 
 Katib has out of the box support for the [Kubeflow Training Operators](https://github.com/kubeflow/training-operator) to

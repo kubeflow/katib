@@ -1,7 +1,9 @@
-FROM tensorflow/tensorflow:2.8.0
+FROM python:3.9
 
-ADD test/functional/v1beta1/suggestion/pbt /opt/pbt
+ADD examples/v1beta1/trial-images/simple-pbt /opt/pbt
 WORKDIR /opt/pbt
+
+RUN python3 -m pip install -r requirements.txt
 
 RUN chgrp -R 0 /opt/pbt \
   && chmod -R g+rwX /opt/pbt
