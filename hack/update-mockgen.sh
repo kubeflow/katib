@@ -30,7 +30,7 @@ MOCKGEN_VERSION=$(grep 'github.com/golang/mock' go.mod | awk '{print $2}')
 
 if [[ ! $(mockgen -version) == "${MOCKGEN_VERSION}" ]]; then
   echo "You must use ${MOCKGEN_VERSION} mockgen version to run this script"
-  echo "To install mockgen follow this doc: https://github.com/golang/mock/tree/master#installation"
+  echo "To install mockgen follow this doc: https://github.com/golang/mock/tree/main#installation"
   echo "Run 'mockgen -version' to check the installed version"
   exit 1
 fi

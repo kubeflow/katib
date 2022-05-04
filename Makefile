@@ -1,8 +1,11 @@
 HAS_LINT := $(shell command -v golangci-lint;)
 HAS_SHELLCHECK := $(shell command shellcheck --version)
+HAS_SETUP_ENVTEST := $(shell command setup-envtest list)
+
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= amd64
+ENVTEST_K8S_VERSION ?= 1.22
 
 # for pytest
 PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
@@ -11,8 +14,16 @@ TEST_TENSORFLOW_EVENT_FILE_PATH ?= $(CURDIR)/test/unit/v1beta1/metricscollector/
 
 # Run tests
 .PHONY: test
-test:
-	go test ./pkg/... ./cmd/... -coverprofile coverage.out
+test: envtest
+	KUBEBUILDER_ASSETS="$(shell setup-envtest use $(ENVTEST_K8S_VERSION) -p path)" go test ./pkg/... ./cmd/... -coverprofile coverage.out
+
+envtest:
+ifndef HAS_SETUP_ENVTEST
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@c48baad70c539a2efb8dfe8850434ecc721c1ee1 # v0.10.0
+	echo "setup-envtest has been installed"
+endif
+	echo "setup-envtest has already installed"
+
 
 check: generate fmt vet lint
 

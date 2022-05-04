@@ -80,7 +80,10 @@ func (c *Clientset) Tracker() testing.ObjectTracker {
 	return c.tracker
 }
 
-var _ clientset.Interface = &Clientset{}
+var (
+	_ clientset.Interface = &Clientset{}
+	_ testing.FakeClient  = &Clientset{}
+)
 
 // CommonV1beta1 retrieves the CommonV1beta1Client
 func (c *Clientset) CommonV1beta1() commonv1beta1.CommonV1beta1Interface {

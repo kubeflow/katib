@@ -22,10 +22,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-openapi/spec"
 	"github.com/kubeflow/katib/pkg/apis/v1beta1"
 	"k8s.io/klog"
 	"k8s.io/kube-openapi/pkg/common"
+	"k8s.io/kube-openapi/pkg/validation/spec"
 )
 
 // Generate OpenAPI spec definitions for Katib Resource
