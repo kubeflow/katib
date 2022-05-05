@@ -16,7 +16,7 @@ spec:
   algorithm:
     algorithmName: pbt
     algorithmSettings:
-      - name: checkpoint_dir
+      - name: suggestion_trial_dir
         value: /var/log/katib/checkpoints/
       - name: n_population
         value: '40'

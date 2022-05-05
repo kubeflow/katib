@@ -333,7 +333,7 @@ func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, me
 	return args, nil
 }
 
-// Mutate trial container with shared Suggestions PVC when algorithm settings contains checkpoint_dir
+// Mutate trial container with shared Suggestions PVC when algorithm settings contains suggestion_trial_dir
 func (s *SidecarInjector) mutateSuggestionVolume(pod *v1.Pod, primaryContainerName string, trial *trialsv1beta1.Trial) error {
 	// Suggestion name == Experiment name
 	// Suggestion namespace == Trial namespace
@@ -350,7 +350,7 @@ func (s *SidecarInjector) mutateSuggestionVolume(pod *v1.Pod, primaryContainerNa
 	// Check if mutation is needed
 	checkpointPath := ""
 	for _, s := range suggestion.Spec.Algorithm.AlgorithmSettings {
-		if s.Name == "checkpoint_dir" && s.Value != "" {
+		if s.Name == consts.SuggestionVolumeMountKey && s.Value != "" {
 			checkpointPath = s.Value
 			break
 		}

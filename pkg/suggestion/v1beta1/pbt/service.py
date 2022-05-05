@@ -32,7 +32,7 @@ from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 logger = logging.getLogger(__name__)
 
 
-_REQUIRED_SETTINGS = ["checkpoint_dir", "n_population", "truncation_threshold"]
+_REQUIRED_SETTINGS = ["suggestion_trial_dir", "n_population", "truncation_threshold"]
 _DATA_PATH = "/opt/katib/data"
 
 
