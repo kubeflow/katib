@@ -21,7 +21,10 @@ import uuid
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
-from pkg.suggestion.v1beta1.internal.search_space import HyperParameter, HyperParameterSearchSpace
+from pkg.suggestion.v1beta1.internal.search_space import (
+    HyperParameter,
+    HyperParameterSearchSpace,
+)
 import pkg.suggestion.v1beta1.internal.constant as constant
 from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment, Annotations
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
@@ -41,16 +44,30 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         self.job_queue = None
 
     def ValidateAlgorithmSettings(self, request, context):
-        settings = {entry.name: entry.value for entry in request.experiment.spec.algorithm.algorithm_settings}
+        settings = {
+            entry.name: entry.value
+            for entry in request.experiment.spec.algorithm.algorithm_settings
+        }
         missing_settings = [k for k in _REQUIRED_SETTINGS if k not in settings]
         if len(missing_settings) > 0:
-            return self._set_validate_context_error(context, "Required params missing: {}".format(", ".join(missing_settings)))
+            return self._set_validate_context_error(
+                context,
+                "Required params missing: {}".format(", ".join(missing_settings)),
+            )
 
         if int(settings["n_population"]) < 5:
-            return self._set_validate_context_error(context, "Param(n_population) should be >= 5")
+            return self._set_validate_context_error(
+                context, "Param(n_population) should be >= 5"
+            )
         if not 0 <= float(settings["truncation_threshold"]) <= 1:
-            return self._set_validate_context_error(context, "Param(truncation_threshold) should be between 0 and 1, inclusive")
-        if "resample_probability" in settings and not 0 <= settings["resample_probability"] <= 1:
+            return self._set_validate_context_error(
+                context,
+                "Param(truncation_threshold) should be between 0 and 1, inclusive",
+            )
+        if (
+            "resample_probability" in settings
+            and not 0 <= settings["resample_probability"] <= 1
+        ):
             return self._set_validate_context_error(
                 context,
                 "Param(resample_probability) should be null to perturb at 0.8 or 1.2, or be between 0 and 1, inclusive, to resample",
@@ -60,17 +77,27 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def GetSuggestions(self, request, context):
         if self.is_first_run:
-            settings = {entry.name: entry.value for entry in request.experiment.spec.algorithm.algorithm_settings}  # all type:str
+            settings = {
+                entry.name: entry.value
+                for entry in request.experiment.spec.algorithm.algorithm_settings
+            }  # all type:str
             search_space = HyperParameterSearchSpace.convert(request.experiment)
-            search_space = [HyperParameterSampler.from_hyperparameter(i) for i in search_space.params]
+            search_space = [
+                HyperParameterSampler.from_hyperparameter(i)
+                for i in search_space.params
+            ]
             # Always maximize the objective_metric
-            objective_scale = 1 if request.experiment.spec.objective.type == api_pb2.MAXIMIZE else -1
+            objective_scale = (
+                1 if request.experiment.spec.objective.type == api_pb2.MAXIMIZE else -1
+            )
             objective_metric = request.experiment.spec.objective.objective_metric_name
             # Create Job Manager
             self.job_queue = PbtJobQueue(
                 int(settings["n_population"]),
                 float(settings["truncation_threshold"]),
-                None if not "resample_probability" in settings else float(settings["resample_probability"]),
+                None
+                if not "resample_probability" in settings
+                else float(settings["resample_probability"]),
                 search_space,
                 objective_metric,
                 objective_scale,
@@ -86,10 +113,16 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         request_count = request.current_request_number
         if len(self.job_queue) < request_count:
             if len(self.job_queue) > 0:
-                logger.info("Job queue < request count; flushing queue before spawning...")
+                logger.info(
+                    "Job queue < request count; flushing queue before spawning..."
+                )
                 request_count = len(self.job_queue)
             elif len(self.job_queue.running) > 0:
-                logger.info("Waiting for trials to complete before spawning next generation: {}".format(list(self.job_queue.running.keys())))
+                logger.info(
+                    "Waiting for trials to complete before spawning next generation: {}".format(
+                        list(self.job_queue.running.keys())
+                    )
+                )
                 self.job_queue.verify_running(request.trials)
                 return api_pb2.GetSuggestionsReply(parameter_assignments=[])
             else:
@@ -101,7 +134,9 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         annotations = Annotations.generate([j[1] for j in jobs])
         logger.info("Transmitting suggestion...")
 
-        return api_pb2.GetSuggestionsReply(parameter_assignments=parameter_assignments, annotations=annotations)
+        return api_pb2.GetSuggestionsReply(
+            parameter_assignments=parameter_assignments, annotations=annotations
+        )
 
     def _set_validate_context_error(self, context, error_message):
         context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
@@ -114,9 +149,11 @@ class HyperParameterSampler(HyperParameter):
     def __init__(self, *args, **kwargs):
         super(HyperParameterSampler, self).__init__(*args, **kwargs)
         if self.type in (constant.INTEGER, constant.DOUBLE):
-            self.sample_list = np.arange(float(self.min), float(self.max) + float(self.step) / 2, float(self.step)).astype(
-                int if self.type == constant.INTEGER else float
-            )
+            self.sample_list = np.arange(
+                float(self.min),
+                float(self.max) + float(self.step) / 2,
+                float(self.step),
+            ).astype(int if self.type == constant.INTEGER else float)
         else:
             self.sample_list = self.list
 
@@ -131,7 +168,9 @@ class HyperParameterSampler(HyperParameter):
             new_value = float(value) * np.random.choice([0.8, 1.2], 1)[0]
             return max(float(self.min), min(float(self.max), new_value))
         else:
-            sample_index = self.sample_list.index(value) + np.random.choice([-1, 1], 1)[0]
+            sample_index = (
+                self.sample_list.index(value) + np.random.choice([-1, 1], 1)[0]
+            )
             if sample_index >= len(self.sample_list):
                 return self.sample_list[0]
             else:
@@ -148,7 +187,9 @@ class PbtJob(object):
             self.uid = str(uuid.uuid4())
         else:
             self.uid = uid
-        self.params = {a.name: str(a.value) for a in assignment_list}  # all assignments transmitted as str
+        self.params = {
+            a.name: str(a.value) for a in assignment_list
+        }  # all assignments transmitted as str
         self.generation = generation
         self.parent = parent
         self.metric_value = None
@@ -164,12 +205,20 @@ class PbtJob(object):
         return assignments, annotations
 
     def __repr__(self):
-        return "generation: {}, uid: {}, parent: {}".format(self.generation, self.uid, self.parent)
+        return "generation: {}, uid: {}, parent: {}".format(
+            self.generation, self.uid, self.parent
+        )
 
 
 class PbtJobQueue(object):
     def __init__(
-        self, population_size, truncation_threshold, resample_probability, search_space, metric_name, metric_scaler
+        self,
+        population_size,
+        truncation_threshold,
+        resample_probability,
+        search_space,
+        metric_name,
+        metric_scaler,
     ):
         self.population_size = population_size
         self.truncation_threshold = truncation_threshold
@@ -186,7 +235,10 @@ class PbtJobQueue(object):
 
         # Seed the initial population
         for n in range(self.population_size):
-            self.append([Assignment(param.name, param.sample()) for param in self.search_space], self.generation)
+            self.append(
+                [Assignment(param.name, param.sample()) for param in self.search_space],
+                self.generation,
+            )
 
     def __len__(self):
         return len(self.pending)
@@ -195,12 +247,15 @@ class PbtJobQueue(object):
         for m in trial.status.observation.metrics:
             if m.name == self.metric_name:
                 return self.metric_scaler * float(m.value)
-        logger.error("Objective metric value could not be found for {}".format(trial.name))
-
+        logger.error(
+            "Objective metric value could not be found for {}".format(trial.name)
+        )
 
     def append(self, assignments, generation, parent=None):
         if generation > 0 and parent is None:
-            logger.warning("Trial generation >0 but no previous checkpoint trial provided")
+            logger.warning(
+                "Trial generation >0 but no previous checkpoint trial provided"
+            )
         obj = PbtJob(assignments, generation, parent)
         self.pending.append(obj)
         new_trial_dir = os.path.join(_DATA_PATH, obj.uid)
@@ -242,7 +297,10 @@ class PbtJobQueue(object):
         generation = trial_annotations["pbt.suggestion.katib.kubeflow.org/generation"]
 
         # Do not update active/pending or already processed trials
-        if trial.status.condition in (api_pb2.TrialStatus.TrialConditionType.CREATED, api_pb2.TrialStatus.TrialConditionType.RUNNING):
+        if trial.status.condition in (
+            api_pb2.TrialStatus.TrialConditionType.CREATED,
+            api_pb2.TrialStatus.TrialConditionType.RUNNING,
+        ):
             return
         for i in range(self.generation + 1):
             if uid in self.completed[i]:
@@ -258,20 +316,40 @@ class PbtJobQueue(object):
         # Generate next trial if necessary
         if (
             trial.status.condition
-            in (api_pb2.TrialStatus.TrialConditionType.SUCCEEDED, api_pb2.TrialStatus.TrialConditionType.EARLYSTOPPED)
+            in (
+                api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
+                api_pb2.TrialStatus.TrialConditionType.EARLYSTOPPED,
+            )
             and Trial.convertTrial(trial) is None
         ):
             # Trial invalid, retry
-            logger.error("Unable to convert trial {} (status: {}), re-adding to task queue".format(trial.name, trial.status.condition))
+            logger.error(
+                "Unable to convert trial {} (status: {}), re-adding to task queue".format(
+                    trial.name, trial.status.condition
+                )
+            )
             self.append(trial_assignments, obj.generation, obj.parent)
-        elif trial.status.condition in (api_pb2.TrialStatus.TrialConditionType.KILLED, api_pb2.TrialStatus.TrialConditionType.FAILED):
+        elif trial.status.condition in (
+            api_pb2.TrialStatus.TrialConditionType.KILLED,
+            api_pb2.TrialStatus.TrialConditionType.FAILED,
+        ):
             # Trial error, retry
-            logger.warning("Trial failed {} (status: {}), re-adding to task queue".format(trial.name, trial.status.condition))
+            logger.warning(
+                "Trial failed {} (status: {}), re-adding to task queue".format(
+                    trial.name, trial.status.condition
+                )
+            )
             self.append(trial_assignments, obj.generation, obj.parent)
 
     def generate(self):
-        values = [job.metric_value for _, job in self.completed[self.generation].items() if not job.metric_value is None]
-        trunc_bounds = np.quantile(values, (self.truncation_threshold, 1 - self.truncation_threshold))
+        values = [
+            job.metric_value
+            for _, job in self.completed[self.generation].items()
+            if not job.metric_value is None
+        ]
+        trunc_bounds = np.quantile(
+            values, (self.truncation_threshold, 1 - self.truncation_threshold)
+        )
         exploit_names, explore_names, upper_names = [], [], []
         for trial_uid, job in self.completed[self.generation].items():
             if job.metric_value is None:
@@ -287,7 +365,11 @@ class PbtJobQueue(object):
         exploit_replacements = np.random.choice(upper_names, len(exploit_names))
         for n, trial_uid in enumerate(exploit_names):
             job = self.completed[self.generation][trial_uid]
-            self.append(self.completed[self.generation][exploit_replacements[n]].get()[0], job.generation + 1, job.uid)
+            self.append(
+                self.completed[self.generation][exploit_replacements[n]].get()[0],
+                job.generation + 1,
+                job.uid,
+            )
 
         # Generate perturbed trials
         for trial_uid in explore_names:

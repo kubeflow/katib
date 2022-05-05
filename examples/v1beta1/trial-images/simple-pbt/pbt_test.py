@@ -11,7 +11,8 @@ import random
 import tensorflow as tf
 import time
 
-class PBTBenchmarkExample():
+
+class PBTBenchmarkExample:
     """Toy PBT problem for benchmarking adaptive learning rate.
     The goal is to optimize this trainable's accuracy. The accuracy increases
     fastest at the optimal lr, which is a function of the current accuracy.
@@ -36,24 +37,23 @@ class PBTBenchmarkExample():
         self._log_interval = log_interval
         self._lr = lr
 
-        self._checkpoint_file = os.path.join(checkpoint, 'training.ckpt')
+        self._checkpoint_file = os.path.join(checkpoint, "training.ckpt")
         if os.path.exists(self._checkpoint_file):
-            with open(self._checkpoint_file, 'rb') as fin:
+            with open(self._checkpoint_file, "rb") as fin:
                 checkpoint_data = pickle.load(fin)
-            self._accuracy = checkpoint_data['accuracy']
-            self._step = checkpoint_data['step']
+            self._accuracy = checkpoint_data["accuracy"]
+            self._step = checkpoint_data["step"]
         else:
             os.makedirs(checkpoint, exist_ok=True)
             self._step = 1
             self._accuracy = 0.0
-        
 
     def save_checkpoint(self):
-        with open(self._checkpoint_file, 'wb') as fout:
-            pickle.dump({'step': self._step, 'accuracy': self._accuracy}, fout)
+        with open(self._checkpoint_file, "wb") as fout:
+            pickle.dump({"step": self._step, "accuracy": self._accuracy}, fout)
 
     def step(self):
-        midpoint = 100   # lr starts decreasing after acc > midpoint
+        midpoint = 100  # lr starts decreasing after acc > midpoint
         q_tolerance = 3  # penalize exceeding lr by more than this multiple
         noise_level = 2  # add gaussian noise to the acc increase
         # triangle wave:
@@ -80,32 +80,53 @@ class PBTBenchmarkExample():
             if not self._writer:
                 self._writer = tf.summary.create_file_writer(self._log_dir)
             with self._writer.as_default():
-                tf.summary.scalar("Validation-accuracy", self._accuracy, step=self._step)
+                tf.summary.scalar(
+                    "Validation-accuracy", self._accuracy, step=self._step
+                )
                 tf.summary.scalar("lr", self._lr, step=self._step)
                 self._writer.flush()
 
         self._step += 1
 
     def __repr__(self):
-        return "epoch {}:\nlr={:0.4f}\nValidation-accuracy={:0.4f}".format(self._step, self._lr, self._accuracy)
+        return "epoch {}:\nlr={:0.4f}\nValidation-accuracy={:0.4f}".format(
+            self._step, self._lr, self._accuracy
+        )
 
 
 if __name__ == "__main__":
     # Parse CLI arguments
-    parser = argparse.ArgumentParser(description='PBT Basic Test')
-    parser.add_argument('--lr', type=float, default=0.0001,
-                        help='learning rate (default: 0.0001)')
-    parser.add_argument('--epochs', type=int, default=20,
-                        help='number of epochs to train (default: 20)')
-    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status (default: 1)')
-    parser.add_argument('--log-path', type=str, default="/var/log/katib/tfevent/",
-                        help='tfevent output path (default: /var/log/katib/tfevent/)')
-    parser.add_argument('--checkpoint', type=str, default="/var/log/katib/checkpoints/",
-                        help='checkpoint directory (resume and save)')
+    parser = argparse.ArgumentParser(description="PBT Basic Test")
+    parser.add_argument(
+        "--lr", type=float, default=0.0001, help="learning rate (default: 0.0001)"
+    )
+    parser.add_argument(
+        "--epochs", type=int, default=20, help="number of epochs to train (default: 20)"
+    )
+    parser.add_argument(
+        "--log-interval",
+        type=int,
+        default=10,
+        metavar="N",
+        help="how many batches to wait before logging training status (default: 1)",
+    )
+    parser.add_argument(
+        "--log-path",
+        type=str,
+        default="/var/log/katib/tfevent/",
+        help="tfevent output path (default: /var/log/katib/tfevent/)",
+    )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default="/var/log/katib/checkpoints/",
+        help="checkpoint directory (resume and save)",
+    )
     opt = parser.parse_args()
 
-    benchmark = PBTBenchmarkExample(opt.lr, opt.log_path, opt.log_interval, opt.checkpoint)
+    benchmark = PBTBenchmarkExample(
+        opt.lr, opt.log_path, opt.log_interval, opt.checkpoint
+    )
     for i in range(opt.epochs):
         benchmark.step()
         time.sleep(0.2)

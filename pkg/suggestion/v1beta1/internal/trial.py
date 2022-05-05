@@ -21,7 +21,15 @@ logger = logging.getLogger(__name__)
 
 
 class Trial(object):
-    def __init__(self, name, assignments, target_metric, metric_name, additional_metrics, annotations):
+    def __init__(
+        self,
+        name,
+        assignments,
+        target_metric,
+        metric_name,
+        additional_metrics,
+        annotations,
+    ):
         self.name = name
         self.assignments = assignments
         self.target_metric = target_metric
@@ -50,19 +58,29 @@ class Trial(object):
         annotations = trial.spec.annotations
         # If the target_metric is none, ignore the trial.
         if target_metric is not None:
-            trial = Trial(trial.name, assignments, target_metric,
-                          metric_name, additional_metrics, annotations)
+            trial = Trial(
+                trial.name,
+                assignments,
+                target_metric,
+                metric_name,
+                additional_metrics,
+                annotations,
+            )
             return trial
         return None
 
     def __str__(self):
         if self.name is None:
-            return "Trial(assignment: {})".format(", ".join([str(e) for e in self.assignments]))
+            return "Trial(assignment: {})".format(
+                ", ".join([str(e) for e in self.assignments])
+            )
         else:
             return "Trial(assignment: {}, metric_name: {}, metric: {}, additional_metrics: {})".format(
                 ", ".join([str(e) for e in self.assignments]),
-                self.metric_name, self.target_metric,
-                ", ".join(str(e) for e in self.additional_metrics))
+                self.metric_name,
+                self.target_metric,
+                ", ".join(str(e) for e in self.additional_metrics),
+            )
 
 
 class Assignment(object):
@@ -81,9 +99,11 @@ class Assignment(object):
             buf = []
             for assignment in assignments:
                 buf.append(
-                    api.ParameterAssignment(name=assignment.name, value=str(assignment.value)))
-            rt = api.GetSuggestionsReply.ParameterAssignments(
-                assignments=buf)
+                    api.ParameterAssignment(
+                        name=assignment.name, value=str(assignment.value)
+                    )
+                )
+            rt = api.GetSuggestionsReply.ParameterAssignments(assignments=buf)
             res.append(rt)
         return res
 

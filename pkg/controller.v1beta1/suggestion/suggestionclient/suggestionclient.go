@@ -185,7 +185,7 @@ func (g *General) SyncAssignments(
 		if responseSuggestion.Annotations != nil {
 			assignment.Annotations = responseSuggestion.Annotations[n].Annotations
 		}
-		trialAssignments = append(trialAssignments, assignment)		
+		trialAssignments = append(trialAssignments, assignment)
 	}
 
 	instance.Status.Suggestions = append(instance.Status.Suggestions, trialAssignments...)
