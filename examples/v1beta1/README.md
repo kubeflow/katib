@@ -44,6 +44,8 @@ Experiments for the following algorithms:
 
 - [HyperBand](./hp-tuning/hyperband.yaml)
 
+- [PBT](./hp-tuning/pbt.yaml)
+
 ### Neural Architecture Search
 
 Check the [Neural Architecture Search](https://www.kubeflow.org/docs/components/katib/overview/#neural-architecture-search)
