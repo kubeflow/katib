@@ -65,7 +65,7 @@ func (k *KatibUIHandler) getExperiments(namespace []string) ([]ExperimentView, e
 	return experiments, nil
 }
 
-func hasAnnotation(trials []trialv1beta1.Trial, annotation string)  bool{
+func hasAnnotation(trials []trialv1beta1.Trial, annotation string) bool {
 	for _, t := range trials {
 		_, ok := t.Spec.Annotations[annotation]
 		if ok {

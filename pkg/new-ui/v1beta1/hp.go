@@ -271,7 +271,7 @@ func (k *KatibUIHandler) FetchHPJobAnnotationInfo(w http.ResponseWriter, r *http
 
 	// Set the index of each annotation
 	a_index := 0
-	for a, _ := range annotations {
+	for a := range annotations {
 		annotations[a] = a_index
 		resultText += "," + a
 		a_index++

@@ -10,7 +10,13 @@ import { PbtTabComponent } from './pbt-tab.component';
 
 @NgModule({
   declarations: [PbtTabComponent],
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatCheckboxModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatCheckboxModule,
+  ],
   exports: [PbtTabComponent],
 })
 export class PbtTabModule {}

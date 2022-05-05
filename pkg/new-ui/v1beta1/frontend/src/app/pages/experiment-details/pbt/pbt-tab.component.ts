@@ -19,12 +19,12 @@ import { DOCUMENT } from '@angular/common';
 declare let d3: any;
 
 type PbtPoint = {
-    uid: string;
-    parentUid: string;
-    trialName: string;
-    parameters: Object; // all y-axis possible values (parameters + alternativeMetrics)
-    generation: number; // generation
-    metricValue: number; // evaluation metric
+  uid: string;
+  parentUid: string;
+  trialName: string;
+  parameters: Object; // all y-axis possible values (parameters + alternativeMetrics)
+  generation: number; // generation
+  metricValue: number; // evaluation metric
 };
 
 type PbtAnnotation = {
@@ -32,7 +32,7 @@ type PbtAnnotation = {
   parentUid: string;
   generation: number;
   trialName: string;
-}
+};
 
 @Component({
   selector: 'app-experiment-pbt-tab',
@@ -41,17 +41,17 @@ type PbtAnnotation = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
-  @ViewChild('pbtGraph') graphWrapper:ElementRef; // used to manipulate svg dom
+  @ViewChild('pbtGraph') graphWrapper: ElementRef; // used to manipulate svg dom
 
   graph: any; // svg dom
   selectableNames: string[]; // list of parameters/metrics for UI dropdown
   selectedName: string; // user selected parameter/metric
   displayTrace: boolean;
 
-  private annotData: {[uid: string]: PbtAnnotation} = {};
+  private annotData: { [uid: string]: PbtAnnotation } = {};
   private trialData = {}; // primary key: trialName
   private parameterNames: string[]; // parameter names
-  private goalName: string = "";
+  private goalName: string = '';
   private data: PbtPoint[][] = []; // data sorted by generation and segment
   private graphHelper: any; // graph metadata and auxiliary info
 
@@ -66,15 +66,17 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.graphHelper = {};
-    this.graphHelper.margin = {top: 10, right: 30, bottom: 30, left: 60};
-    this.graphHelper.width = 460 - this.graphHelper.margin.left - this.graphHelper.margin.right;
-    this.graphHelper.height = 400 - this.graphHelper.margin.top - this.graphHelper.margin.bottom;
+    this.graphHelper.margin = { top: 10, right: 30, bottom: 30, left: 60 };
+    this.graphHelper.width =
+      460 - this.graphHelper.margin.left - this.graphHelper.margin.right;
+    this.graphHelper.height =
+      400 - this.graphHelper.margin.top - this.graphHelper.margin.bottom;
     // Track angular initialization since using @Input from template
     this.graphHelper.ngInit = false;
   }
 
   ngOnInit(): void {
-    if (this.experiment.spec.algorithm.algorithmName != "pbt") {
+    if (this.experiment.spec.algorithm.algorithmName != 'pbt') {
       // Prevent initialization if not Pbt
       return;
     }
@@ -87,47 +89,72 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
     this.goalName = this.experiment.spec.objective.objectiveMetricName;
     // Create full list of selectable names
     this.selectableNames = [...this.parameterNames];
-    if (this.experiment.spec.objective.additionalMetricNames && this.experiment.spec.objective.additionalMetricNames.length > 0) {
-      this.selectableNames = [...this.selectableNames, ...this.experiment.spec.objective.additionalMetricNames];
+    if (
+      this.experiment.spec.objective.additionalMetricNames &&
+      this.experiment.spec.objective.additionalMetricNames.length > 0
+    ) {
+      this.selectableNames = [
+        ...this.selectableNames,
+        ...this.experiment.spec.objective.additionalMetricNames,
+      ];
     }
     // Create converters for all possible y-axes
     this.graphHelper.yMeta = {};
     for (const param of this.experiment.spec.parameters) {
       this.graphHelper.yMeta[param.name] = {};
-      if (param.parameterType == "discrete" || param.parameterType == "categorical") {
-        this.graphHelper.yMeta[param.name].transform = (x) => { return x; };
+      if (
+        param.parameterType == 'discrete' ||
+        param.parameterType == 'categorical'
+      ) {
+        this.graphHelper.yMeta[param.name].transform = x => {
+          return x;
+        };
         this.graphHelper.yMeta[param.name].isNumber = false;
-      } else if (param.parameterType == "double") {
-        this.graphHelper.yMeta[param.name].transform = (x) => { return parseFloat(x); };
+      } else if (param.parameterType == 'double') {
+        this.graphHelper.yMeta[param.name].transform = x => {
+          return parseFloat(x);
+        };
         this.graphHelper.yMeta[param.name].isNumber = true;
       } else {
-        this.graphHelper.yMeta[param.name].transform = (x) => { return parseInt(x); };
+        this.graphHelper.yMeta[param.name].transform = x => {
+          return parseInt(x);
+        };
         this.graphHelper.yMeta[param.name].isNumber = true;
       }
     }
     if (this.experiment.spec.objective.additionalMetricNames) {
-      for (const metricName of this.experiment.spec.objective.additionalMetricNames) {
-        if (this.graphHelper.yMeta.hasOwnProperty(metricName)){
-          console.warn("Additional metric name conflict with parameter name; ignoring metric:", metricName);
+      for (const metricName of this.experiment.spec.objective
+        .additionalMetricNames) {
+        if (this.graphHelper.yMeta.hasOwnProperty(metricName)) {
+          console.warn(
+            'Additional metric name conflict with parameter name; ignoring metric:',
+            metricName,
+          );
           continue;
         }
-        this.graphHelper.yMeta[metricName].transform = (x) => { return parseFloat(x); };
+        this.graphHelper.yMeta[metricName].transform = x => {
+          return parseFloat(x);
+        };
         this.graphHelper.yMeta[metricName].isNumber = true;
       }
     }
-    
+
     this.graphHelper.ngInit = true;
   }
 
   ngAfterViewInit(): void {
-    if (this.experiment.spec.algorithm.algorithmName != "pbt") {
+    if (this.experiment.spec.algorithm.algorithmName != 'pbt') {
       // Remove pbt tab and tab content
-      const tabs = document.querySelectorAll(".mat-tab-labels .mat-tab-label");
+      const tabs = document.querySelectorAll('.mat-tab-labels .mat-tab-label');
       for (let i = 0; i < tabs.length; i++) {
-        if (tabs[i].querySelector(".mat-tab-label-content").innerHTML.includes("PBT")){
-          const tabId = tabs[i].getAttribute("id");
-          const tabBodyId = tabId.replace("label", "content")
-          const tabBody = document.querySelector("#" + tabBodyId);
+        if (
+          tabs[i]
+            .querySelector('.mat-tab-label-content')
+            .innerHTML.includes('PBT')
+        ) {
+          const tabId = tabs[i].getAttribute('id');
+          const tabBodyId = tabId.replace('label', 'content');
+          const tabBody = document.querySelector('#' + tabBodyId);
           tabBody.remove();
           tabs[i].remove();
           break;
@@ -141,13 +168,13 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
     this.displayTrace = false;
   }
 
-  onDropdownChange(){
+  onDropdownChange() {
     // Trigger graph redraw on dropdown change event
     this.clearGraph();
     this.updateGraph();
   }
 
-  onTraceChange(){
+  onTraceChange() {
     // Trigger graph redraw on trace change event
     // TODO: could use d3.select(..).remove() instead of recreating
     this.clearGraph();
@@ -164,9 +191,9 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
     if (changes.experimentTrialsCsv && this.experimentTrialsCsv) {
       let trialArr = d3.csv.parse(this.experimentTrialsCsv);
       for (let trial of trialArr) {
-        let existingEntry = this.trialData[trial["trialName"]];
+        let existingEntry = this.trialData[trial['trialName']];
         if (existingEntry != trial) {
-          this.trialData[trial["trialName"]] = trial;
+          this.trialData[trial['trialName']] = trial;
           updatePoints = true;
         }
       }
@@ -176,10 +203,12 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
       let annotArr = d3.csv.parse(this.annotationsCsv);
       for (let annot of annotArr) {
         let newEntry: PbtAnnotation = {
-          trialName: annot["trialName"],
-          uid: annot["pbt.suggestion.katib.kubeflow.org/uid"],
-          parentUid: annot["pbt.suggestion.katib.kubeflow.org/parent"],
-          generation: parseInt(annot["pbt.suggestion.katib.kubeflow.org/generation"]),
+          trialName: annot['trialName'],
+          uid: annot['pbt.suggestion.katib.kubeflow.org/uid'],
+          parentUid: annot['pbt.suggestion.katib.kubeflow.org/parent'],
+          generation: parseInt(
+            annot['pbt.suggestion.katib.kubeflow.org/generation'],
+          ),
         };
         let existingEntry = this.annotData[newEntry.uid];
         if (existingEntry != newEntry) {
@@ -191,7 +220,7 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
 
     if (updatePoints) {
       // Lazy; reprocess all points
-      let points: PbtPoint[] = []
+      let points: PbtPoint[] = [];
       Object.values(this.annotData).forEach(entry => {
         let point = {} as PbtPoint;
         point.uid = entry.uid;
@@ -215,7 +244,7 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
 
       // Generate segments
       // Group seeds
-      let remaining_points = {}
+      let remaining_points = {};
       for (let p of points) {
         remaining_points[p.uid] = p;
       }
@@ -239,7 +268,6 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
       this.clearGraph();
       this.updateGraph();
     }
-
   }
 
   private maxGenerationTrials(d) {
@@ -261,49 +289,70 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
     // Clear any existing views from graphs object
     if (this.graph) {
       // this.graph.remove(); // d3 remove from DOM
-      d3.select(this.graphWrapper.nativeElement).select("svg").remove();
+      d3.select(this.graphWrapper.nativeElement).select('svg').remove();
     }
     this.graph = undefined;
   }
 
   private createGraph() {
-    this.graph = d3.select(this.graphWrapper.nativeElement)
-      .append("svg")
-        .attr("width", this.graphHelper.width + this.graphHelper.margin.left + this.graphHelper.margin.right)
-        .attr("height", this.graphHelper.height + this.graphHelper.margin.top + this.graphHelper.margin.bottom)
-      .append("g")
-        .attr("transform",
-              "translate(" + this.graphHelper.margin.left + "," + this.graphHelper.margin.top + ")");
+    this.graph = d3
+      .select(this.graphWrapper.nativeElement)
+      .append('svg')
+      .attr(
+        'width',
+        this.graphHelper.width +
+          this.graphHelper.margin.left +
+          this.graphHelper.margin.right,
+      )
+      .attr(
+        'height',
+        this.graphHelper.height +
+          this.graphHelper.margin.top +
+          this.graphHelper.margin.bottom,
+      )
+      .append('g')
+      .attr(
+        'transform',
+        'translate(' +
+          this.graphHelper.margin.left +
+          ',' +
+          this.graphHelper.margin.top +
+          ')',
+      );
   }
 
-  private getRangeX(){
+  private getRangeX() {
     const xValues = Object.values(this.annotData).map(entry => {
       return entry.generation;
     });
-    return d3.scale.linear()
-          .domain(d3.extent(xValues))
-          .range([ 0, this.graphHelper.width ]);
+    return d3.scale
+      .linear()
+      .domain(d3.extent(xValues))
+      .range([0, this.graphHelper.width]);
   }
 
-  private getRangeY(key){
+  private getRangeY(key) {
     if (this.selectableNames.includes(key)) {
       const paramValues = Object.keys(this.trialData).map(trialName => {
-        return this.graphHelper.yMeta[key].transform(this.trialData[trialName][key]);
+        return this.graphHelper.yMeta[key].transform(
+          this.trialData[trialName][key],
+        );
       });
 
       if (this.graphHelper.yMeta[key].isNumber) {
-        return d3.scale.linear()
+        return d3.scale
+          .linear()
           .domain(d3.extent(paramValues))
-          .range([ this.graphHelper.height, 0 ]);
+          .range([this.graphHelper.height, 0]);
       } else {
-        paramValues.sort((a,b)=>a-b);
-        return d3.scale.ordinal()
+        paramValues.sort((a, b) => a - b);
+        return d3.scale
+          .ordinal()
           .domain(paramValues)
-          .range([ this.graphHelper.height, 0 ]);
+          .range([this.graphHelper.height, 0]);
       }
-
     } else {
-      console.error("Key(" + key + ") not found in y-axis list");
+      console.error('Key(' + key + ') not found in y-axis list');
     }
   }
 
@@ -314,14 +363,15 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
         values.push(point.metricValue);
       }
     }
-    return d3.scale.linear()
+    return d3.scale
+      .linear()
       .domain(d3.extent(values))
       .interpolate(d3.interpolateHcl)
-      .range([d3.rgb("#cfd8dc"), d3.rgb('#263238')]);
+      .range([d3.rgb('#cfd8dc'), d3.rgb('#263238')]);
   }
 
   private updateGraph() {
-    if (!this.graphHelper || !this.graphHelper.ngInit){
+    if (!this.graphHelper || !this.graphHelper.ngInit) {
       // ngOnInit not called yet
       return;
     }
@@ -335,59 +385,80 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
 
     // Add X axis
     let xAxis = this.getRangeX();
-    this.graph.append("g")
-      .attr("transform", "translate(0," + this.graphHelper.height + ")")
-      .call(d3.svg.axis().scale(xAxis).orient("bottom"));
-    this.graph.append("text")
-      .attr("text-anchor", "middle")
-      .attr("x", this.graphHelper.width/2)
-      .attr("y", this.graphHelper.height + 30)
-      .text("Generation");
+    this.graph
+      .append('g')
+      .attr('transform', 'translate(0,' + this.graphHelper.height + ')')
+      .call(d3.svg.axis().scale(xAxis).orient('bottom'));
+    this.graph
+      .append('text')
+      .attr('text-anchor', 'middle')
+      .attr('x', this.graphHelper.width / 2)
+      .attr('y', this.graphHelper.height + 30)
+      .text('Generation');
     // Add Y axis
     let yAxis = this.getRangeY(this.selectedName);
-    this.graph.append("g")
-      .call(d3.svg.axis().scale(yAxis).orient("left"));
-    this.graph.append("text")
-      .attr("text-anchor", "middle")
-      .attr("x", -this.graphHelper.height/2)
-      .attr("y", -50)
-      .attr("transform", "rotate(-90)")
+    this.graph.append('g').call(d3.svg.axis().scale(yAxis).orient('left'));
+    this.graph
+      .append('text')
+      .attr('text-anchor', 'middle')
+      .attr('x', -this.graphHelper.height / 2)
+      .attr('y', -50)
+      .attr('transform', 'rotate(-90)')
       .text(this.selectedName);
     // Change line width
-    this.graph.selectAll('path').style({ 'stroke': 'black', 'fill': 'none', 'stroke-width': '1px'});
+    this.graph
+      .selectAll('path')
+      .style({ stroke: 'black', fill: 'none', 'stroke-width': '1px' });
 
     // Add the points
     const sparam = this.selectedName;
     const colorScale = this.getColorScaleZ();
     for (const segment of this.data) {
       // Plot only valid points
-      const validSegment = segment.filter(point => point.parameters && point.parameters[sparam] && point.metricValue !== undefined);
+      const validSegment = segment.filter(
+        point =>
+          point.parameters &&
+          point.parameters[sparam] &&
+          point.metricValue !== undefined,
+      );
       this.graph
-        .append("g")
-        .selectAll("dot")
+        .append('g')
+        .selectAll('dot')
         .data(validSegment)
         .enter()
-        .append("circle")
-          .attr("cx", function(d) { return xAxis(d.generation) } )
-          .attr("cy", function(d) { return yAxis(d.parameters[sparam]) } )
-          .attr("r", 2)
-          .attr("fill", function(d) { return colorScale(d.metricValue); } );
+        .append('circle')
+        .attr('cx', function (d) {
+          return xAxis(d.generation);
+        })
+        .attr('cy', function (d) {
+          return yAxis(d.parameters[sparam]);
+        })
+        .attr('r', 2)
+        .attr('fill', function (d) {
+          return colorScale(d.metricValue);
+        });
 
       if (this.displayTrace && validSegment.length > 0) {
         // Add the lines
         const strokeColor = colorScale(validSegment[0].metricValue);
         this.graph
-          .append("path")
+          .append('path')
           .datum(validSegment)
-          .attr("fill", "none")
-          .attr("stroke", strokeColor)
-          .attr("stroke-width", 1)
-          .attr("d", d3.svg.line()
-            .x(function(d) { return xAxis(d.generation) } )
-            .y(function(d) { return yAxis(d.parameters[sparam]) } )
-        );
+          .attr('fill', 'none')
+          .attr('stroke', strokeColor)
+          .attr('stroke-width', 1)
+          .attr(
+            'd',
+            d3.svg
+              .line()
+              .x(function (d) {
+                return xAxis(d.generation);
+              })
+              .y(function (d) {
+                return yAxis(d.parameters[sparam]);
+              }),
+          );
       }
     }
   }
-
 }

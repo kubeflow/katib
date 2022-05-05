@@ -56,7 +56,10 @@ export class KWABackendService extends BackendService {
     return this.http.get(url).pipe(catchError(error => this.parseError(error)));
   }
 
-  getExperimentAnnotationsInfo(name: string, namespace: string): Observable<any> {
+  getExperimentAnnotationsInfo(
+    name: string,
+    namespace: string,
+  ): Observable<any> {
     const url = `/katib/fetch_hp_job_annotation_info/?experimentName=${name}&namespace=${namespace}`;
 
     return this.http.get(url).pipe(catchError(error => this.parseError(error)));
