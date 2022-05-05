@@ -244,7 +244,7 @@ export const DartsSettings: AlgorithmSetting[] = [
 
 export const PbtSettings: AlgorithmSetting[] = [
   {
-    name: 'checkpoint_dir',
+    name: 'suggestion_trial_dir',
     value: '/var/log/katib/checkpoints/',
     type: AlgorithmSettingType.STRING,
   },
