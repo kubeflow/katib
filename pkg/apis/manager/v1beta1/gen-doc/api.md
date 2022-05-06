@@ -327,7 +327,7 @@ Discrete and Categorical type use List.
 | parameter_assignments | [GetSuggestionsReply.ParameterAssignments](#api-v1-beta1-GetSuggestionsReply-ParameterAssignments) | repeated |  |
 | algorithm | [AlgorithmSpec](#api-v1-beta1-AlgorithmSpec) |  |  |
 | early_stopping_rules | [EarlyStoppingRule](#api-v1-beta1-EarlyStoppingRule) | repeated |  |
-| annotations | [GetSuggestionsReply.Annotations](#api-v1-beta1-GetSuggestionsReply-Annotations) | repeated |  |
+| annotations | [GetSuggestionsReply.Annotations](#api-v1-beta1-GetSuggestionsReply-Annotations) | repeated | Optional field to add annotations to the generated Trials |
 
 
 
@@ -374,6 +374,7 @@ Discrete and Categorical type use List.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | assignments | [ParameterAssignment](#api-v1-beta1-ParameterAssignment) | repeated |  |
+| trial_name | [string](#string) |  | Optional field to override the trial name |
 
 
 

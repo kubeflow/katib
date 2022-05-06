@@ -93,9 +93,11 @@ class Assignment(object):
         return Assignment(assignment.name, assignment.value)
 
     @staticmethod
-    def generate(list_of_assignments):
+    def generate(list_of_assignments, trial_names=None):
+        if trial_names is not None and len(list_of_assignments) != len(trial_names):
+            raise RuntimeError("Assignment and trial list length mismatch")
         res = []
-        for assignments in list_of_assignments:
+        for n, assignments in enumerate(list_of_assignments):
             buf = []
             for assignment in assignments:
                 buf.append(
@@ -103,7 +105,10 @@ class Assignment(object):
                         name=assignment.name, value=str(assignment.value)
                     )
                 )
-            rt = api.GetSuggestionsReply.ParameterAssignments(assignments=buf)
+            if trial_names is not None:
+                rt = api.GetSuggestionsReply.ParameterAssignments(assignments=buf, trial_name=trial_names[n])
+            else:
+                rt = api.GetSuggestionsReply.ParameterAssignments(assignments=buf)
             res.append(rt)
         return res
 

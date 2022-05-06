@@ -20,8 +20,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -359,21 +359,10 @@ func (s *SidecarInjector) mutateSuggestionVolume(pod *v1.Pod, primaryContainerNa
 		return nil
 	}
 
-	// Generate folder name in format: <ExperimentName>-<trialNumber>
-	// This format allows Suggestion services to create and access sub-folders in the shared volume for trials
-	// before the trial is created and without knowing the name as the controller generates the name on spawn
-	var trialCounterOffset int32 = 0
-	for _, i := range experiment.Status.PendingTrialList {
-		if i == trial.Name {
-			trialCounterOffset = 1
-			break
-		}
-	}
-	trialCount := experiment.Status.Trials - experiment.Status.TrialsPending + trialCounterOffset - 1
-	checkpointFolder := fmt.Sprintf("%s-%d", experimentName, trialCount)
+	// Generate folder name in format: <ExperimentName>/<TrialName>
+	checkpointFolder := filepath.Join(experimentName, trial.Name)
 
 	// Suggestion volume for the trial to the MetricsCollector
-	//     Path within container will be at <checkpointPath>/../<trial.Name>
 	suggestionVolume := v1.Volume{
 		Name: consts.ContainerSuggestionVolumeName,
 		VolumeSource: v1.VolumeSource{

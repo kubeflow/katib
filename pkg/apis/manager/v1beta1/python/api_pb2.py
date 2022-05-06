@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='api.proto',
   package='api.v1.beta1',
   syntax='proto3',
-  serialized_pb=_b('\n\tapi.proto\x12\x0c\x61pi.v1.beta1\"F\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x04spec\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ExperimentSpec\"\x96\x03\n\x0e\x45xperimentSpec\x12\x44\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32+.api.v1.beta1.ExperimentSpec.ParameterSpecs\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12.\n\talgorithm\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12\x37\n\x0e\x65\x61rly_stopping\x18\x04 \x01(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingSpec\x12\x1c\n\x14parallel_trial_count\x18\x05 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x06 \x01(\x05\x12+\n\nnas_config\x18\x07 \x01(\x0b\x32\x17.api.v1.beta1.NasConfig\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"\x87\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x33\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1b.api.v1.beta1.ParameterType\x12\x33\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.FeasibleSpace\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x88\x01\n\rObjectiveSpec\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.api.v1.beta1.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"c\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x12\x61lgorithm_settings\x18\x02 \x03(\x0b\x32\x1e.api.v1.beta1.AlgorithmSetting\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"k\n\x11\x45\x61rlyStoppingSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12>\n\x12\x61lgorithm_settings\x18\x02 \x03(\x0b\x32\".api.v1.beta1.EarlyStoppingSetting\"3\n\x14\x45\x61rlyStoppingSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\xae\x01\n\tNasConfig\x12/\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x19.api.v1.beta1.GraphConfig\x12\x36\n\noperations\x18\x02 \x01(\x0b\x32\".api.v1.beta1.NasConfig.Operations\x1a\x38\n\nOperations\x12*\n\toperation\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa7\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12?\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32&.api.v1.beta1.Operation.ParameterSpecs\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"g\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12%\n\x04spec\x18\x02 \x01(\x0b\x32\x17.api.v1.beta1.TrialSpec\x12)\n\x06status\x18\x03 \x01(\x0b\x32\x19.api.v1.beta1.TrialStatus\"\xcb\x02\n\tTrialSpec\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12K\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32,.api.v1.beta1.TrialSpec.ParameterAssignments\x12=\n\x0b\x61nnotations\x18\x04 \x03(\x0b\x32(.api.v1.beta1.TrialSpec.AnnotationsEntry\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\xba\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12?\n\tcondition\x18\x03 \x01(\x0e\x32,.api.v1.beta1.TrialStatus.TrialConditionType\x12.\n\x0bobservation\x18\x04 \x01(\x0b\x32\x19.api.v1.beta1.Observation\"\x8c\x01\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x16\n\x12METRICSUNAVAILABLE\x10\x05\x12\x10\n\x0c\x45\x41RLYSTOPPED\x10\x06\x12\x0b\n\x07UNKNOWN\x10\x07\"4\n\x0bObservation\x12%\n\x07metrics\x18\x01 \x03(\x0b\x32\x14.api.v1.beta1.Metric\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"h\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x35\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x1b\n\x19ReportObservationLogReply\">\n\x0eObservationLog\x12,\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.MetricLog\"E\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12$\n\x06metric\x18\x02 \x01(\x0b\x32\x14.api.v1.beta1.Metric\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"O\n\x16GetObservationLogReply\x12\x35\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"1\n\x1b\x44\x65leteObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x1b\n\x19\x44\x65leteObservationLogReply\"\xc4\x01\n\x15GetSuggestionsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\x12\x1a\n\x0erequest_number\x18\x03 \x01(\x05\x42\x02\x18\x01\x12\x1e\n\x16\x63urrent_request_number\x18\x04 \x01(\x05\x12\x1c\n\x14total_request_number\x18\x05 \x01(\x05\"\x88\x04\n\x13GetSuggestionsReply\x12U\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x36.api.v1.beta1.GetSuggestionsReply.ParameterAssignments\x12.\n\talgorithm\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12=\n\x14\x65\x61rly_stopping_rules\x18\x03 \x03(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingRule\x12\x42\n\x0b\x61nnotations\x18\x04 \x03(\x0b\x32-.api.v1.beta1.GetSuggestionsReply.Annotations\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\x1a\x96\x01\n\x0b\x41nnotations\x12S\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32>.api.v1.beta1.GetSuggestionsReply.Annotations.AnnotationsEntry\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"P\n ValidateAlgorithmSettingsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\" \n\x1eValidateAlgorithmSettingsReply\"\x8d\x01\n\x1cGetEarlyStoppingRulesRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\x12\x1a\n\x12\x64\x62_manager_address\x18\x03 \x01(\t\"[\n\x1aGetEarlyStoppingRulesReply\x12=\n\x14\x65\x61rly_stopping_rules\x18\x01 \x03(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingRule\"v\n\x11\x45\x61rlyStoppingRule\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\x30\n\ncomparison\x18\x03 \x01(\x0e\x32\x1c.api.v1.beta1.ComparisonType\x12\x12\n\nstart_step\x18\x04 \x01(\x05\"_\n$ValidateEarlyStoppingSettingsRequest\x12\x37\n\x0e\x65\x61rly_stopping\x18\x01 \x01(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingSpec\"$\n\"ValidateEarlyStoppingSettingsReply\"+\n\x15SetTrialStatusRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x15\n\x13SetTrialStatusReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02*J\n\x0e\x43omparisonType\x12\x16\n\x12UNKNOWN_COMPARISON\x10\x00\x12\t\n\x05\x45QUAL\x10\x01\x12\x08\n\x04LESS\x10\x02\x12\x0b\n\x07GREATER\x10\x03\x32\xc6\x02\n\tDBManager\x12j\n\x14ReportObservationLog\x12).api.v1.beta1.ReportObservationLogRequest\x1a\'.api.v1.beta1.ReportObservationLogReply\x12\x61\n\x11GetObservationLog\x12&.api.v1.beta1.GetObservationLogRequest\x1a$.api.v1.beta1.GetObservationLogReply\x12j\n\x14\x44\x65leteObservationLog\x12).api.v1.beta1.DeleteObservationLogRequest\x1a\'.api.v1.beta1.DeleteObservationLogReply2\xe1\x01\n\nSuggestion\x12X\n\x0eGetSuggestions\x12#.api.v1.beta1.GetSuggestionsRequest\x1a!.api.v1.beta1.GetSuggestionsReply\x12y\n\x19ValidateAlgorithmSettings\x12..api.v1.beta1.ValidateAlgorithmSettingsRequest\x1a,.api.v1.beta1.ValidateAlgorithmSettingsReply2\xe0\x02\n\rEarlyStopping\x12m\n\x15GetEarlyStoppingRules\x12*.api.v1.beta1.GetEarlyStoppingRulesRequest\x1a(.api.v1.beta1.GetEarlyStoppingRulesReply\x12X\n\x0eSetTrialStatus\x12#.api.v1.beta1.SetTrialStatusRequest\x1a!.api.v1.beta1.SetTrialStatusReply\x12\x85\x01\n\x1dValidateEarlyStoppingSettings\x12\x32.api.v1.beta1.ValidateEarlyStoppingSettingsRequest\x1a\x30.api.v1.beta1.ValidateEarlyStoppingSettingsReplyb\x06proto3')
+  serialized_pb=_b('\n\tapi.proto\x12\x0c\x61pi.v1.beta1\"F\n\nExperiment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12*\n\x04spec\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ExperimentSpec\"\x96\x03\n\x0e\x45xperimentSpec\x12\x44\n\x0fparameter_specs\x18\x01 \x01(\x0b\x32+.api.v1.beta1.ExperimentSpec.ParameterSpecs\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12.\n\talgorithm\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12\x37\n\x0e\x65\x61rly_stopping\x18\x04 \x01(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingSpec\x12\x1c\n\x14parallel_trial_count\x18\x05 \x01(\x05\x12\x17\n\x0fmax_trial_count\x18\x06 \x01(\x05\x12+\n\nnas_config\x18\x07 \x01(\x0b\x32\x17.api.v1.beta1.NasConfig\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"\x87\x01\n\rParameterSpec\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x33\n\x0eparameter_type\x18\x02 \x01(\x0e\x32\x1b.api.v1.beta1.ParameterType\x12\x33\n\x0e\x66\x65\x61sible_space\x18\x03 \x01(\x0b\x32\x1b.api.v1.beta1.FeasibleSpace\"E\n\rFeasibleSpace\x12\x0b\n\x03max\x18\x01 \x01(\t\x12\x0b\n\x03min\x18\x02 \x01(\t\x12\x0c\n\x04list\x18\x03 \x03(\t\x12\x0c\n\x04step\x18\x04 \x01(\t\"\x88\x01\n\rObjectiveSpec\x12)\n\x04type\x18\x01 \x01(\x0e\x32\x1b.api.v1.beta1.ObjectiveType\x12\x0c\n\x04goal\x18\x02 \x01(\x01\x12\x1d\n\x15objective_metric_name\x18\x03 \x01(\t\x12\x1f\n\x17\x61\x64\x64itional_metric_names\x18\x04 \x03(\t\"c\n\rAlgorithmSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12:\n\x12\x61lgorithm_settings\x18\x02 \x03(\x0b\x32\x1e.api.v1.beta1.AlgorithmSetting\"/\n\x10\x41lgorithmSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"k\n\x11\x45\x61rlyStoppingSpec\x12\x16\n\x0e\x61lgorithm_name\x18\x01 \x01(\t\x12>\n\x12\x61lgorithm_settings\x18\x02 \x03(\x0b\x32\".api.v1.beta1.EarlyStoppingSetting\"3\n\x14\x45\x61rlyStoppingSetting\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\xae\x01\n\tNasConfig\x12/\n\x0cgraph_config\x18\x01 \x01(\x0b\x32\x19.api.v1.beta1.GraphConfig\x12\x36\n\noperations\x18\x02 \x01(\x0b\x32\".api.v1.beta1.NasConfig.Operations\x1a\x38\n\nOperations\x12*\n\toperation\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.Operation\"L\n\x0bGraphConfig\x12\x12\n\nnum_layers\x18\x01 \x01(\x05\x12\x13\n\x0binput_sizes\x18\x02 \x03(\x05\x12\x14\n\x0coutput_sizes\x18\x03 \x03(\x05\"\xa7\x01\n\tOperation\x12\x16\n\x0eoperation_type\x18\x01 \x01(\t\x12?\n\x0fparameter_specs\x18\x02 \x01(\x0b\x32&.api.v1.beta1.Operation.ParameterSpecs\x1a\x41\n\x0eParameterSpecs\x12/\n\nparameters\x18\x01 \x03(\x0b\x32\x1b.api.v1.beta1.ParameterSpec\"g\n\x05Trial\x12\x0c\n\x04name\x18\x01 \x01(\t\x12%\n\x04spec\x18\x02 \x01(\x0b\x32\x17.api.v1.beta1.TrialSpec\x12)\n\x06status\x18\x03 \x01(\x0b\x32\x19.api.v1.beta1.TrialStatus\"\xcb\x02\n\tTrialSpec\x12.\n\tobjective\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.ObjectiveSpec\x12K\n\x15parameter_assignments\x18\x03 \x01(\x0b\x32,.api.v1.beta1.TrialSpec.ParameterAssignments\x12=\n\x0b\x61nnotations\x18\x04 \x03(\x0b\x32(.api.v1.beta1.TrialSpec.AnnotationsEntry\x1aN\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"2\n\x13ParameterAssignment\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\xba\x02\n\x0bTrialStatus\x12\x12\n\nstart_time\x18\x01 \x01(\t\x12\x17\n\x0f\x63ompletion_time\x18\x02 \x01(\t\x12?\n\tcondition\x18\x03 \x01(\x0e\x32,.api.v1.beta1.TrialStatus.TrialConditionType\x12.\n\x0bobservation\x18\x04 \x01(\x0b\x32\x19.api.v1.beta1.Observation\"\x8c\x01\n\x12TrialConditionType\x12\x0b\n\x07\x43REATED\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tSUCCEEDED\x10\x02\x12\n\n\x06KILLED\x10\x03\x12\n\n\x06\x46\x41ILED\x10\x04\x12\x16\n\x12METRICSUNAVAILABLE\x10\x05\x12\x10\n\x0c\x45\x41RLYSTOPPED\x10\x06\x12\x0b\n\x07UNKNOWN\x10\x07\"4\n\x0bObservation\x12%\n\x07metrics\x18\x01 \x03(\x0b\x32\x14.api.v1.beta1.Metric\"%\n\x06Metric\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"h\n\x1bReportObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x35\n\x0fobservation_log\x18\x02 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"\x1b\n\x19ReportObservationLogReply\">\n\x0eObservationLog\x12,\n\x0bmetric_logs\x18\x01 \x03(\x0b\x32\x17.api.v1.beta1.MetricLog\"E\n\tMetricLog\x12\x12\n\ntime_stamp\x18\x01 \x01(\t\x12$\n\x06metric\x18\x02 \x01(\x0b\x32\x14.api.v1.beta1.Metric\"i\n\x18GetObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\x12\x13\n\x0bmetric_name\x18\x02 \x01(\t\x12\x12\n\nstart_time\x18\x03 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\"O\n\x16GetObservationLogReply\x12\x35\n\x0fobservation_log\x18\x01 \x01(\x0b\x32\x1c.api.v1.beta1.ObservationLog\"1\n\x1b\x44\x65leteObservationLogRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x1b\n\x19\x44\x65leteObservationLogReply\"\xc4\x01\n\x15GetSuggestionsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\x12\x1a\n\x0erequest_number\x18\x03 \x01(\x05\x42\x02\x18\x01\x12\x1e\n\x16\x63urrent_request_number\x18\x04 \x01(\x05\x12\x1c\n\x14total_request_number\x18\x05 \x01(\x05\"\x9c\x04\n\x13GetSuggestionsReply\x12U\n\x15parameter_assignments\x18\x01 \x03(\x0b\x32\x36.api.v1.beta1.GetSuggestionsReply.ParameterAssignments\x12.\n\talgorithm\x18\x02 \x01(\x0b\x32\x1b.api.v1.beta1.AlgorithmSpec\x12=\n\x14\x65\x61rly_stopping_rules\x18\x03 \x03(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingRule\x12\x42\n\x0b\x61nnotations\x18\x05 \x03(\x0b\x32-.api.v1.beta1.GetSuggestionsReply.Annotations\x1a\x62\n\x14ParameterAssignments\x12\x36\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32!.api.v1.beta1.ParameterAssignment\x12\x12\n\ntrial_name\x18\x02 \x01(\t\x1a\x96\x01\n\x0b\x41nnotations\x12S\n\x0b\x61nnotations\x18\x01 \x03(\x0b\x32>.api.v1.beta1.GetSuggestionsReply.Annotations.AnnotationsEntry\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"P\n ValidateAlgorithmSettingsRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\" \n\x1eValidateAlgorithmSettingsReply\"\x8d\x01\n\x1cGetEarlyStoppingRulesRequest\x12,\n\nexperiment\x18\x01 \x01(\x0b\x32\x18.api.v1.beta1.Experiment\x12#\n\x06trials\x18\x02 \x03(\x0b\x32\x13.api.v1.beta1.Trial\x12\x1a\n\x12\x64\x62_manager_address\x18\x03 \x01(\t\"[\n\x1aGetEarlyStoppingRulesReply\x12=\n\x14\x65\x61rly_stopping_rules\x18\x01 \x03(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingRule\"v\n\x11\x45\x61rlyStoppingRule\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\x30\n\ncomparison\x18\x03 \x01(\x0e\x32\x1c.api.v1.beta1.ComparisonType\x12\x12\n\nstart_step\x18\x04 \x01(\x05\"_\n$ValidateEarlyStoppingSettingsRequest\x12\x37\n\x0e\x65\x61rly_stopping\x18\x01 \x01(\x0b\x32\x1f.api.v1.beta1.EarlyStoppingSpec\"$\n\"ValidateEarlyStoppingSettingsReply\"+\n\x15SetTrialStatusRequest\x12\x12\n\ntrial_name\x18\x01 \x01(\t\"\x15\n\x13SetTrialStatusReply*U\n\rParameterType\x12\x10\n\x0cUNKNOWN_TYPE\x10\x00\x12\n\n\x06\x44OUBLE\x10\x01\x12\x07\n\x03INT\x10\x02\x12\x0c\n\x08\x44ISCRETE\x10\x03\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x04*8\n\rObjectiveType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0c\n\x08MINIMIZE\x10\x01\x12\x0c\n\x08MAXIMIZE\x10\x02*J\n\x0e\x43omparisonType\x12\x16\n\x12UNKNOWN_COMPARISON\x10\x00\x12\t\n\x05\x45QUAL\x10\x01\x12\x08\n\x04LESS\x10\x02\x12\x0b\n\x07GREATER\x10\x03\x32\xc6\x02\n\tDBManager\x12j\n\x14ReportObservationLog\x12).api.v1.beta1.ReportObservationLogRequest\x1a\'.api.v1.beta1.ReportObservationLogReply\x12\x61\n\x11GetObservationLog\x12&.api.v1.beta1.GetObservationLogRequest\x1a$.api.v1.beta1.GetObservationLogReply\x12j\n\x14\x44\x65leteObservationLog\x12).api.v1.beta1.DeleteObservationLogRequest\x1a\'.api.v1.beta1.DeleteObservationLogReply2\xe1\x01\n\nSuggestion\x12X\n\x0eGetSuggestions\x12#.api.v1.beta1.GetSuggestionsRequest\x1a!.api.v1.beta1.GetSuggestionsReply\x12y\n\x19ValidateAlgorithmSettings\x12..api.v1.beta1.ValidateAlgorithmSettingsRequest\x1a,.api.v1.beta1.ValidateAlgorithmSettingsReply2\xe0\x02\n\rEarlyStopping\x12m\n\x15GetEarlyStoppingRules\x12*.api.v1.beta1.GetEarlyStoppingRulesRequest\x1a(.api.v1.beta1.GetEarlyStoppingRulesReply\x12X\n\x0eSetTrialStatus\x12#.api.v1.beta1.SetTrialStatusRequest\x1a!.api.v1.beta1.SetTrialStatusReply\x12\x85\x01\n\x1dValidateEarlyStoppingSettings\x12\x32.api.v1.beta1.ValidateEarlyStoppingSettingsRequest\x1a\x30.api.v1.beta1.ValidateEarlyStoppingSettingsReplyb\x06proto3')
 )
 
 _PARAMETERTYPE = _descriptor.EnumDescriptor(
@@ -52,8 +52,8 @@ _PARAMETERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4430,
-  serialized_end=4515,
+  serialized_start=4450,
+  serialized_end=4535,
 )
 _sym_db.RegisterEnumDescriptor(_PARAMETERTYPE)
 
@@ -79,8 +79,8 @@ _OBJECTIVETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4517,
-  serialized_end=4573,
+  serialized_start=4537,
+  serialized_end=4593,
 )
 _sym_db.RegisterEnumDescriptor(_OBJECTIVETYPE)
 
@@ -110,8 +110,8 @@ _COMPARISONTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4575,
-  serialized_end=4649,
+  serialized_start=4595,
+  serialized_end=4669,
 )
 _sym_db.RegisterEnumDescriptor(_COMPARISONTYPE)
 
@@ -1459,6 +1459,13 @@ _GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='trial_name', full_name='api.v1.beta1.GetSuggestionsReply.ParameterAssignments.trial_name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -1471,8 +1478,8 @@ _GETSUGGESTIONSREPLY_PARAMETERASSIGNMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1900,
-  serialized_end=1978,
+  serialized_start=3521,
+  serialized_end=3619,
 )
 
 _GETSUGGESTIONSREPLY_ANNOTATIONS_ANNOTATIONSENTRY = _descriptor.Descriptor(
@@ -1538,8 +1545,8 @@ _GETSUGGESTIONSREPLY_ANNOTATIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3602,
-  serialized_end=3752,
+  serialized_start=3622,
+  serialized_end=3772,
 )
 
 _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
@@ -1572,7 +1579,7 @@ _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='annotations', full_name='api.v1.beta1.GetSuggestionsReply.annotations', index=3,
-      number=4, type=11, cpp_type=10, label=3,
+      number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -1590,7 +1597,7 @@ _GETSUGGESTIONSREPLY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=3232,
-  serialized_end=3752,
+  serialized_end=3772,
 )
 
 
@@ -1620,8 +1627,8 @@ _VALIDATEALGORITHMSETTINGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3754,
-  serialized_end=3834,
+  serialized_start=3774,
+  serialized_end=3854,
 )
 
 
@@ -1644,8 +1651,8 @@ _VALIDATEALGORITHMSETTINGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3836,
-  serialized_end=3868,
+  serialized_start=3856,
+  serialized_end=3888,
 )
 
 
@@ -1689,8 +1696,8 @@ _GETEARLYSTOPPINGRULESREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3871,
-  serialized_end=4012,
+  serialized_start=3891,
+  serialized_end=4032,
 )
 
 
@@ -1720,8 +1727,8 @@ _GETEARLYSTOPPINGRULESREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4014,
-  serialized_end=4105,
+  serialized_start=4034,
+  serialized_end=4125,
 )
 
 
@@ -1772,8 +1779,8 @@ _EARLYSTOPPINGRULE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4107,
-  serialized_end=4225,
+  serialized_start=4127,
+  serialized_end=4245,
 )
 
 
@@ -1803,8 +1810,8 @@ _VALIDATEEARLYSTOPPINGSETTINGSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4227,
-  serialized_end=4322,
+  serialized_start=4247,
+  serialized_end=4342,
 )
 
 
@@ -1827,8 +1834,8 @@ _VALIDATEEARLYSTOPPINGSETTINGSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4324,
-  serialized_end=4360,
+  serialized_start=4344,
+  serialized_end=4380,
 )
 
 
@@ -1858,8 +1865,8 @@ _SETTRIALSTATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4362,
-  serialized_end=4405,
+  serialized_start=4382,
+  serialized_end=4425,
 )
 
 
@@ -1882,8 +1889,8 @@ _SETTRIALSTATUSREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4407,
-  serialized_end=4428,
+  serialized_start=4427,
+  serialized_end=4448,
 )
 
 _EXPERIMENT.fields_by_name['spec'].message_type = _EXPERIMENTSPEC
@@ -2318,8 +2325,8 @@ _DBMANAGER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=4652,
-  serialized_end=4978,
+  serialized_start=4672,
+  serialized_end=4998,
   methods=[
   _descriptor.MethodDescriptor(
     name='ReportObservationLog',
@@ -2360,8 +2367,8 @@ _SUGGESTION = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   options=None,
-  serialized_start=4981,
-  serialized_end=5206,
+  serialized_start=5001,
+  serialized_end=5226,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSuggestions',
@@ -2393,8 +2400,8 @@ _EARLYSTOPPING = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   options=None,
-  serialized_start=5209,
-  serialized_end=5561,
+  serialized_start=5229,
+  serialized_end=5581,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetEarlyStoppingRules',

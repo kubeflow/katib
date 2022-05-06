@@ -305,6 +305,8 @@ message GetSuggestionsRequest {
 message GetSuggestionsReply {
     message ParameterAssignments {
         repeated ParameterAssignment assignments = 1;
+        // Optional field to override the trial name
+        string trial_name = 2;
     }
     message Annotations {
         map<string, string> annotations = 1;
@@ -314,7 +316,8 @@ message GetSuggestionsReply {
     AlgorithmSpec algorithm = 2;
     repeated EarlyStoppingRule early_stopping_rules = 3;
 
-    repeated Annotations annotations = 4;
+    // Optional field to add annotations to the generated Trials
+    repeated Annotations annotations = 5;
 }
 
 message ValidateAlgorithmSettingsRequest {
