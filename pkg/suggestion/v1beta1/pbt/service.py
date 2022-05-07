@@ -93,6 +93,7 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             objective_metric = request.experiment.spec.objective.objective_metric_name
             # Create Job Manager
             self.job_queue = PbtJobQueue(
+                request.experiment.name,
                 int(settings["n_population"]),
                 float(settings["truncation_threshold"]),
                 None
@@ -109,33 +110,20 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         for trial in request.trials:
             self.job_queue.update(trial)
 
-        # Synchronize generation
         request_count = request.current_request_number
         if len(self.job_queue) < request_count:
-            if len(self.job_queue) > 0:
-                logger.info(
-                    "Job queue < request count; flushing queue before spawning..."
-                )
-                request_count = len(self.job_queue)
-            elif len(self.job_queue.running) > 0:
-                logger.info(
-                    "Waiting for trials to complete before spawning next generation: {}".format(
-                        list(self.job_queue.running.keys())
-                    )
-                )
-                self.job_queue.verify_running(request.trials)
-                return api_pb2.GetSuggestionsReply(parameter_assignments=[])
-            else:
-                logger.info("Spawning next generation...")
-                self.job_queue.generate()
+            self.job_queue.generate(request_count)
 
         jobs = [self.job_queue.get() for _ in range(request_count)]
-        parameter_assignments = Assignment.generate([j[0] for j in jobs])
+        parameter_assignments = Assignment.generate(
+            [j[0] for j in jobs], trial_names=[j[2] for j in jobs]
+        )
         annotations = Annotations.generate([j[1] for j in jobs])
         logger.info("Transmitting suggestion...")
 
         return api_pb2.GetSuggestionsReply(
-            parameter_assignments=parameter_assignments, annotations=annotations
+            parameter_assignments=parameter_assignments,
+            annotations=annotations,
         )
 
     def _set_validate_context_error(self, context, error_message):
@@ -182,11 +170,8 @@ class HyperParameterSampler(HyperParameter):
 
 
 class PbtJob(object):
-    def __init__(self, assignment_list, generation=0, parent=None, uid=None):
-        if uid is None:
-            self.uid = str(uuid.uuid4())
-        else:
-            self.uid = uid
+    def __init__(self, uid, assignment_list, generation, parent=None):
+        self.uid = uid
         self.params = {
             a.name: str(a.value) for a in assignment_list
         }  # all assignments transmitted as str
@@ -197,12 +182,11 @@ class PbtJob(object):
     def get(self):
         assignments = [Assignment(k, v) for k, v in self.params.items()]
         annotations = {
-            "pbt.suggestion.katib.kubeflow.org/uid": self.uid,
-            "pbt.suggestion.katib.kubeflow.org/generation": self.generation
+            "pbt.suggestion.katib.kubeflow.org/generation": self.generation,
         }
         if not self.parent is None:
             annotations["pbt.suggestion.katib.kubeflow.org/parent"] = self.parent
-        return assignments, annotations
+        return assignments, annotations, self.uid
 
     def __repr__(self):
         return "generation: {}, uid: {}, parent: {}".format(
@@ -213,6 +197,7 @@ class PbtJob(object):
 class PbtJobQueue(object):
     def __init__(
         self,
+        experiment_name,
         population_size,
         truncation_threshold,
         resample_probability,
@@ -220,6 +205,9 @@ class PbtJobQueue(object):
         metric_name,
         metric_scaler,
     ):
+        self.experiment_name = experiment_name
+        self.suggestion_dir = os.path.join(_DATA_PATH, self.experiment_name)
+
         self.population_size = population_size
         self.truncation_threshold = truncation_threshold
         self.resample_probability = resample_probability
@@ -230,15 +218,11 @@ class PbtJobQueue(object):
 
         self.pending = []
         self.running = {}
-        self.generation = 0
-        self.completed = [{}]
+        self.completed = {}
+        self.sample_pool = {"previous": [], "current": []}
 
         # Seed the initial population
-        for n in range(self.population_size):
-            self.append(
-                [Assignment(param.name, param.sample()) for param in self.search_space],
-                self.generation,
-            )
+        self._seed_from_base(self.population_size)
 
     def __len__(self):
         return len(self.pending)
@@ -251,18 +235,38 @@ class PbtJobQueue(object):
             "Objective metric value could not be found for {}".format(trial.name)
         )
 
+    def _seed_from_base(self, count):
+        for n in range(count):
+            self.append(
+                assignments=[
+                    Assignment(param.name, param.sample())
+                    for param in self.search_space
+                ],
+                generation=0,
+            )
+
     def append(self, assignments, generation, parent=None):
         if generation > 0 and parent is None:
             logger.warning(
                 "Trial generation >0 but no previous checkpoint trial provided"
             )
-        obj = PbtJob(assignments, generation, parent)
+
+        obj = PbtJob(
+            uid="{}-{}".format(self.experiment_name, uuid.uuid4()),
+            assignment_list=assignments,
+            generation=generation,
+            parent=parent,
+        )
         self.pending.append(obj)
-        new_trial_dir = os.path.join(_DATA_PATH, obj.uid)
+
+        new_trial_dir = os.path.join(self.suggestion_dir, obj.uid)
+        if os.path.isdir(new_trial_dir):
+            shutil.rmtree(new_trial_dir)
+
         if parent is None:
             os.makedirs(new_trial_dir, exist_ok=True)
         else:
-            previous_trial_dir = os.path.join(_DATA_PATH, obj.parent)
+            previous_trial_dir = os.path.join(self.suggestion_dir, obj.parent)
             shutil.copytree(previous_trial_dir, new_trial_dir)
 
         logger.info("PbtJob enqueued: {}".format(obj))
@@ -279,101 +283,117 @@ class PbtJobQueue(object):
 
         return obj.get()
 
-    def verify_running(self, trials):
-        nospawn_uids = list(self.running.keys())
-        for trial in trials:
-            trial_annotations = trial.spec.annotations
-            uid = trial_annotations["pbt.suggestion.katib.kubeflow.org/uid"]
-            if uid in nospawn_uids:
-                nospawn_uids.remove(uid)
-        for uid in nospawn_uids:
-            logger.info("PbtJob requeued: {}".format(uid))
-            self.pending.append(self.running.pop(uid))
-
     def update(self, trial):
-        trial_assignments = [Assignment.convert(assignment) for assignment in trial.spec.parameter_assignments.assignments]
         trial_annotations = trial.spec.annotations
-        uid = trial_annotations["pbt.suggestion.katib.kubeflow.org/uid"]
+        uid = trial.name
         generation = trial_annotations["pbt.suggestion.katib.kubeflow.org/generation"]
 
-        # Do not update active/pending or already processed trials
+        # Do not update active/pending trials
         if trial.status.condition in (
             api_pb2.TrialStatus.TrialConditionType.CREATED,
             api_pb2.TrialStatus.TrialConditionType.RUNNING,
         ):
             return
-        for i in range(self.generation + 1):
-            if uid in self.completed[i]:
-                return
-
-        if not uid in self.running:
-            logger.error("Unable to find trial match in PbtJobQueue.running!")
+        # Do not update previously processed trials
+        if uid in self.completed:
             return
+
         obj = self.running.pop(uid)
         obj.metric_value = self._get_objective_value(trial)
-        self.completed[self.generation][obj.uid] = obj
+        self.completed[obj.uid] = obj
 
-        # Generate next trial if necessary
-        if (
-            trial.status.condition
-            in (
-                api_pb2.TrialStatus.TrialConditionType.SUCCEEDED,
-                api_pb2.TrialStatus.TrialConditionType.EARLYSTOPPED,
-            )
-            and Trial.convertTrial(trial) is None
-        ):
-            # Trial invalid, retry
-            logger.error(
-                "Unable to convert trial {} (status: {}), re-adding to task queue".format(
-                    trial.name, trial.status.condition
-                )
-            )
-            self.append(trial_assignments, obj.generation, obj.parent)
-        elif trial.status.condition in (
+        # Re-queue killed or failed jobs
+        if trial.status.condition in (
             api_pb2.TrialStatus.TrialConditionType.KILLED,
             api_pb2.TrialStatus.TrialConditionType.FAILED,
         ):
             # Trial error, retry
             logger.warning(
-                "Trial failed {} (status: {}), re-adding to task queue".format(
+                "Trial failed {} (status: {}), re-queuing".format(
                     trial.name, trial.status.condition
                 )
             )
-            self.append(trial_assignments, obj.generation, obj.parent)
+            trial_assignments = [
+                Assignment.convert(assignment)
+                for assignment in trial.spec.parameter_assignments.assignments
+            ]
+            self.append(
+                assignments=trial_assignments,
+                generation=obj.generation,
+                parent=obj.parent,
+            )
+            return
 
-    def generate(self):
-        values = [
-            job.metric_value
-            for _, job in self.completed[self.generation].items()
-            if not job.metric_value is None
-        ]
+        self.sample_pool["current"].append(obj.uid)
+
+    def _segment_sample_pool(self, pool, count):
+        # Keep the first population_size samples to construct the new generation
+        trial_pool = [self.completed[uid] for uid in self.sample_pool[pool]]
+
+        values = [job.metric_value for job in trial_pool]
         trunc_bounds = np.quantile(
             values, (self.truncation_threshold, 1 - self.truncation_threshold)
         )
+
         exploit_names, explore_names, upper_names = [], [], []
-        for trial_uid, job in self.completed[self.generation].items():
-            if job.metric_value is None:
-                continue
+        for job in trial_pool:
             if job.metric_value < trunc_bounds[0]:
-                exploit_names.append(trial_uid)
+                exploit_names.append(job.uid)
             else:
-                explore_names.append(trial_uid)
+                explore_names.append(job.uid)
                 if job.metric_value >= trunc_bounds[1]:
-                    upper_names.append(trial_uid)
+                    upper_names.append(job.uid)
+
+        # Keep count samples in (exploit + explore)
+        np.random.shuffle(exploit_names)
+        np.random.shuffle(explore_names)
+        exploit_names = list(exploit_names[: int(count * self.truncation_threshold)])
+        explore_names = list(explore_names[: (count - len(exploit_names))])
+        return exploit_names, explore_names, upper_names
+
+    def generate(self, min_count):
+        # Check if new generation can be created
+        if len(self.sample_pool["current"]) <= self.population_size:
+            # Check if first generation
+            if len(self.sample_pool["previous"]) == 0:
+                logger.info(
+                    "Spawning {} additional samples from original search space...".format(
+                        min_count
+                    )
+                )
+                self._seed_from_base(min_count)
+                return
+
+            # Sample from previous generation
+            logger.info(
+                "Spawning {} additional samples from previous generation...".format(
+                    min_count
+                )
+            )
+            exploit_names, explore_names, upper_names = self._segment_sample_pool(
+                "previous", min_count
+            )
+        else:
+            logger.info("Spawning next generation...")
+            exploit_names, explore_names, upper_names = self._segment_sample_pool(
+                "current", self.population_size
+            )
+            self.sample_pool["previous"] = self.sample_pool["current"]
+            self.sample_pool["current"] = []
 
         # Generate exploit jobs
         exploit_replacements = np.random.choice(upper_names, len(exploit_names))
         for n, trial_uid in enumerate(exploit_names):
-            job = self.completed[self.generation][trial_uid]
+            job = self.completed[trial_uid]
             self.append(
-                self.completed[self.generation][exploit_replacements[n]].get()[0],
-                job.generation + 1,
-                job.uid,
+                assignments=self.completed[exploit_replacements[n]].get()[0],
+                generation=job.generation + 1,
+                parent=job.uid,
             )
 
         # Generate perturbed trials
         for trial_uid in explore_names:
-            job = self.completed[self.generation][trial_uid]
+            job = self.completed[trial_uid]
             assignment_list = []
             for param in self.search_space:
                 if self.resample_probability is None:
@@ -384,9 +404,8 @@ class PbtJobQueue(object):
                 else:
                     new_value = job.params[param.name]
                 assignment_list.append(Assignment(param.name, new_value))
-            self.append(assignment_list, job.generation + 1, job.uid)
-
-        # TODO: generate() should enforce number of spawn with self.population_size
-
-        self.completed.append({})
-        self.generation += 1
+            self.append(
+                assignments=assignment_list,
+                generation=job.generation + 1,
+                parent=job.uid,
+            )
