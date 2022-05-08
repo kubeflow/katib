@@ -132,6 +132,7 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
           );
           continue;
         }
+        this.graphHelper.yMeta[metricName] = {};
         this.graphHelper.yMeta[metricName].transform = x => {
           return parseFloat(x);
         };
@@ -204,7 +205,7 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
       for (let annot of annotArr) {
         let newEntry: PbtAnnotation = {
           trialName: annot['trialName'],
-          uid: annot['pbt.suggestion.katib.kubeflow.org/uid'],
+          uid: annot['trialName'],
           parentUid: annot['pbt.suggestion.katib.kubeflow.org/parent'],
           generation: parseInt(
             annot['pbt.suggestion.katib.kubeflow.org/generation'],
