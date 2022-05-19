@@ -54,7 +54,7 @@ spec:
               inaccel/fpga: enabled
             annotations:
               inaccel/cli: |
-                bitstream install --mode others https://store.inaccel.com/artifactory/bitstreams/xilinx/aws-vu9p-f1/shell-v04261818_201920.2/aws/com/inaccel/xgboost/0.1/2exact
+                bitstream install --mode others https://store.inaccel.com/artifactory/bitstreams/xilinx/aws-vu9p-f1/dynamic-shell/aws/com/inaccel/xgboost/0.1/2exact
           spec:
             containers:
               - name: training-container
