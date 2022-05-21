@@ -43,7 +43,7 @@ import (
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	experimentUtil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
-	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
 	suggestionmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/suggestion"
 )
@@ -163,7 +163,7 @@ func TestReconcile(t *testing.T) {
 
 	mockCtrl2 := gomock.NewController(t)
 	defer mockCtrl2.Finish()
-	mockGenerator := manifestmock.NewMockGenerator(mockCtrl)
+	mockGenerator := manifestmock.NewMockGenerator(mockCtrl2)
 
 	// Setup the Manager and Controller.  Wrap the Controller Reconcile function so it writes each request to a
 	// channel when it is finished.
@@ -217,7 +217,6 @@ func TestReconcile(t *testing.T) {
 		nil).AnyTimes()
 
 	suggestionRestartNo := newFakeSuggestion()
-
 	mockSuggestion.EXPECT().GetOrCreateSuggestion(gomock.Any(), gomock.Any()).Return(
 		suggestionRestartNo, nil).AnyTimes()
 
@@ -304,10 +303,10 @@ func TestReconcile(t *testing.T) {
 	)
 
 	// Test 1 - Regural experiment run
-	instance := newFakeInstance()
 
 	// Create the suggestion with NeverResume
-	g.Expect(c.Create(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
+	suggestionInstance := newFakeSuggestion()
+	g.Expect(c.Create(context.TODO(), suggestionInstance)).NotTo(gomega.HaveOccurred())
 	// Manually update suggestion's status with 3 suggestions
 	// Ones redundant trial is deleted, suggestion status must be updated
 	g.Eventually(func() error {
@@ -321,6 +320,7 @@ func TestReconcile(t *testing.T) {
 	}, timeout).ShouldNot(gomega.HaveOccurred())
 
 	// Create the experiment
+	instance := newFakeInstance()
 	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
 
 	// Expect that experiment status is running
@@ -382,7 +382,7 @@ func TestReconcile(t *testing.T) {
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the suggestion
-	g.Expect(c.Delete(context.TODO(), suggestionRestartNo)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(context.TODO(), suggestionInstance)).NotTo(gomega.HaveOccurred())
 
 	// Expect that suggestion with ResumePolicy = NeverResume is deleted
 	g.Eventually(func() bool {
@@ -391,7 +391,9 @@ func TestReconcile(t *testing.T) {
 	}, timeout).Should(gomega.BeTrue())
 
 	// Create the suggestion with ResumePolicy = FromVolume
-	g.Expect(c.Create(context.TODO(), suggestionRestartYes)).NotTo(gomega.HaveOccurred())
+	suggestionInstance = newFakeSuggestion()
+	suggestionInstance.Spec.ResumePolicy = experimentsv1beta1.FromVolume
+	g.Expect(c.Create(context.TODO(), suggestionInstance)).NotTo(gomega.HaveOccurred())
 	// Expect that suggestion is created
 	g.Eventually(func() bool {
 		return errors.IsNotFound(c.Get(context.TODO(),
@@ -437,7 +439,7 @@ func TestReconcile(t *testing.T) {
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the suggestion
-	g.Expect(c.Delete(context.TODO(), suggestionRestartYes)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(context.TODO(), suggestionInstance)).NotTo(gomega.HaveOccurred())
 
 	// Expect that suggestion with ResumePolicy = FromVolume is deleted
 	g.Eventually(func() bool {
