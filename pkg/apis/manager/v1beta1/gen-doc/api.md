@@ -20,8 +20,8 @@
     - [GetObservationLogReply](#api-v1-beta1-GetObservationLogReply)
     - [GetObservationLogRequest](#api-v1-beta1-GetObservationLogRequest)
     - [GetSuggestionsReply](#api-v1-beta1-GetSuggestionsReply)
-    - [GetSuggestionsReply.Annotations](#api-v1-beta1-GetSuggestionsReply-Annotations)
-    - [GetSuggestionsReply.Annotations.AnnotationsEntry](#api-v1-beta1-GetSuggestionsReply-Annotations-AnnotationsEntry)
+    - [GetSuggestionsReply.LabelAssignments](#api-v1-beta1-GetSuggestionsReply-LabelAssignments)
+    - [GetSuggestionsReply.LabelAssignments.LabelsEntry](#api-v1-beta1-GetSuggestionsReply-LabelAssignments-LabelsEntry)
     - [GetSuggestionsReply.ParameterAssignments](#api-v1-beta1-GetSuggestionsReply-ParameterAssignments)
     - [GetSuggestionsRequest](#api-v1-beta1-GetSuggestionsRequest)
     - [GraphConfig](#api-v1-beta1-GraphConfig)
@@ -42,7 +42,7 @@
     - [SetTrialStatusRequest](#api-v1-beta1-SetTrialStatusRequest)
     - [Trial](#api-v1-beta1-Trial)
     - [TrialSpec](#api-v1-beta1-TrialSpec)
-    - [TrialSpec.AnnotationsEntry](#api-v1-beta1-TrialSpec-AnnotationsEntry)
+    - [TrialSpec.LabelsEntry](#api-v1-beta1-TrialSpec-LabelsEntry)
     - [TrialSpec.ParameterAssignments](#api-v1-beta1-TrialSpec-ParameterAssignments)
     - [TrialStatus](#api-v1-beta1-TrialStatus)
     - [ValidateAlgorithmSettingsReply](#api-v1-beta1-ValidateAlgorithmSettingsReply)
@@ -327,31 +327,31 @@ Discrete and Categorical type use List.
 | parameter_assignments | [GetSuggestionsReply.ParameterAssignments](#api-v1-beta1-GetSuggestionsReply-ParameterAssignments) | repeated |  |
 | algorithm | [AlgorithmSpec](#api-v1-beta1-AlgorithmSpec) |  |  |
 | early_stopping_rules | [EarlyStoppingRule](#api-v1-beta1-EarlyStoppingRule) | repeated |  |
-| annotations | [GetSuggestionsReply.Annotations](#api-v1-beta1-GetSuggestionsReply-Annotations) | repeated | Optional field to add annotations to the generated Trials |
+| label_assignments | [GetSuggestionsReply.LabelAssignments](#api-v1-beta1-GetSuggestionsReply-LabelAssignments) | repeated | Optional field to add labels to the generated Trials |
 
 
 
 
 
 
-<a name="api-v1-beta1-GetSuggestionsReply-Annotations"></a>
+<a name="api-v1-beta1-GetSuggestionsReply-LabelAssignments"></a>
 
-### GetSuggestionsReply.Annotations
+### GetSuggestionsReply.LabelAssignments
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| annotations | [GetSuggestionsReply.Annotations.AnnotationsEntry](#api-v1-beta1-GetSuggestionsReply-Annotations-AnnotationsEntry) | repeated |  |
+| labels | [GetSuggestionsReply.LabelAssignments.LabelsEntry](#api-v1-beta1-GetSuggestionsReply-LabelAssignments-LabelsEntry) | repeated |  |
 
 
 
 
 
 
-<a name="api-v1-beta1-GetSuggestionsReply-Annotations-AnnotationsEntry"></a>
+<a name="api-v1-beta1-GetSuggestionsReply-LabelAssignments-LabelsEntry"></a>
 
-### GetSuggestionsReply.Annotations.AnnotationsEntry
+### GetSuggestionsReply.LabelAssignments.LabelsEntry
 
 
 
@@ -671,16 +671,16 @@ Specification of a Trial. It represents Trial&#39;s parameter assignments and ob
 | ----- | ---- | ----- | ----------- |
 | objective | [ObjectiveSpec](#api-v1-beta1-ObjectiveSpec) |  | Objective specification for the Trial. |
 | parameter_assignments | [TrialSpec.ParameterAssignments](#api-v1-beta1-TrialSpec-ParameterAssignments) |  | List of assignments generated for the Trial. |
-| annotations | [TrialSpec.AnnotationsEntry](#api-v1-beta1-TrialSpec-AnnotationsEntry) | repeated | Map of annotations assigned to the Trial |
+| labels | [TrialSpec.LabelsEntry](#api-v1-beta1-TrialSpec-LabelsEntry) | repeated | Map of labels assigned to the Trial |
 
 
 
 
 
 
-<a name="api-v1-beta1-TrialSpec-AnnotationsEntry"></a>
+<a name="api-v1-beta1-TrialSpec-LabelsEntry"></a>
 
-### TrialSpec.AnnotationsEntry
+### TrialSpec.LabelsEntry
 
 
 

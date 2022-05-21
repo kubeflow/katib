@@ -26,7 +26,7 @@ from pkg.suggestion.v1beta1.internal.search_space import (
     HyperParameterSearchSpace,
 )
 import pkg.suggestion.v1beta1.internal.constant as constant
-from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment, Annotations
+from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment, Labels
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 
 logger = logging.getLogger(__name__)
@@ -118,12 +118,12 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         parameter_assignments = Assignment.generate(
             [j[0] for j in jobs], trial_names=[j[2] for j in jobs]
         )
-        annotations = Annotations.generate([j[1] for j in jobs])
+        label_assignments = Labels.generate([j[1] for j in jobs])
         logger.info("Transmitting suggestion...")
 
         return api_pb2.GetSuggestionsReply(
             parameter_assignments=parameter_assignments,
-            annotations=annotations,
+            label_assignments=label_assignments,
         )
 
     def _set_validate_context_error(self, context, error_message):
@@ -181,12 +181,12 @@ class PbtJob(object):
 
     def get(self):
         assignments = [Assignment(k, v) for k, v in self.params.items()]
-        annotations = {
+        labels = {
             "pbt.suggestion.katib.kubeflow.org/generation": self.generation,
         }
         if not self.parent is None:
-            annotations["pbt.suggestion.katib.kubeflow.org/parent"] = self.parent
-        return assignments, annotations, self.uid
+            labels["pbt.suggestion.katib.kubeflow.org/parent"] = self.parent
+        return assignments, labels, self.uid
 
     def __repr__(self):
         return "generation: {}, uid: {}, parent: {}".format(
@@ -284,9 +284,9 @@ class PbtJobQueue(object):
         return obj.get()
 
     def update(self, trial):
-        trial_annotations = trial.spec.annotations
+        trial_labels = trial.spec.labels
         uid = trial.name
-        generation = trial_annotations["pbt.suggestion.katib.kubeflow.org/generation"]
+        generation = trial_labels["pbt.suggestion.katib.kubeflow.org/generation"]
 
         # Do not update active/pending trials
         if trial.status.condition in (

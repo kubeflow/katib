@@ -243,11 +243,11 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.beta1.GetSuggestionsReply.Annotations"><span class="badge">M</span>GetSuggestionsReply.Annotations</a>
+                  <a href="#api.v1.beta1.GetSuggestionsReply.LabelAssignments"><span class="badge">M</span>GetSuggestionsReply.LabelAssignments</a>
                 </li>
               
                 <li>
-                  <a href="#api.v1.beta1.GetSuggestionsReply.Annotations.AnnotationsEntry"><span class="badge">M</span>GetSuggestionsReply.Annotations.AnnotationsEntry</a>
+                  <a href="#api.v1.beta1.GetSuggestionsReply.LabelAssignments.LabelsEntry"><span class="badge">M</span>GetSuggestionsReply.LabelAssignments.LabelsEntry</a>
                 </li>
               
                 <li>
@@ -331,7 +331,7 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.beta1.TrialSpec.AnnotationsEntry"><span class="badge">M</span>TrialSpec.AnnotationsEntry</a>
+                  <a href="#api.v1.beta1.TrialSpec.LabelsEntry"><span class="badge">M</span>TrialSpec.LabelsEntry</a>
                 </li>
               
                 <li>
@@ -934,10 +934,10 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
                 </tr>
               
                 <tr>
-                  <td>annotations</td>
-                  <td><a href="#api.v1.beta1.GetSuggestionsReply.Annotations">GetSuggestionsReply.Annotations</a></td>
+                  <td>label_assignments</td>
+                  <td><a href="#api.v1.beta1.GetSuggestionsReply.LabelAssignments">GetSuggestionsReply.LabelAssignments</a></td>
                   <td>repeated</td>
-                  <td><p>Optional field to add annotations to the generated Trials </p></td>
+                  <td><p>Optional field to add labels to the generated Trials </p></td>
                 </tr>
               
             </tbody>
@@ -947,7 +947,7 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
 
         
       
-        <h3 id="api.v1.beta1.GetSuggestionsReply.Annotations">GetSuggestionsReply.Annotations</h3>
+        <h3 id="api.v1.beta1.GetSuggestionsReply.LabelAssignments">GetSuggestionsReply.LabelAssignments</h3>
         <p></p>
 
         
@@ -958,8 +958,8 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
             <tbody>
               
                 <tr>
-                  <td>annotations</td>
-                  <td><a href="#api.v1.beta1.GetSuggestionsReply.Annotations.AnnotationsEntry">GetSuggestionsReply.Annotations.AnnotationsEntry</a></td>
+                  <td>labels</td>
+                  <td><a href="#api.v1.beta1.GetSuggestionsReply.LabelAssignments.LabelsEntry">GetSuggestionsReply.LabelAssignments.LabelsEntry</a></td>
                   <td>repeated</td>
                   <td><p> </p></td>
                 </tr>
@@ -971,7 +971,7 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
 
         
       
-        <h3 id="api.v1.beta1.GetSuggestionsReply.Annotations.AnnotationsEntry">GetSuggestionsReply.Annotations.AnnotationsEntry</h3>
+        <h3 id="api.v1.beta1.GetSuggestionsReply.LabelAssignments.LabelsEntry">GetSuggestionsReply.LabelAssignments.LabelsEntry</h3>
         <p></p>
 
         
@@ -1613,10 +1613,10 @@ This can be empty if we only care about the objective metric. </p></td>
                 </tr>
               
                 <tr>
-                  <td>annotations</td>
-                  <td><a href="#api.v1.beta1.TrialSpec.AnnotationsEntry">TrialSpec.AnnotationsEntry</a></td>
+                  <td>labels</td>
+                  <td><a href="#api.v1.beta1.TrialSpec.LabelsEntry">TrialSpec.LabelsEntry</a></td>
                   <td>repeated</td>
-                  <td><p>Map of annotations assigned to the Trial </p></td>
+                  <td><p>Map of labels assigned to the Trial </p></td>
                 </tr>
               
             </tbody>
@@ -1626,7 +1626,7 @@ This can be empty if we only care about the objective metric. </p></td>
 
         
       
-        <h3 id="api.v1.beta1.TrialSpec.AnnotationsEntry">TrialSpec.AnnotationsEntry</h3>
+        <h3 id="api.v1.beta1.TrialSpec.LabelsEntry">TrialSpec.LabelsEntry</h3>
         <p></p>
 
         

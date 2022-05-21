@@ -85,8 +85,8 @@ type TrialAssignment struct {
 	// Contains rule name, value and comparison type
 	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
 
-	// Suggestion metadata to attach to Trial job
-	Annotations map[string]string `json:"annotations,omitempty"`
+	// Suggestion label metadata to attach to Trial job
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 // SuggestionCondition describes the state of the Suggestion at a certain point.

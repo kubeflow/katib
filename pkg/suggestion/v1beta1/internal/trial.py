@@ -28,14 +28,14 @@ class Trial(object):
         target_metric,
         metric_name,
         additional_metrics,
-        annotations,
+        labels,
     ):
         self.name = name
         self.assignments = assignments
         self.target_metric = target_metric
         self.metric_name = metric_name
         self.additional_metrics = additional_metrics
-        self.annotations = annotations
+        self.labels = labels
 
     @staticmethod
     def convert(trials):
@@ -55,7 +55,7 @@ class Trial(object):
         metric_name = trial.spec.objective.objective_metric_name
         target_metric, additional_metrics = Metric.convert(
             trial.status.observation, metric_name)
-        annotations = trial.spec.annotations
+        labels = trial.spec.labels
         # If the target_metric is none, ignore the trial.
         if target_metric is not None:
             trial = Trial(
@@ -64,7 +64,7 @@ class Trial(object):
                 target_metric,
                 metric_name,
                 additional_metrics,
-                annotations,
+                labels,
             )
             return trial
         return None
@@ -116,21 +116,21 @@ class Assignment(object):
         return "Assignment(name={}, value={})".format(self.name, self.value)
 
 
-class Annotations(object):
-    def __init__(self, annotations):
-        self.annotations = {k:str(v) for k,v in annotations.items()}
+class Labels(object):
+    def __init__(self, labels):
+        self.labels = {k:str(v) for k,v in labels.items()}
 
     @staticmethod
-    def generate(list_of_annotations):
+    def generate(list_of_labels):
         ret = []
-        for annotations in list_of_annotations:
-            str_annotations = {k:str(v) for k,v in annotations.items()}
-            ret.append(api.GetSuggestionsReply.Annotations(annotations=str_annotations))
+        for labels in list_of_labels:
+            str_labels = {k:str(v) for k,v in labels.items()}
+            ret.append(api.GetSuggestionsReply.LabelAssignments(labels=str_labels))
         return ret
 
     def __str__(self):
-        strfmt = "Annotation(name={}, value={})"
-        strlist = [strfmt.format(name,value) for name,value in annotations.items()]
+        strfmt = "Labels(name={}, value={})"
+        strlist = [strfmt.format(name,value) for name,value in labels.items()]
         return "; ".join(strlist)
 
 

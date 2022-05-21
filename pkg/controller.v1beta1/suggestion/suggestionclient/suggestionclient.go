@@ -128,9 +128,9 @@ func (g *General) SyncAssignments(
 		logger.Error(err, "The response contains unexpected trials")
 		return err
 	}
-	if responseSuggestion.Annotations != nil && len(responseSuggestion.Annotations) != currentRequestNum {
-		err := fmt.Errorf("The response contains unexpected annotations")
-		logger.Error(err, "The response contains unexpected annotations")
+	if responseSuggestion.LabelAssignments != nil && len(responseSuggestion.LabelAssignments) != currentRequestNum {
+		err := fmt.Errorf("The response contains unexpected labels")
+		logger.Error(err, "The response contains unexpected labels")
 		return err
 	}
 
@@ -189,8 +189,8 @@ func (g *General) SyncAssignments(
 			ParameterAssignments: composeParameterAssignments(t.Assignments),
 			EarlyStoppingRules:   earlyStoppingRules,
 		}
-		if responseSuggestion.Annotations != nil {
-			assignment.Annotations = responseSuggestion.Annotations[n].Annotations
+		if responseSuggestion.LabelAssignments != nil {
+			assignment.Labels = responseSuggestion.LabelAssignments[n].Labels
 		}
 		trialAssignments = append(trialAssignments, assignment)
 	}
@@ -367,8 +367,8 @@ func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial
 				Observation:    convertTrialObservation(t.Spec.Objective.MetricStrategies, t.Status.Observation),
 			},
 		}
-		if t.Spec.Annotations != nil {
-			trial.Spec.Annotations = t.Spec.Annotations
+		if t.Spec.Labels != nil {
+			trial.Spec.Labels = t.Spec.Labels
 		}
 		if t.Spec.Objective.Goal != nil {
 			trial.Spec.Objective.Goal = *t.Spec.Objective.Goal

@@ -62,8 +62,8 @@ type TrialSpec struct {
 	// For example for BatchJob: status.conditions.#(type=="Failed")#|#(status=="True")#
 	FailureCondition string `json:"failureCondition,omitempty"`
 
-	// Annotations that provide additional metadata for services (e.g. Suggestions tracking)
-	Annotations map[string]string `json:"annotations,omitempty"`
+	// Labels that provide additional metadata for services (e.g. Suggestions tracking)
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 // TrialStatus is the current status of a Trial.

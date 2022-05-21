@@ -216,7 +216,7 @@ message TrialSpec {
 
     ObjectiveSpec objective = 2; // Objective specification for the Trial.
     ParameterAssignments parameter_assignments = 3; // List of assignments generated for the Trial.
-    map<string, string> annotations = 4; // Map of annotations assigned to the Trial
+    map<string, string> labels = 4; // Map of labels assigned to the Trial
 }
 
 message ParameterAssignment {
@@ -308,16 +308,16 @@ message GetSuggestionsReply {
         // Optional field to override the trial name
         string trial_name = 2;
     }
-    message Annotations {
-        map<string, string> annotations = 1;
+    message LabelAssignments {
+        map<string, string> labels = 1;
     }
 
     repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
     repeated EarlyStoppingRule early_stopping_rules = 3;
 
-    // Optional field to add annotations to the generated Trials
-    repeated Annotations annotations = 5;
+    // Optional field to add labels to the generated Trials
+    repeated LabelAssignments label_assignments = 5;
 }
 
 message ValidateAlgorithmSettingsRequest {
