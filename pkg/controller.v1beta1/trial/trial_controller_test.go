@@ -17,7 +17,6 @@ limitations under the License.
 package trial
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"testing"
@@ -112,7 +111,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		// Try to update status until it be succeeded
 		for err != nil {
 			updatedInstance := &trialsv1beta1.Trial{}
-			if err = c.Get(context.TODO(), trialKey, updatedInstance); err != nil {
+			if err = c.Get(ctx, trialKey, updatedInstance); err != nil {
 				continue
 			}
 			updatedInstance.Status = instance.Status
@@ -139,7 +138,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
+		g.Expect(mgr.Start(ctx)).NotTo(gomega.HaveOccurred())
 	}()
 
 	// Result for GetTrialObservationLog with some metrics.
@@ -188,16 +187,16 @@ func TestReconcileBatchJob(t *testing.T) {
 	batchJob := &batchv1.Job{}
 
 	// Create the Trial
-	g.Expect(c.Create(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 	// Expect that BatchJob with appropriate name is created
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), batchJobKey, batchJob)
+		return c.Get(ctx, batchJobKey, batchJob)
 	}, timeout).Should(gomega.Succeed())
 
 	// Expect that Trial status is running
 	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), trialKey, trial); err != nil {
+		if err = c.Get(ctx, trialKey, trial); err != nil {
 			return false
 		}
 		return trial.IsRunning()
@@ -206,7 +205,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	// Manually update BatchJob status to failed
 	// Expect that Trial status is failed
 	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), batchJobKey, batchJob); err != nil {
+		if err = c.Get(ctx, batchJobKey, batchJob); err != nil {
 			return false
 		}
 		batchJob.Status = batchv1.JobStatus{
@@ -219,31 +218,31 @@ func TestReconcileBatchJob(t *testing.T) {
 				},
 			},
 		}
-		if err = c.Status().Update(context.TODO(), batchJob); err != nil {
+		if err = c.Status().Update(ctx, batchJob); err != nil {
 			return false
 		}
 
-		if err = c.Get(context.TODO(), trialKey, trial); err != nil {
+		if err = c.Get(ctx, trialKey, trial); err != nil {
 			return false
 		}
 		return trial.IsFailed()
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the Trial
-	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 	// Expect that Trial is deleted
 	// BatchJob can't be deleted because GC doesn't work in envtest and BatchJob stuck in termination phase.
 	// Ref: https://book.kubebuilder.io/reference/testing/envtest.html#testing-considerations.
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
+		return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	// Test 2 - Trail with "Complete" BatchJob and Available metrics.
 	batchJobCompleteMessage := "BatchJob completed test message"
 	batchJobCompleteReason := "BatchJob completed test reason"
 	// Update BatchJob status to Complete.
-	g.Expect(c.Get(context.TODO(), batchJobKey, batchJob)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Get(ctx, batchJobKey, batchJob)).NotTo(gomega.HaveOccurred())
 	batchJob.Status = batchv1.JobStatus{
 		Conditions: []batchv1.JobCondition{
 			{
@@ -254,16 +253,16 @@ func TestReconcileBatchJob(t *testing.T) {
 			},
 		},
 	}
-	g.Expect(c.Status().Update(context.TODO(), batchJob)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
 
 	// Create the Trial
 	trial = newFakeTrialBatchJob()
-	g.Expect(c.Create(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 	// Expect that Trial status is succeeded and metrics are properly populated
 	// Metrics available because GetTrialObservationLog returns values
 	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), trialKey, trial); err != nil {
+		if err = c.Get(ctx, trialKey, trial); err != nil {
 			return false
 		}
 		return trial.IsSucceeded() &&
@@ -274,22 +273,22 @@ func TestReconcileBatchJob(t *testing.T) {
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the Trial
-	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 	// Expect that Trial is deleted
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
+		return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	// Test 3 - Trail with "Complete" BatchJob and Unavailable metrics.
 	// Create the Trial
 	trial = newFakeTrialBatchJob()
-	g.Expect(c.Create(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 	// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
 	// Metrics unavailable because GetTrialObservationLog returns "unavailable".
 	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), trialKey, trial); err != nil {
+		if err = c.Get(ctx, trialKey, trial); err != nil {
 			return false
 		}
 		isConditionCorrect := false
@@ -304,11 +303,11 @@ func TestReconcileBatchJob(t *testing.T) {
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the Trial
-	g.Expect(c.Delete(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 	// Expect that Trial is deleted
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), trialKey, &trialsv1beta1.Trial{}))
+		return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	// Test 4 - Update status for empty Trial
