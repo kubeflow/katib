@@ -16,8 +16,8 @@ from tensorflow import keras
 from keras.datasets import cifar10
 from ModelConstructor import ModelConstructor
 from tensorflow.keras.utils import to_categorical
-from tensorflow.python.keras.utils.multi_gpu_utils import multi_gpu_model
 from keras.preprocessing.image import ImageDataGenerator
+import tensorflow as tf
 import argparse
 
 if __name__ == "__main__":
@@ -50,16 +50,23 @@ if __name__ == "__main__":
 
     print("\n>>> Constructing Model...")
     constructor = ModelConstructor(arch, nn_config)
-    test_model = constructor.build_model()
+
+    num_physical_gpus = len(tf.config.experimental.list_physical_devices('GPU'))
+    if 1 <= num_gpus <= num_physical_gpus:
+        devices = ["/gpu:"+str(i) for i in range(num_physical_gpus)]
+    else:
+        num_physical_cpu = len(tf.config.experimental.list_physical_devices('CPU'))
+        devices = ["/cpu:"+str(j) for j in range(num_physical_cpu)]
+
+    strategy = tf.distribute.MirroredStrategy(devices)
+    with strategy.scope():
+        test_model = constructor.build_model()
+        test_model.summary()
+        test_model.compile(loss=keras.losses.categorical_crossentropy,
+                           optimizer=keras.optimizers.Adam(learning_rate=1e-3, decay=1e-4),
+                           metrics=['accuracy'])
+
     print(">>> Model Constructed Successfully\n")
-
-    if num_gpus > 1:
-        test_model = multi_gpu_model(test_model, gpus=num_gpus)
-
-    test_model.summary()
-    test_model.compile(loss=keras.losses.categorical_crossentropy,
-                       optimizer=keras.optimizers.Adam(learning_rate=1e-3, decay=1e-4),
-                       metrics=['accuracy'])
 
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
     x_train = x_train.astype('float32')
