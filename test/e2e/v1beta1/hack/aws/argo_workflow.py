@@ -54,6 +54,7 @@ KATIB_IMAGES = {
     "suggestion-hyperband":          "cmd/suggestion/hyperband/v1beta1/Dockerfile",
     "suggestion-goptuna":            "cmd/suggestion/goptuna/v1beta1/Dockerfile",
     "suggestion-optuna":             "cmd/suggestion/optuna/v1beta1/Dockerfile",
+    "suggestion-pbt":                "cmd/suggestion/pbt/v1beta1/Dockerfile",
     "suggestion-enas":               "cmd/suggestion/nas/enas/v1beta1/Dockerfile",
     "suggestion-darts":              "cmd/suggestion/nas/darts/v1beta1/Dockerfile",
     "earlystopping-medianstop":      "cmd/earlystopping/medianstop/v1beta1/Dockerfile",
@@ -63,6 +64,7 @@ KATIB_IMAGES = {
     "trial-enas-cnn-cifar10-gpu":    "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu",
     "trial-enas-cnn-cifar10-cpu":    "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu",
     "trial-darts-cnn-cifar10":       "examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile",
+    "trial-simple-pbt":              "examples/v1beta1/trial-images/simple-pbt/Dockerfile",
 }
 
 # Dict with Katib Experiments to run during the test.
@@ -75,6 +77,7 @@ KATIB_EXPERIMENTS = {
     "multivariate-tpe":                       "examples/v1beta1/hp-tuning/multivariate-tpe.yaml",
     "cmaes":                                  "examples/v1beta1/hp-tuning/cma-es.yaml",
     "hyperband":                              "examples/v1beta1/hp-tuning/hyperband.yaml",
+    "pbt":                                    "examples/v1beta1/hp-tuning/pbt.yaml",
     "enas":                                   "examples/v1beta1/nas/enas-cpu.yaml",
     "darts":                                  "examples/v1beta1/nas/darts-cpu.yaml",
     "pytorchjob":                             "examples/v1beta1/kubeflow-training-operator/pytorchjob-mnist.yaml",

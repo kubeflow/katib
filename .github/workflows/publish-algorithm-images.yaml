@@ -41,6 +41,8 @@ jobs:
             dockerfile: cmd/suggestion/goptuna/v1beta1/Dockerfile
           - component-name: suggestion-optuna
             dockerfile: cmd/suggestion/optuna/v1beta1/Dockerfile
+          - component-name: suggestion-pbt
+            dockerfile: cmd/suggestion/pbt/v1beta1/Dockerfile
           - component-name: suggestion-enas
             dockerfile: cmd/suggestion/nas/enas/v1beta1/Dockerfile
           - component-name: suggestion-darts
