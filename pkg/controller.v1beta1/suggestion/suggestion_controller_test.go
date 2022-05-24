@@ -17,7 +17,6 @@ limitations under the License.
 package suggestion
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -101,7 +100,7 @@ func TestReconcile(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
+		g.Expect(mgr.Start(ctx)).NotTo(gomega.HaveOccurred())
 	}()
 
 	mockSuggestionClient.EXPECT().ValidateAlgorithmSettings(gomock.Any(), gomock.Any()).DoAndReturn(
@@ -148,22 +147,22 @@ func TestReconcile(t *testing.T) {
 		},
 	}
 
-	g.Expect(c.Create(context.TODO(), kubeflowNS)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, kubeflowNS)).NotTo(gomega.HaveOccurred())
 	// Test 1 - Early stopping suggestion run
 	// Create ConfigMap with suggestion and early stopping data.
-	g.Expect(c.Create(context.TODO(), configMap)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, configMap)).NotTo(gomega.HaveOccurred())
 	// Create the suggestion
-	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, instance)).NotTo(gomega.HaveOccurred())
 	// Create experiment
-	g.Expect(c.Create(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, experiment)).NotTo(gomega.HaveOccurred())
 	// Create trial
-	g.Expect(c.Create(context.TODO(), trial)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 	suggestionDeploy := &appsv1.Deployment{}
 
 	// Expect that deployment with appropriate name and image is created
 	g.Eventually(func() string {
-		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, suggestionDeploy); err != nil {
+		if err = c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: resourceName}, suggestionDeploy); err != nil {
 			return ""
 		}
 		return suggestionDeploy.Spec.Template.Spec.Containers[0].Image
@@ -171,12 +170,12 @@ func TestReconcile(t *testing.T) {
 
 	// Expect that service with appropriate name is created
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{})
+		return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{})
 	}, timeout).Should(gomega.Succeed())
 
 	// Expect that PVC with appropriate name is created
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.PersistentVolumeClaim{})
+		return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.PersistentVolumeClaim{})
 	}, timeout).Should(gomega.Succeed())
 
 	rbacName := util.GetSuggestionRBACName(instance)
@@ -184,19 +183,19 @@ func TestReconcile(t *testing.T) {
 	// Expect that serviceAccount with appropriate name is created
 	suggestionServiceAccount := &corev1.ServiceAccount{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionServiceAccount)
+		return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionServiceAccount)
 	}, timeout).Should(gomega.Succeed())
 
 	// Expect that Role with appropriate name is created
 	suggestionRole := &rbacv1.Role{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionRole)
+		return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionRole)
 	}, timeout).Should(gomega.Succeed())
 
 	// Expect that RoleBinding with appropriate name is created
 	suggestionRoleBinding := &rbacv1.RoleBinding{}
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionRoleBinding)
+		return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: rbacName}, suggestionRoleBinding)
 	}, timeout).Should(gomega.Succeed())
 
 	// Manually change ready deployment status
@@ -209,12 +208,12 @@ func TestReconcile(t *testing.T) {
 		},
 	}
 
-	g.Expect(c.Status().Update(context.TODO(), suggestionDeploy)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Status().Update(ctx, suggestionDeploy)).NotTo(gomega.HaveOccurred())
 
 	// Expect that suggestion status is running
 	suggestion := &suggestionsv1beta1.Suggestion{}
 	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion); err != nil {
+		if err = c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion); err != nil {
 			return false
 		}
 		return suggestion.IsRunning()
@@ -222,11 +221,11 @@ func TestReconcile(t *testing.T) {
 
 	// Manually update suggestion status to succeeded
 	suggestion.MarkSuggestionStatusSucceeded("test-reason", "test-message")
-	g.Expect(c.Status().Update(context.TODO(), suggestion)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Status().Update(ctx, suggestion)).NotTo(gomega.HaveOccurred())
 
 	// Expect that suggestion status is succeeded, is not running and deployment is not ready
 	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion); err != nil {
+		if err = c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: suggestionName}, suggestion); err != nil {
 			return false
 		}
 		return !suggestion.IsRunning() && !suggestion.IsDeploymentReady() && suggestion.IsSucceeded()
@@ -234,16 +233,16 @@ func TestReconcile(t *testing.T) {
 
 	// Expect that deployment and service is deleted
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &appsv1.Deployment{})) &&
-			errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{}))
+		return errors.IsNotFound(c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: resourceName}, &appsv1.Deployment{})) &&
+			errors.IsNotFound(c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: resourceName}, &corev1.Service{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the suggestion
-	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(ctx, instance)).NotTo(gomega.HaveOccurred())
 
 	// Expect that suggestion is deleted
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, &suggestionsv1beta1.Suggestion{}))
+		return errors.IsNotFound(c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: suggestionName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	oldS := &suggestionsv1beta1.Suggestion{
@@ -284,11 +283,11 @@ func TestReconcile(t *testing.T) {
 	g.Expect(r.updateStatusCondition(&suggestionsv1beta1.Suggestion{}, oldS)).To(gomega.HaveOccurred())
 
 	// Delete the experiment
-	g.Expect(c.Delete(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(ctx, experiment)).NotTo(gomega.HaveOccurred())
 
 	// Expect that experiment is deleted
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: suggestionName}, &experimentsv1beta1.Experiment{}))
+		return errors.IsNotFound(c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: suggestionName}, &experimentsv1beta1.Experiment{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	// Test 5 - ValidateAlgorithmSettings returns error
@@ -304,13 +303,13 @@ func TestReconcile(t *testing.T) {
 	suggestionDeploy = &appsv1.Deployment{}
 
 	// Create the suggestion
-	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, instance)).NotTo(gomega.HaveOccurred())
 	// Create experiment
-	g.Expect(c.Create(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, experiment)).NotTo(gomega.HaveOccurred())
 
 	// Expect deployment with appropriate name is created
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, suggestionDeploy)
+		return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, suggestionDeploy)
 	}, timeout).Should(gomega.Succeed())
 
 	// Manually change ready deployment status
@@ -323,39 +322,39 @@ func TestReconcile(t *testing.T) {
 		},
 	}
 
-	g.Expect(c.Status().Update(context.TODO(), suggestionDeploy)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Status().Update(ctx, suggestionDeploy)).NotTo(gomega.HaveOccurred())
 
 	// Expect that suggestion status is failed
 	suggestion = &suggestionsv1beta1.Suggestion{}
 	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, suggestion); err != nil {
+		if err = c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, suggestion); err != nil {
 			return false
 		}
 		return suggestion.IsFailed()
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the experiment
-	g.Expect(c.Delete(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(ctx, experiment)).NotTo(gomega.HaveOccurred())
 
 	// Expect that experiment is deleted
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, &experimentsv1beta1.Experiment{}))
+		return errors.IsNotFound(c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, &experimentsv1beta1.Experiment{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the suggestion
-	g.Expect(c.Delete(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(ctx, instance)).NotTo(gomega.HaveOccurred())
 
 	// Expect that suggestion is deleted
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, &suggestionsv1beta1.Suggestion{}))
+		return errors.IsNotFound(c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: invalidAlgorithmSettingsSuggestionName}, &suggestionsv1beta1.Suggestion{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the deployment is deleted
-	g.Expect(c.Delete(context.TODO(), suggestionDeploy)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Delete(ctx, suggestionDeploy)).NotTo(gomega.HaveOccurred())
 
 	// Expect that deployment is deleted
 	g.Eventually(func() bool {
-		return errors.IsNotFound(c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, &appsv1.Deployment{}))
+		return errors.IsNotFound(c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, &appsv1.Deployment{}))
 	}, timeout).Should(gomega.BeTrue())
 
 	// Test 6 - ValidateEarlyStoppingSettings returns error
@@ -370,13 +369,13 @@ func TestReconcile(t *testing.T) {
 	invalidResourceName = strings.Join([]string{invalidEarlyStoppingSettingsSuggestionName, "random"}, "-")
 
 	// Create the suggestion
-	g.Expect(c.Create(context.TODO(), instance)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, instance)).NotTo(gomega.HaveOccurred())
 	// Create experiment
-	g.Expect(c.Create(context.TODO(), experiment)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, experiment)).NotTo(gomega.HaveOccurred())
 
 	// Expect deployment with appropriate name is created
 	g.Eventually(func() error {
-		return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, suggestionDeploy)
+		return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: invalidResourceName}, suggestionDeploy)
 	}, timeout).Should(gomega.Succeed())
 
 	// Manually change ready deployment status
@@ -389,12 +388,12 @@ func TestReconcile(t *testing.T) {
 		},
 	}
 
-	g.Expect(c.Status().Update(context.TODO(), suggestionDeploy)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Status().Update(ctx, suggestionDeploy)).NotTo(gomega.HaveOccurred())
 
 	// Expect that suggestion status is failed
 	suggestion = &suggestionsv1beta1.Suggestion{}
 	g.Eventually(func() bool {
-		if err = c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: invalidEarlyStoppingSettingsSuggestionName}, suggestion); err != nil {
+		if err = c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: invalidEarlyStoppingSettingsSuggestionName}, suggestion); err != nil {
 			return false
 		}
 		return suggestion.IsFailed()

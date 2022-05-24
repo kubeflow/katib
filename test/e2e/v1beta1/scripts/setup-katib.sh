@@ -76,6 +76,13 @@ if [ $? -ne 1 ]; then
   exit 1
 fi
 
+# TODO (tenzen-y): Once the changes on https://github.com/kubeflow/testing/pull/974 are reflected in the `public.ecr.aws` registry, we must remove this process.
+# To avoid the `../../../../pkg/mod/k8s.io/client-go@v0.22.2/plugin/pkg/client/auth/exec/metrics.go:21:2: package io/fs is not in GOROOT (/usr/local/go/src/io/fs)` error,
+# we must use Go v1.16 or later, but as described in https://github.com/kubeflow/training-operator/issues/1581,
+# we do not have permission to update `public.ecr.aws/j1r0q0g6/kubeflow-testing:latest` so we need to update it in this.
+rm -rf /usr/local/go
+wget -O /tmp/go.tar.gz https://dl.google.com/go/go1.17.10.linux-amd64.tar.gz && tar -C /usr/local -xzf /tmp/go.tar.gz
+
 # Build the binary for e2e test
 echo "Building run-e2e-experiment for e2e test cases"
 go build -o run-e2e-experiment test/e2e/v1beta1/run-e2e-experiment.go
