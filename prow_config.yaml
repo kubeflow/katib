@@ -2,7 +2,7 @@
 # # See https://github.com/kubeflow/testing/blob/master/py/kubeflow/testing/run_e2e_workflow.py.
 # python_paths:
 #   - kubeflow/katib/test/e2e/v1beta1
-# workflows:
+workflows: []
 #   - name: e2e-v1beta1
 #     py_func: argo_workflow.create_workflow
 #     job_types:
