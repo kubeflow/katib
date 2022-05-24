@@ -57,6 +57,8 @@ import (
 var (
 	cfg     *rest.Config
 	timeout = time.Second * 40
+	ctx     context.Context
+	cancel  context.CancelFunc
 
 	suggestionName         = "test-suggestion"
 	suggestionAlgorithm    = "random"
@@ -97,6 +99,11 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	// To avoid the `timeout waiting for process kube-apiserver to stop` error,
+	// we must use the `context.WithCancel`.
+	// Ref: https://github.com/kubernetes-sigs/controller-runtime/issues/1571#issuecomment-945535598
+	ctx, cancel = context.WithCancel(context.TODO())
+
 	// Start test k8s server
 	t := &envtest.Environment{
 		CRDDirectoryPaths: []string{
@@ -113,6 +120,7 @@ func TestMain(m *testing.M) {
 	}
 
 	code := m.Run()
+	cancel()
 	if err = t.Stop(); err != nil {
 		stdlog.Fatal(err)
 	}
@@ -130,7 +138,7 @@ func TestDesiredDeployment(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
+		g.Expect(mgr.Start(ctx)).NotTo(gomega.HaveOccurred())
 	}()
 
 	c := mgr.GetClient()
@@ -141,7 +149,7 @@ func TestDesiredDeployment(t *testing.T) {
 			Name: namespace,
 		},
 	}
-	g.Expect(c.Create(context.TODO(), kubeflowNS)).NotTo(gomega.HaveOccurred())
+	g.Expect(c.Create(ctx, kubeflowNS)).NotTo(gomega.HaveOccurred())
 
 	tcs := []struct {
 		suggestion         *suggestionsv1beta1.Suggestion
@@ -237,11 +245,11 @@ func TestDesiredDeployment(t *testing.T) {
 
 	for idx, tc := range tcs {
 		// Create configMap with Katib config
-		g.Expect(c.Create(context.TODO(), tc.configMap)).NotTo(gomega.HaveOccurred())
+		g.Expect(c.Create(ctx, tc.configMap)).NotTo(gomega.HaveOccurred())
 
 		// Wait that Config Map is created
 		g.Eventually(func() error {
-			return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{})
+			return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{})
 		}, timeout).ShouldNot(gomega.HaveOccurred())
 
 		// Get deployment
@@ -269,12 +277,12 @@ func TestDesiredDeployment(t *testing.T) {
 		}
 
 		// Delete configMap with Katib config
-		g.Expect(c.Delete(context.TODO(), tc.configMap)).NotTo(gomega.HaveOccurred())
+		g.Expect(c.Delete(ctx, tc.configMap)).NotTo(gomega.HaveOccurred())
 
 		// Wait that Config Map is deleted
 		g.Eventually(func() bool {
 			return errors.IsNotFound(
-				c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
+				c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
 		}, timeout).Should(gomega.BeTrue())
 
 	}
@@ -377,7 +385,7 @@ func TestDesiredVolume(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
+		g.Expect(mgr.Start(ctx)).NotTo(gomega.HaveOccurred())
 	}()
 
 	c := mgr.GetClient()
@@ -443,11 +451,11 @@ func TestDesiredVolume(t *testing.T) {
 
 		if tc.configMap != nil {
 			// Create ConfigMap with Katib config
-			g.Expect(c.Create(context.TODO(), tc.configMap)).NotTo(gomega.HaveOccurred())
+			g.Expect(c.Create(ctx, tc.configMap)).NotTo(gomega.HaveOccurred())
 
 			// Expect that ConfigMap is created
 			g.Eventually(func() error {
-				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{})
+				return c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{})
 			}, timeout).ShouldNot(gomega.HaveOccurred())
 		}
 
@@ -488,11 +496,11 @@ func TestDesiredVolume(t *testing.T) {
 
 		if tc.configMap != nil {
 			// Delete ConfigMap with Katib config
-			g.Expect(c.Delete(context.TODO(), tc.configMap)).NotTo(gomega.HaveOccurred())
+			g.Expect(c.Delete(ctx, tc.configMap)).NotTo(gomega.HaveOccurred())
 			// Expect that ConfigMap is deleted
 			g.Eventually(func() bool {
 				return errors.IsNotFound(
-					c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
+					c.Get(ctx, types.NamespacedName{Namespace: namespace, Name: configMap}, &corev1.ConfigMap{}))
 			}, timeout).Should(gomega.BeTrue())
 		}
 	}
