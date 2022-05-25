@@ -108,6 +108,16 @@ func TestValidateExperiment(t *testing.T) {
 			Err:             true,
 			testDescription: "Objective metric name is empty",
 		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Spec.Objective.ObjectiveMetricName = "objective"
+				i.Spec.Objective.AdditionalMetricNames = []string{"objective", "objective-1"}
+				return i
+			}(),
+			Err:             true,
+			testDescription: "additionalMetricNames should not contain objective metric name",
+		},
 		// Algorithm
 		{
 			Instance: func() *experimentsv1beta1.Experiment {

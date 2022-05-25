@@ -157,6 +157,9 @@ func (g *DefaultValidator) validateObjective(obj *commonapiv1beta1.ObjectiveSpec
 	if obj.ObjectiveMetricName == "" {
 		return fmt.Errorf("no spec.objective.objectiveMetricName specified")
 	}
+	if contains(obj.AdditionalMetricNames, obj.ObjectiveMetricName) {
+		return fmt.Errorf("spec.objective.additionalMetricNames should not contain spec.objective.objectiveMetricName")
+	}
 	return nil
 }
 
