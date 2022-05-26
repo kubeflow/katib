@@ -33,6 +33,9 @@ spec:
         max: "64"
   trialTemplate:
     primaryContainerName: tensorflow
+    # In this example we can collect metrics only from the Worker pods.
+    primaryPodLabels:
+      training.kubeflow.org/replica-type: worker
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
