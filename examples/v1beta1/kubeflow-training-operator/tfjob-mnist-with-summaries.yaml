@@ -29,8 +29,8 @@ spec:
     - name: batch_size
       parameterType: int
       feasibleSpace:
-        min: "10"
-        max: "20"
+        min: "32"
+        max: "64"
   trialTemplate:
     primaryContainerName: tensorflow
     trialParameters:
