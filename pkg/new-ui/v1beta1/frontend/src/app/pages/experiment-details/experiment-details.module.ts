@@ -15,6 +15,7 @@ import { TrialsTableModule } from './trials-table/trials-table.module';
 import { ExperimentOverviewModule } from './overview/experiment-overview.module';
 import { ExperimentDetailsTabModule } from './details/experiment-details-tab.module';
 import { ExperimentYamlModule } from './yaml/experiment-yaml.module';
+import { TrialsGraphEchartsModule } from './trials-graph-echarts/trials-graph-echarts.module';
 
 @NgModule({
   declarations: [ExperimentDetailsComponent],
@@ -31,6 +32,7 @@ import { ExperimentYamlModule } from './yaml/experiment-yaml.module';
     MatProgressSpinnerModule,
     ExperimentYamlModule,
     TitleActionsToolbarModule,
+    TrialsGraphEchartsModule
   ],
   exports: [ExperimentDetailsComponent],
 })

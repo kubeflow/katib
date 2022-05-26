@@ -110,7 +110,7 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
         const data = transformStringResponses(response);
         this.columns = data.types;
         this.details = this.parseTrialsDetails(data.details);
-        this.showGraph = true;
+        this.showGraph = this.showGraphF(response);
       });
     this.backendService
       .getExperiment(this.name, this.namespace)
@@ -184,7 +184,7 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
             const data = transformStringResponses(trials);
             this.columns = data.types;
             this.details = this.parseTrialsDetails(data.details);
-            this.showGraph = trials.split(/\r\n|\r|\n/).length > 1;
+            this.showGraph = this.showGraphF(trials);
           });
       }),
     );
@@ -251,6 +251,12 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
 
     if (createdCondition && createdCondition.status === 'True') {
       return StatusEnum.CREATED;
+    }
+  }
+
+  private showGraphF(response: string): boolean {
+    if (!response.includes(',,') && response.includes('\n')) {
+      return true;
     }
   }
 }
