@@ -197,7 +197,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 
 	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) {
 		suggestionContainer.ReadinessProbe = &corev1.Probe{
-			Handler: corev1.Handler{
+			ProbeHandler: corev1.ProbeHandler{
 				Exec: &corev1.ExecAction{
 					Command: []string{
 						defaultGRPCHealthCheckProbe,
@@ -210,7 +210,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 			PeriodSeconds:       defaultPeriodForReady,
 		}
 		suggestionContainer.LivenessProbe = &corev1.Probe{
-			Handler: corev1.Handler{
+			ProbeHandler: corev1.ProbeHandler{
 				Exec: &corev1.ExecAction{
 					Command: []string{
 						defaultGRPCHealthCheckProbe,

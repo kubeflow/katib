@@ -5,7 +5,7 @@ HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= amd64
-ENVTEST_K8S_VERSION ?= 1.22
+ENVTEST_K8S_VERSION ?= 1.23
 
 # for pytest
 PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
@@ -19,10 +19,10 @@ test: envtest
 
 envtest:
 ifndef HAS_SETUP_ENVTEST
-	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@c48baad70c539a2efb8dfe8850434ecc721c1ee1 # v0.10.0
-	echo "setup-envtest has been installed"
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@bf71fc56485f6bf03e95ef6b0233ff36c695d4c9 # v0.11.2
+	@echo "setup-envtest has been installed"
 endif
-	echo "setup-envtest has already installed"
+	@echo "setup-envtest has already installed"
 
 
 check: generate fmt vet lint
@@ -33,7 +33,7 @@ fmt:
 lint:
 ifndef HAS_LINT
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
-	echo "golangci-lint has been installed"
+	@echo "golangci-lint has been installed"
 endif
 	hack/verify-golangci-lint.sh
 
@@ -43,7 +43,7 @@ vet:
 shellcheck:
 ifndef HAS_SHELLCHECK
 	bash hack/install-shellcheck.sh
-	echo "shellcheck has been installed"
+	@echo "shellcheck has been installed"
 endif
 	hack/verify-shellcheck.sh
 
