@@ -2,7 +2,7 @@ FROM python:3.9
 
 ENV TARGET_DIR /opt/katib
 ENV SUGGESTION_DIR cmd/suggestion/nas/enas/v1beta1
-ENV GRPC_HEALTH_PROBE_VERSION v0.4.6
+ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
 # tensorflow community build for aarch64
 # https://github.com/tensorflow/build#tensorflow-builds
 ENV PIP_EXTRA_INDEX_URL https://snapshots.linaro.org/ldcg/python-cache/

@@ -2,7 +2,7 @@ FROM python:3.9
 
 ENV TARGET_DIR /opt/katib
 ENV SUGGESTION_DIR cmd/suggestion/hyperopt/v1beta1
-ENV GRPC_HEALTH_PROBE_VERSION v0.4.6
+ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
 
 RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
     apt-get -y update && \
