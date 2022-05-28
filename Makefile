@@ -24,7 +24,6 @@ ifndef HAS_SETUP_ENVTEST
 endif
 	echo "setup-envtest has already installed"
 
-
 check: generate fmt vet lint
 
 fmt:

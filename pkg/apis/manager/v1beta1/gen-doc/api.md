@@ -771,7 +771,7 @@ Types of value for HyperParameter.
 <a name="api-v1-beta1-TrialStatus-TrialConditionType"></a>
 
 ### TrialStatus.TrialConditionType
-Trial can be in one of 6 conditions.
+Trial can be in one of 8 conditions.
 TODO (andreyvelich): Remove unused conditions.
 
 | Name | Number | Description |
@@ -781,8 +781,9 @@ TODO (andreyvelich): Remove unused conditions.
 | SUCCEEDED | 2 |  |
 | KILLED | 3 |  |
 | FAILED | 4 |  |
-| EARLYSTOPPED | 5 |  |
-| UNKNOWN | 6 |  |
+| METRICSUNAVAILABLE | 5 |  |
+| EARLYSTOPPED | 6 |  |
+| UNKNOWN | 7 |  |
 
 
  

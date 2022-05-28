@@ -690,6 +690,14 @@
           "description": "Represents last time when the Experiment was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
           "$ref": "#/definitions/v1.Time"
         },
+        "metricsUnavailableTrialList": {
+          "description": "List of trial names which have been metrics unavailable",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": ""
+          }
+        },
         "pendingTrialList": {
           "description": "List of trial names which are pending.",
           "type": "array",
@@ -717,6 +725,11 @@
             "type": "string",
             "default": ""
           }
+        },
+        "trialMetricsUnavailable": {
+          "description": "How many trials are currently metrics unavailable.",
+          "type": "integer",
+          "format": "int32"
         },
         "trials": {
           "description": "Trials is the total number of trials owned by the experiment.",

@@ -848,8 +848,8 @@ func newFakeTrials() []trialsv1beta1.Trial {
 			Status: trialsv1beta1.TrialStatus{
 				Conditions: []trialsv1beta1.TrialCondition{
 					{
-						Type:    trialsv1beta1.TrialSucceeded,
-						Status:  corev1.ConditionFalse,
+						Type:    trialsv1beta1.TrialMetricsUnavailable,
+						Status:  corev1.ConditionTrue,
 						Message: "Metrics are not available",
 					},
 				},

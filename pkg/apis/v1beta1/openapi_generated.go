@@ -975,6 +975,21 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 							},
 						},
 					},
+					"metricsUnavailableTrialList": {
+						SchemaProps: spec.SchemaProps{
+							Description: "List of trial names which have been metrics unavailable",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 					"trials": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Trials is the total number of trials owned by the experiment.",
@@ -1020,6 +1035,13 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 					"trialsEarlyStopped": {
 						SchemaProps: spec.SchemaProps{
 							Description: "How many trials are currently early stopped.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"trialMetricsUnavailable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "How many trials are currently metrics unavailable.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
