@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 ENV TARGET_DIR /opt/katib
 ENV METRICS_COLLECTOR_DIR cmd/metricscollector/v1beta1/tfevent-metricscollector

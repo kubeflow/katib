@@ -17,12 +17,12 @@
 # This shell script is used to setup Katib deployment.
 
 set -o errexit
-set -o nounset
 set -o pipefail
 
 cd "$(dirname "$0")"
+TRIAL_IMAGES=$1
 
 kubectl wait --for condition=ready --timeout=5m node minikube
 kubectl version
 echo "Build and Load container images"
-./build-load.sh
+./build-load.sh "$TRIAL_IMAGES"

@@ -10,6 +10,9 @@ inputs:
   training-operator:
     required: false
     type: boolean
+  trial-images:
+    required: true
+    type: string
 
 runs:
   using: composite
@@ -32,7 +35,7 @@ runs:
 
     - name: Set Up Minikube Cluster
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.trial-images }}
 
     - name: Set Up Katib
       shell: bash

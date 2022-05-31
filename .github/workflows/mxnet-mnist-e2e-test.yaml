@@ -1,4 +1,4 @@
-name: E2E Test for Kubeflow Training-Operator
+name: E2E Test With mxnet-mnist Image
 on:
   - push
   - pull_request
@@ -14,18 +14,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Run e2e test for ${{ matrix.experiments }}
+      - name: Run e2e test using for ${{ matrix.experiments }}
         uses: ./.github/workflows/template-e2e-test
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
-          experiments-path: ${{ matrix.experiments }}
-          training-operator: true
+          experiments: ${{ matrix.experiments }}
+          # Comma Delimited
+          trial-images: mxnet-mnist
 
     strategy:
       matrix:
-        kubernetes-version: ["1.21.13", "1.22.10"]
-        # TODO (tenzen-y): Add others JobType (ex. MXJob)
+        kubernetes-version: ["1.21.13", "1.22.10", "1.23.7"]
         # Comma Delimited
         experiments:
-          - tfjob-mnist-with-summaries
-          - pytorchjob-mnist # Take a long time.
+          - random,grid,bayesian-optimization,tpe,multivariate-tpe
+          - cma-es,hyperband,never-resume,from-volume-resume,median-stop

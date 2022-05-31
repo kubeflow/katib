@@ -25,6 +25,8 @@ REGISTRY=docker.io/kubeflowkatib
 TAG="e2e-test"
 VERSION="v1beta1"
 CMD_PREFIX="cmd"
+# shellcheck disable=SC2206
+TRIAL_IMAGES=(${1//,/ })
 
 _build_containers() {
   CONTAINER_NAME=$1
@@ -41,7 +43,7 @@ _load_minikube_cluster() {
 
 cleanup_build_cache() {
   echo -e "\nCleanup Build Cache...\n"
-  docker builder prune
+  echo y | docker builder prune
 }
 
 run() {
@@ -82,11 +84,9 @@ cleanup_build_cache
 
 # Training container images
 echo -e "\nBuilding training container images..."
-run "mxnet-mnist" "examples/$VERSION/trial-images/mxnet-mnist/Dockerfile"
-run "tf-mnist-with-summaries" "examples/$VERSION/trial-images/tf-mnist-with-summaries/Dockerfile"
-run "pytorch-mnist" "examples/$VERSION/trial-images/pytorch-mnist/Dockerfile"
-run "enas-cnn-cifar10-cpu" "examples/$VERSION/trial-images/enas-cnn-cifar10/Dockerfile.cpu"
-run "darts-cnn-cifar10" "examples/$VERSION/trial-images/darts-cnn-cifar10/Dockerfile"
+for name in "${TRIAL_IMAGES[@]}"; do
+  run "$name" "examples/$VERSION/trial-images/$name/Dockerfile"
+done
 cleanup_build_cache
 
 echo -e "\nAll Katib images with ${TAG} tag have been built successfully!\n"

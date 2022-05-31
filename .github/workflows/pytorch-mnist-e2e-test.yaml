@@ -1,0 +1,34 @@
+name: E2E Test With pytorch-mnist Image
+on:
+  - push
+  - pull_request
+
+env:
+  github_token: "${{ secrets.GITHUB_TOKEN }}"
+
+jobs:
+  e2e:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run e2e test for ${{ matrix.experiments }}
+        uses: ./.github/workflows/template-e2e-test
+        with:
+          kubernetes-version: ${{ matrix.kubernetes-version }}
+          experiments-path: ${{ matrix.experiments }}
+          training-operator: true
+          # Comma Delimited
+          trial-images: pytorch-mnist
+
+    strategy:
+      matrix:
+        kubernetes-version: ["1.21.13", "1.22.10", "1.23.7"]
+        # Comma Delimited
+        experiments:
+          - file-metrics-collector
+          - pytorchjob-mnist # Take a long time.
+          - file-metrics-collector-with-json-format # Take a long time.
+          - median-stop-with-json-format # Take a long time.
