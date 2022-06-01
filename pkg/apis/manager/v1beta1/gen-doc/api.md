@@ -20,9 +20,8 @@
     - [GetObservationLogReply](#api-v1-beta1-GetObservationLogReply)
     - [GetObservationLogRequest](#api-v1-beta1-GetObservationLogRequest)
     - [GetSuggestionsReply](#api-v1-beta1-GetSuggestionsReply)
-    - [GetSuggestionsReply.LabelAssignments](#api-v1-beta1-GetSuggestionsReply-LabelAssignments)
-    - [GetSuggestionsReply.LabelAssignments.LabelsEntry](#api-v1-beta1-GetSuggestionsReply-LabelAssignments-LabelsEntry)
     - [GetSuggestionsReply.ParameterAssignments](#api-v1-beta1-GetSuggestionsReply-ParameterAssignments)
+    - [GetSuggestionsReply.ParameterAssignments.LabelsEntry](#api-v1-beta1-GetSuggestionsReply-ParameterAssignments-LabelsEntry)
     - [GetSuggestionsRequest](#api-v1-beta1-GetSuggestionsRequest)
     - [GraphConfig](#api-v1-beta1-GraphConfig)
     - [Metric](#api-v1-beta1-Metric)
@@ -327,38 +326,6 @@ Discrete and Categorical type use List.
 | parameter_assignments | [GetSuggestionsReply.ParameterAssignments](#api-v1-beta1-GetSuggestionsReply-ParameterAssignments) | repeated |  |
 | algorithm | [AlgorithmSpec](#api-v1-beta1-AlgorithmSpec) |  |  |
 | early_stopping_rules | [EarlyStoppingRule](#api-v1-beta1-EarlyStoppingRule) | repeated |  |
-| label_assignments | [GetSuggestionsReply.LabelAssignments](#api-v1-beta1-GetSuggestionsReply-LabelAssignments) | repeated | Optional field to add labels to the generated Trials |
-
-
-
-
-
-
-<a name="api-v1-beta1-GetSuggestionsReply-LabelAssignments"></a>
-
-### GetSuggestionsReply.LabelAssignments
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| labels | [GetSuggestionsReply.LabelAssignments.LabelsEntry](#api-v1-beta1-GetSuggestionsReply-LabelAssignments-LabelsEntry) | repeated |  |
-
-
-
-
-
-
-<a name="api-v1-beta1-GetSuggestionsReply-LabelAssignments-LabelsEntry"></a>
-
-### GetSuggestionsReply.LabelAssignments.LabelsEntry
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| key | [string](#string) |  |  |
-| value | [string](#string) |  |  |
 
 
 
@@ -375,6 +342,23 @@ Discrete and Categorical type use List.
 | ----- | ---- | ----- | ----------- |
 | assignments | [ParameterAssignment](#api-v1-beta1-ParameterAssignment) | repeated |  |
 | trial_name | [string](#string) |  | Optional field to override the trial name |
+| labels | [GetSuggestionsReply.ParameterAssignments.LabelsEntry](#api-v1-beta1-GetSuggestionsReply-ParameterAssignments-LabelsEntry) | repeated | Optional field to add labels to the generated Trials |
+
+
+
+
+
+
+<a name="api-v1-beta1-GetSuggestionsReply-ParameterAssignments-LabelsEntry"></a>
+
+### GetSuggestionsReply.ParameterAssignments.LabelsEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [string](#string) |  |  |
 
 
 

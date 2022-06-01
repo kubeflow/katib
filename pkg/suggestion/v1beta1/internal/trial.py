@@ -54,7 +54,8 @@ class Trial(object):
             assignments.append(Assignment.convert(assignment))
         metric_name = trial.spec.objective.objective_metric_name
         target_metric, additional_metrics = Metric.convert(
-            trial.status.observation, metric_name)
+            trial.status.observation, metric_name
+        )
         labels = trial.spec.labels
         # If the target_metric is none, ignore the trial.
         if target_metric is not None:
@@ -93,7 +94,7 @@ class Assignment(object):
         return Assignment(assignment.name, assignment.value)
 
     @staticmethod
-    def generate(list_of_assignments, trial_names=None):
+    def generate(list_of_assignments, trial_names=None, labels=None):
         if trial_names is not None and len(list_of_assignments) != len(trial_names):
             raise RuntimeError("Assignment and trial list length mismatch")
         res = []
@@ -105,33 +106,20 @@ class Assignment(object):
                         name=assignment.name, value=str(assignment.value)
                     )
                 )
+            kwargs = {"assignments": buf}
             if trial_names is not None:
-                rt = api.GetSuggestionsReply.ParameterAssignments(assignments=buf, trial_name=trial_names[n])
-            else:
-                rt = api.GetSuggestionsReply.ParameterAssignments(assignments=buf)
+                kwargs["trial_name"] = trial_names[n]
+            if labels is not None:
+                kwargs["labels"] = {
+                    k: str(v) for k, v in labels[n].items()
+                }  # force string encoding
+
+            rt = api.GetSuggestionsReply.ParameterAssignments(**kwargs)
             res.append(rt)
         return res
 
     def __str__(self):
         return "Assignment(name={}, value={})".format(self.name, self.value)
-
-
-class Labels(object):
-    def __init__(self, labels):
-        self.labels = {k:str(v) for k,v in labels.items()}
-
-    @staticmethod
-    def generate(list_of_labels):
-        ret = []
-        for labels in list_of_labels:
-            str_labels = {k:str(v) for k,v in labels.items()}
-            ret.append(api.GetSuggestionsReply.LabelAssignments(labels=str_labels))
-        return ret
-
-    def __str__(self):
-        strfmt = "Labels(name={}, value={})"
-        strlist = [strfmt.format(name,value) for name,value in labels.items()]
-        return "; ".join(strlist)
 
 
 class Metric(object):

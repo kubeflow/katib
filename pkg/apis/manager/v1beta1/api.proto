@@ -307,17 +307,13 @@ message GetSuggestionsReply {
         repeated ParameterAssignment assignments = 1;
         // Optional field to override the trial name
         string trial_name = 2;
-    }
-    message LabelAssignments {
-        map<string, string> labels = 1;
+        // Optional field to add labels to the generated Trials
+        map<string, string> labels = 3;
     }
 
     repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
     repeated EarlyStoppingRule early_stopping_rules = 3;
-
-    // Optional field to add labels to the generated Trials
-    repeated LabelAssignments label_assignments = 5;
 }
 
 message ValidateAlgorithmSettingsRequest {

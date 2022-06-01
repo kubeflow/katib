@@ -2,9 +2,9 @@ apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   name: random-experiment
-  namespace: ''
+  namespace: 'kubeflow'
 spec:
-  maxTrialCount: null
+  maxTrialCount: 12
   parallelTrialCount: 12
   maxFailedTrialCount: 3
   resumePolicy: FromVolume
@@ -12,7 +12,6 @@ spec:
     type: maximize
     goal: 0.99
     objectiveMetricName: Validation-accuracy
-    additionalMetricNames: []
   algorithm:
     algorithmName: pbt
     algorithmSettings:
@@ -29,9 +28,6 @@ spec:
         min: '0.0001'
         max: '0.02'
         step: '0.0001'
-  metricsCollectorSpec:
-    collector:
-      kind: StdOut
   trialTemplate:
     primaryContainerName: training-container
     trialParameters:

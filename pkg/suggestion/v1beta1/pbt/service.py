@@ -26,7 +26,7 @@ from pkg.suggestion.v1beta1.internal.search_space import (
     HyperParameterSearchSpace,
 )
 import pkg.suggestion.v1beta1.internal.constant as constant
-from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment, Labels
+from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 
 logger = logging.getLogger(__name__)
@@ -116,15 +116,13 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
         jobs = [self.job_queue.get() for _ in range(request_count)]
         parameter_assignments = Assignment.generate(
-            [j[0] for j in jobs], trial_names=[j[2] for j in jobs]
+            [j[0] for j in jobs],
+            trial_names=[j[2] for j in jobs],
+            labels=[j[1] for j in jobs],
         )
-        label_assignments = Labels.generate([j[1] for j in jobs])
         logger.info("Transmitting suggestion...")
 
-        return api_pb2.GetSuggestionsReply(
-            parameter_assignments=parameter_assignments,
-            label_assignments=label_assignments,
-        )
+        return api_pb2.GetSuggestionsReply(parameter_assignments=parameter_assignments)
 
     def _set_validate_context_error(self, context, error_message):
         context.set_code(grpc.StatusCode.INVALID_ARGUMENT)

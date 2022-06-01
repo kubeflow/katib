@@ -243,15 +243,11 @@
                 </li>
               
                 <li>
-                  <a href="#api.v1.beta1.GetSuggestionsReply.LabelAssignments"><span class="badge">M</span>GetSuggestionsReply.LabelAssignments</a>
-                </li>
-              
-                <li>
-                  <a href="#api.v1.beta1.GetSuggestionsReply.LabelAssignments.LabelsEntry"><span class="badge">M</span>GetSuggestionsReply.LabelAssignments.LabelsEntry</a>
-                </li>
-              
-                <li>
                   <a href="#api.v1.beta1.GetSuggestionsReply.ParameterAssignments"><span class="badge">M</span>GetSuggestionsReply.ParameterAssignments</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.GetSuggestionsReply.ParameterAssignments.LabelsEntry"><span class="badge">M</span>GetSuggestionsReply.ParameterAssignments.LabelsEntry</a>
                 </li>
               
                 <li>
@@ -933,68 +929,6 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
                   <td><p> </p></td>
                 </tr>
               
-                <tr>
-                  <td>label_assignments</td>
-                  <td><a href="#api.v1.beta1.GetSuggestionsReply.LabelAssignments">GetSuggestionsReply.LabelAssignments</a></td>
-                  <td>repeated</td>
-                  <td><p>Optional field to add labels to the generated Trials </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id="api.v1.beta1.GetSuggestionsReply.LabelAssignments">GetSuggestionsReply.LabelAssignments</h3>
-        <p></p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>labels</td>
-                  <td><a href="#api.v1.beta1.GetSuggestionsReply.LabelAssignments.LabelsEntry">GetSuggestionsReply.LabelAssignments.LabelsEntry</a></td>
-                  <td>repeated</td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id="api.v1.beta1.GetSuggestionsReply.LabelAssignments.LabelsEntry">GetSuggestionsReply.LabelAssignments.LabelsEntry</h3>
-        <p></p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>key</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-                <tr>
-                  <td>value</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
             </tbody>
           </table>
 
@@ -1024,6 +958,44 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>Optional field to override the trial name </p></td>
+                </tr>
+              
+                <tr>
+                  <td>labels</td>
+                  <td><a href="#api.v1.beta1.GetSuggestionsReply.ParameterAssignments.LabelsEntry">GetSuggestionsReply.ParameterAssignments.LabelsEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>Optional field to add labels to the generated Trials </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetSuggestionsReply.ParameterAssignments.LabelsEntry">GetSuggestionsReply.ParameterAssignments.LabelsEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
                 </tr>
               
             </tbody>

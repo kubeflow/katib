@@ -128,11 +128,6 @@ func (g *General) SyncAssignments(
 		logger.Error(err, "The response contains unexpected trials")
 		return err
 	}
-	if responseSuggestion.LabelAssignments != nil && len(responseSuggestion.LabelAssignments) != currentRequestNum {
-		err := fmt.Errorf("The response contains unexpected labels")
-		logger.Error(err, "The response contains unexpected labels")
-		return err
-	}
 
 	earlyStoppingRules := []commonapiv1beta1.EarlyStoppingRule{}
 	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions.
@@ -176,7 +171,7 @@ func (g *General) SyncAssignments(
 	}
 
 	trialAssignments := []suggestionsv1beta1.TrialAssignment{}
-	for n, t := range responseSuggestion.ParameterAssignments {
+	for _, t := range responseSuggestion.ParameterAssignments {
 		var trialName string
 		if t.TrialName != "" {
 			trialName = t.TrialName
@@ -189,8 +184,8 @@ func (g *General) SyncAssignments(
 			ParameterAssignments: composeParameterAssignments(t.Assignments),
 			EarlyStoppingRules:   earlyStoppingRules,
 		}
-		if responseSuggestion.LabelAssignments != nil {
-			assignment.Labels = responseSuggestion.LabelAssignments[n].Labels
+		if t.Labels != nil {
+			assignment.Labels = t.Labels
 		}
 		trialAssignments = append(trialAssignments, assignment)
 	}
