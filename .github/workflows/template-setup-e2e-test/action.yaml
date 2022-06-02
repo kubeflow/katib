@@ -15,7 +15,7 @@ runs:
     - name: Set Up KinD Cluster
       uses: helm/kind-action@v1.2.0
       with:
-        kubectl_version: ${{ inputs.kubernetes-version }}
+        version: v0.13.0
         node_image: kindest/node:${{ inputs.kubernetes-version }}
         cluster_name: ${{ inputs.cluster_name }}
         wait: 120s

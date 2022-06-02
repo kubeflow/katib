@@ -28,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         # Detail: https://hub.docker.com/r/kindest/node
-        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6", "v1.24.0"]
+        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
         # Comma Delimited
         # We must run experiments individually as they take a long time.
         experiments:

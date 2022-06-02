@@ -36,7 +36,7 @@ cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
 
 if "$DEPLOY_TRAINING_OPERATOR"; then
   echo "Deploying Training Operator $TRAINING_OPERATOR_VERSION"
-  kubectl apply -k "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION"
+  kustomize build "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION" | kubectl apply -f -
 fi
 
 if "$DEPLOY_KATIB_UI"; then
