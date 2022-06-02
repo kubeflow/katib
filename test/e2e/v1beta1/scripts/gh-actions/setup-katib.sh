@@ -30,6 +30,11 @@ echo "Start to install Katib"
 # Update Katib images with `e2e-test`.
 cd ../../../../../ && make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib/" TAG="$E2E_TEST_IMAGE_TAG" && cd -
 
+if ! "$DEPLOY_KATIB_UI"; then
+  index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml)"
+  index="$index" yq eval -i 'del(.resources.[env(index)])' ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
+fi
+
 echo -e "\n The Katib will be deployed with the following configs"
 cat ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
 cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
@@ -37,11 +42,6 @@ cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
 if "$DEPLOY_TRAINING_OPERATOR"; then
   echo "Deploying Training Operator $TRAINING_OPERATOR_VERSION"
   kustomize build "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION" | kubectl apply -f -
-fi
-
-if "$DEPLOY_KATIB_UI"; then
-  index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' manifests/v1beta1/installs/katib-standalone/kustomization.yaml)"
-  index="$index" yq eval -i '.resources | del(.[env(index)])' manifests/v1beta1/installs/katib-standalone/kustomization.yaml
 fi
 
 echo "Deploying Katib"

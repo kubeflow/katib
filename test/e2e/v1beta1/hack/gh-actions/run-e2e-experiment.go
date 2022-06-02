@@ -66,6 +66,11 @@ func main() {
 	var maxTrials int32 = 2
 	var parallelTrials int32 = 1
 	var maxFailedTrial int32 = 0
+	// For random we test 2 parallel execution.
+	if exp.Name == "random" {
+		maxTrials = 3
+		parallelTrials = 2
+	}
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
 		// thus we should not change it.
