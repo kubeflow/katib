@@ -15,32 +15,26 @@
 # limitations under the License.
 
 # This shell script is used to setup Katib deployment.
-
 set -o errexit
-set -o nounset
 set -o pipefail
-
-E2E_TEST_IMAGE_TAG="e2e-test"
-TRAINING_OPERATOR_VERSION="v1.4.0"
-DEPLOY_TRAINING_OPERATOR=$1
+set -o nounset
 cd "$(dirname "$0")"
 
+DEPLOY_TRAINING_OPERATOR=${1:-false}
+E2E_TEST_IMAGE_TAG="e2e-test"
+TRAINING_OPERATOR_VERSION="v1.4.0"
+
 echo "Start to install Katib"
-kubectl cluster-info
-kubectl get nodes
 
 # Update Katib images with `e2e-test`.
 cd ../../../../../ && make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib/" TAG="$E2E_TEST_IMAGE_TAG" && cd -
 
 echo -e "\n The Katib will be deployed with the following configs"
-cat "manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
-cat "manifests/v1beta1/components/controller/katib-config.yaml"
-
-echo "Creating Kubeflow namespace"
-kubectl create namespace kubeflow
+cat ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
+cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
 
 if "$DEPLOY_TRAINING_OPERATOR"; then
-  echo "Deploying Training Operator v1.4.0"
+  echo "Deploying Training Operator $TRAINING_OPERATOR_VERSION"
   kubectl apply -k "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION"
 fi
 
@@ -49,8 +43,10 @@ cd ../../../../../ && make deploy && cd -
 
 # Wait until all Katib pods is running.
 TIMEOUT=120s
-kubectl wait --for=condition=complete --timeout=${TIMEOUT} -l katib.kubeflow.org/component=cert-generator -n kubeflow job
-kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,mysql,ui)" -n kubeflow pod
+kubectl wait --for=condition=complete --timeout=${TIMEOUT} -l katib.kubeflow.org/component=cert-generator -n kubeflow job ||
+  (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && exit 1)
+kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,mysql,ui)" -n kubeflow pod ||
+  (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && exit 1)
 
 echo "All Katib components are running."
 echo "Katib deployments"
@@ -61,11 +57,11 @@ echo "Katib pods"
 kubectl -n kubeflow get pod
 
 # Check that Katib is working with 2 Experiments.
-kubectl apply -f ../testdata/valid-experiment.yaml
-kubectl delete -f ../testdata/valid-experiment.yaml
+kubectl apply -f ../../testdata/valid-experiment.yaml
+kubectl delete -f ../../testdata/valid-experiment.yaml
 
 set +o errexit
-kubectl apply -f ../testdata/invalid-experiment.yaml
+kubectl apply -f ../../testdata/invalid-experiment.yaml
 if [ $? -ne 1 ]; then
   echo "Failed to create invalid-experiment: return code $?"
   exit 1
@@ -74,8 +70,8 @@ set -o errexit
 
 # Build the binary for e2e test
 echo "Building run-e2e-experiment for e2e test cases"
-mkdir -p ../bin
-go build -o ../bin/run-e2e-experiment ../hack/gh-actions/run-e2e-experiment.go
-chmod +x ../bin/run-e2e-experiment
+mkdir -p ../../bin
+go build -o ../../bin/run-e2e-experiment ../../hack/gh-actions/run-e2e-experiment.go
+chmod +x ../../bin/run-e2e-experiment
 
 exit 0

@@ -3,9 +3,6 @@ on:
   - push
   - pull_request
 
-env:
-  github_token: "${{ secrets.GITHUB_TOKEN }}"
-
 jobs:
   e2e:
     runs-on: ubuntu-20.04
@@ -14,21 +11,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Run e2e test for ${{ matrix.experiments }}
-        uses: ./.github/workflows/template-e2e-test
+      - name: Setup Test Env
+        uses: ./.github/workflows/template-setup-e2e-test
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
+
+      - name: Run e2e test with ${{ matrix.experiments }} experiments
+        uses: ./.github/workflows/template-e2e-test
+        with:
           experiments-path: ${{ matrix.experiments }}
           training-operator: true
           # Comma Delimited
           trial-images: pytorch-mnist
 
     strategy:
+      fail-fast: false
       matrix:
-        kubernetes-version: ["1.21.13", "1.22.10", "1.23.7"]
+        # Detail: https://hub.docker.com/r/kindest/node
+#        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6", "v1.24.0"]
+        kubernetes-version: ["v1.22.9"]
         # Comma Delimited
+        # We must run experiments individually as they take a long time.
         experiments:
-          - file-metrics-collector
-          - pytorchjob-mnist # Take a long time.
-          - file-metrics-collector-with-json-format # Take a long time.
-          - median-stop-with-json-format # Take a long time.
+          - "file-metrics-collector"
+          - "pytorchjob-mnist"
+          - "file-metrics-collector-with-json-format"
+          - "median-stop-with-json-format"

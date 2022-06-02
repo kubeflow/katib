@@ -31,9 +31,13 @@
 # For example, to update images from: docker.io/kubeflowkatib/ to: docker.io/private/ registry with tag: v0.12.0, run:
 # ./scripts/v1beta1/update-images.sh docker.io/kubeflowkatib/ docker.io/private/ v0.12.0
 
-OLD_PREFIX=$1
-NEW_PREFIX=$2
-TAG=$3
+set -o errexit
+set -o pipefail
+set -o nounset
+
+OLD_PREFIX=${1:-""}
+NEW_PREFIX=${2:-""}
+TAG=${3:-""}
 
 if [[ -z "$OLD_PREFIX" || -z "$NEW_PREFIX" || -z "$TAG" ]]; then
   echo "Image old prefix, new prefix, and tag must be set"

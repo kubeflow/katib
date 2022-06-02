@@ -49,6 +49,7 @@ spec:
       apiVersion: batch/v1
       kind: Job
       spec:
+        backoffLimit: 0
         template:
           spec:
             containers:

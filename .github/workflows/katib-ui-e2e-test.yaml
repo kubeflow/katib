@@ -1,0 +1,30 @@
+name: E2E Test For Katib-UI
+on:
+  - push
+  - pull_request
+
+jobs:
+  e2e:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Test Env
+        uses: ./.github/workflows/template-setup-e2e-test
+        with:
+          kubernetes-version: ${{ matrix.kubernetes-version }}
+
+      - name: Set Up KinD Cluster
+        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-kind.sh
+
+      - name: Start Katib
+        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Detail: https://hub.docker.com/r/kindest/node
+        #        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6", "v1.24.0"]
+        kubernetes-version: ["v1.22.9"]

@@ -18,11 +18,17 @@
 
 set -o errexit
 set -o pipefail
-
+set -o nounset
 cd "$(dirname "$0")"
-TRIAL_IMAGES=$1
 
-kubectl wait --for condition=ready --timeout=5m node minikube
+TRIAL_IMAGES=${1:-""}
+CLUSTER_NAME=${2:-"katib-e2e-cluster"}
+EXPERIMENTS=${3:-""}
+
+echo "Start to setup KinD Kubernetes Cluster"
+kubectl wait --for condition=ready --timeout=5m node "$CLUSTER_NAME-control-plane"
 kubectl version
+kubectl cluster-info
+kubectl get nodes
 echo "Build and Load container images"
-./build-load.sh "$TRIAL_IMAGES"
+./build-load.sh "$TRIAL_IMAGES" "$CLUSTER_NAME" "$EXPERIMENTS"

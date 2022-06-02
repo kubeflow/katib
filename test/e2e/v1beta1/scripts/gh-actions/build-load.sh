@@ -19,38 +19,136 @@
 
 set -o errexit
 set -o pipefail
+set -o nounset
 cd "$(dirname "$0")"
 
-REGISTRY=docker.io/kubeflowkatib
+TRIAL_IMAGES=${1:-""}
+CLUSTER_NAME=${2:-""}
+EXPERIMENTS=${3:-""}
+
+REGISTRY="docker.io/kubeflowkatib"
 TAG="e2e-test"
 VERSION="v1beta1"
 CMD_PREFIX="cmd"
-# shellcheck disable=SC2206
-TRIAL_IMAGES=(${1//,/ })
+SPECIFIED_DEVICE_TYPE_IMAGES=("enas-cnn-cifar10" "darts-cnn-cifar10")
+
+IFS="," read -r -a TRIAL_IMAGE_ARRAY <<< "$TRIAL_IMAGES"
+IFS="," read -r -a EXPERIMENT_ARRAY <<< "$EXPERIMENTS"
 
 _build_containers() {
-  CONTAINER_NAME=$1
-  DOCKERFILE=$2
+  CONTAINER_NAME=${1:-"katib-controller"}
+  DOCKERFILE=${2:-"$CMD_PREFIX/katib-controller/$VERSION/Dockerfile"}
+
   echo -e "\nBuilding $CONTAINER_NAME image...\n"
-  docker build -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
+  for image in "${SPECIFIED_DEVICE_TYPE_IMAGES[@]}"; do
+    if [ "$image" = "$CONTAINER_NAME" ]; then
+      DOCKERFILE="${DOCKERFILE}.cpu"
+      break
+    fi
+  done
+  docker build --platform "$(uname -m)" -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
 }
 
-_load_minikube_cluster() {
-  CONTAINER_NAME=$1
-  echo -e "\nLoading $CONTAINER_NAME image...\n"
-  minikube image load "$REGISTRY/$CONTAINER_NAME:$TAG"
+_load_kind_cluster() {
+  CONTAINER_NAME=${1:-"katib-controller"}
+
+  echo -e "\nLoading $CONTAINER_NAME image to $CLUSTER_NAME...\n"
+  kind load docker-image "$REGISTRY/$CONTAINER_NAME:$TAG" --name "$CLUSTER_NAME"
+}
+
+_install_tools() {
+  # install yq
+  if [ -z "$(which yq)" ]; then
+    wget -O /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.25.2/yq_$(uname -s)_$(uname -m)"
+    chmod +x /usr/local/bin/yq
+  fi
+}
+
+_select_suggestion() {
+  suggestions=()
+  for exp_name in "${EXPERIMENT_ARRAY[@]}"; do
+    exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
+    algorithm_name="$(yq eval '.spec.algorithm.algorithmName' "$exp_path")"
+
+    suggestion_image_name="$(yq eval '.data.suggestion' manifests/v1beta1/components/controller/katib-config.yaml |
+      algorithm_name=$algorithm_name yq eval '.[env(algorithm_name)].image' | cut -d: -f1)"
+    suggestion_name="$(basename "$suggestion_image_name")"
+
+    suggestions+=("$suggestion_name")
+  done
+  echo "${suggestions[@]}"
 }
 
 cleanup_build_cache() {
   echo -e "\nCleanup Build Cache...\n"
-  echo y | docker builder prune
+  docker builder prune
 }
 
 run() {
-  CONTAINER_NAME=$1
-  DOCKERFILE=$2
-  _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
-  _load_minikube_cluster "$CONTAINER_NAME"
+  CONTAINER_NAME=${1:-"katib-controller"}
+  DOCKERFILE=${2:-"$CMD_PREFIX/katib-controller/$VERSION/Dockerfile"}
+
+  _install_tools
+
+  # CONTAINER_NAME is image for suggestion services
+  if echo "$CONTAINER_NAME" | grep -q "^suggestion-"; then
+
+    suggestions=()
+
+    # Search for Suggestion Images required for Trial.
+    for exp_name in "${EXPERIMENT_ARRAY[@]}"; do
+
+      exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
+      algorithm_name="$(yq eval '.spec.algorithm.algorithmName' "$exp_path")"
+
+      suggestion_image_name="$(yq eval '.data.suggestion' ../../../../../manifests/v1beta1/components/controller/katib-config.yaml |
+        algorithm_name=$algorithm_name yq eval '.[env(algorithm_name)].image' | cut -d: -f1)"
+      suggestion_name="$(basename "$suggestion_image_name")"
+
+      suggestions+=("$suggestion_name")
+
+    done
+
+    for s in "${suggestions[@]}"; do
+      if [ "$s" == "$CONTAINER_NAME" ]; then
+        _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
+        _load_kind_cluster "$CONTAINER_NAME"
+        break
+      fi
+    done
+
+  # $CONTAINER_NAME is image for earlystopping services
+  elif echo "$CONTAINER_NAME" | grep -q "^earlystopping-"; then
+
+    earlystoppings=()
+
+    # Search for EarlyStopping Images required for Trial.
+    for exp_name in "${EXPERIMENT_ARRAY[@]}"; do
+
+      exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
+      algorithm_name="$(yq eval '.spec.earlyStopping.algorithmName' "$exp_path")"
+
+      earlystopping_image_name="$(yq eval '.data.early-stopping' ../../../../../manifests/v1beta1/components/controller/katib-config.yaml |
+        algorithm_name=$algorithm_name yq eval '.[env(algorithm_name)].image' | cut -d: -f1)"
+      earlystopping_name="$(basename "$earlystopping_image_name")"
+
+      earlystoppings+=("$earlystopping_name")
+
+    done
+
+    for e in "${earlystoppings[@]}"; do
+      if [ "$e" == "$CONTAINER_NAME" ]; then
+        _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
+        _load_kind_cluster "$CONTAINER_NAME"
+        break
+      fi
+    done
+
+  # Others
+  else
+    _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
+    _load_kind_cluster "$CONTAINER_NAME"
+  fi
 }
 
 echo "Building images for Katib ${VERSION}..."
@@ -60,6 +158,11 @@ echo "Image tag: ${TAG}"
 # Katib core images
 run "katib-controller" "$CMD_PREFIX/katib-controller/$VERSION/Dockerfile"
 run "katib-db-manager" "$CMD_PREFIX/db-manager/$VERSION/Dockerfile"
+
+if [ -z "$EXPERIMENTS" ]; then
+  run "katib-ui" "${CMD_PREFIX}/new-ui/${VERSION}/Dockerfile"
+fi
+
 run "cert-generator" "$CMD_PREFIX/cert-generator/$VERSION/Dockerfile"
 run "file-metrics-collector" "$CMD_PREFIX/metricscollector/$VERSION/file-metricscollector/Dockerfile"
 run "tfevent-metrics-collector" "$CMD_PREFIX/metricscollector/$VERSION/tfevent-metricscollector/Dockerfile"
@@ -84,7 +187,7 @@ cleanup_build_cache
 
 # Training container images
 echo -e "\nBuilding training container images..."
-for name in "${TRIAL_IMAGES[@]}"; do
+for name in "${TRIAL_IMAGE_ARRAY[@]}"; do
   run "$name" "examples/$VERSION/trial-images/$name/Dockerfile"
 done
 cleanup_build_cache

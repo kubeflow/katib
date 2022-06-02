@@ -22,8 +22,8 @@ set -o nounset
 set -o pipefail
 
 cd "$(dirname "$0")"
-# shellcheck disable=SC2206
-EXPERIMENT_FILES=(${1//,/ })
+EXPERIMENT_FILES=${1:-""}
+IFS="," read -r -a EXPERIMENT_FILE_ARRAY <<< "$EXPERIMENT_FILES"
 
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
@@ -36,10 +36,15 @@ kubectl get pvc -n kubeflow
 echo "Available CRDs"
 kubectl get crd
 
-for exp_name in "${EXPERIMENT_FILES[@]}"; do
+if [ -z "$EXPERIMENT_FILES" ]; then
+  echo "Skip Test for Experiment"
+  exit 0
+fi
+
+for exp_name in "${EXPERIMENT_FILE_ARRAY[@]}"; do
   echo "Running Experiment from $exp_name file"
   exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
-  ../bin/run-e2e-experiment "$exp_path"
+  ../../bin/run-e2e-experiment "$exp_path" || (kubectl get pods -n kubeflow && exit 1)
 done
 
 exit 0

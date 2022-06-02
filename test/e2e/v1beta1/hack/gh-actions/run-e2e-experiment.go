@@ -25,7 +25,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -53,27 +52,20 @@ func main() {
 		log.Fatalf("Error in reading file: %v", err)
 	}
 
-	// Replace batch size to number of epochs for faster execution.
-	strExp := strings.Replace(string(byteExp), "--batch-size=64", "--num-epochs=2", -1)
-
 	exp := &experimentsv1beta1.Experiment{}
-	buf := bytes.NewBufferString(strExp)
+	buf := bytes.NewBufferString(string(byteExp))
 	if err := k8syaml.NewYAMLOrJSONDecoder(buf, 1024).Decode(exp); err != nil {
 		log.Fatal("Yaml decode error ", err)
 	}
 
 	kclient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
-		log.Fatal("Create NewClient for Katib failed: ", err)
+		log.Fatalf("Create NewClient for Katib failed: %v", err)
 	}
 
 	var maxTrials int32 = 2
 	var parallelTrials int32 = 1
-	// For random we test 2 parallel execution.
-	if exp.Name == "random" {
-		maxTrials = 3
-		parallelTrials = 2
-	}
+	var maxFailedTrial int32 = 0
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
 		// thus we should not change it.
@@ -81,6 +73,9 @@ func main() {
 		exp.Spec.MaxTrialCount = &maxTrials
 		exp.Spec.ParallelTrialCount = &parallelTrials
 	}
+	exp.Spec.TrialTemplate.Retain = true
+	exp.Spec.MaxFailedTrialCount = &maxFailedTrial
+
 	log.Printf("Creating Experiment %v with MaxTrialCount: %v, ParallelTrialCount: %v", exp.Name, maxTrials, parallelTrials)
 	err = kclient.CreateRuntimeObject(exp)
 	if err != nil {
