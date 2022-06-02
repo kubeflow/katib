@@ -1,22 +1,43 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { NamespaceService, FormModule } from 'kubeflow';
 
-import { MetadataComponent } from './metadata.component';
+import { FormMetadataComponent } from './metadata.component';
+import { FormControl, FormGroup } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
-describe('MetadataComponent', () => {
-  let component: MetadataComponent;
-  let fixture: ComponentFixture<MetadataComponent>;
+describe('FormMetadataComponent', () => {
+  let component: FormMetadataComponent;
+  let fixture: ComponentFixture<FormMetadataComponent>;
 
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [MetadataComponent],
+        imports: [
+          CommonModule,
+          FormModule,
+          BrowserAnimationsModule,
+          MatFormFieldModule,
+          MatInputModule,
+        ],
+        declarations: [FormMetadataComponent],
+        providers: [
+          { provide: NamespaceService, useValue: { getSelectedNamespace: () => of('') } },
+        ]
       }).compileComponents();
     }),
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(MetadataComponent);
+    fixture = TestBed.createComponent(FormMetadataComponent);
     component = fixture.componentInstance;
+    component.metadataForm = new FormGroup({
+      name: new FormControl(),
+      namespace: new FormControl()
+    });
     fixture.detectChanges();
   });
 

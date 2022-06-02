@@ -1,22 +1,56 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { of } from 'rxjs';
+import { KWABackendService } from 'src/app/services/backend.service';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatDividerModule } from '@angular/material/divider';
+import { FormModule, PopoverModule } from 'kubeflow';
+import { ListKeyValueModule } from 'src/app/shared/list-key-value/list-key-value.module';
+import { AceEditorModule } from 'ng2-ace-editor';
 
-import { TrialTemplateComponent } from './trial-template.component';
+import { FormTrialTemplateComponent } from './trial-template.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-describe('TrialTemplateComponent', () => {
-  let component: TrialTemplateComponent;
-  let fixture: ComponentFixture<TrialTemplateComponent>;
+describe('FormTrialTemplateComponent', () => {
+  let component: FormTrialTemplateComponent;
+  let fixture: ComponentFixture<FormTrialTemplateComponent>;
 
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [TrialTemplateComponent],
+        imports: [
+          CommonModule,
+          BrowserAnimationsModule,
+          FormModule,
+          ListKeyValueModule,
+          MatDividerModule,
+          AceEditorModule,
+          PopoverModule,
+        ],
+        declarations: [FormTrialTemplateComponent],
+        providers: [
+          { provide: KWABackendService, useValue: { getTrialTemplates: () => of() } }
+        ]
       }).compileComponents();
     }),
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TrialTemplateComponent);
+    fixture = TestBed.createComponent(FormTrialTemplateComponent);
     component = fixture.componentInstance;
+    component.formGroup = new FormGroup({
+      trialParameters: new FormArray([]),
+      podLabels: new FormControl(),
+      containerName: new FormControl(),
+      successCond: new FormControl(),
+      failureCond: new FormControl(),
+      retain: new FormControl(),
+      type: new FormControl(),
+      cmNamespace: new FormControl(),
+      cmName: new FormControl(),
+      cmTrialPath: new FormControl()
+    });
     fixture.detectChanges();
   });
 
