@@ -16,12 +16,17 @@
 
 set -o errexit
 set -o pipefail
-
+set -o nounset
 cd "$(dirname "$0")"
 
 ARCH=$(uname -m)
 OS=$(uname)
 SHELLCHECK_VERSION=v0.8.0
+
+if [ "$ARCH" = "arm64" ] && [ "$OS" = "Darwin" ]; then
+  echo "Please install the shellcheck via Homebrew."
+  exit 1
+fi
 
 curl -sSL "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.${OS,,}.${ARCH}.tar.xz" \
   | tar Jxf - -C /tmp
