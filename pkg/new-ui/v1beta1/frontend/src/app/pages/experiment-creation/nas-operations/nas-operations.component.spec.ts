@@ -1,22 +1,36 @@
+import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { FormArray } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormModule } from 'kubeflow';
 
-import { NasOperationsComponent } from './nas-operations.component';
+import { FormNasOperationsComponent } from './nas-operations.component';
+import { FormNasOperationsModule } from './nas-operations.module';
 
-describe('NasOperationsComponent', () => {
-  let component: NasOperationsComponent;
-  let fixture: ComponentFixture<NasOperationsComponent>;
+describe('FormNasOperationsComponent', () => {
+  let component: FormNasOperationsComponent;
+  let fixture: ComponentFixture<FormNasOperationsComponent>;
 
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [NasOperationsComponent],
+        imports: [
+          CommonModule,
+          BrowserAnimationsModule,
+          MatIconModule,
+          FormModule,
+          FormNasOperationsModule,
+        ],
+        declarations: [FormNasOperationsComponent],
       }).compileComponents();
     }),
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NasOperationsComponent);
+    fixture = TestBed.createComponent(FormNasOperationsComponent);
     component = fixture.componentInstance;
+    component.formArray = new FormArray([]);
     fixture.detectChanges();
   });
 

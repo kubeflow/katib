@@ -1,22 +1,45 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { FormControl, FormGroup } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormModule } from 'kubeflow';
+import { ListKeyValueModule } from 'src/app/shared/list-key-value/list-key-value.module';
+import { AceEditorModule } from 'ng2-ace-editor';
 
-import { MetricsCollectorComponent } from './metrics-collector.component';
+import { FormMetricsCollectorComponent } from './metrics-collector.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-describe('MetricsCollectorComponent', () => {
-  let component: MetricsCollectorComponent;
-  let fixture: ComponentFixture<MetricsCollectorComponent>;
+describe('FormMetricsCollectorComponent', () => {
+  let component: FormMetricsCollectorComponent;
+  let fixture: ComponentFixture<FormMetricsCollectorComponent>;
 
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [MetricsCollectorComponent],
+        imports: [
+          CommonModule,
+          BrowserAnimationsModule,
+          FormModule,
+          ListKeyValueModule,
+          AceEditorModule,
+        ],
+        declarations: [FormMetricsCollectorComponent],
       }).compileComponents();
     }),
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(MetricsCollectorComponent);
+    fixture = TestBed.createComponent(FormMetricsCollectorComponent);
     component = fixture.componentInstance;
+    component.formGroup = new FormGroup({
+      kind: new FormControl(),
+      metricsFile: new FormControl(),
+      tfDir: new FormControl(),
+      port: new FormControl(),
+      path: new FormControl(),
+      scheme: new FormControl(),
+      host: new FormControl(),
+      prometheus: new FormControl(),
+    });
     fixture.detectChanges();
   });
 

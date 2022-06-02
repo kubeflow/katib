@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { MatDividerModule } from '@angular/material/divider';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DetailsListModule, PopoverModule } from 'kubeflow';
 
 import { ExperimentOptimalTrialComponent } from './experiment-optimal-trial.component';
 
@@ -9,6 +12,12 @@ describe('ExperimentOptimalTrialComponent', () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
+        imports: [
+          BrowserAnimationsModule,
+          PopoverModule,
+          DetailsListModule,
+          MatDividerModule,
+        ],
         declarations: [ExperimentOptimalTrialComponent],
       }).compileComponents();
     }),

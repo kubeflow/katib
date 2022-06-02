@@ -15,7 +15,8 @@
     "paths": {
       "@app/environment": ["src/environments/environment"]
     },
-    "lib": ["es2018", "dom"]
+    "lib": ["es2018", "dom"],
+    "allowSyntheticDefaultImports": true
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

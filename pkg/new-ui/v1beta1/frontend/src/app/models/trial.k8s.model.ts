@@ -76,7 +76,7 @@ interface TrialStatus {
 
 interface TrialStatusCondition {
   type: string;
-  status: boolean;
+  status: string;
   reason: string;
   message: string;
   lastUpdateTime: string;

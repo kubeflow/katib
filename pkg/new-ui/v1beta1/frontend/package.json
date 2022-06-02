@@ -37,7 +37,7 @@
     "echarts-stat": "^1.2.0",
     "js-yaml": "^4.0.0",
     "lodash-es": "4.17.11",
-    "material-icons": "^0.3.1",
+    "material-icons": "^0.7.7",
     "ng2-ace-editor": "^0.3.9",
     "ngx-echarts": "^8.0.1",
     "ngx-json-viewer": "^2.4.0",
