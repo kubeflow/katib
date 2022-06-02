@@ -20,7 +20,8 @@ set -o pipefail
 set -o nounset
 cd "$(dirname "$0")"
 
-DEPLOY_TRAINING_OPERATOR=${1:-false}
+DEPLOY_KATIB_UI=${1:-false}
+DEPLOY_TRAINING_OPERATOR=${2:-false}
 E2E_TEST_IMAGE_TAG="e2e-test"
 TRAINING_OPERATOR_VERSION="v1.4.0"
 
@@ -36,6 +37,11 @@ cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
 if "$DEPLOY_TRAINING_OPERATOR"; then
   echo "Deploying Training Operator $TRAINING_OPERATOR_VERSION"
   kubectl apply -k "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION"
+fi
+
+if "$DEPLOY_KATIB_UI"; then
+  index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' manifests/v1beta1/installs/katib-standalone/kustomization.yaml)"
+  index="$index" yq eval -i '.resources | del(.[env(index)])' manifests/v1beta1/installs/katib-standalone/kustomization.yaml
 fi
 
 echo "Deploying Katib"

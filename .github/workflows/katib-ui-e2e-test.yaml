@@ -17,10 +17,10 @@ jobs:
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: Set Up KinD Cluster
-        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-kind.sh
+        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-kind.sh true
 
       - name: Start Katib
-        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh
+        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh true false
 
     strategy:
       fail-fast: false

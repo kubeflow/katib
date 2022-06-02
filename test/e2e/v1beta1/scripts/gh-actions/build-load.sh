@@ -25,6 +25,7 @@ cd "$(dirname "$0")"
 TRIAL_IMAGES=${1:-""}
 CLUSTER_NAME=${2:-""}
 EXPERIMENTS=${3:-""}
+DEPLOY_KATIB_UI=${4:-false}
 
 REGISTRY="docker.io/kubeflowkatib"
 TAG="e2e-test"
@@ -159,7 +160,7 @@ echo "Image tag: ${TAG}"
 run "katib-controller" "$CMD_PREFIX/katib-controller/$VERSION/Dockerfile"
 run "katib-db-manager" "$CMD_PREFIX/db-manager/$VERSION/Dockerfile"
 
-if [ -z "$EXPERIMENTS" ]; then
+if "$DEPLOY_KATIB_UI"; then
   run "katib-ui" "${CMD_PREFIX}/new-ui/${VERSION}/Dockerfile"
 fi
 

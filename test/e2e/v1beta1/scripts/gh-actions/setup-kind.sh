@@ -21,9 +21,10 @@ set -o pipefail
 set -o nounset
 cd "$(dirname "$0")"
 
-TRIAL_IMAGES=${1:-""}
-CLUSTER_NAME=${2:-"katib-e2e-cluster"}
-EXPERIMENTS=${3:-""}
+DEPLOY_KATIB_UI=${1:-false}
+TRIAL_IMAGES=${2:-""}
+CLUSTER_NAME=${3:-"katib-e2e-cluster"}
+EXPERIMENTS=${4:-""}
 
 echo "Start to setup KinD Kubernetes Cluster"
 kubectl wait --for condition=ready --timeout=5m node "$CLUSTER_NAME-control-plane"
@@ -31,4 +32,4 @@ kubectl version
 kubectl cluster-info
 kubectl get nodes
 echo "Build and Load container images"
-./build-load.sh "$TRIAL_IMAGES" "$CLUSTER_NAME" "$EXPERIMENTS"
+./build-load.sh "$TRIAL_IMAGES" "$CLUSTER_NAME" "$EXPERIMENTS" "$DEPLOY_KATIB_UI"
