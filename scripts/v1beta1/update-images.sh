@@ -96,7 +96,7 @@ update_yaml_files "./" "${OLD_PREFIX}${PYTORCH_MNIST}:.*" "${NEW_PREFIX}${PYTORC
 update_yaml_files "./" "${OLD_PREFIX}${TF_MNIST_WITH_SUMMARIES}:.*" "${NEW_PREFIX}${TF_MNIST_WITH_SUMMARIES}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${ENAS_GPU}:.*" "${NEW_PREFIX}${ENAS_GPU}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${ENAS_CPU}:.*" "${NEW_PREFIX}${ENAS_CPU}:${TAG}"
-update_yaml_files "./" "${OLD_PREFIX}${DARTS}:.*" "${NEW_PREFIX}${DARTS_GPU}:${TAG}"
-update_yaml_files "./" "${OLD_PREFIX}${DARTS}:.*" "${NEW_PREFIX}${DARTS_CPU}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${DARTS_GPU}:.*" "${NEW_PREFIX}${DARTS_GPU}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${DARTS_CPU}:.*" "${NEW_PREFIX}${DARTS_CPU}:${TAG}"
 
 echo "Katib images have been updated"
