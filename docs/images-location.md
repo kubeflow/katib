@@ -361,13 +361,24 @@ The following table shows images for training containers which are used in the
     </tr>
     <tr align="center">
       <td>
-        <code>docker.io/kubeflowkatib/darts-cnn-cifar10</code>
+        <code>docker.io/kubeflowkatib/darts-cnn-cifar10-gpu</code>
       </td>
       <td>
-        PyTorch CIFAR-10 CNN example for DARTS
+        PyTorch CIFAR-10 CNN example for DARTS with GPU support
       </td>
       <td>
-        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile">Dockerfile</a>
+        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.gpu">Dockerfile</a>
+      </td>
+    </tr>
+    <tr align="center">
+      <td>
+        <code>docker.io/kubeflowkatib/darts-cnn-cifar10-cpu</code>
+      </td>
+      <td>
+        PyTorch CIFAR-10 CNN example for DARTS with CPU support
+      </td>
+      <td>
+        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.cpu">Dockerfile</a>
       </td>
     </tr>
 </table>
