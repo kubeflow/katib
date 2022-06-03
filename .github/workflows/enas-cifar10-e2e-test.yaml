@@ -1,6 +1,5 @@
 name: E2E Test with enas-cnn-cifar10
 on:
-  - push
   - pull_request
 
 jobs:

@@ -1,6 +1,5 @@
 name: E2E Test for katib-ui
 on:
-  - push
   - pull_request
 
 jobs:

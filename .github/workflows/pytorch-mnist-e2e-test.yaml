@@ -1,6 +1,5 @@
 name: E2E Test with pytorch-mnist
 on:
-  - push
   - pull_request
 
 jobs:
