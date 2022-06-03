@@ -1,4 +1,4 @@
-name: E2E Test With mxnet-mnist Trial Image
+name: E2E Test With enas-cnn-cifar10 Trial Image
 on:
   - push
   - pull_request
@@ -21,7 +21,7 @@ jobs:
         with:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
-          trial-images: mxnet-mnist
+          trial-images: enas-cnn-cifar10
 
     strategy:
       fail-fast: false
@@ -29,9 +29,4 @@ jobs:
         # Detail: https://hub.docker.com/r/kindest/node
         kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
         # Comma Delimited
-        experiments:
-          # suggestion-hyperopt
-          - "random,tpe,never-resume,from-volume-resume,median-stop"
-          # others
-          - "grid,bayesian-optimization,tpe"
-          - "multivariate-tpe,cma-es,hyperband"
+        experiments: ["enas-cpu"]

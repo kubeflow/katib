@@ -1,4 +1,4 @@
-name: E2E Test With pytorch-mnist Image
+name: E2E Test With pytorch-mnist Trial Image
 on:
   - push
   - pull_request

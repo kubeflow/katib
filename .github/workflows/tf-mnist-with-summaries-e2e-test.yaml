@@ -1,4 +1,4 @@
-name: E2E Test With enas-cnn-cifar10, darts-cnn-cifar10 and tf-mnist-with-summaries Images
+name: E2E Test With tf-mnist-with-summaries Trial Image
 on:
   - push
   - pull_request
@@ -21,7 +21,7 @@ jobs:
         with:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
-          trial-images: enas-cnn-cifar10,darts-cnn-cifar10,tf-mnist-with-summaries
+          trial-images: tf-mnist-with-summaries
 
     strategy:
       fail-fast: false
@@ -29,4 +29,4 @@ jobs:
         # Detail: https://hub.docker.com/r/kindest/node
         kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
         # Comma Delimited
-        experiments: ["enas-cpu,darts-cpu,tfjob-mnist-with-summaries"]
+        experiments: ["tfjob-mnist-with-summaries"]
