@@ -8,5 +8,6 @@ protobuf==3.19.1
 googleapis-common-protos==1.6.0
 SQLAlchemy==1.4.26
 git+https://github.com/AIworx-Labs/chocolate@master
-ghalton>=0.6.2
+ghalton>=0.6.2; platform_machine=="x86_64"
+git+https://github.com/fmder/ghalton@master; platform_machine=="aarch64"
 cython>=0.29.24

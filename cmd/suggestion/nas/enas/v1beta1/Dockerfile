@@ -3,9 +3,6 @@ FROM python:3.9
 ENV TARGET_DIR /opt/katib
 ENV SUGGESTION_DIR cmd/suggestion/nas/enas/v1beta1
 ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
-# tensorflow community build for aarch64
-# https://github.com/tensorflow/build#tensorflow-builds
-ENV PIP_EXTRA_INDEX_URL https://snapshots.linaro.org/ldcg/python-cache/
 
 RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
     apt-get -y update && \
@@ -26,10 +23,6 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
 ADD ./pkg/ ${TARGET_DIR}/pkg/
 ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
 WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
-
-RUN if [ "$(uname -m)" = "aarch64" ]; then \
-    sed -i 's/tensorflow==/tensorflow-aarch64==/' requirements.txt; \
-    fi;
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chgrp -R 0 ${TARGET_DIR} \

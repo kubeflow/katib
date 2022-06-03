@@ -22,9 +22,6 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
 ADD ./pkg/ ${TARGET_DIR}/pkg/
 ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
 WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
-RUN if [ "$(uname -m)" = "aarch64" ]; then \
-    sed -i -e '$a git+https://github.com/fmder/ghalton@master' -e '/^ghalton/d' requirements.txt; \
-    fi;
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chgrp -R 0 ${TARGET_DIR} \
