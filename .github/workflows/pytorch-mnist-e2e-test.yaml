@@ -19,7 +19,7 @@ jobs:
       - name: Run e2e test with ${{ matrix.experiments }} experiments
         uses: ./.github/workflows/template-e2e-test
         with:
-          experiments-path: ${{ matrix.experiments }}
+          experiments: ${{ matrix.experiments }}
           training-operator: true
           # Comma Delimited
           trial-images: pytorch-mnist

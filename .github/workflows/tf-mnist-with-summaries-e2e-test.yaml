@@ -20,6 +20,7 @@ jobs:
         uses: ./.github/workflows/template-e2e-test
         with:
           experiments: ${{ matrix.experiments }}
+          training-operator: true
           # Comma Delimited
           trial-images: tf-mnist-with-summaries
 
