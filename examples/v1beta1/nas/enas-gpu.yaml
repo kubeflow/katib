@@ -132,7 +132,6 @@ spec:
       kind: Job
       spec:
         template:
-        backoffLimit: 0
           spec:
             containers:
               - name: training-container
