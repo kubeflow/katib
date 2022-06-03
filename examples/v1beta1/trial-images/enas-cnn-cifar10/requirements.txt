@@ -1,5 +1,1 @@
 scipy>=1.7.2
-# TODO (tenzen-y): The line below needs to be deleted after merging https://github.com/kubeflow/katib/pull/1870.
-# To avoid the `If this call came from a _pb2.py file, your generated code is out of date and must be regenerated with protoc >= 3.19.0.` error,
-# we must restrict the protobuf version.
-protobuf >= 3.9.2, < 3.20

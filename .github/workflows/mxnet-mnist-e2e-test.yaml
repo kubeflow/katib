@@ -1,4 +1,4 @@
-name: E2E Test with Trial Image, mxnet-mnist
+name: E2E Test with mxnet-mnist
 on:
   - push
   - pull_request
@@ -31,7 +31,8 @@ jobs:
         # Comma Delimited
         experiments:
           # suggestion-hyperopt
-          - "random,tpe,never-resume,from-volume-resume,median-stop"
+          - "random,tpe,never-resume"
+          - "median-stop,from-volume-resume"
           # others
           - "grid,bayesian-optimization,tpe"
           - "multivariate-tpe,cma-es,hyperband"

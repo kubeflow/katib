@@ -1,4 +1,4 @@
-name: E2E Test with Trial Image, pytorch-mnist
+name: E2E Test with pytorch-mnist
 on:
   - push
   - pull_request
@@ -32,6 +32,4 @@ jobs:
         # Comma Delimited
         experiments:
           - "file-metrics-collector,pytorchjob-mnist"
-          # We must run experiments the below individually as they take a long time.
-          - "median-stop-with-json-format"
-          - "file-metrics-collector-with-json-format"
+          - "median-stop-with-json-format,file-metrics-collector-with-json-format"

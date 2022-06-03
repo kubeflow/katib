@@ -67,21 +67,6 @@ _install_tools() {
   fi
 }
 
-_select_suggestion() {
-  suggestions=()
-  for exp_name in "${EXPERIMENT_ARRAY[@]}"; do
-    exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
-    algorithm_name="$(yq eval '.spec.algorithm.algorithmName' "$exp_path")"
-
-    suggestion_image_name="$(yq eval '.data.suggestion' manifests/v1beta1/components/controller/katib-config.yaml |
-      algorithm_name=$algorithm_name yq eval '.[env(algorithm_name)].image' | cut -d: -f1)"
-    suggestion_name="$(basename "$suggestion_image_name")"
-
-    suggestions+=("$suggestion_name")
-  done
-  echo "${suggestions[@]}"
-}
-
 cleanup_build_cache() {
   echo -e "\nCleanup Build Cache...\n"
   docker builder prune

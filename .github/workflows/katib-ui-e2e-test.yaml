@@ -1,4 +1,4 @@
-name: E2E Test for Katib-UI
+name: E2E Test for katib-ui
 on:
   - push
   - pull_request

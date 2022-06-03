@@ -1,4 +1,4 @@
-name: E2E Test with Trial Image, darts-cnn-cifar10
+name: E2E Test with darts-cnn-cifar10
 on:
   - push
   - pull_request
