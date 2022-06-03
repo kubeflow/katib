@@ -1,4 +1,4 @@
-name: E2E Test With tf-mnist-with-summaries Trial Image
+name: E2E Test with Trial Image, tf-mnist-with-summaries
 on:
   - push
   - pull_request

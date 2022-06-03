@@ -35,6 +35,8 @@ if ! "$DEPLOY_KATIB_UI"; then
   index="$index" yq eval -i 'del(.resources.[env(index)])' ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
 fi
 
+yq eval -i '.spec.resources.requests.storage|="2Gi"' ../../../../../manifests/v1beta1/components/mysql/pvc.yaml
+
 echo -e "\n The Katib will be deployed with the following configs"
 cat ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
 cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml

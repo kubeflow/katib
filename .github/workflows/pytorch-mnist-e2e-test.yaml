@@ -1,4 +1,4 @@
-name: E2E Test With pytorch-mnist Trial Image
+name: E2E Test with Trial Image, pytorch-mnist
 on:
   - push
   - pull_request
@@ -30,9 +30,8 @@ jobs:
         # Detail: https://hub.docker.com/r/kindest/node
         kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
         # Comma Delimited
-        # We must run experiments individually as they take a long time.
         experiments:
-          - "file-metrics-collector"
-          - "pytorchjob-mnist"
-          - "file-metrics-collector-with-json-format"
+          - "file-metrics-collector,pytorchjob-mnist"
+          # We must run experiments the below individually as they take a long time.
           - "median-stop-with-json-format"
+          - "file-metrics-collector-with-json-format"

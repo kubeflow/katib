@@ -1,4 +1,4 @@
-name: E2E Test With mxnet-mnist Trial Image
+name: E2E Test with Trial Image, mxnet-mnist
 on:
   - push
   - pull_request

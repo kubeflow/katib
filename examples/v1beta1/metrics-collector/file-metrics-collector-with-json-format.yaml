@@ -57,6 +57,7 @@ spec:
                   - "python3"
                   - "/opt/pytorch-mnist/mnist.py"
                   - "--epochs=1"
+                  - "--batch-size=32"
                   - "--log-path=/katib/mnist.json"
                   - "--lr=${trialParameters.learningRate}"
                   - "--momentum=${trialParameters.momentum}"
