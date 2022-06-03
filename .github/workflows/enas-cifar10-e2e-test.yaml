@@ -21,7 +21,7 @@ jobs:
         with:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
-          trial-images: enas-cnn-cifar10
+          trial-images: enas-cnn-cifar10-cpu
 
     strategy:
       fail-fast: false

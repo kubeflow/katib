@@ -31,7 +31,7 @@ REGISTRY="docker.io/kubeflowkatib"
 TAG="e2e-test"
 VERSION="v1beta1"
 CMD_PREFIX="cmd"
-SPECIFIED_DEVICE_TYPE_IMAGES=("enas-cnn-cifar10" "darts-cnn-cifar10")
+SPECIFIED_DEVICE_TYPE_IMAGES=("enas-cnn-cifar10-cpu" "darts-cnn-cifar10-cpu")
 
 IFS="," read -r -a TRIAL_IMAGE_ARRAY <<< "$TRIAL_IMAGES"
 IFS="," read -r -a EXPERIMENT_ARRAY <<< "$EXPERIMENTS"
@@ -40,13 +40,15 @@ _build_containers() {
   CONTAINER_NAME=${1:-"katib-controller"}
   DOCKERFILE=${2:-"$CMD_PREFIX/katib-controller/$VERSION/Dockerfile"}
 
-  echo -e "\nBuilding $CONTAINER_NAME image...\n"
   for image in "${SPECIFIED_DEVICE_TYPE_IMAGES[@]}"; do
     if [ "$image" = "$CONTAINER_NAME" ]; then
+      DOCKERFILE="${DOCKERFILE//-cpu/}"
       DOCKERFILE="${DOCKERFILE}.cpu"
       break
     fi
   done
+
+  echo -e "\nBuilding $CONTAINER_NAME image with $DOCKERFILE...\n"
   docker build --platform "$(uname -m)" -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
 }
 
