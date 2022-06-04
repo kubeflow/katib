@@ -1,6 +1,6 @@
-HAS_LINT := $(shell command -v golangci-lint)
-HAS_SHELLCHECK := $(shell command -v shellcheck)
-HAS_SETUP_ENVTEST := $(shell command -v setup-envtest)
+HAS_LINT := $(shell command -v golangci-lint;)
+HAS_SHELLCHECK := $(shell command -v shellcheck;)
+HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
 
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
