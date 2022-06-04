@@ -19,7 +19,7 @@ set -o pipefail
 
 cd "$(dirname "$0")/.."
 
-if ! which golangci-lint >/dev/null; then
+if [ -z "$(command -v golangci-lint)" ]; then
 	echo 'Can not find golangci-lint, install with: make lint'
 	exit 1
 fi
