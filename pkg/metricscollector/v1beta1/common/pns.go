@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	psutil "github.com/shirou/gopsutil/process"
+	psutil "github.com/shirou/gopsutil/v3/process"
 	"k8s.io/klog"
 )
 
