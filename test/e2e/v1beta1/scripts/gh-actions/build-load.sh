@@ -61,7 +61,7 @@ _load_kind_cluster() {
 
 _install_tools() {
   # install yq
-  if [ -z "$(which yq)" ]; then
+  if [ -z "$(command -v yq)" ]; then
     wget -O /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.25.2/yq_$(uname -s)_$(uname -m)"
     chmod +x /usr/local/bin/yq
   fi
