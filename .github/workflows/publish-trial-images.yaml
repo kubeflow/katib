@@ -26,6 +26,7 @@ jobs:
           dockerfile: ${{ matrix.dockerfile }}
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           - trial-name: mxnet-mnist
@@ -38,5 +39,7 @@ jobs:
             dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu
           - trial-name: enas-cnn-cifar10-cpu
             dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu
-          - trial-name: darts-cnn-cifar10
-            dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile
+          - trial-name: darts-cnn-cifar10-cpu
+            dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.cpu
+          - trial-name: darts-cnn-cifar10-gpu
+            dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.gpu

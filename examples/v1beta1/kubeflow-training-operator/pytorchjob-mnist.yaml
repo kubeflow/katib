@@ -50,10 +50,11 @@ spec:
                       - "python3"
                       - "/opt/pytorch-mnist/mnist.py"
                       - "--epochs=1"
+                      - "--batch-size=16"
                       - "--lr=${trialParameters.learningRate}"
                       - "--momentum=${trialParameters.momentum}"
           Worker:
-            replicas: 2
+            replicas: 1
             restartPolicy: OnFailure
             template:
               spec:
@@ -64,5 +65,6 @@ spec:
                       - "python3"
                       - "/opt/pytorch-mnist/mnist.py"
                       - "--epochs=1"
+                      - "--batch-size=16"
                       - "--lr=${trialParameters.learningRate}"
                       - "--momentum=${trialParameters.momentum}"

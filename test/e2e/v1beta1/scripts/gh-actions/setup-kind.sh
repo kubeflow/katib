@@ -14,23 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This shell script is used to setup Katib deployment.
+
 set -o errexit
 set -o pipefail
 set -o nounset
 cd "$(dirname "$0")"
 
-ARCH=$(uname -m)
-OS=$(uname)
-SHELLCHECK_VERSION=v0.8.0
+DEPLOY_KATIB_UI=${1:-false}
+TRIAL_IMAGES=${2:-""}
+CLUSTER_NAME=${3:-"katib-e2e-cluster"}
+EXPERIMENTS=${4:-""}
 
-if [ "$ARCH" = "arm64" ] && [ "$OS" = "Darwin" ]; then
-  echo "Please install the shellcheck via Homebrew."
-  exit 1
-fi
-
-curl -sSL "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.${OS,,}.${ARCH}.tar.xz" \
-  | tar Jxf - -C /tmp
-mv /tmp/shellcheck-$SHELLCHECK_VERSION/shellcheck /usr/local/bin/shellcheck
-chmod +x /usr/local/bin/shellcheck
-
-rm -rf /tmp/shellcheck-$SHELLCHECK_VERSION
+echo "Start to setup KinD Kubernetes Cluster"
+kubectl wait --for condition=ready --timeout=5m node "$CLUSTER_NAME-control-plane"
+kubectl version
+kubectl cluster-info
+kubectl get nodes
+echo "Build and Load container images"
+./build-load.sh "$TRIAL_IMAGES" "$CLUSTER_NAME" "$EXPERIMENTS" "$DEPLOY_KATIB_UI"

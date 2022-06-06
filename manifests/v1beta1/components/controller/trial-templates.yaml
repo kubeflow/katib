@@ -54,7 +54,6 @@ data:
               containers:
                 - name: pytorch
                   image: docker.io/kubeflowkatib/pytorch-mnist:latest
-                  imagePullPolicy: Always
                   command:
                     - "python3"
                     - "/opt/pytorch-mnist/mnist.py"
@@ -69,7 +68,6 @@ data:
               containers:
                 - name: pytorch
                   image: docker.io/kubeflowkatib/pytorch-mnist:latest
-                  imagePullPolicy: Always
                   command:
                     - "python3"
                     - "/opt/pytorch-mnist/mnist.py"

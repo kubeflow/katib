@@ -31,9 +31,13 @@
 # For example, to update images from: docker.io/kubeflowkatib/ to: docker.io/private/ registry with tag: v0.12.0, run:
 # ./scripts/v1beta1/update-images.sh docker.io/kubeflowkatib/ docker.io/private/ v0.12.0
 
-OLD_PREFIX=$1
-NEW_PREFIX=$2
-TAG=$3
+set -o errexit
+set -o pipefail
+set -o nounset
+
+OLD_PREFIX=${1:-""}
+NEW_PREFIX=${2:-""}
+TAG=${3:-""}
 
 if [[ -z "$OLD_PREFIX" || -z "$NEW_PREFIX" || -z "$TAG" ]]; then
   echo "Image old prefix, new prefix, and tag must be set"
@@ -83,7 +87,8 @@ PYTORCH_MNIST="pytorch-mnist"
 TF_MNIST_WITH_SUMMARIES="tf-mnist-with-summaries"
 ENAS_GPU="enas-cnn-cifar10-gpu"
 ENAS_CPU="enas-cnn-cifar10-cpu"
-DARTS="darts-cnn-cifar10"
+DARTS_GPU="darts-cnn-cifar10-gpu"
+DARTS_CPU="darts-cnn-cifar10-cpu"
 
 echo -e "Update Katib Trial training container images\n"
 update_yaml_files "./" "${OLD_PREFIX}${MXNET_MNIST}:.*" "${NEW_PREFIX}${MXNET_MNIST}:${TAG}"
@@ -91,6 +96,7 @@ update_yaml_files "./" "${OLD_PREFIX}${PYTORCH_MNIST}:.*" "${NEW_PREFIX}${PYTORC
 update_yaml_files "./" "${OLD_PREFIX}${TF_MNIST_WITH_SUMMARIES}:.*" "${NEW_PREFIX}${TF_MNIST_WITH_SUMMARIES}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${ENAS_GPU}:.*" "${NEW_PREFIX}${ENAS_GPU}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${ENAS_CPU}:.*" "${NEW_PREFIX}${ENAS_CPU}:${TAG}"
-update_yaml_files "./" "${OLD_PREFIX}${DARTS}:.*" "${NEW_PREFIX}${DARTS}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${DARTS_GPU}:.*" "${NEW_PREFIX}${DARTS_GPU}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${DARTS_CPU}:.*" "${NEW_PREFIX}${DARTS_CPU}:${TAG}"
 
 echo "Katib images have been updated"

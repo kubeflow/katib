@@ -55,7 +55,7 @@ spec:
                 command:
                   - "python3"
                   - "/opt/pytorch-mnist/mnist.py"
-                  - "--epochs=2"
+                  - "--epochs=1"
                   - "--log-path=/katib/mnist.json"
                   - "--lr=${trialParameters.learningRate}"
                   - "--momentum=${trialParameters.momentum}"
