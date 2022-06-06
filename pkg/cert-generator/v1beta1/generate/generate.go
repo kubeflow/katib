@@ -39,8 +39,8 @@ import (
 // generateOptions contains values for all certificates.
 type generateOptions struct {
 	namespace         string
-	service           string
-	job               string
+	serviceName       string
+	jobName           string
 	fullServiceDomain string
 }
 
@@ -61,14 +61,14 @@ func NewGenerateCmd(kubeClient client.Client) *cobra.Command {
 	}
 	f := cmd.Flags()
 	f.StringVarP(&o.namespace, "namespace", "n", "kubeflow", "set namespace")
-	f.StringVarP(&o.job, "job", "j", consts.JobName, "set job name")
-	f.StringVarP(&o.service, "service", "s", consts.Service, "set service name")
+	f.StringVarP(&o.jobName, "jobName", "j", consts.JobName, "set job name")
+	f.StringVarP(&o.serviceName, "serviceName", "s", consts.Service, "set service name")
 	return cmd
 }
 
 // run is main function for `generate` subcommand.
 func (o *generateOptions) run(ctx context.Context, kubeClient client.Client) error {
-	o.fullServiceDomain = strings.Join([]string{o.service, o.namespace, "svc"}, ".")
+	o.fullServiceDomain = strings.Join([]string{o.serviceName, o.namespace, "svc"}, ".")
 
 	caKeyPair, err := o.createCACert()
 	if err != nil {
@@ -131,8 +131,8 @@ func (o *generateOptions) createCert(caKeyPair *certificates) (*certificates, er
 			CommonName: o.fullServiceDomain,
 		},
 		DNSNames: []string{
-			o.service,
-			strings.Join([]string{o.service, o.namespace}, "."),
+			o.serviceName,
+			strings.Join([]string{o.serviceName, o.namespace}, "."),
 			o.fullServiceDomain,
 		},
 		NotBefore:             now,
@@ -160,7 +160,7 @@ func (o *generateOptions) createCert(caKeyPair *certificates) (*certificates, er
 func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClient client.Client, caKeyPair *certificates, keyPair *certificates) error {
 
 	certGeneratorJob := &batchv1.Job{}
-	if err := kubeClient.Get(ctx, client.ObjectKey{Namespace: o.namespace, Name: o.job}, certGeneratorJob); err != nil {
+	if err := kubeClient.Get(ctx, client.ObjectKey{Namespace: o.namespace, Name: o.jobName}, certGeneratorJob); err != nil {
 		return err
 	}
 
@@ -181,7 +181,7 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 					APIVersion: "batch/v1",
 					Kind:       "Job",
 					Controller: &isController,
-					Name:       o.job,
+					Name:       o.jobName,
 					UID:        jobUID,
 				},
 			},
