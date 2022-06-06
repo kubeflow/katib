@@ -5,8 +5,43 @@ on:
   - pull_request
 
 jobs:
-  test:
-    name: Test
+  generatetests:
+    name: Generate And Format Test
+    runs-on: ubuntu-latest
+    env:
+      GOPATH: ${{ github.workspace }}/go
+    defaults:
+      run:
+        working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.10
+
+      # Verify that go.mod and go.sum is synchronized
+      - name: Check Go modules
+        run: |
+          if [[ -n $(go mod tidy && git diff --exit-code) ]]; then
+            echo "Please run "go mod tidy" to sync Go modules"
+            exit 1
+          fi
+
+      - name: Run Generate And Go Format Test
+        run: |
+          go mod download
+          if [[ -n $(make check && git diff --exit-code) ]]; then
+            echo "Please run "make generate" to generate codes"
+            exit 1
+          fi
+
+  unittests:
+    name: Unit Test
     runs-on: ubuntu-latest
     env:
       GOPATH: ${{ github.workspace }}/go
@@ -25,22 +60,17 @@ jobs:
         with:
           go-version: 1.17.10
 
-      # Verify that go.mod and go.sum is synchronized
-      - name: Check Go modules
-        run: |
-          if [[ ! -z $(go mod tidy && git diff --exit-code) ]]; then
-            echo "Please run "go mod tidy" to sync Go modules"
-            exit 1
-          fi
-
       - name: Run Go test
-        run: |
-          go mod download
-          make check
-          make test
+        run: go mod download && make test ENVTEST_K8S_VERSION=${{ matrix.kubernetes-version }}
 
       - name: Coveralls report
         uses: shogo82148/actions-goveralls@v1
         with:
           path-to-profile: coverage.out
           working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+
+      strategy:
+        fail-fast: false
+        matrix:
+          # Detail: `setup-envtest list --arch amd64`
+          kubernetes-version: ["1.21.4", "1.22.1", "1.23.5"]
