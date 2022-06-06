@@ -27,18 +27,16 @@ jobs:
       # Verify that go.mod and go.sum is synchronized
       - name: Check Go modules
         run: |
-          if [[ -n $(go mod tidy && git diff --exit-code) ]]; then
-            echo "Please run "go mod tidy" to sync Go modules"
-            exit 1
-          fi
+          go mod tidy &&
+          git add go.* &&
+          git diff --cached --exit-code || (echo 'Please run "go mod tidy" to sync Go modules' && exit 1)
 
       - name: Run Generate And Go Format Test
         run: |
-          go mod download
-          if [[ -n $(make check && git diff --exit-code) ]]; then
-            echo "Please run "make generate" to generate codes"
-            exit 1
-          fi
+          go mod download &&
+          make check &&
+          git add pkg/apis hack/gen-python-sdk &&
+          git diff --cached --exit-code || (echo 'Please run "make check" to generate codes and to format Go codes' && exit 1)
 
   unittests:
     name: Unit Test
@@ -48,7 +46,6 @@ jobs:
     defaults:
       run:
         working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
-
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -69,8 +66,8 @@ jobs:
           path-to-profile: coverage.out
           working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 
-      strategy:
-        fail-fast: false
-        matrix:
-          # Detail: `setup-envtest list --arch amd64`
-          kubernetes-version: ["1.21.4", "1.22.1", "1.23.5"]
+    strategy:
+      fail-fast: false
+      matrix:
+        # Detail: `setup-envtest list --arch amd64`
+        kubernetes-version: ["1.21.4", "1.22.1", "1.23.5"]
