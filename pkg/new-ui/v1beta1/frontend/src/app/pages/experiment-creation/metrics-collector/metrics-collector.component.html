@@ -70,6 +70,7 @@
       <ng-container *ngSwitchCase="kind.CUSTOM">
         <lib-monaco-editor
           [(text)]="customYaml"
+          (textChange)="onTextChange()"
           [language]="'yaml'"
           [readOnly]="false"
           [width]="375"
