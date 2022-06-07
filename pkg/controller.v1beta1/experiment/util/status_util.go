@@ -202,7 +202,7 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 	}
 
 	// First check if MaxFailedTrialCount is reached.
-	if (instance.Spec.MaxFailedTrialCount != nil) && (failedTrialsCount >= *instance.Spec.MaxFailedTrialCount) {
+	if (instance.Spec.MaxFailedTrialCount != nil) && (failedTrialsCount != 0) && (failedTrialsCount >= *instance.Spec.MaxFailedTrialCount) {
 		msg := "Experiment has failed because max failed count has reached"
 		instance.MarkExperimentStatusFailed(ExperimentFailedReason, msg)
 		instance.Status.CompletionTime = &now

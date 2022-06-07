@@ -70,6 +70,7 @@ func main() {
 	if exp.Name == "random" {
 		maxTrials = 3
 		parallelTrials = 2
+		maxFailedTrial = 3
 	}
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
