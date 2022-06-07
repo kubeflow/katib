@@ -186,8 +186,8 @@ func getObjectiveMetricValue(trial trialsv1beta1.Trial) string {
 // UpdateExperimentStatusCondition updates the experiment status.
 func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, isObjectiveGoalReached bool, getSuggestionDone bool) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	completedTrialsCount :=
-		instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled + instance.Status.TrialsEarlyStopped + instance.Status.TrialMetricsUnavailable
+	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed +
+		instance.Status.TrialsKilled + instance.Status.TrialsEarlyStopped + instance.Status.TrialMetricsUnavailable
 	failedTrialsCount := instance.Status.TrialsFailed + instance.Status.TrialMetricsUnavailable
 	activeTrialsCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
 	now := metav1.Now()
@@ -202,9 +202,7 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 	}
 
 	// First check if MaxFailedTrialCount is reached.
-	if (instance.Spec.MaxFailedTrialCount != nil) &&
-		((*instance.Spec.MaxFailedTrialCount != *instance.Spec.MaxTrialCount && failedTrialsCount > *instance.Spec.MaxFailedTrialCount) ||
-			(*instance.Spec.MaxFailedTrialCount == *instance.Spec.MaxTrialCount && failedTrialsCount == *instance.Spec.MaxFailedTrialCount)) {
+	if (instance.Spec.MaxFailedTrialCount != nil) && (failedTrialsCount >= *instance.Spec.MaxFailedTrialCount) {
 		msg := "Experiment has failed because max failed count has reached"
 		instance.MarkExperimentStatusFailed(ExperimentFailedReason, msg)
 		instance.Status.CompletionTime = &now
