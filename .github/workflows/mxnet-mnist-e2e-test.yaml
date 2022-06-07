@@ -27,8 +27,9 @@ jobs:
       matrix:
         # Detail: https://hub.docker.com/r/kindest/node
         # TODO (tenzen-y): We need to consider running tests on more kubernetes versions.
+        # We need to limit the use of only one Kubernetes version to save GH Actions credit.
         # kubernetes-version: ["v1.20.15", "v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
-        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6"]
+        kubernetes-version: ["v1.22.9"]
         # Comma Delimited
         experiments:
           # suggestion-hyperopt
