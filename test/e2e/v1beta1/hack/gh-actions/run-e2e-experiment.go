@@ -200,8 +200,10 @@ func waitExperimentFinish(kclient katibclient.Client, exp *experimentsv1beta1.Ex
 		}
 
 		log.Printf("Waiting for Experiment %s to finish", exp.Name)
-		log.Printf(`Experiment is running: %v Trials, %v Pending Trials, %v Running Trials, %v Succeeded Trials, %v Failed Trials, %v EarlyStopped Trials`,
-			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning, exp.Status.TrialsSucceeded, exp.Status.TrialsFailed, exp.Status.TrialsEarlyStopped)
+		log.Printf("Experiment is running: %v Trials, %v Pending Trials, %v Running Trials, %v Succeeded Trials,"+
+			" %v Failed Trials, %v EarlyStopped Trials, %v MetricsUnavailable Trials",
+			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning, exp.Status.TrialsSucceeded,
+			exp.Status.TrialsFailed, exp.Status.TrialsEarlyStopped, exp.Status.TrialMetricsUnavailable)
 		log.Printf("Current optimal Trial: %v", exp.Status.CurrentOptimalTrial)
 		log.Printf("Experiment conditions: %v\n\n\n", exp.Status.Conditions)
 
