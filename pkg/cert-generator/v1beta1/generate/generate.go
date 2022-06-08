@@ -68,6 +68,12 @@ func NewGenerateCmd(kubeClient client.Client) *cobra.Command {
 
 // run is main function for `generate` subcommand.
 func (o *generateOptions) run(ctx context.Context, kubeClient client.Client) error {
+	controllerService := &corev1.Service{}
+	if err := kubeClient.Get(ctx, client.ObjectKey{Namespace: o.namespace, Name: o.serviceName}, controllerService); err != nil {
+		klog.Errorf("Unable to locate controller service: %s", o.serviceName)
+		return err
+	}
+
 	o.fullServiceDomain = strings.Join([]string{o.serviceName, o.namespace, "svc"}, ".")
 
 	caKeyPair, err := o.createCACert()
