@@ -25,12 +25,13 @@ import (
 )
 
 type TrialsCollector struct {
-	store             cache.Cache
-	trialDeleteCount  *prometheus.CounterVec
-	trialCreateCount  *prometheus.CounterVec
-	trialSucceedCount *prometheus.CounterVec
-	trialFailCount    *prometheus.CounterVec
-	trialCurrent      *prometheus.GaugeVec
+	store                   cache.Cache
+	trialDeleteCount        *prometheus.CounterVec
+	trialCreateCount        *prometheus.CounterVec
+	trialSucceedCount       *prometheus.CounterVec
+	trialFailCount          *prometheus.CounterVec
+	trialMetricsUnavailable *prometheus.CounterVec
+	trialCurrent            *prometheus.GaugeVec
 }
 
 func NewTrialsCollector(store cache.Cache, registerer prometheus.Registerer) *TrialsCollector {
@@ -56,6 +57,11 @@ func NewTrialsCollector(store cache.Cache, registerer prometheus.Registerer) *Tr
 			Help: "The total number of failed trials",
 		}, []string{"namespace"}),
 
+		trialMetricsUnavailable: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Name: "katib_trial_metrics_unavailable_total",
+			Help: "The total number of metrics unavailable trials",
+		}, []string{"namespace"}),
+
 		trialCurrent: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "katib_trials_current",
 			Help: "The number of current katib trials in the cluster",
@@ -71,6 +77,7 @@ func (m *TrialsCollector) Describe(ch chan<- *prometheus.Desc) {
 	m.trialSucceedCount.Describe(ch)
 	m.trialFailCount.Describe(ch)
 	m.trialCreateCount.Describe(ch)
+	m.trialMetricsUnavailable.Describe(ch)
 	m.trialCurrent.Describe(ch)
 }
 
@@ -81,6 +88,7 @@ func (m *TrialsCollector) Collect(ch chan<- prometheus.Metric) {
 	m.trialSucceedCount.Collect(ch)
 	m.trialFailCount.Collect(ch)
 	m.trialCreateCount.Collect(ch)
+	m.trialMetricsUnavailable.Collect(ch)
 	m.trialCurrent.Collect(ch)
 }
 
@@ -98,6 +106,10 @@ func (c *TrialsCollector) IncreaseTrialsSucceededCount(ns string) {
 
 func (c *TrialsCollector) IncreaseTrialsFailedCount(ns string) {
 	c.trialFailCount.WithLabelValues(ns).Inc()
+}
+
+func (c *TrialsCollector) IncreaseTrialsMetricsUnavailableCount(ns string) {
+	c.trialMetricsUnavailable.WithLabelValues(ns).Inc()
 }
 
 // collect gets the current experiments from cache.

@@ -113,12 +113,13 @@ type TrialCondition struct {
 type TrialConditionType string
 
 const (
-	TrialCreated      TrialConditionType = "Created"
-	TrialRunning      TrialConditionType = "Running"
-	TrialSucceeded    TrialConditionType = "Succeeded"
-	TrialKilled       TrialConditionType = "Killed"
-	TrialFailed       TrialConditionType = "Failed"
-	TrialEarlyStopped TrialConditionType = "EarlyStopped"
+	TrialCreated            TrialConditionType = "Created"
+	TrialRunning            TrialConditionType = "Running"
+	TrialSucceeded          TrialConditionType = "Succeeded"
+	TrialKilled             TrialConditionType = "Killed"
+	TrialFailed             TrialConditionType = "Failed"
+	TrialMetricsUnavailable TrialConditionType = "MetricsUnavailable"
+	TrialEarlyStopped       TrialConditionType = "EarlyStopped"
 )
 
 // +genclient

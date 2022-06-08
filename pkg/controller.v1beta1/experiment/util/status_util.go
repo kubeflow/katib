@@ -58,7 +58,13 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	var bestTrialValue float64
 	sts := &instance.Status
 	sts.Trials = 0
-	sts.RunningTrialList, sts.PendingTrialList, sts.FailedTrialList, sts.SucceededTrialList, sts.KilledTrialList, sts.EarlyStoppedTrialList = nil, nil, nil, nil, nil, nil
+	sts.RunningTrialList = nil
+	sts.PendingTrialList = nil
+	sts.FailedTrialList = nil
+	sts.SucceededTrialList = nil
+	sts.KilledTrialList = nil
+	sts.EarlyStoppedTrialList = nil
+	sts.MetricsUnavailableTrialList = nil
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false
 	var objectiveValueGoal float64
@@ -79,6 +85,8 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 			sts.EarlyStoppedTrialList = append(sts.EarlyStoppedTrialList, trial.Name)
 		} else if trial.IsRunning() {
 			sts.RunningTrialList = append(sts.RunningTrialList, trial.Name)
+		} else if trial.IsMetricsUnavailable() {
+			sts.MetricsUnavailableTrialList = append(sts.MetricsUnavailableTrialList, trial.Name)
 		} else {
 			sts.PendingTrialList = append(sts.PendingTrialList, trial.Name)
 		}
@@ -95,7 +103,7 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 			continue
 		}
 
-		//initialize vars to objective metric value of the first trial
+		// initialize vars to objective metric value of the first trial
 		if bestTrialIndex == -1 {
 			bestTrialValue = objectiveMetricValue
 			bestTrialIndex = index
@@ -126,6 +134,7 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	sts.TrialsFailed = int32(len(sts.FailedTrialList))
 	sts.TrialsKilled = int32(len(sts.KilledTrialList))
 	sts.TrialsEarlyStopped = int32(len(sts.EarlyStoppedTrialList))
+	sts.TrialMetricsUnavailable = int32(len(sts.MetricsUnavailableTrialList))
 
 	// if best trial is set
 	if bestTrialIndex != -1 {
@@ -177,8 +186,9 @@ func getObjectiveMetricValue(trial trialsv1beta1.Trial) string {
 // UpdateExperimentStatusCondition updates the experiment status.
 func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *experimentsv1beta1.Experiment, isObjectiveGoalReached bool, getSuggestionDone bool) {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
-	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed + instance.Status.TrialsKilled + instance.Status.TrialsEarlyStopped
-	failedTrialsCount := instance.Status.TrialsFailed
+	completedTrialsCount := instance.Status.TrialsSucceeded + instance.Status.TrialsFailed +
+		instance.Status.TrialsKilled + instance.Status.TrialsEarlyStopped + instance.Status.TrialMetricsUnavailable
+	failedTrialsCount := instance.Status.TrialsFailed + instance.Status.TrialMetricsUnavailable
 	activeTrialsCount := instance.Status.TrialsPending + instance.Status.TrialsRunning
 	now := metav1.Now()
 
@@ -192,7 +202,7 @@ func UpdateExperimentStatusCondition(collector *ExperimentsCollector, instance *
 	}
 
 	// First check if MaxFailedTrialCount is reached.
-	if (instance.Spec.MaxFailedTrialCount != nil) && (failedTrialsCount > *instance.Spec.MaxFailedTrialCount) {
+	if (instance.Spec.MaxFailedTrialCount != nil) && (failedTrialsCount != 0) && (failedTrialsCount >= *instance.Spec.MaxFailedTrialCount) {
 		msg := "Experiment has failed because max failed count has reached"
 		instance.MarkExperimentStatusFailed(ExperimentFailedReason, msg)
 		instance.Status.CompletionTime = &now

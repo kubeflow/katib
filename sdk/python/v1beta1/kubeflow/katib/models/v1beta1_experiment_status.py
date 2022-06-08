@@ -40,10 +40,12 @@ class V1beta1ExperimentStatus(object):
         'failed_trial_list': 'list[str]',
         'killed_trial_list': 'list[str]',
         'last_reconcile_time': 'datetime',
+        'metrics_unavailable_trial_list': 'list[str]',
         'pending_trial_list': 'list[str]',
         'running_trial_list': 'list[str]',
         'start_time': 'datetime',
         'succeeded_trial_list': 'list[str]',
+        'trial_metrics_unavailable': 'int',
         'trials': 'int',
         'trials_early_stopped': 'int',
         'trials_failed': 'int',
@@ -61,10 +63,12 @@ class V1beta1ExperimentStatus(object):
         'failed_trial_list': 'failedTrialList',
         'killed_trial_list': 'killedTrialList',
         'last_reconcile_time': 'lastReconcileTime',
+        'metrics_unavailable_trial_list': 'metricsUnavailableTrialList',
         'pending_trial_list': 'pendingTrialList',
         'running_trial_list': 'runningTrialList',
         'start_time': 'startTime',
         'succeeded_trial_list': 'succeededTrialList',
+        'trial_metrics_unavailable': 'trialMetricsUnavailable',
         'trials': 'trials',
         'trials_early_stopped': 'trialsEarlyStopped',
         'trials_failed': 'trialsFailed',
@@ -74,7 +78,7 @@ class V1beta1ExperimentStatus(object):
         'trials_succeeded': 'trialsSucceeded'
     }
 
-    def __init__(self, completion_time=None, conditions=None, current_optimal_trial=None, early_stopped_trial_list=None, failed_trial_list=None, killed_trial_list=None, last_reconcile_time=None, pending_trial_list=None, running_trial_list=None, start_time=None, succeeded_trial_list=None, trials=None, trials_early_stopped=None, trials_failed=None, trials_killed=None, trials_pending=None, trials_running=None, trials_succeeded=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, completion_time=None, conditions=None, current_optimal_trial=None, early_stopped_trial_list=None, failed_trial_list=None, killed_trial_list=None, last_reconcile_time=None, metrics_unavailable_trial_list=None, pending_trial_list=None, running_trial_list=None, start_time=None, succeeded_trial_list=None, trial_metrics_unavailable=None, trials=None, trials_early_stopped=None, trials_failed=None, trials_killed=None, trials_pending=None, trials_running=None, trials_succeeded=None, local_vars_configuration=None):  # noqa: E501
         """V1beta1ExperimentStatus - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -87,10 +91,12 @@ class V1beta1ExperimentStatus(object):
         self._failed_trial_list = None
         self._killed_trial_list = None
         self._last_reconcile_time = None
+        self._metrics_unavailable_trial_list = None
         self._pending_trial_list = None
         self._running_trial_list = None
         self._start_time = None
         self._succeeded_trial_list = None
+        self._trial_metrics_unavailable = None
         self._trials = None
         self._trials_early_stopped = None
         self._trials_failed = None
@@ -114,6 +120,8 @@ class V1beta1ExperimentStatus(object):
             self.killed_trial_list = killed_trial_list
         if last_reconcile_time is not None:
             self.last_reconcile_time = last_reconcile_time
+        if metrics_unavailable_trial_list is not None:
+            self.metrics_unavailable_trial_list = metrics_unavailable_trial_list
         if pending_trial_list is not None:
             self.pending_trial_list = pending_trial_list
         if running_trial_list is not None:
@@ -122,6 +130,8 @@ class V1beta1ExperimentStatus(object):
             self.start_time = start_time
         if succeeded_trial_list is not None:
             self.succeeded_trial_list = succeeded_trial_list
+        if trial_metrics_unavailable is not None:
+            self.trial_metrics_unavailable = trial_metrics_unavailable
         if trials is not None:
             self.trials = trials
         if trials_early_stopped is not None:
@@ -293,6 +303,29 @@ class V1beta1ExperimentStatus(object):
         self._last_reconcile_time = last_reconcile_time
 
     @property
+    def metrics_unavailable_trial_list(self):
+        """Gets the metrics_unavailable_trial_list of this V1beta1ExperimentStatus.  # noqa: E501
+
+        List of trial names which have been metrics unavailable  # noqa: E501
+
+        :return: The metrics_unavailable_trial_list of this V1beta1ExperimentStatus.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._metrics_unavailable_trial_list
+
+    @metrics_unavailable_trial_list.setter
+    def metrics_unavailable_trial_list(self, metrics_unavailable_trial_list):
+        """Sets the metrics_unavailable_trial_list of this V1beta1ExperimentStatus.
+
+        List of trial names which have been metrics unavailable  # noqa: E501
+
+        :param metrics_unavailable_trial_list: The metrics_unavailable_trial_list of this V1beta1ExperimentStatus.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._metrics_unavailable_trial_list = metrics_unavailable_trial_list
+
+    @property
     def pending_trial_list(self):
         """Gets the pending_trial_list of this V1beta1ExperimentStatus.  # noqa: E501
 
@@ -381,6 +414,29 @@ class V1beta1ExperimentStatus(object):
         """
 
         self._succeeded_trial_list = succeeded_trial_list
+
+    @property
+    def trial_metrics_unavailable(self):
+        """Gets the trial_metrics_unavailable of this V1beta1ExperimentStatus.  # noqa: E501
+
+        How many trials are currently metrics unavailable.  # noqa: E501
+
+        :return: The trial_metrics_unavailable of this V1beta1ExperimentStatus.  # noqa: E501
+        :rtype: int
+        """
+        return self._trial_metrics_unavailable
+
+    @trial_metrics_unavailable.setter
+    def trial_metrics_unavailable(self, trial_metrics_unavailable):
+        """Sets the trial_metrics_unavailable of this V1beta1ExperimentStatus.
+
+        How many trials are currently metrics unavailable.  # noqa: E501
+
+        :param trial_metrics_unavailable: The trial_metrics_unavailable of this V1beta1ExperimentStatus.  # noqa: E501
+        :type: int
+        """
+
+        self._trial_metrics_unavailable = trial_metrics_unavailable
 
     @property
     def trials(self):

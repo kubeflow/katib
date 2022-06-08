@@ -226,7 +226,7 @@ message ParameterAssignment {
  * Current Trial status. It contains Trial's latest condition, start time, completion time, observation.
  */
 message TrialStatus {
-    // Trial can be in one of 6 conditions.
+    // Trial can be in one of 8 conditions.
     // TODO (andreyvelich): Remove unused conditions.
     enum TrialConditionType {
         CREATED = 0;
@@ -234,8 +234,9 @@ message TrialStatus {
         SUCCEEDED = 2;
         KILLED = 3;
         FAILED = 4;
-        EARLYSTOPPED = 5;
-        UNKNOWN = 6;
+        METRICSUNAVAILABLE = 5;
+        EARLYSTOPPED = 6;
+        UNKNOWN = 7;
     }
     string start_time = 1; // Trial start time in RFC3339 format
     string completion_time = 2; // Trial completion time in RFC3339 format

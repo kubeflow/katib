@@ -1777,7 +1777,7 @@ This can be empty if we only care about the objective metric. </p></td>
         </table>
       
         <h3 id="api.v1.beta1.TrialStatus.TrialConditionType">TrialStatus.TrialConditionType</h3>
-        <p>Trial can be in one of 6 conditions.</p><p>TODO (andreyvelich): Remove unused conditions.</p>
+        <p>Trial can be in one of 8 conditions.</p><p>TODO (andreyvelich): Remove unused conditions.</p>
         <table class="enum-table">
           <thead>
             <tr><td>Name</td><td>Number</td><td>Description</td></tr>
@@ -1815,14 +1815,20 @@ This can be empty if we only care about the objective metric. </p></td>
               </tr>
             
               <tr>
-                <td>EARLYSTOPPED</td>
+                <td>METRICSUNAVAILABLE</td>
                 <td>5</td>
                 <td><p></p></td>
               </tr>
             
               <tr>
-                <td>UNKNOWN</td>
+                <td>EARLYSTOPPED</td>
                 <td>6</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>7</td>
                 <td><p></p></td>
               </tr>
             

@@ -86,15 +86,11 @@ func (trial *Trial) IsKilled() bool {
 
 // IsMetricsUnavailable returns true if Trial metrics are not available
 func (trial *Trial) IsMetricsUnavailable() bool {
-	cond := getCondition(trial, TrialSucceeded)
-	if cond != nil && cond.Status == v1.ConditionFalse {
-		return true
-	}
-	return false
+	return hasCondition(trial, TrialMetricsUnavailable)
 }
 
 func (trial *Trial) IsCompleted() bool {
-	return trial.IsSucceeded() || trial.IsFailed() || trial.IsKilled() || trial.IsEarlyStopped()
+	return trial.IsSucceeded() || trial.IsFailed() || trial.IsKilled() || trial.IsEarlyStopped() || trial.IsMetricsUnavailable()
 }
 
 func (trial *Trial) IsEarlyStopped() bool {
@@ -157,4 +153,12 @@ func (trial *Trial) MarkTrialStatusKilled(reason, message string) {
 		trial.setCondition(TrialRunning, v1.ConditionFalse, currentCond.Reason, currentCond.Message)
 	}
 	trial.setCondition(TrialKilled, v1.ConditionTrue, reason, message)
+}
+
+func (trial *Trial) MarkTrialStatusMetricsUnavailable(reason, message string) {
+	currentCond := getCondition(trial, TrialRunning)
+	if currentCond != nil {
+		trial.setCondition(TrialRunning, v1.ConditionFalse, currentCond.Reason, currentCond.Message)
+	}
+	trial.setCondition(TrialMetricsUnavailable, v1.ConditionTrue, reason, message)
 }
