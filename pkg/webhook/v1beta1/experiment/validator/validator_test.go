@@ -761,6 +761,25 @@ spec:
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
+	volumeMountBatchJob := `apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+        - name: job-with-volume-mounts
+          volumeMounts:
+            - mountPath: /tmp
+              readOnly: false
+              name: tmp
+      volumes:
+        - emptyDir: {}
+          name: tmp`
+	volumeMountBatchJobUnstr, err := util.ConvertStringToUnstructured(volumeMountBatchJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
 	tcs := []struct {
 		RunSpec         *unstructured.Unstructured
 		Err             bool
@@ -786,6 +805,12 @@ spec:
 			RunSpec:         notDefaultResourceBatchUnstr,
 			Err:             false,
 			testDescription: "Valid case with nvidia.com/gpu resource in Trial template",
+		},
+		// Valid case with not default Kubernetes resource (nvidia.com/gpu: 1)
+		{
+			RunSpec:         volumeMountBatchJobUnstr,
+			Err:             false,
+			testDescription: "Valid case with volume mount resource in Trial template",
 		},
 	}
 
