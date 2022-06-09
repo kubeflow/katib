@@ -404,7 +404,7 @@ func validatePatchJob(runSpec *unstructured.Unstructured, job interface{}, jobTy
 		// If operation != "remove" some values from trialTemplate were not converted
 		// We can't validate /resources/limits/ because CRDs can have custom k8s resources using defice plugin
 		// ref https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/
-		if operation.Operation != "remove" && !strings.Contains(operation.Path, "/resources/limits/") && !strings.Contains(operation.Path, "/resources/requests/") && !strings.Contains(operation.Path, "/volumeMounts/") {
+		if operation.Operation != "remove" && !strings.Contains(operation.Path, "/resources/limits/") && !strings.Contains(operation.Path, "/resources/requests/") {
 			return fmt.Errorf("unable to convert: %v - %v to %v, converted template: %v", operation.Path, operation.Value, jobType, string(runSpecAfter))
 		}
 	}

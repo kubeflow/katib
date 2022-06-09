@@ -761,7 +761,26 @@ spec:
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
-	volumeMountBatchJob := `apiVersion: batch/v1
+	readonlyVolumeMountBatchJob := `apiVersion: batch/v1
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+        - name: job-with-volume-mounts
+          volumeMounts:
+            - mountPath: /tmp
+              readOnly: true
+              name: tmp
+      volumes:
+        - emptyDir: {}
+          name: tmp`
+	readonlyVolumeMountBatchJobUnstr, err := util.ConvertStringToUnstructured(readonlyVolumeMountBatchJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
+	nonReadonlyVolumeMountBatchJob := `apiVersion: batch/v1
 kind: Job
 spec:
   template:
@@ -775,7 +794,7 @@ spec:
       volumes:
         - emptyDir: {}
           name: tmp`
-	volumeMountBatchJobUnstr, err := util.ConvertStringToUnstructured(volumeMountBatchJob)
+	nonReadonlyVolumeMountBatchJobUnstr, err := util.ConvertStringToUnstructured(nonReadonlyVolumeMountBatchJob)
 	if err != nil {
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
@@ -808,9 +827,14 @@ spec:
 		},
 		// Valid case with not default Kubernetes resource (nvidia.com/gpu: 1)
 		{
-			RunSpec:         volumeMountBatchJobUnstr,
+			RunSpec:         readonlyVolumeMountBatchJobUnstr,
 			Err:             false,
-			testDescription: "Valid case with volume mount resource in Trial template",
+			testDescription: "Valid readonly volume mount resource in Trial template",
+		},
+		{
+			RunSpec:         nonReadonlyVolumeMountBatchJobUnstr,
+			Err:             true,
+			testDescription: "Invalid volume mount resource in Trial template",
 		},
 	}
 
