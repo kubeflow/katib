@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 ENV TARGET_DIR /opt/katib
 ENV SUGGESTION_DIR cmd/suggestion/pbt/v1beta1
@@ -6,7 +6,12 @@ ENV GRPC_HEALTH_PROBE_VERSION v0.4.6
 
 RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
     apt-get -y update && \
-    apt-get -y install gfortran libopenblas-dev liblapack-dev && \
+    apt-get -y install gfortran libopenblas-dev liblapack-dev wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*; \
+    else \
+    apt-get -y update && \
+    apt-get -y install wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*; \
     fi

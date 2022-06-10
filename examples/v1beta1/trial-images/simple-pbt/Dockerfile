@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9-slim
 
 ADD examples/v1beta1/trial-images/simple-pbt /opt/pbt
 WORKDIR /opt/pbt

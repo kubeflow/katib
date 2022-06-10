@@ -1,11 +1,11 @@
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
-  name: random-experiment
-  namespace: 'kubeflow'
+  namespace: kubeflow
+  name: simple-pbt
 spec:
-  maxTrialCount: 12
-  parallelTrialCount: 12
+  maxTrialCount: 2
+  parallelTrialCount: 2
   maxFailedTrialCount: 3
   resumePolicy: FromVolume
   objective:
