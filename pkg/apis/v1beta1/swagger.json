@@ -207,6 +207,14 @@
             "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
           }
         },
+        "labels": {
+          "description": "Suggestion label metadata to attach to Trial job",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "default": ""
+          }
+        },
         "name": {
           "description": "Name of the suggestion",
           "type": "string"
@@ -302,6 +310,14 @@
         "failureCondition": {
           "description": "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
           "type": "string"
+        },
+        "labels": {
+          "description": "Labels that provide additional metadata for services (e.g. Suggestions tracking)",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "default": ""
+          }
         },
         "metricsCollector": {
           "description": "Describes how metrics will be collected",
