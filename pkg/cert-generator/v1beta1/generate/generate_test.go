@@ -85,7 +85,6 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 	}
-
 	oldWebhookCertSecret := &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -93,6 +92,16 @@ func TestGenerate(t *testing.T) {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      consts.Secret,
+			Namespace: testNamespace,
+		},
+	}
+	testControllerService := &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      consts.Service,
 			Namespace: testNamespace,
 		},
 	}
@@ -109,6 +118,7 @@ func TestGenerate(t *testing.T) {
 				testGeneratorJob,
 				testValidatingWebhook,
 				testMutatingWebhook,
+				testControllerService,
 			},
 		},
 		{
@@ -119,6 +129,7 @@ func TestGenerate(t *testing.T) {
 				testValidatingWebhook,
 				testMutatingWebhook,
 				oldWebhookCertSecret,
+				testControllerService,
 			},
 		},
 		{
@@ -127,6 +138,7 @@ func TestGenerate(t *testing.T) {
 			objects: []client.Object{
 				testValidatingWebhook,
 				testMutatingWebhook,
+				testControllerService,
 			},
 		},
 		{
@@ -135,6 +147,7 @@ func TestGenerate(t *testing.T) {
 			objects: []client.Object{
 				testGeneratorJob,
 				testMutatingWebhook,
+				testControllerService,
 			},
 		},
 		{
@@ -143,6 +156,15 @@ func TestGenerate(t *testing.T) {
 			objects: []client.Object{
 				testGeneratorJob,
 				testValidatingWebhook,
+				testControllerService,
+			},
+		},
+		{
+			testDescription: "There is no Service katib-controller",
+			err:             true,
+			objects: []client.Object{
+				testGeneratorJob,
+				testMutatingWebhook,
 			},
 		},
 	}
