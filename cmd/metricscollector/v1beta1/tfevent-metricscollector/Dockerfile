@@ -7,6 +7,13 @@ ADD ./pkg/ ${TARGET_DIR}/pkg/
 ADD ./${METRICS_COLLECTOR_DIR}/ ${TARGET_DIR}/${METRICS_COLLECTOR_DIR}/
 WORKDIR  ${TARGET_DIR}/${METRICS_COLLECTOR_DIR}
 
+RUN if [ "$(uname -m)" = "aarch64" ]; then \
+    apt-get -y update && \
+    apt-get -y install gfortran libpcre3 libpcre3-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*; \
+    fi
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chgrp -R 0 ${TARGET_DIR} \

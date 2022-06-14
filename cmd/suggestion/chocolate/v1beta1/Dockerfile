@@ -16,7 +16,7 @@ ENV SUGGESTION_DIR cmd/suggestion/chocolate/v1beta1
 RUN apt-get -y update && \
     apt-get -y install git && \
     if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
-    apt-get -y install gfortran libopenblas-dev liblapack-dev; \
+    apt-get -y install gfortran libopenblas-dev liblapack-dev g++; \
     fi && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
