@@ -2,6 +2,9 @@ name: E2E Test for katib-ui
 on:
   - pull_request
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   e2e:
     runs-on: ubuntu-20.04
@@ -15,8 +18,8 @@ jobs:
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
-      - name: Set Up KinD Cluster
-        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-kind.sh true
+      - name: Set Up Minikube Cluster
+        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh true
 
       - name: Start Katib
         run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh true false
@@ -24,7 +27,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Detail: https://hub.docker.com/r/kindest/node
         # TODO (tenzen-y): We need to consider running tests on more kubernetes versions.
-        # kubernetes-version: ["v1.20.15", "v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
-        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6"]
+        # kubernetes-version: ["v1.20.15", "v1.21.13", "v1.22.10", "v1.23.7", "v1.24.1"]
+        kubernetes-version: ["v1.21.13", "v1.22.10", "v1.23.7"]
