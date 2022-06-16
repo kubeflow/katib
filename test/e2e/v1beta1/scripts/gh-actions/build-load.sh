@@ -23,9 +23,8 @@ set -o nounset
 cd "$(dirname "$0")"
 
 TRIAL_IMAGES=${1:-""}
-CLUSTER_NAME=${2:-""}
-EXPERIMENTS=${3:-""}
-DEPLOY_KATIB_UI=${4:-false}
+EXPERIMENTS=${2:-""}
+DEPLOY_KATIB_UI=${3:-false}
 
 REGISTRY="docker.io/kubeflowkatib"
 TAG="e2e-test"
@@ -55,8 +54,8 @@ _build_containers() {
 _load_kind_cluster() {
   CONTAINER_NAME=${1:-"katib-controller"}
 
-  echo -e "\nLoading $CONTAINER_NAME image to $CLUSTER_NAME...\n"
-  kind load docker-image "$REGISTRY/$CONTAINER_NAME:$TAG" --name "$CLUSTER_NAME"
+  echo -e "\n\nLoading $CONTAINER_NAME image...\n\n"
+  minikube image load "$REGISTRY/$CONTAINER_NAME:$TAG"
 }
 
 _install_tools() {

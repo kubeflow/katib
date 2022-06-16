@@ -1,10 +1,6 @@
 # Template for e2e tests.
 
 inputs:
-  cluster_name:
-    required: false
-    type: string
-    default: katib-e2e-cluster
   experiments:
     required: true
     type: string
@@ -22,9 +18,9 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set Up KinD Cluster
+    - name: Set Up Minikube Cluster
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-kind.sh ${{ inputs.katib-ui }} ${{ inputs.trial-images }} ${{ inputs.cluster_name }} ${{ inputs.experiments }}
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.trial-images }} ${{ inputs.experiments }}
 
     - name: Set Up Katib
       shell: bash

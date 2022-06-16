@@ -2,6 +2,9 @@ name: E2E Test with pytorch-mnist
 on:
   - pull_request
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   e2e:
     runs-on: ubuntu-20.04
@@ -26,10 +29,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Detail: https://hub.docker.com/r/kindest/node
         # TODO (tenzen-y): We need to consider running tests on more kubernetes versions.
-        # kubernetes-version: ["v1.20.15", "v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
-        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6"]
+        # kubernetes-version: ["v1.20.15", "v1.21.13", "v1.22.10", "v1.23.7", "v1.24.1"]
+        kubernetes-version: ["v1.21.13", "v1.22.10", "v1.23.7"]
         # Comma Delimited
         experiments:
           - "file-metrics-collector,pytorchjob-mnist"
