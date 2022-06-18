@@ -163,6 +163,7 @@ run "suggestion-hyperband" "$CMD_PREFIX/suggestion/hyperband/$VERSION/Dockerfile
 run "suggestion-skopt" "$CMD_PREFIX/suggestion/skopt/$VERSION/Dockerfile"
 run "suggestion-goptuna" "$CMD_PREFIX/suggestion/goptuna/$VERSION/Dockerfile"
 run "suggestion-optuna" "$CMD_PREFIX/suggestion/optuna/$VERSION/Dockerfile"
+run "suggestion-pbt" "$CMD_PREFIX/suggestion/pbt/$VERSION/Dockerfile"
 run "suggestion-enas" "$CMD_PREFIX/suggestion/nas/enas/$VERSION/Dockerfile"
 run "suggestion-darts" "$CMD_PREFIX/suggestion/nas/darts/$VERSION/Dockerfile"
 cleanup_build_cache
