@@ -16,22 +16,16 @@ import { ExperimentK8s } from '../../../models/experiment.k8s.model';
 import { Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
+import { StatusEnum } from 'src/app/enumerations/status.enum';
+
 declare let d3: any;
 
 type PbtPoint = {
-  uid: string;
-  parentUid: string;
   trialName: string;
+  parentUid: string;
   parameters: Object; // all y-axis possible values (parameters + alternativeMetrics)
   generation: number; // generation
   metricValue: number; // evaluation metric
-};
-
-type PbtAnnotation = {
-  uid: string;
-  parentUid: string;
-  generation: number;
-  trialName: string;
 };
 
 @Component({
@@ -48,8 +42,8 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
   selectedName: string; // user selected parameter/metric
   displayTrace: boolean;
 
-  private annotData: { [uid: string]: PbtAnnotation } = {};
-  private trialData = {}; // primary key: trialName
+  private labelData: { [trialName: string]: PbtPoint } = {};
+  private trialData: { [trialName: string]: Object } = {};
   private parameterNames: string[]; // parameter names
   private goalName: string = '';
   private data: PbtPoint[][] = []; // data sorted by generation and segment
@@ -59,7 +53,7 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
   experiment: ExperimentK8s;
 
   @Input()
-  annotationsCsv: string[] = [];
+  labelCsv: string[] = [];
 
   @Input()
   experimentTrialsCsv: string[] = [];
@@ -184,50 +178,54 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.graphHelper || !this.graphHelper.ngInit) {
-      // Wait for view to properly initialize
-      return;
+      console.warn(
+        'graphHelper not initialized yet, attempting manual call to ngOnInit()',
+      );
+      this.ngOnInit();
     }
     // Recompute formatted plotting points on data input changes
     let updatePoints = false;
     if (changes.experimentTrialsCsv && this.experimentTrialsCsv) {
       let trialArr = d3.csv.parse(this.experimentTrialsCsv);
       for (let trial of trialArr) {
-        let existingEntry = this.trialData[trial['trialName']];
-        if (existingEntry != trial) {
+        if (
+          trial['Status'] == StatusEnum.SUCCEEDED &&
+          !this.trialData.hasOwnProperty(trial['trialName'])
+        ) {
           this.trialData[trial['trialName']] = trial;
           updatePoints = true;
         }
       }
     }
 
-    if (changes.annotationsCsv && this.annotationsCsv) {
-      let annotArr = d3.csv.parse(this.annotationsCsv);
-      for (let annot of annotArr) {
-        let newEntry: PbtAnnotation = {
-          trialName: annot['trialName'],
-          uid: annot['trialName'],
-          parentUid: annot['pbt.suggestion.katib.kubeflow.org/parent'],
-          generation: parseInt(
-            annot['pbt.suggestion.katib.kubeflow.org/generation'],
-          ),
-        };
-        let existingEntry = this.annotData[newEntry.uid];
-        if (existingEntry != newEntry) {
-          this.annotData[newEntry.uid] = newEntry;
-          updatePoints = true;
+    if (changes.labelCsv && this.labelCsv) {
+      let labelArr = d3.csv.parse(this.labelCsv);
+      for (let label of labelArr) {
+        if (this.labelData.hasOwnProperty(label['trialName'])) {
+          continue;
         }
+        let newEntry: PbtPoint = {
+          trialName: label['trialName'],
+          parentUid: label['pbt.suggestion.katib.kubeflow.org/parent'],
+          generation: parseInt(
+            label['pbt.suggestion.katib.kubeflow.org/generation'],
+          ),
+          parameters: undefined,
+          metricValue: undefined,
+        };
+        this.labelData[newEntry.trialName] = newEntry;
+        updatePoints = true;
       }
     }
 
     if (updatePoints) {
       // Lazy; reprocess all points
       let points: PbtPoint[] = [];
-      Object.values(this.annotData).forEach(entry => {
+      Object.values(this.labelData).forEach(entry => {
         let point = {} as PbtPoint;
-        point.uid = entry.uid;
+        point.trialName = entry.trialName;
         point.generation = entry.generation;
         point.parentUid = entry.parentUid;
-        point.trialName = entry.trialName;
 
         // Find corresponding trial data
         let trial = this.trialData[point.trialName];
@@ -247,7 +245,7 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
       // Group seeds
       let remaining_points = {};
       for (let p of points) {
-        remaining_points[p.uid] = p;
+        remaining_points[p.trialName] = p;
       }
 
       this.data = [];
@@ -258,9 +256,9 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
           let v = seed;
           while (v) {
             segment.push(v);
-            let delete_uid = v.uid;
+            let delete_entry = v.trialName;
             v = remaining_points[v.parentUid];
-            delete remaining_points[delete_uid];
+            delete remaining_points[delete_entry];
           }
           this.data.push(segment);
         }
@@ -323,7 +321,7 @@ export class PbtTabComponent implements OnChanges, OnInit, AfterViewInit {
   }
 
   private getRangeX() {
-    const xValues = Object.values(this.annotData).map(entry => {
+    const xValues = Object.values(this.labelData).map(entry => {
       return entry.generation;
     });
     return d3.scale

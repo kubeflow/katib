@@ -30,7 +30,7 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
   columns: string[] = [];
   details: string[][] = [];
   experimentTrialsCsv: string;
-  annotationsCsv: string;
+  labelCsv: string;
   hoveredTrial: number;
   experimentDetails: ExperimentK8s;
   showGraph: boolean;
@@ -96,9 +96,9 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
         this.showGraph = true;
       });
     this.backendService
-      .getExperimentAnnotationsInfo(this.name, this.namespace)
+      .getExperimentLabelInfo(this.name, this.namespace)
       .subscribe(response => {
-        this.annotationsCsv = response;
+        this.labelCsv = response;
       });
     this.backendService
       .getExperiment(this.name, this.namespace)

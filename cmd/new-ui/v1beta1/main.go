@@ -59,7 +59,7 @@ func main() {
 
 	http.HandleFunc("/katib/fetch_hp_job_info/", kuh.FetchHPJobInfo)
 	http.HandleFunc("/katib/fetch_hp_job_trial_info/", kuh.FetchHPJobTrialInfo)
-	http.HandleFunc("/katib/fetch_hp_job_annotation_info/", kuh.FetchHPJobAnnotationInfo)
+	http.HandleFunc("/katib/fetch_hp_job_label_info/", kuh.FetchHPJobLabelInfo)
 	http.HandleFunc("/katib/fetch_nas_job_info/", kuh.FetchNASJobInfo)
 
 	http.HandleFunc("/katib/fetch_trial_templates/", kuh.FetchTrialTemplates)

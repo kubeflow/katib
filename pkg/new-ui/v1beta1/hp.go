@@ -72,13 +72,13 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	log.Printf("Got Trial List")
 
 	// append a column for the Pipeline UID associated with the Trial
-	if hasAnnotation(trialList.Items, kfpRunIDAnnotation) {
+	if havePipelineUID(trialList.Items) {
 		resultText += ",KFP Run"
 	}
 
 	foundPipelineUID := false
 	for _, t := range trialList.Items {
-		runUid, ok := t.Spec.Annotations[kfpRunIDAnnotation]
+		runUid, ok := t.GetAnnotations()[kfpRunIDAnnotation]
 		if !ok {
 			log.Printf("Trial %s has no pipeline run.", t.Name)
 			runUid = ""
@@ -246,12 +246,10 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func (k *KatibUIHandler) FetchHPJobAnnotationInfo(w http.ResponseWriter, r *http.Request) {
+func (k *KatibUIHandler) FetchHPJobLabelInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
 	namespace := r.URL.Query()["namespace"][0]
-
-	resultText := "trialName"
 
 	trialList, err := k.katibClient.GetTrialList(experimentName, namespace)
 	if err != nil {
@@ -261,34 +259,37 @@ func (k *KatibUIHandler) FetchHPJobAnnotationInfo(w http.ResponseWriter, r *http
 	}
 	log.Printf("Got Trial List")
 
-	// Find set(annotations)
-	annotations := map[string]int{}
+	labelList := map[string]int{}
+	labelList["trialName"] = 0
+	var trialRes [][]string
 	for _, t := range trialList.Items {
-		for a := range t.Spec.Annotations {
-			annotations[a] = 0
-		}
-	}
-
-	// Set the index of each annotation
-	a_index := 0
-	for a := range annotations {
-		annotations[a] = a_index
-		resultText += "," + a
-		a_index++
-	}
-	log.Printf("Got Annotations List")
-
-	for _, t := range trialList.Items {
-		trialResText := make([]string, len(annotations))
-		for a, n := range annotations {
-			a_value, ok := t.Spec.Annotations[a]
-			if !ok {
-				log.Printf("Trial %s has no annotation value for %s", t.Name, a)
-				a_value = ""
+		trialResText := make([]string, len(labelList))
+		trialResText[labelList["trialName"]] = t.Name
+		for k, v := range t.ObjectMeta.Labels {
+			i, exists := labelList[k]
+			if !exists {
+				i = len(labelList)
+				labelList[k] = i
+				trialResText = append(trialResText, "")
 			}
-			trialResText[n] = a_value
+			trialResText[i] = v
 		}
-		resultText += "\n" + t.Name + "," + strings.Join(trialResText, ",")
+		trialRes = append(trialRes, trialResText)
+	}
+
+	// Format header output
+	headerArr := make([]string, len(labelList))
+	for k, v := range labelList {
+		headerArr[v] = k
+	}
+	resultText := strings.Join(headerArr, ",")
+
+	// Format entry output
+	for _, row := range trialRes {
+		resultText += "\n" + strings.Join(row, ",")
+		for j := 0; j < len(labelList)-len(row); j++ {
+			resultText += ","
+		}
 	}
 
 	log.Printf("Logs parsed, results:\n %v", resultText)
