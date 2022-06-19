@@ -89,6 +89,7 @@ ENAS_GPU="enas-cnn-cifar10-gpu"
 ENAS_CPU="enas-cnn-cifar10-cpu"
 DARTS_GPU="darts-cnn-cifar10-gpu"
 DARTS_CPU="darts-cnn-cifar10-cpu"
+SIMPLE_PBT="simple-pbt"
 
 echo -e "Update Katib Trial training container images\n"
 update_yaml_files "./" "${OLD_PREFIX}${MXNET_MNIST}:.*" "${NEW_PREFIX}${MXNET_MNIST}:${TAG}"
@@ -98,5 +99,6 @@ update_yaml_files "./" "${OLD_PREFIX}${ENAS_GPU}:.*" "${NEW_PREFIX}${ENAS_GPU}:$
 update_yaml_files "./" "${OLD_PREFIX}${ENAS_CPU}:.*" "${NEW_PREFIX}${ENAS_CPU}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${DARTS_GPU}:.*" "${NEW_PREFIX}${DARTS_GPU}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${DARTS_CPU}:.*" "${NEW_PREFIX}${DARTS_CPU}:${TAG}"
+update_yaml_files "./" "${OLD_PREFIX}${SIMPLE_PBT}:.*" "${NEW_PREFIX}${SIMPLE_PBT}:${TAG}"
 
 echo "Katib images have been updated"

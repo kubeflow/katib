@@ -2,6 +2,9 @@ name: E2E Test with simple-pbt
 on:
   - pull_request
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   e2e:
     runs-on: ubuntu-20.04

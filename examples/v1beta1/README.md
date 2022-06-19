@@ -44,7 +44,7 @@ Experiments for the following algorithms:
 
 - [HyperBand](./hp-tuning/hyperband.yaml)
 
-- [PBT](./hp-tuning/pbt.yaml)
+- [PBT](./hp-tuning/simple-pbt.yaml)
 
 ### Neural Architecture Search
 

@@ -77,7 +77,7 @@ KATIB_EXPERIMENTS = {
     "multivariate-tpe":                       "examples/v1beta1/hp-tuning/multivariate-tpe.yaml",
     "cmaes":                                  "examples/v1beta1/hp-tuning/cma-es.yaml",
     "hyperband":                              "examples/v1beta1/hp-tuning/hyperband.yaml",
-    "pbt":                                    "examples/v1beta1/hp-tuning/pbt.yaml",
+    "pbt":                                    "examples/v1beta1/hp-tuning/simple-pbt.yaml",
     "enas":                                   "examples/v1beta1/nas/enas-cpu.yaml",
     "darts":                                  "examples/v1beta1/nas/darts-cpu.yaml",
     "pytorchjob":                             "examples/v1beta1/kubeflow-training-operator/pytorchjob-mnist.yaml",

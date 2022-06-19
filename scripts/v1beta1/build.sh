@@ -136,7 +136,7 @@ else
   docker build --platform linux/amd64 -t "${REGISTRY}/darts-cnn-cifar10-gpu:${TAG}" -f examples/${VERSION}/trial-images/darts-cnn-cifar10/Dockerfile.gpu .
 
   echo -e "\nBuilding dynamic learning rate training container example for PBT...\n"
-  docker build --platform linux/amd64 -t "${REGISTRY}/simple-pbt:${TAG}" -f examples/${VERSION}/trial-images/pbt/Dockerfile .
+  docker build --platform linux/amd64 -t "${REGISTRY}/simple-pbt:${TAG}" -f examples/${VERSION}/trial-images/simple-pbt/Dockerfile .
 fi
 
 echo -e "\nBuilding Tensorflow with summaries mnist training container example...\n"

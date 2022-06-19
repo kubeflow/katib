@@ -43,7 +43,6 @@ spec:
             containers:
               - name: training-container
                 image: docker.io/kubeflowkatib/simple-pbt:latest
-                imagePullPolicy: Always
                 command:
                   - "python3"
                   - "/opt/pbt/pbt_test.py"
