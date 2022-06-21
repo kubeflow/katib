@@ -80,6 +80,9 @@ docker push "${REGISTRY}/suggestion-enas:${TAG}"
 echo -e "\nPushing DARTS suggestion...\n"
 docker push "${REGISTRY}/suggestion-darts:${TAG}"
 
+echo -e "\nPushing PBT suggestion...\n"
+docker push "${REGISTRY}/suggestion-pbt:${TAG}"
+
 # Early stopping images
 echo -e "\nPushing early stopping images...\n"
 
@@ -106,5 +109,8 @@ docker push "${REGISTRY}/enas-cnn-cifar10-cpu:${TAG}"
 
 echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS...\n"
 docker push "${REGISTRY}/darts-cnn-cifar10:${TAG}"
+
+echo -e "\nPushing dynamic learning rate training container example for PBT...\n"
+docker push "${REGISTRY}/simple-pbt:${TAG}"
 
 echo -e "\nAll Katib images with ${TAG} tag have been pushed successfully!\n"

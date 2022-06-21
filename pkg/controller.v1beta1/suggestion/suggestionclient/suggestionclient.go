@@ -170,14 +170,27 @@ func (g *General) SyncAssignments(
 		}
 	}
 
+	trialAssignments := []suggestionsv1beta1.TrialAssignment{}
 	for _, t := range responseSuggestion.ParameterAssignments {
-		instance.Status.Suggestions = append(instance.Status.Suggestions,
-			suggestionsv1beta1.TrialAssignment{
-				Name:                 fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8)),
-				ParameterAssignments: composeParameterAssignments(t.Assignments),
-				EarlyStoppingRules:   earlyStoppingRules,
-			})
+		var trialName string
+		if t.TrialName != "" {
+			trialName = t.TrialName
+		} else {
+			trialName = fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8))
+		}
+
+		assignment := suggestionsv1beta1.TrialAssignment{
+			Name:                 trialName,
+			ParameterAssignments: composeParameterAssignments(t.Assignments),
+			EarlyStoppingRules:   earlyStoppingRules,
+		}
+		if t.Labels != nil {
+			assignment.Labels = t.Labels
+		}
+		trialAssignments = append(trialAssignments, assignment)
 	}
+
+	instance.Status.Suggestions = append(instance.Status.Suggestions, trialAssignments...)
 	instance.Status.SuggestionCount = int32(len(instance.Status.Suggestions))
 
 	if responseSuggestion.Algorithm != nil {
@@ -348,6 +361,9 @@ func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial
 				CompletionTime: convertTrialStatusTime(t.Status.CompletionTime),
 				Observation:    convertTrialObservation(t.Spec.Objective.MetricStrategies, t.Status.Observation),
 			},
+		}
+		if t.Spec.Labels != nil {
+			trial.Spec.Labels = t.Spec.Labels
 		}
 		if t.Spec.Objective.Goal != nil {
 			trial.Spec.Objective.Goal = *t.Spec.Objective.Goal

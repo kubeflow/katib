@@ -125,6 +125,15 @@ custom algorithm.
       <td>
       </td>
     </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#pbt">Population Based Training</a>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
   </tbody>
 </table>
 

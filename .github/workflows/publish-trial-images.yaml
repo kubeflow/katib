@@ -43,3 +43,5 @@ jobs:
             dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.cpu
           - trial-name: darts-cnn-cifar10-gpu
             dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.gpu
+          - trial-name: simple-pbt
+            dockerfile: examples/v1beta1/trial-images/simple-pbt/Dockerfile

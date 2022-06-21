@@ -811,6 +811,7 @@ func newFakeTrials() []trialsv1beta1.Trial {
 						Value: "0.1",
 					},
 				},
+				Labels: map[string]string{},
 			},
 			Status: trialsv1beta1.TrialStatus{
 				StartTime:      newFakeTime(),
@@ -835,6 +836,7 @@ func newFakeTrials() []trialsv1beta1.Trial {
 						Value: "0.2",
 					},
 				},
+				Labels: map[string]string{},
 			},
 			Status: trialsv1beta1.TrialStatus{
 				Conditions: fakeConditions,
@@ -879,6 +881,8 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 			},
 		},
 	}
+
+	fakeLabels := make(map[string]string)
 
 	fakeObjective := &suggestionapi.ObjectiveSpec{
 		Type:                  suggestionapi.ObjectiveType_MAXIMIZE,
@@ -955,6 +959,7 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 							},
 						},
 					},
+					Labels: fakeLabels,
 				},
 				Status: &suggestionapi.TrialStatus{
 					StartTime:      newFakeTime().Format(timeFormat),
@@ -979,6 +984,7 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 							},
 						},
 					},
+					Labels: fakeLabels,
 				},
 				Status: &suggestionapi.TrialStatus{
 					StartTime:      "",

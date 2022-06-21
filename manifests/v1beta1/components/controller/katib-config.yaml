@@ -57,6 +57,19 @@ data:
       },
       "darts": {
         "image": "docker.io/kubeflowkatib/suggestion-darts:latest"
+      },
+      "pbt": {
+        "image": "docker.io/kubeflowkatib/suggestion-pbt:latest",
+        "persistentVolumeClaimSpec": {
+          "accessModes": [
+            "ReadWriteMany"
+          ],
+          "resources": {
+            "requests": {
+              "storage": "5Gi"
+            }
+          }
+        }
       }
     }
   early-stopping: |-

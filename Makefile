@@ -128,6 +128,7 @@ prepare-pytest:
 	pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
 	pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
 	pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/pbt/v1beta1/requirements.txt
 	pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
 	pip install -r cmd/metricscollector/v1beta1/tfevent-metricscollector/requirements.txt
 

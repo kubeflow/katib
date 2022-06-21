@@ -213,8 +213,10 @@ message TrialSpec {
     message ParameterAssignments {
         repeated ParameterAssignment assignments = 1;
     }
+
     ObjectiveSpec objective = 2; // Objective specification for the Trial.
     ParameterAssignments parameter_assignments = 3; // List of assignments generated for the Trial.
+    map<string, string> labels = 4; // Map of labels assigned to the Trial
 }
 
 message ParameterAssignment {
@@ -303,7 +305,12 @@ message GetSuggestionsRequest {
 message GetSuggestionsReply {
     message ParameterAssignments {
         repeated ParameterAssignment assignments = 1;
+        // Optional field to override the trial name
+        string trial_name = 2;
+        // Optional field to add labels to the generated Trials
+        map<string, string> labels = 3;
     }
+
     repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
     repeated EarlyStoppingRule early_stopping_rules = 3;
