@@ -1,5 +1,4 @@
-# TODO (tenzen-y): Upgrade Python version and Pytorch version
-FROM python:3.7-slim
+FROM python:3.9-slim
 
 ADD examples/v1beta1/trial-images/pytorch-mnist /opt/pytorch-mnist
 WORKDIR /opt/pytorch-mnist
