@@ -18,11 +18,7 @@ jobs:
           set -eux
           sudo apt update
           sudo apt install python3-setuptools
-          sudo pip3 install yamllint black flake8
-
-      - name: Check YAML
-        run: |
-          yamllint -d "{extends: default, rules: {line-length: disable}}" examples/* manifests/*
+          sudo pip3 install black flake8
 
       - name: Check black
         run: black --check operators/*/src
