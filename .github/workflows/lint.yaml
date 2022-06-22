@@ -13,13 +13,11 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: |
-          set -eux
-          sudo apt update
-          sudo apt install python3-setuptools
-          sudo pip3 install yamllint
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
 
       - name: Check YAML
-        run: |
-          yamllint -d "{extends: default, rules: {line-length: disable}}" examples/* manifests/*
+        run: make yamllint
+          
