@@ -1,3 +1,4 @@
+---
 # This example shows how you can use Tekton Pipelines in Katib, transfer parameters from one Task to another and run HP job.
 # It uses simple random algorithm and tunes only learning rate.
 # Pipelines contains 2 Tasks, first is data-preprocessing second is model-training.
