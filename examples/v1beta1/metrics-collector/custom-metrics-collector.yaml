@@ -1,3 +1,4 @@
+---
 # TODO (andreyvelich) This metrics collector image (kubeflowkatib/custom-metrics-collector) doesn't work in v1beta1.
 # It is currently using api.v1.alpha3.Manager instead of api.v1.beta1.Manager to report metrics.
 apiVersion: kubeflow.org/v1beta1
