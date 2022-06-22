@@ -1,4 +1,5 @@
 HAS_LINT := $(shell command -v golangci-lint;)
+HAS_YAMLLINT := $(shell command -v yamllint;)
 HAS_SHELLCHECK := $(shell command -v shellcheck;)
 HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
 
@@ -35,6 +36,13 @@ ifndef HAS_LINT
 	@echo "golangci-lint has been installed"
 endif
 	hack/verify-golangci-lint.sh
+
+yamllint:
+ifndef HAS_YAMLLINT
+	pip install yamllint
+	@echo "yamllint has been installed"
+endif
+	hack/verify-yamllint.sh
 
 vet:
 	go vet ./pkg/... ./cmd/...
