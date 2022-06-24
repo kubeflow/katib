@@ -26,7 +26,6 @@
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": ["src/styles.scss", "src/assets/css/d3.parcoords.css"],
             "scripts": [
-              "node_modules/d3/d3.js",
               "node_modules/ace-builds/src-min/ace.js",
               "node_modules/ace-builds/src-min/mode-yaml.js",
               "node_modules/ace-builds/src-min/theme-xcode.js"

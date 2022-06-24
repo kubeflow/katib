@@ -14,7 +14,6 @@ import { ExperimentDetailsComponent } from './experiment-details.component';
 import { TrialsTableModule } from './trials-table/trials-table.module';
 import { ExperimentOverviewModule } from './overview/experiment-overview.module';
 import { ExperimentDetailsTabModule } from './details/experiment-details-tab.module';
-import { TrialsGraphModule } from './trials-graph/trials-graph.module';
 import { ExperimentYamlModule } from './yaml/experiment-yaml.module';
 
 @NgModule({
@@ -29,7 +28,6 @@ import { ExperimentYamlModule } from './yaml/experiment-yaml.module';
     PanelModule,
     ExperimentOverviewModule,
     ExperimentDetailsTabModule,
-    TrialsGraphModule,
     MatProgressSpinnerModule,
     ExperimentYamlModule,
     TitleActionsToolbarModule,

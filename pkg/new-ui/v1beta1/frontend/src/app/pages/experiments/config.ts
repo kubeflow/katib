@@ -3,7 +3,6 @@ import {
   StatusValue,
   ActionListValue,
   ActionIconValue,
-  TRUNCATE_TEXT_SIZE,
   TableConfig,
   DateTimeValue,
   TemplateValue,
