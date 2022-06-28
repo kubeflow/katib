@@ -146,8 +146,7 @@ def main():
     best_top1 = 0.
 
     for epoch in range(num_epochs):
-        lr_scheduler.step()
-        lr = lr_scheduler.get_lr()[0]
+        lr = lr_scheduler.get_last_lr()
 
         model.print_alphas()
 
@@ -155,6 +154,7 @@ def main():
         print(">>> Training")
         train(train_loader, valid_loader, model, architect, w_optim, alpha_optim,
               lr, epoch, num_epochs, device, w_grad_clip, print_step)
+        lr_scheduler.step()
 
         # Validation
         print("\n>>> Validation")

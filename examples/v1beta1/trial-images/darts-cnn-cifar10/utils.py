@@ -38,7 +38,7 @@ class AverageMeter():
 
 
 def accuracy(output, target, topk=(1,)):
-    """ Computes the precision@k  for the specified values of k """
+    """ Computes the precision@k for the specified values of k """
     maxk = max(topk)
     batch_size = target.size(0)
 
@@ -53,7 +53,7 @@ def accuracy(output, target, topk=(1,)):
 
     res = []
     for k in topk:
-        correct_k = correct[:k].view(-1).float().sum(0)
+        correct_k = correct[:k].contiguous().view(-1).float().sum(0)
         res.append(correct_k.mul_(1.0 / batch_size))
 
     return res
