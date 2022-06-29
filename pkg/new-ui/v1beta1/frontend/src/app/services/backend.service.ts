@@ -11,6 +11,7 @@ import {
 
 import { Experiments } from '../models/experiment.model';
 import { ExperimentK8s } from '../models/experiment.k8s.model';
+import { TrialK8s } from '../models/trial.k8s.model';
 import { TrialTemplateResponse } from '../models/trial-templates.model';
 
 @Injectable({
@@ -78,6 +79,11 @@ export class KWABackendService extends BackendService {
 
   getTrial(name: string, namespace: string): Observable<any> {
     const url = `/katib/fetch_hp_job_trial_info/?trialName=${name}&namespace=${namespace}`;
+    return this.http.get(url).pipe(catchError(error => this.parseError(error)));
+  }
+
+  getTrialInfo(name: string, namespace: string): Observable<TrialK8s> {
+    const url = `/katib/fetch_trial/?trialName=${name}&namespace=${namespace}`;
     return this.http.get(url).pipe(catchError(error => this.parseError(error)));
   }
 
