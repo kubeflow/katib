@@ -23,7 +23,7 @@ cd "$(dirname "$0")"
 DEPLOY_KATIB_UI=${1:-false}
 DEPLOY_TRAINING_OPERATOR=${2:-false}
 E2E_TEST_IMAGE_TAG="e2e-test"
-TRAINING_OPERATOR_VERSION="v1.4.0"
+TRAINING_OPERATOR_VERSION="v1.5.0-rc.0"
 
 echo "Start to install Katib"
 
