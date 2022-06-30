@@ -107,8 +107,11 @@ docker push "${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}"
 echo -e "\nPushing Keras CIFAR-10 CNN training container example for ENAS with CPU support...\n"
 docker push "${REGISTRY}/enas-cnn-cifar10-cpu:${TAG}"
 
-echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS...\n"
-docker push "${REGISTRY}/darts-cnn-cifar10:${TAG}"
+echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS with CPU support...\n"
+docker push "${REGISTRY}/darts-cnn-cifar10-cpu:${TAG}"
+
+echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS with GPU support...\n"
+docker push "${REGISTRY}/darts-cnn-cifar10-gpu:${TAG}"
 
 echo -e "\nPushing dynamic learning rate training container example for PBT...\n"
 docker push "${REGISTRY}/simple-pbt:${TAG}"
