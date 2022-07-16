@@ -98,8 +98,11 @@ docker push "${REGISTRY}/mxnet-mnist:${TAG}"
 echo -e "\nPushing Tensorflow with summaries mnist training container example...\n"
 docker push "${REGISTRY}/tf-mnist-with-summaries:${TAG}"
 
-echo -e "\nPushing PyTorch mnist training container example...\n"
-docker push "${REGISTRY}/pytorch-mnist:${TAG}"
+echo -e "\nPushing PyTorch mnist training container example with CPU support...\n"
+docker push "${REGISTRY}/pytorch-mnist-cpu:${TAG}"
+
+echo -e "\nPushing PyTorch mnist training container example with GPU support...\n"
+docker push "${REGISTRY}/pytorch-mnist-gpu:${TAG}"
 
 echo -e "\nPushing Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
 docker push "${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}"
