@@ -30,7 +30,7 @@ REGISTRY="docker.io/kubeflowkatib"
 TAG="e2e-test"
 VERSION="v1beta1"
 CMD_PREFIX="cmd"
-SPECIFIED_DEVICE_TYPE_IMAGES=("enas-cnn-cifar10-cpu" "darts-cnn-cifar10-cpu")
+SPECIFIED_DEVICE_TYPE_IMAGES=("enas-cnn-cifar10-cpu" "darts-cnn-cifar10-cpu" "pytorch-mnist-cpu")
 
 IFS="," read -r -a TRIAL_IMAGE_ARRAY <<< "$TRIAL_IMAGES"
 IFS="," read -r -a EXPERIMENT_ARRAY <<< "$EXPERIMENTS"
@@ -51,7 +51,7 @@ _build_containers() {
   docker build --platform "$(uname -m)" -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
 }
 
-_load_kind_cluster() {
+_load_minikube_cluster() {
   CONTAINER_NAME=${1:-"katib-controller"}
 
   echo -e "\n\nLoading $CONTAINER_NAME image...\n\n"
@@ -99,7 +99,7 @@ run() {
     for s in "${suggestions[@]}"; do
       if [ "$s" == "$CONTAINER_NAME" ]; then
         _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
-        _load_kind_cluster "$CONTAINER_NAME"
+        _load_minikube_cluster "$CONTAINER_NAME"
         break
       fi
     done
@@ -126,7 +126,7 @@ run() {
     for e in "${earlystoppings[@]}"; do
       if [ "$e" == "$CONTAINER_NAME" ]; then
         _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
-        _load_kind_cluster "$CONTAINER_NAME"
+        _load_minikube_cluster "$CONTAINER_NAME"
         break
       fi
     done
@@ -134,7 +134,7 @@ run() {
   # Others
   else
     _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
-    _load_kind_cluster "$CONTAINER_NAME"
+    _load_minikube_cluster "$CONTAINER_NAME"
   fi
 }
 

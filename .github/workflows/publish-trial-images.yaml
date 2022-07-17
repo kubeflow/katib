@@ -31,8 +31,10 @@ jobs:
         include:
           - trial-name: mxnet-mnist
             dockerfile: examples/v1beta1/trial-images/mxnet-mnist/Dockerfile
-          - trial-name: pytorch-mnist
-            dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile
+          - trial-name: pytorch-mnist-cpu
+            dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile.cpu
+          - trial-name: pytorch-mnist-gpu
+            dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile.gpu
           - trial-name: tf-mnist-with-summaries
             dockerfile: examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile
           - trial-name: enas-cnn-cifar10-gpu

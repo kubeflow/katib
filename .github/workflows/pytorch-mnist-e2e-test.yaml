@@ -24,7 +24,7 @@ jobs:
           experiments: ${{ matrix.experiments }}
           training-operator: true
           # Comma Delimited
-          trial-images: pytorch-mnist
+          trial-images: pytorch-mnist-cpu
 
     strategy:
       fail-fast: false
