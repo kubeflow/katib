@@ -24,7 +24,7 @@ spec:
         - name: katib-postgres
           image: postgres:14.3-alpine
           envFrom:
-          - secretRef:
+            - secretRef:
               name: katib-postgres-secrets
           env:
             - name: PGDATA
@@ -33,36 +33,10 @@ spec:
             - name: postgres
               containerPort: 5432
               protocol: TCP
-          # readinessProbe:
-          #   exec:
-          #     command:
-          #       - "/bin/bash"
-          #       - "-c"
-          #       - "mysql -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
-          #   initialDelaySeconds: 10
-          #   periodSeconds: 5
-          #   failureThreshold: 10
-          # livenessProbe:
-          #   exec:
-          #     command:
-          #       - "/bin/bash"
-          #       - "-c"
-          #       - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-          #   initialDelaySeconds: 10
-          #   periodSeconds: 5
-          #   failureThreshold: 10
-          # startupProbe:
-          #   exec:
-          #     command:
-          #       - "/bin/bash"
-          #       - "-c"
-          #       - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-          #   periodSeconds: 15
-          #   failureThreshold: 60
       #     volumeMounts:
-      #       - name: katib-mysql
-      #         mountPath: /var/lib/mysql
+      #       - name: katib-postgres
+      #         mountPath: /var/lib/postgresql/data
       # volumes:
-      #   - name: katib-mysql
+      #   - name: katib-postgres
       #     persistentVolumeClaim:
-      #       claimName: katib-mysql
+      #       claimName: katib-postgres
