@@ -23,12 +23,9 @@ spec:
           image: docker.io/kubeflowkatib/katib-db-manager
           env:
             - name: DB_NAME
-              value: "mysql"
+              value: "postgres"
             - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: katib-mysql-secrets
-                  key: MYSQL_ROOT_PASSWORD
+              value: "katib"
           command:
             - "./katib-db-manager"
           ports:
