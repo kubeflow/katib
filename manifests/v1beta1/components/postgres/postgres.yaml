@@ -25,7 +25,7 @@ spec:
           image: postgres:14.3-alpine
           envFrom:
             - secretRef:
-              name: katib-postgres-secrets
+                name: katib-postgres-secrets
           env:
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
