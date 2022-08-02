@@ -65,35 +65,11 @@ func getDbName() string {
 }
 
 func NewDBInterface() (common.KatibDBInterface, error) {
-	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
+	db, err := common.OpenSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
 	}
 	return NewWithSQLConn(db)
-}
-
-func openSQLConn(driverName string, dataSourceName string, interval time.Duration,
-	timeout time.Duration) (*sql.DB, error) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	timeoutC := time.After(timeout)
-	for {
-		select {
-		case <-ticker.C:
-			if db, err := sql.Open(driverName, dataSourceName); err == nil {
-				// if db, err := sql.Open(driverName, dataSourceName); err == nil {
-				if err = db.Ping(); err == nil {
-					return db, nil
-				}
-				klog.Errorf("Ping to Katib db failed: %v", err)
-			} else {
-				klog.Errorf("Open sql connection failed: %v", err)
-			}
-		case <-timeoutC:
-			return nil, fmt.Errorf("Timeout waiting for DB conn successfully opened.")
-		}
-	}
 }
 
 func NewWithSQLConn(db *sql.DB) (common.KatibDBInterface, error) {
@@ -114,7 +90,7 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 	statement := "INSERT INTO observation_logs (trial_name, time, metric_name, value) VALUES "
 	values := []interface{}{}
 
-	i := 1
+	index_of_qparam := 1
 	for _, mlog := range observationLog.MetricLogs {
 		if mlog.TimeStamp == "" {
 			continue
@@ -125,9 +101,11 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 		}
 		sqlTimeStr := t.UTC().Format(time.RFC3339Nano)
 
-		statement += fmt.Sprintf("($%d, $%d, $%d, $%d),", i, i+1, i+2, i+3)
+		statement += fmt.Sprintf("($%d, $%d, $%d, $%d),",
+			index_of_qparam, index_of_qparam+1, index_of_qparam+2, index_of_qparam+3,
+		)
 		values = append(values, trialName, sqlTimeStr, mlog.Metric.Name, mlog.Metric.Value)
-		i += 4
+		index_of_qparam += 4
 	}
 
 	statement = statement[:len(statement)-1]
@@ -153,12 +131,15 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 func (d *dbConn) GetObservationLog(trialName string, metricName string, startTime string, endTime string) (*v1beta1.ObservationLog, error) {
 	qfield := []interface{}{trialName}
 	qstr := ""
+	index_of_qparam := 1
 
-	i := 2
+	base_stmt := fmt.Sprintf("SELECT time, metric_name, value FROM observation_logs WHERE trial_name = $%d", index_of_qparam)
+	index_of_qparam += 1
+
 	if metricName != "" {
-		qstr += fmt.Sprintf(" AND metric_name = $%d", i)
+		qstr += fmt.Sprintf(" AND metric_name = $%d", index_of_qparam)
 		qfield = append(qfield, metricName)
-		i += 1
+		index_of_qparam += 1
 	}
 
 	if startTime != "" {
@@ -167,9 +148,9 @@ func (d *dbConn) GetObservationLog(trialName string, metricName string, startTim
 			return nil, fmt.Errorf("Error parsing start time %s: %v", startTime, err)
 		}
 		formattedStartTime := s_time.UTC().Format(time.RFC3339Nano)
-		qstr += fmt.Sprintf(" AND time >= $%d", i)
+		qstr += fmt.Sprintf(" AND time >= $%d", index_of_qparam)
 		qfield = append(qfield, formattedStartTime)
-		i += 1
+		index_of_qparam += 1
 	}
 	if endTime != "" {
 		e_time, err := time.Parse(time.RFC3339Nano, endTime)
@@ -177,13 +158,12 @@ func (d *dbConn) GetObservationLog(trialName string, metricName string, startTim
 			return nil, fmt.Errorf("Error parsing completion time %s: %v", endTime, err)
 		}
 		formattedEndTime := e_time.UTC().Format(time.RFC3339Nano)
-		qstr += fmt.Sprintf(" AND time <= $%d", i)
+		qstr += fmt.Sprintf(" AND time <= $%d", index_of_qparam)
 		qfield = append(qfield, formattedEndTime)
 		// i += 1
 	}
 
-	rows, err := d.db.Query("SELECT time, metric_name, value FROM observation_logs WHERE trial_name = $1"+qstr+" ORDER BY time",
-		qfield...)
+	rows, err := d.db.Query(base_stmt+qstr+" ORDER BY time", qfield...)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get ObservationLogs %v", err)
 	}

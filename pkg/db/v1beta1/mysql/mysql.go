@@ -62,29 +62,6 @@ func getDbName() string {
 	return fmt.Sprintf(dbNameTmpl, dbUser, dbPass, dbHost, dbPort, dbName)
 }
 
-func openSQLConn(driverName string, dataSourceName string, interval time.Duration,
-	timeout time.Duration) (*sql.DB, error) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	timeoutC := time.After(timeout)
-	for {
-		select {
-		case <-ticker.C:
-			if db, err := sql.Open(driverName, dataSourceName); err == nil {
-				if err = db.Ping(); err == nil {
-					return db, nil
-				}
-				klog.Errorf("Ping to Katib db failed: %v", err)
-			} else {
-				klog.Errorf("Open sql connection failed: %v", err)
-			}
-		case <-timeoutC:
-			return nil, fmt.Errorf("Timeout waiting for DB conn successfully opened.")
-		}
-	}
-}
-
 func NewWithSQLConn(db *sql.DB) (common.KatibDBInterface, error) {
 	d := new(dbConn)
 	d.db = db
@@ -100,7 +77,7 @@ func NewWithSQLConn(db *sql.DB) (common.KatibDBInterface, error) {
 }
 
 func NewDBInterface() (common.KatibDBInterface, error) {
-	db, err := openSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
+	db, err := common.OpenSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
 	}
