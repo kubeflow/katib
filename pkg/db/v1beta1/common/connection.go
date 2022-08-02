@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/lib/pq"
-
 	"k8s.io/klog"
 )
 
