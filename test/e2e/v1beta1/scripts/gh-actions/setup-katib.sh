@@ -41,13 +41,10 @@ if [ "$WITH_DATABASE_TYPE" == "postgres" ]; then
   PVC_FILE="../../../../../manifests/v1beta1/components/postgres/pvc.yaml"
 fi
 
-# then change the kustomization file to use the right kustomization file
-
-
-# if ! "$DEPLOY_KATIB_UI"; then
-#   index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' $KUSTOMIZATION_FILE)"
-#   index="$index" yq eval -i 'del(.resources.[env(index)])' $KUSTOMIZATION_FILE
-# fi
+if ! "$DEPLOY_KATIB_UI"; then
+  index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' $KUSTOMIZATION_FILE)"
+  index="$index" yq eval -i 'del(.resources.[env(index)])' $KUSTOMIZATION_FILE
+fi
 
 yq eval -i '.spec.resources.requests.storage|="2Gi"' $PVC_FILE
 
@@ -61,7 +58,7 @@ if "$DEPLOY_TRAINING_OPERATOR"; then
 fi
 
 echo "Deploying Katib"
-cd ../../../../../ && bash scripts/v1beta1/deploy.sh $WITH_DATABASE_TYPE && cd -
+cd ../../../../../ && bash scripts/v1beta1/deploy.sh "$WITH_DATABASE_TYPE" && cd -
 
 # Wait until all Katib pods is running.
 TIMEOUT=120s

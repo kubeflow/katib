@@ -24,7 +24,7 @@ images:
     newName: docker.io/kubeflowkatib/katib-controller
     newTag: e2e-test
   - name: docker.io/kubeflowkatib/katib-db-manager
-    newName: cr.makina.rocks/library/katib-db-manager # TODO need to change it to official katib image
+    newName: cr.makina.rocks/library/katib-db-manager  # TODO need to change it to official katib image
     newTag: e2e-test
   - name: docker.io/kubeflowkatib/katib-ui
     newName: docker.io/kubeflowkatib/katib-ui
@@ -44,4 +44,3 @@ patches:
     target:
       kind: Deployment
       labelSelector: "katib.kubeflow.org/component=db-manager"
-

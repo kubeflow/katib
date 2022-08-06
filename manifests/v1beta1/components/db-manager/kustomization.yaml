@@ -3,5 +3,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - db-manager.yaml # if you want to use postgres as katib's db, change this to db-manager-with-postgres.yaml
+  - db-manager.yaml
   - service.yaml
