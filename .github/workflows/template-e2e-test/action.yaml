@@ -14,6 +14,10 @@ inputs:
     required: true
     type: boolean
     default: false
+  database-type:
+    required: false
+    type: string
+    default: mysql
 
 runs:
   using: composite
@@ -24,7 +28,7 @@ runs:
 
     - name: Set Up Katib
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh ${{ inputs.katib-ui }} ${{ inputs.training-operator }}
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh ${{ inputs.katib-ui }} ${{ inputs.training-operator }} ${{ inputs.database-type }}
 
     - name: Run E2E Experiment
       shell: bash

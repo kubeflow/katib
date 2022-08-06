@@ -20,8 +20,14 @@ set -o pipefail
 set -o nounset
 cd "$(dirname "$0")"
 
+# TODO(anencore94) 여기서 postgres option 추가 하고,
+# 해당 옵션에 따라서
+# ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml 을 변경해서 사용할 수 있도록
+
 DEPLOY_KATIB_UI=${1:-false}
 DEPLOY_TRAINING_OPERATOR=${2:-false}
+WITH_DATABASE_TYPE=${3:-mysql}
+
 E2E_TEST_IMAGE_TAG="e2e-test"
 TRAINING_OPERATOR_VERSION="v1.5.0-rc.0"
 
@@ -30,15 +36,27 @@ echo "Start to install Katib"
 # Update Katib images with `e2e-test`.
 cd ../../../../../ && make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib/" TAG="$E2E_TEST_IMAGE_TAG" && cd -
 
+# if WITH_DATABASE_TYPE is mysql, then use kustomization file to ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
+# if WITH_DATABASE_TYPE is postgres, then use kustomization file to ../../../../../manifests/v1beta1/installs/katib-postgres/kustomization.yaml
+
+# first declare the which kustomization file to use
+KUSTOMIZATION_FILE="../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
+if [ "$WITH_DATABASE_TYPE" == "postgres" ]; then
+  KUSTOMIZATION_FILE="../../../../../manifests/v1beta1/installs/katib-postgres/kustomization.yaml"
+fi
+
+# then change the kustomization file to use the right kustomization file
+
+
 if ! "$DEPLOY_KATIB_UI"; then
-  index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml)"
-  index="$index" yq eval -i 'del(.resources.[env(index)])' ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
+  index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' $KUSTOMIZATION_FILE)"
+  index="$index" yq eval -i 'del(.resources.[env(index)])' $KUSTOMIZATION_FILE
 fi
 
 yq eval -i '.spec.resources.requests.storage|="2Gi"' ../../../../../manifests/v1beta1/components/mysql/pvc.yaml
 
 echo -e "\n The Katib will be deployed with the following configs"
-cat ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
+cat $KUSTOMIZATION_FILE
 cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
 
 if "$DEPLOY_TRAINING_OPERATOR"; then

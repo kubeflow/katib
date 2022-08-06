@@ -24,6 +24,7 @@ jobs:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
           trial-images: mxnet-mnist
+          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
@@ -39,3 +40,4 @@ jobs:
           # others
           - "grid,bayesian-optimization,tpe"
           - "multivariate-tpe,cma-es,hyperband"
+        database-type: ["mysql", "postgres"]

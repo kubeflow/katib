@@ -25,6 +25,7 @@ jobs:
           training-operator: true
           # Comma Delimited
           trial-images: tf-mnist-with-summaries
+          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
@@ -34,3 +35,4 @@ jobs:
         kubernetes-version: ["v1.21.13", "v1.22.10", "v1.23.7"]
         # Comma Delimited
         experiments: ["tfjob-mnist-with-summaries"]
+        database-type: ["mysql", "postgres"]
