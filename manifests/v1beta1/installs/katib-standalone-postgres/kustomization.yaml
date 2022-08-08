@@ -22,16 +22,16 @@ resources:
 images:
   - name: docker.io/kubeflowkatib/katib-controller
     newName: docker.io/kubeflowkatib/katib-controller
-    newTag: e2e-test
+    newTag: latest
   - name: docker.io/kubeflowkatib/katib-db-manager
-    newName: cr.makina.rocks/library/katib-db-manager  # TODO need to change it to official katib image
-    newTag: e2e-test
+    newName: docker.io/kubeflowkatib/katib-db-manager
+    newTag: latest
   - name: docker.io/kubeflowkatib/katib-ui
     newName: docker.io/kubeflowkatib/katib-ui
-    newTag: e2e-test
+    newTag: latest
   - name: docker.io/kubeflowkatib/cert-generator
     newName: docker.io/kubeflowkatib/cert-generator
-    newTag: e2e-test
+    newTag: latest
 patches:
   - patch: |-
       - op: replace
