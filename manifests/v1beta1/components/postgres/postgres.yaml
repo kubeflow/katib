@@ -33,11 +33,10 @@ spec:
             - name: postgres
               containerPort: 5432
               protocol: TCP
-      # For persistent database, use pvc
-      #     volumeMounts:
-      #       - name: katib-postgres
-      #         mountPath: /var/lib/postgresql/data
-      # volumes:
-      #   - name: katib-postgres
-      #     persistentVolumeClaim:
-      #       claimName: katib-postgres
+          volumeMounts:
+            - name: katib-postgres
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: katib-postgres
+          persistentVolumeClaim:
+            claimName: katib-postgres
