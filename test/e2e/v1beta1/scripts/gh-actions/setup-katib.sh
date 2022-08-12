@@ -80,16 +80,11 @@ kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
 
-for i in 1 2 3 4 5
-do
-  sleep 1
-  kubectl -n kubeflow get pod
-done
-
 # Check that Katib is working with 2 Experiments.
 kubectl apply -f ../../testdata/valid-experiment.yaml
 kubectl delete -f ../../testdata/valid-experiment.yaml
 
+sleep 60
 set +o errexit
 kubectl apply -f ../../testdata/invalid-experiment.yaml
 if [ $? -ne 1 ]; then
