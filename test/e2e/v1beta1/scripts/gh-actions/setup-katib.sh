@@ -84,14 +84,13 @@ kubectl -n kubeflow get pod
 kubectl apply -f ../../testdata/valid-experiment.yaml
 kubectl delete -f ../../testdata/valid-experiment.yaml
 
-# TODO (kjy) temporarily skip the test: since it is hard to debug
-# set +o errexit
-# kubectl apply -f ../../testdata/invalid-experiment.yaml
-# if [ $? -ne 1 ]; then
-#   echo "Failed to create invalid-experiment: return code $?"
-#   exit 1
-# fi
-# set -o errexit
+set +o errexit
+kubectl apply -f ../../testdata/invalid-experiment.yaml
+if [ $? -ne 1 ]; then
+  echo "Failed to create invalid-experiment: return code $?"
+  exit 1
+fi
+set -o errexit
 
 # Build the binary for e2e test
 echo "Building run-e2e-experiment for e2e test cases"
