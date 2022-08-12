@@ -42,13 +42,11 @@ func main() {
 	}
 
 	katibVersion := os.Args[2]
-	oAPIDefs := make(map[string]common.OpenAPIDefinition)
-	if katibVersion == "v1beta1" {
-		oAPIDefs = v1beta1.GetOpenAPIDefinitions(refCallback)
-	} else {
+	if katibVersion != "v1beta1" {
 		klog.Fatalf("Katib version %v is not supported", katibVersion)
 	}
 
+	oAPIDefs := v1beta1.GetOpenAPIDefinitions(refCallback)
 	defs := spec.Definitions{}
 	for defName, val := range oAPIDefs {
 		defs[swaggify(defName)] = val.Schema
