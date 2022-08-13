@@ -32,26 +32,30 @@ echo "Start to install Katib"
 # Update Katib images with `e2e-test`.
 cd ../../../../../ && make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib/" TAG="$E2E_TEST_IMAGE_TAG" && cd -
 
-# first declare the which kustomization file to use
+# first declare the which kustomization file to use, by default use mysql.
 KUSTOMIZATION_FILE="../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
 PVC_FILE="../../../../../manifests/v1beta1/components/mysql/pvc.yaml"
 
+# If the database type is postgres, then use postgres.
 if [ "$WITH_DATABASE_TYPE" == "postgres" ]; then
   KUSTOMIZATION_FILE="../../../../../manifests/v1beta1/installs/katib-standalone-postgres/kustomization.yaml"
   PVC_FILE="../../../../../manifests/v1beta1/components/postgres/pvc.yaml"
 fi
 
+# If the user wants to deploy Katib UI, then use the kustomization file for Katib UI.
 if ! "$DEPLOY_KATIB_UI"; then
   index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' $KUSTOMIZATION_FILE)"
   index="$index" yq eval -i 'del(.resources.[env(index)])' $KUSTOMIZATION_FILE
 fi
 
+# Since e2e test doesn't need to large storage, we use a small PVC for Katib.
 yq eval -i '.spec.resources.requests.storage|="2Gi"' $PVC_FILE
 
 echo -e "\n The Katib will be deployed with the following configs"
 cat $KUSTOMIZATION_FILE
 cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
 
+# If the user wants to deploy training operator, then use the kustomization file for training operator.
 if "$DEPLOY_TRAINING_OPERATOR"; then
   echo "Deploying Training Operator $TRAINING_OPERATOR_VERSION"
   kustomize build "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION" | kubectl apply -f -
@@ -71,6 +75,9 @@ kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/c
 kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,ui)" -n kubeflow pod ||
   (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && exit 1)
 
+# Wait until all Katib pods is actually ready.
+# Since Katib-controller does not use Readinessprobe yet, just wait for a while.
+sleep 30
 
 echo "All Katib components are running."
 echo "Katib deployments"
@@ -84,7 +91,7 @@ kubectl -n kubeflow get pod
 kubectl apply -f ../../testdata/valid-experiment.yaml
 kubectl delete -f ../../testdata/valid-experiment.yaml
 
-sleep 60
+# Check the ValidatingWebhookConfiguration works well.
 set +o errexit
 kubectl apply -f ../../testdata/invalid-experiment.yaml
 if [ $? -ne 1 ]; then
