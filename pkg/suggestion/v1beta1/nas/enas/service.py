@@ -26,6 +26,7 @@ from pkg.suggestion.v1beta1.nas.enas.Operation import SearchSpace
 from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import (
     parseAlgorithmSettings, algorithmSettingsValidator, enableNoneSettingsList)
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
+from pkg.suggestion.v1beta1.nas.common.validation import validate_operations
 
 
 class EnasExperiment:
@@ -161,67 +162,29 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def ValidateAlgorithmSettings(self, request, context):
         self.logger.info("Validate Algorithm Settings start")
-        graph_config = request.experiment.spec.nas_config.graph_config
+        nas_config = request.experiment.spec.nas_config
+        graph_config = nas_config.graph_config
 
         # Validate GraphConfig
         # Check InputSize
         if not graph_config.input_sizes:
-            return self.SetValidateContextError(context, "Missing InputSizes in GraphConfig:\n{}".format(graph_config))
+            return self.set_validate_context_error(context,
+                                                   "Missing InputSizes in GraphConfig:\n{}".format(graph_config))
 
         # Check OutputSize
         if not graph_config.output_sizes:
-            return self.SetValidateContextError(context, "Missing OutputSizes in GraphConfig:\n{}".format(graph_config))
+            return self.set_validate_context_error(context,
+                                                   "Missing OutputSizes in GraphConfig:\n{}".format(graph_config))
 
         # Check NumLayers
         if not graph_config.num_layers:
-            return self.SetValidateContextError(context, "Missing NumLayers in GraphConfig:\n{}".format(graph_config))
+            return self.set_validate_context_error(context,
+                                                   "Missing NumLayers in GraphConfig:\n{}".format(graph_config))
 
-        # Validate each operation
-        operations_list = list(
-            request.experiment.spec.nas_config.operations.operation)
-        for operation in operations_list:
-
-            # Check OperationType
-            if not operation.operation_type:
-                return self.SetValidateContextError(context, "Missing operationType in Operation:\n{}".format(
-                    operation))
-
-            # Check ParameterConfigs
-            if not operation.parameter_specs.parameters:
-                return self.SetValidateContextError(context, "Missing ParameterConfigs in Operation:\n{}".format(
-                    operation))
-
-            # Validate each ParameterConfig in Operation
-            parameters_list = list(operation.parameter_specs.parameters)
-            for parameter in parameters_list:
-
-                # Check Name
-                if not parameter.name:
-                    return self.SetValidateContextError(context, "Missing Name in ParameterConfig:\n{}".format(
-                        parameter))
-
-                # Check ParameterType
-                if not parameter.parameter_type:
-                    return self.SetValidateContextError(context, "Missing ParameterType in ParameterConfig:\n{}".format(
-                        parameter))
-
-                # Check List in Categorical or Discrete Type
-                if parameter.parameter_type == api_pb2.CATEGORICAL or parameter.parameter_type == api_pb2.DISCRETE:
-                    if not parameter.feasible_space.list:
-                        return self.SetValidateContextError(
-                            context, "Missing List in ParameterConfig.feasibleSpace:\n{}".format(parameter))
-
-                # Check Max, Min, Step in Int or Double Type
-                elif parameter.parameter_type == api_pb2.INT or parameter.parameter_type == api_pb2.DOUBLE:
-                    if not parameter.feasible_space.min and not parameter.feasible_space.max:
-                        return self.SetValidateContextError(
-                            context, "Missing Max and Min in ParameterConfig.feasibleSpace:\n{}".format(parameter))
-
-                    if (parameter.parameter_type == api_pb2.DOUBLE and
-                            (not parameter.feasible_space.step or float(parameter.feasible_space.step) <= 0)):
-                        return self.SetValidateContextError(
-                            context, "Step parameter should be > 0 in ParameterConfig.feasibleSpace:\n{}".format(
-                                parameter))
+        # Validate Operations
+        is_valid, message = validate_operations(nas_config.operations.operation)
+        if not is_valid:
+            return self.set_validate_context_error(context, message)
 
         # Validate Algorithm Settings
         settings_raw = request.experiment.spec.algorithm.algorithm_settings
@@ -233,14 +196,15 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 setting_range = algorithmSettingsValidator[setting.name][1]
                 try:
                     converted_value = setting_type(setting.value)
-                except Exception:
-                    return self.SetValidateContextError(context, "Algorithm Setting {} must be {} type".format(
-                        setting.name, setting_type.__name__))
+                except Exception as e:
+                    return self.set_validate_context_error(context,
+                                                           "Algorithm Setting {} must be {} type: exception {}".format(
+                                                               setting.name, setting_type.__name__, e))
 
                 if setting_type == float:
                     if (converted_value <= setting_range[0] or
                             (setting_range[1] != 'inf' and converted_value > setting_range[1])):
-                        return self.SetValidateContextError(
+                        return self.set_validate_context_error(
                             context, "Algorithm Setting {}: {} with {} type must be in range ({}, {}]".format(
                                 setting.name,
                                 converted_value,
@@ -250,7 +214,7 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                         )
 
                 elif converted_value < setting_range[0]:
-                    return self.SetValidateContextError(
+                    return self.set_validate_context_error(
                         context, "Algorithm Setting {}: {} with {} type must be in range [{}, {})".format(
                             setting.name,
                             converted_value,
@@ -259,12 +223,13 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                             setting_range[1])
                     )
             else:
-                return self.SetValidateContextError(context, "Unknown Algorithm Setting name: {}".format(setting.name))
+                return self.set_validate_context_error(context,
+                                                       "Unknown Algorithm Setting name: {}".format(setting.name))
 
         self.logger.info("All Experiment Settings are Valid")
         return api_pb2.ValidateAlgorithmSettingsReply()
 
-    def SetValidateContextError(self, context, error_message):
+    def set_validate_context_error(self, context, error_message):
         context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
         context.set_details(error_message)
         self.logger.info(error_message)

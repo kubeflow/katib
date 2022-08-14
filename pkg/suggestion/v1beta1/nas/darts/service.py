@@ -15,10 +15,12 @@
 import logging
 from logging import getLogger, StreamHandler, INFO
 import json
+import grpc
 
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
+from pkg.suggestion.v1beta1.nas.common.validation import validate_operations
 
 
 class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
@@ -36,8 +38,12 @@ class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         self.logger.addHandler(handler)
         self.logger.propagate = False
 
-    # TODO: Add validation
     def ValidateAlgorithmSettings(self, request, context):
+        is_valid, message = validate_algorithm_settings(request.experiment.spec)
+        if not is_valid:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            context.set_details(message)
+            self.logger.error(message)
         return api_pb2.ValidateAlgorithmSettingsReply()
 
     def GetSuggestions(self, request, context):
@@ -134,3 +140,60 @@ def get_algorithm_settings(settings_raw):
         algorithm_settings_default[s_name] = s_value
 
     return algorithm_settings_default
+
+
+def validate_algorithm_settings(spec: api_pb2.ExperimentSpec) -> (bool, str):
+    # Validate Operations
+    is_valid, message = validate_operations(spec.nas_config.operations.operation)
+    if not is_valid:
+        return False, message
+
+    # Validate AlgorithmSettings
+    is_valid, message = validate_algorithm_spec(spec.algorithm.algorithm_settings)
+    if not is_valid:
+        return False, message
+
+    return True, ""
+
+
+def validate_algorithm_spec(algorithm_settings: list[api_pb2.AlgorithmSetting]) -> (bool, str):
+    for s in algorithm_settings:
+        try:
+            if s.name == "num_epochs":
+                if not int(s.value) > 0:
+                    return False, "{} should be greate than zero".format(s.name)
+
+            # Validate learning rate
+            if s.name in ["w_lr", "w_lr_min", "alpha_lr"]:
+                if not float(s.value) >= 0.0:
+                    return False, "{} should be greate or equal than zero".format(s.name)
+
+            # Validate weight decay
+            if s.name in ["w_weight_decay", "alpha_weight_decay"]:
+                if not float(s.value) >= 0.0:
+                    return False, "{} should be greate or equal than zero".format(s.name)
+
+            # Validate w_momentum and w_grad_clip
+            if s.name in ["w_momentum", "w_grad_clip"]:
+                if not float(s.value) >= 0.0:
+                    return False, "{} should be greate or equal than zero".format(s.name)
+
+            if s.name == "batch_size":
+                if s.value is not "None":
+                    if not int(s.value) >= 1:
+                        return False, "batch_size should be greate or equal than one"
+
+            if s.name == "num_workers":
+                if not int(s.value) >= 0:
+                    return False, "num_workers should be greate or equal than zero"
+
+            # Validate "init_channels", "print_step", "num_nodes" and "stem_multiplier"
+            if s.name in ["init_channels", "print_step", "num_nodes", "stem_multiplier"]:
+                if not int(s.value) >= 1:
+                    return False, "{} should be greate or equal than one".format(s.name)
+
+        except Exception as e:
+            return False, "failed to validate {name}({value}): {exception}".format(name=s.name, value=s.value,
+                                                                                   exception=e)
+
+    return True, ""
