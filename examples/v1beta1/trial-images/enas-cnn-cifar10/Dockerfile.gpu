@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.7.0-gpu
+FROM tensorflow/tensorflow:2.8.2-gpu
 
 ENV TARGET_DIR /opt/enas-cnn-cifar10
 
