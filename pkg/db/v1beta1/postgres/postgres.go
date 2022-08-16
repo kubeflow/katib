@@ -160,7 +160,7 @@ func (d *dbConn) GetObservationLog(trialName string, metricName string, startTim
 		formattedEndTime := e_time.UTC().Format(time.RFC3339Nano)
 		qstr += fmt.Sprintf(" AND time <= $%d", index_of_qparam)
 		qfield = append(qfield, formattedEndTime)
-		// i += 1
+		// index_of_qparam += 1
 	}
 
 	rows, err := d.db.Query(base_stmt+qstr+" ORDER BY time", qfield...)
