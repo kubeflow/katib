@@ -18,26 +18,26 @@
 set -e
 
 # Verify that appropriate tools are installed.
-if [[ ! $(which docker) ]]; then
+if [ -z "$(command -v docker)" ]; then
   echo "Unable to find Docker"
   echo "To install Docker, please follow this guide: https://docs.docker.com/get-docker"
   exit 1
 fi
 
-if [[ ! $(which kind) ]]; then
+if [ -z "$(command -v kind)" ]; then
   echo "Unable to find Kind"
   echo "To install Kind, please follow this guide: https://kind.sigs.k8s.io/docs/user/quick-start/#installation"
   exit 1
 fi
 
-if [[ ! $(which kubectl) ]]; then
+if [ -z "$(command -v kubectl)" ]; then
   echo "Unable to find kubectl"
   echo "To install kubectl, please follow this guide: https://kubernetes.io/docs/tasks/tools/#kubectl"
   exit 1
 fi
 
-# Step 1. Create Kind cluster with Kubernetes v1.21.1
-kind create cluster --image kindest/node:v1.21.1
+# Step 1. Create Kind cluster with Kubernetes v1.23.6
+kind create cluster --image kindest/node:v1.23.6
 echo -e "\nKind cluster has been created\n"
 
 # Step 2. Set context for kubectl
@@ -52,6 +52,12 @@ kubectl get nodes
 # Step 4. Deploy Katib components.
 echo -e "\nDeploying Katib components\n"
 kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=master"
+
+# If the local machine's CPU architecture is arm64, rewrite mysql image.
+if [ "$(uname -m)" = "arm64" ]; then
+  kubectl patch deployments -n kubeflow katib-mysql --type json -p \
+    '[{"op": "replace", "path": "/spec/template/spec/containers/0/image", "value": "arm64v8/mysql:8.0.29-oracle"}]'
+fi
 
 # Wait until all Katib pods are running.
 kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,mysql,ui)" -n kubeflow pod

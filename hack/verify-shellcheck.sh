@@ -19,7 +19,7 @@ set -o pipefail
 
 cd "$(dirname "$0")/.."
 
-if ! which shellcheck >/dev/null; then
+if [ -z "$(command -v shellcheck)" ]; then
 	echo 'Can not find shellcheck, install with: make shellcheck'
 	exit 1
 fi

@@ -1,0 +1,42 @@
+<div>
+  <lib-details-list-item key="Trial Name">
+    {{ trialName }}
+  </lib-details-list-item>
+
+  <lib-details-list-item key="Experiment Name">
+    {{ experimentName }}
+  </lib-details-list-item>
+
+  <lib-details-list-item key="Status" [icon]="statusIcon">
+    {{ status }}
+  </lib-details-list-item>
+
+  <lib-details-list-item key="Completion Time">
+    {{ completionTime }}
+  </lib-details-list-item>
+
+  <lib-details-list-item [chipsList]="performance" key="Performance">
+  </lib-details-list-item>
+
+  <ng-container *ngIf="trial.status.observation?.metrics">
+    <div
+      *ngFor="let metric of trial.status.observation?.metrics"
+      [style.margin-top]="'16px'"
+    >
+      <lib-heading-row heading="Metric:" subHeading="{{ metric.name }}">
+      </lib-heading-row>
+      <app-metrics-overview
+        [name]="metric.name"
+        [min]="metric.min"
+        [max]="metric.max"
+        [latest]="metric.latest"
+      ></app-metrics-overview>
+    </div>
+  </ng-container>
+
+  <lib-conditions-table
+    *ngIf="trial"
+    [conditions]="trial.status.conditions"
+    title="Trial Conditions"
+  ></lib-conditions-table>
+</div>

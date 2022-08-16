@@ -1,31 +1,56 @@
-<div class="modal">
-  <div class="title">
-    <span class="experiment-title">Trial name: {{ trialName }}</span>
-  </div>
+<div class="lib-content-wrapper">
+  <lib-title-actions-toolbar
+    [backButton]="true"
+    (back)="returnToExperimentDetails()"
+    title="Trial details"
+  >
+  </lib-title-actions-toolbar>
 
-  <div *ngIf="dataLoaded; else loading">
-    <ngx-charts-line-chart
-      [animations]="animations"
-      [curve]="curve"
-      [legendTitle]="legendTitle"
-      [legend]="legend"
-      [results]="chartData"
-      [showXAxisLabel]="showXAxisLabel"
-      [showYAxisLabel]="showYAxisLabel"
-      [xAxisTickFormatting]="xAxisFormat"
-      [timeline]="timeline"
-      [view]="view"
-      [xAxisLabel]="xAxisLabel"
-      [xAxis]="xAxis"
-      [yAxisLabel]="yAxisLabel"
-      [yAxis]="yAxis"
-      [yScaleMax]="yScaleMax"
-      [yScaleMin]="yScaleMin"
-    >
-    </ngx-charts-line-chart>
-  </div>
+  <div class="page-padding lib-flex-grow lib-overflow-auto">
+    <div *ngIf="dataLoaded; else loading">
+      <div class="graph-div-outer">
+        <div class="graph-div-inner">
+          <ngx-charts-line-chart
+            [animations]="animations"
+            [curve]="curve"
+            [legendTitle]="legendTitle"
+            [legend]="legend"
+            [results]="chartData"
+            [showXAxisLabel]="showXAxisLabel"
+            [showYAxisLabel]="showYAxisLabel"
+            [xAxisTickFormatting]="xAxisFormat"
+            [timeline]="timeline"
+            [view]="view"
+            [xAxisLabel]="xAxisLabel"
+            [xAxis]="xAxis"
+            [yAxisLabel]="yAxisLabel"
+            [yAxis]="yAxis"
+            [yScaleMax]="yScaleMax"
+            [yScaleMin]="yScaleMin"
+          >
+          </ngx-charts-line-chart>
+        </div>
+      </div>
 
-  <ng-template #loading>
-    <div class="loader"><mat-spinner></mat-spinner></div>
-  </ng-template>
+      <div class="tab-height-fix">
+        <mat-tab-group dynamicHeight animationDuration="0ms">
+          <mat-tab label="OVERVIEW">
+            <app-trial-modal-overview
+              [trialName]="trialName"
+              [experimentName]="experimentName"
+              [trial]="trialDetails"
+            ></app-trial-modal-overview>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+    </div>
+
+    <ng-template #loading>
+      <div class="graph-div-outer">
+        <div class="graph-div-inner">
+          <mat-spinner></mat-spinner>
+        </div>
+      </div>
+    </ng-template>
+  </div>
 </div>

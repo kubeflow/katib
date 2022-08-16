@@ -1,0 +1,53 @@
+---
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: simple-pbt
+spec:
+  maxTrialCount: 2
+  parallelTrialCount: 2
+  maxFailedTrialCount: 3
+  resumePolicy: FromVolume
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: Validation-accuracy
+  algorithm:
+    algorithmName: pbt
+    algorithmSettings:
+      - name: suggestion_trial_dir
+        value: /var/log/katib/checkpoints/
+      - name: n_population
+        value: '40'
+      - name: truncation_threshold
+        value: '0.2'
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: '0.0001'
+        max: '0.02'
+        step: '0.0001'
+  trialTemplate:
+    primaryContainerName: training-container
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for training the model
+        reference: lr
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
+                image: docker.io/kubeflowkatib/simple-pbt:latest
+                command:
+                  - "python3"
+                  - "/opt/pbt/pbt_test.py"
+                  - "--epochs=20"
+                  - "--lr=${trialParameters.learningRate}"
+                  - "--checkpoint=/var/log/katib/checkpoints/"
+            restartPolicy: Never

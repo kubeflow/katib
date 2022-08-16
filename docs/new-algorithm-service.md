@@ -18,7 +18,7 @@ from pkg.apis.manager.v1beta1.python import api_pb2_grpc
 from pkg.suggestion.v1beta1.internal.search_space import HyperParameter, HyperParameterSearchSpace
 from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.hyperopt.base_service import BaseHyperoptService
-from pkg.suggestion.v1beta1.base_health_service import HealthServicer
+from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 
 
 # Inherit SuggestionServicer and implement GetSuggestions.
@@ -90,9 +90,7 @@ Then build the Docker image.
 
 ### Use the algorithm in Katib.
 
-Update the [Katib config](../manifests/v1beta1/components/controller/katib-config.yaml)
-and [Katib config patch](../manifests/v1beta1/installs/katib-standalone/katib-config-patch.yaml)
-with the new algorithm entity:
+Update the [Katib config](../manifests/v1beta1/components/controller/katib-config.yaml) and [operator](../operators/katib-controller/src/suggestion.json) with the new algorithm entity:
 
 ```diff
   suggestion: |-

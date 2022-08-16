@@ -44,6 +44,8 @@ Experiments for the following algorithms:
 
 - [HyperBand](./hp-tuning/hyperband.yaml)
 
+- [PBT](./hp-tuning/simple-pbt.yaml)
+
 ### Neural Architecture Search
 
 Check the [Neural Architecture Search](https://www.kubeflow.org/docs/components/katib/overview/#neural-architecture-search)
@@ -109,6 +111,8 @@ Check the following images for the Trial containers:
 - [ENAS Keras CNN CIFAR-10](./trial-images/enas-cnn-cifar10)
 
 - [DARTS PyTorch CNN CIFAR-10](./trial-images/darts-cnn-cifar10)
+
+- [PBT proof of concept](./trial-images/simple-pbt)
 
 ## Katib with Kubeflow Training Operator
 

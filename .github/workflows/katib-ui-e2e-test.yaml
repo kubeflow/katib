@@ -1,0 +1,32 @@
+name: E2E Test for katib-ui
+on:
+  - pull_request
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  e2e:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Test Env
+        uses: ./.github/workflows/template-setup-e2e-test
+        with:
+          kubernetes-version: ${{ matrix.kubernetes-version }}
+
+      - name: Set Up Minikube Cluster
+        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh true
+
+      - name: Start Katib
+        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh true false
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # TODO (tenzen-y): We need to consider running tests on more kubernetes versions.
+        # kubernetes-version: ["v1.20.15", "v1.21.13", "v1.22.10", "v1.23.7", "v1.24.1"]
+        kubernetes-version: ["v1.21.13", "v1.22.10", "v1.23.7"]

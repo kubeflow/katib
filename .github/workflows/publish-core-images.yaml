@@ -26,6 +26,7 @@ jobs:
           dockerfile: ${{ matrix.dockerfile }}
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           - component-name: katib-controller

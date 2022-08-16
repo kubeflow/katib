@@ -191,6 +191,13 @@ func (in *TrialAssignment) DeepCopyInto(out *TrialAssignment) {
 		*out = make([]commonv1beta1.EarlyStoppingRule, len(*in))
 		copy(*out, *in)
 	}
+	if in.Labels != nil {
+		in, out := &in.Labels, &out.Labels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

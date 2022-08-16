@@ -1,3 +1,4 @@
+---
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
@@ -59,7 +60,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/darts-cnn-cifar10:latest
+                image: docker.io/kubeflowkatib/darts-cnn-cifar10-cpu:latest
                 command:
                   - python3
                   - run_trial.py

@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -34,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	katibmanagerv1beta1 "github.com/kubeflow/katib/pkg/common/v1beta1"
@@ -153,18 +155,24 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 
+	// Create metrics sidecar container spec
 	injectContainer, err := s.getMetricsCollectorContainer(trial, pod)
 	if err != nil {
 		return nil, err
 	}
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, *injectContainer)
 
+	// Enable shared volume between suggestion <> trial
+	if err = s.mutateSuggestionVolume(mutatedPod, injectContainer.Name, trial); err != nil {
+		return nil, err
+	}
+
 	isShareProcessNamespace := true
 	mutatedPod.Spec.ShareProcessNamespace = &isShareProcessNamespace
 
 	mountPath, pathKind := getMountPath(trial.Spec.MetricsCollector)
 	if mountPath != "" {
-		if err = mutateVolume(mutatedPod, mountPath, injectContainer.Name, trial.Spec.PrimaryContainerName, pathKind); err != nil {
+		if err = mutateMetricsCollectorVolume(mutatedPod, mountPath, injectContainer.Name, trial.Spec.PrimaryContainerName, pathKind); err != nil {
 			return nil, err
 		}
 	}
@@ -323,4 +331,57 @@ func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, me
 	}
 
 	return args, nil
+}
+
+// Mutate trial container with shared Suggestions PVC when algorithm settings contains suggestion_trial_dir
+func (s *SidecarInjector) mutateSuggestionVolume(pod *v1.Pod, primaryContainerName string, trial *trialsv1beta1.Trial) error {
+	// Suggestion name == Experiment name
+	// Suggestion namespace == Trial namespace
+	experimentName := trial.ObjectMeta.Labels[consts.LabelExperimentName]
+	experiment := &experimentsv1beta1.Experiment{}
+	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: experimentName, Namespace: trial.Namespace}, experiment); err != nil {
+		return err
+	}
+	suggestion := &suggestionsv1beta1.Suggestion{}
+	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: experimentName, Namespace: trial.Namespace}, suggestion); err != nil {
+		return err
+	}
+
+	// Check if mutation is needed
+	checkpointPath := ""
+	for _, s := range suggestion.Spec.Algorithm.AlgorithmSettings {
+		if s.Name == consts.SuggestionVolumeMountKey && s.Value != "" {
+			checkpointPath = s.Value
+			break
+		}
+	}
+	if checkpointPath == "" {
+		return nil
+	}
+
+	// Generate folder name in format: <ExperimentName>/<TrialName>
+	checkpointFolder := filepath.Join(experimentName, trial.Name)
+
+	// Suggestion volume for the trial to the MetricsCollector
+	suggestionVolume := v1.Volume{
+		Name: consts.ContainerSuggestionVolumeName,
+		VolumeSource: v1.VolumeSource{
+			PersistentVolumeClaim: &v1.PersistentVolumeClaimVolumeSource{
+				ClaimName: util.GetSuggestionPersistentVolumeClaimName(suggestion),
+			},
+		},
+	}
+
+	vm := v1.VolumeMount{
+		Name:      suggestionVolume.Name,
+		MountPath: checkpointPath,
+		SubPath:   checkpointFolder,
+	}
+
+	primaryContainerIndex := getPrimaryContainerIndex(pod.Spec.Containers, trial.Spec.PrimaryContainerName)
+	addContainerVolumeMount(&pod.Spec.Containers[primaryContainerIndex], &vm)
+
+	pod.Spec.Volumes = append(pod.Spec.Volumes, suggestionVolume)
+
+	return nil
 }

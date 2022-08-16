@@ -125,6 +125,9 @@ const (
 	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode
 	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
 
+	// SuggestionVolumeMountKey specifies the AlgorithmSettings key used to toggle Suggestion managed trial storage
+	SuggestionVolumeMountKey = "suggestion_trial_dir"
+
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"
 
