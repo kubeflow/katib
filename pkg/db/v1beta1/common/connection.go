@@ -34,7 +34,6 @@ func OpenSQLConn(driverName string, dataSourceName string, interval time.Duratio
 		select {
 		case <-ticker.C:
 			if db, err := sql.Open(driverName, dataSourceName); err == nil {
-				// if db, err := sql.Open(driverName, dataSourceName); err == nil {
 				if err = db.Ping(); err == nil {
 					return db, nil
 				}

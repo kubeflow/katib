@@ -62,17 +62,14 @@ if "$DEPLOY_TRAINING_OPERATOR"; then
 fi
 
 echo "Deploying Katib"
-cd ../../../../../ && bash scripts/v1beta1/deploy.sh "$WITH_DATABASE_TYPE" && cd -
+cd ../../../../../ && WITH_DATABASE_TYPE=$WITH_DATABASE_TYPE make deploy && cd -
 
 # Wait until all Katib pods is running.
 TIMEOUT=120s
 kubectl wait --for=condition=complete --timeout=${TIMEOUT} -l katib.kubeflow.org/component=cert-generator -n kubeflow job ||
   (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && exit 1)
 
-kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in ($WITH_DATABASE_TYPE)" -n kubeflow pod ||
-  (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && exit 1)
-
-kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in (controller,db-manager,ui)" -n kubeflow pod ||
+kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in ($WITH_DATABASE_TYPE,controller,db-manager,ui)" -n kubeflow pod ||
   (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && exit 1)
 
 # Wait until all Katib pods is actually ready.

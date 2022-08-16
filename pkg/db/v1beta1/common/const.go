@@ -16,7 +16,12 @@ limitations under the License.
 
 package common
 
+import "time"
+
 const (
+	ConnectInterval = 5 * time.Second
+	ConnectTimeout  = 60 * time.Second
+
 	DBUserEnvName     = "DB_USER"
 	DBNameEnvName     = "DB_NAME"
 	DBPasswordEnvName = "DB_PASSWORD"

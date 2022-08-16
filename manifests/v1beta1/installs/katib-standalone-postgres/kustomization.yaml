@@ -32,15 +32,10 @@ images:
   - name: docker.io/kubeflowkatib/cert-generator
     newName: docker.io/kubeflowkatib/cert-generator
     newTag: latest
-patches:
-  - patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/env
-        value:
-          - name: DB_NAME
-            value: "postgres"
-          - name: DB_PASSWORD
-            value: "katib"
-    target:
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
       kind: Deployment
-      labelSelector: "katib.kubeflow.org/component=db-manager"
+      name: katib-db-manager
+    path: ./patches/db-manager.yaml

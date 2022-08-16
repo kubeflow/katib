@@ -38,9 +38,6 @@ const (
 	//dbNameTmpl   = "root:%s@tcp(%s:%s)/%s?timeout=5s"
 	dbNameTmpl   = "%s:%s@tcp(%s:%s)/%s?timeout=5s"
 	mysqlTimeFmt = "2006-01-02 15:04:05.999999"
-
-	connectInterval = 5 * time.Second
-	connectTimeout  = 60 * time.Second
 )
 
 type dbConn struct {
@@ -77,7 +74,7 @@ func NewWithSQLConn(db *sql.DB) (common.KatibDBInterface, error) {
 }
 
 func NewDBInterface() (common.KatibDBInterface, error) {
-	db, err := common.OpenSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
+	db, err := common.OpenSQLConn(dbDriver, getDbName(), common.ConnectInterval, common.ConnectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
 	}

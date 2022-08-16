@@ -33,12 +33,7 @@ import (
 	"k8s.io/klog"
 )
 
-const (
-	dbDriver = "postgres"
-
-	connectInterval = 5 * time.Second
-	connectTimeout  = 60 * time.Second
-)
+const dbDriver = "postgres"
 
 type dbConn struct {
 	db *sql.DB
@@ -65,7 +60,7 @@ func getDbName() string {
 }
 
 func NewDBInterface() (common.KatibDBInterface, error) {
-	db, err := common.OpenSQLConn(dbDriver, getDbName(), connectInterval, connectTimeout)
+	db, err := common.OpenSQLConn(dbDriver, getDbName(), common.ConnectInterval, common.ConnectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
 	}
@@ -160,7 +155,7 @@ func (d *dbConn) GetObservationLog(trialName string, metricName string, startTim
 		formattedEndTime := e_time.UTC().Format(time.RFC3339Nano)
 		qstr += fmt.Sprintf(" AND time <= $%d", index_of_qparam)
 		qfield = append(qfield, formattedEndTime)
-		// index_of_qparam += 1
+		// index_of_qparam += 1  // if any other filters are added, this should be incremented
 	}
 
 	rows, err := d.db.Query(base_stmt+qstr+" ORDER BY time", qfield...)
