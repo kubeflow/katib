@@ -49,7 +49,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		fmt.Printf("error `SELECT 1` probing: %v\n", err)
 	}
-	os.Exit(m.Run())
+	m.Run()
 }
 
 func TestRegisterObservationLog(t *testing.T) {
