@@ -19,7 +19,7 @@ import json
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 
-from pkg.suggestion.v1beta1.nas.darts.service import DartsService, validate_algorithm_spec
+from pkg.suggestion.v1beta1.nas.darts.service import DartsService, validate_algorithm_settings
 
 
 class TestDarts(unittest.TestCase):
@@ -132,37 +132,37 @@ class TestDarts(unittest.TestCase):
             api_pb2.AlgorithmSetting(name="num_nodes", value="4"),
             api_pb2.AlgorithmSetting(name="stem_multiplier", value="3"),
         ]
-        is_valid, _ = validate_algorithm_spec(valid)
+        is_valid, _ = validate_algorithm_settings(valid)
         self.assertEqual(is_valid, True)
 
         # Invalid num_epochs
         invalid = [api_pb2.AlgorithmSetting(name="num_epochs", value="0")]
-        is_valid, _ = validate_algorithm_spec(invalid)
+        is_valid, _ = validate_algorithm_settings(invalid)
         self.assertEqual(is_valid, False)
 
         # Invalid w_lr
         invalid = [api_pb2.AlgorithmSetting(name="w_lr", value="-0.1")]
-        is_valid, _ = validate_algorithm_spec(invalid)
+        is_valid, _ = validate_algorithm_settings(invalid)
         self.assertEqual(is_valid, False)
 
         # Invalid alpha_weight_decay
         invalid = [api_pb2.AlgorithmSetting(name="alpha_weight_decay", value="-0.02")]
-        is_valid, _ = validate_algorithm_spec(invalid)
+        is_valid, _ = validate_algorithm_settings(invalid)
         self.assertEqual(is_valid, False)
 
         # Invalid w_momentum
         invalid = [api_pb2.AlgorithmSetting(name="w_momentum", value="-0.8")]
-        is_valid, _ = validate_algorithm_spec(invalid)
+        is_valid, _ = validate_algorithm_settings(invalid)
         self.assertEqual(is_valid, False)
 
         # Invalid batch_size
         invalid = [api_pb2.AlgorithmSetting(name="batch_size", value="0")]
-        is_valid, _ = validate_algorithm_spec(invalid)
+        is_valid, _ = validate_algorithm_settings(invalid)
         self.assertEqual(is_valid, False)
 
         # Invalid print_step
         invalid = [api_pb2.AlgorithmSetting(name="print_step", value="0")]
-        is_valid, _ = validate_algorithm_spec(invalid)
+        is_valid, _ = validate_algorithm_settings(invalid)
         self.assertEqual(is_valid, False)
 
 

@@ -171,26 +171,26 @@ def validate_algorithm_settings(algorithm_settings: list[api_pb2.AlgorithmSettin
             # Validate weight decay
             if s.name in ["w_weight_decay", "alpha_weight_decay"]:
                 if not float(s.value) >= 0.0:
-                    return False, "{} should be greate or equal than zero".format(s.name)
+                    return False, "{} should be greater than or equal to zero".format(s.name)
 
             # Validate w_momentum and w_grad_clip
             if s.name in ["w_momentum", "w_grad_clip"]:
                 if not float(s.value) >= 0.0:
-                    return False, "{} should be greate or equal than zero".format(s.name)
+                    return False, "{} should be greater than or equal to zero".format(s.name)
 
             if s.name == "batch_size":
                 if s.value is not "None":
                     if not int(s.value) >= 1:
-                        return False, "batch_size should be greate or equal than one"
+                        return False, "batch_size should be greater than or equal to one"
 
             if s.name == "num_workers":
                 if not int(s.value) >= 0:
-                    return False, "num_workers should be greate or equal than zero"
+                    return False, "num_workers should be greater than or equal to zero"
 
             # Validate "init_channels", "print_step", "num_nodes" and "stem_multiplier"
             if s.name in ["init_channels", "print_step", "num_nodes", "stem_multiplier"]:
                 if not int(s.value) >= 1:
-                    return False, "{} should be greate or equal than one".format(s.name)
+                    return False, "{} should be greater than or equal to one".format(s.name)
 
         except Exception as e:
             return False, "failed to validate {name}({value}): {exception}".format(name=s.name, value=s.value,
