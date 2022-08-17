@@ -166,7 +166,7 @@ def validate_algorithm_spec(algorithm_settings: list[api_pb2.AlgorithmSetting]) 
             # Validate learning rate
             if s.name in ["w_lr", "w_lr_min", "alpha_lr"]:
                 if not float(s.value) >= 0.0:
-                    return False, "{} should be greate or equal than zero".format(s.name)
+                    return False, "{} should be greater than or equal to zero".format(s.name)
 
             # Validate weight decay
             if s.name in ["w_weight_decay", "alpha_weight_decay"]:
