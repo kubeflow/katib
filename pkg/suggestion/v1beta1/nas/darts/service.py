@@ -161,7 +161,7 @@ def validate_algorithm_spec(algorithm_settings: list[api_pb2.AlgorithmSetting]) 
         try:
             if s.name == "num_epochs":
                 if not int(s.value) > 0:
-                    return False, "{} should be greate than zero".format(s.name)
+                    return False, "{} should be greater than zero".format(s.name)
 
             # Validate learning rate
             if s.name in ["w_lr", "w_lr_min", "alpha_lr"]:
