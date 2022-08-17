@@ -9,6 +9,7 @@ export enum AlgorithmsEnum {
   SOBOL = 'sobol',
   ENAS = 'enas',
   DARTS = 'darts',
+  PBT = 'pbt',
 }
 
 export enum EarlyStoppingAlgorithmsEnum {

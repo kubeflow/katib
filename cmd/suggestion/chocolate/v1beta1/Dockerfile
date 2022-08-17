@@ -1,15 +1,5 @@
-FROM python:3.9
-
-ENV TARGET_DIR /opt/katib
-ENV SUGGESTION_DIR cmd/suggestion/chocolate/v1beta1
+FROM alpine:3.15 AS downloader
 ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
-
-RUN if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
-    apt-get -y update && \
-    apt-get -y install gfortran libopenblas-dev liblapack-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*; \
-    fi
 RUN if [ "$(uname -m)" = "ppc64le" ]; then \
     wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-ppc64le; \
     elif [ "$(uname -m)" = "aarch64" ]; then \
@@ -19,12 +9,23 @@ RUN if [ "$(uname -m)" = "ppc64le" ]; then \
     fi && \
     chmod +x /bin/grpc_health_probe
 
+FROM python:3.9-slim
+ENV TARGET_DIR /opt/katib
+ENV SUGGESTION_DIR cmd/suggestion/chocolate/v1beta1
+
+RUN apt-get -y update && \
+    apt-get -y install git && \
+    if [ "$(uname -m)" = "ppc64le" ] || [ "$(uname -m)" = "aarch64" ]; then \
+    apt-get -y install gfortran libopenblas-dev liblapack-dev g++; \
+    fi && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 ADD ./pkg/ ${TARGET_DIR}/pkg/
 ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
+COPY --from=downloader /bin/grpc_health_probe /bin/grpc_health_probe
+
 WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
-RUN if [ "$(uname -m)" = "aarch64" ]; then \
-    sed -i -e '$a git+https://github.com/fmder/ghalton@master' -e '/^ghalton/d' requirements.txt; \
-    fi;
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chgrp -R 0 ${TARGET_DIR} \

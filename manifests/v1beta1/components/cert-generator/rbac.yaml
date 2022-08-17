@@ -1,3 +1,4 @@
+---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -7,6 +8,7 @@ rules:
       - ""
     resources:
       - secrets
+      - services
     verbs:
       - get
       - create

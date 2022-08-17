@@ -35,6 +35,7 @@ class V1beta1TrialSpec(object):
     openapi_types = {
         'early_stopping_rules': 'list[V1beta1EarlyStoppingRule]',
         'failure_condition': 'str',
+        'labels': 'dict(str, str)',
         'metrics_collector': 'V1beta1MetricsCollectorSpec',
         'objective': 'V1beta1ObjectiveSpec',
         'parameter_assignments': 'list[V1beta1ParameterAssignment]',
@@ -48,6 +49,7 @@ class V1beta1TrialSpec(object):
     attribute_map = {
         'early_stopping_rules': 'earlyStoppingRules',
         'failure_condition': 'failureCondition',
+        'labels': 'labels',
         'metrics_collector': 'metricsCollector',
         'objective': 'objective',
         'parameter_assignments': 'parameterAssignments',
@@ -58,7 +60,7 @@ class V1beta1TrialSpec(object):
         'success_condition': 'successCondition'
     }
 
-    def __init__(self, early_stopping_rules=None, failure_condition=None, metrics_collector=None, objective=None, parameter_assignments=None, primary_container_name=None, primary_pod_labels=None, retain_run=None, run_spec=None, success_condition=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, early_stopping_rules=None, failure_condition=None, labels=None, metrics_collector=None, objective=None, parameter_assignments=None, primary_container_name=None, primary_pod_labels=None, retain_run=None, run_spec=None, success_condition=None, local_vars_configuration=None):  # noqa: E501
         """V1beta1TrialSpec - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -66,6 +68,7 @@ class V1beta1TrialSpec(object):
 
         self._early_stopping_rules = None
         self._failure_condition = None
+        self._labels = None
         self._metrics_collector = None
         self._objective = None
         self._parameter_assignments = None
@@ -80,6 +83,8 @@ class V1beta1TrialSpec(object):
             self.early_stopping_rules = early_stopping_rules
         if failure_condition is not None:
             self.failure_condition = failure_condition
+        if labels is not None:
+            self.labels = labels
         if metrics_collector is not None:
             self.metrics_collector = metrics_collector
         if objective is not None:
@@ -142,6 +147,29 @@ class V1beta1TrialSpec(object):
         """
 
         self._failure_condition = failure_condition
+
+    @property
+    def labels(self):
+        """Gets the labels of this V1beta1TrialSpec.  # noqa: E501
+
+        Labels that provide additional metadata for services (e.g. Suggestions tracking)  # noqa: E501
+
+        :return: The labels of this V1beta1TrialSpec.  # noqa: E501
+        :rtype: dict(str, str)
+        """
+        return self._labels
+
+    @labels.setter
+    def labels(self, labels):
+        """Sets the labels of this V1beta1TrialSpec.
+
+        Labels that provide additional metadata for services (e.g. Suggestions tracking)  # noqa: E501
+
+        :param labels: The labels of this V1beta1TrialSpec.  # noqa: E501
+        :type: dict(str, str)
+        """
+
+        self._labels = labels
 
     @property
     def metrics_collector(self):

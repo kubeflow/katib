@@ -1,11 +1,12 @@
+---
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
   name: hyperband
 spec:
-  parallelTrialCount: 9
-  maxTrialCount: 9
+  parallelTrialCount: 2
+  maxTrialCount: 2
   objective:
     type: maximize
     goal: 0.99
@@ -18,10 +19,10 @@ spec:
       - name: "resource_name"
         value: "num-epochs"
       - name: "eta"
-        value: "3"
+        value: "2"
       - name: "r_l"
-        value: "9"
-  maxFailedTrialCount: 9
+        value: "2"
+  maxFailedTrialCount: 2
   parameters:
     - name: lr
       parameterType: double
@@ -43,8 +44,8 @@ spec:
     - name: num-epochs
       parameterType: int
       feasibleSpace:
-        min: "20"
-        max: "20"
+        min: "1"
+        max: "1"
   trialTemplate:
     primaryContainerName: training-container
     trialParameters:
@@ -72,7 +73,7 @@ spec:
                 command:
                   - "python3"
                   - "/opt/mxnet-mnist/mnist.py"
-                  - "--batch-size=64"
+                  - "--batch-size=32"
                   - "--lr=${trialParameters.learningRate}"
                   - "--num-layers=${trialParameters.numberLayers}"
                   - "--optimizer=${trialParameters.optimizer}"

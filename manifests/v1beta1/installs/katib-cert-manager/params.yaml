@@ -1,3 +1,4 @@
+---
 varReference:
   - path: spec/commonName
     kind: Certificate

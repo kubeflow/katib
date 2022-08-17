@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { TrialModalComponent } from './trial-modal/trial-modal.component';
 
 @Component({
   selector: 'app-trials-table',
@@ -23,6 +22,9 @@ export class TrialsTableComponent implements OnChanges {
 
   @Input()
   data = [];
+
+  @Input()
+  experimentName = [];
 
   @Input()
   namespace: string;
@@ -56,9 +58,7 @@ export class TrialsTableComponent implements OnChanges {
   }
 
   openTrialModal(name: string) {
-    const modalRef = this.dialog.open(TrialModalComponent, {});
-    modalRef.componentInstance.trialName = name;
-    modalRef.componentInstance.namespace = this.namespace;
+    this.router.navigate([`/experiment/${this.experimentName}/trial/${name}`]);
   }
 
   handleMouseLeave = () => this.leaveMouseFromTrial.emit();

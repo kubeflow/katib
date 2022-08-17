@@ -17,7 +17,6 @@ limitations under the License.
 package trial
 
 import (
-	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -41,7 +40,7 @@ import (
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
-	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	managerclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/trial/managerclient"
 )
 
@@ -267,8 +266,8 @@ func TestReconcileBatchJob(t *testing.T) {
 		}
 		return trial.IsSucceeded() &&
 			len(trial.Status.Observation.Metrics) > 0 &&
-			trial.Status.Observation.Metrics[0].Max == "0.99" &&
 			trial.Status.Observation.Metrics[0].Min == "0.11" &&
+			trial.Status.Observation.Metrics[0].Max == "0.99" &&
 			trial.Status.Observation.Metrics[0].Latest == "0.11"
 	}, timeout).Should(gomega.BeTrue())
 
@@ -291,15 +290,11 @@ func TestReconcileBatchJob(t *testing.T) {
 		if err = c.Get(ctx, trialKey, trial); err != nil {
 			return false
 		}
-		isConditionCorrect := false
-		for _, cond := range trial.Status.Conditions {
-			if cond.Type == trialsv1beta1.TrialSucceeded && cond.Status == corev1.ConditionFalse &&
-				cond.Reason == fmt.Sprintf("%v. Job reason: %v", TrialMetricsUnavailableReason, batchJobCompleteReason) &&
-				cond.Message == fmt.Sprintf("Metrics are not available. Job message: %v", batchJobCompleteMessage) {
-				isConditionCorrect = true
-			}
-		}
-		return isConditionCorrect
+		return trial.IsMetricsUnavailable() &&
+			len(trial.Status.Observation.Metrics) > 0 &&
+			trial.Status.Observation.Metrics[0].Min == consts.UnavailableMetricValue &&
+			trial.Status.Observation.Metrics[0].Max == consts.UnavailableMetricValue &&
+			trial.Status.Observation.Metrics[0].Latest == consts.UnavailableMetricValue
 	}, timeout).Should(gomega.BeTrue())
 
 	// Delete the Trial

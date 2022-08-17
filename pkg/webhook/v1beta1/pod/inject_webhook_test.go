@@ -577,7 +577,7 @@ func TestNeedWrapWorkerContainer(t *testing.T) {
 	}
 }
 
-func TestMutateVolume(t *testing.T) {
+func TestMutateMetricsCollectorVolume(t *testing.T) {
 	tc := struct {
 		Pod                  v1.Pod
 		ExpectedPod          v1.Pod
@@ -644,14 +644,14 @@ func TestMutateVolume(t *testing.T) {
 		PathKind:             common.FileKind,
 	}
 
-	err := mutateVolume(
+	err := mutateMetricsCollectorVolume(
 		&tc.Pod,
 		tc.MountPath,
 		tc.SidecarContainerName,
 		tc.PrimaryContainerName,
 		tc.PathKind)
 	if err != nil {
-		t.Errorf("mutateVolume failed: %v", err)
+		t.Errorf("mutateMetricsCollectorVolume failed: %v", err)
 	} else if !equality.Semantic.DeepEqual(tc.Pod, tc.ExpectedPod) {
 		t.Errorf("Expected pod %v, got %v", tc.ExpectedPod, tc.Pod)
 	}

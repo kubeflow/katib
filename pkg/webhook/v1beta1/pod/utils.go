@@ -48,6 +48,17 @@ func isPrimaryPod(podLabels, primaryLabels map[string]string) bool {
 	return true
 }
 
+func getPrimaryContainerIndex(containers []v1.Container, primaryContainerName string) int {
+	primaryContainerIndex := -1
+	for i, c := range containers {
+		if c.Name == primaryContainerName {
+			primaryContainerIndex = i
+			break
+		}
+	}
+	return primaryContainerIndex
+}
+
 func getRemoteImage(pod *v1.Pod, namespace string, containerIndex int) (crv1.Image, error) {
 	// verify the image name, then download the remote config file
 	c := pod.Spec.Containers[containerIndex]
@@ -140,13 +151,7 @@ func needWrapWorkerContainer(mc common.MetricsCollectorSpec) bool {
 func wrapWorkerContainer(trial *trialsv1beta1.Trial, pod *v1.Pod, namespace,
 	metricsFile string, pathKind common.FileSystemKind) error {
 	// Search for primary container.
-	index := -1
-	for i, c := range pod.Spec.Containers {
-		if c.Name == trial.Spec.PrimaryContainerName {
-			index = i
-			break
-		}
-	}
+	index := getPrimaryContainerIndex(pod.Spec.Containers, trial.Spec.PrimaryContainerName)
 	if index >= 0 {
 		command := []string{"sh", "-c"}
 		args, err := getContainerCommand(pod, namespace, index)
@@ -212,7 +217,14 @@ func getMarkCompletedCommand(metricsFileDir string, pathKind common.FileSystemKi
 	return fmt.Sprintf("echo %s > %s", mccommon.TrainingCompleted, pidFile)
 }
 
-func mutateVolume(pod *v1.Pod, mountPath, sidecarContainerName, primaryContainerName string, pathKind common.FileSystemKind) error {
+func addContainerVolumeMount(c *v1.Container, vm *v1.VolumeMount) {
+	if c.VolumeMounts == nil {
+		c.VolumeMounts = make([]v1.VolumeMount, 0)
+	}
+	c.VolumeMounts = append(c.VolumeMounts, *vm)
+}
+
+func mutateMetricsCollectorVolume(pod *v1.Pod, mountPath, sidecarContainerName, primaryContainerName string, pathKind common.FileSystemKind) error {
 	metricsVol := v1.Volume{
 		Name: common.MetricsVolume,
 		VolumeSource: v1.VolumeSource{
@@ -241,12 +253,7 @@ func mutateVolume(pod *v1.Pod, mountPath, sidecarContainerName, primaryContainer
 	}
 
 	for _, i := range indexList {
-		c := &pod.Spec.Containers[i]
-		if c.VolumeMounts == nil {
-			c.VolumeMounts = make([]v1.VolumeMount, 0)
-		}
-		c.VolumeMounts = append(c.VolumeMounts, vm)
-		pod.Spec.Containers[i] = *c
+		addContainerVolumeMount(&pod.Spec.Containers[i], &vm)
 	}
 	pod.Spec.Volumes = append(pod.Spec.Volumes, metricsVol)
 

@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 import {
   ConfirmDialogService,
   DIALOG_RESP,
@@ -35,6 +36,13 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
   showGraph: boolean;
   bestTrialName: string;
   pageLoading = true;
+  selectedTab = 0;
+  tabs = new Map<string, number>([
+    ['overview', 0],
+    ['trials', 1],
+    ['details', 2],
+    ['yaml', 3],
+  ]);
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -62,12 +70,22 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.name = this.activatedRoute.snapshot.params.experimentName;
 
+    if (this.activatedRoute.snapshot.queryParams['tab']) {
+      this.selectedTab = this.tabs.get(
+        this.activatedRoute.snapshot.queryParams['tab'],
+      );
+    }
+
     this.subs.add(
       this.namespaceService.getSelectedNamespace().subscribe(namespace => {
         this.namespace = namespace;
         this.updateExperimentInfo();
       }),
     );
+  }
+
+  tabChanged(event: MatTabChangeEvent) {
+    this.selectedTab = event.index;
   }
 
   ngOnDestroy(): void {

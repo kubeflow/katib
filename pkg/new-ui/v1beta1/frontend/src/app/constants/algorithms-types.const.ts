@@ -12,6 +12,7 @@ export const AlgorithmNames = {
   [AlgorithmsEnum.MULTIVARIATE_TPE]: 'Multivariate Tree of Parzen Estimators',
   [AlgorithmsEnum.CMAES]: 'Covariance Matrix Adaptation: Evolution Strategy',
   [AlgorithmsEnum.SOBOL]: 'Sobol Quasirandom Sequence',
+  [AlgorithmsEnum.PBT]: 'Population Based Training',
 };
 
 export const NasAlgorithmNames = {

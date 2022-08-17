@@ -975,6 +975,21 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 							},
 						},
 					},
+					"metricsUnavailableTrialList": {
+						SchemaProps: spec.SchemaProps{
+							Description: "List of trial names which have been metrics unavailable",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 					"trials": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Trials is the total number of trials owned by the experiment.",
@@ -1020,6 +1035,13 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 					"trialsEarlyStopped": {
 						SchemaProps: spec.SchemaProps{
 							Description: "How many trials are currently early stopped.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"trialMetricsUnavailable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "How many trials are currently metrics unavailable.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -1733,6 +1755,22 @@ func schema_apis_controller_suggestions_v1beta1_TrialAssignment(ref common.Refer
 							},
 						},
 					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Suggestion label metadata to attach to Trial job",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -1993,6 +2031,22 @@ func schema_apis_controller_trials_v1beta1_TrialSpec(ref common.ReferenceCallbac
 							Description: "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Labels that provide additional metadata for services (e.g. Suggestions tracking)",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
 						},
 					},
 				},

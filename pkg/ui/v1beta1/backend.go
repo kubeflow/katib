@@ -23,6 +23,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -44,7 +45,7 @@ func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
 }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.DBManagerClient) {
-	conn, err := grpc.Dial(k.dbManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(k.dbManagerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Printf("Dial to GRPC failed: %v", err)
 		return nil, nil

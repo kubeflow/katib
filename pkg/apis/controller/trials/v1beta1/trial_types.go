@@ -61,6 +61,9 @@ type TrialSpec struct {
 	// Condition must be in GJSON format, ref https://github.com/tidwall/gjson.
 	// For example for BatchJob: status.conditions.#(type=="Failed")#|#(status=="True")#
 	FailureCondition string `json:"failureCondition,omitempty"`
+
+	// Labels that provide additional metadata for services (e.g. Suggestions tracking)
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 // TrialStatus is the current status of a Trial.
@@ -113,12 +116,13 @@ type TrialCondition struct {
 type TrialConditionType string
 
 const (
-	TrialCreated      TrialConditionType = "Created"
-	TrialRunning      TrialConditionType = "Running"
-	TrialSucceeded    TrialConditionType = "Succeeded"
-	TrialKilled       TrialConditionType = "Killed"
-	TrialFailed       TrialConditionType = "Failed"
-	TrialEarlyStopped TrialConditionType = "EarlyStopped"
+	TrialCreated            TrialConditionType = "Created"
+	TrialRunning            TrialConditionType = "Running"
+	TrialSucceeded          TrialConditionType = "Succeeded"
+	TrialKilled             TrialConditionType = "Killed"
+	TrialFailed             TrialConditionType = "Failed"
+	TrialMetricsUnavailable TrialConditionType = "MetricsUnavailable"
+	TrialEarlyStopped       TrialConditionType = "EarlyStopped"
 )
 
 // +genclient

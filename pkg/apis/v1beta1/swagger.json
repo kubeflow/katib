@@ -207,6 +207,14 @@
             "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
           }
         },
+        "labels": {
+          "description": "Suggestion label metadata to attach to Trial job",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "default": ""
+          }
+        },
         "name": {
           "description": "Name of the suggestion",
           "type": "string"
@@ -302,6 +310,14 @@
         "failureCondition": {
           "description": "Condition when trial custom resource is failed. Condition must be in GJSON format, ref https://github.com/tidwall/gjson. For example for BatchJob: status.conditions.#(type==\"Failed\")#|#(status==\"True\")#",
           "type": "string"
+        },
+        "labels": {
+          "description": "Labels that provide additional metadata for services (e.g. Suggestions tracking)",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "default": ""
+          }
         },
         "metricsCollector": {
           "description": "Describes how metrics will be collected",
@@ -690,6 +706,14 @@
           "description": "Represents last time when the Experiment was reconciled. It is not guaranteed to be set in happens-before order across separate operations. It is represented in RFC3339 form and is in UTC.",
           "$ref": "#/definitions/v1.Time"
         },
+        "metricsUnavailableTrialList": {
+          "description": "List of trial names which have been metrics unavailable",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "default": ""
+          }
+        },
         "pendingTrialList": {
           "description": "List of trial names which are pending.",
           "type": "array",
@@ -717,6 +741,11 @@
             "type": "string",
             "default": ""
           }
+        },
+        "trialMetricsUnavailable": {
+          "description": "How many trials are currently metrics unavailable.",
+          "type": "integer",
+          "format": "int32"
         },
         "trials": {
           "description": "Trials is the total number of trials owned by the experiment.",

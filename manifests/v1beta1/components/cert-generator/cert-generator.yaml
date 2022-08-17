@@ -1,3 +1,4 @@
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -15,7 +16,6 @@ spec:
       containers:
         - name: cert-generator
           image: docker.io/kubeflowkatib/cert-generator
-          imagePullPolicy: Always
           command: ["./katib-cert-generator"]
           args: ["generate", "--namespace=$(KATIB_CORE_NAMESPACE)"]
           env:
