@@ -1,3 +1,4 @@
+---
 # This is example with median stopping early stopping rule with logs in JSON format.
 # It has bad feasible space for learning rate to show more early stopped Trials.
 apiVersion: kubeflow.org/v1beta1
@@ -61,7 +62,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/pytorch-mnist:latest
+                image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                 command:
                   - "python3"
                   - "/opt/pytorch-mnist/mnist.py"

@@ -47,13 +47,13 @@ class Architect():
         gradients = torch.autograd.grad(loss, self.model.getWeights())
 
         # Do virtual step (Update gradient)
-        # Below opeartions do not need gradient tracking
+        # Below operations do not need gradient tracking
         with torch.no_grad():
             # dict key is not the value, but the pointer. So original network weight have to
             # be iterated also.
             for w, vw, g in zip(self.model.getWeights(), self.v_model.getWeights(), gradients):
                 m = w_optim.state[w].get("momentum_buffer", 0.) * self.w_momentum
-                vw.copy_(w - xi * (m + g + self.w_weight_decay * w))
+                vw.copy_(w - torch.FloatTensor(xi) * (m + g + self.w_weight_decay * w))
 
             # Sync alphas
             for a, va in zip(self.model.getAlphas(), self.v_model.getAlphas()):
@@ -85,7 +85,7 @@ class Architect():
         # Update final gradient = dalpha - xi * hessian
         with torch.no_grad():
             for alpha, da, h in zip(self.model.getAlphas(), dalpha, hessian):
-                alpha.grad = da - xi * h
+                alpha.grad = da - torch.FloatTensor(xi) * h
 
     def compute_hessian(self, dws, train_x, train_y):
         """

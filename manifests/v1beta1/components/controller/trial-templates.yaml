@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -53,8 +54,7 @@ data:
             spec:
               containers:
                 - name: pytorch
-                  image: docker.io/kubeflowkatib/pytorch-mnist:latest
-                  imagePullPolicy: Always
+                  image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                   command:
                     - "python3"
                     - "/opt/pytorch-mnist/mnist.py"
@@ -68,8 +68,7 @@ data:
             spec:
               containers:
                 - name: pytorch
-                  image: docker.io/kubeflowkatib/pytorch-mnist:latest
-                  imagePullPolicy: Always
+                  image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                   command:
                     - "python3"
                     - "/opt/pytorch-mnist/mnist.py"

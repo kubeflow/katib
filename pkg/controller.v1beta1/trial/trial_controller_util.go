@@ -67,8 +67,6 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 				r.collector.IncreaseTrialsSucceededCount(instance.Namespace)
 			}
 		} else if !instance.IsMetricsUnavailable() {
-			// TODO (andreyvelich): Is it correct to mark succeeded status false when metrics are unavailable?
-			// Ref issue to add new condition: https://github.com/kubeflow/katib/issues/1343
 			msg := "Metrics are not available"
 			reason := TrialMetricsUnavailableReason
 
@@ -81,10 +79,12 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			}
 
 			logger.Info("Trial status changed to Metrics Unavailable")
-			instance.MarkTrialStatusSucceeded(corev1.ConditionFalse, reason, msg)
+			instance.MarkTrialStatusMetricsUnavailable(reason, msg)
+			instance.Status.CompletionTime = &timeNow
 
 			eventMsg := fmt.Sprintf("Metrics are not available for Job %v", deployedJobName)
 			r.recorder.Eventf(instance, corev1.EventTypeWarning, JobMetricsUnavailableReason, eventMsg)
+			r.collector.IncreaseTrialsMetricsUnavailableCount(instance.Namespace)
 		}
 	} else if jobStatus.Condition == trialutil.JobFailed && !instance.IsFailed() && !instance.IsEarlyStopped() {
 		msg := "Trial has failed"

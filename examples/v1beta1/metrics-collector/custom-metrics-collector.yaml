@@ -1,3 +1,4 @@
+---
 # TODO (andreyvelich) This metrics collector image (kubeflowkatib/custom-metrics-collector) doesn't work in v1beta1.
 # It is currently using api.v1.alpha3.Manager instead of api.v1.beta1.Manager to report metrics.
 apiVersion: kubeflow.org/v1beta1
@@ -66,7 +67,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/pytorch-mnist:latest
+                image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                 command:
                   - "python3"
                   - "/opt/pytorch-mnist/mnist.py"

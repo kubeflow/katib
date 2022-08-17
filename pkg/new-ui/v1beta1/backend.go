@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -57,7 +58,7 @@ func (k *KatibUIHandler) ServeIndex(buildDir string) func(w http.ResponseWriter,
 }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.DBManagerClient) {
-	conn, err := grpc.Dial(k.dbManagerAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(k.dbManagerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Printf("Dial to GRPC failed: %v", err)
 		return nil, nil
@@ -392,6 +393,30 @@ func (k *KatibUIHandler) FetchSuggestion(w http.ResponseWriter, r *http.Request)
 	}
 	if _, err = w.Write(response); err != nil {
 		log.Printf("Write Suggestion failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+// FetchTrial gets trial in specific namespace.
+func (k *KatibUIHandler) FetchTrial(w http.ResponseWriter, r *http.Request) {
+	trialName := r.URL.Query()["trialName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+
+	trial, err := k.katibClient.GetTrial(trialName, namespace)
+	if err != nil {
+		log.Printf("GetTrial failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(trial)
+	if err != nil {
+		log.Printf("Marshal Trial failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write trial failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -14,23 +14,23 @@
 
 import grpc
 import grpc_testing
-
 import pytest
 
 from pkg.apis.manager.v1beta1.python import api_pb2
-
 from pkg.suggestion.v1beta1.optuna.service import OptunaService
+
+import utils
 
 
 class TestOptuna:
     def setup_method(self):
-        servicers = {
+        services = {
             api_pb2.DESCRIPTOR.services_by_name['Suggestion']: OptunaService(
             )
         }
 
         self.test_server = grpc_testing.server_from_dictionary(
-            servicers, grpc_testing.strict_real_time())
+            services, grpc_testing.strict_real_time())
 
     @pytest.mark.parametrize(
         ["algorithm_name", "algorithm_settings"],
@@ -183,6 +183,281 @@ class TestOptuna:
         response, metadata, code, details = get_suggestion.termination()
         assert code == grpc.StatusCode.OK
         assert 2 == len(response.parameter_assignments)
+
+    def test_validate_algorithm_settings(self):
+        # Invalid algorithm name
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="invalid",
+            ),
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.UNKNOWN
+
+        # [TPE] Valid Case
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="tpe",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="n_startup_trials",
+                        value="5",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="n_ei_candidates",
+                        value="24",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="1",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.OK
+
+        # [TPE] Invalid Parameter Name
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="tpe",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="invalid",
+                        value="5",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [TPE] Invalid n_startup_trials
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="tpe",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="n_startup_trials",
+                        value="-1",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [TPE] Invalid n_ei_candidates
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="tpe",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="n_ei_candidates",
+                        value="-1",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [TPE] Invalid random_state
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="tpe",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="-1",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [Multivariate-TPE] Valid Case
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="multivariate-tpe",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="n_startup_trials",
+                        value="5",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="n_ei_candidates",
+                        value="24",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="1",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.OK
+
+        # [CMAES] Valid Case
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="cmaes",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="restart_strategy",
+                        value="ipop",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="sigma",
+                        value="0.1",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="10",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.OK
+
+        # [CMAES] Invalid parameter name
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="cmaes",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="invalid",
+                        value="invalid",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="sigma",
+                        value="0.1",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [CMAES] Invalid restart_strategy
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="cmaes",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="restart_strategy",
+                        value="invalid",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="sigma",
+                        value="0.1",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [CMAES] Invalid sigma
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="cmaes",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="restart_strategy",
+                        value="None",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="sigma",
+                        value="-10",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [CMAES] Invalid random_state
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="cmaes",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="sigma",
+                        value="0.2",
+                    ),
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="-20",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [CMAES] Invalid number of parameters
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="cmaes",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="sigma",
+                        value="0.2",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [RANDOM] Valid Case
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="random",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="10",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.OK
+
+        # [RANDOM] Invalid parameter name
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="random",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="invalid",
+                        value="invalid",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
+
+        # [RANDOM] Invalid random_state
+        experiment_spec = api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(
+                algorithm_name="random",
+                algorithm_settings=[
+                    api_pb2.AlgorithmSetting(
+                        name="random_state",
+                        value="-1",
+                    ),
+                ],
+            )
+        )
+        _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
+        assert code == grpc.StatusCode.INVALID_ARGUMENT
 
 
 if __name__ == '__main__':

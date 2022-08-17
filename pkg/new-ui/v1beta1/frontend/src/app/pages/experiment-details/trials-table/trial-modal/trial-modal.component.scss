@@ -1,21 +1,19 @@
-.experiment-title {
-  font-weight: 400;
-  font-size: 20px;
+.panel {
+  margin: 16px 0;
+  display: block;
 }
 
-.modal {
+.graph-div-outer {
+  margin: 16px 0;
+}
+
+.graph-div-inner {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
 }
 
-.title {
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.loader {
-  display: flex;
-  flex: 1;
-  align-items: center;
+// https://github.com/angular/components/issues/9592
+.tab-height-fix {
+  min-height: calc(100vh - 600px - 52px);
+  clear: both;
 }

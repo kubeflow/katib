@@ -125,6 +125,15 @@ custom algorithm.
       <td>
       </td>
     </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#pbt">Population Based Training</a>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -146,7 +155,7 @@ Follow the next steps to install Katib standalone.
 
 This is the minimal requirements to install Katib:
 
-- Kubernetes >= 1.17
+- Kubernetes >= 1.21
 - `kubectl` >= 1.21
 
 ## Latest Version

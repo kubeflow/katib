@@ -1,0 +1,23 @@
+name: Lint YAML files
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Check YAML
+        run: make yamllint
+          

@@ -33,7 +33,12 @@
   </ng-template>
 
   <div class="tab-height-fix">
-    <mat-tab-group dynamicHeight animationDuration="0ms">
+    <mat-tab-group
+      dynamicHeight
+      animationDuration="0ms"
+      [(selectedIndex)]="selectedTab"
+      (selectedTabChange)="tabChanged($event)"
+    >
       <mat-tab label="OVERVIEW">
         <app-experiment-overview
           [experimentName]="name"
@@ -45,6 +50,7 @@
           (leaveMouseFromTrial)="mouseLeftTrial()"
           (mouseOnTrial)="mouseOverTrial($event)"
           [data]="details"
+          [experimentName]="name"
           [displayedColumns]="columns"
           [namespace]="namespace"
           [bestTrialName]="bestTrialName"

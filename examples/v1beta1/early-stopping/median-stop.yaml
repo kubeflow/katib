@@ -1,3 +1,4 @@
+---
 # This is example with median stopping early stopping rule.
 # It has bad feasible space for learning rate to show more early stopped Trials.
 apiVersion: kubeflow.org/v1beta1
@@ -18,9 +19,9 @@ spec:
     algorithmName: medianstop
     algorithmSettings:
       - name: min_trials_required
-        value: "3"
+        value: "1"
       - name: start_step
-        value: "5"
+        value: "2"
   parallelTrialCount: 2
   maxTrialCount: 15
   maxFailedTrialCount: 3
@@ -33,8 +34,8 @@ spec:
     - name: num-epochs
       parameterType: int
       feasibleSpace:
-        min: "7"
-        max: "8"
+        min: "3"
+        max: "4"
   trialTemplate:
     retain: true
     primaryContainerName: training-container

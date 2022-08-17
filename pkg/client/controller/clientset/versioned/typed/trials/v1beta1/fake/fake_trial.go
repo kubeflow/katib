@@ -117,7 +117,7 @@ func (c *FakeTrials) UpdateStatus(ctx context.Context, trial *v1beta1.Trial, opt
 // Delete takes name of the trial and deletes it. Returns an error if one occurs.
 func (c *FakeTrials) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(trialsResource, c.ns, name), &v1beta1.Trial{})
+		Invokes(testing.NewDeleteActionWithOptions(trialsResource, c.ns, name, opts), &v1beta1.Trial{})
 
 	return err
 }

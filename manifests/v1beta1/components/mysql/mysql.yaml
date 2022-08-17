@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,7 +22,7 @@ spec:
     spec:
       containers:
         - name: katib-mysql
-          image: mysql:8.0.26
+          image: mysql:8.0.29
           args:
             - --datadir
             - /var/lib/mysql/datadir
