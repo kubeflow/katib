@@ -242,7 +242,7 @@ func verifyExperimentResults(kclient katibclient.Client, exp *experimentsv1beta1
 	}
 
 	// Best objective metric should be set.
-	bestObjectiveMetric := &commonv1beta1.Metric{}
+	var bestObjectiveMetric *commonv1beta1.Metric
 	for _, metric := range exp.Status.CurrentOptimalTrial.Observation.Metrics {
 		if metric.Name == exp.Spec.Objective.ObjectiveMetricName {
 			bestObjectiveMetric = &metric

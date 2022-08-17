@@ -12,7 +12,7 @@ see the following user guides:
 
 ## Requirements
 
-- [Go](https://golang.org/) (1.17 or later)
+- [Go](https://golang.org/) (1.18 or later)
 - [Docker](https://docs.docker.com/) (20.10 or later)
 - [Java](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) (8 or later)
 - [Python](https://www.python.org/) (3.9 or later)

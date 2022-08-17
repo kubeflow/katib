@@ -20,9 +20,9 @@ jobs:
           path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.17.10
+          go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
 
       # Verify that go.mod and go.sum is synchronized
       - name: Check Go modules
@@ -53,9 +53,9 @@ jobs:
           path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.17.10
+          go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
 
       - name: Run Go test
         run: go mod download && make test ENVTEST_K8S_VERSION=${{ matrix.kubernetes-version }}
