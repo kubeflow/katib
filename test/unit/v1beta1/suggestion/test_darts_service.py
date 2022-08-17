@@ -160,6 +160,11 @@ class TestDarts(unittest.TestCase):
         is_valid, _ = validate_algorithm_settings(invalid)
         self.assertEqual(is_valid, False)
 
+        # Valid batch_size
+        valid = [api_pb2.AlgorithmSetting(name="batch_size", value="None")]
+        is_valid, _ = validate_algorithm_settings(valid)
+        self.assertEqual(is_valid, True)
+
         # Invalid print_step
         invalid = [api_pb2.AlgorithmSetting(name="print_step", value="0")]
         is_valid, _ = validate_algorithm_settings(invalid)

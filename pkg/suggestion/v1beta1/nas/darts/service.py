@@ -136,7 +136,7 @@ def get_algorithm_settings(settings_raw):
 
     for setting in settings_raw:
         s_name = setting.name
-        s_value = setting.value
+        s_value = None if setting.value == "None" else setting.value
         algorithm_settings_default[s_name] = s_value
 
     return algorithm_settings_default
@@ -179,9 +179,8 @@ def validate_algorithm_settings(algorithm_settings: list[api_pb2.AlgorithmSettin
                     return False, "{} should be greater than or equal to zero".format(s.name)
 
             if s.name == "batch_size":
-                if s.value is not "None":
-                    if not int(s.value) >= 1:
-                        return False, "batch_size should be greater than or equal to one"
+                if s.value != "None" and not int(s.value) >= 1:
+                    return False, "batch_size should be greater than or equal to one"
 
             if s.name == "num_workers":
                 if not int(s.value) >= 0:
