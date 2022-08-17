@@ -39,7 +39,7 @@ class DartsService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         self.logger.propagate = False
 
     def ValidateAlgorithmSettings(self, request, context):
-        is_valid, message = validate_algorithm_settings(request.experiment.spec)
+        is_valid, message = validate_algorithm_spec(request.experiment.spec)
         if not is_valid:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(message)
@@ -142,21 +142,21 @@ def get_algorithm_settings(settings_raw):
     return algorithm_settings_default
 
 
-def validate_algorithm_settings(spec: api_pb2.ExperimentSpec) -> (bool, str):
+def validate_algorithm_spec(spec: api_pb2.ExperimentSpec) -> (bool, str):
     # Validate Operations
     is_valid, message = validate_operations(spec.nas_config.operations.operation)
     if not is_valid:
         return False, message
 
     # Validate AlgorithmSettings
-    is_valid, message = validate_algorithm_spec(spec.algorithm.algorithm_settings)
+    is_valid, message = validate_algorithm_settings(spec.algorithm.algorithm_settings)
     if not is_valid:
         return False, message
 
     return True, ""
 
 
-def validate_algorithm_spec(algorithm_settings: list[api_pb2.AlgorithmSetting]) -> (bool, str):
+def validate_algorithm_settings(algorithm_settings: list[api_pb2.AlgorithmSetting]) -> (bool, str):
     for s in algorithm_settings:
         try:
             if s.name == "num_epochs":
