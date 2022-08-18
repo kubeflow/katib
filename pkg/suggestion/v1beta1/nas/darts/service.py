@@ -167,17 +167,17 @@ def validate_algorithm_settings(algorithm_settings: list[api_pb2.AlgorithmSettin
                     return False, "{} should be greater than zero".format(s.name)
 
             # Validate learning rate
-            if s.name in ["w_lr", "w_lr_min", "alpha_lr"]:
+            if s.name in {"w_lr", "w_lr_min", "alpha_lr"}:
                 if not float(s.value) >= 0.0:
                     return False, "{} should be greater than or equal to zero".format(s.name)
 
             # Validate weight decay
-            if s.name in ["w_weight_decay", "alpha_weight_decay"]:
+            if s.name in {"w_weight_decay", "alpha_weight_decay"}:
                 if not float(s.value) >= 0.0:
                     return False, "{} should be greater than or equal to zero".format(s.name)
 
             # Validate w_momentum and w_grad_clip
-            if s.name in ["w_momentum", "w_grad_clip"]:
+            if s.name in {"w_momentum", "w_grad_clip"}:
                 if not float(s.value) >= 0.0:
                     return False, "{} should be greater than or equal to zero".format(s.name)
 
@@ -190,7 +190,7 @@ def validate_algorithm_settings(algorithm_settings: list[api_pb2.AlgorithmSettin
                     return False, "num_workers should be greater than or equal to zero"
 
             # Validate "init_channels", "print_step", "num_nodes" and "stem_multiplier"
-            if s.name in ["init_channels", "print_step", "num_nodes", "stem_multiplier"]:
+            if s.name in {"init_channels", "print_step", "num_nodes", "stem_multiplier"}:
                 if not int(s.value) >= 1:
                     return False, "{} should be greater than or equal to one".format(s.name)
 
