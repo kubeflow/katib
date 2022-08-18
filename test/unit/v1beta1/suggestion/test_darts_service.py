@@ -19,18 +19,18 @@ import json
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 
-from pkg.suggestion.v1beta1.nas.darts.service import DartsService
+from pkg.suggestion.v1beta1.nas.darts.service import DartsService, validate_algorithm_settings
 
 
 class TestDarts(unittest.TestCase):
     def setUp(self):
-        servicers = {
+        services = {
             api_pb2.DESCRIPTOR.services_by_name['Suggestion']: DartsService(
             )
         }
 
         self.test_server = grpc_testing.server_from_dictionary(
-            servicers, grpc_testing.strict_real_time())
+            services, grpc_testing.strict_real_time())
 
     def test_get_suggestion(self):
         experiment = api_pb2.Experiment(
@@ -102,16 +102,73 @@ class TestDarts(unittest.TestCase):
 
         exp_search_space = ["separable_convolution_3x3", "separable_convolution_5x5"]
         for pa in response.parameter_assignments[0].assignments:
-            if (pa.name == "algorithm-settings"):
+            if pa.name == "algorithm-settings":
                 algorithm_settings = pa.value.replace("\'", "\"")
                 algorithm_settings = json.loads(algorithm_settings)
                 self.assertDictContainsSubset(exp_algorithm_settings, algorithm_settings)
-            elif (pa.name == "num-layers"):
+            elif pa.name == "num-layers":
                 self.assertEqual(exp_num_layers, int(pa.value))
-            elif (pa.name == "search-space"):
+            elif pa.name == "search-space":
                 search_space = pa.value.replace("\'", "\"")
                 search_space = json.loads(search_space)
                 self.assertEqual(exp_search_space, search_space)
+
+    def test_validate_algorithm_spec(self):
+
+        # Valid Case
+        valid = [
+            api_pb2.AlgorithmSetting(name="num_epoch", value="10"),
+            api_pb2.AlgorithmSetting(name="w_lr", value="0.01"),
+            api_pb2.AlgorithmSetting(name="w_lr_min", value="0.01"),
+            api_pb2.AlgorithmSetting(name="alpha_lr", value="0.01"),
+            api_pb2.AlgorithmSetting(name="w_weight_decay", value="0.25"),
+            api_pb2.AlgorithmSetting(name="alpha_weight_decay", value="0.25"),
+            api_pb2.AlgorithmSetting(name="w_momentum", value="0.9"),
+            api_pb2.AlgorithmSetting(name="w_grad_clip", value="5.0"),
+            api_pb2.AlgorithmSetting(name="batch_size", value="100"),
+            api_pb2.AlgorithmSetting(name="num_workers", value="0"),
+            api_pb2.AlgorithmSetting(name="init_channels", value="1"),
+            api_pb2.AlgorithmSetting(name="print_step", value="100"),
+            api_pb2.AlgorithmSetting(name="num_nodes", value="4"),
+            api_pb2.AlgorithmSetting(name="stem_multiplier", value="3"),
+        ]
+        is_valid, _ = validate_algorithm_settings(valid)
+        self.assertEqual(is_valid, True)
+
+        # Invalid num_epochs
+        invalid = [api_pb2.AlgorithmSetting(name="num_epochs", value="0")]
+        is_valid, _ = validate_algorithm_settings(invalid)
+        self.assertEqual(is_valid, False)
+
+        # Invalid w_lr
+        invalid = [api_pb2.AlgorithmSetting(name="w_lr", value="-0.1")]
+        is_valid, _ = validate_algorithm_settings(invalid)
+        self.assertEqual(is_valid, False)
+
+        # Invalid alpha_weight_decay
+        invalid = [api_pb2.AlgorithmSetting(name="alpha_weight_decay", value="-0.02")]
+        is_valid, _ = validate_algorithm_settings(invalid)
+        self.assertEqual(is_valid, False)
+
+        # Invalid w_momentum
+        invalid = [api_pb2.AlgorithmSetting(name="w_momentum", value="-0.8")]
+        is_valid, _ = validate_algorithm_settings(invalid)
+        self.assertEqual(is_valid, False)
+
+        # Invalid batch_size
+        invalid = [api_pb2.AlgorithmSetting(name="batch_size", value="0")]
+        is_valid, _ = validate_algorithm_settings(invalid)
+        self.assertEqual(is_valid, False)
+
+        # Valid batch_size
+        valid = [api_pb2.AlgorithmSetting(name="batch_size", value="None")]
+        is_valid, _ = validate_algorithm_settings(valid)
+        self.assertEqual(is_valid, True)
+
+        # Invalid print_step
+        invalid = [api_pb2.AlgorithmSetting(name="print_step", value="0")]
+        is_valid, _ = validate_algorithm_settings(invalid)
+        self.assertEqual(is_valid, False)
 
 
 if __name__ == '__main__':
