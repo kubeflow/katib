@@ -156,6 +156,9 @@ def validate_algorithm_spec(spec: api_pb2.ExperimentSpec) -> (bool, str):
     return True, ""
 
 
+# validate_algorithm_settings is implemented based on quark0/darts and pt.darts.
+# quark0/darts: https://github.com/quark0/darts
+# pt.darts: https://github.com/khanrc/pt.darts
 def validate_algorithm_settings(algorithm_settings: list[api_pb2.AlgorithmSetting]) -> (bool, str):
     for s in algorithm_settings:
         try:
