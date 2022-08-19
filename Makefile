@@ -59,7 +59,7 @@ update:
 
 # Deploy Katib v1beta1 manifests using Kustomize into a k8s cluster.
 deploy:
-	bash scripts/v1beta1/deploy.sh
+	bash scripts/v1beta1/deploy.sh $(WITH_DATABASE_TYPE)
 
 # Undeploy Katib v1beta1 manifests using Kustomize from a k8s cluster
 undeploy:

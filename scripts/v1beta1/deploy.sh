@@ -20,4 +20,15 @@ set -o errexit
 SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/../.."
 
 cd "${SCRIPT_ROOT}"
-kustomize build manifests/v1beta1/installs/katib-standalone | kubectl apply -f -
+
+WITH_DATABASE_TYPE=${1:-mysql}
+
+# if mysql, use below kustomize, else use postgres
+if [ "$WITH_DATABASE_TYPE" == "mysql" ]; then
+    kustomize build manifests/v1beta1/installs/katib-standalone | kubectl apply -f -
+elif [ "$WITH_DATABASE_TYPE" == "postgres" ]; then
+    kustomize build manifests/v1beta1/installs/katib-standalone-postgres | kubectl apply -f -
+else
+    echo "Unknown database type: $WITH_DATABASE_TYPE"
+    exit 1
+fi

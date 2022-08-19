@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: katib-postgres
+  namespace: kubeflow
+  labels:
+    katib.kubeflow.org/component: postgres
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      protocol: TCP
+      name: dbapi
+  selector:
+    katib.kubeflow.org/component: postgres

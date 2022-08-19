@@ -24,6 +24,7 @@ jobs:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
           trial-images: enas-cnn-cifar10-cpu
+          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
@@ -33,3 +34,4 @@ jobs:
         kubernetes-version: ["v1.21.13", "v1.22.10", "v1.23.7"]
         # Comma Delimited
         experiments: ["enas-cpu"]
+        database-type: ["mysql", "postgres"]

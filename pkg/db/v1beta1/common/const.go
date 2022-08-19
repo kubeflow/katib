@@ -16,14 +16,17 @@ limitations under the License.
 
 package common
 
-const (
-	DBUserEnvName = "DB_USER"
+import "time"
 
-	DBNameEnvName = "DB_NAME"
+const (
+	ConnectInterval = 5 * time.Second
+	ConnectTimeout  = 60 * time.Second
+
+	DBUserEnvName     = "DB_USER"
+	DBNameEnvName     = "DB_NAME"
+	DBPasswordEnvName = "DB_PASSWORD"
 
 	MySqlDBNameEnvValue = "mysql"
-
-	DBPasswordEnvName = "DB_PASSWORD"
 
 	MySQLDBHostEnvName = "KATIB_MYSQL_DB_HOST"
 	MySQLDBPortEnvName = "KATIB_MYSQL_DB_PORT"
@@ -33,4 +36,15 @@ const (
 	DefaultMySQLDatabase = "katib"
 	DefaultMySQLHost     = "katib-mysql"
 	DefaultMySQLPort     = "3306"
+
+	PostgresSQLDBNameEnvValue = "postgres"
+
+	PostgreSQLDBHostEnvName = "KATIB_POSTGRESQL_DB_HOST"
+	PostgreSQLDBPortEnvName = "KATIB_POSTGRESQL_DB_PORT"
+	PostgreSQLDatabase      = "KATIB_POSTGRESQL_DB_DATABASE"
+
+	DefaultPostgreSQLUser     = "katib"
+	DefaultPostgreSQLDatabase = "katib"
+	DefaultPostgreSQLHost     = "katib-postgres"
+	DefaultPostgreSQLPort     = "5432"
 )

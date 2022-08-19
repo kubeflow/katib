@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: katib-postgres
+  namespace: kubeflow
+  labels:
+    katib.kubeflow.org/component: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      katib.kubeflow.org/component: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        katib.kubeflow.org/component: postgres
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: katib-postgres
+          image: postgres:14.5-alpine
+          envFrom:
+            - secretRef:
+                name: katib-postgres-secrets
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - name: katib-postgres
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: katib-postgres
+          persistentVolumeClaim:
+            claimName: katib-postgres

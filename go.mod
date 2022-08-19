@@ -14,6 +14,7 @@ require (
 	github.com/google/go-containerregistry/pkg/authn/k8schain v0.0.0-20211222182933-7c19fa370dbd
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/hpcloud/tail v1.0.1-0.20180514194441-a1dbeea552b7
+	github.com/lib/pq v1.10.6
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a
 	github.com/onsi/gomega v1.17.0
 	github.com/prometheus/client_golang v1.11.0

@@ -14,25 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package db
+package postgres
 
 import (
-	"errors"
+	"fmt"
 
-	"github.com/kubeflow/katib/pkg/db/v1beta1/common"
-	"github.com/kubeflow/katib/pkg/db/v1beta1/mysql"
-	"github.com/kubeflow/katib/pkg/db/v1beta1/postgres"
 	"k8s.io/klog"
 )
 
-func NewKatibDBInterface(dbName string) (common.KatibDBInterface, error) {
+func (d *dbConn) DBInit() {
+	db := d.db
+	klog.Info("Initializing v1beta1 DB schema")
 
-	if dbName == common.MySqlDBNameEnvValue {
-		klog.Info("Using MySQL")
-		return mysql.NewDBInterface()
-	} else if dbName == common.PostgresSQLDBNameEnvValue {
-		klog.Info("Using Postgres")
-		return postgres.NewDBInterface()
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs
+		(trial_name VARCHAR(255) NOT NULL,
+		id serial PRIMARY KEY,
+		time TIMESTAMP(6),
+		metric_name VARCHAR(255) NOT NULL,
+		value TEXT NOT NULL)`)
+	if err != nil {
+		klog.Fatalf("Error creating observation_logs table: %v", err)
 	}
-	return nil, errors.New("Invalid DB Name")
+}
+
+func (d *dbConn) SelectOne() error {
+	db := d.db
+	_, err := db.Exec(`SELECT 1`)
+	if err != nil {
+		return fmt.Errorf("Error `SELECT 1` probing: %v", err)
+	}
+	return nil
 }
