@@ -1,5 +1,71 @@
 # Changelog
 
+## [v0.14.0](https://github.com/kubeflow/katib/tree/v0.14.0) (2022-08-18)
+
+# New Features
+
+## Core Features
+
+- Population based training ([#1833](https://github.com/kubeflow/katib/pull/1833) by [@a9p](https://github.com/a9p))
+- Support JSON format logs in `file-metrics-collector` ([#1765](https://github.com/kubeflow/katib/pull/1765) by [@tenzen-y](https://github.com/tenzen-y))
+- Include MetricsUnavailable condition to Complete in Trial ([#1877](https://github.com/kubeflow/katib/pull/1877) by [@tenzen-y](https://github.com/tenzen-y))
+- Allow running examples on Apple Silicon M1 and fix image build errors for arm64 ([#1898](https://github.com/kubeflow/katib/pull/1898) by [@tenzen-y](https://github.com/tenzen-y))
+- Configurable job name and service name for cert generator ([#1889](https://github.com/kubeflow/katib/pull/1889) by [@shaowei-su](https://github.com/shaowei-su))
+
+
+## UI Features and Enhancements
+
+- Add PBT to experiment creation form ([#1909](https://github.com/kubeflow/katib/pull/1909) by [@a9p](https://github.com/a9p))
+- Distinct page for each Trial in the UI ([#1783](https://github.com/kubeflow/katib/pull/1783) by [@d-gol](https://github.com/d-gol))
+
+
+# Bug fixes
+
+- Add the pytorch-mnist with GPU support container image ([#1917](https://github.com/kubeflow/katib/pull/1917) by [@tenzen-y](https://github.com/tenzen-y))
+- Fix push script to include new images ([#1912](https://github.com/kubeflow/katib/pull/1912) by [@johnugeorge](https://github.com/johnugeorge))
+- Fixes lint warnings in YAML files ([#1902](https://github.com/kubeflow/katib/pull/1902) by [@Rishit-dagli](https://github.com/Rishit-dagli))
+- Fix errors when running the test on Apple Silicon M1 ([#1886](https://github.com/kubeflow/katib/pull/1886) by [@tenzen-y](https://github.com/tenzen-y))
+- Reconcile trial assignments by comparing suggestion and trials being executed ([#1831](https://github.com/kubeflow/katib/pull/1831) by [@henrysecond1](https://github.com/henrysecond1))
+- Increate the probes seconds in manifests ([#1845](https://github.com/kubeflow/katib/pull/1845) by [@haoxins](https://github.com/haoxins))
+- Set upper constraint for Optuna ([#1852](https://github.com/kubeflow/katib/pull/1852) by [@himkt](https://github.com/himkt))
+- Don't check if trial's metadata is in spec.parameters  ([#1848](https://github.com/kubeflow/katib/pull/1848) by [@alexeygorobets](https://github.com/alexeygorobets))
+
+# Documentation
+
+- Fix the FPGA examples documentation ([#1841](https://github.com/kubeflow/katib/pull/1841) by [@eliaskoromilas](https://github.com/eliaskoromilas))
+- Add CyberAgent to adopters ([#1894](https://github.com/kubeflow/katib/pull/1894) by [@tenzen-y](https://github.com/tenzen-y))
+
+# Misc
+
+- Updating the training operator image in CI ([#1910](https://github.com/kubeflow/katib/pull/1910) by [@johnugeorge](https://github.com/johnugeorge))
+- Upgrade Python and Pytorch versions for some examples ([#1906](https://github.com/kubeflow/katib/pull/1906) by [@tenzen-y](https://github.com/tenzen-y))
+- Linting for K8s YAML files ([#1901](https://github.com/kubeflow/katib/pull/1901) by [@Rishit-dagli](https://github.com/Rishit-dagli))
+- Change integration test sysytem from KinD Cluster to Minikube Cluster  ([#1899](https://github.com/kubeflow/katib/pull/1899) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade mysql version to v8.0.29 ([#1897](https://github.com/kubeflow/katib/pull/1897) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade tensorflow-aarch64 version to v2.9.1 ([#1891](https://github.com/kubeflow/katib/pull/1891) by [@tenzen-y](https://github.com/tenzen-y))
+- chore: Upgrade Go libraries to resolve some security issues in the katib-controller ([#1888](https://github.com/kubeflow/katib/pull/1888) by [@tenzen-y](https://github.com/tenzen-y))
+- Migrate kubeflow-katib-presubmit to GitHub Actions ([#1882](https://github.com/kubeflow/katib/pull/1882) by [@tenzen-y](https://github.com/tenzen-y))
+- Add semicolon when using `command` command in Makefile ([#1885](https://github.com/kubeflow/katib/pull/1885) by [@tenzen-y](https://github.com/tenzen-y))
+- Fix `HAS_SHELLCHECK` and `HAS_SETUP_ENVTEST` in Makefile ([#1884](https://github.com/kubeflow/katib/pull/1884) by [@tenzen-y](https://github.com/tenzen-y))
+- Remove presubmit tests depending on optional-test-infra ([#1871](https://github.com/kubeflow/katib/pull/1871) by [@aws-kf-ci-bot](https://github.com/aws-kf-ci-bot))
+- Upgrade the Tensorflow version to address some security issues ([#1870](https://github.com/kubeflow/katib/pull/1870) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade the grpc_health_probe version to v0.4.11 to resolve security vulnerability CVE-2022-27191 ([#1875](https://github.com/kubeflow/katib/pull/1875) by [@tenzen-y](https://github.com/tenzen-y))
+- additional metric names should not include objective metric name ([#1874](https://github.com/kubeflow/katib/pull/1874) by [@henrysecond1](https://github.com/henrysecond1))
+- Upgrade the Kubernetes Python client to 22.6.0 ([#1869](https://github.com/kubeflow/katib/pull/1869) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade the kubebuilder to v3.2.0 and Kubernetes Go libraries to v1.22.2 ([#1861](https://github.com/kubeflow/katib/pull/1861) by [@tenzen-y](https://github.com/tenzen-y))
+- Update FPGA XGBoost example ([#1865](https://github.com/kubeflow/katib/pull/1865) by [@eliaskoromilas](https://github.com/eliaskoromilas))
+- Fix kubeflowkatib/mxnet-mnist image ([#1866](https://github.com/kubeflow/katib/pull/1866) by [@tenzen-y](https://github.com/tenzen-y))
+- pins pip and setuptools versions operators to avoid installation issues ([#1867](https://github.com/kubeflow/katib/pull/1867) by [@DnPlas](https://github.com/DnPlas))
+- Add shellcheck ([#1857](https://github.com/kubeflow/katib/pull/1857) by [@tenzen-y](https://github.com/tenzen-y))
+- Bump kubeflow-katib and kfp version in notebook examples ([#1849](https://github.com/kubeflow/katib/pull/1849) by [@tenzen-y](https://github.com/tenzen-y))
+- Add prometheus scraping and grafana support to charmed katib-controller operator ([#1839](https://github.com/kubeflow/katib/pull/1839) by [@jardon](https://github.com/jardon))
+- Upgrade Black to fix linting ([#1842](https://github.com/kubeflow/katib/pull/1842) by [@jardon](https://github.com/jardon))
+
+
+# Change Log
+
+Check the [Full Change Log](https://github.com/kubeflow/katib/compare/v0.13.0...v0.14.0).
+
 ## [v0.13.0](https://github.com/kubeflow/katib/tree/v0.13.0) (2022-03-04)
 
 ## New Features
