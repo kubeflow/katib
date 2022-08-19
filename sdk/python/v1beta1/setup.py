@@ -19,7 +19,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name='kubeflow-katib',
-    version='0.13.0',
+    version='0.14.0',
     author="Kubeflow Authors",
     author_email='premnath.vel@gmail.com',
     license="Apache License Version 2.0",
