@@ -1,6 +1,7 @@
 FROM python:3.9-slim
 
 ADD examples/v1beta1/trial-images/mxnet-mnist /opt/mxnet-mnist
+
 WORKDIR /opt/mxnet-mnist
 
 RUN apt-get -y update \

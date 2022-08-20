@@ -17,7 +17,7 @@ runs:
         github token: ${{ env.GITHUB_TOKEN }}
 
     - name: Set Up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
 
     - name: Set Up Go env
       uses: actions/setup-go@v2
