@@ -136,9 +136,15 @@ func main() {
 	}
 
 	log.Info("Setting up health checker.")
-	mgr.AddHealthzCheck("healthz", healthz.Ping)
+	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+		log.Error(err, "Unable to add healthz endpoint to the manager")
+		os.Exit(1)
+	}
 	// TODO (@anencore94) need to more detailed check whether is it possible to communicate with k8s-apiserver or db-manager at '/readyz' ?
-	mgr.AddReadyzCheck("readyz", healthz.Ping)
+	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+		log.Error(err, "Unable to add readyz endpoint to the manager")
+		os.Exit(1)
+	}
 
 	// Start the Cmd
 	log.Info("Starting the Cmd.")
