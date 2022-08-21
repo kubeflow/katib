@@ -73,8 +73,8 @@ func NewWithSQLConn(db *sql.DB) (common.KatibDBInterface, error) {
 	return d, nil
 }
 
-func NewDBInterface() (common.KatibDBInterface, error) {
-	db, err := common.OpenSQLConn(dbDriver, getDbName(), common.ConnectInterval, common.ConnectTimeout)
+func NewDBInterface(connectTimeout time.Duration) (common.KatibDBInterface, error) {
+	db, err := common.OpenSQLConn(dbDriver, getDbName(), common.ConnectInterval, connectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
 	}

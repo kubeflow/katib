@@ -28,4 +28,3 @@ WORKDIR /app
 COPY --from=build-env /bin/grpc_health_probe /bin/
 COPY --from=build-env /go/src/github.com/kubeflow/katib/katib-db-manager /app/
 ENTRYPOINT ["./katib-db-manager"]
-CMD ["-w", "kubernetes"]
