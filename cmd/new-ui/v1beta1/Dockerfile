@@ -35,6 +35,8 @@ RUN npm run build:prod
 # --- Build the backend ---
 FROM golang:alpine AS go-build
 
+ARG TARGETARCH
+
 WORKDIR /go/src/github.com/kubeflow/katib
 
 # Download packages.
@@ -47,13 +49,7 @@ COPY cmd/ cmd/
 COPY pkg/ pkg/
 
 # Build the binary.
-RUN if [ "$(uname -m)" = "ppc64le" ]; then \
-    CGO_ENABLED=0 GOOS=linux GOARCH=ppc64le go build -a -o katib-ui  ./cmd/new-ui/v1beta1; \
-    elif [ "$(uname -m)" = "aarch64" ]; then \
-    CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o katib-ui  ./cmd/new-ui/v1beta1; \
-    else \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o katib-ui  ./cmd/new-ui/v1beta1; \
-    fi
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build -a -o katib-ui  ./cmd/new-ui/v1beta1
 
 # --- Compose the web app ---
 FROM alpine:3.15

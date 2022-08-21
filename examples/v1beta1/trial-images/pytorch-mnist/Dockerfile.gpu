@@ -1,6 +1,7 @@
 FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
 
 ADD examples/v1beta1/trial-images/pytorch-mnist /opt/pytorch-mnist
+
 WORKDIR /opt/pytorch-mnist
 
 # Add folder for the logs.
