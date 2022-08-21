@@ -74,15 +74,26 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 		return fmt.Errorf(msg)
 	}
 
-	if instance.Spec.MaxFailedTrialCount != nil && *instance.Spec.MaxFailedTrialCount < 0 {
-		return fmt.Errorf("spec.maxFailedTrialCount should not be less than 0")
+	if instance.Spec.MaxFailedTrialCount != nil {
+		if *instance.Spec.MaxFailedTrialCount < 0 {
+			return fmt.Errorf("spec.maxFailedTrialCount should not be less than 0")
+		}
+		if instance.Spec.MaxTrialCount != nil && *instance.Spec.MaxFailedTrialCount > *instance.Spec.MaxTrialCount {
+			return fmt.Errorf("spec.maxFailedTrialCount should be less than or equal to spec.maxTrialCount")
+		}
 	}
 	if instance.Spec.MaxTrialCount != nil && *instance.Spec.MaxTrialCount <= 0 {
 		return fmt.Errorf("spec.maxTrialCount must be greater than 0")
 	}
-	if instance.Spec.ParallelTrialCount != nil && *instance.Spec.ParallelTrialCount <= 0 {
-		return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
+	if instance.Spec.ParallelTrialCount != nil {
+		if *instance.Spec.ParallelTrialCount <= 0 {
+			return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
+		}
+		if instance.Spec.MaxTrialCount != nil && *instance.Spec.ParallelTrialCount > *instance.Spec.MaxTrialCount {
+			return fmt.Errorf("spec.paralelTrialCount should be less than or equal to spec.maxTrialCount")
+		}
 	}
+
 	if oldInst != nil {
 		// We should validate restart only if appropriate fields are changed.
 		// Otherwise check below is triggered when experiment is deleted.
