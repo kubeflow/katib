@@ -49,7 +49,7 @@ func getDbName() string {
 		common.PostgreSQLDBHostEnvName, common.DefaultPostgreSQLHost)
 	dbPort := env.GetEnvOrDefault(
 		common.PostgreSQLDBPortEnvName, common.DefaultPostgreSQLPort)
-	dbName := env.GetEnvOrDefault(common.DefaultPostgreSQLDatabase,
+	dbName := env.GetEnvOrDefault(common.PostgreSQLDatabase,
 		common.DefaultPostgreSQLDatabase)
 
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
@@ -59,8 +59,8 @@ func getDbName() string {
 	return psqlInfo
 }
 
-func NewDBInterface() (common.KatibDBInterface, error) {
-	db, err := common.OpenSQLConn(dbDriver, getDbName(), common.ConnectInterval, common.ConnectTimeout)
+func NewDBInterface(connectTimeout time.Duration) (common.KatibDBInterface, error) {
+	db, err := common.OpenSQLConn(dbDriver, getDbName(), common.ConnectInterval, connectTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
 	}
