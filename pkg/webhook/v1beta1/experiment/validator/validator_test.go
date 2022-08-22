@@ -284,6 +284,54 @@ func TestValidateExperiment(t *testing.T) {
 			Err:             true,
 			testDescription: "Invalid feasible space in parameters",
 		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				maxTrialCount := int32(5)
+				invalidMaxFailedTrialCount := int32(6)
+				i := newFakeInstance()
+				i.Spec.MaxTrialCount = &maxTrialCount
+				i.Spec.MaxFailedTrialCount = &invalidMaxFailedTrialCount
+				return i
+			}(),
+			Err:             true,
+			testDescription: "maxFailedTrialCount greater than maxTrialCount",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				maxTrialCount := int32(5)
+				validMaxFailedTrialCount := int32(5)
+				i := newFakeInstance()
+				i.Spec.MaxTrialCount = &maxTrialCount
+				i.Spec.MaxFailedTrialCount = &validMaxFailedTrialCount
+				return i
+			}(),
+			Err:             false,
+			testDescription: "maxFailedTrialCount equal to maxTrialCount",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				maxTrialCount := int32(5)
+				invalidParallelTrialCount := int32(6)
+				i := newFakeInstance()
+				i.Spec.MaxTrialCount = &maxTrialCount
+				i.Spec.ParallelTrialCount = &invalidParallelTrialCount
+				return i
+			}(),
+			Err:             true,
+			testDescription: "parallelTrialCount greater than maxTrialCount",
+		},
+		{
+			Instance: func() *experimentsv1beta1.Experiment {
+				maxTrialCount := int32(5)
+				validParallelTrialCount := int32(5)
+				i := newFakeInstance()
+				i.Spec.MaxTrialCount = &maxTrialCount
+				i.Spec.ParallelTrialCount = &validParallelTrialCount
+				return i
+			}(),
+			Err:             false,
+			testDescription: "parallelTrialCount equal to maxTrialCount",
+		},
 	}
 
 	for _, tc := range tcs {
