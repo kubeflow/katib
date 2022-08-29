@@ -120,12 +120,6 @@ echo -e "\nBuilding training container images..."
 if [ ! "$ARCH" = "amd64" ]; then
   echo -e "\nSome training container images are supported only amd64."
 else
-  echo -e "\nBuilding PyTorch mnist training container example with CPU support...\n"
-  docker buildx build --platform linux/amd64 -t "${REGISTRY}/pytorch-mnist-cpu:${TAG}" -f examples/${VERSION}/trial-images/pytorch-mnist/Dockerfile.cpu .
-
-  echo -e "\nBuilding PyTorch mnist training container example with GPU support...\n"
-  docker buildx build --platform linux/amd64 -t "${REGISTRY}/pytorch-mnist-gpu:${TAG}" -f examples/${VERSION}/trial-images/pytorch-mnist/Dockerfile.gpu .
-
   echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
   docker buildx build --platform linux/amd64 -t "${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}" -f examples/${VERSION}/trial-images/enas-cnn-cifar10/Dockerfile.gpu .
 
@@ -141,6 +135,12 @@ fi
 
 echo -e "\nBuilding mxnet mnist training container example...\n"
 docker buildx build --platform "linux/$ARCH" -t "${REGISTRY}/mxnet-mnist:${TAG}" -f examples/${VERSION}/trial-images/mxnet-mnist/Dockerfile .
+
+echo -e "\nBuilding PyTorch mnist training container example with CPU support...\n"
+docker buildx build --platform "linux/$ARCH" -t "${REGISTRY}/pytorch-mnist-cpu:${TAG}" -f examples/${VERSION}/trial-images/pytorch-mnist/Dockerfile.cpu .
+
+echo -e "\nBuilding PyTorch mnist training container example with GPU support...\n"
+docker buildx build --platform "linux/$ARCH" -t "${REGISTRY}/pytorch-mnist-gpu:${TAG}" -f examples/${VERSION}/trial-images/pytorch-mnist/Dockerfile.gpu .
 
 echo -e "\nBuilding Tensorflow with summaries mnist training container example...\n"
 docker buildx build --platform "linux/$ARCH" -t "${REGISTRY}/tf-mnist-with-summaries:${TAG}" -f examples/${VERSION}/trial-images/tf-mnist-with-summaries/Dockerfile .
