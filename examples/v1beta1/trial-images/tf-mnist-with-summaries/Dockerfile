@@ -6,7 +6,7 @@ ADD examples/v1beta1/trial-images/tf-mnist-with-summaries /opt/tf-mnist-with-sum
 
 WORKDIR /opt/tf-mnist-with-summaries
 
-RUN if [ "${TARGETARCH}" = "aarch64" ]; then \
+RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     apt-get -y update && \
     apt-get -y install gfortran libpcre3 libpcre3-dev && \
     apt-get clean && \

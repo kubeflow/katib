@@ -1,4 +1,6 @@
-FROM tensorflow/tensorflow:2.9.1-gpu
+# tensorflow-gpu=2.9.1, cuda=11.7.1
+# Ref: https://docs.nvidia.com/deeplearning/frameworks/tensorflow-release-notes/rel_22-08.html#rel_22-08
+FROM nvcr.io/nvidia/tensorflow:22.08-tf2-py3
 
 ENV TARGET_DIR /opt/enas-cnn-cifar10
 ENV PYTHONPATH ${TARGET_DIR}

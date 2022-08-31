@@ -120,9 +120,6 @@ echo -e "\nBuilding training container images..."
 if [ ! "$ARCH" = "amd64" ]; then
   echo -e "\nSome training container images are supported only amd64."
 else
-  echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
-  docker buildx build --platform linux/amd64 -t "${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}" -f examples/${VERSION}/trial-images/enas-cnn-cifar10/Dockerfile.gpu .
-
   echo -e "\nBuilding PyTorch CIFAR-10 CNN training container example for DARTS with CPU support...\n"
   docker buildx build --platform linux/amd64 -t "${REGISTRY}/darts-cnn-cifar10-cpu:${TAG}" -f examples/${VERSION}/trial-images/darts-cnn-cifar10/Dockerfile.cpu .
 
@@ -147,5 +144,8 @@ docker buildx build --platform "linux/$ARCH" -t "${REGISTRY}/tf-mnist-with-summa
 
 echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with CPU support...\n"
 docker buildx build --platform "linux/$ARCH" -t "${REGISTRY}/enas-cnn-cifar10-cpu:${TAG}" -f examples/${VERSION}/trial-images/enas-cnn-cifar10/Dockerfile.cpu .
+
+echo -e "\nBuilding Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
+docker buildx build --platform "linux/$ARCH" -t "${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}" -f examples/${VERSION}/trial-images/enas-cnn-cifar10/Dockerfile.gpu .
 
 echo -e "\nAll Katib images with ${TAG} tag have been built successfully!\n"
