@@ -8,11 +8,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { TrialsTableComponent } from './trials-table.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TrialDetailsComponent } from './trial-details/trial-details.component';
+import { MatButtonModule } from '@angular/material/button';
+import { KubeflowModule } from 'kubeflow';
+import { KfpRunComponent } from './kfp-run/kfp-run.component';
 import { TrialDetailsModule } from './trial-details/trial-details.module';
 
 @NgModule({
-  declarations: [TrialsTableComponent],
+  declarations: [TrialsTableComponent, KfpRunComponent],
   imports: [
     CommonModule,
     MatTableModule,
@@ -21,9 +23,10 @@ import { TrialDetailsModule } from './trial-details/trial-details.module';
     MatIconModule,
     NgxChartsModule,
     MatTooltipModule,
+    MatButtonModule,
+    KubeflowModule,
     TrialDetailsModule,
   ],
-  entryComponents: [TrialDetailsComponent],
   exports: [TrialsTableComponent],
 })
 export class TrialsTableModule {}
