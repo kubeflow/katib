@@ -36,6 +36,8 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	experimentName := r.URL.Query()["experimentName"][0]
 	namespace := r.URL.Query()["namespace"][0]
 
+	log.Printf("Start FetchHPJobInfo for Experiment: %v in namespace: %v", experimentName, namespace)
+
 	conn, c := k.connectManager()
 	defer conn.Close()
 
@@ -46,7 +48,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Got Experiment")
+	log.Printf("Got Experiment %v", experimentName)
 	metricsList := map[string]int{}
 	metricsName := experiment.Spec.Objective.ObjectiveMetricName
 	resultText += "," + metricsName
@@ -69,7 +71,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Got Trial List")
+	log.Printf("Got Trial List - Count: %v", len(trialList.Items))
 
 	// append a column for the Pipeline UID associated with the Trial
 	if havePipelineUID(trialList.Items) {
@@ -78,6 +80,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 	foundPipelineUID := false
 	for _, t := range trialList.Items {
+		log.Printf("Processing trial: %s", t.Name)
 		runUid, ok := t.GetAnnotations()[kfpRunIDAnnotation]
 		if !ok {
 			log.Printf("Trial %s has no pipeline run.", t.Name)
@@ -96,6 +99,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		trialResText := make([]string, len(metricsList)+len(paramList))
 
 		if t.IsSucceeded() || t.IsEarlyStopped() {
+			log.Printf("Trial: %s Suceeded or Stopped Early", t.Name)
 			obsLogResp, err := c.GetObservationLog(
 				context.Background(),
 				&api_pb_v1beta1.GetObservationLogRequest{
