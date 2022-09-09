@@ -99,7 +99,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		trialResText := make([]string, len(metricsList)+len(paramList))
 
 		if t.IsSucceeded() || t.IsEarlyStopped() {
-			log.Printf("Trial: %s Suceeded or Stopped Early", t.Name)
+			log.Printf("Trial: %s suceeded or stopped early", t.Name)
 			obsLogResp, err := c.GetObservationLog(
 				context.Background(),
 				&api_pb_v1beta1.GetObservationLogRequest{
