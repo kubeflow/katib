@@ -80,7 +80,6 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 	foundPipelineUID := false
 	for _, t := range trialList.Items {
-		log.Printf("Processing trial: %s", t.Name)
 		runUid, ok := t.GetAnnotations()[kfpRunIDAnnotation]
 		if !ok {
 			log.Printf("Trial %s has no pipeline run.", t.Name)
@@ -99,7 +98,6 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		trialResText := make([]string, len(metricsList)+len(paramList))
 
 		if t.IsSucceeded() || t.IsEarlyStopped() {
-			log.Printf("Trial: %s suceeded or stopped early", t.Name)
 			obsLogResp, err := c.GetObservationLog(
 				context.Background(),
 				&api_pb_v1beta1.GetObservationLogRequest{
