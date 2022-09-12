@@ -14,20 +14,21 @@
 
 import json
 import os
+import textwrap
 
 
 def is_running_in_k8s():
-    return os.path.isdir('/var/run/secrets/kubernetes.io/')
+    return os.path.isdir("/var/run/secrets/kubernetes.io/")
 
 
 def get_current_k8s_namespace():
-    with open('/var/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as f:
+    with open("/var/run/secrets/kubernetes.io/serviceaccount/namespace", "r") as f:
         return f.readline()
 
 
 def get_default_target_namespace():
     if not is_running_in_k8s():
-        return 'default'
+        return "default"
     return get_current_k8s_namespace()
 
 
@@ -36,10 +37,29 @@ def set_katib_namespace(katib):
     namespace = katib_namespace or get_default_target_namespace()
     return namespace
 
+
+def get_script_for_python_packages(packages_to_install, pip_index_url):
+    packages_str = " ".join([str(package) for package in packages_to_install])
+
+    script_for_python_packages = textwrap.dedent(
+        f"""
+        if ! [ -x "$(command -v pip)" ]; then
+            python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip
+        fi
+
+        PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet \
+        --no-warn-script-location --index-url {pip_index_url} {packages_str}
+        """
+    )
+
+    return script_for_python_packages
+
+
 class FakeResponse:
     """Fake object of RESTResponse to deserialize
     Ref) https://github.com/kubeflow/katib/pull/1630#discussion_r697877815
     Ref) https://github.com/kubernetes-client/python/issues/977#issuecomment-592030030
     """
+
     def __init__(self, obj):
         self.data = json.dumps(obj)

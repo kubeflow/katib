@@ -189,10 +189,51 @@ katib-ui-5767cfccdc-pwg2x           1/1     Running     0          36s
 
 For the Katib Experiments check the [complete examples list](./examples/v1beta1).
 
+# Quickstart
+
+You can run your first HyperParameter Tuning Experiment using [Katib Python SDK](./sdk/python/v1beta1).
+
+In the following example we are going to maximize a simple objective function:
+$F(a,b) = 4a - b^2$. The bigger $a$ and the lesser $b$ value, the bigger the function value $F$.
+
+```python
+import kubeflow.katib as katib
+
+# Step 1. Create an objective function.
+def objective(parameters):
+    # Import required packages.
+    import time
+    time.sleep(5)
+    # Calculate objective function.
+    result = 4 * int(parameters["a"]) - float(parameters["b"]) ** 2
+    # Katib parses metrics in this format: <metric-name>=<metric-value>.
+    print(f"result={result}")
+
+# Step 2. Create HyperParameter search space.
+parameters = {
+    "a": katib.int(min=10, max=20),
+    "b": katib.double(min=0.1, max=0.2)
+}
+
+# Step 3. Create Katib Experiment.
+katib_client = katib.KatibClient()
+name = "tune-experiment"
+katib_client.tune(
+    name=name,
+    objective=objective,
+    parameters=parameters,
+    objective_metric_name="result",
+    max_trial_count=12
+)
+
+# Step 4. Get the best HyperParameters.
+print(katib_client.get_optimal_hyperparameters(name))
+```
+
 # Documentation
 
-- Run your first Katib Experiment in the
-  [getting started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm).
+- Check
+  [the Katib getting started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm).
 
 - Learn about Katib **Concepts** in this
   [guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-concepts).

@@ -15,13 +15,21 @@
 import os
 
 # Global CRD version
-KATIB_VERSION = os.environ.get('EXPERIMENT_VERSION', 'v1beta1')
+KATIB_VERSION = os.environ.get("EXPERIMENT_VERSION", "v1beta1")
 
 # Katib K8S constants
-KUBEFLOW_GROUP = 'kubeflow.org'
-EXPERIMENT_PLURAL = 'experiments'
-SUGGESTION_PLURAL = 'suggestions'
-TRIAL_PLURAL = 'trials'
+KUBEFLOW_GROUP = "kubeflow.org"
+EXPERIMENT_KIND = "Experiment"
+EXPERIMENT_PLURAL = "experiments"
+SUGGESTION_PLURAL = "suggestions"
+TRIAL_PLURAL = "trials"
 
 # How long to wait in seconds for requests to the ApiServer
 APISERVER_TIMEOUT = 120
+
+DEFAULT_PRIMARY_CONTAINER_NAME = "training-container"
+
+# Supported base images for the Katib Trials.
+# TODO (andreyvelich): Implement list_base_images function to get each image description.
+BASE_IMAGE_TENSORFLOW = "docker.io/tensorflow/tensorflow:2.9.1"
+BASE_IMAGE_MXNET = "docker.io/mxnet/python:1.9.1_native_py3"
