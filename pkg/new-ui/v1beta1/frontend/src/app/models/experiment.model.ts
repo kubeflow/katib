@@ -1,3 +1,5 @@
+import { Params } from '@angular/router';
+
 /*
  * UI relative types
  */
@@ -47,3 +49,13 @@ export interface Experiment {
 }
 
 export type Experiments = Experiment[];
+
+export interface ExperimentProcessed extends Experiment {
+  link: {
+    text: string;
+    url: string;
+    queryParams?: Params | null;
+  };
+}
+
+export type ExperimentsProcessed = ExperimentProcessed[];
