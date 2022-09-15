@@ -158,7 +158,8 @@ class KatibClient(object):
             parallel_trial_count: Number of Trials that Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
             retain_trials: Whether Trials' resources (e.g. pods) are deleted after Succeeded state.
-            packages_to_install: List of Python packages to install before
+            packages_to_install: List of Python packages to install in addition
+                to the base image packages. These packages are installed before
                 executing the objective function.
             pip_index_url: The PyPI url from which to install Python packages.
         """
@@ -193,23 +194,8 @@ class KatibClient(object):
         if max_failed_trial_count is not None:
             experiment.spec.max_failed_trial_count = max_failed_trial_count
 
-        # Modify objective function.
-        # Check if objective function is callable.
-        if not callable(objective):
-            raise ValueError(
-                f"Objective function must be callable, got function type: {type(objective)}"
-            )
-
-        # Verify the objective function arguments.
-        objective_signature = inspect.signature(objective)
-        try:
-            objective_signature.bind({})
-        except Exception:
-            raise ValueError(
-                "Invalid args in the Objective function. "
-                "The function args must have only 'parameters' dictionary. "
-                f"Current Objective arguments: {objective_signature}"
-            ) from None
+        # Validate objective function.
+        utils.validate_objective_function(objective)
 
         # Extract objective function implementation.
         objective_code = inspect.getsource(objective)

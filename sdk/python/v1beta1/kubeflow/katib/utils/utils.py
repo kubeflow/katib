@@ -15,6 +15,8 @@
 import json
 import os
 import textwrap
+from typing import Callable
+import inspect
 
 
 def is_running_in_k8s():
@@ -36,6 +38,26 @@ def set_katib_namespace(katib):
     katib_namespace = katib.metadata.namespace
     namespace = katib_namespace or get_default_target_namespace()
     return namespace
+
+
+def validate_objective_function(objective: Callable):
+
+    # Check if objective function is callable.
+    if not callable(objective):
+        raise ValueError(
+            f"Objective function must be callable, got function type: {type(objective)}"
+        )
+
+    # Verify the objective function arguments.
+    objective_signature = inspect.signature(objective)
+    try:
+        objective_signature.bind({})
+    except Exception:
+        raise ValueError(
+            "Invalid args in the Objective function. "
+            "The function args must have only 'parameters' dictionary. "
+            f"Current Objective arguments: {objective_signature}"
+        )
 
 
 def get_script_for_python_packages(packages_to_install, pip_index_url):
