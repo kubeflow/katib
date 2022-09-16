@@ -19,7 +19,7 @@ REQUIRES = [
     "six>=1.10",
     "setuptools>=21.0.0",
     "urllib3>=1.15.1",
-    "kubernetes>=12.0.0",
+    "kubernetes>=23.6.0",
 ]
 
 setuptools.setup(
