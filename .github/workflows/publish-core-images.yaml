@@ -1,29 +1,21 @@
 name: Publish Katib Core Images
 
 on:
-  push:
-    branches:
-      - master
-
-env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  - push
+  - pull_request
 
 jobs:
   core:
     name: Publish Image
-    # Trigger workflow only for kubeflow/katib repository.
-    if: github.repository == 'kubeflow/katib'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    uses: ./.github/workflows/build-and-publish-images.yaml
+    with:
+      component-name: ${{ matrix.component-name }}
+      platforms: linux/amd64,linux/arm64
+      dockerfile: ${{ matrix.dockerfile }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Publish Component ${{ matrix.component-name }}
-        uses: ./.github/workflows/template-publish-image
-        with:
-          image: docker.io/kubeflowkatib/${{ matrix.component-name }}
-          dockerfile: ${{ matrix.dockerfile }}
 
     strategy:
       fail-fast: false

@@ -1,9 +1,11 @@
-# Template for e2e tests.
+# Composite action to setup e2e tests.
+name: Setup E2E Test
+description: setup env for e2e test using the minikube cluster
 
 inputs:
   kubernetes-version:
     required: true
-    type: string
+    description: kubernetes version
 
 runs:
   using: composite
