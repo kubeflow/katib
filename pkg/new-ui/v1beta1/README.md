@@ -19,7 +19,7 @@ To make changes to the UI you need to install:
 
 - Tools, defined [here](https://github.com/kubeflow/katib/blob/master/docs/developer-guide.md#requirements).
 
-- `node` (v12 or later) and `npm` (v6.13 or later). Recommended to install `node` and `npm` using [`nvm`](https://github.com/nvm-sh/nvm). After installing `nvm`, you can run `nvm install 12.18.1` to install `node` version 12.18.1 and run `nvm use 12.18.1` to use that version.
+- `node` (v12.18.1) and `npm` (v6.13). Recommended to install `node` and `npm` using [`nvm`](https://github.com/nvm-sh/nvm). After installing `nvm`, you can run `nvm install 12.18.1` to install `node` version 12.18.1 and run `nvm use 12.18.1` to use that version.
 
 ## Development
 
@@ -42,7 +42,7 @@ You can build the common library with:
 ```bash
 cd /tmp && git clone https://github.com/kubeflow/kubeflow.git \
   && cd kubeflow \
-  && git checkout 24bcb8e \
+  && git checkout ecb72c2 \
   && cd components/crud-web-apps/common/frontend/kubeflow-common-lib
 
 # build the common library module

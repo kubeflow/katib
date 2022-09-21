@@ -1,3 +1,4 @@
+---
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
@@ -45,24 +46,26 @@ spec:
               spec:
                 containers:
                   - name: pytorch
-                    image: docker.io/kubeflowkatib/pytorch-mnist:latest
+                    image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                     command:
                       - "python3"
                       - "/opt/pytorch-mnist/mnist.py"
                       - "--epochs=1"
+                      - "--batch-size=16"
                       - "--lr=${trialParameters.learningRate}"
                       - "--momentum=${trialParameters.momentum}"
           Worker:
-            replicas: 2
+            replicas: 1
             restartPolicy: OnFailure
             template:
               spec:
                 containers:
                   - name: pytorch
-                    image: docker.io/kubeflowkatib/pytorch-mnist:latest
+                    image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                     command:
                       - "python3"
                       - "/opt/pytorch-mnist/mnist.py"
                       - "--epochs=1"
+                      - "--batch-size=16"
                       - "--lr=${trialParameters.learningRate}"
                       - "--momentum=${trialParameters.momentum}"

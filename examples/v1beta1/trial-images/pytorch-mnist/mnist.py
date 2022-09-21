@@ -1,9 +1,24 @@
+# Copyright 2022 The Kubeflow Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from __future__ import print_function
 
 import argparse
 import logging
 import os
 
+import hypertune
 from torchvision import datasets, transforms
 import torch
 import torch.distributed as dist
@@ -50,7 +65,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
             niter = epoch * len(train_loader) + batch_idx
 
 
-def test(args, model, device, test_loader, epoch):
+def test(args, model, device, test_loader, epoch, hpt):
     model.eval()
     test_loss = 0
     correct = 0
@@ -63,8 +78,19 @@ def test(args, model, device, test_loader, epoch):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
+    test_accuracy = float(correct) / len(test_loader.dataset)
     logging.info("{{metricName: accuracy, metricValue: {:.4f}}};{{metricName: loss, metricValue: {:.4f}}}\n".format(
-        float(correct) / len(test_loader.dataset), test_loss))
+        test_accuracy, test_loss))
+
+    if args.logger == "hypertune":
+        hpt.report_hyperparameter_tuning_metric(
+            hyperparameter_metric_tag='loss',
+            metric_value=test_loss,
+            global_step=epoch)
+        hpt.report_hyperparameter_tuning_metric(
+            hyperparameter_metric_tag='accuracy',
+            metric_value=test_accuracy,
+            global_step=epoch)
 
 
 def should_distribute():
@@ -98,6 +124,8 @@ def main():
                         help="Path to save logs. Print to StdOut if log-path is not set")
     parser.add_argument("--save-model", action="store_true", default=False,
                         help="For Saving the current Model")
+    parser.add_argument("--logger", type=str, choices=["standard", "hypertune"],
+                        help="Logger", default="standard")
 
     if dist.is_available():
         parser.add_argument("--backend", type=str, help="Distributed backend",
@@ -107,7 +135,7 @@ def main():
 
     # Use this format (%Y-%m-%dT%H:%M:%SZ) to record timestamp of the metrics.
     # If log_path is empty print log to StdOut, otherwise print log to the file.
-    if args.log_path == "":
+    if args.log_path == "" or args.logger == "hypertune":
         logging.basicConfig(
             format="%(asctime)s %(levelname)-8s %(message)s",
             datefmt="%Y-%m-%dT%H:%M:%SZ",
@@ -118,6 +146,12 @@ def main():
             datefmt="%Y-%m-%dT%H:%M:%SZ",
             level=logging.DEBUG,
             filename=args.log_path)
+
+    if args.logger == "hypertune" and args.log_path != "":
+        os.environ['CLOUD_ML_HP_METRIC_FILE'] = args.log_path
+
+    # For JSON logging
+    hpt = hypertune.HyperTune()
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     if use_cuda:
@@ -161,7 +195,7 @@ def main():
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
-        test(args, model, device, test_loader, epoch)
+        test(args, model, device, test_loader, epoch, hpt)
 
     if (args.save_model):
         torch.save(model.state_dict(), "mnist_cnn.pt")

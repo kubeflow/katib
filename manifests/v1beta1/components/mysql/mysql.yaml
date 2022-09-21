@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,7 +22,7 @@ spec:
     spec:
       containers:
         - name: katib-mysql
-          image: mysql:8.0.26
+          image: mysql:8.0.29
           args:
             - --datadir
             - /var/lib/mysql/datadir
@@ -44,7 +45,8 @@ spec:
                 - "/bin/bash"
                 - "-c"
                 - "mysql -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
-            periodSeconds: 2
+            initialDelaySeconds: 10
+            periodSeconds: 5
             failureThreshold: 10
           livenessProbe:
             exec:
@@ -52,7 +54,8 @@ spec:
                 - "/bin/bash"
                 - "-c"
                 - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-            periodSeconds: 2
+            initialDelaySeconds: 10
+            periodSeconds: 5
             failureThreshold: 10
           startupProbe:
             exec:

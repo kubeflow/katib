@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import (
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -90,7 +91,7 @@ func (g *General) SyncAssignments(
 	}
 
 	endpoint := util.GetAlgorithmEndpoint(instance)
-	connSuggestion, err := grpc.Dial(endpoint, grpc.WithInsecure())
+	connSuggestion, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
@@ -132,7 +133,7 @@ func (g *General) SyncAssignments(
 	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions.
 	if instance.Spec.EarlyStopping != nil {
 		endpoint = util.GetEarlyStoppingEndpoint(instance)
-		connEarlyStopping, err := grpc.Dial(endpoint, grpc.WithInsecure())
+		connEarlyStopping, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			return err
 		}
@@ -169,14 +170,27 @@ func (g *General) SyncAssignments(
 		}
 	}
 
+	trialAssignments := []suggestionsv1beta1.TrialAssignment{}
 	for _, t := range responseSuggestion.ParameterAssignments {
-		instance.Status.Suggestions = append(instance.Status.Suggestions,
-			suggestionsv1beta1.TrialAssignment{
-				Name:                 fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8)),
-				ParameterAssignments: composeParameterAssignments(t.Assignments),
-				EarlyStoppingRules:   earlyStoppingRules,
-			})
+		var trialName string
+		if t.TrialName != "" {
+			trialName = t.TrialName
+		} else {
+			trialName = fmt.Sprintf("%s-%s", instance.Name, utilrand.String(8))
+		}
+
+		assignment := suggestionsv1beta1.TrialAssignment{
+			Name:                 trialName,
+			ParameterAssignments: composeParameterAssignments(t.Assignments),
+			EarlyStoppingRules:   earlyStoppingRules,
+		}
+		if t.Labels != nil {
+			assignment.Labels = t.Labels
+		}
+		trialAssignments = append(trialAssignments, assignment)
 	}
+
+	instance.Status.Suggestions = append(instance.Status.Suggestions, trialAssignments...)
 	instance.Status.SuggestionCount = int32(len(instance.Status.Suggestions))
 
 	if responseSuggestion.Algorithm != nil {
@@ -190,7 +204,7 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggest
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := util.GetAlgorithmEndpoint(instance)
 
-	conn, err := grpc.Dial(endpoint, grpc.WithInsecure(),
+	conn, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callValidatorOpts...)),
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callValidatorOpts...)),
 	)
@@ -238,7 +252,7 @@ func (g *General) ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Sug
 	logger := log.WithValues("EarlyStopping", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := util.GetEarlyStoppingEndpoint(instance)
 
-	conn, err := grpc.Dial(endpoint, grpc.WithInsecure(),
+	conn, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callValidatorOpts...)),
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callValidatorOpts...)),
 	)
@@ -347,6 +361,9 @@ func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial
 				CompletionTime: convertTrialStatusTime(t.Status.CompletionTime),
 				Observation:    convertTrialObservation(t.Spec.Objective.MetricStrategies, t.Status.Observation),
 			},
+		}
+		if t.Spec.Labels != nil {
+			trial.Spec.Labels = t.Spec.Labels
 		}
 		if t.Spec.Objective.Goal != nil {
 			trial.Spec.Objective.Goal = *t.Spec.Objective.Goal

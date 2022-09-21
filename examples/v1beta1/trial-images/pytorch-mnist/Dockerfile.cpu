@@ -1,10 +1,12 @@
-FROM pytorch/pytorch:1.0-cuda10.0-cudnn7-runtime
+FROM python:3.9-slim
 
 ADD examples/v1beta1/trial-images/pytorch-mnist /opt/pytorch-mnist
+
 WORKDIR /opt/pytorch-mnist
 
 # Add folder for the logs.
 RUN mkdir /katib
+RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chgrp -R 0 /opt/pytorch-mnist \
   && chmod -R g+rwX /opt/pytorch-mnist \

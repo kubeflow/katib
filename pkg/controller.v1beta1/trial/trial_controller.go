@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -230,9 +230,8 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 
 	// Job already exists.
 	// If Trial is EarlyStopped we need to verify/update observation logs.
-	// TODO (andreyvelich): We can include "MetricsUnavailable" condition to "Complete".
 	// In that case, Trial's job will be deleted even if metrics are not available.
-	if deployedJob != nil && ((!instance.IsCompleted() && !instance.IsMetricsUnavailable()) || instance.IsEarlyStopped()) {
+	if deployedJob != nil && (!instance.IsCompleted() || instance.IsEarlyStopped()) {
 		jobStatus, err := trialutil.GetDeployedJobStatus(instance, deployedJob)
 		if err != nil {
 			logger.Error(err, "GetDeployedJobStatus error")

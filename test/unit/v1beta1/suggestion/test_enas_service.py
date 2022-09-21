@@ -1,4 +1,4 @@
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ from pkg.suggestion.v1beta1.nas.enas.service import EnasService
 
 class TestEnas(unittest.TestCase):
     def setUp(self):
-        servicers = {
+        services = {
             api_pb2.DESCRIPTOR.services_by_name['Suggestion']: EnasService(
             )
         }
 
         self.test_server = grpc_testing.server_from_dictionary(
-            servicers, grpc_testing.strict_real_time())
+            services, grpc_testing.strict_real_time())
 
     def test_get_suggestion(self):
         trials = [

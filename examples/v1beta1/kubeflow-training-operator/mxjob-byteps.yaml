@@ -1,3 +1,4 @@
+---
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
@@ -23,7 +24,7 @@ spec:
     primaryContainerName: mxnet
     # In this example we can collect metrics only from the Worker pods.
     primaryPodLabels:
-      replica-type: worker
+      training.kubeflow.org/replica-type: worker
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model

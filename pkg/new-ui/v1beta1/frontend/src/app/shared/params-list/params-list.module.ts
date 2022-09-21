@@ -18,7 +18,6 @@ import { ListInputModule } from '../list-input/list-input.module';
     ParameterComponent,
     AddParamModalComponent,
   ],
-  entryComponents: [AddParamModalComponent],
   imports: [
     CommonModule,
     FormModule,

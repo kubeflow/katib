@@ -1,0 +1,41 @@
+name: E2E Test with mxnet-mnist
+on:
+  - pull_request
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  e2e:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Test Env
+        uses: ./.github/workflows/template-setup-e2e-test
+        with:
+          kubernetes-version: ${{ matrix.kubernetes-version }}
+
+      - name: Run e2e test with ${{ matrix.experiments }} experiments
+        uses: ./.github/workflows/template-e2e-test
+        with:
+          experiments: ${{ matrix.experiments }}
+          # Comma Delimited
+          trial-images: mxnet-mnist
+          database-type: ${{ matrix.database-type }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        kubernetes-version: ["v1.22.14", "v1.23.11", "1.24.5"]
+        # Comma Delimited
+        experiments:
+          # suggestion-hyperopt
+          - "random,tpe,never-resume"
+          - "median-stop,from-volume-resume"
+          # others
+          - "grid,bayesian-optimization,tpe"
+          - "multivariate-tpe,cma-es,hyperband"
+        database-type: ["mysql", "postgres"]

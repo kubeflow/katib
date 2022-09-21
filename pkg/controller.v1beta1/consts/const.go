@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -125,6 +125,9 @@ const (
 	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode
 	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
 
+	// SuggestionVolumeMountKey specifies the AlgorithmSettings key used to toggle Suggestion managed trial storage
+	SuggestionVolumeMountKey = "suggestion_trial_dir"
+
 	// ReconcileErrorReason is the reason when there is a reconcile error.
 	ReconcileErrorReason = "ReconcileError"
 
@@ -179,4 +182,14 @@ var (
 	DefaultKatibDBManagerServiceIP = env.GetEnvOrDefault(DefaultKatibDBManagerServiceIPEnvName, "katib-db-manager")
 	// DefaultKatibDBManagerServicePort is the default Port of Katib DB Manager
 	DefaultKatibDBManagerServicePort = env.GetEnvOrDefault(DefaultKatibDBManagerServicePortEnvName, "6789")
+
+	// List of all valid keys of trial metadata for substitution in Trial template
+	TrialTemplateMetaKeys = []string{
+		TrialTemplateMetaKeyOfName,
+		TrialTemplateMetaKeyOfNamespace,
+		TrialTemplateMetaKeyOfKind,
+		TrialTemplateMetaKeyOfAPIVersion,
+		TrialTemplateMetaKeyOfAnnotations,
+		TrialTemplateMetaKeyOfLabels,
+	}
 )

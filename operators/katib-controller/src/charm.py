@@ -10,12 +10,14 @@ from ops.charm import CharmBase
 from ops.framework import StoredState
 from ops.main import main
 from ops.model import ActiveStatus, MaintenanceStatus, WaitingStatus
+from charms.prometheus_k8s.v0.prometheus_scrape import MetricsEndpointProvider
+from charms.grafana_k8s.v0.grafana_dashboard import GrafanaDashboardProvider
 
 logger = logging.getLogger(__name__)
 
 
 class CheckFailed(Exception):
-    """ Raise this exception if one of the checks in main fails. """
+    """Raise this exception if one of the checks in main fails."""
 
     def __init__(self, msg, status_type=None):
         super().__init__()
@@ -35,8 +37,27 @@ class Operator(CharmBase):
 
         self._stored.set_default(**self.gen_certs())
         self.image = OCIImageResource(self, "oci-image")
-        self.framework.observe(self.on.install, self.set_pod_spec)
-        self.framework.observe(self.on.upgrade_charm, self.set_pod_spec)
+
+        self.prometheus_provider = MetricsEndpointProvider(
+            charm=self,
+            jobs=[
+                {
+                    "job_name": "katib_controller_metrics",
+                    "static_configs": [
+                        {"targets": [f"*:{self.config['metrics-port']}"]}
+                    ],
+                }
+            ],
+        )
+        self.dashboard_provider = GrafanaDashboardProvider(self)
+
+        for event in [
+            self.on.config_changed,
+            self.on.install,
+            self.on.leader_elected,
+            self.on.upgrade_charm,
+        ]:
+            self.framework.observe(event, self.set_pod_spec)
 
     def set_pod_spec(self, event):
         self.model.unit.status = MaintenanceStatus("Setting pod spec")

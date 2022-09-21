@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ echo "ECR_REGISTRY: ${ECR_REGISTRY}"
 echo "VERSION: ${PULL_PULL_SHA}"
 
 echo "Configuring kubeconfig.."
-aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
+aws eks update-kubeconfig --region="${AWS_REGION}" --name="${CLUSTER_NAME}"
 kubectl version
 kubectl cluster-info
 
@@ -41,8 +41,8 @@ cat "manifests/v1beta1/components/controller/katib-config.yaml"
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow
 
-echo "Deploying training-operator from kubeflow/manifests v1.4 branch"
 cd "${MANIFESTS_DIR}/apps/training-operator/upstream/overlays/kubeflow"
+echo "Deploying Training Operator from kubeflow/manifests $(git rev-parse --abbrev-ref HEAD)"
 kustomize build . | kubectl apply -f -
 
 echo "Deploying Katib"
@@ -75,6 +75,13 @@ if [ $? -ne 1 ]; then
   echo "Failed to create invalid-experiment: return code $?"
   exit 1
 fi
+
+# TODO (tenzen-y): Once the changes on https://github.com/kubeflow/testing/pull/974 are reflected in the `public.ecr.aws` registry, we must remove this process.
+# To avoid the `../../../../pkg/mod/k8s.io/client-go@v0.22.2/plugin/pkg/client/auth/exec/metrics.go:21:2: package io/fs is not in GOROOT (/usr/local/go/src/io/fs)` error,
+# we must use Go v1.16 or later, but as described in https://github.com/kubeflow/training-operator/issues/1581,
+# we do not have permission to update `public.ecr.aws/j1r0q0g6/kubeflow-testing:latest` so we need to update it in this.
+rm -rf /usr/local/go
+wget -O /tmp/go.tar.gz https://dl.google.com/go/go1.17.10.linux-amd64.tar.gz && tar -C /usr/local -xzf /tmp/go.tar.gz
 
 # Build the binary for e2e test
 echo "Building run-e2e-experiment for e2e test cases"

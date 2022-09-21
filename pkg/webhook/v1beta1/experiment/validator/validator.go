@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -83,6 +83,18 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 	if instance.Spec.ParallelTrialCount != nil && *instance.Spec.ParallelTrialCount <= 0 {
 		return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
 	}
+
+	if instance.Spec.MaxFailedTrialCount != nil && instance.Spec.MaxTrialCount != nil {
+		if *instance.Spec.MaxFailedTrialCount > *instance.Spec.MaxTrialCount {
+			return fmt.Errorf("spec.maxFailedTrialCount should be less than or equal to spec.maxTrialCount")
+		}
+	}
+	if instance.Spec.ParallelTrialCount != nil && instance.Spec.MaxTrialCount != nil {
+		if *instance.Spec.ParallelTrialCount > *instance.Spec.MaxTrialCount {
+			return fmt.Errorf("spec.paralelTrialCount should be less than or equal to spec.maxTrialCount")
+		}
+	}
+
 	if oldInst != nil {
 		// We should validate restart only if appropriate fields are changed.
 		// Otherwise check below is triggered when experiment is deleted.
@@ -156,6 +168,9 @@ func (g *DefaultValidator) validateObjective(obj *commonapiv1beta1.ObjectiveSpec
 	}
 	if obj.ObjectiveMetricName == "" {
 		return fmt.Errorf("no spec.objective.objectiveMetricName specified")
+	}
+	if contains(obj.AdditionalMetricNames, obj.ObjectiveMetricName) {
+		return fmt.Errorf("spec.objective.additionalMetricNames should not contain spec.objective.objectiveMetricName")
 	}
 	return nil
 }
@@ -311,8 +326,10 @@ func (g *DefaultValidator) validateTrialTemplate(instance *experimentsv1beta1.Ex
 
 		// Check if parameter reference exist in experiment parameters
 		if len(experimentParameterNames) > 0 {
-			if _, ok := experimentParameterNames[parameter.Reference]; !ok {
-				return fmt.Errorf("parameter reference %v does not exist in spec.parameters: %v", parameter.Reference, instance.Spec.Parameters)
+			if !isMetaKey(parameter.Reference) {
+				if _, ok := experimentParameterNames[parameter.Reference]; !ok {
+					return fmt.Errorf("parameter reference %v does not exist in spec.parameters: %v", parameter.Reference, instance.Spec.Parameters)
+				}
 			}
 		}
 
@@ -428,10 +445,21 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 			mcSpec.Source.FileSystemPath.Kind != commonapiv1beta1.FileKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
 			return fmt.Errorf("file path where metrics file exists is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
 		}
+		// Format
+		fileFormat := mcSpec.Source.FileSystemPath.Format
+		if fileFormat != commonapiv1beta1.TextFormat && fileFormat != commonapiv1beta1.JsonFormat {
+			return fmt.Errorf("format of metrics file is required by .spec.metricsCollectorSpec.source.fileSystemPath.format")
+		}
+		if fileFormat == commonapiv1beta1.JsonFormat && mcSpec.Source.Filter != nil {
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.filter must be nil when format of metrics file is %v", commonapiv1beta1.JsonFormat)
+		}
 	case commonapiv1beta1.TfEventCollector:
 		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||
 			mcSpec.Source.FileSystemPath.Kind != commonapiv1beta1.DirectoryKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
 			return fmt.Errorf("directory path where tensorflow event files exist is required by .spec.metricsCollectorSpec.source.fileSystemPath.path")
+		}
+		if mcSpec.Source.FileSystemPath.Format != "" {
+			return fmt.Errorf(".spec.metricsCollectorSpec.source.fileSystemPath.format must be empty")
 		}
 	case commonapiv1beta1.PrometheusMetricCollector:
 		i, err := strconv.Atoi(mcSpec.Source.HttpGet.Port.String())
@@ -469,4 +497,32 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 	}
 
 	return nil
+}
+
+func isMetaKey(parameter string) bool {
+	// Check if parameter is trial metadata reference as ${trailSpec.Name}, ${trialSpec.Labels[label]}, etc. used for substitution
+	match := regexp.MustCompile(consts.TrialTemplateMetaReplaceFormatRegex).FindStringSubmatch(parameter)
+	isMeta := false
+	if len(match) > 0 {
+		matchedKey := match[1]
+		if contains(consts.TrialTemplateMetaKeys, matchedKey) {
+			isMeta = true
+		} else {
+			// Check if it's Labels[label] or Annotations[annotation]
+			subMatch := regexp.MustCompile(consts.TrialTemplateMetaParseFormatRegex).FindStringSubmatch(matchedKey)
+			if len(subMatch) == 3 && contains(consts.TrialTemplateMetaKeys, subMatch[1]) {
+				isMeta = true
+			}
+		}
+	}
+	return isMeta
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }

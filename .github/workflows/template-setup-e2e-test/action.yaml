@@ -1,0 +1,25 @@
+# Template for e2e tests.
+
+inputs:
+  kubernetes-version:
+    required: true
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Set Up Minikube Cluster
+      uses: manusa/actions-setup-minikube@v2.6.0
+      with:
+        minikube version: "v1.25.2"
+        kubernetes version: ${{ inputs.kubernetes-version }}
+        start args: --driver none --wait-timeout=60s
+        github token: ${{ env.GITHUB_TOKEN }}
+
+    - name: Set Up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Set Up Go env
+      uses: actions/setup-go@v3
+      with:
+        go-version-file: go.mod

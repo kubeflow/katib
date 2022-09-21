@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -811,6 +811,7 @@ func newFakeTrials() []trialsv1beta1.Trial {
 						Value: "0.1",
 					},
 				},
+				Labels: map[string]string{},
 			},
 			Status: trialsv1beta1.TrialStatus{
 				StartTime:      newFakeTime(),
@@ -835,6 +836,7 @@ func newFakeTrials() []trialsv1beta1.Trial {
 						Value: "0.2",
 					},
 				},
+				Labels: map[string]string{},
 			},
 			Status: trialsv1beta1.TrialStatus{
 				Conditions: fakeConditions,
@@ -848,8 +850,8 @@ func newFakeTrials() []trialsv1beta1.Trial {
 			Status: trialsv1beta1.TrialStatus{
 				Conditions: []trialsv1beta1.TrialCondition{
 					{
-						Type:    trialsv1beta1.TrialSucceeded,
-						Status:  corev1.ConditionFalse,
+						Type:    trialsv1beta1.TrialMetricsUnavailable,
+						Status:  corev1.ConditionTrue,
 						Message: "Metrics are not available",
 					},
 				},
@@ -879,6 +881,8 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 			},
 		},
 	}
+
+	fakeLabels := make(map[string]string)
 
 	fakeObjective := &suggestionapi.ObjectiveSpec{
 		Type:                  suggestionapi.ObjectiveType_MAXIMIZE,
@@ -955,6 +959,7 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 							},
 						},
 					},
+					Labels: fakeLabels,
 				},
 				Status: &suggestionapi.TrialStatus{
 					StartTime:      newFakeTime().Format(timeFormat),
@@ -979,6 +984,7 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 							},
 						},
 					},
+					Labels: fakeLabels,
 				},
 				Status: &suggestionapi.TrialStatus{
 					StartTime:      "",

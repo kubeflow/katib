@@ -1,0 +1,36 @@
+# Template for e2e tests.
+
+inputs:
+  experiments:
+    required: true
+    type: string
+  training-operator:
+    required: false
+    type: boolean
+    default: false
+  trial-images:
+    required: true
+    type: string
+  katib-ui:
+    required: true
+    type: boolean
+    default: false
+  database-type:
+    required: false
+    type: string
+    default: mysql
+
+runs:
+  using: composite
+  steps:
+    - name: Set Up Minikube Cluster
+      shell: bash
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.trial-images }} ${{ inputs.experiments }}
+
+    - name: Set Up Katib
+      shell: bash
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh ${{ inputs.katib-ui }} ${{ inputs.training-operator }} ${{ inputs.database-type }}
+
+    - name: Run E2E Experiment
+      shell: bash
+      run: ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}

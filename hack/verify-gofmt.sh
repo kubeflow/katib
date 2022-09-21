@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if ! which gofmt >/dev/null; then
+if [ -z "$(command -v gofmt)" ]; then
   echo "Can not find gofmt"
   exit 1
 fi

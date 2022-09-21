@@ -247,6 +247,10 @@
                 </li>
               
                 <li>
+                  <a href="#api.v1.beta1.GetSuggestionsReply.ParameterAssignments.LabelsEntry"><span class="badge">M</span>GetSuggestionsReply.ParameterAssignments.LabelsEntry</a>
+                </li>
+              
+                <li>
                   <a href="#api.v1.beta1.GetSuggestionsRequest"><span class="badge">M</span>GetSuggestionsRequest</a>
                 </li>
               
@@ -320,6 +324,10 @@
               
                 <li>
                   <a href="#api.v1.beta1.TrialSpec"><span class="badge">M</span>TrialSpec</a>
+                </li>
+              
+                <li>
+                  <a href="#api.v1.beta1.TrialSpec.LabelsEntry"><span class="badge">M</span>TrialSpec.LabelsEntry</a>
                 </li>
               
                 <li>
@@ -945,6 +953,51 @@ If start step is empty, rule is applied from the first recorded metric. </p></td
                   <td><p> </p></td>
                 </tr>
               
+                <tr>
+                  <td>trial_name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Optional field to override the trial name </p></td>
+                </tr>
+              
+                <tr>
+                  <td>labels</td>
+                  <td><a href="#api.v1.beta1.GetSuggestionsReply.ParameterAssignments.LabelsEntry">GetSuggestionsReply.ParameterAssignments.LabelsEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>Optional field to add labels to the generated Trials </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.GetSuggestionsReply.ParameterAssignments.LabelsEntry">GetSuggestionsReply.ParameterAssignments.LabelsEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -1531,6 +1584,44 @@ This can be empty if we only care about the objective metric. </p></td>
                   <td><p>List of assignments generated for the Trial. </p></td>
                 </tr>
               
+                <tr>
+                  <td>labels</td>
+                  <td><a href="#api.v1.beta1.TrialSpec.LabelsEntry">TrialSpec.LabelsEntry</a></td>
+                  <td>repeated</td>
+                  <td><p>Map of labels assigned to the Trial </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="api.v1.beta1.TrialSpec.LabelsEntry">TrialSpec.LabelsEntry</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>key</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>value</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -1777,7 +1868,7 @@ This can be empty if we only care about the objective metric. </p></td>
         </table>
       
         <h3 id="api.v1.beta1.TrialStatus.TrialConditionType">TrialStatus.TrialConditionType</h3>
-        <p>Trial can be in one of 6 conditions.</p><p>TODO (andreyvelich): Remove unused conditions.</p>
+        <p>Trial can be in one of 8 conditions.</p><p>TODO (andreyvelich): Remove unused conditions.</p>
         <table class="enum-table">
           <thead>
             <tr><td>Name</td><td>Number</td><td>Description</td></tr>
@@ -1815,14 +1906,20 @@ This can be empty if we only care about the objective metric. </p></td>
               </tr>
             
               <tr>
-                <td>EARLYSTOPPED</td>
+                <td>METRICSUNAVAILABLE</td>
                 <td>5</td>
                 <td><p></p></td>
               </tr>
             
               <tr>
-                <td>UNKNOWN</td>
+                <td>EARLYSTOPPED</td>
                 <td>6</td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>UNKNOWN</td>
+                <td>7</td>
                 <td><p></p></td>
               </tr>
             

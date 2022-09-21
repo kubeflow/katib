@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,6 +43,12 @@ func (r *ReconcileExperiment) getTrialInstance(expInstance *experimentsv1beta1.E
 	trial.Name = trialAssignment.Name
 	trial.Namespace = expInstance.GetNamespace()
 	trial.Labels = util.TrialLabels(expInstance)
+
+	if trialAssignment.Labels != nil {
+		for k, v := range trialAssignment.Labels {
+			trial.Labels[k] = v
+		}
+	}
 
 	if err := controllerutil.SetControllerReference(expInstance, trial, r.scheme); err != nil {
 		logger.Error(err, "Set controller reference error")

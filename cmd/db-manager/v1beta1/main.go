@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	health_pb "github.com/kubeflow/katib/pkg/apis/manager/health"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
@@ -34,7 +35,8 @@ import (
 )
 
 const (
-	port = "0.0.0.0:6789"
+	port                  = "0.0.0.0:6789"
+	defaultConnectTimeout = time.Second * 60
 )
 
 var dbIf common.KatibDBInterface
@@ -87,14 +89,17 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 }
 
 func main() {
+	var connectTimeout time.Duration
+	flag.DurationVar(&connectTimeout, "connect-timeout", defaultConnectTimeout, "Timeout before calling error during database connection. (e.g. 120s)")
 	flag.Parse()
+
 	var err error
 	dbNameEnvName := common.DBNameEnvName
 	dbName := os.Getenv(dbNameEnvName)
 	if dbName == "" {
 		klog.Fatal("DB_NAME env is not set. Exiting")
 	}
-	dbIf, err = db.NewKatibDBInterface(dbName)
+	dbIf, err = db.NewKatibDBInterface(dbName, connectTimeout)
 	if err != nil {
 		klog.Fatalf("Failed to open db connection: %v", err)
 	}

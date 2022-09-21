@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
 # limitations under the License.
 
 set -o xtrace
+set -o errexit
 
 # Delete all Katib Experiment in all namespaces.
 kubectl delete experiment --all --all-namespaces
 sleep 10
 
-SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
+SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/../.."
 
-cd ${SCRIPT_ROOT}
+cd "${SCRIPT_ROOT}"
 kustomize build manifests/v1beta1/installs/katib-standalone | kubectl delete -f -

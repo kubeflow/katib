@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ func main() {
 	http.HandleFunc("/katib/delete_experiment/", kuh.DeleteExperiment)
 
 	http.HandleFunc("/katib/fetch_experiment/", kuh.FetchExperiment)
+	http.HandleFunc("/katib/fetch_trial/", kuh.FetchTrial)
 	http.HandleFunc("/katib/fetch_suggestion/", kuh.FetchSuggestion)
 
 	http.HandleFunc("/katib/fetch_hp_job_info/", kuh.FetchHPJobInfo)

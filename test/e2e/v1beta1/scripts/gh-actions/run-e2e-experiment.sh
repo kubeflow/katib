@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,12 +21,9 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-CLUSTER_NAME="${CLUSTER_NAME}"
-AWS_REGION="${AWS_REGION}"
-EXPERIMENT_FILE=$1
-
-echo "Configuring kubeconfig.."
-aws eks update-kubeconfig --region=${AWS_REGION} --name=${CLUSTER_NAME}
+cd "$(dirname "$0")"
+EXPERIMENT_FILES=${1:-""}
+IFS="," read -r -a EXPERIMENT_FILE_ARRAY <<< "$EXPERIMENT_FILES"
 
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
@@ -39,7 +36,15 @@ kubectl get pvc -n kubeflow
 echo "Available CRDs"
 kubectl get crd
 
-echo "Running Experiment from ${EXPERIMENT_FILE} file"
-./run-e2e-experiment ${EXPERIMENT_FILE}
+if [ -z "$EXPERIMENT_FILES" ]; then
+  echo "Skip Test for Experiment"
+  exit 0
+fi
+
+for exp_name in "${EXPERIMENT_FILE_ARRAY[@]}"; do
+  echo "Running Experiment from $exp_name file"
+  exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
+  ../../bin/run-e2e-experiment "$exp_path" || (kubectl get pods -n kubeflow && exit 1)
+done
 
 exit 0

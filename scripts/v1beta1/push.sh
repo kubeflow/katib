@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,6 +80,9 @@ docker push "${REGISTRY}/suggestion-enas:${TAG}"
 echo -e "\nPushing DARTS suggestion...\n"
 docker push "${REGISTRY}/suggestion-darts:${TAG}"
 
+echo -e "\nPushing PBT suggestion...\n"
+docker push "${REGISTRY}/suggestion-pbt:${TAG}"
+
 # Early stopping images
 echo -e "\nPushing early stopping images...\n"
 
@@ -95,8 +98,11 @@ docker push "${REGISTRY}/mxnet-mnist:${TAG}"
 echo -e "\nPushing Tensorflow with summaries mnist training container example...\n"
 docker push "${REGISTRY}/tf-mnist-with-summaries:${TAG}"
 
-echo -e "\nPushing PyTorch mnist training container example...\n"
-docker push "${REGISTRY}/pytorch-mnist:${TAG}"
+echo -e "\nPushing PyTorch mnist training container example with CPU support...\n"
+docker push "${REGISTRY}/pytorch-mnist-cpu:${TAG}"
+
+echo -e "\nPushing PyTorch mnist training container example with GPU support...\n"
+docker push "${REGISTRY}/pytorch-mnist-gpu:${TAG}"
 
 echo -e "\nPushing Keras CIFAR-10 CNN training container example for ENAS with GPU support...\n"
 docker push "${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}"
@@ -104,7 +110,13 @@ docker push "${REGISTRY}/enas-cnn-cifar10-gpu:${TAG}"
 echo -e "\nPushing Keras CIFAR-10 CNN training container example for ENAS with CPU support...\n"
 docker push "${REGISTRY}/enas-cnn-cifar10-cpu:${TAG}"
 
-echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS...\n"
-docker push "${REGISTRY}/darts-cnn-cifar10:${TAG}"
+echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS with CPU support...\n"
+docker push "${REGISTRY}/darts-cnn-cifar10-cpu:${TAG}"
+
+echo -e "\nPushing PyTorch CIFAR-10 CNN training container example for DARTS with GPU support...\n"
+docker push "${REGISTRY}/darts-cnn-cifar10-gpu:${TAG}"
+
+echo -e "\nPushing dynamic learning rate training container example for PBT...\n"
+docker push "${REGISTRY}/simple-pbt:${TAG}"
 
 echo -e "\nAll Katib images with ${TAG} tag have been pushed successfully!\n"

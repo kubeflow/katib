@@ -123,7 +123,7 @@ In the namespace with `katib.kubeflow.org/metrics-collector-injection=enabled` l
 
 In **Pod Level Injecting**,
 
-1. Job operators (_e.x. TFjob/PyTorchjob_) tag the `job-role: master` ([#1064](https://github.com/kubeflow/tf-operator/pull/1064)) label on the master pod.
+1. Job operators (_e.x. TFjob/PyTorchjob_) tag the `training.kubeflow.org/job-role: master` ([#1064](https://github.com/kubeflow/tf-operator/pull/1064)) label on the master pod.
 2. The webhook inject the metric collector only if the webhook recognizes this label.
 3. The webhook uses [ObjectSelector](https://github.com/kubernetes/kubernetes/pull/78505) to skip on irrelevant objects in order to optimize the performance.
 4. ObjectSelector is only supported above _Kubernetes v1.15_. Without this new feature, there may be a [performance issue](https://github.com/kubeflow/katib/issues/685#issuecomment-516226070) in webhook. In this situation, the following **Job Level Injecting** mode may be a better option.

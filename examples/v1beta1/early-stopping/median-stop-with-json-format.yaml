@@ -1,0 +1,73 @@
+---
+# This is example with median stopping early stopping rule with logs in JSON format.
+# It has bad feasible space for learning rate to show more early stopped Trials.
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  namespace: kubeflow
+  name: median-stop-with-json-format
+spec:
+  objective:
+    type: maximize
+    goal: 0.99
+    objectiveMetricName: accuracy
+    additionalMetricNames:
+      - loss
+  metricsCollectorSpec:
+    source:
+      fileSystemPath:
+        path: "/katib/mnist.json"
+        kind: File
+        format: JSON
+    collector:
+      kind: File
+  algorithm:
+    algorithmName: random
+  earlyStopping:
+    algorithmName: medianstop
+    algorithmSettings:
+      - name: min_trials_required
+        value: "1"
+      - name: start_step
+        value: "2"
+  parallelTrialCount: 2
+  maxTrialCount: 15
+  maxFailedTrialCount: 3
+  parameters:
+    - name: lr
+      parameterType: double
+      feasibleSpace:
+        min: "0.01"
+        max: "0.5"
+    - name: num-epochs
+      parameterType: int
+      feasibleSpace:
+        min: "3"
+        max: "4"
+  trialTemplate:
+    retain: true
+    primaryContainerName: training-container
+    trialParameters:
+      - name: learningRate
+        description: Learning rate for the training model
+        reference: lr
+      - name: numberEpochs
+        description: Number of epochs to train the model
+        reference: num-epochs
+    trialSpec:
+      apiVersion: batch/v1
+      kind: Job
+      spec:
+        template:
+          spec:
+            containers:
+              - name: training-container
+                image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
+                command:
+                  - "python3"
+                  - "/opt/pytorch-mnist/mnist.py"
+                  - "--epochs=${trialParameters.numberEpochs}"
+                  - "--log-path=/katib/mnist.json"
+                  - "--lr=${trialParameters.learningRate}"
+                  - "--logger=hypertune"
+            restartPolicy: Never

@@ -125,6 +125,15 @@ custom algorithm.
       <td>
       </td>
     </tr>
+    <tr align="center">
+      <td>
+        <a href="https://www.kubeflow.org/docs/components/katib/experiment/#pbt">Population Based Training</a>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -146,8 +155,8 @@ Follow the next steps to install Katib standalone.
 
 This is the minimal requirements to install Katib:
 
-- Kubernetes >= 1.17
-- `kubectl` >= 1.21
+- Kubernetes >= 1.22
+- `kubectl` >= 1.22
 
 ## Latest Version
 
@@ -159,10 +168,10 @@ kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib
 
 ## Release Version
 
-For the specific Katib release (for example `v0.12.0`) run this command:
+For the specific Katib release (for example `v0.14.0`) run this command:
 
 ```
-kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.12.0"
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.14.0"
 ```
 
 Make sure that all Katib components are running:

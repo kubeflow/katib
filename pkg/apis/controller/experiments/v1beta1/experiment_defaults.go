@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -157,6 +157,9 @@ func (e *Experiment) setDefaultMetricsCollector() {
 		}
 		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path == "" {
 			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path = common.DefaultFilePath
+		}
+		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Format == "" {
+			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Format = common.TextFormat
 		}
 	case common.TfEventCollector:
 		if e.Spec.MetricsCollectorSpec.Source == nil {

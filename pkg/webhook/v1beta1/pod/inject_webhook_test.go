@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -343,6 +343,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 				"-path", common.DefaultFilePath,
+				"-format", string(common.TextFormat),
 				"-w", "false",
 			},
 			Name: "StdOut MC",
@@ -356,7 +357,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				},
 				Source: &common.SourceSpec{
 					FileSystemPath: &common.FileSystemPath{
-						Path: testPath,
+						Path:   testPath,
+						Format: common.TextFormat,
 					},
 					Filter: &common.FilterSpec{
 						MetricsFormat: []string{
@@ -374,8 +376,34 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-s-db", katibDBAddress,
 				"-path", testPath,
 				"-f", "{mn1: ([a-b]), mv1: [0-9]};{mn2: ([a-b]), mv2: ([0-9])}",
+				"-format", string(common.TextFormat),
 			},
 			Name: "File MC with Filter",
+		},
+		{
+			Trial:       testTrial,
+			MetricNames: testMetricName,
+			MCSpec: common.MetricsCollectorSpec{
+				Collector: &common.CollectorSpec{
+					Kind: common.FileCollector,
+				},
+				Source: &common.SourceSpec{
+					FileSystemPath: &common.FileSystemPath{
+						Path:   testPath,
+						Format: common.JsonFormat,
+					},
+				},
+			},
+			KatibConfig: katibconfig.MetricsCollectorConfig{},
+			ExpectedArgs: []string{
+				"-t", testTrialName,
+				"-m", testMetricName,
+				"-o-type", string(testObjective),
+				"-s-db", katibDBAddress,
+				"-path", testPath,
+				"-format", string(common.JsonFormat),
+			},
+			Name: "File MC with Json Format",
 		},
 		{
 			Trial:       testTrial,
@@ -473,6 +501,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 				"-path", common.DefaultFilePath,
+				"-format", string(common.TextFormat),
 				"-stop-rule", earlyStoppingRules[0],
 				"-stop-rule", earlyStoppingRules[1],
 				"-s-earlystop", katibEarlyStopAddress,
@@ -548,7 +577,7 @@ func TestNeedWrapWorkerContainer(t *testing.T) {
 	}
 }
 
-func TestMutateVolume(t *testing.T) {
+func TestMutateMetricsCollectorVolume(t *testing.T) {
 	tc := struct {
 		Pod                  v1.Pod
 		ExpectedPod          v1.Pod
@@ -615,14 +644,14 @@ func TestMutateVolume(t *testing.T) {
 		PathKind:             common.FileKind,
 	}
 
-	err := mutateVolume(
+	err := mutateMetricsCollectorVolume(
 		&tc.Pod,
 		tc.MountPath,
 		tc.SidecarContainerName,
 		tc.PrimaryContainerName,
 		tc.PathKind)
 	if err != nil {
-		t.Errorf("mutateVolume failed: %v", err)
+		t.Errorf("mutateMetricsCollectorVolume failed: %v", err)
 	} else if !equality.Semantic.DeepEqual(tc.Pod, tc.ExpectedPod) {
 		t.Errorf("Expected pod %v, got %v", tc.ExpectedPod, tc.Pod)
 	}

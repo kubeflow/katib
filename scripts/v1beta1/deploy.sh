@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Copyright 2021 The Kubeflow Authors.
+# Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,20 @@
 # limitations under the License.
 
 set -o xtrace
+set -o errexit
 
-SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/../..
+SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/../.."
 
-cd ${SCRIPT_ROOT}
-kustomize build manifests/v1beta1/installs/katib-standalone | kubectl apply -f -
+cd "${SCRIPT_ROOT}"
+
+WITH_DATABASE_TYPE=${1:-mysql}
+
+# if mysql, use below kustomize, else use postgres
+if [ "$WITH_DATABASE_TYPE" == "mysql" ]; then
+    kustomize build manifests/v1beta1/installs/katib-standalone | kubectl apply -f -
+elif [ "$WITH_DATABASE_TYPE" == "postgres" ]; then
+    kustomize build manifests/v1beta1/installs/katib-standalone-postgres | kubectl apply -f -
+else
+    echo "Unknown database type: $WITH_DATABASE_TYPE"
+    exit 1
+fi

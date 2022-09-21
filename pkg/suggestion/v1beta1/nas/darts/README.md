@@ -69,8 +69,6 @@ Currently, it supports running only on single GPU and second-order approximation
 
 - Integrate E2E test in CI. Create simple example, which can run on CPU.
 
-- Add validation to Suggestion service.
-
 - Support multi GPU training. Add functionality to select GPU for training.
 
 - Support DARTS in Katib UI.

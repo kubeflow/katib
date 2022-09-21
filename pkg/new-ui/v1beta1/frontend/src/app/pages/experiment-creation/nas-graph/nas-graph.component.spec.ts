@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { NasGraphComponent } from './nas-graph.component';
 
@@ -6,11 +6,13 @@ describe('NasGraphComponent', () => {
   let component: NasGraphComponent;
   let fixture: ComponentFixture<NasGraphComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [NasGraphComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [NasGraphComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(NasGraphComponent);

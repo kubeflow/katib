@@ -11,7 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TrialModalComponent } from './trial-modal/trial-modal.component';
 
 @NgModule({
-  declarations: [TrialsTableComponent, TrialModalComponent],
+  declarations: [TrialsTableComponent],
   imports: [
     CommonModule,
     MatTableModule,

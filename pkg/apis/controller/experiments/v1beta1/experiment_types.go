@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -100,6 +100,9 @@ type ExperimentStatus struct {
 	// List of trial names which have been early stopped.
 	EarlyStoppedTrialList []string `json:"earlyStoppedTrialList,omitempty"`
 
+	// List of trial names which have been metrics unavailable
+	MetricsUnavailableTrialList []string `json:"metricsUnavailableTrialList,omitempty"`
+
 	// Trials is the total number of trials owned by the experiment.
 	Trials int32 `json:"trials,omitempty"`
 
@@ -120,6 +123,9 @@ type ExperimentStatus struct {
 
 	// How many trials are currently early stopped.
 	TrialsEarlyStopped int32 `json:"trialsEarlyStopped,omitempty"`
+
+	// How many trials are currently metrics unavailable.
+	TrialMetricsUnavailable int32 `json:"trialMetricsUnavailable,omitempty"`
 }
 
 // OptimalTrial is the metrics and assignments of the best trial.

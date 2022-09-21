@@ -213,8 +213,10 @@ message TrialSpec {
     message ParameterAssignments {
         repeated ParameterAssignment assignments = 1;
     }
+
     ObjectiveSpec objective = 2; // Objective specification for the Trial.
     ParameterAssignments parameter_assignments = 3; // List of assignments generated for the Trial.
+    map<string, string> labels = 4; // Map of labels assigned to the Trial
 }
 
 message ParameterAssignment {
@@ -226,7 +228,7 @@ message ParameterAssignment {
  * Current Trial status. It contains Trial's latest condition, start time, completion time, observation.
  */
 message TrialStatus {
-    // Trial can be in one of 6 conditions.
+    // Trial can be in one of 8 conditions.
     // TODO (andreyvelich): Remove unused conditions.
     enum TrialConditionType {
         CREATED = 0;
@@ -234,8 +236,9 @@ message TrialStatus {
         SUCCEEDED = 2;
         KILLED = 3;
         FAILED = 4;
-        EARLYSTOPPED = 5;
-        UNKNOWN = 6;
+        METRICSUNAVAILABLE = 5;
+        EARLYSTOPPED = 6;
+        UNKNOWN = 7;
     }
     string start_time = 1; // Trial start time in RFC3339 format
     string completion_time = 2; // Trial completion time in RFC3339 format
@@ -302,7 +305,12 @@ message GetSuggestionsRequest {
 message GetSuggestionsReply {
     message ParameterAssignments {
         repeated ParameterAssignment assignments = 1;
+        // Optional field to override the trial name
+        string trial_name = 2;
+        // Optional field to add labels to the generated Trials
+        map<string, string> labels = 3;
     }
+
     repeated ParameterAssignments parameter_assignments = 1;
     AlgorithmSpec algorithm = 2;
     repeated EarlyStoppingRule early_stopping_rules = 3;

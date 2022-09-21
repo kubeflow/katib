@@ -8,7 +8,7 @@ Katib offers the following APIs:
 
 ## GRPC API documentation
 
-See the [Katib v1beta1 API reference docs](https://www.kubeflow.org/docs/reference/katib/v1beta1/katib/).
+See the [Katib v1beta1 API reference docs](./v1beta1/gen-doc/api.md).
 
 ## Update API and generate documents
 

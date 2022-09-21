@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -34,7 +33,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // For GCP testing
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
@@ -44,12 +42,6 @@ import (
 )
 
 func main() {
-	// For AWS we should point KUBECONFIG env to correct folder.
-	err := os.Setenv("KUBECONFIG", "/root/.kube/config")
-	if err != nil {
-		log.Fatalf("Unable to set KUBECONFIG env variable, error: %v", err)
-	}
-
 	// First argument should be Experiment yaml path.
 	if len(os.Args) != 2 {
 		log.Fatal("Path to Experiment yaml is missing")
@@ -60,26 +52,25 @@ func main() {
 		log.Fatalf("Error in reading file: %v", err)
 	}
 
-	// Replace batch size to number of epochs for faster execution.
-	strExp := strings.Replace(string(byteExp), "--batch-size=64", "--num-epochs=2", -1)
-
 	exp := &experimentsv1beta1.Experiment{}
-	buf := bytes.NewBufferString(strExp)
+	buf := bytes.NewBufferString(string(byteExp))
 	if err := k8syaml.NewYAMLOrJSONDecoder(buf, 1024).Decode(exp); err != nil {
 		log.Fatal("Yaml decode error ", err)
 	}
 
 	kclient, err := katibclient.NewClient(client.Options{})
 	if err != nil {
-		log.Fatal("Create NewClient for Katib failed: ", err)
+		log.Fatalf("Create NewClient for Katib failed: %v", err)
 	}
 
 	var maxTrials int32 = 2
 	var parallelTrials int32 = 1
+	var maxFailedTrial int32 = 0
 	// For random we test 2 parallel execution.
 	if exp.Name == "random" {
 		maxTrials = 3
 		parallelTrials = 2
+		maxFailedTrial = 3
 	}
 	if exp.Spec.Algorithm.AlgorithmName != "hyperband" && exp.Spec.Algorithm.AlgorithmName != "darts" {
 		// Hyperband will validate the parallel trial count,
@@ -88,6 +79,9 @@ func main() {
 		exp.Spec.MaxTrialCount = &maxTrials
 		exp.Spec.ParallelTrialCount = &parallelTrials
 	}
+	exp.Spec.TrialTemplate.Retain = true
+	exp.Spec.MaxFailedTrialCount = &maxFailedTrial
+
 	log.Printf("Creating Experiment %v with MaxTrialCount: %v, ParallelTrialCount: %v", exp.Name, maxTrials, parallelTrials)
 	err = kclient.CreateRuntimeObject(exp)
 	if err != nil {
@@ -116,12 +110,12 @@ func main() {
 		// Update Experiment with new info.
 		err := kclient.UpdateRuntimeObject(exp)
 		if err != nil {
-			log.Fatalf("UpdateRuntimeObject failed: %v", err)
 			// Delete Experiment in case of error.
 			log.Printf("Deleting Experiment %v\n", exp.Name)
 			if kclient.DeleteRuntimeObject(exp) != nil {
 				log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
 			}
+			log.Fatalf("UpdateRuntimeObject failed: %v", err)
 		}
 
 		log.Printf("Restarting Experiment %v with MaxTrialCount: %v, ParallelTrialCount: %v\n\n",
@@ -133,12 +127,12 @@ func main() {
 		for time.Now().Before(endTime) {
 			exp, err = kclient.GetExperiment(exp.Name, exp.Namespace)
 			if err != nil {
-				log.Fatalf("Get Experiment error: %v", err)
 				// Delete Experiment in case of error
 				log.Printf("Deleting Experiment %v\n", exp.Name)
 				if kclient.DeleteRuntimeObject(exp) != nil {
 					log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
 				}
+				log.Fatalf("Get Experiment error: %v", err)
 			}
 			// Once Experiment is restarted stop the waiting loop.
 			if exp.IsRestarting() {
@@ -148,22 +142,22 @@ func main() {
 		}
 		// Check if Experiment is not restarting and is not running.
 		if !exp.IsRestarting() && !exp.IsRunning() {
-			log.Fatalf("Unable to restart Experiment %v, Experiment conditions: %v", exp.Name, exp.Status.Conditions)
 			// Delete experiment in case of error.
 			log.Printf("Deleting Experiment %v\n", exp.Name)
 			if kclient.DeleteRuntimeObject(exp) != nil {
 				log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
 			}
+			log.Fatalf("Unable to restart Experiment %v, Experiment conditions: %v", exp.Name, exp.Status.Conditions)
 		}
 		// Wait until Experiment is finished.
 		exp, err = waitExperimentFinish(kclient, exp)
 		if err != nil {
-			log.Fatalf("Wait Experiment finish failed: %v", err)
 			// Delete experiment in case of error
 			log.Printf("Deleting Experiment %v\n", exp.Name)
 			if kclient.DeleteRuntimeObject(exp) != nil {
 				log.Fatalf("Unable to delete Experiment %v, error: %v", exp.Name, err)
 			}
+			log.Fatalf("Wait Experiment finish failed: %v", err)
 		}
 	}
 
@@ -207,8 +201,10 @@ func waitExperimentFinish(kclient katibclient.Client, exp *experimentsv1beta1.Ex
 		}
 
 		log.Printf("Waiting for Experiment %s to finish", exp.Name)
-		log.Printf(`Experiment is running: %v Trials, %v Pending Trials, %v Running Trials, %v Succeeded Trials, %v Failed Trials`,
-			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning, exp.Status.TrialsSucceeded, exp.Status.TrialsFailed)
+		log.Printf("Experiment is running: %v Trials, %v Pending Trials, %v Running Trials, %v Succeeded Trials,"+
+			" %v Failed Trials, %v EarlyStopped Trials, %v MetricsUnavailable Trials",
+			exp.Status.Trials, exp.Status.TrialsPending, exp.Status.TrialsRunning, exp.Status.TrialsSucceeded,
+			exp.Status.TrialsFailed, exp.Status.TrialsEarlyStopped, exp.Status.TrialMetricsUnavailable)
 		log.Printf("Current optimal Trial: %v", exp.Status.CurrentOptimalTrial)
 		log.Printf("Experiment conditions: %v\n\n\n", exp.Status.Conditions)
 
@@ -246,7 +242,7 @@ func verifyExperimentResults(kclient katibclient.Client, exp *experimentsv1beta1
 	}
 
 	// Best objective metric should be set.
-	bestObjectiveMetric := &commonv1beta1.Metric{}
+	var bestObjectiveMetric *commonv1beta1.Metric
 	for _, metric := range exp.Status.CurrentOptimalTrial.Observation.Metrics {
 		if metric.Name == exp.Spec.Objective.ObjectiveMetricName {
 			bestObjectiveMetric = &metric
@@ -270,8 +266,13 @@ func verifyExperimentResults(kclient katibclient.Client, exp *experimentsv1beta1
 			*exp.Spec.MaxTrialCount, exp.Status.TrialsSucceeded)
 	}
 
+	trialsCompleted := exp.Status.TrialsSucceeded
+	if exp.Spec.EarlyStopping != nil {
+		trialsCompleted += exp.Status.TrialsEarlyStopped
+	}
+
 	// Otherwise, Goal should be reached.
-	if exp.Status.TrialsSucceeded != *exp.Spec.MaxTrialCount &&
+	if trialsCompleted != *exp.Spec.MaxTrialCount &&
 		((objectiveType == commonv1beta1.ObjectiveTypeMinimize && minMetric > *goal) ||
 			(objectiveType == commonv1beta1.ObjectiveTypeMaximize && maxMetric < *goal)) {
 		return fmt.Errorf(`Objective Goal is not reached and Succeeded Trials: %v != %v MaxTrialCount.

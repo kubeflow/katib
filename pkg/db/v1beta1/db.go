@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,15 +18,22 @@ package db
 
 import (
 	"errors"
+	"time"
 
 	"github.com/kubeflow/katib/pkg/db/v1beta1/common"
 	"github.com/kubeflow/katib/pkg/db/v1beta1/mysql"
+	"github.com/kubeflow/katib/pkg/db/v1beta1/postgres"
+	"k8s.io/klog"
 )
 
-func NewKatibDBInterface(dbName string) (common.KatibDBInterface, error) {
+func NewKatibDBInterface(dbName string, connectTimeout time.Duration) (common.KatibDBInterface, error) {
 
 	if dbName == common.MySqlDBNameEnvValue {
-		return mysql.NewDBInterface()
+		klog.Info("Using MySQL")
+		return mysql.NewDBInterface(connectTimeout)
+	} else if dbName == common.PostgresSQLDBNameEnvValue {
+		klog.Info("Using Postgres")
+		return postgres.NewDBInterface(connectTimeout)
 	}
 	return nil, errors.New("Invalid DB Name")
 }

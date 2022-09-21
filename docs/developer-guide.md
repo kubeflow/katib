@@ -12,8 +12,9 @@ see the following user guides:
 
 ## Requirements
 
-- [Go](https://golang.org/) (1.17 or later)
+- [Go](https://golang.org/) (1.18 or later)
 - [Docker](https://docs.docker.com/) (20.10 or later)
+- [Docker Buildx](https://docs.docker.com/build/buildx/) (0.8.0 or later)
 - [Java](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) (8 or later)
 - [Python](https://www.python.org/) (3.9 or later)
 - [kustomize](https://kustomize.io/) (4.0.5 or later)
@@ -57,7 +58,7 @@ make generate
 Below is a list of command-line flags accepted by Katib controller:
 
 | Name                            | Type                      | Default                       | Description                                                                                                            |
-| ------------------------------- | ------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------|---------------------------|-------------------------------|------------------------------------------------------------------------------------------------------------------------|
 | enable-grpc-probe-in-suggestion | bool                      | true                          | Enable grpc probe in suggestions                                                                                       |
 | experiment-suggestion-name      | string                    | "default"                     | The implementation of suggestion interface in experiment controller                                                    |
 | metrics-addr                    | string                    | ":8080"                       | The address the metric endpoint binds to                                                                               |
@@ -66,6 +67,14 @@ Below is a list of command-line flags accepted by Katib controller:
 | webhook-port                    | int                       | 8443                          | The port number to be used for admission webhook server                                                                |
 | enable-leader-election          | bool                      | false                         | Enable leader election for katib-controller. Enabling this will ensure there is only one active katib-controller.      |
 | leader-election-id              | string                    | "3fbc96e9.katib.kubeflow.org" | The ID for leader election.                                                                                            |
+
+## DB Manager Flags
+
+Below is a list of command-line flags accepted by Katib DB Manager:
+
+| Name            | Type          | Default | Description                                             |
+|-----------------|---------------|---------|---------------------------------------------------------|
+| connect-timeout | time.Duration | 60s     | Timeout before calling error during database connection |
 
 ## Workflow design
 

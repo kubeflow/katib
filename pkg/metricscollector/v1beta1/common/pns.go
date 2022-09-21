@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	psutil "github.com/shirou/gopsutil/process"
+	psutil "github.com/shirou/gopsutil/v3/process"
 	"k8s.io/klog"
 )
 

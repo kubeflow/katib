@@ -34,29 +34,34 @@ class V1beta1TrialAssignment(object):
     """
     openapi_types = {
         'early_stopping_rules': 'list[V1beta1EarlyStoppingRule]',
+        'labels': 'dict(str, str)',
         'name': 'str',
         'parameter_assignments': 'list[V1beta1ParameterAssignment]'
     }
 
     attribute_map = {
         'early_stopping_rules': 'earlyStoppingRules',
+        'labels': 'labels',
         'name': 'name',
         'parameter_assignments': 'parameterAssignments'
     }
 
-    def __init__(self, early_stopping_rules=None, name=None, parameter_assignments=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, early_stopping_rules=None, labels=None, name=None, parameter_assignments=None, local_vars_configuration=None):  # noqa: E501
         """V1beta1TrialAssignment - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._early_stopping_rules = None
+        self._labels = None
         self._name = None
         self._parameter_assignments = None
         self.discriminator = None
 
         if early_stopping_rules is not None:
             self.early_stopping_rules = early_stopping_rules
+        if labels is not None:
+            self.labels = labels
         if name is not None:
             self.name = name
         if parameter_assignments is not None:
@@ -84,6 +89,29 @@ class V1beta1TrialAssignment(object):
         """
 
         self._early_stopping_rules = early_stopping_rules
+
+    @property
+    def labels(self):
+        """Gets the labels of this V1beta1TrialAssignment.  # noqa: E501
+
+        Suggestion label metadata to attach to Trial job  # noqa: E501
+
+        :return: The labels of this V1beta1TrialAssignment.  # noqa: E501
+        :rtype: dict(str, str)
+        """
+        return self._labels
+
+    @labels.setter
+    def labels(self, labels):
+        """Sets the labels of this V1beta1TrialAssignment.
+
+        Suggestion label metadata to attach to Trial job  # noqa: E501
+
+        :param labels: The labels of this V1beta1TrialAssignment.  # noqa: E501
+        :type: dict(str, str)
+        """
+
+        self._labels = labels
 
     @property
     def name(self):

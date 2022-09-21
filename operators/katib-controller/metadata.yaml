@@ -6,6 +6,7 @@ description: |
   Katib is the project which is agnostic to machine learning (ML) frameworks. It can tune
   hyperparameters of applications written in any language of the users’ choice and natively
   supports many ML frameworks, such as TensorFlow, MXNet, PyTorch, XGBoost, and others.
+min-juju-version: "2.9.0"
 series: [kubernetes]
 resources:
   oci-image:
@@ -16,3 +17,7 @@ resources:
 provides:
   katib-controller:
     interface: http
+  metrics-endpoint:
+    interface: prometheus_scrape
+  grafana-dashboard:
+    interface: grafana_dashboard

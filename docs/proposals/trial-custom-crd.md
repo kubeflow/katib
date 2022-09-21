@@ -124,7 +124,7 @@ For example, for TFJob:
 ```yaml
 . . .
 PrimaryPodLabel:
-  "job-role": "master"
+  "training.kubeflow.org/job-role": "master"
 . . .
 ```
 

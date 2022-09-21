@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ func (c *FakeSuggestions) UpdateStatus(ctx context.Context, suggestion *v1beta1.
 // Delete takes name of the suggestion and deletes it. Returns an error if one occurs.
 func (c *FakeSuggestions) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(suggestionsResource, c.ns, name), &v1beta1.Suggestion{})
+		Invokes(testing.NewDeleteActionWithOptions(suggestionsResource, c.ns, name, opts), &v1beta1.Suggestion{})
 
 	return err
 }

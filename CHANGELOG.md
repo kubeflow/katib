@@ -1,5 +1,230 @@
 # Changelog
 
+## [v0.14.0](https://github.com/kubeflow/katib/tree/v0.14.0) (2022-08-18)
+
+# New Features
+
+## Core Features
+
+- Population based training ([#1833](https://github.com/kubeflow/katib/pull/1833) by [@a9p](https://github.com/a9p))
+- Support JSON format logs in `file-metrics-collector` ([#1765](https://github.com/kubeflow/katib/pull/1765) by [@tenzen-y](https://github.com/tenzen-y))
+- Include MetricsUnavailable condition to Complete in Trial ([#1877](https://github.com/kubeflow/katib/pull/1877) by [@tenzen-y](https://github.com/tenzen-y))
+- Allow running examples on Apple Silicon M1 and fix image build errors for arm64 ([#1898](https://github.com/kubeflow/katib/pull/1898) by [@tenzen-y](https://github.com/tenzen-y))
+- Configurable job name and service name for cert generator ([#1889](https://github.com/kubeflow/katib/pull/1889) by [@shaowei-su](https://github.com/shaowei-su))
+
+
+## UI Features and Enhancements
+
+- Add PBT to experiment creation form ([#1909](https://github.com/kubeflow/katib/pull/1909) by [@a9p](https://github.com/a9p))
+- Distinct page for each Trial in the UI ([#1783](https://github.com/kubeflow/katib/pull/1783) by [@d-gol](https://github.com/d-gol))
+
+
+# Bug fixes
+
+- Add the pytorch-mnist with GPU support container image ([#1917](https://github.com/kubeflow/katib/pull/1917) by [@tenzen-y](https://github.com/tenzen-y))
+- Fix push script to include new images ([#1912](https://github.com/kubeflow/katib/pull/1912) by [@johnugeorge](https://github.com/johnugeorge))
+- Fixes lint warnings in YAML files ([#1902](https://github.com/kubeflow/katib/pull/1902) by [@Rishit-dagli](https://github.com/Rishit-dagli))
+- Fix errors when running the test on Apple Silicon M1 ([#1886](https://github.com/kubeflow/katib/pull/1886) by [@tenzen-y](https://github.com/tenzen-y))
+- Reconcile trial assignments by comparing suggestion and trials being executed ([#1831](https://github.com/kubeflow/katib/pull/1831) by [@henrysecond1](https://github.com/henrysecond1))
+- Increate the probes seconds in manifests ([#1845](https://github.com/kubeflow/katib/pull/1845) by [@haoxins](https://github.com/haoxins))
+- Set upper constraint for Optuna ([#1852](https://github.com/kubeflow/katib/pull/1852) by [@himkt](https://github.com/himkt))
+- Don't check if trial's metadata is in spec.parameters  ([#1848](https://github.com/kubeflow/katib/pull/1848) by [@alexeygorobets](https://github.com/alexeygorobets))
+
+# Documentation
+
+- Fix the FPGA examples documentation ([#1841](https://github.com/kubeflow/katib/pull/1841) by [@eliaskoromilas](https://github.com/eliaskoromilas))
+- Add CyberAgent to adopters ([#1894](https://github.com/kubeflow/katib/pull/1894) by [@tenzen-y](https://github.com/tenzen-y))
+
+# Misc
+
+- Updating the training operator image in CI ([#1910](https://github.com/kubeflow/katib/pull/1910) by [@johnugeorge](https://github.com/johnugeorge))
+- Upgrade Python and Pytorch versions for some examples ([#1906](https://github.com/kubeflow/katib/pull/1906) by [@tenzen-y](https://github.com/tenzen-y))
+- Linting for K8s YAML files ([#1901](https://github.com/kubeflow/katib/pull/1901) by [@Rishit-dagli](https://github.com/Rishit-dagli))
+- Change integration test sysytem from KinD Cluster to Minikube Cluster  ([#1899](https://github.com/kubeflow/katib/pull/1899) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade mysql version to v8.0.29 ([#1897](https://github.com/kubeflow/katib/pull/1897) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade tensorflow-aarch64 version to v2.9.1 ([#1891](https://github.com/kubeflow/katib/pull/1891) by [@tenzen-y](https://github.com/tenzen-y))
+- chore: Upgrade Go libraries to resolve some security issues in the katib-controller ([#1888](https://github.com/kubeflow/katib/pull/1888) by [@tenzen-y](https://github.com/tenzen-y))
+- Migrate kubeflow-katib-presubmit to GitHub Actions ([#1882](https://github.com/kubeflow/katib/pull/1882) by [@tenzen-y](https://github.com/tenzen-y))
+- Add semicolon when using `command` command in Makefile ([#1885](https://github.com/kubeflow/katib/pull/1885) by [@tenzen-y](https://github.com/tenzen-y))
+- Fix `HAS_SHELLCHECK` and `HAS_SETUP_ENVTEST` in Makefile ([#1884](https://github.com/kubeflow/katib/pull/1884) by [@tenzen-y](https://github.com/tenzen-y))
+- Remove presubmit tests depending on optional-test-infra ([#1871](https://github.com/kubeflow/katib/pull/1871) by [@aws-kf-ci-bot](https://github.com/aws-kf-ci-bot))
+- Upgrade the Tensorflow version to address some security issues ([#1870](https://github.com/kubeflow/katib/pull/1870) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade the grpc_health_probe version to v0.4.11 to resolve security vulnerability CVE-2022-27191 ([#1875](https://github.com/kubeflow/katib/pull/1875) by [@tenzen-y](https://github.com/tenzen-y))
+- additional metric names should not include objective metric name ([#1874](https://github.com/kubeflow/katib/pull/1874) by [@henrysecond1](https://github.com/henrysecond1))
+- Upgrade the Kubernetes Python client to 22.6.0 ([#1869](https://github.com/kubeflow/katib/pull/1869) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade the kubebuilder to v3.2.0 and Kubernetes Go libraries to v1.22.2 ([#1861](https://github.com/kubeflow/katib/pull/1861) by [@tenzen-y](https://github.com/tenzen-y))
+- Update FPGA XGBoost example ([#1865](https://github.com/kubeflow/katib/pull/1865) by [@eliaskoromilas](https://github.com/eliaskoromilas))
+- Fix kubeflowkatib/mxnet-mnist image ([#1866](https://github.com/kubeflow/katib/pull/1866) by [@tenzen-y](https://github.com/tenzen-y))
+- pins pip and setuptools versions operators to avoid installation issues ([#1867](https://github.com/kubeflow/katib/pull/1867) by [@DnPlas](https://github.com/DnPlas))
+- Add shellcheck ([#1857](https://github.com/kubeflow/katib/pull/1857) by [@tenzen-y](https://github.com/tenzen-y))
+- Bump kubeflow-katib and kfp version in notebook examples ([#1849](https://github.com/kubeflow/katib/pull/1849) by [@tenzen-y](https://github.com/tenzen-y))
+- Add prometheus scraping and grafana support to charmed katib-controller operator ([#1839](https://github.com/kubeflow/katib/pull/1839) by [@jardon](https://github.com/jardon))
+- Upgrade Black to fix linting ([#1842](https://github.com/kubeflow/katib/pull/1842) by [@jardon](https://github.com/jardon))
+
+
+# Change Log
+
+Check the [Full Change Log](https://github.com/kubeflow/katib/compare/v0.13.0...v0.14.0).
+
+## [v0.13.0](https://github.com/kubeflow/katib/tree/v0.13.0) (2022-03-04)
+
+## New Features
+
+### Algorithms and Components
+
+- Implement validation for Early Stopping ([#1709](https://github.com/kubeflow/katib/pull/1709) by [@tenzen-y](https://github.com/tenzen-y))
+- Change namespace label for Metrics Collector injection ([#1740](https://github.com/kubeflow/katib/pull/1740) by [@andreyvelich](https://github.com/andreyvelich))
+- Modify gRPC API with Current Request Number ([#1728](https://github.com/kubeflow/katib/pull/1728) by [@andreyvelich](https://github.com/andreyvelich))
+- Allow to remove each resource in Katib config ([#1729](https://github.com/kubeflow/katib/pull/1729) by [@andreyvelich](https://github.com/andreyvelich))
+- Support leader election for Katib Controller ([#1713](https://github.com/kubeflow/katib/pull/1713) by [@tenzen-y](https://github.com/tenzen-y))
+- Change default Metrics Collect format ([#1707](https://github.com/kubeflow/katib/pull/1707) by [@anencore94](https://github.com/anencore94))
+- Bump Python version to 3.9 ([#1731](https://github.com/kubeflow/katib/pull/1731) by [@tenzen-y](https://github.com/tenzen-y))
+- Update Go version to 1.17 ([#1683](https://github.com/kubeflow/katib/pull/1683) by [@andreyvelich](https://github.com/andreyvelich))
+- Create Python script to run e2e Argo Workflow ([#1674](https://github.com/kubeflow/katib/pull/1674) by [@andreyvelich](https://github.com/andreyvelich))
+- Reimplement Katib Cert Generator in Go ([#1662](https://github.com/kubeflow/katib/pull/1662) by [@tenzen-y](https://github.com/tenzen-y))
+- SDK: change list apis to return objects as default ([#1630](https://github.com/kubeflow/katib/pull/1630) by [@anencore94](https://github.com/anencore94))
+
+### UI Features
+
+- Enhance Katib UI feasible space ([#1721](https://github.com/kubeflow/katib/pull/1721) by [@seong7](https://github.com/seong7))
+- Handle missing TrialTemplates in Katib UI ([#1652](https://github.com/kubeflow/katib/pull/1652) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Add Prettier devDependency in Katib UI ([#1629](https://github.com/kubeflow/katib/pull/1629) by [@seong7](https://github.com/seong7))
+
+## Documentation
+
+- Fix a link for GRPC API documentation ([#1786](https://github.com/kubeflow/katib/pull/1786) by [@tenzen-y](https://github.com/tenzen-y))
+- Add my presentations that include Katib ([#1753](https://github.com/kubeflow/katib/pull/1753) by [@terrytangyuan](https://github.com/terrytangyuan))
+- Add Akuity to list of adopters ([#1749](https://github.com/kubeflow/katib/pull/1749) by [@terrytangyuan](https://github.com/terrytangyuan))
+- Change Argo -> Argo Workflows ([#1741](https://github.com/kubeflow/katib/pull/1741) by [@terrytangyuan](https://github.com/terrytangyuan))
+- Update Algorithm Service Doc for the new CI script ([#1724](https://github.com/kubeflow/katib/pull/1724) by [@andreyvelich](https://github.com/andreyvelich))
+- Update link to Training Operator ([#1699](https://github.com/kubeflow/katib/pull/1699) by [@terrytangyuan](https://github.com/terrytangyuan))
+- Refactor examples folder structure ([#1691](https://github.com/kubeflow/katib/pull/1691) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix README in examples directory ([#1687](https://github.com/kubeflow/katib/pull/1687) by [@tenzen-y](https://github.com/tenzen-y))
+- Add Kubeflow MXJob example ([#1688](https://github.com/kubeflow/katib/pull/1688) by [@andreyvelich](https://github.com/andreyvelich))
+- Update FPGA examples ([#1685](https://github.com/kubeflow/katib/pull/1685) by [@eliaskoromilas](https://github.com/eliaskoromilas))
+- Refactor README ([#1667](https://github.com/kubeflow/katib/pull/1667) by [@andreyvelich](https://github.com/andreyvelich))
+- Change the minimal Kustomize version in the developer guide ([#1675](https://github.com/kubeflow/katib/pull/1675) by [@tenzen-y](https://github.com/tenzen-y))
+- Add Katib release process guide ([#1641](https://github.com/kubeflow/katib/pull/1641) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Bug Fixes
+
+- Remove unrecognized keys from metadata.yaml in Charmed operators ([#1759](https://github.com/kubeflow/katib/pull/1759) by [@DnPlas](https://github.com/DnPlas))
+- Fix the default Metrics Collector regex ([#1755](https://github.com/kubeflow/katib/pull/1755) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix Status Handling in Charmed Operators ([#1743](https://github.com/kubeflow/katib/pull/1743) by [@DomFleischmann](https://github.com/DomFleischmann))
+- Fix bug on list type HP in Katib UI ([#1704](https://github.com/kubeflow/katib/pull/1704) by [@seong7](https://github.com/seong7))
+- Fix Range for Int and Double values in Grid search ([#1732](https://github.com/kubeflow/katib/pull/1732) by [@andreyvelich](https://github.com/andreyvelich))
+- Check if parameter references exist in Experiment parameters ([#1726](https://github.com/kubeflow/katib/pull/1726) by [@henrysecond1](https://github.com/henrysecond1))
+- Fix same set for HyperParameters in Bayesian Optimization algorithm ([#1701](https://github.com/kubeflow/katib/pull/1701) by [@fabianvdW](https://github.com/fabianvdW))
+- Close MySQL statement and rows resources when SQL exec ends ([#1720](https://github.com/kubeflow/katib/pull/1720) by [@chenwenjun-github](https://github.com/chenwenjun-github))
+- Fix Cluster Role of Katib Controller to access image pull secrets ([#1725](https://github.com/kubeflow/katib/pull/1725) by [@henrysecond1](https://github.com/henrysecond1))
+- Emit events when fails to reconcile all Trials ([#1706](https://github.com/kubeflow/katib/pull/1706) by [@henrysecond1](https://github.com/henrysecond1))
+- Missing metrics port annotation ([#1715](https://github.com/kubeflow/katib/pull/1715) by [@alexeykaplin](https://github.com/alexeykaplin))
+- Fix absolute value in Katib UI ([#1676](https://github.com/kubeflow/katib/pull/1676) by [@anencore94](https://github.com/anencore94))
+- Add missing omitempty parameter to APIs ([#1645](https://github.com/kubeflow/katib/pull/1645) by [@andreyvelich](https://github.com/andreyvelich))
+- Reconcile semantics for Suggestion Algorithms ([#1633](https://github.com/kubeflow/katib/pull/1633) by [@johnugeorge](https://github.com/johnugeorge))
+- Fix default label for Training Operators ([#1813](https://github.com/kubeflow/katib/pull/1813) by [@andreyvelich](https://github.com/andreyvelich))
+- Update supported Python version for Katib SDK ([#1798](https://github.com/kubeflow/katib/pull/1798) by [@tenzen-y](https://github.com/tenzen-y))
+
+
+## Misc
+
+- Use release tags for Trial images ([#1757](https://github.com/kubeflow/katib/pull/1757) by [@andreyvelich](https://github.com/andreyvelich))
+- Upgrade cert-manager API from v1alpha2 to v1 ([#1752](https://github.com/kubeflow/katib/pull/1752) by [@haoxins](https://github.com/haoxins))
+- Add Workflow to Publish Katib Images ([#1746](https://github.com/kubeflow/katib/pull/1746) by [@andreyvelich](https://github.com/andreyvelich))
+- Update Charmed Katib Operators + CI to 0.12 ([#1717](https://github.com/kubeflow/katib/pull/1717) by [@knkski](https://github.com/knkski))
+- Updating Katib CI to use Training Operator ([#1710](https://github.com/kubeflow/katib/pull/1710) by [@midhun1998](https://github.com/midhun1998))
+- Update OWNERS for Charmed operators ([#1718](https://github.com/kubeflow/katib/pull/1718) by [@ca-scribner](https://github.com/ca-scribner))
+- Implement some unit tests for the Katib Config package ([#1690](https://github.com/kubeflow/katib/pull/1690) by [@tenzen-y](https://github.com/tenzen-y))
+- Add GitHub Actions for Python unit tests ([#1677](https://github.com/kubeflow/katib/pull/1677) by [@andreyvelich](https://github.com/andreyvelich))
+- Add OWNERS file for the Katib new UI ([#1681](https://github.com/kubeflow/katib/pull/1681) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Add envtest to check `reconcileRBAC` ([#1678](https://github.com/kubeflow/katib/pull/1678) by [@tenzen-y](https://github.com/tenzen-y))
+- Use golangci-lint as linter for Go ([#1671](https://github.com/kubeflow/katib/pull/1671) by [@tenzen-y](https://github.com/tenzen-y))
+
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.12.0...v0.13.0)
+
+## [v0.13.0-rc.1](https://github.com/kubeflow/katib/tree/v0.13.0-rc.1) (2022-02-15)
+
+## Bug fixes
+
+- Fix default label for Training Operators ([#1813](https://github.com/kubeflow/katib/pull/1813) by [@andreyvelich](https://github.com/andreyvelich))
+- Update supported Python version for Katib SDK ([#1798](https://github.com/kubeflow/katib/pull/1798) by [@tenzen-y](https://github.com/tenzen-y))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.13.0-rc.0...v0.13.0-rc.1)
+
+## [v0.13.0-rc.0](https://github.com/kubeflow/katib/tree/v0.13.0-rc.0) (2022-01-25)
+
+## New Features
+
+### Algorithms and Components
+
+- Implement validation for Early Stopping ([#1709](https://github.com/kubeflow/katib/pull/1709) by [@tenzen-y](https://github.com/tenzen-y))
+- Change namespace label for Metrics Collector injection ([#1740](https://github.com/kubeflow/katib/pull/1740) by [@andreyvelich](https://github.com/andreyvelich))
+- Modify gRPC API with Current Request Number ([#1728](https://github.com/kubeflow/katib/pull/1728) by [@andreyvelich](https://github.com/andreyvelich))
+- Allow to remove each resource in Katib config ([#1729](https://github.com/kubeflow/katib/pull/1729) by [@andreyvelich](https://github.com/andreyvelich))
+- Support leader election for Katib Controller ([#1713](https://github.com/kubeflow/katib/pull/1713) by [@tenzen-y](https://github.com/tenzen-y))
+- Change default Metrics Collect format ([#1707](https://github.com/kubeflow/katib/pull/1707) by [@anencore94](https://github.com/anencore94))
+- Bump Python version to 3.9 ([#1731](https://github.com/kubeflow/katib/pull/1731) by [@tenzen-y](https://github.com/tenzen-y))
+- Update Go version to 1.17 ([#1683](https://github.com/kubeflow/katib/pull/1683) by [@andreyvelich](https://github.com/andreyvelich))
+- Create Python script to run e2e Argo Workflow ([#1674](https://github.com/kubeflow/katib/pull/1674) by [@andreyvelich](https://github.com/andreyvelich))
+- Reimplement Katib Cert Generator in Go ([#1662](https://github.com/kubeflow/katib/pull/1662) by [@tenzen-y](https://github.com/tenzen-y))
+- SDK: change list apis to return objects as default ([#1630](https://github.com/kubeflow/katib/pull/1630) by [@anencore94](https://github.com/anencore94))
+
+### UI Features
+
+- Enhance Katib UI feasible space ([#1721](https://github.com/kubeflow/katib/pull/1721) by [@seong7](https://github.com/seong7))
+- Handle missing TrialTemplates in Katib UI ([#1652](https://github.com/kubeflow/katib/pull/1652) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Add Prettier devDependency in Katib UI ([#1629](https://github.com/kubeflow/katib/pull/1629) by [@seong7](https://github.com/seong7))
+
+## Documentation
+
+- Fix a link for GRPC API documentation ([#1786](https://github.com/kubeflow/katib/pull/1786) by [@tenzen-y](https://github.com/tenzen-y))
+- Add my presentations that include Katib ([#1753](https://github.com/kubeflow/katib/pull/1753) by [@terrytangyuan](https://github.com/terrytangyuan))
+- Add Akuity to list of adopters ([#1749](https://github.com/kubeflow/katib/pull/1749) by [@terrytangyuan](https://github.com/terrytangyuan))
+- Change Argo -> Argo Workflows ([#1741](https://github.com/kubeflow/katib/pull/1741) by [@terrytangyuan](https://github.com/terrytangyuan))
+- Update Algorithm Service Doc for the new CI script ([#1724](https://github.com/kubeflow/katib/pull/1724) by [@andreyvelich](https://github.com/andreyvelich))
+- Update link to Training Operator ([#1699](https://github.com/kubeflow/katib/pull/1699) by [@terrytangyuan](https://github.com/terrytangyuan))
+- Refactor examples folder structure ([#1691](https://github.com/kubeflow/katib/pull/1691) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix README in examples directory ([#1687](https://github.com/kubeflow/katib/pull/1687) by [@tenzen-y](https://github.com/tenzen-y))
+- Add Kubeflow MXJob example ([#1688](https://github.com/kubeflow/katib/pull/1688) by [@andreyvelich](https://github.com/andreyvelich))
+- Update FPGA examples ([#1685](https://github.com/kubeflow/katib/pull/1685) by [@eliaskoromilas](https://github.com/eliaskoromilas))
+- Refactor README ([#1667](https://github.com/kubeflow/katib/pull/1667) by [@andreyvelich](https://github.com/andreyvelich))
+- Change the minimal Kustomize version in the developer guide ([#1675](https://github.com/kubeflow/katib/pull/1675) by [@tenzen-y](https://github.com/tenzen-y))
+- Add Katib release process guide ([#1641](https://github.com/kubeflow/katib/pull/1641) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Bug Fixes
+
+- Remove unrecognized keys from metadata.yaml in Charmed operators ([#1759](https://github.com/kubeflow/katib/pull/1759) by [@DnPlas](https://github.com/DnPlas))
+- Fix the default Metrics Collector regex ([#1755](https://github.com/kubeflow/katib/pull/1755) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix Status Handling in Charmed Operators ([#1743](https://github.com/kubeflow/katib/pull/1743) by [@DomFleischmann](https://github.com/DomFleischmann))
+- Fix bug on list type HP in Katib UI ([#1704](https://github.com/kubeflow/katib/pull/1704) by [@seong7](https://github.com/seong7))
+- Fix Range for Int and Double values in Grid search ([#1732](https://github.com/kubeflow/katib/pull/1732) by [@andreyvelich](https://github.com/andreyvelich))
+- Check if parameter references exist in Experiment parameters ([#1726](https://github.com/kubeflow/katib/pull/1726) by [@henrysecond1](https://github.com/henrysecond1))
+- Fix same set for HyperParameters in Bayesian Optimization algorithm ([#1701](https://github.com/kubeflow/katib/pull/1701) by [@fabianvdW](https://github.com/fabianvdW))
+- Close MySQL statement and rows resources when SQL exec ends ([#1720](https://github.com/kubeflow/katib/pull/1720) by [@chenwenjun-github](https://github.com/chenwenjun-github))
+- Fix Cluster Role of Katib Controller to access image pull secrets ([#1725](https://github.com/kubeflow/katib/pull/1725) by [@henrysecond1](https://github.com/henrysecond1))
+- Emit events when fails to reconcile all Trials ([#1706](https://github.com/kubeflow/katib/pull/1706) by [@henrysecond1](https://github.com/henrysecond1))
+- Missing metrics port annotation ([#1715](https://github.com/kubeflow/katib/pull/1715) by [@alexeykaplin](https://github.com/alexeykaplin))
+- Fix absolute value in Katib UI ([#1676](https://github.com/kubeflow/katib/pull/1676) by [@anencore94](https://github.com/anencore94))
+- Add missing omitempty parameter to APIs ([#1645](https://github.com/kubeflow/katib/pull/1645) by [@andreyvelich](https://github.com/andreyvelich))
+- Reconcile semantics for Suggestion Algorithms ([#1633](https://github.com/kubeflow/katib/pull/1633) by [@johnugeorge](https://github.com/johnugeorge))
+
+## Misc
+
+- Use release tags for Trial images ([#1757](https://github.com/kubeflow/katib/pull/1757) by [@andreyvelich](https://github.com/andreyvelich))
+- Upgrade cert-manager API from v1alpha2 to v1 ([#1752](https://github.com/kubeflow/katib/pull/1752) by [@haoxins](https://github.com/haoxins))
+- Add Workflow to Publish Katib Images ([#1746](https://github.com/kubeflow/katib/pull/1746) by [@andreyvelich](https://github.com/andreyvelich))
+- Update Charmed Katib Operators + CI to 0.12 ([#1717](https://github.com/kubeflow/katib/pull/1717) by [@knkski](https://github.com/knkski))
+- Updating Katib CI to use Training Operator ([#1710](https://github.com/kubeflow/katib/pull/1710) by [@midhun1998](https://github.com/midhun1998))
+- Update OWNERS for Charmed operators ([#1718](https://github.com/kubeflow/katib/pull/1718) by [@ca-scribner](https://github.com/ca-scribner))
+- Implement some unit tests for the Katib Config package ([#1690](https://github.com/kubeflow/katib/pull/1690) by [@tenzen-y](https://github.com/tenzen-y))
+- Add GitHub Actions for Python unit tests ([#1677](https://github.com/kubeflow/katib/pull/1677) by [@andreyvelich](https://github.com/andreyvelich))
+- Add OWNERS file for the Katib new UI ([#1681](https://github.com/kubeflow/katib/pull/1681) by [@kimwnasptd](https://github.com/kimwnasptd))
+- Add envtest to check `reconcileRBAC` ([#1678](https://github.com/kubeflow/katib/pull/1678) by [@tenzen-y](https://github.com/tenzen-y))
+- Use golangci-lint as linter for Go ([#1671](https://github.com/kubeflow/katib/pull/1671) by [@tenzen-y](https://github.com/tenzen-y))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.12.0...v0.13.0-rc.0)
+
 ## [v0.12.0](https://github.com/kubeflow/katib/tree/v0.12.0) (2021-10-05)
 
 ## New Features

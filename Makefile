@@ -1,7 +1,12 @@
 HAS_LINT := $(shell command -v golangci-lint;)
+HAS_YAMLLINT := $(shell command -v yamllint;)
+HAS_SHELLCHECK := $(shell command -v shellcheck;)
+HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
+
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= amd64
+ENVTEST_K8S_VERSION ?= 1.24
 
 # for pytest
 PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
@@ -10,8 +15,15 @@ TEST_TENSORFLOW_EVENT_FILE_PATH ?= $(CURDIR)/test/unit/v1beta1/metricscollector/
 
 # Run tests
 .PHONY: test
-test:
-	go test ./pkg/... ./cmd/... -coverprofile coverage.out
+test: envtest
+	KUBEBUILDER_ASSETS="$(shell setup-envtest --arch=amd64 use $(ENVTEST_K8S_VERSION) -p path)" go test ./pkg/... ./cmd/... -coverprofile coverage.out
+
+envtest:
+ifndef HAS_SETUP_ENVTEST
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@c7a98aa706379c4e5c79ea675c7f333192677971 # v0.12.3
+	@echo "setup-envtest has been installed"
+endif
+	@echo "setup-envtest has already installed"
 
 check: generate fmt vet lint
 
@@ -20,20 +32,34 @@ fmt:
 
 lint:
 ifndef HAS_LINT
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.1
-	echo "golangci-lint has been installed"
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.48.0
+	@echo "golangci-lint has been installed"
 endif
 	hack/verify-golangci-lint.sh
 
+yamllint:
+ifndef HAS_YAMLLINT
+	pip install yamllint
+	@echo "yamllint has been installed"
+endif
+	hack/verify-yamllint.sh
+
 vet:
 	go vet ./pkg/... ./cmd/...
+
+shellcheck:
+ifndef HAS_SHELLCHECK
+	bash hack/install-shellcheck.sh
+	@echo "shellcheck has been installed"
+endif
+	hack/verify-shellcheck.sh
 
 update:
 	hack/update-gofmt.sh
 
 # Deploy Katib v1beta1 manifests using Kustomize into a k8s cluster.
 deploy:
-	bash scripts/v1beta1/deploy.sh
+	bash scripts/v1beta1/deploy.sh $(WITH_DATABASE_TYPE)
 
 # Undeploy Katib v1beta1 manifests using Kustomize from a k8s cluster
 undeploy:
@@ -50,8 +76,8 @@ ifndef GOPATH
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
-	cd ./pkg/apis/manager/v1beta1 && ./build.sh
-	cd ./pkg/apis/manager/health && ./build.sh
+	pkg/apis/manager/v1beta1/build.sh
+	pkg/apis/manager/health/build.sh
 
 # Build images for the Katib v1beta1 components.
 build: generate
@@ -62,8 +88,8 @@ endif
 
 # Build and push Katib images from the latest master commit.
 push-latest: generate
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) latest
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) latest $(CPU_ARCH)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT) $(CPU_ARCH)
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) latest
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
 
@@ -72,8 +98,8 @@ push-tag: generate
 ifeq ($(TAG),)
 	$(error TAG must be set. Usage: make push-tag TAG=<release-tag>)
 endif
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(TAG)
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(TAG) $(CPU_ARCH)
+	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT) $(CPU_ARCH)
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(TAG)
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
 
@@ -110,6 +136,7 @@ prepare-pytest:
 	pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
 	pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
 	pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
+	pip install -r cmd/suggestion/pbt/v1beta1/requirements.txt
 	pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
 	pip install -r cmd/metricscollector/v1beta1/tfevent-metricscollector/requirements.txt
 

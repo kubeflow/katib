@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Kubeflow Authors.
+Copyright 2022 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ const (
 	// Score=1E0
 	// Score=1.23E10
 	DefaultFilter = `([\w|-]+)\s*=\s*([+-]?\d*(\.\d+)?([Ee][+-]?\d+)?)`
+
+	TimeStampJsonKey = "timestamp"
 
 	// TODO (andreyvelich): Do we need to maintain 2 names? Should we leave only 1?
 	MetricCollectorContainerName       = "metrics-collector"

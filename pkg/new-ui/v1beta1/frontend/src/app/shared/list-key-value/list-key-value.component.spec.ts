@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ListKeyValueComponent } from './list-key-value.component';
 
@@ -6,11 +6,13 @@ describe('ListKeyValueComponent', () => {
   let component: ListKeyValueComponent;
   let fixture: ComponentFixture<ListKeyValueComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ListKeyValueComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ListKeyValueComponent],
+      }).compileComponents();
+    }),
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ListKeyValueComponent);
