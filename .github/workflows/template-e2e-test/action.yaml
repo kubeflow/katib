@@ -1,23 +1,25 @@
-# Template for e2e tests.
+# Composite action for e2e tests.
+name: Run E2E Test
+description: Run e2e test using the minikube cluster
 
 inputs:
   experiments:
     required: true
-    type: string
+    description: comma delimited experiment name
   training-operator:
     required: false
-    type: boolean
-    default: false
+    description: whether to deploy training-operator or not
+    default: "false"
   trial-images:
     required: true
-    type: string
+    description: comma delimited trial image name
   katib-ui:
     required: true
-    type: boolean
-    default: false
+    description:  whether to deploy katib-ui or not
+    default: "false"
   database-type:
     required: false
-    type: string
+    description: mysql or postgres
     default: mysql
 
 runs:
