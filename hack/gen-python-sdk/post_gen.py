@@ -42,11 +42,11 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
         lines.append("# Import Katib API client.\n")
         lines.append("from kubeflow.katib.api.katib_client import KatibClient\n")
         lines.append("# Import Katib helper functions.\n")
-        lines.append("from kubeflow.katib.api.katib_client import double\n")
-        lines.append("from kubeflow.katib.api.katib_client import int\n")
-        lines.append("from kubeflow.katib.api.katib_client import categorical\n")
+        lines.append("import kubeflow.katib.api.search as search\n")
         lines.append("# Import Katib helper constants.\n")
         lines.append("from kubeflow.katib.constants.constants import BASE_IMAGE_TENSORFLOW\n")
+        lines.append("from kubeflow.katib.constants.constants import BASE_IMAGE_TENSORFLOW_GPU\n")
+        lines.append("from kubeflow.katib.constants.constants import BASE_IMAGE_PYTORCH\n")
         lines.append("from kubeflow.katib.constants.constants import BASE_IMAGE_MXNET\n")
 
     # Add Kubernetes models to proper deserialization of Katib models.

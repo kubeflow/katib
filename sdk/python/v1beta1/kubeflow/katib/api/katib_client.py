@@ -138,10 +138,12 @@ class KatibClient(object):
             objective: Objective function that Katib uses to train the model.
                 This function must be Callable and it must have only one dict argument.
                 Katib uses this argument to send HyperParameters to the function.
+                The function should not use any code declared outside of the function
+                definition. Import statements must be added inside the function.
             parameters: Dict of HyperParameters to tune your Experiment. You
                 should use Katib SDK to define the search space for these parameters.
 
-                For example: `parameters = {"lr": katib.double(min=0.1, max=0.2)}`
+                For example: `parameters = {"lr": katib.search.double(min=0.1, max=0.2)}`
 
                 Also, you can use these parameters to define input for your
                 objective function.
@@ -154,7 +156,8 @@ class KatibClient(object):
             objective_type: Type for the Experiment optimization for the objective metric.
                 Must be one of `minimize` or `maximize`.
             objective_goal: Objective goal that Experiment should reach to be Succeeded.
-            max_trial_count: Maximum number of Trials to run.
+            max_trial_count: Maximum number of Trials to run. For the default
+                values check this doc: https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
             parallel_trial_count: Number of Trials that Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
             retain_trials: Whether Trials' resources (e.g. pods) are deleted after Succeeded state.
@@ -692,51 +695,3 @@ class KatibClient(object):
         )
 
         return result
-
-
-def double(min: float, max: float, step: float = None):
-    """Sample a float value uniformly between `min` and `max`.
-
-    Args:
-        min: Lower boundary for the float value.
-        max: Upper boundary for the float value.
-        step: Step between float values.
-    """
-
-    parameter = models.V1beta1ParameterSpec(
-        parameter_type="double",
-        feasible_space=models.V1beta1FeasibleSpace(min=str(min), max=str(max)),
-    )
-    if step is not None:
-        parameter.feasible_space.step = str(step)
-    return parameter
-
-
-def int(min: int, max: int, step: int = None):
-    """Sample an integer value uniformly between `min` and `max`.
-
-    Args:
-        min: Lower boundary for the integer value.
-        max: Upper boundary for the integer value.
-        step: Step between integer values.
-    """
-
-    parameter = models.V1beta1ParameterSpec(
-        parameter_type="int",
-        feasible_space=models.V1beta1FeasibleSpace(min=str(min), max=str(max)),
-    )
-    if step is not None:
-        parameter.feasible_space.step = str(step)
-    return parameter
-
-
-def categorical(list: List):
-    """Sample a categorical value from the `list`.
-
-    Args:
-        list: List of categorical values.
-    """
-
-    return models.V1beta1ParameterSpec(
-        parameter_type="categorical", feasible_space=models.V1beta1FeasibleSpace(list),
-    )

@@ -211,8 +211,8 @@ def objective(parameters):
 
 # Step 2. Create HyperParameter search space.
 parameters = {
-    "a": katib.int(min=10, max=20),
-    "b": katib.double(min=0.1, max=0.2)
+    "a": katib.search.int(min=10, max=20),
+    "b": katib.search.double(min=0.1, max=0.2)
 }
 
 # Step 3. Create Katib Experiment.

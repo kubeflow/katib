@@ -69,12 +69,12 @@ from kubeflow.katib.models.v1beta1_trial_spec import V1beta1TrialSpec
 from kubeflow.katib.models.v1beta1_trial_status import V1beta1TrialStatus
 from kubeflow.katib.models.v1beta1_trial_template import V1beta1TrialTemplate
 
-# Import Katib API client and helper functions.
+# Import Katib API client.
 from kubeflow.katib.api.katib_client import KatibClient
-# Import Katib helper functions for the user.
-from kubeflow.katib.api.katib_client import double
-from kubeflow.katib.api.katib_client import int
-from kubeflow.katib.api.katib_client import categorical
-# Import Katib helper constants for the user.
+# Import Katib helper functions.
+import kubeflow.katib.api.search as search
+# Import Katib helper constants.
 from kubeflow.katib.constants.constants import BASE_IMAGE_TENSORFLOW
+from kubeflow.katib.constants.constants import BASE_IMAGE_TENSORFLOW_GPU
+from kubeflow.katib.constants.constants import BASE_IMAGE_PYTORCH
 from kubeflow.katib.constants.constants import BASE_IMAGE_MXNET
