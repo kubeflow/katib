@@ -36,6 +36,8 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	experimentName := r.URL.Query()["experimentName"][0]
 	namespace := r.URL.Query()["namespace"][0]
 
+	log.Printf("Start FetchHPJobInfo for Experiment: %v in namespace: %v", experimentName, namespace)
+
 	conn, c := k.connectManager()
 	defer conn.Close()
 
@@ -46,7 +48,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Got Experiment")
+	log.Printf("Got Experiment %v", experimentName)
 	metricsList := map[string]int{}
 	metricsName := experiment.Spec.Objective.ObjectiveMetricName
 	resultText += "," + metricsName
@@ -69,7 +71,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Got Trial List")
+	log.Printf("Got Trial List - Count: %v", len(trialList.Items))
 
 	// append a column for the Pipeline UID associated with the Trial
 	if havePipelineUID(trialList.Items) {
