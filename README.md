@@ -233,7 +233,7 @@ print(katib_client.get_optimal_hyperparameters(name))
 # Documentation
 
 - Check
-  [the Katib getting started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-algorithm).
+  [the Katib getting started guide](https://www.kubeflow.org/docs/components/katib/hyperparameter/#example-using-random-search-algorithm).
 
 - Learn about Katib **Concepts** in this
   [guide](https://www.kubeflow.org/docs/components/katib/overview/#katib-concepts).
