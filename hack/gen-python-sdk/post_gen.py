@@ -37,10 +37,17 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
             if not any(l in line for l in IGNORE_LINES):
                 lines.append(line)
 
-    # Add Katib client to init file.
+    # Add Katib APIs to the init file.
     if (output_file == "sdk/python/v1beta1/kubeflow/katib/__init__.py"):
         lines.append("# Import Katib API client.\n")
         lines.append("from kubeflow.katib.api.katib_client import KatibClient\n")
+        lines.append("# Import Katib helper functions.\n")
+        lines.append("import kubeflow.katib.api.search as search\n")
+        lines.append("# Import Katib helper constants.\n")
+        lines.append("from kubeflow.katib.constants.constants import BASE_IMAGE_TENSORFLOW\n")
+        lines.append("from kubeflow.katib.constants.constants import BASE_IMAGE_TENSORFLOW_GPU\n")
+        lines.append("from kubeflow.katib.constants.constants import BASE_IMAGE_PYTORCH\n")
+        lines.append("from kubeflow.katib.constants.constants import BASE_IMAGE_MXNET\n")
 
     # Add Kubernetes models to proper deserialization of Katib models.
     if (output_file == "sdk/python/v1beta1/kubeflow/katib/models/__init__.py"):
