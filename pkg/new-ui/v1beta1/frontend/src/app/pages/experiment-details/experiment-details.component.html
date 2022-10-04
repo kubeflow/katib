@@ -66,6 +66,13 @@
           [experimentJson]="experimentDetails"
         ></app-experiment-yaml>
       </mat-tab>
+      <mat-tab label="PBT">
+        <app-experiment-pbt-tab
+          [experiment]="experimentDetails"
+          [labelCsv]="labelCsv"
+          [experimentTrialsCsv]="experimentTrialsCsv"
+        ></app-experiment-pbt-tab>
+      </mat-tab>
     </mat-tab-group>
   </div>
 </ng-template>

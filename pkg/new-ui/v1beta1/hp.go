@@ -247,3 +247,63 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 		return
 	}
 }
+
+func (k *KatibUIHandler) FetchHPJobLabelInfo(w http.ResponseWriter, r *http.Request) {
+	//enableCors(&w)
+	experimentName := r.URL.Query()["experimentName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+
+	trialList, err := k.katibClient.GetTrialList(experimentName, namespace)
+	if err != nil {
+		log.Printf("GetTrialList from HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("Got Trial List")
+
+	labelList := map[string]int{}
+	labelList["trialName"] = 0
+	var trialRes [][]string
+	for _, t := range trialList.Items {
+		trialResText := make([]string, len(labelList))
+		trialResText[labelList["trialName"]] = t.Name
+		for k, v := range t.ObjectMeta.Labels {
+			i, exists := labelList[k]
+			if !exists {
+				i = len(labelList)
+				labelList[k] = i
+				trialResText = append(trialResText, "")
+			}
+			trialResText[i] = v
+		}
+		trialRes = append(trialRes, trialResText)
+	}
+
+	// Format header output
+	headerArr := make([]string, len(labelList))
+	for k, v := range labelList {
+		headerArr[v] = k
+	}
+	resultText := strings.Join(headerArr, ",")
+
+	// Format entry output
+	for _, row := range trialRes {
+		resultText += "\n" + strings.Join(row, ",")
+		for j := 0; j < len(labelList)-len(row); j++ {
+			resultText += ","
+		}
+	}
+
+	log.Printf("Logs parsed, results:\n %v", resultText)
+	response, err := json.Marshal(resultText)
+	if err != nil {
+		log.Printf("Marshal result text for HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write result text for HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}

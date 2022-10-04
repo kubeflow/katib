@@ -16,6 +16,7 @@ import { ExperimentOverviewModule } from './overview/experiment-overview.module'
 import { ExperimentDetailsTabModule } from './details/experiment-details-tab.module';
 import { TrialsGraphModule } from './trials-graph/trials-graph.module';
 import { ExperimentYamlModule } from './yaml/experiment-yaml.module';
+import { PbtTabModule } from './pbt/pbt-tab-loader.module';
 
 @NgModule({
   declarations: [ExperimentDetailsComponent],
@@ -33,6 +34,7 @@ import { ExperimentYamlModule } from './yaml/experiment-yaml.module';
     MatProgressSpinnerModule,
     ExperimentYamlModule,
     TitleActionsToolbarModule,
+    PbtTabModule,
   ],
   exports: [ExperimentDetailsComponent],
 })
