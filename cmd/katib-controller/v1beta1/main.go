@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/viper"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -44,6 +45,7 @@ func main() {
 
 	var experimentSuggestionName string
 	var metricsAddr string
+	var healthzAddr string
 	var webhookPort int
 	var injectSecurityContext bool
 	var enableGRPCProbeInSuggestion bool
@@ -54,6 +56,7 @@ func main() {
 	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
 		"default", "The implementation of suggestion interface in experiment controller (default)")
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&healthzAddr, "healthz-addr", ":18080", "The address the healthz endpoint binds to.")
 	flag.BoolVar(&injectSecurityContext, "webhook-inject-securitycontext", false, "Inject the securityContext of container[0] in the sidecar")
 	flag.BoolVar(&enableGRPCProbeInSuggestion, "enable-grpc-probe-in-suggestion", true, "enable grpc probe in suggestions")
 	flag.Var(&trialResources, "trial-resources", "The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org)")
@@ -82,6 +85,8 @@ func main() {
 		webhookPort,
 		"metrics-addr",
 		metricsAddr,
+		"healthz-addr",
+		healthzAddr,
 		consts.ConfigInjectSecurityContext,
 		viper.GetBool(consts.ConfigInjectSecurityContext),
 		consts.ConfigEnableGRPCProbeInSuggestion,
@@ -99,9 +104,10 @@ func main() {
 
 	// Create a new katib controller to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
-		MetricsBindAddress: metricsAddr,
-		LeaderElection:     enableLeaderElection,
-		LeaderElectionID:   leaderElectionID,
+		MetricsBindAddress:     metricsAddr,
+		HealthProbeBindAddress: healthzAddr,
+		LeaderElection:         enableLeaderElection,
+		LeaderElectionID:       leaderElectionID,
 	})
 	if err != nil {
 		log.Error(err, "Failed to create the manager")
@@ -126,6 +132,17 @@ func main() {
 	log.Info("Setting up webhooks.")
 	if err := webhook.AddToManager(mgr, webhookPort); err != nil {
 		log.Error(err, "Unable to register webhooks to the manager")
+		os.Exit(1)
+	}
+
+	log.Info("Setting up health checker.")
+	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+		log.Error(err, "Unable to add healthz endpoint to the manager")
+		os.Exit(1)
+	}
+	// TODO (@anencore94) need to more detailed check whether is it possible to communicate with k8s-apiserver or db-manager at '/readyz' ?
+	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+		log.Error(err, "Unable to add readyz endpoint to the manager")
 		os.Exit(1)
 	}
 

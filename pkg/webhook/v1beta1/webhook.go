@@ -27,7 +27,6 @@ import (
 )
 
 func AddToManager(mgr manager.Manager, port int) error {
-
 	// Create a webhook server.
 	hookServer := &webhook.Server{
 		Port:    port,
@@ -35,6 +34,9 @@ func AddToManager(mgr manager.Manager, port int) error {
 	}
 	if err := mgr.Add(hookServer); err != nil {
 		return fmt.Errorf("Add webhook server to the manager failed: %v", err)
+	}
+	if err := mgr.AddHealthzCheck("healthz", hookServer.StartedChecker()); err != nil {
+		return fmt.Errorf("Add webhook server health checker to the manager failed: %v", err)
 	}
 
 	experimentValidator := experiment.NewExperimentValidator(mgr.GetClient())

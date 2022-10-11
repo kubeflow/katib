@@ -72,10 +72,6 @@ kubectl wait --for=condition=complete --timeout=${TIMEOUT} -l katib.kubeflow.org
 kubectl wait --for=condition=ready --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in ($WITH_DATABASE_TYPE,controller,db-manager,ui)" -n kubeflow pod ||
   (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && exit 1)
 
-# Wait until all Katib pods is actually ready.
-# Since Katib-controller does not use Readinessprobe yet, just wait for a while.
-sleep 30
-
 echo "All Katib components are running."
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
