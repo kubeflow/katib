@@ -13,29 +13,26 @@
 # limitations under the License.
 
 import os
-from typing import Final
 
 # How long to wait in seconds for requests to the ApiServer
-APISERVER_TIMEOUT: Final[int] = 120
+APISERVER_TIMEOUT = 120
 
 # Global CRD version
-KATIB_VERSION: Final[str] = os.environ.get("EXPERIMENT_VERSION", "v1beta1")
+KATIB_VERSION = os.environ.get("EXPERIMENT_VERSION", "v1beta1")
 
 # Katib K8S constants
-KUBEFLOW_GROUP: Final[str] = "kubeflow.org"
-EXPERIMENT_KIND: Final[str] = "Experiment"
-EXPERIMENT_PLURAL: Final[str] = "experiments"
-SUGGESTION_PLURAL: Final[str] = "suggestions"
-TRIAL_PLURAL: Final[str] = "trials"
+KUBEFLOW_GROUP = "kubeflow.org"
+EXPERIMENT_KIND = "Experiment"
+EXPERIMENT_PLURAL = "experiments"
+SUGGESTION_PLURAL = "suggestions"
+TRIAL_PLURAL = "trials"
 
 
-DEFAULT_PRIMARY_CONTAINER_NAME: Final[str] = "training-container"
+DEFAULT_PRIMARY_CONTAINER_NAME = "training-container"
 
 # Supported base images for the Katib Trials.
 # TODO (andreyvelich): Implement list_base_images function to get each image description.
-BASE_IMAGE_TENSORFLOW: Final[str] = "docker.io/tensorflow/tensorflow:2.9.1"
-BASE_IMAGE_TENSORFLOW_GPU: Final[str] = "docker.io/tensorflow/tensorflow:2.9.1-gpu"
-BASE_IMAGE_PYTORCH: Final[
-    str
-] = "docker.io/pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime"
-BASE_IMAGE_MXNET: Final[str] = "docker.io/mxnet/python:1.9.1_native_py3"
+BASE_IMAGE_TENSORFLOW = "docker.io/tensorflow/tensorflow:2.9.1"
+BASE_IMAGE_TENSORFLOW_GPU = "docker.io/tensorflow/tensorflow:2.9.1-gpu"
+BASE_IMAGE_PYTORCH = "docker.io/pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime"
+BASE_IMAGE_MXNET = "docker.io/mxnet/python:1.9.1_native_py3"
