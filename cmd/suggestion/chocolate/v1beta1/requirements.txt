@@ -4,7 +4,7 @@ numpy>=1.20.0
 scikit-learn>=0.24.0
 scipy>=1.5.4
 forestci==0.3
-protobuf==3.19.1
+protobuf==3.19.5
 googleapis-common-protos==1.6.0
 SQLAlchemy==1.4.26
 git+https://github.com/AIworx-Labs/chocolate@master
