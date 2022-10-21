@@ -13,22 +13,21 @@
     <ng-container *ngIf="pageLoading; else content">
       <lib-loading-spinner></lib-loading-spinner>
     </ng-container>
-
     <!--the tabs-->
   </div>
 </div>
 
 <ng-template #content>
-  <app-trials-graph
+  <app-trials-graph-echarts
     *ngIf="showGraph; else emptyGraph"
     [experimentTrialsCsv]="experimentTrialsCsv"
-    [hoveredTrial]="hoveredTrial"
+    [experiment]="experimentDetails"
     class="graph"
-  ></app-trials-graph>
+  ></app-trials-graph-echarts>
 
   <ng-template #emptyGraph>
     <lib-panel icon="info" color="primary" class="panel">
-      Couldn't find information for the underlying Trials.
+      Couldn't find any successful Trial.
     </lib-panel>
   </ng-template>
 

@@ -1,0 +1,33 @@
+.graph-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.graph {
+  width: 400px;
+
+  @media (min-width: 768px) {
+    width: 700px;
+  }
+
+  @media (min-width: 1024px) {
+    width: 1000px;
+  }
+
+  @media (min-width: 1400px) {
+    width: 1300px;
+  }
+
+  @media (min-width: 1650px) {
+    width: 1600px;
+  }
+
+  @media (min-width: 2000px) {
+    width: 1900px;
+  }
+
+  height: 600px;
+}
