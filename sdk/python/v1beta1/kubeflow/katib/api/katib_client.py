@@ -295,7 +295,7 @@ class KatibClient(object):
         experiment.spec.trial_template = trial_template
 
         # Create the Katib Experiment.
-        self.create_experiment(exp_object=experiment)
+        self.create_experiment(exp_object=experiment, namespace=namespace)
 
     # TODO (andreyvelich): Get Experiment should always return one Experiment.
     # Use list_experiments to return Experiment list.
