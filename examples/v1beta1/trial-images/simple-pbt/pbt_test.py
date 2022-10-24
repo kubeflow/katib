@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# Implementation based on:
+#   https://github.com/ray-project/ray/blob/7f1bacc7dc9caf6d0ec042e39499bbf1d9a7d065/python/ray/tune/examples/pbt_example.py
+
 # Copyright 2022 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,11 +15,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-#!/usr/bin/env python
-
-# Implementation based on:
-#   https://github.com/ray-project/ray/blob/master/python/ray/tune/examples/pbt_example.py
 
 import argparse
 import numpy as np
