@@ -32,7 +32,7 @@ import { TrialsGraphEchartsModule } from './trials-graph-echarts/trials-graph-ec
     MatProgressSpinnerModule,
     ExperimentYamlModule,
     TitleActionsToolbarModule,
-    TrialsGraphEchartsModule
+    TrialsGraphEchartsModule,
   ],
   exports: [ExperimentDetailsComponent],
 })
