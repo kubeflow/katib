@@ -38,10 +38,10 @@ export class KWABackendService extends BackendService {
     return throwError(msg);
   }
 
-  getExperiments(): Observable<Experiments> {
+  getExperiments(namespace: string): Observable<Experiments> {
     // If the route doesn't end in a "/"" then the backend will return a 301 to
     // the url ending with "/".
-    const url = '/katib/fetch_experiments/';
+    const url = `/katib/fetch_namespaced_experiments/?namespace=${namespace}`;
 
     return this.http.get<any>(url).pipe(
       catchError(error => this.parseError(error)),
