@@ -31,6 +31,7 @@ import {
     TitleActionsToolbarModule,
     LoadingSpinnerModule,
     PanelModule,
+    TitleActionsToolbarModule,
   ],
   exports: [TrialModalComponent],
 })

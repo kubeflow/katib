@@ -1,4 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { ConditionsTableModule, DetailsListModule } from 'kubeflow';
 
 import { TrialModalMetricsComponent } from './metrics.component';
 
@@ -9,6 +11,7 @@ describe('TrialModalMetricsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TrialModalMetricsComponent],
+      imports: [ConditionsTableModule, DetailsListModule, MatSnackBarModule],
     }).compileComponents();
   }));
 
