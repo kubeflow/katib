@@ -24,11 +24,14 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
+	"github.com/pkg/errors"
 )
 
 func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
@@ -37,8 +40,16 @@ func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
 		log.Printf("NewClient for Katib failed: %v", err)
 		panic(err)
 	}
+	// create a new client-go client for sending SAR objects in the API-SERVER
+	conf, err := config.GetConfig()
+	sarclient, err := kubernetes.NewForConfig(conf)
+	if err != nil {
+		log.Printf("SarClient for Katib failes: %v", err)
+		panic(err)
+	}
 	return &KatibUIHandler{
 		katibClient:   kclient,
+		sarClient:     *sarclient,
 		dbManagerAddr: dbManagerAddr,
 	}
 }
@@ -70,11 +81,20 @@ func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.DBMa
 func (k *KatibUIHandler) CreateExperiment(w http.ResponseWriter, r *http.Request) {
 	var data map[string]interface{}
 
+	// check if user's username is provided in request Header
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		log.Printf("Failed to decode body: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	dataJSON, ok := data["postData"]
 	if !ok {
 		msg := "Couldn't load the 'postData' field of the request's data"
@@ -96,12 +116,69 @@ func (k *KatibUIHandler) CreateExperiment(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	namespace := job.ObjectMeta.Namespace
+	expName := job.ObjectMeta.Name
+
+	err = IsAuthorized(user, "create", namespace, "kubeflow.org", "v1beta1", "experiments", "", "", &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to create experiment: %s from namespace: %s \n", user, expName, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	err = k.katibClient.CreateRuntimeObject(&job)
 	if err != nil {
 		log.Printf("CreateRuntimeObject from parameters failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (k *KatibUIHandler) FetchNamespacedExperiments(w http.ResponseWriter, r *http.Request) {
+
+	// check if user's username is provided in request Header
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No 'namespace' query parameter was provided.")
+		err := errors.New("No 'namespace' query parameter was provided.")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	namespace := namespaces[0]
+
+	err = IsAuthorized(user, "list", namespace, "kubeflow.org", "v1beta1", "experiments", "", "", &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to list experiments from namespace: %s \n", user, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	experiments, err := k.getExperiments([]string{namespace})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(experiments)
+	if err != nil {
+		log.Printf("Marshal experiments failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write experiments failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
 
 // FetchAllExperiments gets HP and NAS experiments in all namespaces.
@@ -130,8 +207,37 @@ func (k *KatibUIHandler) FetchAllExperiments(w http.ResponseWriter, r *http.Requ
 }
 
 func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request) {
-	experimentName := r.URL.Query()["experimentName"][0]
-	namespace := r.URL.Query()["namespace"][0]
+
+	// check if user's username is provided in request Header
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No 'namespace' query parameter was provided.")
+		err := errors.New("No 'namespace' query parameter was provided.")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	experimentNames, ok := r.URL.Query()["experimentName"]
+	if !ok {
+		log.Printf("No experimentName provided in Query parameteres! Provide an 'experimentName' param")
+		err := errors.New("No experimentName provided!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	experimentName := experimentNames[0]
+	namespace := namespaces[0]
+
+	err = IsAuthorized(user, "delete", namespace, "kubeflow.org", "v1beta1", "experiments", "", experimentName, &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to delete experiment: %s from namespace: %s \n", user, experimentName, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
 	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
@@ -139,6 +245,7 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	err = k.katibClient.DeleteRuntimeObject(experiment)
 	if err != nil {
 		log.Printf("DeleteRuntimeObject failed: %v", err)
@@ -188,7 +295,15 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 // FetchTrialTemplates gets all trial templates in all namespaces
 func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Request) {
 
-	trialTemplatesViewList, err := k.getTrialTemplatesViewList()
+	// check if user's username is provided in request Header
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	trialTemplatesViewList, err := k.getTrialTemplatesViewList(user)
 	if err != nil {
 		log.Printf("getTrialTemplatesViewList failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -213,6 +328,15 @@ func (k *KatibUIHandler) FetchTrialTemplates(w http.ResponseWriter, r *http.Requ
 
 //AddTemplate adds template to ConfigMap
 func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
+
+	// check if user's username is provided in request Header
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
 	var data map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		log.Printf("Failed to decode body: %v", err)
@@ -225,7 +349,14 @@ func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 	updatedTemplateYaml := data["updatedTemplateYaml"].(string)
 
-	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, "", updatedConfigMapPath, updatedTemplateYaml, ActionTypeAdd)
+	err = IsAuthorized(user, "add", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to add configmap: %s from namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, "", updatedConfigMapPath, updatedTemplateYaml, ActionTypeAdd, user)
 	if err != nil {
 		log.Printf("updateTrialTemplates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -252,6 +383,14 @@ func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 // EditTemplate edits template in ConfigMap
 func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 
+	// check if user's username is provided in request Header
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	var data map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		log.Printf("Failed to decode body: %v", err)
@@ -265,7 +404,14 @@ func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 	updatedTemplateYaml := data["updatedTemplateYaml"].(string)
 
-	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, configMapPath, updatedConfigMapPath, updatedTemplateYaml, ActionTypeEdit)
+	err = IsAuthorized(user, "edit", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to edit configmap: %s from namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, configMapPath, updatedConfigMapPath, updatedTemplateYaml, ActionTypeEdit, user)
 	if err != nil {
 		log.Printf("updateTrialTemplates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -291,6 +437,14 @@ func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 // DeleteTemplate deletes template in ConfigMap
 func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) {
 
+	// check if user's username is provided in request Header
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
 	var data map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		log.Printf("Failed to decode body: %v", err)
@@ -302,7 +456,14 @@ func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) 
 	updatedConfigMapName := data["updatedConfigMapName"].(string)
 	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 
-	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, "", updatedConfigMapPath, "", ActionTypeDelete)
+	err = IsAuthorized(user, "delete", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to delete configmap: %s from namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	newTemplates, err := k.updateTrialTemplates(updatedConfigMapNamespace, updatedConfigMapName, "", updatedConfigMapPath, "", ActionTypeDelete, user)
 	if err != nil {
 		log.Printf("updateTrialTemplates failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -351,8 +512,37 @@ func (k *KatibUIHandler) FetchNamespaces(w http.ResponseWriter, r *http.Request)
 
 // FetchExperiment gets experiment in specific namespace.
 func (k *KatibUIHandler) FetchExperiment(w http.ResponseWriter, r *http.Request) {
-	experimentName := r.URL.Query()["experimentName"][0]
-	namespace := r.URL.Query()["namespace"][0]
+
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No 'namespace' query parameter was provided.")
+		err := errors.New("No 'namespace' query parameter was provided.")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	experimentNames, ok := r.URL.Query()["experimentName"]
+	if !ok {
+		log.Printf("No experimentName provided in Query parameteres! Provide an 'experimentName' param")
+		err := errors.New("No experimentName provided!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	experimentName := experimentNames[0]
+	namespace := namespaces[0]
+
+	err = IsAuthorized(user, "get", namespace, "kubeflow.org", "v1beta1", "experiments", "", experimentName, &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to get experiment: %s from namespace: %s \n", user, experimentName, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
 	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
@@ -375,8 +565,37 @@ func (k *KatibUIHandler) FetchExperiment(w http.ResponseWriter, r *http.Request)
 
 // FetchSuggestion gets suggestion in specific namespace
 func (k *KatibUIHandler) FetchSuggestion(w http.ResponseWriter, r *http.Request) {
-	suggestionName := r.URL.Query()["suggestionName"][0]
-	namespace := r.URL.Query()["namespace"][0]
+
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
+		err := errors.New("No 'namespace' provided!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	suggestionNames, ok := r.URL.Query()["suggestionName"]
+	if !ok {
+		log.Printf("No experimentName provided in Query parameteres! Provide an 'experimentName' param")
+		err := errors.New("No experimentName provided!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	suggestionName := suggestionNames[0]
+	namespace := namespaces[0]
+
+	err = IsAuthorized(user, "get", namespace, "kubeflow.org", "v1beta1", "suggestions", "", suggestionName, &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to get suggestion: %s from namespace: %s \n", user, suggestionName, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
 	suggestion, err := k.katibClient.GetSuggestion(suggestionName, namespace)
 	if err != nil {

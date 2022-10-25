@@ -20,6 +20,7 @@ import (
 	v1beta1experiment "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
+	"k8s.io/client-go/kubernetes"
 )
 
 var (
@@ -75,6 +76,7 @@ type Template struct {
 
 type KatibUIHandler struct {
 	katibClient   katibclient.Client
+	sarClient     kubernetes.Clientset
 	dbManagerAddr string
 }
 

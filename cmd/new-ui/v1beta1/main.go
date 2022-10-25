@@ -48,7 +48,7 @@ func main() {
 	http.HandleFunc("/katib/", kuh.ServeIndex(*buildDir))
 	http.Handle("/katib/static/", http.StripPrefix("/katib/", frontend))
 
-	http.HandleFunc("/katib/fetch_experiments/", kuh.FetchAllExperiments)
+	http.HandleFunc("/katib/fetch_namespaced_experiments/", kuh.FetchNamespacedExperiments)
 
 	http.HandleFunc("/katib/create_experiment/", kuh.CreateExperiment)
 

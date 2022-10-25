@@ -27,14 +27,45 @@ import (
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	"github.com/pkg/errors"
 )
 
 const kfpRunIDAnnotation = "kubeflow-kale.org/kfp-run-uuid"
 
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	experimentName := r.URL.Query()["experimentName"][0]
-	namespace := r.URL.Query()["namespace"][0]
+
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("User is not provided!")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
+		err := errors.New("No 'namespace' provided!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	experimentNames, ok := r.URL.Query()["experimentName"]
+	if !ok {
+		log.Printf("No experimentName provided in Query parameteres! Provide an 'experimentName' param")
+		err := errors.New("No experimentName provided!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	experimentName := experimentNames[0]
+	namespace := namespaces[0]
+
+	err = IsAuthorized(user, "get", namespace, "kubeflow.org", "v1beta1", "experiments", "", experimentName, &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to get experiments from namespace: %s \n", user, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+	log.Printf("The user: %s is authorized to get kubeflow.org/v1beta1/experiments in namespace: %s", user, namespace)
 
 	log.Printf("Start FetchHPJobInfo for Experiment: %v in namespace: %v", experimentName, namespace)
 
@@ -64,6 +95,14 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		paramList[p.Name] = i + len(metricsList)
 	}
 	log.Printf("Got Parameters names")
+
+	err = IsAuthorized(user, "list", namespace, "kubeflow.org", "v1beta1", "trials", "", "", &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to list trials from namespace: %s \n", user, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+	log.Printf("The user: %s is authorized to list kubeflow.org/v1beta1/trials in namespace: %s", user, namespace)
 
 	trialList, err := k.katibClient.GetTrialList(experimentName, namespace)
 	if err != nil {
@@ -151,16 +190,50 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 // FetchHPJobTrialInfo returns all metrics for the HP Job Trial
 func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	trialName := r.URL.Query()["trialName"][0]
-	namespace := r.URL.Query()["namespace"][0]
+
+	user, err := GetUsername(r)
+	if err != nil {
+		log.Printf("User is not provided!")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
+		err := errors.New("No 'namespace' provided!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	trialNames, ok := r.URL.Query()["trialName"]
+	if !ok {
+		log.Printf("No trialName provided in Query parameters! Provide a 'trialName' param")
+		err := errors.New("No 'trialName' provided!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	trialName := trialNames[0]
+	namespace := namespaces[0]
+
 	conn, c := k.connectManager()
 	defer conn.Close()
+
+	err = IsAuthorized(user, "list", namespace, "kubeflow.org", "v1beta1", "trials", "", trialName, &k.sarClient)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to get trial: %s from namespace: %s \n", user, trialName, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+	log.Printf("The user: %s is authorized to get kubeflow.org/v1beta1/trial: %s in namespace: %s", user, trialName, namespace)
 
 	trial, err := k.katibClient.GetTrial(trialName, namespace)
 
 	if err != nil {
 		log.Printf("GetTrial from HP job failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	objectiveType := trial.Spec.Objective.Type
