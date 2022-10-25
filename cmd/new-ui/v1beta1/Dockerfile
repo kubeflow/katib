@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install git -y
 WORKDIR /kf
 RUN git clone https://github.com/kubeflow/kubeflow.git && \
     cd kubeflow && \
-    git checkout ecb72c2
+    git checkout c4ca7a9
 
 # --- Build the frontend kubeflow library ---
 FROM node:12 AS frontend-kubeflow-lib
