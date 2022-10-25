@@ -91,6 +91,7 @@ This is the recommended way to test the web app e2e. In order to build the UI an
    For example, if you use port-forwarding to expose `katib-db-manager`, run this command:
 
    ```
+   export APP_DISABLE_AUTH=true
    go run main.go --build-dir=../../../pkg/new-ui/v1beta1/frontend/dist --port=8080 --db-manager-address=localhost:6789
    ```
 
