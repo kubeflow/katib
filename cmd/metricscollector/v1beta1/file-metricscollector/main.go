@@ -161,7 +161,9 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 	checkMetricFile(mFile)
 
 	// Get Main process.
-	_, mainProcPid, err := common.GetMainProcesses(mFile)
+	// Extract the metric file dir path based on the file name.
+	mDirPath, _ := filepath.Split(mFile)
+	_, mainProcPid, err := common.GetMainProcesses(mDirPath)
 	if err != nil {
 		klog.Fatalf("GetMainProcesses failed: %v", err)
 	}
