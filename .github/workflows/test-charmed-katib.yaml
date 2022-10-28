@@ -56,7 +56,7 @@ jobs:
         run: |
           set -eux
           images=("katib-controller" "katib-ui" "katib-db-manager")
-          folders=("katib-controller" "ui" "db-manager")
+          folders=("katib-controller" "new-ui" "db-manager")
           for idx in {0..2}; do
             docker buildx build . \
                 -t docker.io/kubeflowkatib/${images[$idx]}:latest \
