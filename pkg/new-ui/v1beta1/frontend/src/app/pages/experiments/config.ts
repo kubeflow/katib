@@ -19,8 +19,6 @@ import {
 import { ExperimentOptimalTrialComponent } from './optimal-trial/experiment-optimal-trial.component';
 
 export const experimentsTableConfig: TableConfig = {
-  title: 'Experiments',
-  newButtonText: 'NEW EXPERIMENT',
   columns: [
     {
       matHeaderCellDef: 'Status',

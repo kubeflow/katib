@@ -18,6 +18,7 @@ import {
   TemplateValue,
   ActionEvent,
   DashboardState,
+  ToolbarButton,
 } from 'kubeflow';
 
 import { KWABackendService } from 'src/app/services/backend.service';
@@ -41,6 +42,17 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
   private poller: ExponentialBackoff;
+
+  buttons: ToolbarButton[] = [
+    new ToolbarButton({
+      text: `New Experiment`,
+      icon: 'add',
+      stroked: true,
+      fn: () => {
+        this.router.navigate(['/new']);
+      },
+    }),
+  ];
 
   constructor(
     private backend: KWABackendService,
@@ -73,9 +85,6 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
   reactToAction(a: ActionEvent) {
     const exp = a.data as Experiment;
     switch (a.action) {
-      case 'newResourceButton': // TODO: could also use enums here
-        this.router.navigate(['/new']);
-        break;
       case 'name:link':
         this.router.navigate([`/experiment/${exp.name}`]);
         break;
