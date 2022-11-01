@@ -47,6 +47,7 @@ import (
 const (
 	ControllerName = "suggestion-controller"
 )
+var ReconcileSuggestionVolumeOverrides = [...] string {"pbt"}
 
 var log = logf.Log.WithName(ControllerName)
 
@@ -191,8 +192,17 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	suggestionNsName := types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}
 	logger := log.WithValues("Suggestion", suggestionNsName)
 
+	// Check if requested algorithm is in reconcile override list
+	isReconcileOverride := false
+	for _, algorithmName := range ReconcileSuggestionVolumeOverrides {
+		if algorithmName == instance.Spec.Algorithm.AlgorithmName {
+			isReconcileOverride = true
+			break
+		}
+	}
+
 	// If ResumePolicy = FromVolume volume is reconciled for suggestion
-	if instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+	if isReconcileOverride || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 		pvc, pv, err := r.DesiredVolume(instance)
 		if err != nil {
 			return err

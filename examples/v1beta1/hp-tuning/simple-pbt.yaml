@@ -8,7 +8,6 @@ spec:
   maxTrialCount: 2
   parallelTrialCount: 2
   maxFailedTrialCount: 3
-  resumePolicy: FromVolume
   objective:
     type: maximize
     goal: 0.99
