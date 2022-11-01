@@ -9,6 +9,7 @@ import {
   ConfirmDialogService,
   NamespaceService,
   KubeflowModule,
+  PollerService,
 } from 'kubeflow';
 import { KWABackendService } from 'src/app/services/backend.service';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -46,6 +47,7 @@ describe('ExperimentsComponent', () => {
           { provide: KWABackendService, useValue: KWABackendServiceStub },
           { provide: ConfirmDialogService, useValue: {} },
           { provide: NamespaceService, useValue: NamespaceServiceStub },
+          { provide: PollerService, useValue: {} },
         ],
       }).compileComponents();
     }),

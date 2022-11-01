@@ -5,8 +5,6 @@ import {
   ActionIconValue,
   TableConfig,
   DateTimeValue,
-  TemplateValue,
-  ChipsListValue,
   ComponentValue,
   LinkValue,
   LinkType,
@@ -16,11 +14,11 @@ import {
   parseSucceededTrials,
   parseRunningTrials,
   parseFailedTrials,
-  parseTotalTrials,
 } from './utils';
 import { ExperimentOptimalTrialComponent } from './optimal-trial/experiment-optimal-trial.component';
 
 export const experimentsTableConfig: TableConfig = {
+  dynamicNamespaceColumn: true,
   columns: [
     {
       matHeaderCellDef: 'Status',

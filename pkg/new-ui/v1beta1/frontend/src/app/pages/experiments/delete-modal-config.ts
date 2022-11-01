@@ -1,18 +1,15 @@
 import { DialogConfig } from 'kubeflow';
 
 // --- Configs for the Confirm Dialogs ---
-export function getDeleteDialogConfig(
-  name: string,
-  namespace: string,
-): DialogConfig {
+export function generateDeleteConfig(name: string): DialogConfig {
   return {
-    title: `Delete experiment`,
-    message: `Are you sure you want to delete ${name} experiment from namespace ${namespace}?`,
-    accept: 'DELETE',
+    title: $localize`Delete experiment ${name}?`,
+    message: $localize`You cannot undo this action. Are you sure you want to delete this experiment?`,
+    accept: $localize`DELETE`,
     confirmColor: 'warn',
-    cancel: 'CANCEL',
+    cancel: $localize`CANCEL`,
     error: '',
-    applying: 'DELETING',
+    applying: $localize`DELETING`,
     width: '600px',
   };
 }
