@@ -293,9 +293,6 @@ message DeleteObservationLogReply {
 message GetSuggestionsRequest {
     Experiment experiment = 1;
     repeated Trial trials = 2; // All completed trials owned by the experiment.
-    // Use current_request_number instead. This API will be removed in Katib 0.14.
-    // The number of Suggestions requested at one time.
-    int32 request_number = 3 [deprecated=true];
     // The number of Suggestions requested at one time.
     // When you set 3 to current_request_number, you get three Suggestions at one time.
     int32 current_request_number = 4; 
