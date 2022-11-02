@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 /*
- Katib-controller is a controller (operator) for Experiments and Trials
+Katib-controller is a controller (operator) for Experiments and Trials
 */
 package main
 
