@@ -91,9 +91,9 @@ class BaseOptunaService(object):
         search_space = {}
         for param in self.search_space.params:
             if param.type == INTEGER:
-                search_space[param.name] = optuna.distributions.IntUniformDistribution(int(param.min), int(param.max))
+                search_space[param.name] = optuna.distributions.IntDistribution(int(param.min), int(param.max))
             elif param.type == DOUBLE:
-                search_space[param.name] = optuna.distributions.UniformDistribution(float(param.min), float(param.max))
+                search_space[param.name] = optuna.distributions.FloatDistribution(float(param.min), float(param.max))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 search_space[param.name] = optuna.distributions.CategoricalDistribution(param.list)
         return search_space

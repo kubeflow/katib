@@ -24,12 +24,12 @@ jobs:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
           trial-images: darts-cnn-cifar10-cpu
+          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
       matrix:
-        # TODO (tenzen-y): We need to consider running tests on more kubernetes versions.
-        # kubernetes-version: ["v1.20.15", "v1.21.13", "v1.22.10", "v1.23.7", "v1.24.1"]
-        kubernetes-version: ["v1.21.13", "v1.22.10", "v1.23.7"]
+        kubernetes-version: ["v1.22.14", "v1.23.11", "1.24.5"]
         # Comma Delimited
         experiments: ["darts-cpu"]
+        database-type: ["mysql", "postgres"]

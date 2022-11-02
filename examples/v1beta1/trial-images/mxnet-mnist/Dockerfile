@@ -1,14 +1,26 @@
 FROM python:3.9-slim
 
-ADD examples/v1beta1/trial-images/mxnet-mnist /opt/mxnet-mnist
+ARG TARGETARCH
+ENV LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:/opt/arm/armpl_22.0.2_gcc-11.2/lib"
+
+COPY examples/v1beta1/trial-images/mxnet-mnist /opt/mxnet-mnist
+
 WORKDIR /opt/mxnet-mnist
 
 RUN apt-get -y update \
-  && apt-get -y install libgomp1 libquadmath0 \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+ && apt-get -y install libgomp1 \
+ && if [ "${TARGETARCH}" = "arm64" ]; then \
+      apt-get -y install wget; \
+    elif [ "${TARGETARCH}" = "amd64" ]; then \
+      apt-get -y install libquadmath0; \
+    fi \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN pip install mxnet==1.9.0
+RUN if [ "${TARGETARCH}" = "arm64" ]; then \
+      /opt/mxnet-mnist/install-arm-performance-libraries.sh; \
+    fi
+RUN pip install mxnet==1.9.1
 RUN chgrp -R 0 /opt/mxnet-mnist \
   && chmod -R g+rwX /opt/mxnet-mnist
 

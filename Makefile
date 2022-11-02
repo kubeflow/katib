@@ -6,7 +6,7 @@ HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= amd64
-ENVTEST_K8S_VERSION ?= 1.23
+ENVTEST_K8S_VERSION ?= 1.24
 
 # for pytest
 PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
@@ -20,7 +20,7 @@ test: envtest
 
 envtest:
 ifndef HAS_SETUP_ENVTEST
-	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@bf71fc56485f6bf03e95ef6b0233ff36c695d4c9 # v0.11.2
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@c7a98aa706379c4e5c79ea675c7f333192677971 # v0.12.3
 	@echo "setup-envtest has been installed"
 endif
 	@echo "setup-envtest has already installed"
@@ -59,7 +59,7 @@ update:
 
 # Deploy Katib v1beta1 manifests using Kustomize into a k8s cluster.
 deploy:
-	bash scripts/v1beta1/deploy.sh
+	bash scripts/v1beta1/deploy.sh $(WITH_DATABASE_TYPE)
 
 # Undeploy Katib v1beta1 manifests using Kustomize from a k8s cluster
 undeploy:

@@ -1,22 +1,46 @@
+import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { FormControl, FormGroup } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { ListInputModule } from 'src/app/shared/list-input/list-input.module';
+import { FormModule } from 'kubeflow';
 
-import { NasGraphComponent } from './nas-graph.component';
+import { FormNasGraphComponent } from './nas-graph.component';
 
-describe('NasGraphComponent', () => {
-  let component: NasGraphComponent;
-  let fixture: ComponentFixture<NasGraphComponent>;
+describe('FormNasGraphComponent', () => {
+  let component: FormNasGraphComponent;
+  let fixture: ComponentFixture<FormNasGraphComponent>;
 
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [NasGraphComponent],
+        imports: [
+          CommonModule,
+          BrowserAnimationsModule,
+          MatFormFieldModule,
+          MatInputModule,
+          MatDividerModule,
+          MatIconModule,
+          ListInputModule,
+          FormModule,
+        ],
+        declarations: [FormNasGraphComponent],
       }).compileComponents();
     }),
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NasGraphComponent);
+    fixture = TestBed.createComponent(FormNasGraphComponent);
     component = fixture.componentInstance;
+    component.formGroup = new FormGroup({
+      layers: new FormControl(),
+      inputSizes: new FormControl([]),
+      outputSizes: new FormControl([]),
+    });
     fixture.detectChanges();
   });
 

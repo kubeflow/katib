@@ -1,4 +1,4 @@
 grpcio==1.41.1
-protobuf==3.19.1
+protobuf==3.19.5
 googleapis-common-protos==1.53.0
 numpy==1.22.2

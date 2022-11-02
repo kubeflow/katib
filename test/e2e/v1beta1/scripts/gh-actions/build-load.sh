@@ -48,7 +48,7 @@ _build_containers() {
   done
 
   echo -e "\nBuilding $CONTAINER_NAME image with $DOCKERFILE...\n"
-  docker build --platform "$(uname -m)" -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
+  docker buildx build --platform "$(uname -m)" --load -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
 }
 
 _load_minikube_cluster() {

@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TrialsTableComponent } from './trials-table.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TrialModalComponent } from './trial-modal/trial-modal.component';
+import { TrialModalModule } from './trial-modal/trial-modal.module';
 
 @NgModule({
   declarations: [TrialsTableComponent],
@@ -20,6 +21,7 @@ import { TrialModalComponent } from './trial-modal/trial-modal.component';
     MatIconModule,
     NgxChartsModule,
     MatTooltipModule,
+    TrialModalModule,
   ],
   entryComponents: [TrialModalComponent],
   exports: [TrialsTableComponent],

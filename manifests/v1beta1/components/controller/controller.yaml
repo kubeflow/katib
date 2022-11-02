@@ -40,6 +40,17 @@ spec:
             - containerPort: 8080
               name: metrics
               protocol: TCP
+            - containerPort: 18080
+              name: healthz
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: healthz
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
           env:
             - name: KATIB_CORE_NAMESPACE
               valueFrom:

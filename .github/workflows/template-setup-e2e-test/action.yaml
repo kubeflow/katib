@@ -1,9 +1,11 @@
-# Template for e2e tests.
+# Composite action to setup e2e tests.
+name: Setup E2E Test
+description: setup env for e2e test using the minikube cluster
 
 inputs:
   kubernetes-version:
     required: true
-    type: string
+    description: kubernetes version
 
 runs:
   using: composite
@@ -17,9 +19,9 @@ runs:
         github token: ${{ env.GITHUB_TOKEN }}
 
     - name: Set Up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
 
     - name: Set Up Go env
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
-        go-version: 1.17.10
+        go-version-file: go.mod

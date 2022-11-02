@@ -1,6 +1,9 @@
-FROM pytorch/pytorch:1.11.0-cuda11.3-cudnn8-runtime
+# Pytorch=1.11.0, cuda=11.6.0
+# Ref: https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/rel_22-08.html#rel_22-08
+FROM nvcr.io/nvidia/pytorch:22.02-py3
 
 ADD examples/v1beta1/trial-images/pytorch-mnist /opt/pytorch-mnist
+
 WORKDIR /opt/pytorch-mnist
 
 # Add folder for the logs.

@@ -24,6 +24,7 @@ jobs:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
           trial-images: simple-pbt
+          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
@@ -34,3 +35,4 @@ jobs:
         kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6"]
         # Comma Delimited
         experiments: ["simple-pbt"]
+        database-type: ["mysql", "postgres"]

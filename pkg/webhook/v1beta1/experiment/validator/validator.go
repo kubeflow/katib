@@ -83,6 +83,18 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 	if instance.Spec.ParallelTrialCount != nil && *instance.Spec.ParallelTrialCount <= 0 {
 		return fmt.Errorf("spec.parallelTrialCount must be greater than 0")
 	}
+
+	if instance.Spec.MaxFailedTrialCount != nil && instance.Spec.MaxTrialCount != nil {
+		if *instance.Spec.MaxFailedTrialCount > *instance.Spec.MaxTrialCount {
+			return fmt.Errorf("spec.maxFailedTrialCount should be less than or equal to spec.maxTrialCount")
+		}
+	}
+	if instance.Spec.ParallelTrialCount != nil && instance.Spec.MaxTrialCount != nil {
+		if *instance.Spec.ParallelTrialCount > *instance.Spec.MaxTrialCount {
+			return fmt.Errorf("spec.paralelTrialCount should be less than or equal to spec.maxTrialCount")
+		}
+	}
+
 	if oldInst != nil {
 		// We should validate restart only if appropriate fields are changed.
 		// Otherwise check below is triggered when experiment is deleted.

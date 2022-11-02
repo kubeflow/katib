@@ -1,4 +1,4 @@
 grpcio==1.41.1
-protobuf==3.19.1
+protobuf==3.19.5
 googleapis-common-protos==1.6.0
 cython>=0.29.24

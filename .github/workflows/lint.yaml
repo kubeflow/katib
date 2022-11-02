@@ -20,4 +20,3 @@ jobs:
 
       - name: Check YAML
         run: make yamllint
-          

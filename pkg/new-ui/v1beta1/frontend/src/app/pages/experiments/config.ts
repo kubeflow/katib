@@ -3,7 +3,6 @@ import {
   StatusValue,
   ActionListValue,
   ActionIconValue,
-  TRUNCATE_TEXT_SIZE,
   TableConfig,
   DateTimeValue,
   TemplateValue,
@@ -20,8 +19,6 @@ import {
 import { ExperimentOptimalTrialComponent } from './optimal-trial/experiment-optimal-trial.component';
 
 export const experimentsTableConfig: TableConfig = {
-  title: 'Experiments',
-  newButtonText: 'NEW EXPERIMENT',
   columns: [
     {
       matHeaderCellDef: 'Status',

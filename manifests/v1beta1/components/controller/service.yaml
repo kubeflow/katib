@@ -19,5 +19,8 @@ spec:
     - name: metrics
       port: 8080
       targetPort: 8080
+    - name: healthz
+      port: 18080
+      targetPort: 18080
   selector:
     katib.kubeflow.org/component: controller
