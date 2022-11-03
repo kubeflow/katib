@@ -20,7 +20,7 @@ test: envtest
 
 envtest:
 ifndef HAS_SETUP_ENVTEST
-	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@2c3a6fa2996c026b284c7fe2b055274cd9a556bc # v0.13.0
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@2c3a6fa2996c026b284c7fe2b055274cd9a556bc #v0.13.0
 	@echo "setup-envtest has been installed"
 endif
 	@echo "setup-envtest has already installed"
