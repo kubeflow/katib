@@ -994,7 +994,6 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 				},
 			},
 		},
-		RequestNumber:        2,
 		CurrentRequestNumber: 2,
 		TotalRequestNumber:   6,
 	}

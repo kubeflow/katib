@@ -109,10 +109,8 @@ func (g *General) SyncAssignments(
 		instance.Status.AlgorithmSettings)
 
 	requestSuggestion := &suggestionapi.GetSuggestionsRequest{
-		Experiment: g.ConvertExperiment(filledE),
-		Trials:     g.ConvertTrials(ts),
-		// TODO (andreyvelich): Remove this once RequestNumber is deprecated.
-		RequestNumber:        int32(currentRequestNum),
+		Experiment:           g.ConvertExperiment(filledE),
+		Trials:               g.ConvertTrials(ts),
 		CurrentRequestNumber: int32(currentRequestNum),
 		TotalRequestNumber:   int32(instance.Spec.Requests),
 	}
