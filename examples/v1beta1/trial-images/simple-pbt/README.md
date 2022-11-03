@@ -19,7 +19,7 @@ In this problem, using PBT with a population of 2-4 is sufficient to
 roughly approximate this lr schedule. Higher population sizes will yield
 faster convergence. Training will not converge without PBT.
 
-If you want read more about this example, vist the 
+If you want to read more about this example, vist the 
 [ray](https://github.com/ray-project/ray/blob/7f1bacc7dc9caf6d0ec042e39499bbf1d9a7d065/python/ray/tune/examples/README.rst) 
 documentation.
 

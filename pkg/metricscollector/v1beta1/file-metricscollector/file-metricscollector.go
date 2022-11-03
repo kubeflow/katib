@@ -19,7 +19,7 @@ package sidecarmetricscollector
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
@@ -40,7 +40,7 @@ func CollectObservationLog(fileName string, metrics []string, filters []string, 
 		return nil, err
 	}
 	defer file.Close()
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}

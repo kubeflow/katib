@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -55,7 +54,7 @@ func main() {
 		log.Fatal("Path to Experiment yaml is missing")
 	}
 	expPath := os.Args[1]
-	byteExp, err := ioutil.ReadFile(expPath)
+	byteExp, err := os.ReadFile(expPath)
 	if err != nil {
 		log.Fatalf("Error in reading file: %v", err)
 	}
