@@ -13,7 +13,9 @@
     "lint": "ng lint --fix",
     "format:check": "prettier --check 'src/**/*.{jsx,js,ts,html,scss,css}' || node scripts/check-format-error.js",
     "format:write": "prettier --write 'src/**/*.{jsx,js,ts,html,scss,css}'",
-    "e2e": "ng e2e"
+    "ui-test": "cypress open . --e2e",
+    "ui-test-ci": "cypress run . --e2e",
+    "ui-test-ci-all": "cypress run . --e2e --browser=chrome && cypress run . --e2e --browser=firefox"
   },
   "private": true,
   "dependencies": {
@@ -57,6 +59,7 @@
     "@angular/cli": "~12.2.7",
     "@angular/compiler-cli": "~12.2.7",
     "@angular/language-service": "~12.2.7",
+    "@cypress/schematic": "^2.3.0",
     "@kubernetes/client-node": "^0.12.2",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.3",
@@ -64,6 +67,7 @@
     "@typescript-eslint/eslint-plugin": "4.28.2",
     "@typescript-eslint/parser": "4.28.2",
     "codelyzer": "^6.0.0",
+    "cypress": "^10.10.0",
     "eslint": "^7.26.0",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
@@ -74,6 +78,6 @@
     "karma-jasmine-html-reporter": "^1.5.0",
     "prettier": "2.3.2",
     "ts-node": "~7.0.0",
-    "typescript": "~4.3.5"
+    "typescript": "~4.3.5",
   }
 }
