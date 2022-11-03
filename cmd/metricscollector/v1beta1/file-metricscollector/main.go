@@ -42,7 +42,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -268,7 +267,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 				klog.Fatalf("Create mark file %v error: %v", markFile, err)
 			}
 
-			err = ioutil.WriteFile(markFile, []byte(common.TrainingEarlyStopped), 0)
+			err = os.WriteFile(markFile, []byte(common.TrainingEarlyStopped), 0)
 			if err != nil {
 				klog.Fatalf("Write to file %v error: %v", markFile, err)
 			}

@@ -32,7 +32,7 @@ fmt:
 
 lint:
 ifndef HAS_LINT
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.48.0
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
 	@echo "golangci-lint has been installed"
 endif
 	hack/verify-golangci-lint.sh

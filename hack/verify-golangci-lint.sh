@@ -25,4 +25,4 @@ if [ -z "$(command -v golangci-lint)" ]; then
 fi
 
 echo 'Running golangci-lint'
-golangci-lint run --timeout 5m --go 1.18
+golangci-lint run --timeout 5m --go 1.19
