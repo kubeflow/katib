@@ -30,9 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         # Detail: https://hub.docker.com/r/kindest/node
-        # TODO (tenzen-y): We need to consider running tests on more kubernetes versions.
-        # kubernetes-version: ["v1.20.15", "v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
-        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6"]
+        kubernetes-version: ["v1.23.12", "v1.24.6", "v1.25.2"]
         # Comma Delimited
         experiments: ["simple-pbt"]
         database-type: ["mysql", "postgres"]

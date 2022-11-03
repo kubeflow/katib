@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes-version: ["v1.22.14", "v1.23.11", "1.24.5"]
+        kubernetes-version: ["v1.23.12", "v1.24.6", "v1.25.2"]
         # Comma Delimited
         experiments: ["enas-cpu"]
         database-type: ["mysql", "postgres"]
