@@ -41,7 +41,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	conn, c := k.connectManager()
 	defer conn.Close()
 
-	resultText := "trialName,Status"
+	resultText := "Status,trialName"
 	experiment, err := k.katibClient.GetExperiment(experimentName, namespace)
 	if err != nil {
 		log.Printf("GetExperiment from HP job failed: %v", err)
@@ -129,7 +129,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		for _, trialParam := range t.Spec.ParameterAssignments {
 			trialResText[paramList[trialParam.Name]] = trialParam.Value
 		}
-		resultText += "\n" + t.Name + "," + lastTrialCondition + "," + strings.Join(trialResText, ",")
+		resultText += "\n" + lastTrialCondition + "," + t.Name + "," + strings.Join(trialResText, ",")
 		if foundPipelineUID {
 			resultText += "," + runUid
 		}
