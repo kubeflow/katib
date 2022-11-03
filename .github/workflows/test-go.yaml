@@ -15,7 +15,7 @@ jobs:
         working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 
@@ -48,7 +48,7 @@ jobs:
         working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 

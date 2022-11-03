@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Test Env
         uses: ./.github/workflows/template-setup-e2e-test

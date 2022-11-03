@@ -27,7 +27,7 @@ runs:
 
     - name: Add Docker Tags
       id: meta
-      uses: docker/metadata-action@v3
+      uses: docker/metadata-action@v4
       with:
         images: ${{ inputs.image }}
         tags: |
