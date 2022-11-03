@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         # Detail: https://hub.docker.com/r/kindest/node
-        kubernetes-version: ["v1.23.12", "v1.24.6", "v1.25.2"]
+        kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
         # Comma Delimited
         experiments: ["simple-pbt"]
         database-type: ["mysql", "postgres"]

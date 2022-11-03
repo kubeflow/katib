@@ -6,7 +6,7 @@ HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= amd64
-ENVTEST_K8S_VERSION ?= 1.24
+ENVTEST_K8S_VERSION ?= 1.25
 
 # for pytest
 PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
@@ -20,7 +20,7 @@ test: envtest
 
 envtest:
 ifndef HAS_SETUP_ENVTEST
-	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@c7a98aa706379c4e5c79ea675c7f333192677971 # v0.12.3
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@2c3a6fa2996c026b284c7fe2b055274cd9a556bc # v0.13.0
 	@echo "setup-envtest has been installed"
 endif
 	@echo "setup-envtest has already installed"
