@@ -155,8 +155,8 @@ Follow the next steps to install Katib standalone.
 
 This is the minimal requirements to install Katib:
 
-- Kubernetes >= 1.22
-- `kubectl` >= 1.22
+- Kubernetes >= 1.23
+- `kubectl` >= 1.23
 
 ## Latest Version
 
