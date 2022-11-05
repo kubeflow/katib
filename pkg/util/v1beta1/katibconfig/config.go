@@ -36,6 +36,11 @@ import (
 type SuggestionConfig struct {
 	Image                     string                           `json:"image"`
 	ImagePullPolicy           corev1.PullPolicy                `json:"imagePullPolicy,omitempty"`
+	Command                   []string                         `json:"command,omitempty"`
+	Args                      []string                         `json:"args,omitempty"`
+	WorkingDir                string                           `json:"workingDir,omitempty"`
+	EnvFrom                   []corev1.EnvFromSource           `json:"envFrom,omitempty"`
+	Env                       []corev1.EnvVar                  `json:"env,omitempty"`
 	Resource                  corev1.ResourceRequirements      `json:"resources,omitempty"`
 	ServiceAccountName        string                           `json:"serviceAccountName,omitempty"`
 	VolumeMountPath           string                           `json:"volumeMountPath,omitempty"`

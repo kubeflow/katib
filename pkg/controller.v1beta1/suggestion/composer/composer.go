@@ -186,6 +186,11 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		Name:            consts.ContainerSuggestion,
 		Image:           suggestionConfigData.Image,
 		ImagePullPolicy: suggestionConfigData.ImagePullPolicy,
+		Command:         suggestionConfigData.Command,
+		Args:            suggestionConfigData.Args,
+		WorkingDir:      suggestionConfigData.WorkingDir,
+		EnvFrom:         suggestionConfigData.EnvFrom,
+		Env:             suggestionConfigData.Env,
 		Ports: []corev1.ContainerPort{
 			{
 				Name:          consts.DefaultSuggestionPortName,
