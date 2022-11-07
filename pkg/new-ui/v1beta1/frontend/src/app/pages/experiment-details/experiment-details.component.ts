@@ -49,7 +49,6 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
     private router: Router,
     private backendService: KWABackendService,
     private confirmDialog: ConfirmDialogService,
-    private backend: KWABackendService,
     private namespaceService: NamespaceService,
   ) {}
 
@@ -68,20 +67,18 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
   private subs = new Subscription();
 
   ngOnInit() {
-    this.name = this.activatedRoute.snapshot.params.experimentName;
+    this.activatedRoute.params.subscribe(params => {
+      this.namespaceService.updateSelectedNamespace(params.namespace);
 
-    if (this.activatedRoute.snapshot.queryParams['tab']) {
-      this.selectedTab = this.tabs.get(
-        this.activatedRoute.snapshot.queryParams['tab'],
-      );
-    }
+      this.name = params.experimentName;
+      this.namespace = params.namespace;
 
-    this.subs.add(
-      this.namespaceService.getSelectedNamespace().subscribe(namespace => {
-        this.namespace = namespace;
-        this.updateExperimentInfo();
-      }),
-    );
+      this.updateExperimentInfo();
+    });
+
+    this.activatedRoute.queryParams.subscribe(queryParams => {
+      this.selectedTab = this.tabs.get(queryParams.tab);
+    });
   }
 
   tabChanged(event: MatTabChangeEvent) {
@@ -146,7 +143,7 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
       }
 
       // Close the open dialog only if the DELETE request succeeded
-      this.backend.deleteExperiment(name, namespace).subscribe({
+      this.backendService.deleteExperiment(name, namespace).subscribe({
         next: _ => {
           ref.close(DIALOG_RESP.ACCEPT);
         },

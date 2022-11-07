@@ -86,7 +86,7 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
     const exp = a.data as Experiment;
     switch (a.action) {
       case 'name:link':
-        this.router.navigate([`/experiment/${exp.name}`]);
+        this.router.navigate([`/experiment/${exp.namespace}/${exp.name}`]);
         break;
       case 'delete':
         this.onDeleteExperiment(exp.name);
