@@ -1,6 +1,8 @@
 name: E2E Test with simple-pbt
 on:
-  - pull_request
+  pull_request:
+    paths-ignore:
+      - 'pkg/new-ui/v1beta1/frontend/**'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
