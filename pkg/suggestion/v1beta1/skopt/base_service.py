@@ -112,7 +112,9 @@ class BaseSkoptService(object):
                 logger.info("List of recorded Trials names: {}\n".format(self.recorded_trials_names))
 
         else:
-            logger.info("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
+            logger.error("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
+            logger.error("No new suggestions could be generated, return early..\n")
+            return []
 
         logger.info("Running Optimizer ask to query new parameters for Trials\n")
 

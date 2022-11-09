@@ -42,7 +42,7 @@ class Trial(object):
         res = []
         for trial in trials:
             if trial.status.condition == api.TrialStatus.TrialConditionType.SUCCEEDED or
-             trial.status.condition == api.TrialStatus.TrialConditionType.EARLYSTOPPED:
+              trial.status.condition == api.TrialStatus.TrialConditionType.EARLYSTOPPED:
                 new_trial = Trial.convertTrial(trial)
                 if new_trial is not None:
                     res.append(Trial.convertTrial(trial))
