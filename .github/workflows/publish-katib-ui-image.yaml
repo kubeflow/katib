@@ -1,0 +1,17 @@
+name: Publish Katib UI Image
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  ui:
+    name: Publish Image
+    uses: ./.github/workflows/build-and-publish-images.yaml
+    with:
+      component-name: katib-ui
+      platforms: linux/amd64,linux/arm64
+      dockerfile: cmd/new-ui/v1beta1/Dockerfile
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
