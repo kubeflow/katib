@@ -1,8 +1,12 @@
 name: Publish Katib Core Images
 
 on:
-  - push
-  - pull_request
+  push:
+    paths-ignore:
+      - 'pkg/new-ui/v1beta1/frontend/**'
+  pull_request:
+    paths-ignore:
+      - 'pkg/new-ui/v1beta1/frontend/**'
 
 jobs:
   core:
@@ -15,7 +19,6 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
 
     strategy:
       fail-fast: false
