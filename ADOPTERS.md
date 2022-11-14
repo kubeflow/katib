@@ -11,6 +11,7 @@ Please keep the list in alphabetical order.
 | [babylon health](https://www.babylonhealth.com/) | [@jeremievallee](https://github.com/jeremievallee)   | Hyperparameter tuning for AIR internal AI Platform                   |
 | [caicloud](https://caicloud.io/)                 | [@gaocegege](https://github.com/gaocegege)           | Hyperparameter tuning in Caicloud Cloud-Native AI Platform           |
 | [canonical](https://ubuntu.com/)                 | [@RFMVasconcelos](https://github.com/rfmvasconcelos) | Hyperparameter tuning for customer projects in Defense and Fintech   |
+| [CERN](https://home.cern/)                       | [@d-gol](https://github.com/d-gol)                   | Hyperparameter tuning within the ML platform on private cloud   |
 | [cisco](https://cisco.com/)                      | [@ramdootp](https://github.com/ramdootp)             | Hyperparameter tuning for conversational AI interface using Rasa     |
 | [cubonacci](https://www.cubonacci.com)           | [@janvdvegt](https://github.com/janvdvegt)           | Hyperparameter tuning within the Cubonacci machine learning platform |
 | [CyberAgent](https://www.cyberagent.co.jp/en/)   | [@tenzen-y](https://github.com/tenzen-y)             | Experiment in CyberAgent internal ML Platform on Private Cloud       |
