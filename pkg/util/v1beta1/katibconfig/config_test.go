@@ -54,13 +54,13 @@ func TestGetSuggestionConfigData(t *testing.T) {
 			katibConfig: func() *katibConfig {
 				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
 				kc.suggestion[testAlgorithmName].ImagePullPolicy = corev1.PullAlways
-				kc.suggestion[testAlgorithmName].Resource = *newFakeCustomResourceRequirements()
+				kc.suggestion[testAlgorithmName].Resources = *newFakeCustomResourceRequirements()
 				return kc
 			}(),
 			expected: func() *SuggestionConfig {
 				c := newFakeSuggestionConfig()
 				c.ImagePullPolicy = corev1.PullAlways
-				c.Resource = *newFakeCustomResourceRequirements()
+				c.Resources = *newFakeCustomResourceRequirements()
 				return c
 			}(),
 			inputAlgorithmName: testAlgorithmName,
@@ -107,7 +107,7 @@ func TestGetSuggestionConfigData(t *testing.T) {
 			testDescription: "GetSuggestionConfigData sets resource.requests and resource.limits for the suggestion service",
 			katibConfig: func() *katibConfig {
 				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
-				kc.suggestion[testAlgorithmName].Resource = corev1.ResourceRequirements{}
+				kc.suggestion[testAlgorithmName].Resources = corev1.ResourceRequirements{}
 				return kc
 			}(),
 			expected:           newFakeSuggestionConfig(),
@@ -402,9 +402,11 @@ func newFakeSuggestionConfig() *SuggestionConfig {
 	defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
 
 	return &SuggestionConfig{
-		Image:           "suggestion-image",
-		ImagePullPolicy: consts.DefaultImagePullPolicy,
-		Resource:        *setFakeResourceRequirements(),
+		Container: corev1.Container{
+			Image:           "suggestion-image",
+			ImagePullPolicy: consts.DefaultImagePullPolicy,
+			Resources:       *setFakeResourceRequirements(),
+		},
 		VolumeMountPath: consts.DefaultContainerSuggestionVolumeMountPath,
 		PersistentVolumeClaimSpec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: []corev1.PersistentVolumeAccessMode{

@@ -182,25 +182,18 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	earlyStoppingConfigData katibconfig.EarlyStoppingConfig) []corev1.Container {
 
 	containers := []corev1.Container{}
-	suggestionContainer := corev1.Container{
-		Name:            consts.ContainerSuggestion,
-		Image:           suggestionConfigData.Image,
-		ImagePullPolicy: suggestionConfigData.ImagePullPolicy,
-		Command:         suggestionConfigData.Command,
-		Args:            suggestionConfigData.Args,
-		WorkingDir:      suggestionConfigData.WorkingDir,
-		EnvFrom:         suggestionConfigData.EnvFrom,
-		Env:             suggestionConfigData.Env,
-		Ports: []corev1.ContainerPort{
+	suggestionContainer := suggestionConfigData.Container
+
+	if len(suggestionContainer.Ports) == 0 {
+		suggestionContainer.Ports = []corev1.ContainerPort{
 			{
 				Name:          consts.DefaultSuggestionPortName,
 				ContainerPort: consts.DefaultSuggestionPort,
 			},
-		},
-		Resources: suggestionConfigData.Resource,
+		}
 	}
 
-	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) {
+	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) && suggestionContainer.ReadinessProbe == nil {
 		suggestionContainer.ReadinessProbe = &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
 				Exec: &corev1.ExecAction{
@@ -214,6 +207,8 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 			InitialDelaySeconds: defaultInitialDelaySeconds,
 			PeriodSeconds:       defaultPeriodForReady,
 		}
+	}
+	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) && suggestionContainer.LivenessProbe == nil {
 		suggestionContainer.LivenessProbe = &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
 				Exec: &corev1.ExecAction{
@@ -232,7 +227,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	}
 
 	// Attach volume mounts to the suggestion container if ResumePolicy = FromVolume
-	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume && len(suggestionContainer.VolumeMounts) == 0 {
 		suggestionContainer.VolumeMounts = []corev1.VolumeMount{
 			{
 				Name:      consts.ContainerSuggestionVolumeName,

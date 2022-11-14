@@ -646,18 +646,20 @@ func newFakeSuggestionConfig() katibconfig.SuggestionConfig {
 	diskQ, _ := resource.ParseQuantity(disk)
 
 	return katibconfig.SuggestionConfig{
-		Image:           image,
-		ImagePullPolicy: imagePullPolicy,
-		Resource: corev1.ResourceRequirements{
-			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:              cpuQ,
-				corev1.ResourceMemory:           memoryQ,
-				corev1.ResourceEphemeralStorage: diskQ,
-			},
-			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:              cpuQ,
-				corev1.ResourceMemory:           memoryQ,
-				corev1.ResourceEphemeralStorage: diskQ,
+		Container: corev1.Container{
+			Image:           image,
+			ImagePullPolicy: imagePullPolicy,
+			Resources: corev1.ResourceRequirements{
+				Limits: corev1.ResourceList{
+					corev1.ResourceCPU:              cpuQ,
+					corev1.ResourceMemory:           memoryQ,
+					corev1.ResourceEphemeralStorage: diskQ,
+				},
+				Requests: corev1.ResourceList{
+					corev1.ResourceCPU:              cpuQ,
+					corev1.ResourceMemory:           memoryQ,
+					corev1.ResourceEphemeralStorage: diskQ,
+				},
 			},
 		},
 		ServiceAccountName: serviceAccount,

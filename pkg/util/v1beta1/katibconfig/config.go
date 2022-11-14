@@ -34,14 +34,7 @@ import (
 
 // SuggestionConfig is the JSON suggestion structure in Katib config.
 type SuggestionConfig struct {
-	Image                     string                           `json:"image"`
-	ImagePullPolicy           corev1.PullPolicy                `json:"imagePullPolicy,omitempty"`
-	Command                   []string                         `json:"command,omitempty"`
-	Args                      []string                         `json:"args,omitempty"`
-	WorkingDir                string                           `json:"workingDir,omitempty"`
-	EnvFrom                   []corev1.EnvFromSource           `json:"envFrom,omitempty"`
-	Env                       []corev1.EnvVar                  `json:"env,omitempty"`
-	Resource                  corev1.ResourceRequirements      `json:"resources,omitempty"`
+	corev1.Container          `json:",inline"`
 	ServiceAccountName        string                           `json:"serviceAccountName,omitempty"`
 	VolumeMountPath           string                           `json:"volumeMountPath,omitempty"`
 	PersistentVolumeClaimSpec corev1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
@@ -103,7 +96,7 @@ func GetSuggestionConfigData(algorithmName string, client client.Client) (Sugges
 	suggestionConfigData.ImagePullPolicy = setImagePullPolicy(suggestionConfigData.ImagePullPolicy)
 
 	// Set resource requirements for suggestion
-	suggestionConfigData.Resource = setResourceRequirements(suggestionConfigData.Resource)
+	suggestionConfigData.Resources = setResourceRequirements(suggestionConfigData.Resources)
 
 	// Set default suggestion container volume mount path
 	if suggestionConfigData.VolumeMountPath == "" {
