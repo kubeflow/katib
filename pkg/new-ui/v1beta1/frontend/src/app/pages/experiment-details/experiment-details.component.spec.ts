@@ -26,34 +26,32 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 let KWABackendServiceStub: Partial<KWABackendService>;
 let NamespaceServiceStub: Partial<NamespaceService>;
+let ActivatedRouteStub: Partial<ActivatedRoute>;
 
 KWABackendServiceStub = {
-  getExperimentTrialsInfo: () => of([]),
+  getExperimentTrialsInfo: () =>
+    of(
+      'Status,trialName,Validation-accuracy,Train-accuracy,lr,num-layers,optimizer\nSucceeded,tpe-05daf02d,0.977807,0.993104,0.023222418198803642,3,sgd',
+    ),
   getExperiment: () => of(),
   deleteExperiment: () => of(),
 };
 
 NamespaceServiceStub = {
-  getSelectedNamespace: () => of(),
+  updateSelectedNamespace: () => {},
+};
+
+ActivatedRouteStub = {
+  params: of({ namespace: 'kubeflow-user', experimentName: '' }),
+  queryParams: of({}),
 };
 
 describe('ExperimentDetailsComponent', () => {
   let component: ExperimentDetailsComponent;
   let fixture: ComponentFixture<ExperimentDetailsComponent>;
-  let activatedRouteSpy;
 
   beforeEach(
     waitForAsync(() => {
-      activatedRouteSpy = {
-        snapshot: {
-          params: {
-            experimentName: '',
-          },
-          queryParams: {
-            tab: '',
-          },
-        },
-      };
       TestBed.configureTestingModule({
         imports: [
           CommonModule,
@@ -75,7 +73,7 @@ describe('ExperimentDetailsComponent', () => {
         ],
         declarations: [ExperimentDetailsComponent],
         providers: [
-          { provide: ActivatedRoute, useValue: activatedRouteSpy },
+          { provide: ActivatedRoute, useValue: ActivatedRouteStub },
           { provide: Router, useValue: {} },
           { provide: KWABackendService, useValue: KWABackendServiceStub },
           { provide: ConfirmDialogService, useValue: {} },

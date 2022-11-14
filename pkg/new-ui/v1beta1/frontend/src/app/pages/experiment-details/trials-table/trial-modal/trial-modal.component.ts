@@ -221,8 +221,11 @@ export class TrialModalComponent implements OnInit {
   }
 
   returnToExperimentDetails() {
-    this.router.navigate([`/experiment/${this.experimentName}`], {
-      queryParams: { tab: 'trials' },
-    });
+    this.router.navigate(
+      [`/experiment/${this.namespace}/${this.experimentName}`],
+      {
+        queryParams: { tab: 'trials' },
+      },
+    );
   }
 }

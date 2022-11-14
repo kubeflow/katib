@@ -7,7 +7,10 @@ import { TrialModalComponent } from './pages/experiment-details/trials-table/tri
 
 const routes: Routes = [
   { path: '', component: ExperimentsComponent },
-  { path: 'experiment/:experimentName', component: ExperimentDetailsComponent },
+  {
+    path: 'experiment/:namespace/:experimentName',
+    component: ExperimentDetailsComponent,
+  },
   { path: 'new', component: ExperimentCreationComponent },
   {
     path: 'experiment/:experimentName/trial/:trialName',
