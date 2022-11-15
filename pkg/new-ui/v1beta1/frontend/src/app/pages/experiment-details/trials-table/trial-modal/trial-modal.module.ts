@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TrialModalOverviewModule } from './overview/trial-modal-overview.module';
 import { TrialModalComponent } from './trial-modal.component';
+import { TrialYamlModule } from './trial-yaml/trial-yaml.module';
 
 import {
   TitleActionsToolbarModule,
@@ -32,6 +33,7 @@ import {
     LoadingSpinnerModule,
     PanelModule,
     TitleActionsToolbarModule,
+    TrialYamlModule,
   ],
   exports: [TrialModalComponent],
 })
