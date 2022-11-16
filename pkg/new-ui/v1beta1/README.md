@@ -40,9 +40,10 @@ In order to build the UI locally, and expose it with a webpack dev server you wi
 You can build the common library with:
 
 ```bash
-cd /tmp && git clone https://github.com/kubeflow/kubeflow.git \
+COMMIT=$(cat ./frontend/COMMIT) \
+  && cd /tmp && git clone https://github.com/kubeflow/kubeflow.git \
   && cd kubeflow \
-  && git checkout c4ca7a9 \
+  && git checkout $COMMIT \
   && cd components/crud-web-apps/common/frontend/kubeflow-common-lib
 
 # build the common library module

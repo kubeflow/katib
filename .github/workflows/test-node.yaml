@@ -38,9 +38,10 @@ jobs:
 
       - name: Fetch Kubeflow and install common code dependencies
         run: |
+          COMMIT=$(cat pkg/new-ui/v1beta1/frontend/COMMIT)
           cd /tmp && git clone https://github.com/kubeflow/kubeflow.git
           cd kubeflow
-          git checkout c4ca7a9
+          git checkout $COMMIT
           cd components/crud-web-apps/common/frontend/kubeflow-common-lib
           npm i
           npm run build
