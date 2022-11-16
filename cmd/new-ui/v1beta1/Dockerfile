@@ -4,9 +4,11 @@ FROM ubuntu AS fetch-kubeflow-kubeflow
 RUN apt-get update && apt-get install git -y
 
 WORKDIR /kf
+COPY ./pkg/new-ui/v1beta1/frontend/COMMIT ./
 RUN git clone https://github.com/kubeflow/kubeflow.git && \
+    COMMIT=$(cat ./COMMIT) && \
     cd kubeflow && \
-    git checkout c4ca7a9
+    git checkout $COMMIT
 
 # --- Build the frontend kubeflow library ---
 FROM node:12 AS frontend-kubeflow-lib
