@@ -2,13 +2,13 @@ package v1beta1
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
-	"github.com/pkg/errors"
 	v1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -30,7 +30,7 @@ func GetUsername(r *http.Request) (string, error) {
 	}
 
 	if r.Header.Get(USER_HEADER) == "" {
-		return "", errors.New("User header not present!")
+		return "", errors.New("user header not present")
 	}
 
 	user := r.Header.Get(USER_HEADER)

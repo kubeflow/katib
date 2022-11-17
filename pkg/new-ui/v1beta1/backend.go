@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -31,7 +32,6 @@ import (
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
-	"github.com/pkg/errors"
 )
 
 func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
@@ -40,8 +40,12 @@ func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
 		log.Printf("NewClient for Katib failed: %v", err)
 		panic(err)
 	}
-	// create a new client-go client for sending SAR objects in the API-SERVER
+	// create a new client for manipulating SAR objects.
 	conf, err := config.GetConfig()
+	if err != nil {
+		log.Printf("Failed to create k8s rest config: %v", err)
+		panic(err)
+	}
 	sarclient, err := kubernetes.NewForConfig(conf)
 	if err != nil {
 		log.Printf("SarClient for Katib failes: %v", err)
@@ -147,7 +151,7 @@ func (k *KatibUIHandler) FetchNamespacedExperiments(w http.ResponseWriter, r *ht
 	namespaces, ok := r.URL.Query()["namespace"]
 	if !ok {
 		log.Printf("No 'namespace' query parameter was provided.")
-		err := errors.New("No 'namespace' query parameter was provided.")
+		err := errors.New("no 'namespace' query parameter was provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -218,14 +222,14 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 	namespaces, ok := r.URL.Query()["namespace"]
 	if !ok {
 		log.Printf("No 'namespace' query parameter was provided.")
-		err := errors.New("No 'namespace' query parameter was provided.")
+		err := errors.New("no 'namespace' query parameter was provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	experimentNames, ok := r.URL.Query()["experimentName"]
 	if !ok {
 		log.Printf("No experimentName provided in Query parameteres! Provide an 'experimentName' param")
-		err := errors.New("No experimentName provided!")
+		err := errors.New("no experimentName provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -349,7 +353,7 @@ func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 	updatedTemplateYaml := data["updatedTemplateYaml"].(string)
 
-	err = IsAuthorized(user, "add", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
+	err = IsAuthorized(user, "create", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
 	if err != nil {
 		log.Printf("The user: %s is not authorized to add configmap: %s from namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
@@ -404,7 +408,7 @@ func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 	updatedTemplateYaml := data["updatedTemplateYaml"].(string)
 
-	err = IsAuthorized(user, "edit", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
+	err = IsAuthorized(user, "update", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
 	if err != nil {
 		log.Printf("The user: %s is not authorized to edit configmap: %s from namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
@@ -522,14 +526,14 @@ func (k *KatibUIHandler) FetchExperiment(w http.ResponseWriter, r *http.Request)
 	namespaces, ok := r.URL.Query()["namespace"]
 	if !ok {
 		log.Printf("No 'namespace' query parameter was provided.")
-		err := errors.New("No 'namespace' query parameter was provided.")
+		err := errors.New("no 'namespace' query parameter was provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	experimentNames, ok := r.URL.Query()["experimentName"]
 	if !ok {
 		log.Printf("No experimentName provided in Query parameteres! Provide an 'experimentName' param")
-		err := errors.New("No experimentName provided!")
+		err := errors.New("no experimentName provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -575,14 +579,14 @@ func (k *KatibUIHandler) FetchSuggestion(w http.ResponseWriter, r *http.Request)
 	namespaces, ok := r.URL.Query()["namespace"]
 	if !ok {
 		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
-		err := errors.New("No 'namespace' provided!")
+		err := errors.New("no 'namespace' provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	suggestionNames, ok := r.URL.Query()["suggestionName"]
 	if !ok {
 		log.Printf("No experimentName provided in Query parameteres! Provide an 'experimentName' param")
-		err := errors.New("No experimentName provided!")
+		err := errors.New("no experimentName provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

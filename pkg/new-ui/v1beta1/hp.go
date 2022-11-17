@@ -19,6 +19,7 @@ package v1beta1
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -27,7 +28,6 @@ import (
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
-	"github.com/pkg/errors"
 )
 
 const kfpRunIDAnnotation = "kubeflow-kale.org/kfp-run-uuid"
@@ -45,14 +45,14 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	namespaces, ok := r.URL.Query()["namespace"]
 	if !ok {
 		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
-		err := errors.New("No 'namespace' provided!")
+		err := errors.New("no 'namespace' provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	experimentNames, ok := r.URL.Query()["experimentName"]
 	if !ok {
 		log.Printf("No experimentName provided in Query parameteres! Provide an 'experimentName' param")
-		err := errors.New("No experimentName provided!")
+		err := errors.New("no experimentName provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -201,7 +201,7 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	namespaces, ok := r.URL.Query()["namespace"]
 	if !ok {
 		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
-		err := errors.New("No 'namespace' provided!")
+		err := errors.New("no 'namespace' provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -209,7 +209,7 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	trialNames, ok := r.URL.Query()["trialName"]
 	if !ok {
 		log.Printf("No trialName provided in Query parameters! Provide a 'trialName' param")
-		err := errors.New("No 'trialName' provided!")
+		err := errors.New("no 'trialName' provided")
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
