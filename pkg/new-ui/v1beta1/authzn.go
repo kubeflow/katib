@@ -40,8 +40,8 @@ func GetUsername(r *http.Request) (string, error) {
 }
 
 // Function for constructing SubjectAccessReviews (SAR) objects
-func CreateSAR(user string, verb string, namespace string, group string,
-	version string, resource string, subresource string, name string) *v1.SubjectAccessReview {
+func CreateSAR(user, verb, namespace, group,
+	version, resource, subresource, name string) *v1.SubjectAccessReview {
 
 	sar := &v1.SubjectAccessReview{
 		Spec: v1.SubjectAccessReviewSpec{
@@ -60,8 +60,8 @@ func CreateSAR(user string, verb string, namespace string, group string,
 	return sar
 }
 
-func IsAuthorized(user string, verb string, namespace string, group string,
-	version string, resource string, subresource string, name string, client *kubernetes.Clientset) error {
+func IsAuthorized(user, verb, namespace, group,
+	version, resource, subresource, name string, client *kubernetes.Clientset) error {
 
 	// Skip authz when in dev_mode
 	if BACKEND_MODE == "dev" || BACKEND_MODE == "development" {
@@ -91,8 +91,8 @@ func IsAuthorized(user string, verb string, namespace string, group string,
 	return err
 }
 
-func generateUnauthorizedMessage(user string, verb string, namespace string, group string,
-	version string, resource string, subresource string, sar *v1.SubjectAccessReview) string {
+func generateUnauthorizedMessage(user, verb, namespace, group,
+	version, resource, subresource string, sar *v1.SubjectAccessReview) string {
 
 	msg := fmt.Sprintf("User: %s is not authorized to %s", user, verb)
 
