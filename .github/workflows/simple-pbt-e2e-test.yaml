@@ -1,6 +1,8 @@
 name: E2E Test with simple-pbt
 on:
-  - pull_request
+  pull_request:
+    paths-ignore:
+      - 'pkg/new-ui/v1beta1/frontend/**'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -11,7 +13,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Test Env
         uses: ./.github/workflows/template-setup-e2e-test
@@ -30,9 +32,7 @@ jobs:
       fail-fast: false
       matrix:
         # Detail: https://hub.docker.com/r/kindest/node
-        # TODO (tenzen-y): We need to consider running tests on more kubernetes versions.
-        # kubernetes-version: ["v1.20.15", "v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
-        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6"]
+        kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
         # Comma Delimited
         experiments: ["simple-pbt"]
         database-type: ["mysql", "postgres"]

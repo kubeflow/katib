@@ -1,8 +1,12 @@
 name: Shellcheck
 
 on:
-  - push
-  - pull_request
+  push:
+    paths-ignore:
+      - 'pkg/new-ui/v1beta1/frontend/**'
+  pull_request:
+    paths-ignore:
+      - 'pkg/new-ui/v1beta1/frontend/**'
 
 jobs:
   test:
@@ -11,7 +15,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Run shellcheck
         run: make shellcheck

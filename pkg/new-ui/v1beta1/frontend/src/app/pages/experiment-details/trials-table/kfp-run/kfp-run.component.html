@@ -1,0 +1,13 @@
+<a
+  *ngIf="trialKfpRunUrl"
+  class="svg-color-enabled"
+  [href]="trialKfpRunUrl"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <mat-icon svgIcon="pipeline-centered"> </mat-icon>
+</a>
+
+<div *ngIf="!trialKfpRunUrl" class="svg-color-disabled" matTooltip="No KFP run">
+  <mat-icon svgIcon="pipeline-centered"> </mat-icon>
+</div>

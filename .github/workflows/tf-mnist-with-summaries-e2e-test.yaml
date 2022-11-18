@@ -1,6 +1,8 @@
 name: E2E Test with tf-mnist-with-summaries
 on:
-  - pull_request
+  pull_request:
+    paths-ignore:
+      - 'pkg/new-ui/v1beta1/frontend/**'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -11,7 +13,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Test Env
         uses: ./.github/workflows/template-setup-e2e-test
@@ -30,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes-version: ["v1.22.14", "v1.23.11", "1.24.5"]
+        kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
         # Comma Delimited
         experiments: ["tfjob-mnist-with-summaries"]
         database-type: ["mysql", "postgres"]

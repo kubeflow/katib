@@ -36,8 +36,9 @@ export const experimentsTableConfig: TableConfig = {
       }),
     },
     {
-      matHeaderCellDef: 'Age',
+      matHeaderCellDef: 'Created at',
       matColumnDef: 'age',
+      textAlignment: 'right',
       value: new DateTimeValue({
         field: 'startTime',
       }),
