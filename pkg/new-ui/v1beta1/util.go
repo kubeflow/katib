@@ -104,7 +104,7 @@ func (k *KatibUIHandler) getTrialTemplatesViewList(user string) ([]TrialTemplate
 			} else {
 				// for all other namespaces check authorization rbac
 				configmapName := cmap.ObjectMeta.Name
-				err = IsAuthorized(user, "get", ns, "", "v1", "configmaps", "", configmapName, &k.sarClient)
+				err = IsAuthorized(user, "get", ns, "", "", configmapName, apiv1.SchemeGroupVersion, k.sarClient)
 				if err != nil {
 					log.Printf("The user: %s is not authorized to view configmap: %s from namespace: %s \n", user, configmapName, ns)
 					return nil, err

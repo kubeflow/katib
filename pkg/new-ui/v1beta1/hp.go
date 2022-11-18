@@ -27,6 +27,8 @@ import (
 	"time"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	trialv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
@@ -59,7 +61,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	experimentName := experimentNames[0]
 	namespace := namespaces[0]
 
-	err = IsAuthorized(user, "get", namespace, "kubeflow.org", "v1beta1", "experiments", "", experimentName, &k.sarClient)
+	err = IsAuthorized(user, "get", namespace, "experiments", "", experimentName, experimentv1beta1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
 		log.Printf("The user: %s is not authorized to get experiments from namespace: %s \n", user, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
@@ -96,7 +98,7 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Parameters names")
 
-	err = IsAuthorized(user, "list", namespace, "kubeflow.org", "v1beta1", "trials", "", "", &k.sarClient)
+	err = IsAuthorized(user, "list", namespace, "trials", "", "", trialv1beta1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
 		log.Printf("The user: %s is not authorized to list trials from namespace: %s \n", user, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
@@ -220,7 +222,7 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	conn, c := k.connectManager()
 	defer conn.Close()
 
-	err = IsAuthorized(user, "list", namespace, "kubeflow.org", "v1beta1", "trials", "", trialName, &k.sarClient)
+	err = IsAuthorized(user, "list", namespace, "trials", "", trialName, trialv1beta1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
 		log.Printf("The user: %s is not authorized to get trial: %s from namespace: %s \n", user, trialName, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)

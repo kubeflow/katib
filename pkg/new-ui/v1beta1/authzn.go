@@ -10,8 +10,8 @@ import (
 
 	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 	v1 "k8s.io/api/authorization/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ENV variables
@@ -40,8 +40,7 @@ func GetUsername(r *http.Request) (string, error) {
 }
 
 // Function for constructing SubjectAccessReviews (SAR) objects
-func CreateSAR(user, verb, namespace, group,
-	version, resource, subresource, name string) *v1.SubjectAccessReview {
+func CreateSAR(user, verb, namespace, resource, subresource, name string, schema schema.GroupVersion) *v1.SubjectAccessReview {
 
 	sar := &v1.SubjectAccessReview{
 		Spec: v1.SubjectAccessReviewSpec{
@@ -49,8 +48,8 @@ func CreateSAR(user, verb, namespace, group,
 			ResourceAttributes: &v1.ResourceAttributes{
 				Namespace:   namespace,
 				Verb:        verb,
-				Group:       group,
-				Version:     version,
+				Group:       schema.Group,
+				Version:     schema.Version,
 				Resource:    resource,
 				Subresource: subresource,
 				Name:        name,
@@ -60,8 +59,7 @@ func CreateSAR(user, verb, namespace, group,
 	return sar
 }
 
-func IsAuthorized(user, verb, namespace, group,
-	version, resource, subresource, name string, client *kubernetes.Clientset) error {
+func IsAuthorized(user, verb, namespace, resource, subresource, name string, schema schema.GroupVersion, client client.Client) error {
 
 	// Skip authz when in dev_mode
 	if BACKEND_MODE == "dev" || BACKEND_MODE == "development" {
@@ -74,32 +72,30 @@ func IsAuthorized(user, verb, namespace, group,
 		return nil
 	}
 
-	sar := CreateSAR(user, verb, namespace, group, version, resource, subresource, name)
+	sar := CreateSAR(user, verb, namespace, resource, subresource, name, schema)
 
-	res, err := client.AuthorizationV1().SubjectAccessReviews().Create(context.TODO(), sar, metav1.CreateOptions{})
+	err := client.Create(context.TODO(), sar)
 	if err != nil {
 		log.Printf("Error submitting SubjectAccessReview: %v, %s", sar, err.Error())
 		return err
 	}
 
-	if res.Status.Allowed {
+	if sar.Status.Allowed {
 		return nil
 	}
 
-	msg := generateUnauthorizedMessage(user, verb, namespace, group, version, resource, subresource, res)
-	err = errors.New(msg)
-	return err
+	msg := generateUnauthorizedMessage(user, verb, namespace, resource, subresource, schema, sar)
+	return errors.New(msg)
 }
 
-func generateUnauthorizedMessage(user, verb, namespace, group,
-	version, resource, subresource string, sar *v1.SubjectAccessReview) string {
+func generateUnauthorizedMessage(user, verb, namespace, resource, subresource string, schema schema.GroupVersion, sar *v1.SubjectAccessReview) string {
 
 	msg := fmt.Sprintf("User: %s is not authorized to %s", user, verb)
 
-	if group == "" {
-		msg += fmt.Sprintf(" %s/%s", version, resource)
+	if schema.Group == "" {
+		msg += fmt.Sprintf(" %s/%s", schema.Version, resource)
 	} else {
-		msg += fmt.Sprintf(" %s/%s/%s", group, version, resource)
+		msg += fmt.Sprintf(" %s/%s/%s", schema.Group, schema.Version, resource)
 	}
 
 	if subresource != "" {

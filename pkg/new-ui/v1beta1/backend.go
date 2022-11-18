@@ -25,13 +25,13 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	suggestionv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
@@ -40,20 +40,11 @@ func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
 		log.Printf("NewClient for Katib failed: %v", err)
 		panic(err)
 	}
-	// create a new client for manipulating SAR objects.
-	conf, err := config.GetConfig()
-	if err != nil {
-		log.Printf("Failed to create k8s rest config: %v", err)
-		panic(err)
-	}
-	sarclient, err := kubernetes.NewForConfig(conf)
-	if err != nil {
-		log.Printf("SarClient for Katib failes: %v", err)
-		panic(err)
-	}
+	sarclient := kclient.GetClient()
+
 	return &KatibUIHandler{
 		katibClient:   kclient,
-		sarClient:     *sarclient,
+		sarClient:     sarclient,
 		dbManagerAddr: dbManagerAddr,
 	}
 }
@@ -123,9 +114,9 @@ func (k *KatibUIHandler) CreateExperiment(w http.ResponseWriter, r *http.Request
 	namespace := job.ObjectMeta.Namespace
 	expName := job.ObjectMeta.Name
 
-	err = IsAuthorized(user, "create", namespace, "kubeflow.org", "v1beta1", "experiments", "", "", &k.sarClient)
+	err = IsAuthorized(user, "create", namespace, "kubeflow.org", "", "", experimentv1beta1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
-		log.Printf("The user: %s is not authorized to create experiment: %s from namespace: %s \n", user, expName, namespace)
+		log.Printf("The user: %s is not authorized to create experiment: %s in namespace: %s \n", user, expName, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
@@ -158,9 +149,9 @@ func (k *KatibUIHandler) FetchNamespacedExperiments(w http.ResponseWriter, r *ht
 
 	namespace := namespaces[0]
 
-	err = IsAuthorized(user, "list", namespace, "kubeflow.org", "v1beta1", "experiments", "", "", &k.sarClient)
+	err = IsAuthorized(user, "list", namespace, "experiments", "", "", experimentv1beta1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
-		log.Printf("The user: %s is not authorized to list experiments from namespace: %s \n", user, namespace)
+		log.Printf("The user: %s is not authorized to list experiments in namespace: %s \n", user, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
@@ -236,9 +227,9 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 	experimentName := experimentNames[0]
 	namespace := namespaces[0]
 
-	err = IsAuthorized(user, "delete", namespace, "kubeflow.org", "v1beta1", "experiments", "", experimentName, &k.sarClient)
+	err = IsAuthorized(user, "delete", namespace, "experiments", "", "", experimentv1beta1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
-		log.Printf("The user: %s is not authorized to delete experiment: %s from namespace: %s \n", user, experimentName, namespace)
+		log.Printf("The user: %s is not authorized to delete experiment: %s in namespace: %s \n", user, experimentName, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
@@ -353,9 +344,9 @@ func (k *KatibUIHandler) AddTemplate(w http.ResponseWriter, r *http.Request) {
 	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 	updatedTemplateYaml := data["updatedTemplateYaml"].(string)
 
-	err = IsAuthorized(user, "create", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
+	err = IsAuthorized(user, "create", updatedConfigMapNamespace, "configmaps", "", updatedConfigMapName, corev1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
-		log.Printf("The user: %s is not authorized to add configmap: %s from namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
+		log.Printf("The user: %s is not authorized to add configmap: %s in namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
@@ -408,9 +399,9 @@ func (k *KatibUIHandler) EditTemplate(w http.ResponseWriter, r *http.Request) {
 	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 	updatedTemplateYaml := data["updatedTemplateYaml"].(string)
 
-	err = IsAuthorized(user, "update", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
+	err = IsAuthorized(user, "update", updatedConfigMapNamespace, "configmaps", "", updatedConfigMapName, corev1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
-		log.Printf("The user: %s is not authorized to edit configmap: %s from namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
+		log.Printf("The user: %s is not authorized to edit configmap: %s in namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
@@ -460,9 +451,9 @@ func (k *KatibUIHandler) DeleteTemplate(w http.ResponseWriter, r *http.Request) 
 	updatedConfigMapName := data["updatedConfigMapName"].(string)
 	updatedConfigMapPath := data["updatedConfigMapPath"].(string)
 
-	err = IsAuthorized(user, "delete", updatedConfigMapNamespace, "", "v1", "configmaps", "", updatedConfigMapName, &k.sarClient)
+	err = IsAuthorized(user, "delete", updatedConfigMapNamespace, "configmaps", "", updatedConfigMapName, corev1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
-		log.Printf("The user: %s is not authorized to delete configmap: %s from namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
+		log.Printf("The user: %s is not authorized to delete configmap: %s in namespace: %s \n", user, updatedConfigMapName, updatedConfigMapNamespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
@@ -541,9 +532,9 @@ func (k *KatibUIHandler) FetchExperiment(w http.ResponseWriter, r *http.Request)
 	experimentName := experimentNames[0]
 	namespace := namespaces[0]
 
-	err = IsAuthorized(user, "get", namespace, "kubeflow.org", "v1beta1", "experiments", "", experimentName, &k.sarClient)
+	err = IsAuthorized(user, "get", namespace, "experiments", "", experimentName, experimentv1beta1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
-		log.Printf("The user: %s is not authorized to get experiment: %s from namespace: %s \n", user, experimentName, namespace)
+		log.Printf("The user: %s is not authorized to get experiment: %s in namespace: %s \n", user, experimentName, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
@@ -594,9 +585,9 @@ func (k *KatibUIHandler) FetchSuggestion(w http.ResponseWriter, r *http.Request)
 	suggestionName := suggestionNames[0]
 	namespace := namespaces[0]
 
-	err = IsAuthorized(user, "get", namespace, "kubeflow.org", "v1beta1", "suggestions", "", suggestionName, &k.sarClient)
+	err = IsAuthorized(user, "get", namespace, "suggestions", "", suggestionName, suggestionv1beta1.SchemeGroupVersion, k.sarClient)
 	if err != nil {
-		log.Printf("The user: %s is not authorized to get suggestion: %s from namespace: %s \n", user, suggestionName, namespace)
+		log.Printf("The user: %s is not authorized to get suggestion: %s in namespace: %s \n", user, suggestionName, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
