@@ -1,7 +1,13 @@
 <h1 mat-dialog-title>Edit YAML</h1>
 
 <div mat-dialog-content>
-  <div ace-editor [(text)]="yaml" theme="xcode" mode="yaml"></div>
+  <lib-monaco-editor
+    [(text)]="yaml"
+    [language]="'yaml'"
+    [readOnly]="false"
+    [width]="700"
+    [height]="350"
+  ></lib-monaco-editor>
 </div>
 
 <div mat-dialog-actions>

@@ -1,8 +1,6 @@
-<div
-  ace-editor
+<lib-monaco-editor
   [(text)]="yaml"
-  theme="xcode"
-  mode="yaml"
+  [language]="'yaml'"
   [readOnly]="true"
-  [options]="{ maxLines: 1000 }"
-></div>
+  [height]="500"
+></lib-monaco-editor>

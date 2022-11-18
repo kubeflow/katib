@@ -11,6 +11,7 @@ import {
   KubeflowModule,
 } from 'kubeflow';
 import { KWABackendService } from 'src/app/services/backend.service';
+import { RouterTestingModule } from '@angular/router/testing';
 
 let KWABackendServiceStub: Partial<KWABackendService>;
 let NamespaceServiceStub: Partial<NamespaceService>;
@@ -22,6 +23,7 @@ KWABackendServiceStub = {
 
 NamespaceServiceStub = {
   getSelectedNamespace: () => of(),
+  getSelectedNamespace2: () => of(),
 };
 
 describe('ExperimentsComponent', () => {
@@ -36,6 +38,7 @@ describe('ExperimentsComponent', () => {
           ReactiveFormsModule,
           MatSnackBarModule,
           KubeflowModule,
+          RouterTestingModule,
         ],
         declarations: [ExperimentsComponent],
         providers: [
