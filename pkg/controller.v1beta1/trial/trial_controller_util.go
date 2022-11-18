@@ -45,7 +45,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 	timeNow := metav1.Now()
 
 	if jobStatus.Condition == trialutil.JobSucceeded {
-		if isTrialObservationAvailable(instance) && !instance.IsSucceeded() {
+		if instance.IsObservationAvailable() && !instance.IsSucceeded() {
 			if !instance.IsEarlyStopped() {
 				msg := "Trial has succeeded"
 				reason := TrialSucceededReason
@@ -160,18 +160,6 @@ func (r *ReconcileTrial) updateFinalizers(instance *trialsv1beta1.Trial, finaliz
 		// Need to requeue because finalizer update does not change metadata.generation
 		return reconcile.Result{Requeue: true}, err
 	}
-}
-
-func isTrialObservationAvailable(instance *trialsv1beta1.Trial) bool {
-	objectiveMetricName := instance.Spec.Objective.ObjectiveMetricName
-	if instance.Status.Observation != nil && instance.Status.Observation.Metrics != nil {
-		for _, metric := range instance.Status.Observation.Metrics {
-			if metric.Name == objectiveMetricName && metric.Latest != consts.UnavailableMetricValue {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func getMetrics(metricLogs []*api_pb.MetricLog, strategies []commonv1beta1.MetricStrategy) (*commonv1beta1.Observation, error) {

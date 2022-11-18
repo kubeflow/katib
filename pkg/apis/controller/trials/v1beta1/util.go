@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	"errors"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -87,6 +88,19 @@ func (trial *Trial) IsKilled() bool {
 // IsMetricsUnavailable returns true if Trial metrics are not available
 func (trial *Trial) IsMetricsUnavailable() bool {
 	return hasCondition(trial, TrialMetricsUnavailable)
+}
+
+// IsObservationAvailable return ture if the Trial has valid observations updated
+func (trial *Trial) IsObservationAvailable() bool {
+	objectiveMetricName := trial.Spec.Objective.ObjectiveMetricName
+	if trial.Status.Observation != nil && trial.Status.Observation.Metrics != nil {
+		for _, metric := range trial.Status.Observation.Metrics {
+			if metric.Name == objectiveMetricName && metric.Latest != consts.UnavailableMetricValue {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (trial *Trial) IsCompleted() bool {
