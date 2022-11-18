@@ -129,7 +129,7 @@ func (k *KatibUIHandler) CreateExperiment(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func (k *KatibUIHandler) FetchNamespacedExperiments(w http.ResponseWriter, r *http.Request) {
+func (k *KatibUIHandler) FetchExperiments(w http.ResponseWriter, r *http.Request) {
 
 	// check if user's username is provided in request Header
 	user, err := GetUsername(r)

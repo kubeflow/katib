@@ -18,14 +18,13 @@ import (
 var (
 	USER_HEADER  = env.GetEnvOrDefault("USERID_HEADER", "kubeflow-userid")
 	USER_PREFIX  = env.GetEnvOrDefault("USERID_PREFIX", ":")
-	DISABLE_AUTH = env.GetEnvOrDefault("APP_DISABLE_AUTH", "false") == "true"
-	BACKEND_MODE = env.GetEnvOrDefault("BACKEND_MODE", "prod")
+	DISABLE_AUTH = env.GetEnvOrDefault("APP_DISABLE_AUTH", "false")
 )
 
 func GetUsername(r *http.Request) (string, error) {
 	var username string
-	if DISABLE_AUTH {
-		log.Printf("APP_DISABLE_AUTH set to True. Skipping authorization check")
+	if DISABLE_AUTH == "true" {
+		log.Printf("APP_DISABLE_AUTH set to True. Skipping authentication check")
 		return "", nil
 	}
 
@@ -61,13 +60,8 @@ func CreateSAR(user, verb, namespace, resource, subresource, name string, schema
 
 func IsAuthorized(user, verb, namespace, resource, subresource, name string, schema schema.GroupVersion, client client.Client) error {
 
-	// Skip authz when in dev_mode
-	if BACKEND_MODE == "dev" || BACKEND_MODE == "development" {
-		log.Printf("Skipping authorization check in development mode")
-		return nil
-	}
 	// Skip authz when admin is explicity requested it
-	if DISABLE_AUTH {
+	if DISABLE_AUTH == "true" {
 		log.Printf("APP_DISABLE_AUTH set to True. Skipping authorization check")
 		return nil
 	}
