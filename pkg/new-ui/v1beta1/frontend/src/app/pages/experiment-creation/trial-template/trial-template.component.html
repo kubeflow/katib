@@ -84,14 +84,14 @@
       </div>
     </ng-container>
 
-    <div
-      ace-editor
+    <lib-monaco-editor
       [(text)]="yaml"
+      [language]="'yaml'"
       [readOnly]="formGroup.get('type').value === 'configmap'"
       (textChange)="recalculateTrialParameters($event)"
-      theme="xcode"
-      mode="yaml"
-    ></div>
+      [width]="375"
+      [height]="350"
+    ></lib-monaco-editor>
 
     <mat-divider class="margin-bottom margin-top"></mat-divider>
 

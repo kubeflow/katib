@@ -68,13 +68,13 @@
       </ng-container>
 
       <ng-container *ngSwitchCase="kind.CUSTOM">
-        <div
-          ace-editor
-          class="ace-editor"
+        <lib-monaco-editor
           [(text)]="customYaml"
-          mode="yaml"
-          theme="xcode"
-        ></div>
+          [language]="'yaml'"
+          [readOnly]="false"
+          [width]="375"
+          [height]="300"
+        ></lib-monaco-editor>
       </ng-container>
     </ng-container>
   </div>

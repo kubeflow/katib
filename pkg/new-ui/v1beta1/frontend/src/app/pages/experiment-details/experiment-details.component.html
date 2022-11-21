@@ -61,9 +61,11 @@
         ></app-experiment-details-tab>
       </mat-tab>
       <mat-tab label="YAML">
-        <app-experiment-yaml
-          [experimentJson]="experimentDetails"
-        ></app-experiment-yaml>
+        <ng-template matTabContent>
+          <app-experiment-yaml
+            [experimentJson]="experimentDetails"
+          ></app-experiment-yaml>
+        </ng-template>
       </mat-tab>
     </mat-tab-group>
   </div>
