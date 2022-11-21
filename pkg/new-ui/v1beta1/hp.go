@@ -30,19 +30,13 @@ import (
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	trialv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
 const kfpRunIDAnnotation = "kubeflow-kale.org/kfp-run-uuid"
 
 func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-
-	user, err := GetUsername(r)
-	if err != nil {
-		log.Printf("User is not provided!")
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
 
 	namespaces, ok := r.URL.Query()["namespace"]
 	if !ok {
@@ -61,13 +55,16 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	experimentName := experimentNames[0]
 	namespace := namespaces[0]
 
-	err = IsAuthorized(user, "get", namespace, "experiments", "", experimentName, experimentv1beta1.SchemeGroupVersion, k.sarClient)
-	if err != nil {
+	user, err := IsAuthorized(consts.ActionTypeGet, namespace, consts.PluralExperiment, "", experimentName, experimentv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
+	if user == "" && err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	} else if err != nil {
 		log.Printf("The user: %s is not authorized to get experiments from namespace: %s \n", user, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
-	log.Printf("The user: %s is authorized to get kubeflow.org/v1beta1/experiments in namespace: %s", user, namespace)
 
 	log.Printf("Start FetchHPJobInfo for Experiment: %v in namespace: %v", experimentName, namespace)
 
@@ -98,13 +95,16 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 	}
 	log.Printf("Got Parameters names")
 
-	err = IsAuthorized(user, "list", namespace, "trials", "", "", trialv1beta1.SchemeGroupVersion, k.sarClient)
-	if err != nil {
+	_, err = IsAuthorized(consts.ActionTypeList, namespace, consts.PluralTrial, "", "", trialv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
+	if user == "" && err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	} else if err != nil {
 		log.Printf("The user: %s is not authorized to list trials from namespace: %s \n", user, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
-	log.Printf("The user: %s is authorized to list kubeflow.org/v1beta1/trials in namespace: %s", user, namespace)
 
 	trialList, err := k.katibClient.GetTrialList(experimentName, namespace)
 	if err != nil {
@@ -193,13 +193,6 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 
-	user, err := GetUsername(r)
-	if err != nil {
-		log.Printf("User is not provided!")
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
 	namespaces, ok := r.URL.Query()["namespace"]
 	if !ok {
 		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
@@ -222,13 +215,16 @@ func (k *KatibUIHandler) FetchHPJobTrialInfo(w http.ResponseWriter, r *http.Requ
 	conn, c := k.connectManager()
 	defer conn.Close()
 
-	err = IsAuthorized(user, "list", namespace, "trials", "", trialName, trialv1beta1.SchemeGroupVersion, k.sarClient)
-	if err != nil {
+	user, err := IsAuthorized(consts.ActionTypeList, namespace, consts.PluralTrial, "", trialName, trialv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
+	if user == "" && err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	} else if err != nil {
 		log.Printf("The user: %s is not authorized to get trial: %s from namespace: %s \n", user, trialName, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
-	log.Printf("The user: %s is authorized to get kubeflow.org/v1beta1/trial: %s in namespace: %s", user, trialName, namespace)
 
 	trial, err := k.katibClient.GetTrial(trialName, namespace)
 

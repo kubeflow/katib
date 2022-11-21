@@ -26,8 +26,23 @@ import (
 
 const (
 
+	// ActionTypeCreate is the create CRUD action
+	ActionTypeCreate = "create"
+	// ActionTypeList is the list CRUD action
+	ActionTypeList = "list"
+	// ActionTypeGet is the get CRUD action
+	ActionTypeGet = "get"
+	// ActionTypeUpdate is the update CRUD action
+	ActionTypeUpdate = "update"
+	// ActionTypeDelete is the delete CRUD action
+	ActionTypeDelete = "delete"
+
 	// PluralTrial is the plural for Trial object
 	PluralTrial = "trials"
+	// PluralExperiment is the plural for Experiment object
+	PluralExperiment = "experiments"
+	// PluralSuggestion is the plural for Suggestion object
+	PluralSuggestion = "suggestions"
 
 	// ConfigExperimentSuggestionName is the config name of the
 	// suggestion client implementation in experiment controller.

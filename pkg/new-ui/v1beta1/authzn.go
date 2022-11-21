@@ -18,25 +18,8 @@ import (
 var (
 	USER_HEADER  = env.GetEnvOrDefault("USERID_HEADER", "kubeflow-userid")
 	USER_PREFIX  = env.GetEnvOrDefault("USERID_PREFIX", ":")
-	DISABLE_AUTH = env.GetEnvOrDefault("APP_DISABLE_AUTH", "false")
+	DISABLE_AUTH = env.GetEnvOrDefault("APP_DISABLE_AUTH", "true")
 )
-
-func GetUsername(r *http.Request) (string, error) {
-	var username string
-	if DISABLE_AUTH == "true" {
-		log.Printf("APP_DISABLE_AUTH set to True. Skipping authentication check")
-		return "", nil
-	}
-
-	if r.Header.Get(USER_HEADER) == "" {
-		return "", errors.New("user header not present")
-	}
-
-	user := r.Header.Get(USER_HEADER)
-	username = strings.Replace(user, USER_PREFIX, "", 1)
-
-	return username, nil
-}
 
 // Function for constructing SubjectAccessReviews (SAR) objects
 func CreateSAR(user, verb, namespace, resource, subresource, name string, schema schema.GroupVersion) *v1.SubjectAccessReview {
@@ -58,28 +41,34 @@ func CreateSAR(user, verb, namespace, resource, subresource, name string, schema
 	return sar
 }
 
-func IsAuthorized(user, verb, namespace, resource, subresource, name string, schema schema.GroupVersion, client client.Client) error {
+func IsAuthorized(verb, namespace, resource, subresource, name string, schema schema.GroupVersion, client client.Client, r *http.Request) (string, error) {
 
-	// Skip authz when admin is explicity requested it
+	// We disable authn/authz checks when in standalone mode.
 	if DISABLE_AUTH == "true" {
-		log.Printf("APP_DISABLE_AUTH set to True. Skipping authorization check")
-		return nil
+		log.Printf("APP_DISABLE_AUTH set to True. Skipping authentication/authorization checks")
+		return "", nil
 	}
+	// Check if an incoming request is from an authenticated user (kubeflow mode: kubeflow-userid header)
+	if r.Header.Get(USER_HEADER) == "" {
+		return "", errors.New("user header not present")
+	}
+	user := r.Header.Get(USER_HEADER)
+	user = strings.Replace(user, USER_PREFIX, "", 1)
 
+	// Check if the user is authorized to perform a given action on katib/k8s resources.
 	sar := CreateSAR(user, verb, namespace, resource, subresource, name, schema)
-
 	err := client.Create(context.TODO(), sar)
 	if err != nil {
 		log.Printf("Error submitting SubjectAccessReview: %v, %s", sar, err.Error())
-		return err
+		return user, err
 	}
 
 	if sar.Status.Allowed {
-		return nil
+		return user, nil
 	}
 
 	msg := generateUnauthorizedMessage(user, verb, namespace, resource, subresource, schema, sar)
-	return errors.New(msg)
+	return user, errors.New(msg)
 }
 
 func generateUnauthorizedMessage(user, verb, namespace, resource, subresource string, schema schema.GroupVersion, sar *v1.SubjectAccessReview) string {

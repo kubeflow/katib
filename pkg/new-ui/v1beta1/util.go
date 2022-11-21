@@ -19,6 +19,7 @@ package v1beta1
 import (
 	"encoding/json"
 	"log"
+	"net/http"
 	"sort"
 	"strconv"
 	"strings"
@@ -76,7 +77,7 @@ func havePipelineUID(trials []trialv1beta1.Trial) bool {
 	return false
 }
 
-func (k *KatibUIHandler) getTrialTemplatesViewList(user string) ([]TrialTemplatesDataView, error) {
+func (k *KatibUIHandler) getTrialTemplatesViewList(r *http.Request) ([]TrialTemplatesDataView, error) {
 	trialTemplatesDataView := make([]TrialTemplatesDataView, 0)
 
 	// Get all available namespaces
@@ -95,21 +96,22 @@ func (k *KatibUIHandler) getTrialTemplatesViewList(user string) ([]TrialTemplate
 		}
 
 		// Iterate over the trialTemplatesConfigMapList from all namespaces and filter out the
-		// configmaps that belong to namespaces other than kubeflow and kubeflow-user.
+		// configmaps that belong to namespaces other than kubeflow and the ones that the user has
+		// access privileges.
 		var newTrialTemplatesConfigMapList []apiv1.ConfigMap
 		for _, cmap := range trialTemplatesConfigMapList.Items {
-			if ns == "kubeflow" {
+			if ns == consts.DefaultKatibNamespace {
 				// Add the configmaps from kubeflow namespace (no user can have access to kubeflow ns, so we hardcode it)
 				newTrialTemplatesConfigMapList = append(newTrialTemplatesConfigMapList, cmap)
 			} else {
 				// for all other namespaces check authorization rbac
 				configmapName := cmap.ObjectMeta.Name
-				err = IsAuthorized(user, "get", ns, "", "", configmapName, apiv1.SchemeGroupVersion, k.sarClient)
+				user, err := IsAuthorized(consts.ActionTypeGet, ns, apiv1.ResourceConfigMaps.String(), "", configmapName, apiv1.SchemeGroupVersion, k.katibClient.GetClient(), r)
 				if err != nil {
-					log.Printf("The user: %s is not authorized to view configmap: %s from namespace: %s \n", user, configmapName, ns)
+					log.Printf("The user: %s is not authorized to view configMap: %s in namespace: %s \n", user, configmapName, ns)
 					return nil, err
 				} else {
-					log.Printf("The user: %s is authorized to view core/v1/configMap: %s in namespace: %s", user, configmapName, ns)
+					log.Printf("The user: %s is authorized to view configMap: %s in namespace: %s", user, configmapName, ns)
 					newTrialTemplatesConfigMapList = append(newTrialTemplatesConfigMapList, cmap)
 				}
 			}
@@ -182,7 +184,7 @@ func (k *KatibUIHandler) updateTrialTemplates(
 	updatedConfigMapPath,
 	updatedTemplateYaml,
 	actionType string,
-	user string) ([]TrialTemplatesDataView, error) {
+	r *http.Request) ([]TrialTemplatesDataView, error) {
 
 	templates, err := k.katibClient.GetConfigMap(updatedConfigMapName, updatedConfigMapNamespace)
 	if err != nil && !(errors.IsNotFound(err) && actionType == ActionTypeAdd) {
@@ -236,7 +238,7 @@ func (k *KatibUIHandler) updateTrialTemplates(
 		}
 	}
 
-	newTemplates, err := k.getTrialTemplatesViewList(user)
+	newTemplates, err := k.getTrialTemplatesViewList(r)
 	if err != nil {
 		log.Printf("getTrialTemplatesViewList: %v", err)
 		return nil, err
