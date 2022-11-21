@@ -38,6 +38,7 @@ describe('FormMetricsCollectorComponent', () => {
       scheme: new FormControl(),
       host: new FormControl(),
       prometheus: new FormControl(),
+      customYaml: new FormControl(),
     });
     fixture.detectChanges();
   });

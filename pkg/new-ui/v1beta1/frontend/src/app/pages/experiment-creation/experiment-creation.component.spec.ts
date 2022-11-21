@@ -81,6 +81,7 @@ ExperimentFormServiceStub = {
       path: new FormControl(),
       scheme: new FormControl(),
       host: new FormControl(),
+      customYaml: new FormControl(),
     }),
   createTrialTemplateForm: () =>
     new FormGroup({
