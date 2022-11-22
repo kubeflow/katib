@@ -5,18 +5,18 @@ import {
   DetailsListModule,
   HeadingSubheadingRowModule,
 } from 'kubeflow';
-import { TrialModalMetricsModule } from './metrics/metrics.component.module';
-import { TrialModalOverviewComponent } from './trial-modal-overview.component';
+import { TrialMetricsModule } from './metrics/metrics.component.module';
+import { TrialOverviewComponent } from './trial-overview.component';
 
 @NgModule({
-  declarations: [TrialModalOverviewComponent],
+  declarations: [TrialOverviewComponent],
   imports: [
     CommonModule,
     ConditionsTableModule,
     DetailsListModule,
     HeadingSubheadingRowModule,
-    TrialModalMetricsModule,
+    TrialMetricsModule,
   ],
-  exports: [TrialModalOverviewComponent],
+  exports: [TrialOverviewComponent],
 })
-export class TrialModalOverviewModule {}
+export class TrialOverviewModule {}

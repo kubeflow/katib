@@ -17,11 +17,11 @@ interface ChartPoint {
 }
 
 @Component({
-  selector: 'app-trial-modal',
-  templateUrl: './trial-modal.component.html',
-  styleUrls: ['./trial-modal.component.scss'],
+  selector: 'app-trial-details',
+  templateUrl: './trial-details.component.html',
+  styleUrls: ['./trial-details.component.scss'],
 })
-export class TrialModalComponent implements OnInit {
+export class TrialDetailsComponent implements OnInit {
   trialName: string;
   namespace: string;
   dataLoaded: boolean;

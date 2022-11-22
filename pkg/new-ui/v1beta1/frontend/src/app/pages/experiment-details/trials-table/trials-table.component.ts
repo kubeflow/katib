@@ -57,7 +57,7 @@ export class TrialsTableComponent implements OnChanges {
     }
   }
 
-  openTrialModal(name: string) {
+  openTrialDetails(name: string) {
     this.router.navigate([`/experiment/${this.experimentName}/trial/${name}`]);
   }
 
