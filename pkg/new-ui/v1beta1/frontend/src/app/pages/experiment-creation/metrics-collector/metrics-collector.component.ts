@@ -10,10 +10,15 @@ import { CollectorKind } from 'src/app/enumerations/metrics-collector';
 export class FormMetricsCollectorComponent implements OnInit {
   @Input() formGroup: FormGroup;
   kind = CollectorKind;
-  customYaml =
-    'name: metrics-collector\nimage: <collector-image>\nresources: {}';
+  customYaml: string;
 
   constructor() {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.customYaml = this.formGroup.get('customYaml').value;
+  }
+
+  onTextChange() {
+    this.formGroup.patchValue({ customYaml: this.customYaml });
+  }
 }
