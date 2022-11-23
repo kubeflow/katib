@@ -2,7 +2,7 @@ name: E2E Test with tf-mnist-with-summaries
 on:
   pull_request:
     paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
+      - "pkg/new-ui/v1beta1/frontend/**"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -27,7 +27,6 @@ jobs:
           training-operator: true
           # Comma Delimited
           trial-images: tf-mnist-with-summaries
-          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
@@ -35,4 +34,3 @@ jobs:
         kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
         # Comma Delimited
         experiments: ["tfjob-mnist-with-summaries"]
-        database-type: ["mysql", "postgres"]

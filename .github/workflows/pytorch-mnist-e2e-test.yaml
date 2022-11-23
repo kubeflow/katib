@@ -2,7 +2,7 @@ name: E2E Test with pytorch-mnist
 on:
   pull_request:
     paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
+      - "pkg/new-ui/v1beta1/frontend/**"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -27,7 +27,6 @@ jobs:
           training-operator: true
           # Comma Delimited
           trial-images: pytorch-mnist-cpu
-          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
@@ -37,4 +36,3 @@ jobs:
         experiments:
           - "file-metrics-collector,pytorchjob-mnist"
           - "median-stop-with-json-format,file-metrics-collector-with-json-format"
-        database-type: ["mysql", "postgres"]

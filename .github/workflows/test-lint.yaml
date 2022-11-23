@@ -1,8 +1,9 @@
-name: Lint YAML files
+name: Lint Files
 
 on:
-  - push
-  - pull_request
+  pull_request:
+    paths-ignore:
+      - "pkg/new-ui/v1beta1/frontend/**"
 
 jobs:
   lint:
@@ -18,5 +19,8 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Check YAML
+      - name: Check YAML files
         run: make yamllint
+
+      - name: Check shell scripts
+        run: make shellcheck

@@ -1,4 +1,4 @@
-name: E2E Test for katib-ui
+name: E2E Test with Katib UI, random search, and postgres
 on:
   - pull_request
 
@@ -18,11 +18,14 @@ jobs:
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
-      - name: Set Up Minikube Cluster
-        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh true
-
-      - name: Start Katib
-        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh true false
+      - name: Run e2e test with ${{ matrix.experiments }} experiments
+        uses: ./.github/workflows/template-e2e-test
+        with:
+          experiments: random
+          # Comma Delimited
+          trial-images: mxnet-mnist
+          katib-ui: true
+          database-type: postgres
 
     strategy:
       fail-fast: false

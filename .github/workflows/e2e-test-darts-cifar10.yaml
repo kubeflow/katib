@@ -2,7 +2,7 @@ name: E2E Test with darts-cnn-cifar10
 on:
   pull_request:
     paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
+      - "pkg/new-ui/v1beta1/frontend/**"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -26,7 +26,6 @@ jobs:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
           trial-images: darts-cnn-cifar10-cpu
-          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
@@ -34,4 +33,3 @@ jobs:
         kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
         # Comma Delimited
         experiments: ["darts-cpu"]
-        database-type: ["mysql", "postgres"]

@@ -1,12 +1,9 @@
 name: Go Test
 
 on:
-  push:
-    paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
   pull_request:
     paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
+      - "pkg/new-ui/v1beta1/frontend/**"
 
 jobs:
   generatetests:
