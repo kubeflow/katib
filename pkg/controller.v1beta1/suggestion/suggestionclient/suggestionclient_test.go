@@ -637,6 +637,14 @@ func newFakeTrialObservation() *commonv1beta1.Observation {
 	}
 }
 
+func newFakeSuggestionTrialObservation() *commonv1beta1.Observation {
+	return &commonv1beta1.Observation{
+		Metrics: []commonv1beta1.Metric{
+			{Name: "metric1-name", Min: "0.95", Max: "0.95", Latest: "0.95"},
+		},
+	}
+}
+
 func newFakeRequestObservation() *suggestionapi.Observation {
 	return &suggestionapi.Observation{
 		Metrics: []*suggestionapi.Metric{
@@ -664,6 +672,9 @@ func newFakeObjective() *commonapiv1beta1.ObjectiveSpec {
 		ObjectiveMetricName:   "metric1-name",
 		AdditionalMetricNames: []string{"metric2-name"},
 		Goal:                  &goal,
+		MetricStrategies: []commonapiv1beta1.MetricStrategy{
+			{Name: "metric1-name", Value: commonapiv1beta1.ExtractByLatest},
+		},
 	}
 }
 
@@ -817,6 +828,7 @@ func newFakeTrials() []trialsv1beta1.Trial {
 				StartTime:      newFakeTime(),
 				CompletionTime: newFakeTime(),
 				Conditions:     fakeConditions,
+				Observation:    newFakeSuggestionTrialObservation(),
 			},
 		},
 		{
@@ -839,7 +851,8 @@ func newFakeTrials() []trialsv1beta1.Trial {
 				Labels: map[string]string{},
 			},
 			Status: trialsv1beta1.TrialStatus{
-				Conditions: fakeConditions,
+				Conditions:  fakeConditions,
+				Observation: newFakeSuggestionTrialObservation(),
 			},
 		},
 		{
@@ -965,7 +978,14 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 					StartTime:      newFakeTime().Format(timeFormat),
 					CompletionTime: newFakeTime().Format(timeFormat),
 					Condition:      suggestionapi.TrialStatus_SUCCEEDED,
-					Observation:    &suggestionapi.Observation{},
+					Observation: &suggestionapi.Observation{
+						Metrics: []*suggestionapi.Metric{
+							{
+								Name:  "metric1-name",
+								Value: "0.95",
+							},
+						},
+					},
 				},
 			},
 			{
@@ -990,7 +1010,14 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 					StartTime:      "",
 					CompletionTime: "",
 					Condition:      suggestionapi.TrialStatus_SUCCEEDED,
-					Observation:    &suggestionapi.Observation{},
+					Observation: &suggestionapi.Observation{
+						Metrics: []*suggestionapi.Metric{
+							{
+								Name:  "metric1-name",
+								Value: "0.95",
+							},
+						},
+					},
 				},
 			},
 		},
