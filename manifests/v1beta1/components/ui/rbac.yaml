@@ -19,6 +19,14 @@ rules:
       - suggestions
     verbs:
       - "*"
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/log
+    verbs:
+      - list
+      - get
 ---
 apiVersion: v1
 kind: ServiceAccount

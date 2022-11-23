@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -28,11 +30,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	suggestionv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	consts "github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 	corev1 "k8s.io/api/core/v1"
+
+	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
@@ -573,4 +582,88 @@ func (k *KatibUIHandler) FetchTrial(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+// FetchTrialLogs fetches logs for a trial in specific namespace.
+func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Requesting logs")
+
+	trialName := r.URL.Query()["trialName"][0]
+	namespace := r.URL.Query()["namespace"][0]
+	log.Printf("Requesting logs")
+
+	logs, err := getTrialLogs(k, trialName, namespace)
+	if err != nil {
+		log.Printf("GetLogs failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(logs)
+	if err != nil {
+		log.Printf("Marshal logs failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(response)
+}
+
+// GetTrialLogs returns logs of a master Pod for the given job name and namespace
+func getTrialLogs(k *KatibUIHandler, trialName string, namespace string) (string, error) {
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return "", err
+	}
+
+	clientset, err := corev1.NewForConfig(cfg)
+	if err != nil {
+		return "", err
+	}
+
+	trial := &trialsv1beta1.Trial{}
+	if err := k.katibClient.GetClient().Get(context.TODO(), types.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
+		return "", err
+	}
+
+	selectionLabel := "training.kubeflow.org/job-name=" + trialName + ",training.kubeflow.org/job-role=master"
+	if trial.Spec.RunSpec.GetKind() == "Job" {
+		selectionLabel = "job-name=" + trialName
+	}
+
+	podList, err := clientset.Pods(namespace).List(context.Background(), metav1.ListOptions{LabelSelector: selectionLabel})
+	if err != nil {
+		return "", err
+	}
+
+	if len(podList.Items) == 0 {
+		message := `Logs for the trial could not be found.
+Was 'retain: true' specified in the Experiment definition?
+An example can be found here: https://github.com/kubeflow/katib/blob/master/examples/v1beta1/argo/argo-workflow.yaml#L33`
+
+		return message, nil
+	}
+
+	podLogOpts := apiv1.PodLogOptions{}
+	podLogOpts.Container = trial.Spec.PrimaryContainerName
+	for container := range podList.Items[0].Spec.Containers {
+		if podList.Items[0].Spec.Containers[container].Name == "metrics-logger-and-collector" {
+			podLogOpts.Container = "metrics-logger-and-collector"
+			break
+		}
+	}
+
+	req := clientset.Pods(namespace).GetLogs(podList.Items[0].Name, &podLogOpts)
+	podLogs, err := req.Stream(context.Background())
+	if err != nil {
+		return "", err
+	}
+	defer podLogs.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, podLogs)
+	if err != nil {
+		return "", err
+	}
+	str := buf.String()
+
+	return str, nil
 }
