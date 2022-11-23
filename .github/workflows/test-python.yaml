@@ -5,6 +5,10 @@ on:
     paths-ignore:
       - "pkg/new-ui/v1beta1/frontend/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Test
