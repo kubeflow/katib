@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { curveLinear } from 'd3-shape';
 import { KWABackendService } from 'src/app/services/backend.service';
 import { transformStringResponses } from 'src/app/shared/utils';

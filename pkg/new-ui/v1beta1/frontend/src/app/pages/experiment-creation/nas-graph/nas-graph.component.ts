@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
@@ -6,10 +6,6 @@ import { FormGroup } from '@angular/forms';
   templateUrl: './nas-graph.component.html',
   styleUrls: ['./nas-graph.component.scss'],
 })
-export class FormNasGraphComponent implements OnInit {
+export class FormNasGraphComponent {
   @Input() formGroup: FormGroup;
-
-  constructor() {}
-
-  ngOnInit() {}
 }

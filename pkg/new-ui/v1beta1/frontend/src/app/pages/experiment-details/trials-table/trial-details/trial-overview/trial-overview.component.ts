@@ -3,6 +3,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnInit,
 } from '@angular/core';
 import { ChipDescriptor, getCondition } from 'kubeflow';
 import { StatusEnum } from 'src/app/enumerations/status.enum';
