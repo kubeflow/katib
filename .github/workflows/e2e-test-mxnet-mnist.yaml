@@ -1,8 +1,13 @@
 name: E2E Test with mxnet-mnist
+
 on:
   pull_request:
     paths-ignore:
       - "pkg/new-ui/v1beta1/frontend/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

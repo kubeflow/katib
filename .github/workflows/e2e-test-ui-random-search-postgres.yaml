@@ -1,6 +1,11 @@
 name: E2E Test with Katib UI, random search, and postgres
+
 on:
   - pull_request
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
