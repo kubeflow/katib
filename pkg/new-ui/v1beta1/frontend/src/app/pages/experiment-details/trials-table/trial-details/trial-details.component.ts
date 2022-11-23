@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { curveLinear } from 'd3-shape';
 import { KWABackendService } from 'src/app/services/backend.service';
 import { transformStringResponses } from 'src/app/shared/utils';
@@ -21,7 +21,7 @@ interface ChartPoint {
   templateUrl: './trial-details.component.html',
   styleUrls: ['./trial-details.component.scss'],
 })
-export class TrialDetailsComponent implements OnInit {
+export class TrialDetailsComponent implements OnInit, OnDestroy {
   trialName: string;
   namespace: string;
   dataLoaded: boolean;

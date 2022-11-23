@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
@@ -6,10 +6,6 @@ import { FormGroup } from '@angular/forms';
   templateUrl: './setting.component.html',
   styleUrls: ['./setting.component.scss'],
 })
-export class FormAlgorithmSettingComponent implements OnInit {
+export class FormAlgorithmSettingComponent {
   @Input() setting: FormGroup;
-
-  constructor() {}
-
-  ngOnInit() {}
 }

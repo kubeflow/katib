@@ -1,11 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
-import {
-  FormArray,
-  FormBuilder,
-  FormGroup,
-  FormControl,
-  Validators,
-} from '@angular/forms';
+import { Component, Input } from '@angular/core';
+import { FormArray } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddParamModalComponent } from './add-modal/add-modal.component';
 import { createParameterGroup } from '../utils';
@@ -15,12 +9,10 @@ import { createParameterGroup } from '../utils';
   templateUrl: './params-list.component.html',
   styleUrls: ['./params-list.component.scss'],
 })
-export class ParamsListComponent implements OnInit {
+export class ParamsListComponent {
   @Input() paramsArray: FormArray;
 
-  constructor(private builder: FormBuilder, private dialog: MatDialog) {}
-
-  ngOnInit() {}
+  constructor(private dialog: MatDialog) {}
 
   removeParam(i: number) {
     this.paramsArray.removeAt(i);

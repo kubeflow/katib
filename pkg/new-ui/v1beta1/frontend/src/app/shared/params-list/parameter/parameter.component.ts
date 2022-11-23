@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddParamModalComponent } from '../add-modal/add-modal.component';
@@ -9,13 +9,11 @@ import { ParameterType } from 'src/app/models/experiment.k8s.model';
   templateUrl: './parameter.component.html',
   styleUrls: ['./parameter.component.scss'],
 })
-export class ParameterComponent implements OnInit {
+export class ParameterComponent {
   @Input() paramFormGroup: FormGroup;
   @Output() delete = new EventEmitter<boolean>();
 
   constructor(private dialog: MatDialog) {}
-
-  ngOnInit() {}
 
   get isListValue() {
     if (!this.paramFormGroup) {

@@ -3,6 +3,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnInit,
 } from '@angular/core';
 import { ChipDescriptor, getCondition } from 'kubeflow';
 import { StatusEnum } from 'src/app/enumerations/status.enum';
@@ -14,7 +15,7 @@ import { numberToExponential } from 'src/app/shared/utils';
   templateUrl: './trial-overview.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TrialOverviewComponent implements OnChanges {
+export class TrialOverviewComponent implements OnInit, OnChanges {
   status: string;
   statusIcon: string;
   completionTime: string;

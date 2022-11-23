@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormArray, FormControl, Validators } from '@angular/forms';
 
 @Component({
@@ -6,16 +6,12 @@ import { FormArray, FormControl, Validators } from '@angular/forms';
   templateUrl: './list-input.component.html',
   styleUrls: ['./list-input.component.scss'],
 })
-export class ListInputComponent implements OnInit {
+export class ListInputComponent {
   @Input() header: string;
   @Input() valueLabel = 'Value';
   @Input() formArray: FormArray;
   @Input() addValueText = 'Add value';
   @Input() requiredValue = true;
-
-  constructor() {}
-
-  ngOnInit() {}
 
   addCtrl() {
     const validators = this.requiredValue ? Validators.required : [];
