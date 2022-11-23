@@ -92,6 +92,9 @@ func (trial *Trial) IsMetricsUnavailable() bool {
 
 // IsObservationAvailable return ture if the Trial has valid observations updated
 func (trial *Trial) IsObservationAvailable() bool {
+	if trial.Spec.Objective == nil {
+		return false
+	}
 	objectiveMetricName := trial.Spec.Objective.ObjectiveMetricName
 	if trial.Status.Observation != nil && trial.Status.Observation.Metrics != nil {
 		for _, metric := range trial.Status.Observation.Metrics {
