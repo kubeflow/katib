@@ -343,7 +343,7 @@ func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial
 		if t.IsMetricsUnavailable() {
 			continue
 		}
-		if !t.IsObservationAvailable() {
+		if !t.IsObservationAvailable() && t.IsEarlyStopped() {
 			continue
 		}
 		trial := &suggestionapi.Trial{
