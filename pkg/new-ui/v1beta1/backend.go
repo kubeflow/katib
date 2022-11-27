@@ -604,7 +604,11 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Write(response)
+	if _, err = w.Write(response); err != nil {
+		log.Printf("Write logs failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // GetTrialLogs returns logs of a master Pod for the given job name and namespace
@@ -624,9 +628,10 @@ func getTrialLogs(k *KatibUIHandler, trialName string, namespace string) (string
 		return "", err
 	}
 
-	selectionLabel := "training.kubeflow.org/job-name=" + trialName + ",training.kubeflow.org/job-role=master"
-	if trial.Spec.RunSpec.GetKind() == "Job" {
-		selectionLabel = "job-name=" + trialName
+	selectionLabel := "training.kubeflow.org/job-name=" + trialName
+
+	for primaryKey, primaryValue := range trial.Spec.PrimaryPodLabels {
+		selectionLabel = selectionLabel + "," + primaryKey + "=" + primaryValue
 	}
 
 	podList, err := clientset.Pods(namespace).List(context.Background(), metav1.ListOptions{LabelSelector: selectionLabel})
