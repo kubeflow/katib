@@ -1,8 +1,13 @@
-name: E2E Test with enas-cnn-cifar10
+name: E2E Test with mxnet-mnist
+
 on:
   pull_request:
     paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
+      - "pkg/new-ui/v1beta1/frontend/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -25,13 +30,15 @@ jobs:
         with:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
-          trial-images: enas-cnn-cifar10-cpu
-          database-type: ${{ matrix.database-type }}
+          trial-images: mxnet-mnist
 
     strategy:
       fail-fast: false
       matrix:
         kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
         # Comma Delimited
-        experiments: ["enas-cpu"]
-        database-type: ["mysql", "postgres"]
+        experiments:
+          # suggestion-hyperopt
+          - "never-resume,from-volume-resume,median-stop"
+          # others
+          - "grid,bayesian-optimization,tpe,multivariate-tpe,cma-es,hyperband"

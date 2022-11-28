@@ -1,8 +1,13 @@
 name: E2E Test with simple-pbt
+
 on:
   pull_request:
     paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
+      - "pkg/new-ui/v1beta1/frontend/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -26,7 +31,6 @@ jobs:
           experiments: ${{ matrix.experiments }}
           # Comma Delimited
           trial-images: simple-pbt
-          database-type: ${{ matrix.database-type }}
 
     strategy:
       fail-fast: false
@@ -35,4 +39,3 @@ jobs:
         kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
         # Comma Delimited
         experiments: ["simple-pbt"]
-        database-type: ["mysql", "postgres"]

@@ -1,8 +1,13 @@
-name: E2E Test with mxnet-mnist
+name: E2E Test with tf-mnist-with-summaries
+
 on:
   pull_request:
     paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
+      - "pkg/new-ui/v1beta1/frontend/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -24,20 +29,13 @@ jobs:
         uses: ./.github/workflows/template-e2e-test
         with:
           experiments: ${{ matrix.experiments }}
+          training-operator: true
           # Comma Delimited
-          trial-images: mxnet-mnist
-          database-type: ${{ matrix.database-type }}
+          trial-images: tf-mnist-with-summaries
 
     strategy:
       fail-fast: false
       matrix:
         kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
         # Comma Delimited
-        experiments:
-          # suggestion-hyperopt
-          - "random,tpe,never-resume"
-          - "median-stop,from-volume-resume"
-          # others
-          - "grid,bayesian-optimization,tpe"
-          - "multivariate-tpe,cma-es,hyperband"
-        database-type: ["mysql", "postgres"]
+        experiments: ["tfjob-mnist-with-summaries"]

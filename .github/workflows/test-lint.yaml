@@ -1,4 +1,4 @@
-name: Python Test
+name: Lint Files
 
 on:
   pull_request:
@@ -10,8 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -23,5 +23,8 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Run Python test
-        run: make pytest
+      - name: Check YAML files
+        run: make yamllint
+
+      - name: Check shell scripts
+        run: make shellcheck

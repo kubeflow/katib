@@ -1,8 +1,11 @@
-name: E2E Test with pytorch-mnist
+name: E2E Test with Katib UI, random search, and postgres
+
 on:
-  pull_request:
-    paths-ignore:
-      - 'pkg/new-ui/v1beta1/frontend/**'
+  - pull_request
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -23,18 +26,13 @@ jobs:
       - name: Run e2e test with ${{ matrix.experiments }} experiments
         uses: ./.github/workflows/template-e2e-test
         with:
-          experiments: ${{ matrix.experiments }}
-          training-operator: true
+          experiments: random
           # Comma Delimited
-          trial-images: pytorch-mnist-cpu
-          database-type: ${{ matrix.database-type }}
+          trial-images: mxnet-mnist
+          katib-ui: true
+          database-type: postgres
 
     strategy:
       fail-fast: false
       matrix:
         kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
-        # Comma Delimited
-        experiments:
-          - "file-metrics-collector,pytorchjob-mnist"
-          - "median-stop-with-json-format,file-metrics-collector-with-json-format"
-        database-type: ["mysql", "postgres"]
