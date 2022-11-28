@@ -4,7 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { TrialModalComponent } from './trial-modal.component';
+import { TrialDetailsComponent } from './trial-details.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { KWABackendService } from 'src/app/services/backend.service';
 import { of } from 'rxjs';
@@ -23,9 +23,9 @@ NamespaceServiceStub = {
   getSelectedNamespace: () => of(),
 };
 
-describe('TrialModalComponent', () => {
-  let component: TrialModalComponent;
-  let fixture: ComponentFixture<TrialModalComponent>;
+describe('TrialDetailsComponent', () => {
+  let component: TrialDetailsComponent;
+  let fixture: ComponentFixture<TrialDetailsComponent>;
   let activatedRouteSpy;
 
   beforeEach(
@@ -47,7 +47,7 @@ describe('TrialModalComponent', () => {
           BrowserAnimationsModule,
           TitleActionsToolbarModule,
         ],
-        declarations: [TrialModalComponent],
+        declarations: [TrialDetailsComponent],
         providers: [
           { provide: ActivatedRoute, useValue: activatedRouteSpy },
           { provide: Router, useValue: {} },
@@ -59,7 +59,7 @@ describe('TrialModalComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TrialModalComponent);
+    fixture = TestBed.createComponent(TrialDetailsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

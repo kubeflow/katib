@@ -10,11 +10,11 @@ import { TrialK8s } from 'src/app/models/trial.k8s.model';
 import { numberToExponential } from 'src/app/shared/utils';
 
 @Component({
-  selector: 'app-trial-modal-overview',
-  templateUrl: './trial-modal-overview.component.html',
+  selector: 'app-trial-overview',
+  templateUrl: './trial-overview.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TrialModalOverviewComponent implements OnChanges {
+export class TrialOverviewComponent implements OnChanges {
   status: string;
   statusIcon: string;
   completionTime: string;

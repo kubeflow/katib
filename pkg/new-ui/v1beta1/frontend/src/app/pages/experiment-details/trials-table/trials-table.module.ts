@@ -8,8 +8,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { TrialsTableComponent } from './trials-table.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TrialModalComponent } from './trial-modal/trial-modal.component';
-import { TrialModalModule } from './trial-modal/trial-modal.module';
+import { TrialDetailsComponent } from './trial-details/trial-details.component';
+import { TrialDetailsModule } from './trial-details/trial-details.module';
 
 @NgModule({
   declarations: [TrialsTableComponent],
@@ -21,9 +21,9 @@ import { TrialModalModule } from './trial-modal/trial-modal.module';
     MatIconModule,
     NgxChartsModule,
     MatTooltipModule,
-    TrialModalModule,
+    TrialDetailsModule,
   ],
-  entryComponents: [TrialModalComponent],
+  entryComponents: [TrialDetailsComponent],
   exports: [TrialsTableComponent],
 })
 export class TrialsTableModule {}
