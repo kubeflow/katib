@@ -134,19 +134,20 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
     // Poll for new data and reset the poller if different data is found
     this.subs.add(
       this.poller.start().subscribe(() => {
-        this.backend.getExperiments().subscribe(experiments => {
-          // the backend should have proper namespace isolation
-          experiments = experiments.filter(
-            experiment => experiment.namespace === this.currNamespace,
-          );
+        if (!this.currNamespace) {
+          return;
+        }
 
-          if (isEqual(this.experiments, experiments)) {
-            return;
-          }
+        this.backend
+          .getExperiments(this.currNamespace)
+          .subscribe(experiments => {
+            if (isEqual(this.experiments, experiments)) {
+              return;
+            }
 
-          this.experiments = experiments;
-          this.poller.reset();
-        });
+            this.experiments = experiments;
+            this.poller.reset();
+          });
       }),
     );
   }
