@@ -7,6 +7,7 @@ resources:
   # Kubeflow Katib components.
   - kubeflow-katib-roles.yaml
   - ui-virtual-service.yaml
+  - istio-authorizationpolicy.yaml
 images:
   - name: docker.io/kubeflowkatib/katib-controller
     newName: docker.io/kubeflowkatib/katib-controller
@@ -20,6 +21,32 @@ images:
 
 patchesStrategicMerge:
   - patches/remove-namespace.yaml
+
+patches:
+  # Extend RBAC permission list of katib-ui so it can
+  # create SubjectAccessReview resources.
+  - target:
+      kind: ClusterRole
+      name: katib-ui
+      group: rbac.authorization.k8s.io
+      version: v1
+    path: patches/ui-rbac.yaml
+  # Enable RBAC authz checks in UI's backend.
+  - target:
+      version: v1
+      kind: Deployment
+      name: katib-ui
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: APP_DISABLE_AUTH
+          value: "false"
+  # Allow istio sidecar injection in katib-UI Pod.
+  - target:
+      kind: Deployment
+      name: katib-ui
+    path: patches/istio-sidecar-injection.yaml
 
 vars:
   - fieldref:
