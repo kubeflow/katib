@@ -804,6 +804,14 @@ func newFakeTrials() []trialsv1beta1.Trial {
 			Type: trialsv1beta1.TrialSucceeded,
 		},
 	}
+
+	fakeEarlyStoppedConditions := []trialsv1beta1.TrialCondition{
+		{
+			Type:   trialsv1beta1.TrialEarlyStopped,
+			Status: corev1.ConditionTrue,
+		},
+	}
+
 	return []trialsv1beta1.Trial{
 		{
 			ObjectMeta: metav1.ObjectMeta{
@@ -868,6 +876,54 @@ func newFakeTrials() []trialsv1beta1.Trial {
 						Message: "Metrics are not available",
 					},
 				},
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "trial4-name",
+				Namespace: "namespace",
+			},
+			Spec: trialsv1beta1.TrialSpec{
+				Objective: newFakeObjective(),
+				ParameterAssignments: []commonapiv1beta1.ParameterAssignment{
+					{
+						Name:  "param1-name",
+						Value: "4",
+					},
+					{
+						Name:  "param2-name",
+						Value: "0.4",
+					},
+				},
+				Labels: map[string]string{},
+			},
+			Status: trialsv1beta1.TrialStatus{
+				Conditions:  fakeEarlyStoppedConditions,
+				Observation: nil,
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "trial5-name",
+				Namespace: "namespace",
+			},
+			Spec: trialsv1beta1.TrialSpec{
+				Objective: newFakeObjective(),
+				ParameterAssignments: []commonapiv1beta1.ParameterAssignment{
+					{
+						Name:  "param1-name",
+						Value: "5",
+					},
+					{
+						Name:  "param2-name",
+						Value: "0.5",
+					},
+				},
+				Labels: map[string]string{},
+			},
+			Status: trialsv1beta1.TrialStatus{
+				Conditions:  fakeEarlyStoppedConditions,
+				Observation: newFakeSuggestionTrialObservation(),
 			},
 		},
 	}
@@ -1010,6 +1066,38 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 					StartTime:      "",
 					CompletionTime: "",
 					Condition:      suggestionapi.TrialStatus_SUCCEEDED,
+					Observation: &suggestionapi.Observation{
+						Metrics: []*suggestionapi.Metric{
+							{
+								Name:  "metric1-name",
+								Value: "0.95",
+							},
+						},
+					},
+				},
+			},
+			{
+				Name: "trial5-name",
+				Spec: &suggestionapi.TrialSpec{
+					Objective: fakeObjective,
+					ParameterAssignments: &suggestionapi.TrialSpec_ParameterAssignments{
+						Assignments: []*suggestionapi.ParameterAssignment{
+							{
+								Name:  "param1-name",
+								Value: "5",
+							},
+							{
+								Name:  "param2-name",
+								Value: "0.5",
+							},
+						},
+					},
+					Labels: fakeLabels,
+				},
+				Status: &suggestionapi.TrialStatus{
+					StartTime:      "",
+					CompletionTime: "",
+					Condition:      suggestionapi.TrialStatus_EARLYSTOPPED,
 					Observation: &suggestionapi.Observation{
 						Metrics: []*suggestionapi.Metric{
 							{
