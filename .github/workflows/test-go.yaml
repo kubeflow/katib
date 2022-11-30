@@ -29,19 +29,8 @@ jobs:
         with:
           go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
 
-      # Verify that go.mod and go.sum is synchronized
-      - name: Check Go modules
-        run: |
-          go mod tidy &&
-          git add go.* &&
-          git diff --cached --exit-code || (echo 'Please run "go mod tidy" to sync Go modules' && exit 1)
-
-      - name: Run Generate And Go Format Test
-        run: |
-          go mod download &&
-          make check &&
-          git add pkg/apis hack/gen-python-sdk &&
-          git diff --cached --exit-code || (echo 'Please run "make check" to generate codes and to format Go codes' && exit 1)
+      - name: Check Go Modules, Generated Go/Python codes, and Format
+        run: make check
 
   unittests:
     name: Unit Test
