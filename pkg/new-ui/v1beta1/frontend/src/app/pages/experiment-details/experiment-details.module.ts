@@ -16,6 +16,7 @@ import { ExperimentOverviewModule } from './overview/experiment-overview.module'
 import { ExperimentDetailsTabModule } from './details/experiment-details-tab.module';
 import { ExperimentYamlModule } from './yaml/experiment-yaml.module';
 import { TrialsGraphEchartsModule } from './trials-graph-echarts/trials-graph-echarts.module';
+import { KubeflowModule } from 'kubeflow';
 
 @NgModule({
   declarations: [ExperimentDetailsComponent],
@@ -33,6 +34,7 @@ import { TrialsGraphEchartsModule } from './trials-graph-echarts/trials-graph-ec
     ExperimentYamlModule,
     TitleActionsToolbarModule,
     TrialsGraphEchartsModule,
+    KubeflowModule,
   ],
   exports: [ExperimentDetailsComponent],
 })
