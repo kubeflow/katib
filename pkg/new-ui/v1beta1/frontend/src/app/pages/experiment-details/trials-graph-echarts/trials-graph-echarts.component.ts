@@ -1,4 +1,4 @@
-import { Component, Input, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import lowerCase from 'lodash-es/lowerCase';
 import capitalize from 'lodash-es/capitalize';
 import { ExperimentK8s } from 'src/app/models/experiment.k8s.model';
@@ -8,7 +8,7 @@ import { ExperimentK8s } from 'src/app/models/experiment.k8s.model';
   templateUrl: './trials-graph-echarts.component.html',
   styleUrls: ['./trials-graph-echarts.component.scss'],
 })
-export class TrialsGraphEchartsComponent {
+export class TrialsGraphEchartsComponent implements OnChanges {
   initOpts = {
     renderer: 'svg',
   };

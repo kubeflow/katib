@@ -9,7 +9,8 @@
     "copyLibAssets": "cp -r ./node_modules/kubeflow/assets/* ./src/assets/",
     "test": "ng test",
     "test:prod": "ng test --browsers=ChromeHeadless --watch=false",
-    "lint": "ng lint",
+    "lint-check": "ng lint",
+    "lint": "ng lint --fix",
     "format:check": "prettier --check 'src/**/*.{jsx,js,ts,html,scss,css}' || node scripts/check-format-error.js",
     "format:write": "prettier --write 'src/**/*.{jsx,js,ts,html,scss,css}'",
     "e2e": "ng e2e"
@@ -48,6 +49,11 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~12.2.7",
+    "@angular-eslint/builder": "12.7.0",
+    "@angular-eslint/eslint-plugin": "12.7.0",
+    "@angular-eslint/eslint-plugin-template": "12.7.0",
+    "@angular-eslint/schematics": "12.7.0",
+    "@angular-eslint/template-parser": "12.7.0",
     "@angular/cli": "~12.2.7",
     "@angular/compiler-cli": "~12.2.7",
     "@angular/language-service": "~12.2.7",
@@ -55,7 +61,10 @@
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
+    "@typescript-eslint/eslint-plugin": "4.28.2",
+    "@typescript-eslint/parser": "4.28.2",
     "codelyzer": "^6.0.0",
+    "eslint": "^7.26.0",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
     "karma": "~6.3.16",
@@ -65,7 +74,6 @@
     "karma-jasmine-html-reporter": "^1.5.0",
     "prettier": "2.3.2",
     "ts-node": "~7.0.0",
-    "tslint": "~6.1.0",
     "typescript": "~4.3.5"
   }
 }

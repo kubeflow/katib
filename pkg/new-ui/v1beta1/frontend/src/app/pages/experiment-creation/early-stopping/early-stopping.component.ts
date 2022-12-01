@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { FormGroup, FormArray, FormControl, Validators } from '@angular/forms';
 import { EarlyStoppingAlgorithmNames } from 'src/app/constants/algorithms-types.const';
 import { Subscription } from 'rxjs';
@@ -10,7 +10,7 @@ import { AlgorithmSettingType } from 'src/app/enumerations/algorithms.enum';
   templateUrl: './early-stopping.component.html',
   styleUrls: ['./early-stopping.component.scss'],
 })
-export class EarlyStoppingComponent implements OnInit {
+export class EarlyStoppingComponent implements OnInit, OnDestroy {
   algorithmSettings: FormArray;
   algorithms: { [key: string]: string } = EarlyStoppingAlgorithmNames;
   algorithmHasSettings = false;

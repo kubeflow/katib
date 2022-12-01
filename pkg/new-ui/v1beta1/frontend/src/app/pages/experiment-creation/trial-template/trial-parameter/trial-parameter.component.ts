@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
 @Component({
@@ -6,10 +6,6 @@ import { FormGroup } from '@angular/forms';
   templateUrl: './trial-parameter.component.html',
   styleUrls: ['./trial-parameter.component.scss'],
 })
-export class TrialParameterComponent implements OnInit {
+export class TrialParameterComponent {
   @Input() formGroup: FormGroup;
-
-  constructor() {}
-
-  ngOnInit() {}
 }
