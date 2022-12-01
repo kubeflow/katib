@@ -94,7 +94,7 @@ func (s *SidecarInjector) Handle(ctx context.Context, req admission.Request) adm
 	// Do mutation
 	mutatedPod, err := s.Mutate(pod, namespace)
 	if err != nil {
-		log.Error(err, "Failed to inject metrics collector")
+		log.Error(err, "Failed to mutate Trial's pod")
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
@@ -124,17 +124,6 @@ func (s *SidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error)
 		return false, err
 	}
 
-	// If PrimaryPodLabel is not set we mutate all pods which are related to Trial job
-	// Otherwise mutate pod only with appropriate labels
-	if trial.Spec.PrimaryPodLabels != nil {
-		if !isPrimaryPod(pod.Labels, trial.Spec.PrimaryPodLabels) {
-			return false, nil
-		}
-	}
-
-	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
-		return false, nil
-	}
 	return true, nil
 }
 
@@ -153,6 +142,21 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	// jobName and Trial name is equal
 	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: jobName, Namespace: namespace}, trial); err != nil {
 		return nil, err
+	}
+
+	// Add Katib Trial labels to the Pod metadata.
+	mutatePodMetadata(mutatedPod, trial)
+
+	// Do the following mutation only for the Primary pod.
+	// If PrimaryPodLabel is not set we mutate all pods which are related to Trial job.
+	// Otherwise, mutate pod only with the appropriate labels.
+	if trial.Spec.PrimaryPodLabels != nil && !isPrimaryPod(pod.Labels, trial.Spec.PrimaryPodLabels) {
+		return mutatedPod, nil
+	}
+
+	// If Metrics Collector in None, skip the mutation.
+	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
+		return mutatedPod, nil
 	}
 
 	// Create metrics sidecar container spec
