@@ -68,6 +68,8 @@ const (
 	LabelExperimentName = "katib.kubeflow.org/experiment"
 	// LabelSuggestionName is the label of suggestion name.
 	LabelSuggestionName = "katib.kubeflow.org/suggestion"
+	// LabelTrialName is the label of trial name.
+	LabelTrialName = "katib.kubeflow.org/trial"
 	// LabelDeploymentName is the label of deployment name.
 	LabelDeploymentName = "katib.kubeflow.org/deployment"
 
