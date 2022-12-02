@@ -28,10 +28,22 @@ Conformance program for AutoML and Training WG should follow the same goals as P
 - The tests should cover basic functionality of Katib and the Training Operator.
   It will not cover all features.
 - The tests are expected to evolve in the future versions.
+- The tests should have a well documented and short list of set-up requirements.
+- The tests should install and complete in a relatively short period of time
+  with suggested minimum infrastructure requirements
+  (e.g. 3 nodes, 24 vCPU, 64 GB RAM, 500 GB Disk).
 
 ## Kubeflow Conformance
 
-Kubeflow conformance consists the 3 category of tests:
+Initially the Kubeflow conformance will include the CRD based tests.
+In the future, API and UI based tests may be added. Kubeflow conformance consists
+the 3 category of tests:
+
+- CRD-based tests
+
+  Most of Katib and Training Operator functionality are based on Kubernetes CRD.
+
+  **This document will define a design for CRD-based tests for Katib and the Training Operator.**
 
 - API-based tests
 
@@ -42,16 +54,10 @@ Kubeflow conformance consists the 3 category of tests:
   In the following versions, we should design conformance program for the
   Katib API-based tests.
 
-- CRD-based tests
-
-  Most of Katib and Training Operator functionality are based on Kubernetes CRD.
-
-  **This document will define a design for CRD-based tests for Katib and the Training Operator.**
-
 - UI-based tests
 
-  In the following versions, we should design conformance program for the
-  Katib UI-based tests.
+  UI tests are valuable but complex to design, document and execute. In the following
+  versions, we should design conformance program for the Katib UI-based tests.
 
 ## Design for the CRD-based tests
 
@@ -73,7 +79,7 @@ All tests will be run in the _kf-conformance_ namespace inside the separate cont
 That will help to avoid environment variance and improve fault tolerance. Driver is required to trigger the deployment and download the results.
 
 - We are going to use
-  [the unify Makefile](https://github.com/kubeflow/kubeflow/blob/2fa0d3665234125aeb8cebe8fe44f0a5a50791c5/conformance/1.5/Makefile)
+  [the unified Makefile](https://github.com/kubeflow/kubeflow/blob/2fa0d3665234125aeb8cebe8fe44f0a5a50791c5/conformance/1.5/Makefile)
   for all Kubeflow conformance tests. Distributions (_driver_ on the diagram)
   need to run the following Makefile commands:
 
@@ -135,6 +141,7 @@ That will help to avoid environment variance and improve fault tolerance. Driver
 - The above report can be downloaded from the test deployment by running `make report`.
 
 - When all reports have been collected, the distributions are going to create PR
-  to publish the reports. The Kubeflow Conformance Committee will verify it and
-  make the distribution
+  to publish the reports and to update the appropriate [Kubeflow Documentation](https://www.kubeflow.org/)
+  on conformant Kubeflow distributions. The Kubeflow Conformance Committee will
+  verify it and make the distribution
   [Certified Kubeflow](https://github.com/kubeflow/community/blob/master/proposals/kubeflow-conformance-program-proposal.md#overview).
