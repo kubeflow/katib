@@ -16,12 +16,14 @@ import multiprocessing
 from typing import Callable, List, Dict, Any
 import inspect
 import textwrap
+import grpc
 
+from kubernetes import client, config
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
-from kubernetes import client, config
+import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 
 
 class KatibClient(object):
@@ -300,7 +302,7 @@ class KatibClient(object):
     # TODO (andreyvelich): Get Experiment should always return one Experiment.
     # Use list_experiments to return Experiment list.
     # That function should return Experiment object.
-    def get_experiment(self, name=None, namespace=None):
+    def get_experiment(self, name=None, namespace=utils.get_default_target_namespace()):
         """Get the Katib Experiment.
 
         :param name: Experiment name.
@@ -312,8 +314,6 @@ class KatibClient(object):
         :return: Experiment object.
         :rtype: dict
         """
-        if namespace is None:
-            namespace = utils.get_default_target_namespace()
 
         if name:
             thread = self.api_instance.get_namespaced_custom_object(
@@ -374,7 +374,7 @@ class KatibClient(object):
 
         return katibexp
 
-    def get_suggestion(self, name=None, namespace=None):
+    def get_suggestion(self, name=None, namespace=utils.get_default_target_namespace()):
         """Get the Katib Suggestion.
 
         :param name: Suggestion name.
@@ -385,9 +385,6 @@ class KatibClient(object):
         :return: Suggestion object.
         :rtype: dict
         """
-
-        if namespace is None:
-            namespace = utils.get_default_target_namespace()
 
         if name:
             thread = self.api_instance.get_namespaced_custom_object(
@@ -475,7 +472,7 @@ class KatibClient(object):
         # TODO (andreyvelich): Use proper logger.
         print("Experiment {} has been deleted".format(name))
 
-    def list_experiments(self, namespace=None):
+    def list_experiments(self, namespace=utils.get_default_target_namespace()):
         """List all Katib Experiments.
 
         :param namespace: Experiments namespace.
@@ -484,8 +481,6 @@ class KatibClient(object):
         :return: List of Experiment objects.
         :rtype: list[V1beta1Experiment]
         """
-        if namespace is None:
-            namespace = utils.get_default_target_namespace()
 
         thread = self.api_instance.list_namespaced_custom_object(
             constants.KUBEFLOW_GROUP,
@@ -523,7 +518,9 @@ class KatibClient(object):
             )
         return result
 
-    def get_experiment_status(self, name, namespace=None):
+    def get_experiment_status(
+        self, name, namespace=utils.get_default_target_namespace()
+    ):
         """Get the Experiment current status.
 
         :param name: Experiment name.
@@ -533,14 +530,14 @@ class KatibClient(object):
         :return: Current Experiment status.
         :rtype: str
         """
-        if namespace is None:
-            namespace = utils.get_default_target_namespace()
 
         katibexp = self.get_experiment(name, namespace=namespace)
         last_condition = katibexp.get("status", {}).get("conditions", [])[-1]
         return last_condition.get("type", "")
 
-    def is_experiment_succeeded(self, name, namespace=None):
+    def is_experiment_succeeded(
+        self, name, namespace=utils.get_default_target_namespace()
+    ):
         """Check if Experiment has succeeded.
 
         :param name: Experiment name.
@@ -553,7 +550,7 @@ class KatibClient(object):
         experiment_status = self.get_experiment_status(name, namespace=namespace)
         return experiment_status.lower() == "succeeded"
 
-    def list_trials(self, name=None, namespace=None):
+    def list_trials(self, name=None, namespace=utils.get_default_target_namespace()):
         """List all Experiment's Trials.
 
         :param name: Experiment name.
@@ -563,8 +560,6 @@ class KatibClient(object):
         :return: List of Trial objects
         :rtype: list[V1beta1Trial]
         """
-        if namespace is None:
-            namespace = utils.get_default_target_namespace()
 
         thread = self.api_instance.list_namespaced_custom_object(
             constants.KUBEFLOW_GROUP,
@@ -609,7 +604,9 @@ class KatibClient(object):
             )
         return result
 
-    def get_success_trial_details(self, name=None, namespace=None):
+    def get_success_trial_details(
+        self, name=None, namespace=utils.get_default_target_namespace()
+    ):
         """Get the Trial details that have succeeded for an Experiment.
 
         :param name: Experiment name.
@@ -619,8 +616,6 @@ class KatibClient(object):
         :return: Trial names with the hyperparameters and metrics.
         :type: list[dict]
         """
-        if namespace is None:
-            namespace = utils.get_default_target_namespace()
 
         thread = self.api_instance.list_namespaced_custom_object(
             constants.KUBEFLOW_GROUP,
@@ -676,7 +671,9 @@ class KatibClient(object):
 
         return result
 
-    def get_optimal_hyperparameters(self, name=None, namespace=None):
+    def get_optimal_hyperparameters(
+        self, name=None, namespace=utils.get_default_target_namespace()
+    ):
         """Get the current optimal Trial from the Experiment.
 
         :param name: Experiment name.
@@ -685,8 +682,6 @@ class KatibClient(object):
         :return: Current optimal Trial for the Experiment.
         :rtype: dict
         """
-        if namespace is None:
-            namespace = utils.get_default_target_namespace()
 
         katibexp = self.get_experiment(name, namespace=namespace)
         result = {}
@@ -695,3 +690,51 @@ class KatibClient(object):
         )
 
         return result
+
+    def get_trial_metrics(
+        self,
+        name: str,
+        namespace: str = utils.get_default_target_namespace(),
+        db_manager_address=constants.DEFAULT_DB_MANAGER_ADDRESS,
+    ):
+        """Get the Trial Metric Results from the Katib DB.
+        Katib DB Manager service should be accessible while calling this API.
+
+        If you run this API in-cluster (e.g. from the Kubeflow Notebook) you can
+        use the default Katib DB Manager address: `katib-db-manager.kubeflow:6789`.
+
+        If you run this API outside the cluster, you have to port-forward the
+        Katib DB Manager before getting the Trial metrics: `kubectl port-forward svc/katib-db-manager -n kubeflow 6789`.
+        In that case, you can use this Katib DB Manager address: `localhost:6789`.
+
+        You can use `curl` to verify that Katib DB Manager is reachable: `curl <db-manager-address>`.
+
+        Args:
+            name: Name for the Trial.
+            namespace: Namespace for the Trial.
+            db-manager-address: Address for the Katib DB Manager in this format: `ip-address:port`.
+
+        Returns: List of MetricLog objects (https://github.com/kubeflow/katib/blob/4a2db414d85f29f17bc8ec6ff3462beef29585da/pkg/apis/manager/v1beta1/gen-doc/api.md#api-v1-beta1-MetricLog).
+            For example, to get the first metric value run the following:
+            `get_trial_metrics(...)[0].metric.value
+        """
+
+        db_manager_address = db_manager_address.split(":")
+        channel = grpc.beta.implementations.insecure_channel(
+            db_manager_address[0], int(db_manager_address[1])
+        )
+
+        with katib_api_pb2.beta_create_DBManager_stub(channel) as client:
+
+            try:
+                # When metric name is empty, we select all logs from the Katib DB.
+                observation_logs = client.GetObservationLog(
+                    katib_api_pb2.GetObservationLogRequest(trial_name=name),
+                    timeout=constants.APISERVER_TIMEOUT,
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Unable to get metrics for Trial {name} in namespace {namespace}. Exception: {e}"
+                )
+
+            return observation_logs.observation_log.metric_logs
