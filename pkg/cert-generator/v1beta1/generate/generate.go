@@ -22,6 +22,10 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"math/big"
+	"strings"
+	"time"
+
 	"github.com/kubeflow/katib/pkg/cert-generator/v1beta1/consts"
 	"github.com/spf13/cobra"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
@@ -30,10 +34,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
-	"math/big"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strings"
-	"time"
 )
 
 // generateOptions contains values for all certificates.
@@ -76,45 +77,39 @@ func (o *generateOptions) run(ctx context.Context, kubeClient client.Client) err
 
 	o.fullServiceDomain = strings.Join([]string{o.serviceName, o.namespace, "svc"}, ".")
 
-	caKeyPair, err := o.createCACert()
-	if err != nil {
-		return err
-	}
-	keyPair, err := o.createCert(caKeyPair)
+	keyPair, err := o.createCert()
 	if err != nil {
 		return err
 	}
 
-	if err = o.createWebhookCertSecret(ctx, kubeClient, caKeyPair, keyPair); err != nil {
+	if err = o.createWebhookCertSecret(ctx, kubeClient, keyPair); err != nil {
 		return err
 	}
-	if err = o.injectCert(ctx, kubeClient, caKeyPair); err != nil {
+	if err = o.injectCert(ctx, kubeClient, keyPair); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// createCACert creates the self-signed CA certificate and private key.
-func (o *generateOptions) createCACert() (*certificates, error) {
+// createCert creates the self-signed certificate and private key.
+func (o *generateOptions) createCert() (*certificates, error) {
 	now := time.Now()
 	template := &x509.Certificate{
 		SerialNumber: big.NewInt(0),
 		Subject: pkix.Name{
-			CommonName:   consts.CAName,
-			Organization: []string{consts.Katib},
+			CommonName: o.fullServiceDomain,
 		},
 		DNSNames: []string{
-			consts.CAName,
+			o.fullServiceDomain,
 		},
-		NotBefore:             now,
-		NotAfter:              now.Add(24 * time.Hour * 365 * 10),
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment | x509.KeyUsageCertSign,
-		BasicConstraintsValid: true,
-		IsCA:                  true,
+		NotBefore:   now,
+		NotAfter:    now.Add(24 * time.Hour * 365 * 10),
+		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 	}
 
-	klog.Info("Generating the self-signed CA certificate and private key.")
+	klog.Info("Generating self-signed public certificate and private key.")
 	rawKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, err
@@ -128,42 +123,8 @@ func (o *generateOptions) createCACert() (*certificates, error) {
 	return encode(rawKey, der)
 }
 
-// createCert creates public certificate and private key signed with self-signed CA certificate and private key.
-func (o *generateOptions) createCert(caKeyPair *certificates) (*certificates, error) {
-	now := time.Now()
-	template := &x509.Certificate{
-		SerialNumber: big.NewInt(1),
-		Subject: pkix.Name{
-			CommonName: o.fullServiceDomain,
-		},
-		DNSNames: []string{
-			o.serviceName,
-			strings.Join([]string{o.serviceName, o.namespace}, "."),
-			o.fullServiceDomain,
-		},
-		NotBefore:             now,
-		NotAfter:              now.Add(24 * time.Hour * 365 * 10),
-		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		BasicConstraintsValid: false,
-	}
-
-	klog.Info("Generating public certificate and private key signed with self-singed CA cert and private key.")
-	rawKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return nil, err
-	}
-
-	der, err := x509.CreateCertificate(rand.Reader, template, caKeyPair.cert, rawKey.Public(), caKeyPair.key)
-	if err != nil {
-		return nil, err
-	}
-
-	return encode(rawKey, der)
-}
-
-// createWebhookCertSecret creates Secret embedded ca.key, ca.crt, tls.key and tls.crt.
-func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClient client.Client, caKeyPair *certificates, keyPair *certificates) error {
+// createWebhookCertSecret creates Secret embedded tls.key and tls.crt.
+func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClient client.Client, keyPair *certificates) error {
 
 	certGeneratorJob := &batchv1.Job{}
 	if err := kubeClient.Get(ctx, client.ObjectKey{Namespace: o.namespace, Name: o.jobName}, certGeneratorJob); err != nil {
@@ -194,8 +155,6 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 		},
 		Type: corev1.SecretTypeTLS,
 		Data: map[string][]byte{
-			"ca.key":  caKeyPair.keyPem,
-			"ca.crt":  caKeyPair.certPem,
 			"tls.key": keyPair.keyPem,
 			"tls.crt": keyPair.certPem,
 		},
@@ -221,13 +180,13 @@ func (o *generateOptions) createWebhookCertSecret(ctx context.Context, kubeClien
 }
 
 // injectCert applies patch to ValidatingWebhookConfiguration and MutatingWebhookConfiguration.
-func (o *generateOptions) injectCert(ctx context.Context, kubeClient client.Client, caKeypair *certificates) error {
+func (o *generateOptions) injectCert(ctx context.Context, kubeClient client.Client, keyPair *certificates) error {
 	validatingConf := &admissionregistrationv1.ValidatingWebhookConfiguration{}
 	if err := kubeClient.Get(ctx, client.ObjectKey{Name: consts.Webhook}, validatingConf); err != nil {
 		return err
 	}
 	newValidatingConf := validatingConf.DeepCopy()
-	newValidatingConf.Webhooks[0].ClientConfig.CABundle = caKeypair.certPem
+	newValidatingConf.Webhooks[0].ClientConfig.CABundle = keyPair.certPem
 
 	klog.Info("Trying to patch ValidatingWebhookConfiguration adding the caBundle.")
 	if err := kubeClient.Patch(ctx, newValidatingConf, client.MergeFrom(validatingConf)); err != nil {
@@ -240,8 +199,8 @@ func (o *generateOptions) injectCert(ctx context.Context, kubeClient client.Clie
 		return err
 	}
 	newMutatingConf := mutatingConf.DeepCopy()
-	newMutatingConf.Webhooks[0].ClientConfig.CABundle = caKeypair.certPem
-	newMutatingConf.Webhooks[1].ClientConfig.CABundle = caKeypair.certPem
+	newMutatingConf.Webhooks[0].ClientConfig.CABundle = keyPair.certPem
+	newMutatingConf.Webhooks[1].ClientConfig.CABundle = keyPair.certPem
 
 	klog.Info("Trying to patch MutatingWebhookConfiguration adding the caBundle.")
 	if err := kubeClient.Patch(ctx, newMutatingConf, client.MergeFrom(mutatingConf)); err != nil {
