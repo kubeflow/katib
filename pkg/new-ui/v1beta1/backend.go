@@ -634,6 +634,7 @@ func getTrialLogs(k *KatibUIHandler, trialName string, namespace string) (string
 		selectionLabel = selectionLabel + "," + primaryKey + "=" + primaryValue
 	}
 
+	// TODO: Use controller-runtime client instead of kubernetes client to get logs, once this is available
 	cfg, err := config.GetConfig()
 	if err != nil {
 		return "", err
