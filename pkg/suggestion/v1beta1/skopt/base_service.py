@@ -73,7 +73,7 @@ class BaseSkoptService(object):
         Get the new suggested trials with skopt algorithm.
         """
         logger.info("-" * 100 + "\n")
-        logger.info("New GetSuggestions call\n")
+        logger.info("New GetSuggestions call with current request number: {}\n".format(current_request_number))
         skopt_suggested = []
         loss_for_skopt = []
         if len(trials) > self.succeeded_trials or self.succeeded_trials == 0:
@@ -112,7 +112,7 @@ class BaseSkoptService(object):
                 logger.info("List of recorded Trials names: {}\n".format(self.recorded_trials_names))
 
         else:
-            logger.info("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
+            logger.error("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
 
         logger.info("Running Optimizer ask to query new parameters for Trials\n")
 
