@@ -25,13 +25,13 @@ REQUIRES = [
     "grpcio==1.41.1",
 ]
 
-katib_grpc_api_file = "kubeflow/katib/katib_api_pb2.py"
+katib_grpc_api_file = "../../../pkg/apis/manager/v1beta1/python/api_pb2.py"
 
 # Copy Katib gRPC Python APIs to use it in the Katib SDK Client.
-# We need to copy this file only on the SDK building stage, not on installation stage.
-if not os.path.exists(katib_grpc_api_file):
+# We need to always copy this file only on the SDK building stage, not on SDK installation stage.
+if os.path.exists(katib_grpc_api_file):
     shutil.copy(
-        "../../../pkg/apis/manager/v1beta1/python/api_pb2.py", katib_grpc_api_file,
+        katib_grpc_api_file, "kubeflow/katib/katib_api_pb2.py",
     )
 
 setuptools.setup(
