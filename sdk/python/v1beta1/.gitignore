@@ -1,2 +1,5 @@
 # Distribution / packaging
 dist/
+
+# Katib gRPC APIs
+kubeflow/katib/katib_api_pb2.py
