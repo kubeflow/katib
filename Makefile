@@ -2,11 +2,14 @@ HAS_LINT := $(shell command -v golangci-lint;)
 HAS_YAMLLINT := $(shell command -v yamllint;)
 HAS_SHELLCHECK := $(shell command -v shellcheck;)
 HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
+HAS_MOCKGEN := $(shell command -v mockgen;)
 
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= amd64
 ENVTEST_K8S_VERSION ?= 1.25
+MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 2)
+GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
 
 # for pytest
 PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
@@ -21,11 +24,11 @@ test: envtest
 envtest:
 ifndef HAS_SETUP_ENVTEST
 	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@2c3a6fa2996c026b284c7fe2b055274cd9a556bc #v0.13.0
-	@echo "setup-envtest has been installed"
+	$(info "setup-envtest has been installed")
 endif
-	@echo "setup-envtest has already installed"
+	$(info "setup-envtest has already installed")
 
-check: generate fmt vet lint
+check: generated-codes go-mod fmt vet lint
 
 fmt:
 	hack/verify-gofmt.sh
@@ -33,14 +36,14 @@ fmt:
 lint:
 ifndef HAS_LINT
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
-	@echo "golangci-lint has been installed"
+	$(info "golangci-lint has been installed")
 endif
 	hack/verify-golangci-lint.sh
 
 yamllint:
 ifndef HAS_YAMLLINT
 	pip install yamllint
-	@echo "yamllint has been installed"
+	$(info "yamllint has been installed")
 endif
 	hack/verify-yamllint.sh
 
@@ -50,7 +53,7 @@ vet:
 shellcheck:
 ifndef HAS_SHELLCHECK
 	bash hack/install-shellcheck.sh
-	@echo "shellcheck has been installed"
+	$(info "shellcheck has been installed")
 endif
 	hack/verify-shellcheck.sh
 
@@ -65,19 +68,38 @@ deploy:
 undeploy:
 	bash scripts/v1beta1/undeploy.sh
 
+generated-codes: generate
+ifneq ($(shell bash hack/verify-generated-codes.sh '.'; echo $$?),0)
+	$(error 'Please run "make generate" to generate codes')
+endif
+
+go-mod: sync-go-mod
+ifneq ($(shell bash hack/verify-generated-codes.sh 'go.*'; echo $$?),0)
+	$(error 'Please run "go mod tidy -go $(GO_VERSION)" to sync Go modules')
+endif
+
+sync-go-mod:
+	go mod tidy -go $(GO_VERSION)
+
 # Run this if you update any existing controller APIs.
-# 1. Genereate deepcopy, clientset, listers, informers for the APIs (hack/update-codegen.sh)
+# 1. Generate deepcopy, clientset, listers, informers for the APIs (hack/update-codegen.sh)
 # 2. Generate open-api for the APIs (hack/update-openapigen)
 # 3. Generate Python SDK for Katib (hack/gen-python-sdk/gen-sdk.sh)
 # 4. Generate gRPC manager APIs (pkg/apis/manager/v1beta1/build.sh and pkg/apis/manager/health/build.sh)
+# 5. Generate Go mock codes
 generate:
 ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
+endif
+ifndef HAS_MOCKGEN
+	go install github.com/golang/mock/mockgen@$(MOCKGEN_VERSION)
+	$(info "mockgen has been installed")
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
 	pkg/apis/manager/v1beta1/build.sh
 	pkg/apis/manager/health/build.sh
+	hack/update-mockgen.sh
 
 # Build images for the Katib v1beta1 components.
 build: generate

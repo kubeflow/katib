@@ -809,6 +809,19 @@ spec:
 		t.Errorf("ConvertStringToUnstructured failed: %v", err)
 	}
 
+	notKubernetesBatchJob := `apiVersion: test/v1
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+      - name: container`
+
+	notKubernetesBatchJobUnstr, err := util.ConvertStringToUnstructured(notKubernetesBatchJob)
+	if err != nil {
+		t.Errorf("ConvertStringToUnstructured failed: %v", err)
+	}
+
 	tcs := []struct {
 		RunSpec         *unstructured.Unstructured
 		Err             bool
@@ -834,6 +847,12 @@ spec:
 			RunSpec:         notDefaultResourceBatchUnstr,
 			Err:             false,
 			testDescription: "Valid case with nvidia.com/gpu resource in Trial template",
+		},
+		// Not kubernetes batch job
+		{
+			RunSpec:         notKubernetesBatchJobUnstr,
+			Err:             false,
+			testDescription: "Only validate Kuernetes Job",
 		},
 	}
 

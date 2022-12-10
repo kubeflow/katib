@@ -1,12 +1,17 @@
 name: Frontend Test
 
 on:
-  - push
-  - pull_request
+  pull_request:
+    paths:
+      - pkg/new-ui/v1beta1/frontend/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
-    name: Test
+    name: Code format and lint
     runs-on: ubuntu-latest
 
     steps:
@@ -18,10 +23,15 @@ jobs:
         with:
           node-version: 12.18.1
 
-      - name: Run Node test
+      - name: Format katib code
         run: |
           npm install prettier --prefix ./pkg/new-ui/v1beta1/frontend
           make prettier-check
+
+      - name: Lint katib code
+        run: |
+          cd pkg/new-ui/v1beta1/frontend
+          npm run lint-check
 
   frontend-unit-tests:
     name: Frontend Unit Tests

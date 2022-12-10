@@ -1,5 +1,6 @@
 import { Component, Input, Inject } from '@angular/core';
 import { load, dump } from 'js-yaml';
+import { SnackBarService, SnackType } from 'kubeflow';
 import {
   MatDialog,
   MatDialogRef,
@@ -17,12 +18,17 @@ export class YamlModalComponent {
   constructor(
     public dialogRef: MatDialogRef<YamlModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
+    private snack: SnackBarService,
   ) {
     this.yaml = dump(data);
   }
 
   save() {
-    this.dialogRef.close(load(this.yaml));
+    try {
+      this.dialogRef.close(load(this.yaml));
+    } catch (e) {
+      this.snack.open(`${e.reason}`, SnackType.Error, 4000);
+    }
   }
 
   close() {

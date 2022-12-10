@@ -2,21 +2,21 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ConditionsTableModule, DetailsListModule } from 'kubeflow';
 
-import { TrialModalMetricsComponent } from './metrics.component';
+import { TrialMetricsComponent } from './metrics.component';
 
-describe('TrialModalMetricsComponent', () => {
-  let component: TrialModalMetricsComponent;
-  let fixture: ComponentFixture<TrialModalMetricsComponent>;
+describe('TrialMetricsComponent', () => {
+  let component: TrialMetricsComponent;
+  let fixture: ComponentFixture<TrialMetricsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TrialModalMetricsComponent],
+      declarations: [TrialMetricsComponent],
       imports: [ConditionsTableModule, DetailsListModule, MatSnackBarModule],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TrialModalMetricsComponent);
+    fixture = TestBed.createComponent(TrialMetricsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1019,3 +1019,49 @@ func TestIsPrimaryPod(t *testing.T) {
 		}
 	}
 }
+
+func TestMutatePodMetadata(t *testing.T) {
+	mutatedPodLabels := map[string]string{
+		"custom-pod-label":    "custom-value",
+		"katib-experiment":    "katib-value",
+		consts.LabelTrialName: "test-trial",
+	}
+
+	testCases := []struct {
+		pod             *v1.Pod
+		trial           *trialsv1beta1.Trial
+		mutatedPod      *v1.Pod
+		testDescription string
+	}{
+		{
+			pod: &v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"custom-pod-label": "custom-value",
+					},
+				},
+			},
+			trial: &trialsv1beta1.Trial{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test-trial",
+					Labels: map[string]string{
+						"katib-experiment": "katib-value",
+					},
+				},
+			},
+			mutatedPod: &v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: mutatedPodLabels,
+				},
+			},
+			testDescription: "Mutated Pod should contain label from the origin Pod and Trial",
+		},
+	}
+
+	for _, tc := range testCases {
+		mutatePodMetadata(tc.pod, tc.trial)
+		if !reflect.DeepEqual(tc.mutatedPod, tc.pod) {
+			t.Errorf("Case %v. Expected Pod %v, got %v", tc.testDescription, tc.mutatedPod, tc.pod)
+		}
+	}
+}

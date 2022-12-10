@@ -58,7 +58,7 @@ make generate
 Below is a list of command-line flags accepted by Katib controller:
 
 | Name                            | Type                      | Default                       | Description                                                                                                            |
-|---------------------------------|---------------------------|-------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------- | ------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | enable-grpc-probe-in-suggestion | bool                      | true                          | Enable grpc probe in suggestions                                                                                       |
 | experiment-suggestion-name      | string                    | "default"                     | The implementation of suggestion interface in experiment controller                                                    |
 | metrics-addr                    | string                    | ":8080"                       | The address that the metrics endpoint binds to                                                                         |
@@ -74,7 +74,7 @@ Below is a list of command-line flags accepted by Katib controller:
 Below is a list of command-line flags accepted by Katib DB Manager:
 
 | Name            | Type          | Default | Description                                             |
-|-----------------|---------------|---------|---------------------------------------------------------|
+| --------------- | ------------- | ------- | ------------------------------------------------------- |
 | connect-timeout | time.Duration | 60s     | Timeout before calling error during database connection |
 
 ## Workflow design
@@ -113,13 +113,11 @@ to generate certificates for the webhooks.
 
 Once Katib is deployed in the Kubernetes cluster, the `cert-generator` Job follows these steps:
 
-- Generate the self-signed CA certificate and private key.
+- Generate the self-signed certificate and private key.
 
-- Generate public certificate and private key signed with the key generated in the previous step.
-
-- Create a Kubernetes Secret with the signed certificate. Secret has
-  the `katib-webhook-cert` name and `cert-generator` Job's `ownerReference` to
-  clean-up resources once Katib is uninstalled.
+- Create a Kubernetes Secret with the self-signed TLS certificate and private key.
+  Secret has the `katib-webhook-cert` name and `cert-generator` Job's
+  `ownerReference` to clean-up resources once Katib is uninstalled.
 
   Once Secret is created, the Katib controller Deployment spawns the Pod,
   since the controller has the `katib-webhook-cert` Secret volume.

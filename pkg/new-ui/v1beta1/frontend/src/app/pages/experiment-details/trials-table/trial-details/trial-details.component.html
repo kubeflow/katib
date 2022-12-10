@@ -35,11 +35,19 @@
       <div class="tab-height-fix">
         <mat-tab-group dynamicHeight animationDuration="0ms">
           <mat-tab label="OVERVIEW">
-            <app-trial-modal-overview
-              [trialName]="trialName"
-              [experimentName]="experimentName"
-              [trial]="trialDetails"
-            ></app-trial-modal-overview>
+            <ng-template matTabContent>
+              <app-trial-overview
+                [trialName]="trialName"
+                [experimentName]="experimentName"
+                [trial]="trialDetails"
+              ></app-trial-overview>
+            </ng-template>
+          </mat-tab>
+
+          <mat-tab label="YAML">
+            <ng-template matTabContent>
+              <app-trial-yaml [trialJson]="trialDetails"></app-trial-yaml>
+            </ng-template>
           </mat-tab>
         </mat-tab-group>
       </div>

@@ -665,9 +665,25 @@ func newFakeSuggestionConfig() katibconfig.SuggestionConfig {
 }
 
 func newFakeEarlyStoppingConfig() katibconfig.EarlyStoppingConfig {
+	cpuQ, _ := resource.ParseQuantity(cpu)
+	memoryQ, _ := resource.ParseQuantity(memory)
+	diskQ, _ := resource.ParseQuantity(disk)
+
 	return katibconfig.EarlyStoppingConfig{
 		Image:           image,
 		ImagePullPolicy: imagePullPolicy,
+		Resource: corev1.ResourceRequirements{
+			Limits: corev1.ResourceList{
+				corev1.ResourceCPU:              cpuQ,
+				corev1.ResourceMemory:           memoryQ,
+				corev1.ResourceEphemeralStorage: diskQ,
+			},
+			Requests: corev1.ResourceList{
+				corev1.ResourceCPU:              cpuQ,
+				corev1.ResourceMemory:           memoryQ,
+				corev1.ResourceEphemeralStorage: diskQ,
+			},
+		},
 	}
 }
 
@@ -834,6 +850,18 @@ func newFakeContainers() []corev1.Container {
 				{
 					Name:          consts.DefaultEarlyStoppingPortName,
 					ContainerPort: consts.DefaultEarlyStoppingPort,
+				},
+			},
+			Resources: corev1.ResourceRequirements{
+				Limits: corev1.ResourceList{
+					corev1.ResourceCPU:              cpuQ,
+					corev1.ResourceMemory:           memoryQ,
+					corev1.ResourceEphemeralStorage: diskQ,
+				},
+				Requests: corev1.ResourceList{
+					corev1.ResourceCPU:              cpuQ,
+					corev1.ResourceMemory:           memoryQ,
+					corev1.ResourceEphemeralStorage: diskQ,
 				},
 			},
 		},

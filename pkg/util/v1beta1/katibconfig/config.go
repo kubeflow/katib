@@ -46,8 +46,9 @@ type SuggestionConfig struct {
 
 // EarlyStoppingConfig is the JSON early stopping structure in Katib config.
 type EarlyStoppingConfig struct {
-	Image           string            `json:"image"`
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
+	Image           string                      `json:"image"`
+	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy,omitempty"`
+	Resource        corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // MetricsCollectorConfig is the JSON metrics collector structure in Katib config.
@@ -176,6 +177,9 @@ func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (Ear
 
 	// Set Image Pull Policy.
 	earlyStoppingConfigData.ImagePullPolicy = setImagePullPolicy(earlyStoppingConfigData.ImagePullPolicy)
+
+	// Set resource requirements
+	earlyStoppingConfigData.Resource = setResourceRequirements(earlyStoppingConfigData.Resource)
 
 	return earlyStoppingConfigData, nil
 }

@@ -207,6 +207,8 @@ export class ExperimentFormService {
         host: this.builder.control(''),
         httpHeaders: this.builder.array([]),
       }),
+      customYaml:
+        'name: metrics-collector\nimage: <collector-image>\nresources: {}',
     });
   }
 
@@ -391,8 +393,17 @@ export class ExperimentFormService {
       return metrics;
     }
 
-    /* TODO(kimwnasptd): We need to handle the Custom case */
     if (kind === 'Custom') {
+      delete metrics.source.fileSystemPath;
+      try {
+        metrics.collector.customCollector = load(group.get('customYaml').value);
+      } catch (e) {
+        this.snack.open(
+          'Metrics Colletor(Custom): ' + `${e.reason}`,
+          SnackType.Error,
+          4000,
+        );
+      }
       return metrics;
     }
 
@@ -421,7 +432,11 @@ export class ExperimentFormService {
       try {
         trialTemplate.trialSpec = load(formValue.yaml);
       } catch (e) {
-        this.snack.open(`${e.reason}`, SnackType.Warning, 4000);
+        this.snack.open(
+          'Trial Template: ' + `${e.reason}`,
+          SnackType.Error,
+          4000,
+        );
       }
 
       return trialTemplate;

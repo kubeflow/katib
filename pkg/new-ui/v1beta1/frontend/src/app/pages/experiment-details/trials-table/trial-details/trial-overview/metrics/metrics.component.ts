@@ -4,7 +4,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-metrics-overview',
   templateUrl: './metrics.component.html',
 })
-export class TrialModalMetricsComponent {
+export class TrialMetricsComponent {
   @Input() name: string;
   @Input() latest: string;
   @Input() max: string;

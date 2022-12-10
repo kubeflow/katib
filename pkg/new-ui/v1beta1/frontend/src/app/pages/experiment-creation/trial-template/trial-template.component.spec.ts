@@ -5,9 +5,8 @@ import { KWABackendService } from 'src/app/services/backend.service';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
-import { FormModule, PopoverModule } from 'kubeflow';
+import { EditorModule, FormModule, PopoverModule } from 'kubeflow';
 import { ListKeyValueModule } from 'src/app/shared/list-key-value/list-key-value.module';
-import { AceEditorModule } from 'ng2-ace-editor';
 
 import { FormTrialTemplateComponent } from './trial-template.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -25,8 +24,8 @@ describe('FormTrialTemplateComponent', () => {
           FormModule,
           ListKeyValueModule,
           MatDividerModule,
-          AceEditorModule,
           PopoverModule,
+          EditorModule,
         ],
         declarations: [FormTrialTemplateComponent],
         providers: [

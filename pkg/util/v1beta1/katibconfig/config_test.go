@@ -426,6 +426,7 @@ func newFakeEarlyStoppingConfig() *EarlyStoppingConfig {
 	return &EarlyStoppingConfig{
 		Image:           "early-stopping-image",
 		ImagePullPolicy: consts.DefaultImagePullPolicy,
+		Resource:        *setFakeResourceRequirements(),
 	}
 }
 

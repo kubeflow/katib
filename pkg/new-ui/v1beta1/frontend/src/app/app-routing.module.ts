@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { ExperimentsComponent } from './pages/experiments/experiments.component';
 import { ExperimentDetailsComponent } from './pages/experiment-details/experiment-details.component';
 import { ExperimentCreationComponent } from './pages/experiment-creation/experiment-creation.component';
-import { TrialModalComponent } from './pages/experiment-details/trials-table/trial-modal/trial-modal.component';
+import { TrialDetailsComponent } from './pages/experiment-details/trials-table/trial-details/trial-details.component';
 
 const routes: Routes = [
   { path: '', component: ExperimentsComponent },
@@ -14,7 +14,7 @@ const routes: Routes = [
   { path: 'new', component: ExperimentCreationComponent },
   {
     path: 'experiment/:experimentName/trial/:trialName',
-    component: TrialModalComponent,
+    component: TrialDetailsComponent,
   },
 ];
 

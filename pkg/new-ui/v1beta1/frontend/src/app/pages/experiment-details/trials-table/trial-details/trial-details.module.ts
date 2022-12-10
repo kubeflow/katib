@@ -7,8 +7,9 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
-import { TrialModalOverviewModule } from './overview/trial-modal-overview.module';
-import { TrialModalComponent } from './trial-modal.component';
+import { TrialOverviewModule } from './trial-overview/trial-overview.module';
+import { TrialDetailsComponent } from './trial-details.component';
+import { TrialYamlModule } from './trial-yaml/trial-yaml.module';
 
 import {
   TitleActionsToolbarModule,
@@ -17,9 +18,9 @@ import {
 } from 'kubeflow';
 
 @NgModule({
-  declarations: [TrialModalComponent],
+  declarations: [TrialDetailsComponent],
   imports: [
-    TrialModalOverviewModule,
+    TrialOverviewModule,
     CommonModule,
     MatTableModule,
     MatProgressSpinnerModule,
@@ -32,7 +33,8 @@ import {
     LoadingSpinnerModule,
     PanelModule,
     TitleActionsToolbarModule,
+    TrialYamlModule,
   ],
-  exports: [TrialModalComponent],
+  exports: [TrialDetailsComponent],
 })
-export class TrialModalModule {}
+export class TrialDetailsModule {}

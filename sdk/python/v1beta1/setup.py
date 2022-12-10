@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import shutil
 import setuptools
 
 REQUIRES = [
@@ -20,7 +22,17 @@ REQUIRES = [
     "setuptools>=21.0.0",
     "urllib3>=1.15.1",
     "kubernetes>=23.6.0",
+    "grpcio==1.41.1",
 ]
+
+katib_grpc_api_file = "../../../pkg/apis/manager/v1beta1/python/api_pb2.py"
+
+# Copy Katib gRPC Python APIs to use it in the Katib SDK Client.
+# We need to always copy this file only on the SDK building stage, not on SDK installation stage.
+if os.path.exists(katib_grpc_api_file):
+    shutil.copy(
+        katib_grpc_api_file, "kubeflow/katib/katib_api_pb2.py",
+    )
 
 setuptools.setup(
     name="kubeflow-katib",

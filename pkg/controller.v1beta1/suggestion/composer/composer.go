@@ -248,6 +248,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 					ContainerPort: consts.DefaultEarlyStoppingPort,
 				},
 			},
+			Resources: earlyStoppingConfigData.Resource,
 		}
 
 		containers = append(containers, earlyStoppingContainer)

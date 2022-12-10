@@ -107,7 +107,7 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
         const data = transformStringResponses(response);
         this.columns = data.types;
         this.details = this.parseTrialsDetails(data.details);
-        this.showGraph = this.showGraphFn(response);
+        this.showGraph = this.showGraphFn(this.details);
       });
     this.backendService
       .getExperiment(this.name, this.namespace)
@@ -181,7 +181,7 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
             const data = transformStringResponses(trials);
             this.columns = data.types;
             this.details = this.parseTrialsDetails(data.details);
-            this.showGraph = this.showGraphFn(trials);
+            this.showGraph = this.showGraphFn(this.details);
           });
       }),
     );
@@ -251,8 +251,10 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private showGraphFn(response: string): boolean {
-    if (!response.includes(',,') && response.includes('\n')) {
+  private showGraphFn(array: string[][]): boolean {
+    const found = array.find(a => a[0] === 'Succeeded');
+
+    if (found) {
       return true;
     }
   }

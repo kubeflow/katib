@@ -460,12 +460,19 @@ func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1beta1.
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	var assignments []suggestionsv1beta1.TrialAssignment
 	currentCount := int32(len(trialList))
+	incompleteEarlyStoppingCount := int32(0)
 	trialNames := map[string]bool{}
 	for _, trial := range trialList {
 		trialNames[trial.Name] = true
+
+		if !trial.IsObservationAvailable() && trial.IsEarlyStopped() {
+			incompleteEarlyStoppingCount += 1
+		}
 	}
 
-	suggestionRequestsCount := currentCount + addCount
+	// Exclude the number of incomplete early stopping trials from total suggestion requests
+	// This means that no new trials will be requested from suggestion service until observations are ready for early stopped trials
+	suggestionRequestsCount := currentCount + addCount - incompleteEarlyStoppingCount
 
 	logger.Info("GetOrCreateSuggestion", "name", instance.Name, "Suggestion Requests", suggestionRequestsCount)
 	original, err := r.GetOrCreateSuggestion(instance, suggestionRequestsCount)

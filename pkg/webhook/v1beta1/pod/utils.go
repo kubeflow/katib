@@ -31,6 +31,7 @@ import (
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
 
@@ -258,6 +259,26 @@ func mutateMetricsCollectorVolume(pod *v1.Pod, mountPath, sidecarContainerName, 
 	pod.Spec.Volumes = append(pod.Spec.Volumes, metricsVol)
 
 	return nil
+}
+
+func mutatePodMetadata(pod *v1.Pod, trial *trialsv1beta1.Trial) {
+	podLabels := map[string]string{}
+
+	// Get labels from the created pod.
+	if pod.Labels != nil {
+		podLabels = pod.Labels
+	}
+
+	// Get labels from Trial.
+	for k, v := range trial.Labels {
+		podLabels[k] = v
+	}
+
+	// Add Trial name label.
+	podLabels[consts.LabelTrialName] = trial.GetName()
+
+	// Append label to the Pod metadata.
+	pod.Labels = podLabels
 }
 
 func getSidecarContainerName(cKind common.CollectorKind) string {

@@ -26,6 +26,7 @@ export const experimentsTableConfig: TableConfig = {
       value: new StatusValue({
         valueFn: parseStatus,
       }),
+      sort: true,
     },
     {
       matHeaderCellDef: 'Name',
@@ -34,6 +35,7 @@ export const experimentsTableConfig: TableConfig = {
         field: 'name',
         isLink: true,
       }),
+      sort: true,
     },
     {
       matHeaderCellDef: 'Created at',
@@ -42,6 +44,7 @@ export const experimentsTableConfig: TableConfig = {
       value: new DateTimeValue({
         field: 'startTime',
       }),
+      sort: true,
     },
     {
       matHeaderCellDef: 'Successful trials',
@@ -50,6 +53,7 @@ export const experimentsTableConfig: TableConfig = {
       value: new PropertyValue({
         valueFn: parseSucceededTrials,
       }),
+      sort: true,
     },
     {
       matHeaderCellDef: 'Running trials',
@@ -58,6 +62,7 @@ export const experimentsTableConfig: TableConfig = {
       value: new PropertyValue({
         valueFn: parseRunningTrials,
       }),
+      sort: true,
     },
     {
       matHeaderCellDef: 'Failed trials',
@@ -66,6 +71,7 @@ export const experimentsTableConfig: TableConfig = {
       value: new PropertyValue({
         valueFn: parseFailedTrials,
       }),
+      sort: true,
     },
     {
       matHeaderCellDef: 'Optimal trial',

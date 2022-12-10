@@ -1,9 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormModule } from 'kubeflow';
+import { EditorModule, FormModule } from 'kubeflow';
 import { ListKeyValueModule } from 'src/app/shared/list-key-value/list-key-value.module';
-import { AceEditorModule } from 'ng2-ace-editor';
 
 import { FormMetricsCollectorComponent } from './metrics-collector.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -20,7 +19,7 @@ describe('FormMetricsCollectorComponent', () => {
           BrowserAnimationsModule,
           FormModule,
           ListKeyValueModule,
-          AceEditorModule,
+          EditorModule,
         ],
         declarations: [FormMetricsCollectorComponent],
       }).compileComponents();
@@ -39,6 +38,7 @@ describe('FormMetricsCollectorComponent', () => {
       scheme: new FormControl(),
       host: new FormControl(),
       prometheus: new FormControl(),
+      customYaml: new FormControl(),
     });
     fixture.detectChanges();
   });

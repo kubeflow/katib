@@ -6,30 +6,30 @@ import {
   DetailsListModule,
   HeadingSubheadingRowModule,
 } from 'kubeflow';
-import { TrialModalMetricsModule } from './metrics/metrics.component.module';
+import { TrialMetricsModule } from './metrics/metrics.component.module';
 
-import { TrialModalOverviewComponent } from './trial-modal-overview.component';
+import { TrialOverviewComponent } from './trial-overview.component';
 
-describe('TrialModalOverviewComponent', () => {
-  let component: TrialModalOverviewComponent;
-  let fixture: ComponentFixture<TrialModalOverviewComponent>;
+describe('TrialOverviewComponent', () => {
+  let component: TrialOverviewComponent;
+  let fixture: ComponentFixture<TrialOverviewComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TrialModalOverviewComponent],
+      declarations: [TrialOverviewComponent],
       imports: [
         CommonModule,
         ConditionsTableModule,
         DetailsListModule,
         HeadingSubheadingRowModule,
-        TrialModalMetricsModule,
+        TrialMetricsModule,
         MatSnackBarModule,
       ],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TrialModalOverviewComponent);
+    fixture = TestBed.createComponent(TrialOverviewComponent);
     component = fixture.componentInstance;
     component.trial = {
       status: {
