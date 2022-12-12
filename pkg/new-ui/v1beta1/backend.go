@@ -45,8 +45,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
@@ -605,7 +603,7 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err = IsAuthorized(consts.ActionTypeList, namespace, "pods", "", "", schema.GroupVersion{Group: "apps", Version: "v1"}, k.katibClient.GetClient(), r)
+	user, err = IsAuthorized(consts.ActionTypeList, namespace, corev1.ResourcePods.String(), "", "", corev1.SchemeGroupVersion, k.katibClient.GetClient(), r)
 	if user == "" && err != nil {
 		log.Printf("No user provided in kubeflow-userid header.")
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -638,13 +636,13 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err = IsAuthorized(consts.ActionTypeGet, namespace, "pods", "log", podName, schema.GroupVersion{Group: "apps", Version: "v1"}, k.katibClient.GetClient(), r)
+	user, err = IsAuthorized(consts.ActionTypeGet, namespace, corev1.ResourcePods.String(), "log", podName, corev1.SchemeGroupVersion, k.katibClient.GetClient(), r)
 	if user == "" && err != nil {
 		log.Printf("No user provided in kubeflow-userid header.")
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	} else if err != nil {
-		log.Printf("The user: %s is not authorized to list pod logs: %s in namespace: %s \n", user, podName, namespace)
+		log.Printf("The user: %s is not authorized to get pod logs: %s in namespace: %s \n", user, podName, namespace)
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
