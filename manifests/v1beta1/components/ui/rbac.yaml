@@ -23,9 +23,13 @@ rules:
       - ""
     resources:
       - pods
-      - pods/log
     verbs:
       - list
+  - apiGroups:
+      - ""
+    resources:
+      - pods/log
+    verbs:
       - get
 ---
 apiVersion: v1

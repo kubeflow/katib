@@ -45,6 +45,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func NewKatibUIHandler(dbManagerAddr string) *KatibUIHandler {
@@ -603,7 +605,57 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	logs, err := getTrialLogs(k, trialName, namespace)
+	user, err = IsAuthorized(consts.ActionTypeList, namespace, "pods", "", "", schema.GroupVersion{Group: "apps", Version: "v1"}, k.katibClient.GetClient(), r)
+	if user == "" && err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		log.Printf("The user: %s is not authorized to list pods in namespace: %s \n", user, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	trial := &trialsv1beta1.Trial{}
+	if err := k.katibClient.GetClient().Get(context.TODO(), types.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
+		log.Printf("GetLogs failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// TODO: Use controller-runtime client instead of kubernetes client to get logs, once this is available
+	clientset, err := createKubernetesClientset()
+	if err != nil {
+		log.Printf("GetLogs failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	podName, err := fetchMasterPodName(clientset, trial)
+	if err != nil {
+		log.Printf("GetLogs failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	user, err = IsAuthorized(consts.ActionTypeGet, namespace, "pods", "log", podName, schema.GroupVersion{Group: "apps", Version: "v1"}, k.katibClient.GetClient(), r)
+	if user == "" && err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		log.Printf("The user: %s is not authorized to list pod logs: %s in namespace: %s \n", user, podName, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	podLogOpts := apiv1.PodLogOptions{}
+	podLogOpts.Container = trial.Spec.PrimaryContainerName
+	if trial.Spec.MetricsCollector.Collector.Kind == common.StdOutCollector {
+		podLogOpts.Container = mccommon.MetricLoggerCollectorContainerName
+	}
+
+	logs, err := fetchPodLogs(clientset, namespace, podName, podLogOpts)
 	if err != nil {
 		log.Printf("GetLogs failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -622,51 +674,46 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// GetTrialLogs returns logs of a master Pod for the given job name and namespace
-func getTrialLogs(k *KatibUIHandler, trialName string, namespace string) (string, error) {
-	trial := &trialsv1beta1.Trial{}
-	if err := k.katibClient.GetClient().Get(context.TODO(), types.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
-		return "", err
+// createKubernetesClientset returns kubernetes clientset
+func createKubernetesClientset() (*kubernetes.Clientset, error) {
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return nil, err
 	}
+	clientset, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return clientset, nil
+}
 
-	selectionLabel := consts.LabelTrialName + "=" + trialName
+// fetchMasterPodName returns name of the master pod for a trial
+func fetchMasterPodName(clientset *kubernetes.Clientset, trial *trialsv1beta1.Trial) (string, error) {
+	selectionLabel := consts.LabelTrialName + "=" + trial.ObjectMeta.Name
 	for primaryKey, primaryValue := range trial.Spec.PrimaryPodLabels {
 		selectionLabel = selectionLabel + "," + primaryKey + "=" + primaryValue
 	}
 
-	// TODO: Use controller-runtime client instead of kubernetes client to get logs, once this is available
-	cfg, err := config.GetConfig()
-	if err != nil {
-		return "", err
-	}
-	clientset, err := kubernetes.NewForConfig(cfg)
-	if err != nil {
-		return "", err
-	}
-
-	podList, err := clientset.CoreV1().Pods(namespace).List(context.Background(), metav1.ListOptions{LabelSelector: selectionLabel})
+	podList, err := clientset.CoreV1().Pods(trial.ObjectMeta.Namespace).List(context.Background(), metav1.ListOptions{LabelSelector: selectionLabel})
 	if err != nil {
 		return "", err
 	}
 
 	if len(podList.Items) == 0 {
-		message := `Logs for the trial could not be found.
+		return "", errors.New(`Logs for the trial could not be found.
 Was 'retain: true' specified in the Experiment definition?
-An example can be found here: https://github.com/kubeflow/katib/blob/7bf39225f7235ee4ba6cf285ecc2c455c6471234/examples/v1beta1/argo/argo-workflow.yaml#L33`
-
-		return message, nil
+An example can be found here: https://github.com/kubeflow/katib/blob/7bf39225f7235ee4ba6cf285ecc2c455c6471234/examples/v1beta1/argo/argo-workflow.yaml#L33`)
 	}
 	if len(podList.Items) > 1 {
 		return "", errors.New("More than one master replica found")
 	}
 
-	podLogOpts := apiv1.PodLogOptions{}
-	podLogOpts.Container = trial.Spec.PrimaryContainerName
-	if trial.Spec.MetricsCollector.Collector.Kind == common.StdOutCollector {
-		podLogOpts.Container = mccommon.MetricLoggerCollectorContainerName
-	}
+	return podList.Items[0].Name, nil
+}
 
-	req := clientset.CoreV1().Pods(namespace).GetLogs(podList.Items[0].Name, &podLogOpts)
+// fetchPodLogs returns logs of a pod for the given job name and namespace
+func fetchPodLogs(clientset *kubernetes.Clientset, namespace string, podName string, podLogOpts apiv1.PodLogOptions) (string, error) {
+	req := clientset.CoreV1().Pods(namespace).GetLogs(podName, &podLogOpts)
 	podLogs, err := req.Stream(context.Background())
 	if err != nil {
 		return "", err
