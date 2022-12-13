@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { curveLinear } from 'd3-shape';
 import { KWABackendService } from 'src/app/services/backend.service';
 import { transformStringResponses } from 'src/app/shared/utils';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,10 +9,8 @@ import { ExponentialBackoff, getCondition, NamespaceService } from 'kubeflow';
 
 interface ChartPoint {
   name: string;
-  series: {
-    name: any;
-    value: number;
-  }[];
+  type: string;
+  data: [string, number][];
 }
 
 @Component({
@@ -22,27 +19,18 @@ interface ChartPoint {
   styleUrls: ['./trial-details.component.scss'],
 })
 export class TrialDetailsComponent implements OnInit, OnDestroy {
+  initOpts = {
+    renderer: 'svg',
+  };
+
   trialName: string;
   namespace: string;
-  dataLoaded: boolean;
+  pageLoading = true;
   trialDetails: TrialK8s;
   experimentName: string;
   showTrialGraph: boolean = false;
-
-  // chart's options
-  view = [700, 500];
-  legend = true;
-  legendTitle = '';
-  animations = true;
-  xAxis = true;
-  yAxis = true;
-  showYAxisLabel = true;
-  showXAxisLabel = true;
-  xAxisLabel = 'Datetime';
-  yAxisLabel = 'Value';
-  timeline = true;
+  options: {};
   chartData: ChartPoint[] = [];
-  curve = curveLinear;
   yScaleMax = 0;
   yScaleMin = 1;
 
@@ -82,12 +70,15 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
     details.forEach(detail => {
       const name = detail[nameIndex];
       const value = +detail[valueIndex];
-      const time = new Date(detail[timeIndex]);
+      const time = detail[timeIndex];
+      const type = 'line';
 
       // figure out the min-max values in y-axis
       if (value > this.yScaleMax) {
         this.yScaleMax = value;
-      } else {
+      }
+
+      if (value < this.yScaleMin) {
         this.yScaleMin = value;
       }
 
@@ -95,23 +86,25 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
         // chart has already some points, append current one
         const index = this.chartData.findIndex(chart => chart.name === name);
 
-        this.chartData[index].series.push({
-          //name: formattedDate,
-          name: time,
-          value,
-        });
+        this.chartData[index].data.push([time, value]);
       } else {
         // first point of the chart
         this.chartData.push({
           name,
-          series: [{ name: time, value }],
+          type,
+          data: [[time, value]],
         });
       }
     });
 
     this.yScaleMin = Math.floor(this.yScaleMin * 10) / 10;
     this.yScaleMax = Math.ceil(this.yScaleMax * 10) / 10;
-    this.dataLoaded = true;
+
+    this.options = this.createGraphOptions(
+      this.chartData,
+      this.yScaleMin,
+      this.yScaleMax,
+    );
   }
 
   private updateTrialInfo() {
@@ -138,6 +131,7 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
           this.startTrialInfoPolling();
           this.startTrialPolling();
         }
+        this.pageLoading = false;
       });
   }
 
@@ -214,19 +208,68 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
     );
   }
 
-  public xAxisFormat(time: Date) {
-    function zeroPad(n: number): string {
-      if (n < 10) {
-        return `0${n}`;
-      }
+  createGraphOptions(
+    chartData: ChartPoint[],
+    yScaleMin: number,
+    yScaleMax: number,
+  ) {
+    // Set the options value that echarts need to create the graph
+    let graphOptions = {
+      legend: {
+        data: ['Train-accuracy', 'Validation-accuracy'],
+      },
+      tooltip: {
+        trigger: 'axis',
+      },
+      toolbox: {
+        show: true,
+        feature: {
+          dataZoom: {
+            yAxisIndex: 'none',
+          },
+          dataView: {
+            readOnly: true,
+            buttonColor: '#1e88e5',
+            optionToContent: function (opt) {
+              var series = opt.series;
+              var table = '';
+              var tmp;
+              for (const sr of series) {
+                tmp = table;
+                table =
+                  '<table style="width:100%; table-layout: fixed;"><tbody><tr>' +
+                  '<td style="font-weight: bold; width:10%">Timestamp</td>' +
+                  '<td style="font-weight: bold; width:30%">' +
+                  sr.name +
+                  '</td>' +
+                  '</tr>';
 
-      return n.toString();
-    }
+                for (var i = 0; i < sr.data.length; i++) {
+                  table +=
+                    '<tr>' +
+                    '<td>' +
+                    sr.data[i][0].replace('T', ' ').substring(0, 19) +
+                    '</td>' +
+                    '<td>' +
+                    sr.data[i][1] +
+                    '</td>' +
+                    '</tr>';
+                }
+                table += '</tbody></table><br>';
+                table = tmp + table;
+              }
 
-    const hours = zeroPad(time.getHours());
-    const minutes = zeroPad(time.getMinutes());
-    const seconds = zeroPad(time.getSeconds());
-    return `${hours}:${minutes}:${seconds}`;
+              return table;
+            },
+          },
+          saveAsImage: {},
+        },
+      },
+      xAxis: [{ type: 'time' }],
+      yAxis: [{ type: 'value', min: yScaleMin, max: yScaleMax }],
+      series: chartData,
+    };
+    return graphOptions;
   }
 
   returnToExperimentDetails() {
