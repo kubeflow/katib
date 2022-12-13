@@ -589,8 +589,24 @@ func (k *KatibUIHandler) FetchTrial(w http.ResponseWriter, r *http.Request) {
 
 // FetchTrialLogs fetches logs for a trial in specific namespace.
 func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) {
-	trialName := r.URL.Query()["trialName"][0]
-	namespace := r.URL.Query()["namespace"][0]
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
+		err := errors.New("no 'namespace' provided")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	trialNames, ok := r.URL.Query()["trialName"]
+	if !ok {
+		log.Printf("No trialName provided in Query parameters! Provide a 'trialName' param")
+		err := errors.New("no 'trialName' provided")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	trialName := trialNames[0]
+	namespace := namespaces[0]
 
 	user, err := IsAuthorized(consts.ActionTypeGet, namespace, consts.PluralTrial, "", trialName, trialsv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
 	if user == "" && err != nil {
