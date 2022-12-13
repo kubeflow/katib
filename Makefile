@@ -151,7 +151,6 @@ update-boilerplate:
 
 prepare-pytest:
 	pip install -r test/unit/v1beta1/requirements.txt
-	pip install -r cmd/suggestion/chocolate/v1beta1/requirements.txt
 	pip install -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
 	pip install -r cmd/suggestion/skopt/v1beta1/requirements.txt
 	pip install -r cmd/suggestion/optuna/v1beta1/requirements.txt

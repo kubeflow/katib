@@ -84,9 +84,6 @@ echo -e "\nBuilding suggestion images..."
 echo -e "\nBuilding hyperopt suggestion...\n"
 docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/suggestion-hyperopt:${TAG}" -f ${CMD_PREFIX}/suggestion/hyperopt/${VERSION}/Dockerfile .
 
-echo -e "\nBuilding chocolate suggestion...\n"
-docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/suggestion-chocolate:${TAG}" -f ${CMD_PREFIX}/suggestion/chocolate/${VERSION}/Dockerfile .
-
 echo -e "\nBuilding hyperband suggestion...\n"
 docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/suggestion-hyperband:${TAG}" -f ${CMD_PREFIX}/suggestion/hyperband/${VERSION}/Dockerfile .
 

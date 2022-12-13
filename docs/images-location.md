@@ -153,17 +153,6 @@ and the [Katib Early Stopping algorithms](https://www.kubeflow.org/docs/componen
     </tr>
     <tr align="center">
       <td>
-        <code>docker.io/kubeflowkatib/suggestion-chocolate</code>
-      </td>
-      <td>
-        <a href="https://github.com/AIworx-Labs/chocolate">Chocolate</a> Suggestion
-      </td>
-      <td>
-        <a href="https://github.com/kubeflow/katib/blob/master/cmd/suggestion/chocolate/v1beta1/Dockerfile">Dockerfile</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
         <code>docker.io/kubeflowkatib/suggestion-skopt</code>
       </td>
       <td>
