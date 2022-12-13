@@ -17,6 +17,7 @@ from collections import defaultdict
 
 from pkg.suggestion.v1beta1.internal.constant import INTEGER, DOUBLE, CATEGORICAL, DISCRETE, MAX_GOAL
 from pkg.suggestion.v1beta1.internal.trial import Assignment
+from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
 
 
 class BaseOptunaService(object):
@@ -47,6 +48,10 @@ class BaseOptunaService(object):
 
         elif self.algorithm_name == "random":
             return optuna.samplers.RandomSampler(**self.algorithm_config)
+
+        elif self.algorithm_name == "grid":
+            combinations = HyperParameterSearchSpace.convert_to_combinations(self.search_space)
+            return optuna.samplers.GridSampler(combinations, **self.algorithm_config)
 
     def get_suggestions(self, trials, current_request_number):
         if len(trials) != 0:

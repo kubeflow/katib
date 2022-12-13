@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import logging
+import numpy as np
 
 from pkg.apis.manager.v1beta1.python import api_pb2 as api
+from pkg.suggestion.v1beta1.internal.constant import INTEGER, DOUBLE, CATEGORICAL, DISCRETE
 import pkg.suggestion.v1beta1.internal.constant as constant
-
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -36,15 +37,38 @@ class HyperParameterSearchSpace(object):
             search_space.goal = constant.MIN_GOAL
         for p in experiment.spec.parameter_specs.parameters:
             search_space.params.append(
-                HyperParameterSearchSpace.convertParameter(p))
+                HyperParameterSearchSpace.convert_parameter(p))
         return search_space
+
+    @staticmethod
+    def convert_to_combinations(search_space):
+        combinations = {}
+
+        for parameter in search_space.params:
+            if parameter.type == INTEGER:
+                combinations[parameter.name] = range(int(parameter.min), int(parameter.max)+1, int(parameter.step))
+            elif parameter.type == DOUBLE:
+                if parameter.step == "" or parameter.step is None:
+                    raise Exception(
+                        "Param {} step is nil; For discrete search space, all parameters must include step".
+                        format(parameter.name)
+                    )
+                double_list = np.arange(float(parameter.min), float(parameter.max)+float(parameter.step),
+                                        float(parameter.step))
+                if double_list[-1] > float(parameter.max):
+                    double_list = double_list[:-1]
+                combinations[parameter.name] = double_list
+            elif parameter.type == CATEGORICAL or parameter.type == DISCRETE:
+                combinations[parameter.name] = parameter.list
+
+        return combinations
 
     def __str__(self):
         return "HyperParameterSearchSpace(goal: {}, ".format(self.goal) + \
             "params: {})".format(", ".join([element.__str__() for element in self.params]))
 
     @staticmethod
-    def convertParameter(p):
+    def convert_parameter(p):
         if p.parameter_type == api.INT:
             # Default value for INT parameter step is 1
             step = 1
