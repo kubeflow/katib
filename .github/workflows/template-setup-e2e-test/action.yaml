@@ -11,11 +11,12 @@ runs:
   using: composite
   steps:
     - name: Set Up Minikube Cluster
-      uses: manusa/actions-setup-minikube@v2.6.0
+      uses: manusa/actions-setup-minikube@v2.7.2
       with:
-        minikube version: "v1.25.2"
+        minikube version: 'v1.28.0'
         kubernetes version: ${{ inputs.kubernetes-version }}
-        start args: --driver none --wait-timeout=60s
+        start args: --wait-timeout=60s
+        driver: 'none'
         github token: ${{ env.GITHUB_TOKEN }}
 
     - name: Set Up Docker Buildx
