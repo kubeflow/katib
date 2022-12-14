@@ -62,7 +62,9 @@
     <ng-template #loading>
       <div class="graph-div-outer">
         <div class="graph-div-inner">
-          <mat-spinner></mat-spinner>
+          <lib-loading-spinner
+            message="Fetching Trial details..."
+          ></lib-loading-spinner>
         </div>
       </div>
     </ng-template>
