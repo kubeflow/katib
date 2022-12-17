@@ -184,6 +184,13 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	containers := []corev1.Container{}
 	suggestionContainer := suggestionConfigData.Container
 
+	// Assign default values for suggestionContainer fields that are not set via
+	// the suggestion config.
+
+	if suggestionContainer.Name == "" {
+		suggestionContainer.Name = consts.ContainerSuggestion
+	}
+
 	if len(suggestionContainer.Ports) == 0 {
 		suggestionContainer.Ports = []corev1.ContainerPort{
 			{
