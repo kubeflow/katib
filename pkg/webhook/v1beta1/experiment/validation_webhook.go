@@ -35,7 +35,6 @@ import (
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
-	"github.com/kubeflow/katib/pkg/webhook/v1beta1/common"
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/experiment/validator"
 )
 
@@ -77,25 +76,6 @@ func (v *ExperimentValidator) Handle(ctx context.Context, req admission.Request)
 		if err := oldDecoder.Decode(&oldInst); err != nil {
 			return admission.Errored(http.StatusBadRequest, fmt.Errorf("Cannot decode incoming old object: %v", err))
 		}
-	}
-
-	// After metrics collector sidecar injection in Job level done, delete validation for namespace labels
-	ns := &v1.Namespace{}
-	if err := v.client.Get(context.TODO(), types.NamespacedName{Name: req.AdmissionRequest.Namespace}, ns); err != nil {
-		return admission.Errored(http.StatusInternalServerError, err)
-	}
-	validNS := true
-	if ns.Labels == nil {
-		validNS = false
-	} else {
-		if v, ok := ns.Labels[common.KatibMetricsCollectorInjection]; !ok || v != common.KatibMetricsCollectorInjectionEnabled {
-			validNS = false
-		}
-	}
-	if !validNS {
-		err = fmt.Errorf("Cannot create the Experiment %q in namespace %q: the namespace lacks label \"%s: %s\"",
-			inst.Name, req.AdmissionRequest.Namespace, common.KatibMetricsCollectorInjection, common.KatibMetricsCollectorInjectionEnabled)
-		return admission.Errored(http.StatusBadRequest, err)
 	}
 
 	err = v.ValidateExperiment(inst, oldInst)

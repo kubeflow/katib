@@ -63,9 +63,6 @@ webhooks:
         name: katib-controller
         namespace: kubeflow
         path: /mutate-pod
-    namespaceSelector:
-      matchLabels:
-        katib.kubeflow.org/metrics-collector-injection: enabled
     rules:
       - apiGroups:
           - ""
