@@ -380,6 +380,23 @@ func TestReconcile(t *testing.T) {
 		return suggestion.IsSucceeded()
 	}, timeout).Should(gomega.BeTrue())
 
+	// Expect that 2 trials are killed
+	g.Eventually(func() bool {
+		trials := &trialsv1beta1.TrialList{}
+		label := labels.Set{
+			consts.LabelExperimentName: experimentName,
+		}
+		g.Expect(c.List(ctx, trials, &client.ListOptions{LabelSelector: label.AsSelector()})).NotTo(gomega.HaveOccurred())
+
+		g.Expect(len(trials.Items)).Should(gomega.Equal(2))
+		for _, item := range trials.Items {
+			if !item.IsKilled() {
+				return false
+			}
+		}
+		return true
+	}, timeout).Should(gomega.BeTrue())
+
 	// Delete the suggestion
 	g.Expect(c.Delete(ctx, suggestionInstance)).NotTo(gomega.HaveOccurred())
 

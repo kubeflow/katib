@@ -339,8 +339,8 @@ func (g *General) ConvertExperiment(e *experimentsv1beta1.Experiment) *suggestio
 func (g *General) ConvertTrials(ts []trialsv1beta1.Trial) []*suggestionapi.Trial {
 	trialsRes := make([]*suggestionapi.Trial, 0)
 	for _, t := range ts {
-		// Skip Trials with unavailable metrics.
-		if t.IsMetricsUnavailable() {
+		// Skip Trials with unavailable metrics or in killed status.
+		if t.IsMetricsUnavailable() || t.IsKilled() {
 			continue
 		}
 		if !t.IsObservationAvailable() && t.IsEarlyStopped() {

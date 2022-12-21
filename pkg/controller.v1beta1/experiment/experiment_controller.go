@@ -46,6 +46,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/suggestion"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial"
 )
 
 const (
@@ -189,6 +190,11 @@ func (r *ReconcileExperiment) Reconcile(ctx context.Context, request reconcile.R
 	}
 
 	if instance.IsCompleted() {
+		if err := r.cleanupTrialResources(instance); err != nil {
+			logger.Error(err, "cleanup Trial Resources error")
+			return reconcile.Result{}, err
+		}
+
 		// Cleanup suggestion after Experiment is finished.
 		// If ResumePolicy = Never or ResumePolicy = FromVolume, delete suggestion deployment, service and mark suggestion status succeeded.
 		if instance.Spec.ResumePolicy == experimentsv1beta1.NeverResume || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
@@ -276,8 +282,7 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1beta1.E
 			return err
 		}
 	}
-	reconcileRequired := !instance.IsCompleted()
-	if reconcileRequired {
+	if !instance.IsCompleted() {
 		return r.ReconcileTrials(instance, trials.Items)
 	}
 
@@ -504,4 +509,36 @@ func (r *ReconcileExperiment) ReconcileSuggestions(instance *experimentsv1beta1.
 		}
 	}
 	return assignments, nil
+}
+
+func (r *ReconcileExperiment) cleanupTrialResources(instance *experimentsv1beta1.Experiment) error {
+
+	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
+	trials := &trialsv1beta1.TrialList{}
+	labels := map[string]string{consts.LabelExperimentName: instance.Name}
+
+	if err := r.List(context.TODO(), trials, client.InNamespace(instance.Namespace), client.MatchingLabels(labels)); err != nil {
+		logger.Error(err, "Trial List error")
+		return err
+	}
+
+	timeNow := metav1.Now()
+	for i := range trials.Items {
+		if trials.Items[i].IsCompleted() {
+			continue
+		}
+		trials.Items[i].MarkTrialStatusKilled(trial.TrialKilledReason, "experiment already completed")
+		instance.Status.CompletionTime = &timeNow
+		eventMsg := fmt.Sprintf("Job %v has killed", trials.Items[i].Spec.RunSpec.GetName())
+		r.recorder.Eventf(instance, corev1.EventTypeNormal, trial.TrialKilledReason, eventMsg)
+		logger.Info("Trial status changed to Killed", "trial name", trials.Items[i].Name)
+
+		if err := r.Status().Update(context.TODO(), &trials.Items[i]); err != nil {
+			logger.Error(err, "Trials status updated failed", "trial name", trials.Items[i].Name)
+			return err
+		}
+	}
+
+	return nil
+
 }

@@ -29,7 +29,10 @@ const (
 	TrialSucceededReason          = "TrialSucceeded"
 	TrialMetricsUnavailableReason = "MetricsUnavailable"
 	TrialFailedReason             = "TrialFailed"
+	TrialKilledReason             = "TrialKilled"
+)
 
+const (
 	// For Jobs
 	JobCreatedReason            = "JobCreated"
 	JobDeletedReason            = "JobDeleted"
@@ -37,6 +40,7 @@ const (
 	JobMetricsUnavailableReason = "MetricsUnavailable"
 	JobFailedReason             = "JobFailed"
 	JobRunningReason            = "JobRunning"
+	JobKilledReason             = "JobKilled"
 )
 
 type updateStatusFunc func(instance *trialsv1beta1.Trial) error

@@ -18,6 +18,7 @@ package v1beta1
 
 import (
 	"errors"
+
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 
 	v1 "k8s.io/api/core/v1"
