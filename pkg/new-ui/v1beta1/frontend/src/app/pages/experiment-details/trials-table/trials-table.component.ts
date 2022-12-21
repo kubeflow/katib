@@ -1,10 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
   OnChanges,
-  Output,
   SimpleChanges,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,7 +11,8 @@ import {
   StatusValue,
   ComponentValue,
   TableConfig,
-  ActionEvent,
+  LinkValue,
+  LinkType,
 } from 'kubeflow';
 import { parseStatus } from '../../experiments/utils';
 import lowerCase from 'lodash-es/lowerCase';
@@ -41,12 +40,6 @@ export class TrialsTableComponent implements OnChanges {
 
   @Input()
   bestTrialName: string;
-
-  @Output()
-  mouseOnTrial = new EventEmitter<number>();
-
-  @Output()
-  leaveMouseFromTrial = new EventEmitter<void>();
 
   bestTrialRow: {};
 
@@ -83,6 +76,13 @@ export class TrialsTableComponent implements OnChanges {
         var key = lowerCase(displayedColumns[j]);
         var value = list[j];
         processedData[i][key] = value;
+
+        if (key === 'trial name') {
+          processedData[i].link = {
+            text: list[j],
+            url: `/experiment/${this.experimentName}/trial/${list[j]}`,
+          };
+        }
       }
     }
 
@@ -97,9 +97,12 @@ export class TrialsTableComponent implements OnChanges {
           columns.push({
             matHeaderCellDef: displayedColumns[i],
             matColumnDef: 'name',
-            value: new PropertyValue({
-              field: lowerCase(displayedColumns[i]),
-              isLink: true,
+            style: { width: '25%' },
+            value: new LinkValue({
+              field: 'link',
+              popoverField: 'trial name',
+              truncate: true,
+              linkType: LinkType.Internal,
             }),
             sort: true,
           });
@@ -145,18 +148,5 @@ export class TrialsTableComponent implements OnChanges {
     return {
       columns,
     };
-  }
-
-  // Event handling functions
-  reactToAction(a: ActionEvent) {
-    switch (a.action) {
-      case 'name:link':
-        this.openTrialDetails(a.data['trial name']);
-        break;
-    }
-  }
-
-  openTrialDetails(name: string) {
-    this.router.navigate([`/experiment/${this.experimentName}/trial/${name}`]);
   }
 }
