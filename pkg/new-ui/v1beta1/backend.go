@@ -619,17 +619,6 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err = IsAuthorized(consts.ActionTypeList, namespace, corev1.ResourcePods.String(), "", "", corev1.SchemeGroupVersion, k.katibClient.GetClient(), r)
-	if user == "" && err != nil {
-		log.Printf("No user provided in kubeflow-userid header.")
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	} else if err != nil {
-		log.Printf("The user: %s is not authorized to list pods in namespace: %s \n", user, namespace)
-		http.Error(w, err.Error(), http.StatusForbidden)
-		return
-	}
-
 	trial := &trialsv1beta1.Trial{}
 	if err := k.katibClient.GetClient().Get(context.TODO(), types.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
 		log.Printf("GetLogs failed: %v", err)
