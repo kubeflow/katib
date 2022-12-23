@@ -620,7 +620,7 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 	}
 
 	trial := &trialsv1beta1.Trial{}
-	if err := k.katibClient.GetClient().Get(context.TODO(), types.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
+	if err := k.katibClient.GetClient().Get(context.Background(), types.NamespacedName{Name: trialName, Namespace: namespace}, trial); err != nil {
 		log.Printf("GetLogs failed: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
