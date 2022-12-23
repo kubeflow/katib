@@ -20,7 +20,7 @@ RUN apt-get -y update \
 RUN if [ "${TARGETARCH}" = "arm64" ]; then \
       /opt/mxnet-mnist/install-arm-performance-libraries.sh; \
     fi
-RUN pip install mxnet==1.9.1
+RUN pip install -r requirements.txt
 RUN chgrp -R 0 /opt/mxnet-mnist \
   && chmod -R g+rwX /opt/mxnet-mnist
 
