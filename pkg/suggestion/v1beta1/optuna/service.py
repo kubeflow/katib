@@ -15,10 +15,10 @@
 import threading
 import grpc
 import logging
+import itertools
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
-from pkg.suggestion.v1beta1.internal.constant import INTEGER, DOUBLE
 from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
 from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.optuna.base_service import BaseOptunaService
@@ -55,7 +55,7 @@ class OptunaService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def ValidateAlgorithmSettings(self, request, context):
         is_valid, message = OptimizerConfiguration.validate_algorithm_spec(
-            request.experiment.spec.algorithm)
+            request.experiment)
         if not is_valid:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(message)
@@ -86,6 +86,9 @@ class OptimizerConfiguration(object):
         "random": {
             "seed": lambda x: int(x),
         },
+        "grid": {
+            "seed": lambda x: int(x),
+        }
     }
 
     @classmethod
@@ -110,7 +113,8 @@ class OptimizerConfiguration(object):
         return algorithm_spec.algorithm_name, config
 
     @classmethod
-    def validate_algorithm_spec(cls, algorithm_spec):
+    def validate_algorithm_spec(cls, experiment):
+        algorithm_spec = experiment.spec.algorithm
         algorithm_name = algorithm_spec.algorithm_name
         algorithm_settings = algorithm_spec.algorithm_settings
 
@@ -120,6 +124,10 @@ class OptimizerConfiguration(object):
             return cls._validate_cmaes_setting(algorithm_settings)
         elif algorithm_name == "random":
             return cls._validate_random_setting(algorithm_settings)
+        elif algorithm_name == "grid":
+            return cls._validate_grid_setting(experiment)
+        else:
+            return False, "unknown algorithm name {}".format(algorithm_name)
 
     @classmethod
     def _validate_tpe_setting(cls, algorithm_spec):
@@ -176,5 +184,36 @@ class OptimizerConfiguration(object):
             except Exception as e:
                 return False, "failed to validate {name}({value}): {exception}".format(name=s.name, value=s.value,
                                                                                        exception=e)
+
+        return True, ""
+
+    @classmethod
+    def _validate_grid_setting(cls, experiment):
+        algorithm_settings = experiment.spec.algorithm.algorithm_settings
+        search_space = HyperParameterSearchSpace.convert(experiment)
+
+        for s in algorithm_settings:
+            try:
+                if s.name == "random_state":
+                    if not int(s.value) >= 0:
+                        return False, ""
+                else:
+                    return False, "unknown setting {} for algorithm grid".format(s.name)
+
+            except Exception as e:
+                return False, "failed to validate {name}({value}): {exception}".format(name=s.name, value=s.value,
+                                                                                       exception=e)
+
+        try:
+            combinations = HyperParameterSearchSpace.convert_to_combinations(search_space)
+            num_combinations = len(list(itertools.product(*combinations.values())))
+            max_trial_count = experiment.spec.max_trial_count
+            if max_trial_count > num_combinations:
+                return False, "Max Trial Count: {max_trial} > all possible search combinations: {combinations}".\
+                    format(max_trial=max_trial_count, combinations=num_combinations)
+
+        except Exception as e:
+            return False, "failed to validate parameters({parameters}): {exception}".\
+                format(parameters=search_space.params, exception=e)
 
         return True, ""

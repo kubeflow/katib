@@ -31,7 +31,7 @@ data:
         "image": "docker.io/kubeflowkatib/suggestion-hyperopt:latest"
       },
       "grid": {
-        "image": "docker.io/kubeflowkatib/suggestion-chocolate:latest"
+        "image": "docker.io/kubeflowkatib/suggestion-optuna:latest"
       },
       "hyperband": {
         "image": "docker.io/kubeflowkatib/suggestion-hyperband:latest"
