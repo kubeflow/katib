@@ -30,6 +30,24 @@ TRIAL_PLURAL = "trials"
 
 DEFAULT_PRIMARY_CONTAINER_NAME = "training-container"
 
+# Label to identify Experiment's resources.
+EXPERIMENT_LABEL = "katib.kubeflow.org/experiment"
+
+# True means that Katib CR is in this condition.
+CONDITION_STATUS_TRUE = "True"
+
+# Experiment conditions.
+# TODO (andreyvelich): Use API enums when Katib SDK supports it.
+# Ref: https://github.com/kubeflow/katib/issues/1969.
+EXPERIMENT_CONDITION_CREATED = "Created"
+EXPERIMENT_CONDITION_RUNNING = "Running"
+EXPERIMENT_CONDITION_RESTARTING = "Restarting"
+EXPERIMENT_CONDITION_SUCCEEDED = "Succeeded"
+EXPERIMENT_CONDITION_FAILED = "Failed"
+
+# Trial conditions.
+TRIAL_CONDITION_SUCCEEDED = "Succeeded"
+
 # Supported base images for the Katib Trials.
 # TODO (andreyvelich): Implement list_base_images function to get each image description.
 BASE_IMAGE_TENSORFLOW = "docker.io/tensorflow/tensorflow:2.9.1"
