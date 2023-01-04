@@ -15,7 +15,7 @@
 import json
 import os
 import textwrap
-from typing import Callable, List
+from typing import Callable
 import inspect
 
 from kubeflow.katib import models

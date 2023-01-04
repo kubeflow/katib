@@ -59,11 +59,11 @@ def verify_experiment_results(
     if succeeded_reason == "ExperimentGoalReached" and (
         (
             experiment.spec.objective.type == "minimize"
-            and best_objective_metric.min > experiment.spec.objective.goal
+            and float(best_objective_metric.min) > float(experiment.spec.objective.goal)
         )
         or (
             experiment.spec.objective.type == "maximize"
-            and best_objective_metric.max < experiment.spec.objective.goal
+            and float(best_objective_metric.max) < float(experiment.spec.objective.goal)
         )
     ):
         raise Exception(
@@ -134,8 +134,10 @@ def verify_experiment_results(
             PVCs = client.CoreV1Api().list_namespaced_persistent_volume_claim(
                 exp_namespace
             )
+            is_deleted = 1
             for i in PVCs.items:
-                is_deleted = 0 if i.metadata.name == resource_name else 1
+                if i.metadata.name == resource_name:
+                    is_deleted = 0
             if is_deleted == 1:
                 raise Exception(
                     "PVC is deleted for FromVolume resume policy. "
