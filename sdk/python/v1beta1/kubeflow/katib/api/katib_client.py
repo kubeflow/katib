@@ -786,6 +786,47 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to get Katib Suggestion: {namespace}/{name}")
 
+    def list_suggestions(self, namespace: str = utils.get_default_target_namespace()):
+        """List of all Katib Suggestion in namespace.
+
+        Args:
+            namespace: Namespace to list the Suggestions.
+
+        Returns:
+            list[V1beta1Suggestion]: List of Katib Suggestions objects. It returns
+            empty list if Suggestions cannot be found.
+
+        Raises:
+            TimeoutError: Timeout to list Katib Suggestions.
+            RuntimeError: Failed to list Katib Suggestions.
+        """
+
+        thread = self.api_instance.list_namespaced_custom_object(
+            constants.KUBEFLOW_GROUP,
+            constants.KATIB_VERSION,
+            namespace=namespace,
+            plural=constants.EXPERIMENT_PLURAL,
+            async_req=True,
+        )
+        result = []
+        try:
+            response = thread.get(constants.APISERVER_TIMEOUT)
+            result = [
+                self.api_client.deserialize(
+                    utils.FakeResponse(item), models.V1beta1Suggestion
+                )
+                for item in response.get("items")
+            ]
+        except multiprocessing.TimeoutError:
+            raise TimeoutError(
+                f"Timeout to list Katib Suggestions in namespace: {namespace}"
+            )
+        except Exception:
+            raise RuntimeError(
+                f"Failed to list Katib Suggestions in namespace: {namespace}"
+            )
+        return result
+
     def get_trial(
         self, name: str, namespace: str = utils.get_default_target_namespace()
     ):
