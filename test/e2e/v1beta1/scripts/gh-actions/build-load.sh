@@ -158,7 +158,6 @@ cleanup_build_cache
 # Suggestion images
 echo -e "\nBuilding suggestion images..."
 run "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
-run "suggestion-chocolate" "$CMD_PREFIX/suggestion/chocolate/$VERSION/Dockerfile"
 run "suggestion-hyperband" "$CMD_PREFIX/suggestion/hyperband/$VERSION/Dockerfile"
 run "suggestion-skopt" "$CMD_PREFIX/suggestion/skopt/$VERSION/Dockerfile"
 run "suggestion-goptuna" "$CMD_PREFIX/suggestion/goptuna/$VERSION/Dockerfile"

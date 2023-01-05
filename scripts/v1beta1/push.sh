@@ -59,9 +59,6 @@ echo -e "\nPushing suggestion images..."
 echo -e "\nPushing hyperopt suggestion...\n"
 docker push "${REGISTRY}/suggestion-hyperopt:${TAG}"
 
-echo -e "\nPushing chocolate suggestion...\n"
-docker push "${REGISTRY}/suggestion-chocolate:${TAG}"
-
 echo -e "\nPushing hyperband suggestion...\n"
 docker push "${REGISTRY}/suggestion-hyperband:${TAG}"
 

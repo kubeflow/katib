@@ -139,7 +139,6 @@ custom algorithm.
 
 To perform above algorithms Katib supports the following frameworks:
 
-- [Chocolate](https://github.com/AIworx-Labs/chocolate)
 - [Goptuna](https://github.com/c-bata/goptuna)
 - [Hyperopt](https://github.com/hyperopt/hyperopt)
 - [Optuna](https://github.com/optuna/optuna)
