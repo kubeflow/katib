@@ -28,5 +28,5 @@ runs:
         python-version: 3.9
 
     - name: Install Katib SDK
-      run: |
-        pip install -e sdk/python/v1beta1
+      shell: bash
+      run: pip install -e sdk/python/v1beta1
