@@ -178,10 +178,15 @@ def run_e2e_experiment(
             f"with MaxTrialCount: {max_trial_count} and ParallelTrialCount: {parallel_trial_count}"
         )
 
-        # Modify Experiment budget and wait until it is Succeeded.
+        # Modify Experiment budget.
         katib_client.edit_experiment_budget(
             exp_name, exp_namespace, max_trial_count, parallel_trial_count
         )
+        # Wait until Experiment is Restarted.
+        katib_client.wait_for_experiment_condition(
+            exp_name, exp_namespace, constants.EXPERIMENT_CONDITION_RESTARTING
+        )
+        # Wait until Experiment is Succeeded.
         experiment = katib_client.wait_for_experiment_condition(exp_name, exp_namespace)
 
     # Verify the Experiment results.

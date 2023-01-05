@@ -575,7 +575,7 @@ class KatibClient(object):
             V1beta1Experiment: Katib Experiment object.
 
         Raises:
-            RuntimeError: Failed to get Katib Experiment or Experiment reaches 
+            RuntimeError: Failed to get Katib Experiment or Experiment reaches
                 Failed state if it does not wait for this condition.
             TimeoutError: Timeout waiting for Experiment to reach required condition
                 or timeout to get Katib Experiment.
@@ -714,10 +714,7 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to edit Katib Experiment: {namespace}/{name}")
 
-        # Wait until Experiment reaches Restarting condition.
-        self.wait_for_experiment_condition(
-            name, namespace, constants.EXPERIMENT_CONDITION_RESTARTING
-        )
+        print(f"Experiment {namespace}/{name} has been updated")
 
     def delete_experiment(
         self, name: str, namespace: str = utils.get_default_target_namespace()
