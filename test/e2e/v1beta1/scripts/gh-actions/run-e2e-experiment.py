@@ -8,6 +8,9 @@ from kubeflow.katib import ApiClient, KatibClient, models
 from kubeflow.katib.utils.utils import FakeResponse
 from kubeflow.katib.constants import constants
 
+# Experiment timeout is 40 min.
+EXPERIMENT_TIMEOUT = 60 * 40
+
 
 def verify_experiment_results(
     katib_client: KatibClient,
@@ -164,7 +167,9 @@ def run_e2e_experiment(
 
     # Wait until Experiment reaches Succeeded condition.
     katib_client.create_experiment(experiment, exp_namespace)
-    experiment = katib_client.wait_for_experiment_condition(exp_name, exp_namespace)
+    experiment = katib_client.wait_for_experiment_condition(
+        exp_name, exp_namespace, timeout=EXPERIMENT_TIMEOUT
+    )
 
     # Test resume feature for "FromVolume" and "LongRunning" Experiments.
     # TODO (andreyvelich): Once we change the default resume policy to "Never",
@@ -184,10 +189,15 @@ def run_e2e_experiment(
         )
         # Wait until Experiment is Restarted.
         katib_client.wait_for_experiment_condition(
-            exp_name, exp_namespace, constants.EXPERIMENT_CONDITION_RESTARTING
+            exp_name,
+            exp_namespace,
+            constants.EXPERIMENT_CONDITION_RESTARTING,
+            EXPERIMENT_TIMEOUT,
         )
         # Wait until Experiment is Succeeded.
-        experiment = katib_client.wait_for_experiment_condition(exp_name, exp_namespace)
+        experiment = katib_client.wait_for_experiment_condition(
+            exp_name, exp_namespace, timeout=EXPERIMENT_TIMEOUT
+        )
 
     # Verify the Experiment results.
     verify_experiment_results(katib_client, experiment, exp_name, exp_namespace)
