@@ -57,7 +57,7 @@ class KatibClient(object):
             config.load_incluster_config()
             self.in_cluster = True
 
-        self.api_instance = client.CustomObjectsApi()
+        self.custom_api = client.CustomObjectsApi()
         self.api_client = ApiClient()
 
     def _is_ipython(self):
@@ -89,7 +89,7 @@ class KatibClient(object):
         """
 
         try:
-            self.api_instance.create_namespaced_custom_object(
+            self.custom_api.create_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace,
@@ -331,7 +331,7 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
-        thread = self.api_instance.get_namespaced_custom_object(
+        thread = self.custom_api.get_namespaced_custom_object(
             constants.KUBEFLOW_GROUP,
             constants.KATIB_VERSION,
             namespace,
@@ -365,7 +365,7 @@ class KatibClient(object):
             RuntimeError: Failed to list Katib Experiments.
         """
 
-        thread = self.api_instance.list_namespaced_custom_object(
+        thread = self.custom_api.list_namespaced_custom_object(
             constants.KUBEFLOW_GROUP,
             constants.KATIB_VERSION,
             namespace=namespace,
@@ -701,7 +701,7 @@ class KatibClient(object):
 
         # Update Experiment with the new Trial budget.
         try:
-            self.api_instance.patch_namespaced_custom_object(
+            self.custom_api.patch_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace,
@@ -731,7 +731,7 @@ class KatibClient(object):
         """
 
         try:
-            self.api_instance.delete_namespaced_custom_object(
+            self.custom_api.delete_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace,
@@ -764,7 +764,7 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Suggestion.
         """
 
-        thread = self.api_instance.get_namespaced_custom_object(
+        thread = self.custom_api.get_namespaced_custom_object(
             constants.KUBEFLOW_GROUP,
             constants.KATIB_VERSION,
             namespace,
@@ -798,7 +798,7 @@ class KatibClient(object):
             RuntimeError: Failed to list Katib Suggestions.
         """
 
-        thread = self.api_instance.list_namespaced_custom_object(
+        thread = self.custom_api.list_namespaced_custom_object(
             constants.KUBEFLOW_GROUP,
             constants.KATIB_VERSION,
             namespace=namespace,
@@ -841,7 +841,7 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Trial.
         """
 
-        thread = self.api_instance.get_namespaced_custom_object(
+        thread = self.custom_api.get_namespaced_custom_object(
             constants.KUBEFLOW_GROUP,
             constants.KATIB_VERSION,
             namespace,
@@ -882,7 +882,7 @@ class KatibClient(object):
         """
 
         if experiment_name is None:
-            thread = self.api_instance.list_namespaced_custom_object(
+            thread = self.custom_api.list_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace=namespace,
@@ -890,7 +890,7 @@ class KatibClient(object):
                 async_req=True,
             )
         else:
-            thread = self.api_instance.list_namespaced_custom_object(
+            thread = self.custom_api.list_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace=namespace,
@@ -937,7 +937,7 @@ class KatibClient(object):
         """
 
         if experiment_name is None:
-            thread = self.api_instance.list_namespaced_custom_object(
+            thread = self.custom_api.list_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace=namespace,
@@ -945,7 +945,7 @@ class KatibClient(object):
                 async_req=True,
             )
         else:
-            thread = self.api_instance.list_namespaced_custom_object(
+            thread = self.custom_api.list_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace=namespace,
