@@ -1,4 +1,4 @@
-psutil==5.8.0
+psutil==5.9.4
 rfc3339>=6.2
 grpcio==1.41.1
 googleapis-common-protos==1.6.0

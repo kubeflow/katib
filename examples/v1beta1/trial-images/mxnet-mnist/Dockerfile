@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 ARG TARGETARCH
 ENV LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:/opt/arm/armpl_22.0.2_gcc-11.2/lib"
