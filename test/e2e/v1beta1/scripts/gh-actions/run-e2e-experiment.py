@@ -2,6 +2,7 @@ import argparse
 import yaml
 import time
 import os
+import logging
 from kubernetes import client, config
 
 from kubeflow.katib import ApiClient, KatibClient, models
@@ -10,6 +11,9 @@ from kubeflow.katib.constants import constants
 
 # Experiment timeout is 40 min.
 EXPERIMENT_TIMEOUT = 60 * 40
+
+# The default logging config.
+logging.basicConfig(level=logging.INFO)
 
 
 def verify_experiment_results(
@@ -156,8 +160,8 @@ def run_e2e_experiment(
 ):
 
     # Create Katib Experiment and wait until it is finished.
-    print(
-        "\n\n\nCreating Experiment: {}/{} with MaxTrialCount: {}, ParallelTrialCount: {}".format(
+    logging.info(
+        "Creating Experiment: {}/{} with MaxTrialCount: {}, ParallelTrialCount: {}".format(
             exp_namespace,
             exp_name,
             experiment.spec.max_trial_count,
@@ -178,7 +182,7 @@ def run_e2e_experiment(
     if exp_name == "from-volume-resume" or exp_name == "random":
         max_trial_count = experiment.spec.max_trial_count + 1
         parallel_trial_count = experiment.spec.parallel_trial_count + 1
-        print(
+        logging.info(
             f"Restarting Experiment {exp_namespace}/{exp_name} "
             f"with MaxTrialCount: {max_trial_count} and ParallelTrialCount: {parallel_trial_count}"
         )
@@ -203,9 +207,14 @@ def run_e2e_experiment(
     verify_experiment_results(katib_client, experiment, exp_name, exp_namespace)
 
     # Describe the Experiment and Suggestion.
-    print(os.popen(f"kubectl describe experiment {exp_name} -n {exp_namespace}").read())
-    print("\n\n\n")
-    print(os.popen(f"kubectl describe suggestion {exp_name} -n {exp_namespace}").read())
+    logging.info(
+        os.popen(f"kubectl describe experiment {exp_name} -n {exp_namespace}").read()
+    )
+    logging.info("---------------------------------------------------------------")
+    logging.info("---------------------------------------------------------------")
+    logging.info(
+        os.popen(f"kubectl describe suggestion {exp_name} -n {exp_namespace}").read()
+    )
 
 
 if __name__ == "__main__":
@@ -216,12 +225,22 @@ if __name__ == "__main__":
         required=True,
         help="Path to the Katib Experiment.",
     )
+    parser.add_argument(
+        "--verbose",
+        type=str,
+        default=True,
+        choices=("True", "False"),
+        required=False,
+        help="Verbose output for the Katib E2E test",
+    )
     args = parser.parse_args()
 
-    # TODO (andreyvelich): Use logging once Katib SDK supports it.
-    print("--------------------------------------------------------------------")
-    print("--------------------------------------------------------------------")
-    print(f"Start E2E test for the Katib Experiment: {args.experiment_path}")
+    if args.verbose == "False":
+        logging.getLogger().setLevel(logging.WARNING)
+
+    logging.info("---------------------------------------------------------------")
+    logging.info("---------------------------------------------------------------")
+    logging.info(f"Start E2E test for the Katib Experiment: {args.experiment_path}")
 
     # Read Experiment YAML to Fake Response object.
     with open(args.experiment_path, "r") as file:
@@ -258,15 +277,17 @@ if __name__ == "__main__":
     katib_client = KatibClient()
     try:
         run_e2e_experiment(katib_client, experiment, exp_name, exp_namespace)
-        print(f"\n\n\nE2E is completed for Experiment: {exp_namespace}/{exp_name}")
-        print("--------------------------------------------------------------------")
-        print("--------------------------------------------------------------------")
+        logging.info("---------------------------------------------------------------")
+        logging.info(f"E2E is completed for Experiment: {exp_namespace}/{exp_name}")
+        logging.info("---------------------------------------------------------------")
+        logging.info("---------------------------------------------------------------")
         # Delete the Experiment.
         katib_client.delete_experiment(exp_name, exp_namespace)
     except Exception as e:
-        print(f"\n\n\nE2E is failed for Experiment: {exp_namespace}/{exp_name}")
-        print("--------------------------------------------------------------------")
-        print("--------------------------------------------------------------------")
+        logging.info("---------------------------------------------------------------")
+        logging.info(f"E2E is failed for Experiment: {exp_namespace}/{exp_name}")
+        logging.info("---------------------------------------------------------------")
+        logging.info("---------------------------------------------------------------")
         # Delete the Experiment and raise an Exception.
         katib_client.delete_experiment(exp_name, exp_namespace)
         raise e
