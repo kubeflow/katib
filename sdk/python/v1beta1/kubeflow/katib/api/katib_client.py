@@ -397,7 +397,8 @@ class KatibClient(object):
         namespace: str = utils.get_default_target_namespace(),
         experiment: models.V1beta1Experiment = None,
     ):
-        """Get the Experiment conditions.
+        """Get the Experiment conditions. Experiment is in the condition when
+        `status` is True for the appropriate condition `type`.
 
         Args:
             name: Name for the Experiment.
@@ -460,6 +461,7 @@ class KatibClient(object):
         experiment: models.V1beta1Experiment = None,
     ):
         """Check if Experiment is Running.
+
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
@@ -557,7 +559,7 @@ class KatibClient(object):
         self,
         name: str,
         namespace: str = utils.get_default_target_namespace(),
-        condition: str = constants.EXPERIMENT_CONDITION_SUCCEEDED,
+        expected_condition: str = constants.EXPERIMENT_CONDITION_SUCCEEDED,
         timeout: int = 600,
         polling_interval: int = 15,
     ):
@@ -567,7 +569,7 @@ class KatibClient(object):
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
-            condition: Which condition Experiment should reach.
+            expected_condition: Which condition Experiment should reach.
             timeout: How many seconds to wait until Experiment reaches condition.
             polling_interval: The polling interval in seconds to get Experiment status.
 
@@ -588,11 +590,11 @@ class KatibClient(object):
 
             # Wait for Failed condition.
             if (
-                condition == constants.EXPERIMENT_CONDITION_FAILED
+                expected_condition == constants.EXPERIMENT_CONDITION_FAILED
                 and self.is_experiment_failed(name, namespace, experiment)
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {condition}\n\n\n")
+                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Raise exception if Experiment is Failed.
@@ -604,49 +606,49 @@ class KatibClient(object):
 
             # Check if Experiment reaches Created condition.
             elif (
-                condition == constants.EXPERIMENT_CONDITION_CREATED
+                expected_condition == constants.EXPERIMENT_CONDITION_CREATED
                 and self.is_experiment_created(name, namespace, experiment)
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {condition}\n\n\n")
+                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Running condition.
             elif (
-                condition == constants.EXPERIMENT_CONDITION_RUNNING
+                expected_condition == constants.EXPERIMENT_CONDITION_RUNNING
                 and self.is_experiment_running(name, namespace, experiment)
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {condition}\n\n\n")
+                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
             elif (
-                condition == constants.EXPERIMENT_CONDITION_RESTARTING
+                expected_condition == constants.EXPERIMENT_CONDITION_RESTARTING
                 and self.is_experiment_restarting(name, namespace, experiment)
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {condition}\n\n\n")
+                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
             elif (
-                condition == constants.EXPERIMENT_CONDITION_SUCCEEDED
+                expected_condition == constants.EXPERIMENT_CONDITION_SUCCEEDED
                 and self.is_experiment_succeeded(name, namespace, experiment)
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {condition}\n\n\n")
+                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.
             utils.print_experiment_status(experiment)
             print(
-                f"Waiting for Experiment: {namespace}/{name} to reach {condition} condition\n\n\n"
+                f"Waiting for Experiment: {namespace}/{name} to reach {expected_condition} condition\n\n\n"
             )
             time.sleep(polling_interval)
 
         raise TimeoutError(
-            f"Timeout waiting for Experiment: {namespace}/{name} to reach Succeeded state"
+            f"Timeout waiting for Experiment: {namespace}/{name} to reach {expected_condition} state"
         )
 
     def edit_experiment_budget(
