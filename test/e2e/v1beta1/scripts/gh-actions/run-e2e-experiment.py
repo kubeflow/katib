@@ -13,7 +13,7 @@ from kubeflow.katib.constants import constants
 EXPERIMENT_TIMEOUT = 60 * 40
 
 # The default logging config.
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def verify_experiment_results(
@@ -160,7 +160,7 @@ def run_e2e_experiment(
 ):
 
     # Create Katib Experiment and wait until it is finished.
-    logging.info(
+    logging.debug(
         "Creating Experiment: {}/{} with MaxTrialCount: {}, ParallelTrialCount: {}".format(
             exp_namespace,
             exp_name,
@@ -182,7 +182,7 @@ def run_e2e_experiment(
     if exp_name == "from-volume-resume" or exp_name == "random":
         max_trial_count = experiment.spec.max_trial_count + 1
         parallel_trial_count = experiment.spec.parallel_trial_count + 1
-        logging.info(
+        logging.debug(
             f"Restarting Experiment {exp_namespace}/{exp_name} "
             f"with MaxTrialCount: {max_trial_count} and ParallelTrialCount: {parallel_trial_count}"
         )
@@ -207,12 +207,12 @@ def run_e2e_experiment(
     verify_experiment_results(katib_client, experiment, exp_name, exp_namespace)
 
     # Describe the Experiment and Suggestion.
-    logging.info(
+    logging.debug(
         os.popen(f"kubectl describe experiment {exp_name} -n {exp_namespace}").read()
     )
-    logging.info("---------------------------------------------------------------")
-    logging.info("---------------------------------------------------------------")
-    logging.info(
+    logging.debug("---------------------------------------------------------------")
+    logging.debug("---------------------------------------------------------------")
+    logging.debug(
         os.popen(f"kubectl describe suggestion {exp_name} -n {exp_namespace}").read()
     )
 
@@ -226,17 +226,12 @@ if __name__ == "__main__":
         help="Path to the Katib Experiment.",
     )
     parser.add_argument(
-        "--verbose",
-        type=str,
-        default=True,
-        choices=("True", "False"),
-        required=False,
-        help="Verbose output for the Katib E2E test",
+        "--verbose", action="store_true", help="Verbose output for the Katib E2E test",
     )
     args = parser.parse_args()
 
-    if args.verbose == "False":
-        logging.getLogger().setLevel(logging.WARNING)
+    if args.verbose:
+        logging.getLogger().setLevel(logging.INFO)
 
     logging.info("---------------------------------------------------------------")
     logging.info("---------------------------------------------------------------")
@@ -279,15 +274,12 @@ if __name__ == "__main__":
         run_e2e_experiment(katib_client, experiment, exp_name, exp_namespace)
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is succeeded for Experiment: {exp_namespace}/{exp_name}")
-        logging.info("---------------------------------------------------------------")
-        logging.info("---------------------------------------------------------------")
-        # Delete the Experiment.
-        katib_client.delete_experiment(exp_name, exp_namespace)
     except Exception as e:
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment: {exp_namespace}/{exp_name}")
-        logging.info("---------------------------------------------------------------")
-        logging.info("---------------------------------------------------------------")
-        # Delete the Experiment and raise an Exception.
-        katib_client.delete_experiment(exp_name, exp_namespace)
         raise e
+    finally:
+        # Delete the Experiment.
+        logging.info("---------------------------------------------------------------")
+        logging.info("---------------------------------------------------------------")
+        katib_client.delete_experiment(exp_name, exp_namespace)
