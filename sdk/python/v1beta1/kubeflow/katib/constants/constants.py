@@ -15,7 +15,7 @@
 import os
 
 # How long to wait in seconds for requests to the Kubernetes or gRPC API Server.
-APISERVER_TIMEOUT = 120
+DEFAULT_TIMEOUT = 120
 
 # Global CRD version
 KATIB_VERSION = os.environ.get("EXPERIMENT_VERSION", "v1beta1")

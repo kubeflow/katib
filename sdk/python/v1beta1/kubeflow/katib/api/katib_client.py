@@ -315,13 +315,18 @@ class KatibClient(object):
         self.create_experiment(experiment, namespace)
 
     def get_experiment(
-        self, name: str, namespace: str = utils.get_default_target_namespace()
+        self,
+        name: str,
+        namespace: str = utils.get_default_target_namespace(),
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Katib Experiment.
 
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             V1beta1Experiment: Katib Experiment object.
@@ -331,17 +336,16 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
-        thread = self.custom_api.get_namespaced_custom_object(
-            constants.KUBEFLOW_GROUP,
-            constants.KATIB_VERSION,
-            namespace,
-            constants.EXPERIMENT_PLURAL,
-            name,
-            async_req=True,
-        )
-
         try:
-            response = utils.FakeResponse(thread.get(constants.APISERVER_TIMEOUT))
+            thread = self.custom_api.get_namespaced_custom_object(
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
+                namespace,
+                constants.EXPERIMENT_PLURAL,
+                name,
+                async_req=True,
+            )
+            response = utils.FakeResponse(thread.get(timeout))
             experiment = self.api_client.deserialize(response, models.V1beta1Experiment)
             return experiment
 
@@ -350,11 +354,17 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to get Katib Experiment: {namespace}/{name}")
 
-    def list_experiments(self, namespace: str = utils.get_default_target_namespace()):
+    def list_experiments(
+        self,
+        namespace: str = utils.get_default_target_namespace(),
+        timeout: int = constants.DEFAULT_TIMEOUT,
+    ):
         """List of all Katib Experiments in namespace.
 
         Args:
             namespace: Namespace to list the Experiments.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             list[V1beta1Experiment]: List of Katib Experiment objects. It returns
@@ -365,16 +375,16 @@ class KatibClient(object):
             RuntimeError: Failed to list Katib Experiments.
         """
 
-        thread = self.custom_api.list_namespaced_custom_object(
-            constants.KUBEFLOW_GROUP,
-            constants.KATIB_VERSION,
-            namespace=namespace,
-            plural=constants.EXPERIMENT_PLURAL,
-            async_req=True,
-        )
         result = []
         try:
-            response = thread.get(constants.APISERVER_TIMEOUT)
+            thread = self.custom_api.list_namespaced_custom_object(
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
+                namespace=namespace,
+                plural=constants.EXPERIMENT_PLURAL,
+                async_req=True,
+            )
+            response = thread.get(timeout)
             result = [
                 self.api_client.deserialize(
                     utils.FakeResponse(item), models.V1beta1Experiment
@@ -396,6 +406,7 @@ class KatibClient(object):
         name: str,
         namespace: str = utils.get_default_target_namespace(),
         experiment: models.V1beta1Experiment = None,
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Experiment conditions. Experiment is in the condition when
         `status` is True for the appropriate condition `type`.
@@ -404,6 +415,8 @@ class KatibClient(object):
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
             experiment: Optionally, Experiment object can be set to get the conditions.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             list[V1beta1ExperimentCondition]: List of Experiment conditions with
@@ -417,7 +430,7 @@ class KatibClient(object):
         """
 
         if experiment is None:
-            experiment = self.get_experiment(name, namespace)
+            experiment = self.get_experiment(name, namespace, timeout)
 
         if (
             experiment.status
@@ -433,6 +446,7 @@ class KatibClient(object):
         name: str,
         namespace: str = utils.get_default_target_namespace(),
         experiment: models.V1beta1Experiment = None,
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Check if Experiment is Created.
 
@@ -440,6 +454,8 @@ class KatibClient(object):
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
             experiment: Optionally, Experiment object can be set to check the status.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             bool: True is Experiment is Created, else False.
@@ -450,7 +466,7 @@ class KatibClient(object):
         """
 
         return utils.has_condition(
-            self.get_experiment_conditions(name, namespace, experiment),
+            self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_CREATED,
         )
 
@@ -459,6 +475,7 @@ class KatibClient(object):
         name: str,
         namespace: str = utils.get_default_target_namespace(),
         experiment: models.V1beta1Experiment = None,
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Check if Experiment is Running.
 
@@ -466,6 +483,8 @@ class KatibClient(object):
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
             experiment: Optionally, Experiment object can be set to check the status.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             bool: True is Experiment is Running, else False.
@@ -476,7 +495,7 @@ class KatibClient(object):
         """
 
         return utils.has_condition(
-            self.get_experiment_conditions(name, namespace, experiment),
+            self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_RUNNING,
         )
 
@@ -485,12 +504,15 @@ class KatibClient(object):
         name: str,
         namespace: str = utils.get_default_target_namespace(),
         experiment: models.V1beta1Experiment = None,
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Check if Experiment is Restarting.
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
             experiment: Optionally, Experiment object can be set to check the status.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             bool: True is Experiment is Resting, else False.
@@ -501,7 +523,7 @@ class KatibClient(object):
         """
 
         return utils.has_condition(
-            self.get_experiment_conditions(name, namespace, experiment),
+            self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_RESTARTING,
         )
 
@@ -510,12 +532,15 @@ class KatibClient(object):
         name: str,
         namespace: str = utils.get_default_target_namespace(),
         experiment: models.V1beta1Experiment = None,
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Check if Experiment is Succeeded.
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
             experiment: Optionally, Experiment object can be set to check the status.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             bool: True is Experiment is Succeeded, else False.
@@ -526,7 +551,7 @@ class KatibClient(object):
         """
 
         return utils.has_condition(
-            self.get_experiment_conditions(name, namespace, experiment),
+            self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_SUCCEEDED,
         )
 
@@ -535,12 +560,15 @@ class KatibClient(object):
         name: str,
         namespace: str = utils.get_default_target_namespace(),
         experiment: models.V1beta1Experiment = None,
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Check if Experiment is Failed.
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
             experiment: Optionally, Experiment object can be set to check the status.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             bool: True is Experiment is Failed, else False.
@@ -551,7 +579,7 @@ class KatibClient(object):
         """
 
         return utils.has_condition(
-            self.get_experiment_conditions(name, namespace, experiment),
+            self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_FAILED,
         )
 
@@ -562,6 +590,7 @@ class KatibClient(object):
         expected_condition: str = constants.EXPERIMENT_CONDITION_SUCCEEDED,
         timeout: int = 600,
         polling_interval: int = 15,
+        apiserver_timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Wait until Experiment reaches specific condition. By default it waits
         for the Succeeded condition.
@@ -572,6 +601,8 @@ class KatibClient(object):
             expected_condition: Which condition Experiment should reach.
             timeout: How many seconds to wait until Experiment reaches condition.
             polling_interval: The polling interval in seconds to get Experiment status.
+            apiserver_timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             V1beta1Experiment: Katib Experiment object.
@@ -586,19 +617,23 @@ class KatibClient(object):
         for _ in range(round(timeout / polling_interval)):
 
             # We should get Experiment only once per cycle and check the statuses.
-            experiment = self.get_experiment(name, namespace)
+            experiment = self.get_experiment(name, namespace, apiserver_timeout)
 
             # Wait for Failed condition.
             if (
                 expected_condition == constants.EXPERIMENT_CONDITION_FAILED
-                and self.is_experiment_failed(name, namespace, experiment)
+                and self.is_experiment_failed(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
                 print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Raise exception if Experiment is Failed.
-            elif self.is_experiment_failed(name, namespace, experiment):
+            elif self.is_experiment_failed(
+                name, namespace, experiment, apiserver_timeout
+            ):
                 raise RuntimeError(
                     f"Experiment: {namespace}/{name} is Failed. "
                     f"Experiment conditions: {experiment.status.conditions}"
@@ -607,7 +642,9 @@ class KatibClient(object):
             # Check if Experiment reaches Created condition.
             elif (
                 expected_condition == constants.EXPERIMENT_CONDITION_CREATED
-                and self.is_experiment_created(name, namespace, experiment)
+                and self.is_experiment_created(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
                 print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
@@ -616,7 +653,9 @@ class KatibClient(object):
             # Check if Experiment reaches Running condition.
             elif (
                 expected_condition == constants.EXPERIMENT_CONDITION_RUNNING
-                and self.is_experiment_running(name, namespace, experiment)
+                and self.is_experiment_running(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
                 print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
@@ -625,7 +664,9 @@ class KatibClient(object):
             # Check if Experiment reaches Restarting condition.
             elif (
                 expected_condition == constants.EXPERIMENT_CONDITION_RESTARTING
-                and self.is_experiment_restarting(name, namespace, experiment)
+                and self.is_experiment_restarting(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
                 print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
@@ -634,7 +675,9 @@ class KatibClient(object):
             # Check if Experiment reaches Succeeded condition.
             elif (
                 expected_condition == constants.EXPERIMENT_CONDITION_SUCCEEDED
-                and self.is_experiment_succeeded(name, namespace, experiment)
+                and self.is_experiment_succeeded(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
                 print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
@@ -658,6 +701,7 @@ class KatibClient(object):
         max_trial_count: int = None,
         parallel_trial_count: int = None,
         max_failed_trial_count: int = None,
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Update Experiment budget for the running Trials. You can modify Trial
         budget to resume Succeeded Experiments with `LongRunning` and `FromVolume`
@@ -671,6 +715,8 @@ class KatibClient(object):
             max_trial_count: The new maximum number of Trials.
             parallel_trial_count: The new number of Trials that Experiment runs in parallel.
             max_failed_trial_count: The new maximum number of Trials allowed to fail.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Raises:
             ValueError: The new Trial budget is not set.
@@ -693,7 +739,7 @@ class KatibClient(object):
             )
 
         # Modify the Experiment Trial budget.
-        experiment = self.get_experiment(name, namespace)
+        experiment = self.get_experiment(name, namespace, timeout)
         if max_trial_count is not None:
             experiment.spec.max_trial_count = max_trial_count
         if parallel_trial_count is not None:
@@ -719,13 +765,18 @@ class KatibClient(object):
         print(f"Experiment {namespace}/{name} has been updated")
 
     def delete_experiment(
-        self, name: str, namespace: str = utils.get_default_target_namespace()
+        self,
+        name: str,
+        namespace: str = utils.get_default_target_namespace(),
+        delete_options: client.V1DeleteOptions = None,
     ):
         """Delete the Katib Experiment.
 
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
+            delete_options: Optional, V1DeleteOptions to set while deleting
+                Katib Experiment. For example, grace period seconds.
 
         Raises:
             TimeoutError: Timeout to delete Katib Experiment.
@@ -739,7 +790,7 @@ class KatibClient(object):
                 namespace,
                 constants.EXPERIMENT_PLURAL,
                 name,
-                body=client.V1DeleteOptions(),
+                body=delete_options,
             )
         except multiprocessing.TimeoutError:
             raise TimeoutError(
@@ -751,12 +802,19 @@ class KatibClient(object):
         # TODO (andreyvelich): Use proper logger.
         print(f"Experiment {namespace}/{name} has been deleted")
 
-    def get_suggestion(self, name: str, namespace=utils.get_default_target_namespace()):
+    def get_suggestion(
+        self,
+        name: str,
+        namespace: str = utils.get_default_target_namespace(),
+        timeout: int = constants.DEFAULT_TIMEOUT,
+    ):
         """Get the Katib Suggestion.
 
         Args:
             name: Name for the Suggestion.
             namespace: Namespace for the Suggestion.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             V1beta1Suggestion: Katib Suggestion object.
@@ -766,17 +824,16 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Suggestion.
         """
 
-        thread = self.custom_api.get_namespaced_custom_object(
-            constants.KUBEFLOW_GROUP,
-            constants.KATIB_VERSION,
-            namespace,
-            constants.SUGGESTION_PLURAL,
-            name,
-            async_req=True,
-        )
-
         try:
-            response = utils.FakeResponse(thread.get(constants.APISERVER_TIMEOUT))
+            thread = self.custom_api.get_namespaced_custom_object(
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
+                namespace,
+                constants.SUGGESTION_PLURAL,
+                name,
+                async_req=True,
+            )
+            response = utils.FakeResponse(thread.get(timeout))
             suggestion = self.api_client.deserialize(response, models.V1beta1Suggestion)
             return suggestion
 
@@ -785,11 +842,17 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to get Katib Suggestion: {namespace}/{name}")
 
-    def list_suggestions(self, namespace: str = utils.get_default_target_namespace()):
+    def list_suggestions(
+        self,
+        namespace: str = utils.get_default_target_namespace(),
+        timeout: int = constants.DEFAULT_TIMEOUT,
+    ):
         """List of all Katib Suggestion in namespace.
 
         Args:
             namespace: Namespace to list the Suggestions.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             list[V1beta1Suggestion]: List of Katib Suggestions objects. It returns
@@ -800,16 +863,16 @@ class KatibClient(object):
             RuntimeError: Failed to list Katib Suggestions.
         """
 
-        thread = self.custom_api.list_namespaced_custom_object(
-            constants.KUBEFLOW_GROUP,
-            constants.KATIB_VERSION,
-            namespace=namespace,
-            plural=constants.EXPERIMENT_PLURAL,
-            async_req=True,
-        )
         result = []
         try:
-            response = thread.get(constants.APISERVER_TIMEOUT)
+            thread = self.custom_api.list_namespaced_custom_object(
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
+                namespace=namespace,
+                plural=constants.EXPERIMENT_PLURAL,
+                async_req=True,
+            )
+            response = thread.get(timeout)
             result = [
                 self.api_client.deserialize(
                     utils.FakeResponse(item), models.V1beta1Suggestion
@@ -827,13 +890,18 @@ class KatibClient(object):
         return result
 
     def get_trial(
-        self, name: str, namespace: str = utils.get_default_target_namespace()
+        self,
+        name: str,
+        namespace: str = utils.get_default_target_namespace(),
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Katib Trial.
 
         Args:
             name: Name for the Trial.
             namespace: Namespace for the Trial.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             V1beta1Trial: Katib Trial object.
@@ -843,17 +911,16 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Trial.
         """
 
-        thread = self.custom_api.get_namespaced_custom_object(
-            constants.KUBEFLOW_GROUP,
-            constants.KATIB_VERSION,
-            namespace,
-            constants.TRIAL_PLURAL,
-            name,
-            async_req=True,
-        )
-
         try:
-            response = utils.FakeResponse(thread.get(constants.APISERVER_TIMEOUT))
+            thread = self.custom_api.get_namespaced_custom_object(
+                constants.KUBEFLOW_GROUP,
+                constants.KATIB_VERSION,
+                namespace,
+                constants.TRIAL_PLURAL,
+                name,
+                async_req=True,
+            )
+            response = utils.FakeResponse(thread.get(timeout))
             trial = self.api_client.deserialize(response, models.V1beta1Trial)
             return trial
 
@@ -866,6 +933,7 @@ class KatibClient(object):
         self,
         experiment_name: str = None,
         namespace: str = utils.get_default_target_namespace(),
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """List of all Trials in namespace. If Experiment name is set,
         it returns all Trials belong to the Experiment.
@@ -873,6 +941,8 @@ class KatibClient(object):
         Args:
             experiment_name: Optional name for the Experiment.
             namespace: Namespace to list the Trials.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             list[V1beta1Trial]: List of Katib Trial objects. It returns
@@ -883,26 +953,26 @@ class KatibClient(object):
             RuntimeError: Failed to list Katib Trials.
         """
 
-        if experiment_name is None:
-            thread = self.custom_api.list_namespaced_custom_object(
-                constants.KUBEFLOW_GROUP,
-                constants.KATIB_VERSION,
-                namespace=namespace,
-                plural=constants.TRIAL_PLURAL,
-                async_req=True,
-            )
-        else:
-            thread = self.custom_api.list_namespaced_custom_object(
-                constants.KUBEFLOW_GROUP,
-                constants.KATIB_VERSION,
-                namespace=namespace,
-                plural=constants.TRIAL_PLURAL,
-                label_selector=f"{constants.EXPERIMENT_LABEL}={experiment_name}",
-                async_req=True,
-            )
         result = []
         try:
-            response = thread.get(constants.APISERVER_TIMEOUT)
+            if experiment_name is None:
+                thread = self.custom_api.list_namespaced_custom_object(
+                    constants.KUBEFLOW_GROUP,
+                    constants.KATIB_VERSION,
+                    namespace=namespace,
+                    plural=constants.TRIAL_PLURAL,
+                    async_req=True,
+                )
+            else:
+                thread = self.custom_api.list_namespaced_custom_object(
+                    constants.KUBEFLOW_GROUP,
+                    constants.KATIB_VERSION,
+                    namespace=namespace,
+                    plural=constants.TRIAL_PLURAL,
+                    label_selector=f"{constants.EXPERIMENT_LABEL}={experiment_name}",
+                    async_req=True,
+                )
+            response = thread.get(timeout)
             result = [
                 self.api_client.deserialize(
                     utils.FakeResponse(item), models.V1beta1Trial
@@ -921,6 +991,7 @@ class KatibClient(object):
         self,
         experiment_name: str = None,
         namespace: str = utils.get_default_target_namespace(),
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Succeeded Trial details. If Experiment name is set,
         it returns Succeeded Trials details belong to the Experiment.
@@ -928,6 +999,8 @@ class KatibClient(object):
         Args:
             experiment_name: Optional name for the Experiment.
             namespace: Namespace to list the Trials.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             list[dict]: Trial names with hyperparameters and metrics.
@@ -938,27 +1011,26 @@ class KatibClient(object):
             RuntimeError: Failed to list Katib Trials.
         """
 
-        if experiment_name is None:
-            thread = self.custom_api.list_namespaced_custom_object(
-                constants.KUBEFLOW_GROUP,
-                constants.KATIB_VERSION,
-                namespace=namespace,
-                plural=constants.TRIAL_PLURAL,
-                async_req=True,
-            )
-        else:
-            thread = self.custom_api.list_namespaced_custom_object(
-                constants.KUBEFLOW_GROUP,
-                constants.KATIB_VERSION,
-                namespace=namespace,
-                plural=constants.TRIAL_PLURAL,
-                label_selector=f"{constants.EXPERIMENT_LABEL}={experiment_name}",
-                async_req=True,
-            )
-
         result = []
         try:
-            response = thread.get(constants.APISERVER_TIMEOUT)
+            if experiment_name is None:
+                thread = self.custom_api.list_namespaced_custom_object(
+                    constants.KUBEFLOW_GROUP,
+                    constants.KATIB_VERSION,
+                    namespace=namespace,
+                    plural=constants.TRIAL_PLURAL,
+                    async_req=True,
+                )
+            else:
+                thread = self.custom_api.list_namespaced_custom_object(
+                    constants.KUBEFLOW_GROUP,
+                    constants.KATIB_VERSION,
+                    namespace=namespace,
+                    plural=constants.TRIAL_PLURAL,
+                    label_selector=f"{constants.EXPERIMENT_LABEL}={experiment_name}",
+                    async_req=True,
+                )
+            response = thread.get(timeout)
             for item in response.get("items"):
                 trial = self.api_client.deserialize(
                     utils.FakeResponse(item), models.V1beta1Trial
@@ -987,13 +1059,18 @@ class KatibClient(object):
         return result
 
     def get_optimal_hyperparameters(
-        self, name: str, namespace: str = utils.get_default_target_namespace(),
+        self,
+        name: str,
+        namespace: str = utils.get_default_target_namespace(),
+        timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the current optimal Trial from the Experiment.
 
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
+            timeout: Optional, Kubernetes API server timeout in seconds
+                to execute the request.
 
         Returns:
             V1beta1OptimalTrial: The most optimal Trial for the Experiment.
@@ -1004,7 +1081,7 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
-        experiment = self.get_experiment(name, namespace)
+        experiment = self.get_experiment(name, namespace, timeout)
         if (
             experiment.status
             and experiment.status.current_optimal_trial
@@ -1018,7 +1095,8 @@ class KatibClient(object):
         self,
         name: str,
         namespace: str = utils.get_default_target_namespace(),
-        db_manager_address=constants.DEFAULT_DB_MANAGER_ADDRESS,
+        db_manager_address: str = constants.DEFAULT_DB_MANAGER_ADDRESS,
+        timeout: str = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Trial Metric Results from the Katib DB.
         Katib DB Manager service should be accessible while calling this API.
@@ -1036,6 +1114,7 @@ class KatibClient(object):
             name: Name for the Trial.
             namespace: Namespace for the Trial.
             db-manager-address: Address for the Katib DB Manager in this format: `ip-address:port`.
+            timeout: Optional, gRPC API Server timeout in seconds to get metrics.
 
         Returns:
             List of MetricLog objects
@@ -1058,7 +1137,7 @@ class KatibClient(object):
                 # When metric name is empty, we select all logs from the Katib DB.
                 observation_logs = client.GetObservationLog(
                     katib_api_pb2.GetObservationLogRequest(trial_name=name),
-                    timeout=constants.APISERVER_TIMEOUT,
+                    timeout=timeout,
                 )
             except Exception as e:
                 raise RuntimeError(

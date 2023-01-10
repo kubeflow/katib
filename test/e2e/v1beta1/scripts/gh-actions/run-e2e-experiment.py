@@ -278,7 +278,7 @@ if __name__ == "__main__":
     try:
         run_e2e_experiment(katib_client, experiment, exp_name, exp_namespace)
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is completed for Experiment: {exp_namespace}/{exp_name}")
+        logging.info(f"E2E is succeeded for Experiment: {exp_namespace}/{exp_name}")
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
         # Delete the Experiment.
