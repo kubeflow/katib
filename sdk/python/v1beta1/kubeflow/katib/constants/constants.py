@@ -32,8 +32,8 @@ DEFAULT_PRIMARY_CONTAINER_NAME = "training-container"
 
 # Supported base images for the Katib Trials.
 # TODO (andreyvelich): Implement list_base_images function to get each image description.
-BASE_IMAGE_TENSORFLOW = "docker.io/tensorflow/tensorflow:2.9.1"
-BASE_IMAGE_TENSORFLOW_GPU = "docker.io/tensorflow/tensorflow:2.9.1-gpu"
+BASE_IMAGE_TENSORFLOW = "docker.io/tensorflow/tensorflow:2.11.0"
+BASE_IMAGE_TENSORFLOW_GPU = "docker.io/tensorflow/tensorflow:2.11.0-gpu"
 BASE_IMAGE_PYTORCH = "docker.io/pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime"
 BASE_IMAGE_MXNET = "docker.io/mxnet/python:1.9.1_native_py3"
 

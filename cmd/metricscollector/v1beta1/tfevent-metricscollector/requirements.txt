@@ -2,5 +2,4 @@ psutil==5.9.4
 rfc3339>=6.2
 grpcio==1.41.1
 googleapis-common-protos==1.6.0
-tensorflow==2.9.3; platform_machine=="x86_64"
-tensorflow-aarch64==2.9.1; platform_machine=="aarch64"
+tensorflow==2.11.0

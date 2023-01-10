@@ -63,7 +63,7 @@ if __name__ == "__main__":
         test_model = constructor.build_model()
         test_model.summary()
         test_model.compile(loss=keras.losses.categorical_crossentropy,
-                           optimizer=keras.optimizers.Adam(learning_rate=1e-3, decay=1e-4),
+                           optimizer=keras.optimizers.Adam(learning_rate=1e-3),
                            metrics=['accuracy'])
 
     print(">>> Model Constructed Successfully\n")
