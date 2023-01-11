@@ -56,6 +56,8 @@ _load_minikube_cluster() {
 
   echo -e "\n\nLoading $CONTAINER_NAME image...\n\n"
   minikube image load "$REGISTRY/$CONTAINER_NAME:$TAG"
+  minikube cache delete
+  free
 }
 
 _install_tools() {
