@@ -1,10 +1,8 @@
 import argparse
 import yaml
 import time
-import os
 import logging
 from kubernetes import client, config
-
 from kubeflow.katib import ApiClient, KatibClient, models
 from kubeflow.katib.utils.utils import FakeResponse
 from kubeflow.katib.constants import constants
@@ -13,7 +11,7 @@ from kubeflow.katib.constants import constants
 EXPERIMENT_TIMEOUT = 60 * 40
 
 # The default logging config.
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 def verify_experiment_results(
@@ -111,45 +109,47 @@ def verify_experiment_results(
     ):
         resource_name = exp_name + "-" + experiment.spec.algorithm.algorithm_name
 
-        # Suggestion's Service and Deployment should be deleted.
         config.load_kube_config()
-        for _ in range(10):
-
-            services = client.CoreV1Api().list_namespaced_service(exp_namespace)
-            for i in services.items:
-                is_deleted = 0 if i.metadata.name == resource_name else 1
-
-            deployments = client.AppsV1Api().list_namespaced_deployment(exp_namespace)
-            for i in deployments.items:
-                is_deleted *= 0 if i.metadata.name == resource_name else 1
-            if is_deleted == 1:
-                break
-
-            # Deployment and Service deletion might take some time.
+        # Suggestion's Service and Deployment should be deleted.
+        for i in range(10):
+            try:
+                client.AppsV1Api().read_namespaced_deployment(
+                    resource_name, exp_namespace
+                )
+            except client.ApiException as e:
+                if e.status == 404:
+                    break
+                else:
+                    raise e
+            # Deployment deletion might take some time.
             time.sleep(1)
-
-        if is_deleted == 0:
+        if i == 10:
             raise Exception(
-                "Suggestion Service or Deployment is still alive for "
-                f"ResumePolicy == {experiment.spec.resume_policy}. "
-                f"Alive Services: {[i.metadata.name for i in services.items]}. "
-                f"Alive Deployments: {[i.metadata.name for i in deployments.items]}."
+                "Suggestion Deployment is still alive for Resume Policy: {}".format(
+                    experiment.spec.resume_policy
+                )
+            )
+
+        try:
+            client.CoreV1Api().read_namespaced_service(resource_name, exp_namespace)
+        except client.ApiException as e:
+            if e.status != 404:
+                raise e
+        else:
+            raise Exception(
+                "Suggestion Service is still alive for Resume Policy: {}".format(
+                    experiment.spec.resume_policy
+                )
             )
 
         # For FromVolume resume policy PVC should not be deleted.
         if experiment.spec.resume_policy == "FromVolume":
-            PVCs = client.CoreV1Api().list_namespaced_persistent_volume_claim(
-                exp_namespace
-            )
-            is_deleted = 1
-            for i in PVCs.items:
-                if i.metadata.name == resource_name:
-                    is_deleted = 0
-            if is_deleted == 1:
-                raise Exception(
-                    "PVC is deleted for FromVolume resume policy. "
-                    f"Alive PVCs: {[i.metadata.name for i in PVCs.items]}."
+            try:
+                client.CoreV1Api().read_namespaced_persistent_volume_claim(
+                    resource_name, exp_namespace
                 )
+            except client.ApiException:
+                raise Exception("PVC is deleted for FromVolume Resume Policy")
 
 
 def run_e2e_experiment(
@@ -206,15 +206,9 @@ def run_e2e_experiment(
     # Verify the Experiment results.
     verify_experiment_results(katib_client, experiment, exp_name, exp_namespace)
 
-    # Describe the Experiment and Suggestion.
-    logging.debug(
-        os.popen(f"kubectl describe experiment {exp_name} -n {exp_namespace}").read()
-    )
-    logging.debug("---------------------------------------------------------------")
-    logging.debug("---------------------------------------------------------------")
-    logging.debug(
-        os.popen(f"kubectl describe suggestion {exp_name} -n {exp_namespace}").read()
-    )
+    # Print the Experiment and Suggestion.
+    logging.debug(katib_client.get_experiment(exp_name, exp_namespace))
+    logging.debug(katib_client.get_suggestion(exp_name, exp_namespace))
 
 
 if __name__ == "__main__":
@@ -231,7 +225,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger().setLevel(logging.DEBUG)
 
     logging.info("---------------------------------------------------------------")
     logging.info("---------------------------------------------------------------")
