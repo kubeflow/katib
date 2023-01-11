@@ -1,6 +1,7 @@
-# Pytorch=1.11.0, cuda=11.6.0
-# Ref: https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/rel_22-08.html#rel_22-08
-FROM nvcr.io/nvidia/pytorch:22.02-py3
+# We need to use the nvcr.io/nvidia/pytorch image as a base image to support both linux/amd64 and linux_arm64 platforms.
+# PyTorch=1.13.0, cuda=11.8.0
+# Ref: https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/rel-22-11.html#rel-22-11
+FROM nvcr.io/nvidia/pytorch:22.11-py3
 
 ENV TARGET_DIR /opt/darts-cnn-cifar10
 
