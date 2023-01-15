@@ -195,7 +195,8 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		suggestionContainer.Name = consts.ContainerSuggestion
 	}
 
-	if !containsContainerPort(suggestionContainer.Ports, consts.DefaultSuggestionPortName) {
+	if !containsContainerPortWithName(suggestionContainer.Ports, consts.DefaultSuggestionPortName) &&
+		!containsContainerPort(suggestionConfigData.Ports, consts.DefaultSuggestionPort) {
 		suggestionPort := corev1.ContainerPort{
 			Name:          consts.DefaultSuggestionPortName,
 			ContainerPort: consts.DefaultSuggestionPort,
@@ -236,7 +237,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		}
 	}
 
-	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume && !containsVolumeMount(suggestionContainer.VolumeMounts, consts.ContainerSuggestionVolumeName) {
+	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume && !containsVolumeMountWithName(suggestionContainer.VolumeMounts, consts.ContainerSuggestionVolumeName) {
 		suggestionVolume := corev1.VolumeMount{
 			Name:      consts.ContainerSuggestionVolumeName,
 			MountPath: suggestionConfigData.VolumeMountPath,
@@ -264,7 +265,7 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	return containers
 }
 
-func containsVolumeMount(volumeMounts []corev1.VolumeMount, name string) bool {
+func containsVolumeMountWithName(volumeMounts []corev1.VolumeMount, name string) bool {
 	for i := range volumeMounts {
 		if volumeMounts[i].Name == name {
 			return true
@@ -274,9 +275,19 @@ func containsVolumeMount(volumeMounts []corev1.VolumeMount, name string) bool {
 	return false
 }
 
-func containsContainerPort(ports []corev1.ContainerPort, name string) bool {
+func containsContainerPortWithName(ports []corev1.ContainerPort, name string) bool {
 	for i := range ports {
 		if ports[i].Name == name {
+			return true
+		}
+	}
+
+	return false
+}
+
+func containsContainerPort(ports []corev1.ContainerPort, port int32) bool {
+	for i := range ports {
+		if ports[i].ContainerPort == port {
 			return true
 		}
 	}
