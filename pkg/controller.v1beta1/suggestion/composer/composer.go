@@ -181,8 +181,12 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	suggestionConfigData katibconfig.SuggestionConfig,
 	earlyStoppingConfigData katibconfig.EarlyStoppingConfig) []corev1.Container {
 
-	containers := []corev1.Container{}
-	suggestionContainer := suggestionConfigData.Container
+	var (
+		containers          []corev1.Container
+		suggestionContainer corev1.Container
+	)
+
+	suggestionConfigData.Container.DeepCopyInto(&suggestionContainer)
 
 	// Assign default values for suggestionContainer fields that are not set via
 	// the suggestion config.
