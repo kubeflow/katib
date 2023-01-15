@@ -191,13 +191,12 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		suggestionContainer.Name = consts.ContainerSuggestion
 	}
 
-	if len(suggestionContainer.Ports) == 0 {
-		suggestionContainer.Ports = []corev1.ContainerPort{
-			{
-				Name:          consts.DefaultSuggestionPortName,
-				ContainerPort: consts.DefaultSuggestionPort,
-			},
+	if !containsContainerPort(suggestionContainer.Ports, consts.DefaultSuggestionPortName) {
+		suggestionPort := corev1.ContainerPort{
+			Name:          consts.DefaultSuggestionPortName,
+			ContainerPort: consts.DefaultSuggestionPort,
 		}
+		suggestionContainer.Ports = append(suggestionContainer.Ports, suggestionPort)
 	}
 
 	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) && suggestionContainer.ReadinessProbe == nil {
@@ -233,15 +232,14 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		}
 	}
 
-	// Attach volume mounts to the suggestion container if ResumePolicy = FromVolume
-	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume && len(suggestionContainer.VolumeMounts) == 0 {
-		suggestionContainer.VolumeMounts = []corev1.VolumeMount{
-			{
-				Name:      consts.ContainerSuggestionVolumeName,
-				MountPath: suggestionConfigData.VolumeMountPath,
-			},
+	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume && !containsVolumeMount(suggestionContainer.VolumeMounts, consts.ContainerSuggestionVolumeName) {
+		suggestionVolume := corev1.VolumeMount{
+			Name:      consts.ContainerSuggestionVolumeName,
+			MountPath: suggestionConfigData.VolumeMountPath,
 		}
+		suggestionContainer.VolumeMounts = append(suggestionContainer.VolumeMounts, suggestionVolume)
 	}
+
 	containers = append(containers, suggestionContainer)
 
 	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
@@ -260,6 +258,26 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		containers = append(containers, earlyStoppingContainer)
 	}
 	return containers
+}
+
+func containsVolumeMount(volumeMounts []corev1.VolumeMount, name string) bool {
+	for i := range volumeMounts {
+		if volumeMounts[i].Name == name {
+			return true
+		}
+	}
+
+	return false
+}
+
+func containsContainerPort(ports []corev1.ContainerPort, name string) bool {
+	for i := range ports {
+		if ports[i].Name == name {
+			return true
+		}
+	}
+
+	return false
 }
 
 // DesiredVolume returns desired PVC and PV for Suggestion.
