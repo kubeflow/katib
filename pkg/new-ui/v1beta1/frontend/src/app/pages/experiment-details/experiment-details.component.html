@@ -11,7 +11,9 @@
   <div class="page-padding lib-flex-grow lib-overflow-auto">
     <!--spinner-->
     <ng-container *ngIf="pageLoading; else content">
-      <lib-loading-spinner></lib-loading-spinner>
+      <lib-loading-spinner
+        message="Fetching Experiment details..."
+      ></lib-loading-spinner>
     </ng-container>
     <!--the tabs-->
   </div>

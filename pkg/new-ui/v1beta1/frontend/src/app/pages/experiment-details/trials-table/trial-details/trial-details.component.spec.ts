@@ -2,14 +2,17 @@ import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { TrialDetailsComponent } from './trial-details.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { KWABackendService } from 'src/app/services/backend.service';
 import { of } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NamespaceService, TitleActionsToolbarModule } from 'kubeflow';
+import {
+  LoadingSpinnerModule,
+  NamespaceService,
+  TitleActionsToolbarModule,
+} from 'kubeflow';
 
 let KWABackendServiceStub: Partial<KWABackendService>;
 let NamespaceServiceStub: Partial<NamespaceService>;
@@ -43,9 +46,9 @@ describe('TrialDetailsComponent', () => {
           HttpClientModule,
           ReactiveFormsModule,
           MatSnackBarModule,
-          MatProgressSpinnerModule,
           BrowserAnimationsModule,
           TitleActionsToolbarModule,
+          LoadingSpinnerModule,
         ],
         declarations: [TrialDetailsComponent],
         providers: [
