@@ -93,10 +93,4 @@ if [ $? -ne 1 ]; then
 fi
 set -o errexit
 
-# Build the binary for e2e test
-echo "Building run-e2e-experiment for e2e test cases"
-mkdir -p ../../bin
-go build -o ../../bin/run-e2e-experiment ../../hack/gh-actions/run-e2e-experiment.go
-chmod +x ../../bin/run-e2e-experiment
-
 exit 0

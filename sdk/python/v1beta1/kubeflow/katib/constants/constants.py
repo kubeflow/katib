@@ -15,7 +15,7 @@
 import os
 
 # How long to wait in seconds for requests to the Kubernetes or gRPC API Server.
-APISERVER_TIMEOUT = 120
+DEFAULT_TIMEOUT = 120
 
 # Global CRD version
 KATIB_VERSION = os.environ.get("EXPERIMENT_VERSION", "v1beta1")
@@ -29,6 +29,24 @@ TRIAL_PLURAL = "trials"
 
 
 DEFAULT_PRIMARY_CONTAINER_NAME = "training-container"
+
+# Label to identify Experiment's resources.
+EXPERIMENT_LABEL = "katib.kubeflow.org/experiment"
+
+# True means that Katib CR is in this condition.
+CONDITION_STATUS_TRUE = "True"
+
+# Experiment conditions.
+# TODO (andreyvelich): Use API enums when Katib SDK supports it.
+# Ref: https://github.com/kubeflow/katib/issues/1969.
+EXPERIMENT_CONDITION_CREATED = "Created"
+EXPERIMENT_CONDITION_RUNNING = "Running"
+EXPERIMENT_CONDITION_RESTARTING = "Restarting"
+EXPERIMENT_CONDITION_SUCCEEDED = "Succeeded"
+EXPERIMENT_CONDITION_FAILED = "Failed"
+
+# Trial conditions.
+TRIAL_CONDITION_SUCCEEDED = "Succeeded"
 
 # Supported base images for the Katib Trials.
 # TODO (andreyvelich): Implement list_base_images function to get each image description.
