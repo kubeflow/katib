@@ -67,3 +67,35 @@ jobs:
         run: |
           cd pkg/new-ui/v1beta1/frontend
           npm run test:prod
+
+  frontend-ui-tests:
+    name: UI tests with Cypress
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup node version to 12
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12
+
+      - name: Fetch Kubeflow and install common code dependencies
+        run: |
+          COMMIT=$(cat pkg/new-ui/v1beta1/frontend/COMMIT)
+          cd /tmp && git clone https://github.com/kubeflow/kubeflow.git
+          cd kubeflow
+          git checkout $COMMIT
+          cd components/crud-web-apps/common/frontend/kubeflow-common-lib
+          npm i
+          npm run build
+          npm link ./dist/kubeflow
+      - name: Install KWA dependencies
+        run: |
+          cd pkg/new-ui/v1beta1/frontend
+          npm i
+          npm link kubeflow
+      - name: Serve UI & run Cypress tests in Chrome and Firefox
+        run: |
+          cd pkg/new-ui/v1beta1/frontend
+          npm run start & npx wait-on http://localhost:4200
+          npm run ui-test-ci-all
