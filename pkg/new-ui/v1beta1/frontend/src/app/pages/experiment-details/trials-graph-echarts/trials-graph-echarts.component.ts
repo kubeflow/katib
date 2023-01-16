@@ -245,6 +245,13 @@ export class TrialsGraphEchartsComponent implements OnChanges {
         padding: 10,
         borderWidth: 1,
       },
+      toolbox: {
+        show: true,
+        feature: {
+          restore: {},
+          saveAsImage: {},
+        },
+      },
       parallelAxis: parallelAxis,
       visualMap: {
         min: 0,
