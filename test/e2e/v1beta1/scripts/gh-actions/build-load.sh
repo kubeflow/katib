@@ -20,7 +20,10 @@
 set -o errexit
 set -o pipefail
 set -o nounset
-cd "$(dirname "$0")"
+
+pushd .
+cd "$(dirname "$0")/../../../../.."
+trap popd EXIT
 
 TRIAL_IMAGES=${1:-""}
 EXPERIMENTS=${2:-""}
@@ -48,14 +51,7 @@ _build_containers() {
   done
 
   echo -e "\nBuilding $CONTAINER_NAME image with $DOCKERFILE...\n"
-  docker buildx build --platform "$(uname -m)" --load -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
-}
-
-_load_minikube_cluster() {
-  CONTAINER_NAME=${1:-"katib-controller"}
-
-  echo -e "\n\nLoading $CONTAINER_NAME image...\n\n"
-  minikube image load "$REGISTRY/$CONTAINER_NAME:$TAG"
+  DOCKER_BUILDKIT=1 minikube image build --build-opt platform=linux/amd64 --all -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "$DOCKERFILE" .
 }
 
 _install_tools() {
@@ -64,11 +60,6 @@ _install_tools() {
     wget -O /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.25.2/yq_$(uname -s)_$(uname -m)"
     chmod +x /usr/local/bin/yq
   fi
-}
-
-cleanup_build_cache() {
-  echo -e "\nCleanup Build Cache...\n"
-  docker builder prune
 }
 
 run() {
@@ -85,10 +76,10 @@ run() {
     # Search for Suggestion Images required for Trial.
     for exp_name in "${EXPERIMENT_ARRAY[@]}"; do
 
-      exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
+      exp_path=$(find examples/v1beta1 -name "${exp_name}.yaml")
       algorithm_name="$(yq eval '.spec.algorithm.algorithmName' "$exp_path")"
 
-      suggestion_image_name="$(yq eval '.data.suggestion' ../../../../../manifests/v1beta1/components/controller/katib-config.yaml |
+      suggestion_image_name="$(yq eval '.data.suggestion' manifests/v1beta1/components/controller/katib-config.yaml |
         algorithm_name=$algorithm_name yq eval '.[env(algorithm_name)].image' | cut -d: -f1)"
       suggestion_name="$(basename "$suggestion_image_name")"
 
@@ -99,7 +90,6 @@ run() {
     for s in "${suggestions[@]}"; do
       if [ "$s" == "$CONTAINER_NAME" ]; then
         _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
-        _load_minikube_cluster "$CONTAINER_NAME"
         break
       fi
     done
@@ -112,10 +102,10 @@ run() {
     # Search for EarlyStopping Images required for Trial.
     for exp_name in "${EXPERIMENT_ARRAY[@]}"; do
 
-      exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
+      exp_path=$(find examples/v1beta1 -name "${exp_name}.yaml")
       algorithm_name="$(yq eval '.spec.earlyStopping.algorithmName' "$exp_path")"
 
-      earlystopping_image_name="$(yq eval '.data.early-stopping' ../../../../../manifests/v1beta1/components/controller/katib-config.yaml |
+      earlystopping_image_name="$(yq eval '.data.early-stopping' manifests/v1beta1/components/controller/katib-config.yaml |
         algorithm_name=$algorithm_name yq eval '.[env(algorithm_name)].image' | cut -d: -f1)"
       earlystopping_name="$(basename "$earlystopping_image_name")"
 
@@ -126,7 +116,6 @@ run() {
     for e in "${earlystoppings[@]}"; do
       if [ "$e" == "$CONTAINER_NAME" ]; then
         _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
-        _load_minikube_cluster "$CONTAINER_NAME"
         break
       fi
     done
@@ -134,7 +123,6 @@ run() {
   # Others
   else
     _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
-    _load_minikube_cluster "$CONTAINER_NAME"
   fi
 }
 
@@ -153,7 +141,6 @@ fi
 run "cert-generator" "$CMD_PREFIX/cert-generator/$VERSION/Dockerfile"
 run "file-metrics-collector" "$CMD_PREFIX/metricscollector/$VERSION/file-metricscollector/Dockerfile"
 run "tfevent-metrics-collector" "$CMD_PREFIX/metricscollector/$VERSION/tfevent-metricscollector/Dockerfile"
-cleanup_build_cache
 
 # Suggestion images
 echo -e "\nBuilding suggestion images..."
@@ -165,18 +152,18 @@ run "suggestion-optuna" "$CMD_PREFIX/suggestion/optuna/$VERSION/Dockerfile"
 run "suggestion-pbt" "$CMD_PREFIX/suggestion/pbt/$VERSION/Dockerfile"
 run "suggestion-enas" "$CMD_PREFIX/suggestion/nas/enas/$VERSION/Dockerfile"
 run "suggestion-darts" "$CMD_PREFIX/suggestion/nas/darts/$VERSION/Dockerfile"
-cleanup_build_cache
 
 # Early stopping images
 echo -e "\nBuilding early stopping images...\n"
 run "earlystopping-medianstop" "$CMD_PREFIX/earlystopping/medianstop/$VERSION/Dockerfile"
-cleanup_build_cache
 
 # Training container images
 echo -e "\nBuilding training container images..."
 for name in "${TRIAL_IMAGE_ARRAY[@]}"; do
   run "$name" "examples/$VERSION/trial-images/$name/Dockerfile"
 done
-cleanup_build_cache
+
+echo -e "\nCleanup Build Cache...\n"
+docker buildx prune -f
 
 echo -e "\nAll Katib images with ${TAG} tag have been built successfully!\n"
