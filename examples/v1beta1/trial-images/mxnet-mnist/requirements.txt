@@ -1,0 +1,5 @@
+mxnet==1.9.1
+# This is a workaround to avoid the following error.
+# AttributeError: module 'numpy' has no attribute 'bool'
+# See more: https://github.com/numpy/numpy/pull/22607
+numpy==1.23.5

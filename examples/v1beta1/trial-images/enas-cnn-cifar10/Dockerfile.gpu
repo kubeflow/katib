@@ -1,6 +1,7 @@
-# tensorflow-gpu=2.9.1, cuda=11.7.1
-# Ref: https://docs.nvidia.com/deeplearning/frameworks/tensorflow-release-notes/rel_22-08.html#rel_22-08
-FROM nvcr.io/nvidia/tensorflow:22.08-tf2-py3
+# We need to use the nvcr.io/nvidia/tensorflow image as a base image to support both linux/amd64 and linux_arm64 platforms.
+# tensorflow-gpu=2.10.1, cuda=11.8.0
+# Ref: https://docs.nvidia.com/deeplearning/frameworks/tensorflow-release-notes/rel-22-12.html#rel-22-12
+FROM nvcr.io/nvidia/tensorflow:22.12-tf2-py3
 
 ENV TARGET_DIR /opt/enas-cnn-cifar10
 ENV PYTHONPATH ${TARGET_DIR}

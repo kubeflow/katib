@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 ENV TARGET_DIR /opt/darts-cnn-cifar10
 

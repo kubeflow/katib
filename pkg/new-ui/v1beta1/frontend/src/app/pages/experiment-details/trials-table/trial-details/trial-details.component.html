@@ -8,7 +8,7 @@
 
   <div class="page-padding lib-flex-grow lib-overflow-auto">
     <div *ngIf="dataLoaded; else loading">
-      <div class="graph-div-outer">
+      <div *ngIf="showTrialGraph" class="graph-div-outer">
         <div class="graph-div-inner">
           <ngx-charts-line-chart
             [animations]="animations"
@@ -30,6 +30,12 @@
           >
           </ngx-charts-line-chart>
         </div>
+      </div>
+
+      <div *ngIf="!showTrialGraph">
+        <lib-panel icon="info" color="primary" class="panel">
+          Trial is not completed yet.
+        </lib-panel>
       </div>
 
       <div class="tab-height-fix">
@@ -56,7 +62,9 @@
     <ng-template #loading>
       <div class="graph-div-outer">
         <div class="graph-div-inner">
-          <mat-spinner></mat-spinner>
+          <lib-loading-spinner
+            message="Fetching Trial details..."
+          ></lib-loading-spinner>
         </div>
       </div>
     </ng-template>

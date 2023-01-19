@@ -18,6 +18,9 @@ import textwrap
 from typing import Callable
 import inspect
 
+from kubeflow.katib import models
+from kubeflow.katib.constants import constants
+
 
 def is_running_in_k8s():
     return os.path.isdir("/var/run/secrets/kubernetes.io/")
@@ -38,6 +41,36 @@ def set_katib_namespace(katib):
     katib_namespace = katib.metadata.namespace
     namespace = katib_namespace or get_default_target_namespace()
     return namespace
+
+
+def has_condition(conditions, condition_type):
+    """Verify if the condition list has the required condition.
+    Condition should be valid object with `type` and `status`.
+    """
+
+    for c in conditions:
+        if c.type == condition_type and c.status == constants.CONDITION_STATUS_TRUE:
+            return True
+    return False
+
+
+def print_experiment_status(experiment: models.V1beta1Experiment):
+    if experiment.status:
+        print(
+            "Experiment Trials status: {} Trials, {} Pending Trials, "
+            "{} Running Trials, {} Succeeded Trials, {} Failed Trials, "
+            "{} EarlyStopped Trials, {} MetricsUnavailable Trials".format(
+                experiment.status.trials or 0,
+                experiment.status.trials_pending or 0,
+                experiment.status.trials_running or 0,
+                experiment.status.trials_succeeded or 0,
+                experiment.status.trials_failed or 0,
+                experiment.status.trials_early_stopped or 0,
+                experiment.status.trial_metrics_unavailable or 0,
+            )
+        )
+        print(f"Current Optimal Trial:\n {experiment.status.current_optimal_trial}")
+        print(f"Experiment conditions:\n {experiment.status.conditions}")
 
 
 def validate_objective_function(objective: Callable):

@@ -6,7 +6,7 @@ ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
 RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-${TARGETARCH} \
   && chmod +x /bin/grpc_health_probe
 
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 ARG TARGETARCH
 ENV TARGET_DIR /opt/katib

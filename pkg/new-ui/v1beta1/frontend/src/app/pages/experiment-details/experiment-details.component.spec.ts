@@ -8,7 +8,6 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   ConfirmDialogService,
   NamespaceService,
@@ -63,7 +62,6 @@ describe('ExperimentDetailsComponent', () => {
           PanelModule,
           ExperimentOverviewModule,
           ExperimentDetailsTabModule,
-          MatProgressSpinnerModule,
           ExperimentYamlModule,
           TitleActionsToolbarModule,
           TrialsGraphEchartsModule,

@@ -4,7 +4,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,10 +11,16 @@ import { TrialsTableComponent } from './trials-table.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { SimpleChange } from '@angular/core';
-import { PropertyValue, StatusValue, ComponentValue } from 'kubeflow';
+import {
+  PropertyValue,
+  StatusValue,
+  ComponentValue,
+  KubeflowModule,
+} from 'kubeflow';
 import { parseStatus } from '../../experiments/utils';
 import lowerCase from 'lodash-es/lowerCase';
 import { KfpRunComponent } from './kfp-run/kfp-run.component';
+import { MatIconTestingModule } from '@angular/material/icon/testing';
 
 describe('TrialsTableComponent', () => {
   let component: TrialsTableComponent;
@@ -27,7 +32,6 @@ describe('TrialsTableComponent', () => {
         imports: [
           CommonModule,
           MatTableModule,
-          MatProgressSpinnerModule,
           MatDialogModule,
           MatIconModule,
           NgxChartsModule,
@@ -35,6 +39,8 @@ describe('TrialsTableComponent', () => {
           MatButtonModule,
           RouterTestingModule,
           BrowserAnimationsModule,
+          KubeflowModule,
+          MatIconTestingModule,
         ],
         declarations: [TrialsTableComponent],
       }).compileComponents();

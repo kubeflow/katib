@@ -27,6 +27,7 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
   dataLoaded: boolean;
   trialDetails: TrialK8s;
   experimentName: string;
+  showTrialGraph: boolean = false;
 
   // chart's options
   view = [700, 500];
@@ -122,8 +123,11 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
       .getTrialInfo(this.trialName, this.namespace)
       .subscribe((response: TrialK8s) => {
         this.trialDetails = response;
-
         const status = this.trialStatus(response);
+
+        if (status && status === StatusEnum.SUCCEEDED) {
+          this.showTrialGraph = true;
+        }
 
         if (
           status &&
@@ -183,6 +187,11 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
           .getTrialInfo(this.trialName, this.namespace)
           .subscribe(response => {
             this.trialDetails = response;
+            const status = this.trialStatus(response);
+
+            if (status && status === StatusEnum.SUCCEEDED) {
+              this.showTrialGraph = true;
+            }
           });
       }),
     );

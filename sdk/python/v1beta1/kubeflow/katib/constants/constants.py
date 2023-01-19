@@ -15,7 +15,7 @@
 import os
 
 # How long to wait in seconds for requests to the Kubernetes or gRPC API Server.
-APISERVER_TIMEOUT = 120
+DEFAULT_TIMEOUT = 120
 
 # Global CRD version
 KATIB_VERSION = os.environ.get("EXPERIMENT_VERSION", "v1beta1")
@@ -30,10 +30,28 @@ TRIAL_PLURAL = "trials"
 
 DEFAULT_PRIMARY_CONTAINER_NAME = "training-container"
 
+# Label to identify Experiment's resources.
+EXPERIMENT_LABEL = "katib.kubeflow.org/experiment"
+
+# True means that Katib CR is in this condition.
+CONDITION_STATUS_TRUE = "True"
+
+# Experiment conditions.
+# TODO (andreyvelich): Use API enums when Katib SDK supports it.
+# Ref: https://github.com/kubeflow/katib/issues/1969.
+EXPERIMENT_CONDITION_CREATED = "Created"
+EXPERIMENT_CONDITION_RUNNING = "Running"
+EXPERIMENT_CONDITION_RESTARTING = "Restarting"
+EXPERIMENT_CONDITION_SUCCEEDED = "Succeeded"
+EXPERIMENT_CONDITION_FAILED = "Failed"
+
+# Trial conditions.
+TRIAL_CONDITION_SUCCEEDED = "Succeeded"
+
 # Supported base images for the Katib Trials.
 # TODO (andreyvelich): Implement list_base_images function to get each image description.
-BASE_IMAGE_TENSORFLOW = "docker.io/tensorflow/tensorflow:2.9.1"
-BASE_IMAGE_TENSORFLOW_GPU = "docker.io/tensorflow/tensorflow:2.9.1-gpu"
+BASE_IMAGE_TENSORFLOW = "docker.io/tensorflow/tensorflow:2.11.0"
+BASE_IMAGE_TENSORFLOW_GPU = "docker.io/tensorflow/tensorflow:2.11.0-gpu"
 BASE_IMAGE_PYTORCH = "docker.io/pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime"
 BASE_IMAGE_MXNET = "docker.io/mxnet/python:1.9.1_native_py3"
 

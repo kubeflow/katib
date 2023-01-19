@@ -24,8 +24,6 @@ jobs:
         include:
           - component-name: suggestion-hyperopt
             dockerfile: cmd/suggestion/hyperopt/v1beta1/Dockerfile
-          - component-name: suggestion-chocolate
-            dockerfile: cmd/suggestion/chocolate/v1beta1/Dockerfile
           - component-name: suggestion-hyperband
             dockerfile: cmd/suggestion/hyperband/v1beta1/Dockerfile
           - component-name: suggestion-skopt

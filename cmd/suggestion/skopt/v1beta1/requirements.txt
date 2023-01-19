@@ -1,6 +1,9 @@
 grpcio==1.41.1
 cloudpickle==0.5.6
-numpy>=1.20.0
+# This is a workaround to avoid the following error.
+# AttributeError: module 'numpy' has no attribute 'int'
+# See more: https://github.com/numpy/numpy/pull/22607
+numpy==1.23.5
 scikit-learn>=0.24.0
 scipy>=1.5.4
 forestci==0.3
