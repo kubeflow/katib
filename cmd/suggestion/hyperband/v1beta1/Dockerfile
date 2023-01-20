@@ -1,7 +1,7 @@
 FROM alpine:3.15 AS downloader
 
 ARG TARGETARCH
-ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
+ENV GRPC_HEALTH_PROBE_VERSION v0.4.15
 
 RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-${TARGETARCH} \
   && chmod +x /bin/grpc_health_probe

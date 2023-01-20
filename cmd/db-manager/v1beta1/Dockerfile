@@ -2,7 +2,7 @@
 FROM golang:alpine AS build-env
 
 ARG TARGETARCH
-ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
+ENV GRPC_HEALTH_PROBE_VERSION v0.4.15
 
 WORKDIR /go/src/github.com/kubeflow/katib
 

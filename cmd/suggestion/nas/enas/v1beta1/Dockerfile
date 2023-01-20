@@ -1,7 +1,7 @@
 FROM alpine:3.15 AS downloader
 
 ARG TARGETARCH
-ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
+ENV GRPC_HEALTH_PROBE_VERSION v0.4.15
 
 RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-${TARGETARCH} \
   && chmod +x /bin/grpc_health_probe
@@ -11,7 +11,7 @@ FROM python:3.10-slim
 ARG TARGETARCH
 ENV TARGET_DIR /opt/katib
 ENV SUGGESTION_DIR cmd/suggestion/nas/enas/v1beta1
-ENV GRPC_HEALTH_PROBE_VERSION v0.4.11
+ENV GRPC_HEALTH_PROBE_VERSION v0.4.15
 ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python:${TARGET_DIR}/pkg/apis/manager/health/python
 
 RUN if [ "${TARGETARCH}" = "ppc64le" ] || [ "${TARGETARCH}" = "aarch64" ]; then \
