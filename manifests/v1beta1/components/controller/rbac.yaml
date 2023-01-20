@@ -8,18 +8,53 @@ rules:
       - ""
     resources:
       - configmaps
-      - serviceaccounts
+        #- serviceaccounts
       - services
       - events
-      - namespaces
+        #- namespaces
+        #- persistentvolumes
+        #- persistentvolumeclaims
+        #- pods
+        #- pods/log
+        #- pods/status
+        #- secrets
+    verbs:
+      - "*"
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
       - persistentvolumes
       - persistentvolumeclaims
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - "get"
+      - "create"
+      - "delete"
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+  - apiGroups:
+      - ""
+    resources:
       - pods
       - pods/log
       - pods/status
-      - secrets
     verbs:
-      - "*"
+      - "get"
   - apiGroups:
       - apps
     resources:
@@ -32,7 +67,10 @@ rules:
       - roles
       - rolebindings
     verbs:
-      - "*"
+      - "get"
+      - "create"
+      - "list"
+      - "watch"
   - apiGroups:
       - batch
     resources:
