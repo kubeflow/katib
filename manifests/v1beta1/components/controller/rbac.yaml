@@ -7,7 +7,6 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - configmaps
       - services
       - events
     verbs:
@@ -26,15 +25,8 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - secrets
-    verbs:
-      - "get"
-      - "create"
-      - "delete"
-  - apiGroups:
-      - ""
-    resources:
       - namespaces
+      - configmaps
     verbs:
       - "get"
       - "list"
