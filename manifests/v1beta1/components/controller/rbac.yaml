@@ -8,16 +8,8 @@ rules:
       - ""
     resources:
       - configmaps
-        #- serviceaccounts
       - services
       - events
-        #- namespaces
-        #- persistentvolumes
-        #- persistentvolumeclaims
-        #- pods
-        #- pods/log
-        #- pods/status
-        #- secrets
     verbs:
       - "*"
   - apiGroups:
