@@ -8,9 +8,20 @@ rules:
       - ""
     resources:
       - services
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+  - apiGroups:
+      - ""
+    resources:
       - events
     verbs:
-      - "*"
+      - "create"
+      - "patch"
+      - "update"
   - apiGroups:
       - ""
     resources:
@@ -44,7 +55,11 @@ rules:
     resources:
       - deployments
     verbs:
-      - "*"
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:
@@ -61,7 +76,11 @@ rules:
       - jobs
       - cronjobs
     verbs:
-      - "*"
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
   - apiGroups:
       - kubeflow.org
     resources:
