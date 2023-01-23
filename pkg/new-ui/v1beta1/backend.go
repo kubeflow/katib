@@ -33,7 +33,6 @@ import (
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
-	trialv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	consts "github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
@@ -41,7 +40,6 @@ import (
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
-	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -585,7 +583,7 @@ func (k *KatibUIHandler) FetchTrial(w http.ResponseWriter, r *http.Request) {
 	trialName := trialNames[0]
 	namespace := namespaces[0]
 
-	user, err := IsAuthorized(consts.ActionTypeGet, namespace, consts.PluralTrial, "", trialName, trialv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
+	user, err := IsAuthorized(consts.ActionTypeGet, namespace, consts.PluralTrial, "", trialName, trialsv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
 	if user == "" && err != nil {
 		log.Printf("No user provided in kubeflow-userid header.")
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -680,7 +678,7 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	podLogOpts := apiv1.PodLogOptions{}
+	podLogOpts := corev1.PodLogOptions{}
 	podLogOpts.Container = trial.Spec.PrimaryContainerName
 	if trial.Spec.MetricsCollector.Collector.Kind == common.StdOutCollector {
 		podLogOpts.Container = mccommon.MetricLoggerCollectorContainerName
@@ -743,7 +741,7 @@ An example can be found here: https://github.com/kubeflow/katib/blob/7bf39225f72
 }
 
 // fetchPodLogs returns logs of a pod for the given job name and namespace
-func fetchPodLogs(clientset *kubernetes.Clientset, namespace string, podName string, podLogOpts apiv1.PodLogOptions) (string, error) {
+func fetchPodLogs(clientset *kubernetes.Clientset, namespace string, podName string, podLogOpts corev1.PodLogOptions) (string, error) {
 	req := clientset.CoreV1().Pods(namespace).GetLogs(podName, &podLogOpts)
 	podLogs, err := req.Stream(context.Background())
 	if err != nil {
