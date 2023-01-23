@@ -25,7 +25,6 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - namespaces
       - configmaps
     verbs:
       - "get"
