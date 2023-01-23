@@ -36,12 +36,7 @@ patches:
       version: v1
       kind: Deployment
       name: katib-ui
-    patch: |-
-      - op: add
-        path: /spec/template/spec/containers/0/env/-
-        value:
-          name: APP_DISABLE_AUTH
-          value: "false"
+    path: patches/enable-ui-authz-checks.yaml
   # Allow istio sidecar injection in katib-UI Pod.
   - target:
       kind: Deployment
