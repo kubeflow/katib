@@ -27,7 +27,7 @@ COPY --from=downloader /bin/grpc_health_probe /bin/grpc_health_probe
 
 WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
 RUN chgrp -R 0 ${TARGET_DIR} \
   && chmod -R g+rwX ${TARGET_DIR}
 

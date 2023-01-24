@@ -3,6 +3,3 @@ rfc3339>=6.2
 grpcio==1.41.1
 googleapis-common-protos==1.6.0
 tensorflow==2.11.0
-# TODO (tenzen-y) Once a newer h5py for aarch64 is released, we must remove the below:
-# Ref: https://github.com/h5py/h5py/issues/2215
-h5py==3.7.0

@@ -1,6 +1,6 @@
 FROM ibmcom/tensorflow-ppc64le:2.2.0-py3
 ADD . /usr/src/app/github.com/kubeflow/katib
 WORKDIR /usr/src/app/github.com/kubeflow/katib/cmd/metricscollector/v1beta1/tfevent-metricscollector/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
 ENV PYTHONPATH /usr/src/app/github.com/kubeflow/katib:/usr/src/app/github.com/kubeflow/katib/pkg/apis/manager/v1beta1/python:/usr/src/app/github.com/kubeflow/katib/pkg/metricscollector/v1beta1/tfevent-metricscollector/:/usr/src/app/github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common/
 ENTRYPOINT ["python", "main.py"]

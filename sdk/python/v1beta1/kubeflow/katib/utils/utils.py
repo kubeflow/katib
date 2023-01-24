@@ -102,7 +102,7 @@ def get_script_for_python_packages(packages_to_install, pip_index_url):
             python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip
         fi
 
-        PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet \
+        PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --prefer-binary --quiet \
         --no-warn-script-location --index-url {pip_index_url} {packages_str}
         """
     )

@@ -1,5 +1,2 @@
 scipy>=1.7.2
 tensorflow==2.11.0
-# TODO (tenzen-y) Once a newer h5py for aarch64 is released, we must remove the below:
-# Ref: https://github.com/h5py/h5py/issues/2215
-h5py==3.7.0

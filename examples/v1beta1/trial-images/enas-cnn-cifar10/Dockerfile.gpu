@@ -10,7 +10,7 @@ ADD examples/v1beta1/trial-images/enas-cnn-cifar10 ${TARGET_DIR}
 
 WORKDIR  ${TARGET_DIR}
 
-RUN pip install --no-cache-dir scipy==1.8.1
+RUN pip install --prefer-binary --no-cache-dir scipy==1.8.1
 RUN chgrp -R 0 ${TARGET_DIR} \
   && chmod -R g+rwX ${TARGET_DIR}
 

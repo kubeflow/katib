@@ -13,7 +13,7 @@ RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     rm -rf /var/lib/apt/lists/*; \
     fi
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
 RUN chgrp -R 0 /opt/tf-mnist-with-summaries \
   && chmod -R g+rwX /opt/tf-mnist-with-summaries
 
