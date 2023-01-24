@@ -6,6 +6,11 @@ inputs:
   kubernetes-version:
     required: true
     description: kubernetes version
+  python-version:
+    required: false
+    description: Python version
+    # Most latest supporting version
+    default: "3.10"
 
 runs:
   using: composite
@@ -25,7 +30,7 @@ runs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.9
+        python-version: ${{ inputs.python-version }}
 
     - name: Install Katib SDK
       shell: bash
