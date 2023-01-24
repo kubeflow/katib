@@ -13,7 +13,7 @@ ENV TARGET_DIR /opt/katib
 ENV SUGGESTION_DIR cmd/suggestion/nas/darts/v1beta1
 ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python:${TARGET_DIR}/pkg/apis/manager/health/python
 
-RUN if [ "${TARGETARCH}" = "ppc64le" ] || [ "${TARGETARCH}" = "aarch64" ]; then \
+RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
     apt-get -y update && \
     apt-get -y install gfortran libopenblas-dev liblapack-dev && \
     apt-get clean && \
