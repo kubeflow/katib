@@ -729,9 +729,9 @@ func fetchMasterPodName(clientset *kubernetes.Clientset, trial *trialsv1beta1.Tr
 	}
 
 	if len(podList.Items) == 0 {
-		return "", errors.New(`Logs for the trial could not be found.
-Was 'retain: true' specified in the Experiment definition?
-An example can be found here: https://github.com/kubeflow/katib/blob/7bf39225f7235ee4ba6cf285ecc2c455c6471234/examples/v1beta1/argo/argo-workflow.yaml#L33`)
+		return "", errors.New(`Failed to find logs for this Trial. Make sure you've set "spec.trialTemplate.retain"
+		field to "true" in the Experiment definition. If this error persists then the Pod's logs are not currently
+		persisted in the cluster.`)
 	}
 	if len(podList.Items) > 1 {
 		return "", errors.New("More than one master replica found")
