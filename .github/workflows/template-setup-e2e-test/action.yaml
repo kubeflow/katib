@@ -29,4 +29,4 @@ runs:
 
     - name: Install Katib SDK
       shell: bash
-      run: pip install -e sdk/python/v1beta1
+      run: pip install --prefer-binary -e sdk/python/v1beta1

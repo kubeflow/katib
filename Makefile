@@ -42,7 +42,7 @@ endif
 
 yamllint:
 ifndef HAS_YAMLLINT
-	pip install yamllint
+	pip install --prefer-binary yamllint
 	$(info "yamllint has been installed")
 endif
 	hack/verify-yamllint.sh
@@ -150,16 +150,16 @@ update-boilerplate:
 	./hack/boilerplate/update-boilerplate.sh
 
 prepare-pytest:
-	pip install -r test/unit/v1beta1/requirements.txt
-	pip install -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
-	pip install -r cmd/suggestion/skopt/v1beta1/requirements.txt
-	pip install -r cmd/suggestion/optuna/v1beta1/requirements.txt
-	pip install -r cmd/suggestion/hyperband/v1beta1/requirements.txt
-	pip install -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
-	pip install -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
-	pip install -r cmd/suggestion/pbt/v1beta1/requirements.txt
-	pip install -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
-	pip install -r cmd/metricscollector/v1beta1/tfevent-metricscollector/requirements.txt
+	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/suggestion/optuna/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/suggestion/hyperband/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/suggestion/nas/darts/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/suggestion/pbt/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/metricscollector/v1beta1/tfevent-metricscollector/requirements.txt
 
 prepare-pytest-testdata:
 ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
