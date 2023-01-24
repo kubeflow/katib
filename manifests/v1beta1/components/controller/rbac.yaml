@@ -46,7 +46,6 @@ rules:
       - ""
     resources:
       - pods
-      - pods/log
       - pods/status
     verbs:
       - "get"
@@ -84,6 +83,20 @@ rules:
   - apiGroups:
       - kubeflow.org
     resources:
+      - tfjobs
+      - pytorchjobs
+      - mpijobs
+      - xgboostjobs
+      - mxjobs
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+  - apiGroups:
+      - kubeflow.org
+    resources:
       - experiments
       - experiments/status
       - experiments/finalizers
@@ -93,11 +106,6 @@ rules:
       - suggestions
       - suggestions/status
       - suggestions/finalizers
-      - tfjobs
-      - pytorchjobs
-      - mpijobs
-      - xgboostjobs
-      - mxjobs
     verbs:
       - "*"
 ---
