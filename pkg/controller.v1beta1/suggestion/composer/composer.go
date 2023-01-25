@@ -76,6 +76,11 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 	if err != nil {
 		return nil, err
 	}
+	if containsContainerPortWithName(suggestionConfigData.Ports, consts.DefaultSuggestionPortName) ||
+		containsContainerPort(suggestionConfigData.Ports, consts.DefaultSuggestionPort) {
+		return nil, fmt.Errorf("invalid suggestion config: a port with name %q or number %d must not be specified",
+			consts.DefaultSuggestionPortName, consts.DefaultSuggestionPort)
+	}
 
 	// If early stopping is used, get the config data.
 	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
@@ -195,14 +200,11 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		suggestionContainer.Name = consts.ContainerSuggestion
 	}
 
-	if !containsContainerPortWithName(suggestionContainer.Ports, consts.DefaultSuggestionPortName) &&
-		!containsContainerPort(suggestionConfigData.Ports, consts.DefaultSuggestionPort) {
-		suggestionPort := corev1.ContainerPort{
-			Name:          consts.DefaultSuggestionPortName,
-			ContainerPort: consts.DefaultSuggestionPort,
-		}
-		suggestionContainer.Ports = append(suggestionContainer.Ports, suggestionPort)
+	suggestionPort := corev1.ContainerPort{
+		Name:          consts.DefaultSuggestionPortName,
+		ContainerPort: consts.DefaultSuggestionPort,
 	}
+	suggestionContainer.Ports = append(suggestionContainer.Ports, suggestionPort)
 
 	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) && suggestionContainer.ReadinessProbe == nil {
 		suggestionContainer.ReadinessProbe = &corev1.Probe{
