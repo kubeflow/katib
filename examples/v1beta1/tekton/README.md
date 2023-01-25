@@ -70,7 +70,11 @@ with the appropriate permission:
     - pipelineruns
     - taskruns
   verbs:
-    - "*"
+    - "get"
+    - "list"
+    - "watch"
+    - "create"
+    - "delete"
 ```
 
 Run the following command to update Katib ClusterRole:

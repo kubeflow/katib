@@ -65,7 +65,11 @@ with the appropriate permission:
   resources:
     - workflows
   verbs:
-    - "*"
+    - "get"
+    - "list"
+    - "watch"
+    - "create"
+    - "delete"
 ```
 
 Run the following command to update Katib ClusterRole:
