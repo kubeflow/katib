@@ -176,10 +176,7 @@ def run_e2e_experiment(
     )
 
     # Test resume feature for "FromVolume" and "LongRunning" Experiments.
-    # TODO (andreyvelich): Once we change the default resume policy to "Never",
-    # also test restart for "LongRunning" Experiment here instead of "random".
-    # Ref: https://github.com/kubeflow/katib/issues/2055
-    if exp_name == "from-volume-resume" or exp_name == "random":
+    if exp_name == "from-volume-resume" or exp_name == "long-running-resume":
         max_trial_count = experiment.spec.max_trial_count + 1
         parallel_trial_count = experiment.spec.parallel_trial_count + 1
         logging.debug(

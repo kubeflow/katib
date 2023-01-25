@@ -826,7 +826,7 @@ func schema_apis_controller_experiments_v1beta1_ExperimentSpec(ref common.Refere
 					},
 					"resumePolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Describes resuming policy which usually take effect after experiment terminated.",
+							Description: "Describes resuming policy which usually take effect after experiment terminated. Default value is Never.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1618,7 +1618,7 @@ func schema_apis_controller_suggestions_v1beta1_SuggestionSpec(ref common.Refere
 					},
 					"resumePolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.",
+							Description: "ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is Never.",
 							Type:        []string{"string"},
 							Format:      "",
 						},

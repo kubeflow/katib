@@ -3,7 +3,7 @@ apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
   namespace: kubeflow
-  name: never-resume
+  name: long-running-resume
 spec:
   objective:
     type: maximize
@@ -16,7 +16,7 @@ spec:
   parallelTrialCount: 3
   maxTrialCount: 12
   maxFailedTrialCount: 3
-  resumePolicy: Never
+  resumePolicy: LongRunning
   parameters:
     - name: lr
       parameterType: double

@@ -136,7 +136,7 @@ class V1beta1SuggestionSpec(object):
     def resume_policy(self):
         """Gets the resume_policy of this V1beta1SuggestionSpec.  # noqa: E501
 
-        ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.  # noqa: E501
+        ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is Never.  # noqa: E501
 
         :return: The resume_policy of this V1beta1SuggestionSpec.  # noqa: E501
         :rtype: str
@@ -147,7 +147,7 @@ class V1beta1SuggestionSpec(object):
     def resume_policy(self, resume_policy):
         """Sets the resume_policy of this V1beta1SuggestionSpec.
 
-        ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.  # noqa: E501
+        ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is Never.  # noqa: E501
 
         :param resume_policy: The resume_policy of this V1beta1SuggestionSpec.  # noqa: E501
         :type: str
