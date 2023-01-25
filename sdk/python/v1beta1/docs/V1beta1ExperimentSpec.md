@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 **objective** | [**V1beta1ObjectiveSpec**](V1beta1ObjectiveSpec.md) |  | [optional] 
 **parallel_trial_count** | **int** | How many trials can be processed in parallel. Defaults to 3 | [optional] 
 **parameters** | [**list[V1beta1ParameterSpec]**](V1beta1ParameterSpec.md) | List of hyperparameter configurations. | [optional] 
-**resume_policy** | **str** | Describes resuming policy which usually take effect after experiment terminated. | [optional] 
+**resume_policy** | **str** | Describes resuming policy which usually take effect after experiment terminated. Default value is Never. | [optional] 
 **trial_template** | [**V1beta1TrialTemplate**](V1beta1TrialTemplate.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -39,6 +39,6 @@ jobs:
         # Comma Delimited
         experiments:
           # suggestion-hyperopt
-          - "never-resume,from-volume-resume,median-stop"
+          - "long-running-resume,from-volume-resume,median-stop"
           # others
           - "grid,bayesian-optimization,tpe,multivariate-tpe,cma-es,hyperband"

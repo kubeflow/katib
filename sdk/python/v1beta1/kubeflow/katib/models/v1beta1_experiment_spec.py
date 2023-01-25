@@ -303,7 +303,7 @@ class V1beta1ExperimentSpec(object):
     def resume_policy(self):
         """Gets the resume_policy of this V1beta1ExperimentSpec.  # noqa: E501
 
-        Describes resuming policy which usually take effect after experiment terminated.  # noqa: E501
+        Describes resuming policy which usually take effect after experiment terminated. Default value is Never.  # noqa: E501
 
         :return: The resume_policy of this V1beta1ExperimentSpec.  # noqa: E501
         :rtype: str
@@ -314,7 +314,7 @@ class V1beta1ExperimentSpec(object):
     def resume_policy(self, resume_policy):
         """Sets the resume_policy of this V1beta1ExperimentSpec.
 
-        Describes resuming policy which usually take effect after experiment terminated.  # noqa: E501
+        Describes resuming policy which usually take effect after experiment terminated. Default value is Never.  # noqa: E501
 
         :param resume_policy: The resume_policy of this V1beta1ExperimentSpec.  # noqa: E501
         :type: str

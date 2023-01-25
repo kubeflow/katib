@@ -74,7 +74,7 @@ to know more about it. Check the following examples:
 
 - [Resume From Volume](./resume-experiment/from-volume-resume.yaml)
 
-- [Never Resume](./resume-experiment/never-resume.yaml)
+- [Resume Long Running Experiment](./resume-experiment/long-running-resume.yaml)
 
 ## Metrics Collector
 
