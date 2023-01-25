@@ -81,7 +81,7 @@ Run the following command to update Katib ClusterRole:
 
 ```bash
 kubectl patch ClusterRole katib-controller -n kubeflow --type=json \
-  -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["tekton.dev"],"resources":["pipelineruns", "taskruns"],"verbs":["*"]}}]'
+  -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["tekton.dev"],"resources":["pipelineruns", "taskruns"],"verbs":["get", "list", "watch", "create", "delete"]}}]'
 ```
 
 In addition to that, you have to modify Katib
