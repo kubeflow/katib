@@ -7,39 +7,93 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - configmaps
-      - serviceaccounts
       - services
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+  - apiGroups:
+      - ""
+    resources:
       - events
-      - namespaces
+    verbs:
+      - "create"
+      - "patch"
+      - "update"
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
       - persistentvolumes
       - persistentvolumeclaims
-      - pods
-      - pods/log
-      - pods/status
-      - secrets
     verbs:
-      - "*"
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - configmaps
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/status
+    verbs:
+      - "get"
   - apiGroups:
       - apps
     resources:
       - deployments
     verbs:
-      - "*"
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:
       - roles
       - rolebindings
     verbs:
-      - "*"
+      - "get"
+      - "create"
+      - "list"
+      - "watch"
   - apiGroups:
       - batch
     resources:
       - jobs
       - cronjobs
     verbs:
-      - "*"
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - tfjobs
+      - pytorchjobs
+      - mpijobs
+      - xgboostjobs
+      - mxjobs
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
   - apiGroups:
       - kubeflow.org
     resources:
@@ -52,11 +106,6 @@ rules:
       - suggestions
       - suggestions/status
       - suggestions/finalizers
-      - tfjobs
-      - pytorchjobs
-      - mpijobs
-      - xgboostjobs
-      - mxjobs
     verbs:
       - "*"
 ---
