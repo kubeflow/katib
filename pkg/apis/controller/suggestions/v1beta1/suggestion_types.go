@@ -37,7 +37,7 @@ type SuggestionSpec struct {
 	Requests int32 `json:"requests,omitempty"`
 
 	// ResumePolicy describes resuming policy which usually take effect after experiment terminated.
-	// Default value is LongRunning.
+	// Default value is Never.
 	ResumePolicy experiment.ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 

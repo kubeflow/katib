@@ -56,6 +56,7 @@ type ExperimentSpec struct {
 	NasConfig *NasConfig `json:"nasConfig,omitempty"`
 
 	// Describes resuming policy which usually take effect after experiment terminated.
+	// Default value is Never.
 	ResumePolicy ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 

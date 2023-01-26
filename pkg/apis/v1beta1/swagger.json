@@ -117,7 +117,7 @@
           "format": "int32"
         },
         "resumePolicy": {
-          "description": "ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is LongRunning.",
+          "description": "ResumePolicy describes resuming policy which usually take effect after experiment terminated. Default value is Never.",
           "type": "string"
         }
       }
@@ -648,7 +648,7 @@
           }
         },
         "resumePolicy": {
-          "description": "Describes resuming policy which usually take effect after experiment terminated.",
+          "description": "Describes resuming policy which usually take effect after experiment terminated. Default value is Never.",
           "type": "string"
         },
         "trialTemplate": {

@@ -40,7 +40,6 @@ import (
 
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
-	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -565,8 +564,35 @@ func (k *KatibUIHandler) FetchSuggestion(w http.ResponseWriter, r *http.Request)
 
 // FetchTrial gets trial in specific namespace.
 func (k *KatibUIHandler) FetchTrial(w http.ResponseWriter, r *http.Request) {
-	trialName := r.URL.Query()["trialName"][0]
-	namespace := r.URL.Query()["namespace"][0]
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
+		err := errors.New("no 'namespace' provided")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	trialNames, ok := r.URL.Query()["trialName"]
+	if !ok {
+		log.Printf("No trialName provided in Query parameters! Provide a 'trialName' param")
+		err := errors.New("no 'trialName' provided")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	trialName := trialNames[0]
+	namespace := namespaces[0]
+
+	user, err := IsAuthorized(consts.ActionTypeGet, namespace, consts.PluralTrial, "", trialName, trialsv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
+	if user == "" && err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		log.Printf("The user: %s is not authorized to get trial: %s from namespace: %s \n", user, trialName, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
 	trial, err := k.katibClient.GetTrial(trialName, namespace)
 	if err != nil {
@@ -652,7 +678,7 @@ func (k *KatibUIHandler) FetchTrialLogs(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	podLogOpts := apiv1.PodLogOptions{}
+	podLogOpts := corev1.PodLogOptions{}
 	podLogOpts.Container = trial.Spec.PrimaryContainerName
 	if trial.Spec.MetricsCollector.Collector.Kind == common.StdOutCollector {
 		podLogOpts.Container = mccommon.MetricLoggerCollectorContainerName
@@ -715,7 +741,7 @@ An example can be found here: https://github.com/kubeflow/katib/blob/7bf39225f72
 }
 
 // fetchPodLogs returns logs of a pod for the given job name and namespace
-func fetchPodLogs(clientset *kubernetes.Clientset, namespace string, podName string, podLogOpts apiv1.PodLogOptions) (string, error) {
+func fetchPodLogs(clientset *kubernetes.Clientset, namespace string, podName string, podLogOpts corev1.PodLogOptions) (string, error) {
 	req := clientset.CoreV1().Pods(namespace).GetLogs(podName, &podLogOpts)
 	podLogs, err := req.Stream(context.Background())
 	if err != nil {

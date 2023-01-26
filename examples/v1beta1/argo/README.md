@@ -65,14 +65,18 @@ with the appropriate permission:
   resources:
     - workflows
   verbs:
-    - "*"
+    - "get"
+    - "list"
+    - "watch"
+    - "create"
+    - "delete"
 ```
 
 Run the following command to update Katib ClusterRole:
 
 ```bash
 kubectl patch ClusterRole katib-controller -n kubeflow --type=json \
-  -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["argoproj.io"],"resources":["workflows"],"verbs":["*"]}}]'
+  -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["argoproj.io"],"resources":["workflows"],"verbs":["get", "list", "watch", "create", "delete"]}}]'
 ```
 
 In addition to that, you have to modify Katib

@@ -435,7 +435,9 @@ func newKatibConfigMapInstance() *corev1.ConfigMap {
 	// Create suggestion config
 	suggestionConfig := map[string]katibconfig.SuggestionConfig{
 		"random": {
-			Image: suggestionImage,
+			Container: corev1.Container{
+				Image: suggestionImage,
+			},
 		},
 	}
 	bSuggestionConfig, _ := json.Marshal(suggestionConfig)

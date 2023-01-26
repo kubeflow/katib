@@ -76,6 +76,11 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 	if err != nil {
 		return nil, err
 	}
+	if containsContainerPortWithName(suggestionConfigData.Ports, consts.DefaultSuggestionPortName) ||
+		containsContainerPort(suggestionConfigData.Ports, consts.DefaultSuggestionPort) {
+		return nil, fmt.Errorf("invalid suggestion config: a port with name %q or number %d must not be specified",
+			consts.DefaultSuggestionPortName, consts.DefaultSuggestionPort)
+	}
 
 	// If early stopping is used, get the config data.
 	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
@@ -181,21 +186,27 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	suggestionConfigData katibconfig.SuggestionConfig,
 	earlyStoppingConfigData katibconfig.EarlyStoppingConfig) []corev1.Container {
 
-	containers := []corev1.Container{}
-	suggestionContainer := corev1.Container{
-		Name:            consts.ContainerSuggestion,
-		Image:           suggestionConfigData.Image,
-		ImagePullPolicy: suggestionConfigData.ImagePullPolicy,
-		Ports: []corev1.ContainerPort{
-			{
-				Name:          consts.DefaultSuggestionPortName,
-				ContainerPort: consts.DefaultSuggestionPort,
-			},
-		},
-		Resources: suggestionConfigData.Resource,
+	var (
+		containers          []corev1.Container
+		suggestionContainer corev1.Container
+	)
+
+	suggestionConfigData.Container.DeepCopyInto(&suggestionContainer)
+
+	// Assign default values for suggestionContainer fields that are not set via
+	// the suggestion config.
+
+	if suggestionContainer.Name == "" {
+		suggestionContainer.Name = consts.ContainerSuggestion
 	}
 
-	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) {
+	suggestionPort := corev1.ContainerPort{
+		Name:          consts.DefaultSuggestionPortName,
+		ContainerPort: consts.DefaultSuggestionPort,
+	}
+	suggestionContainer.Ports = append(suggestionContainer.Ports, suggestionPort)
+
+	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) && suggestionContainer.ReadinessProbe == nil {
 		suggestionContainer.ReadinessProbe = &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
 				Exec: &corev1.ExecAction{
@@ -209,6 +220,8 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 			InitialDelaySeconds: defaultInitialDelaySeconds,
 			PeriodSeconds:       defaultPeriodForReady,
 		}
+	}
+	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) && suggestionContainer.LivenessProbe == nil {
 		suggestionContainer.LivenessProbe = &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
 				Exec: &corev1.ExecAction{
@@ -226,15 +239,14 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		}
 	}
 
-	// Attach volume mounts to the suggestion container if ResumePolicy = FromVolume
-	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
-		suggestionContainer.VolumeMounts = []corev1.VolumeMount{
-			{
-				Name:      consts.ContainerSuggestionVolumeName,
-				MountPath: suggestionConfigData.VolumeMountPath,
-			},
+	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume && !containsVolumeMountWithName(suggestionContainer.VolumeMounts, consts.ContainerSuggestionVolumeName) {
+		suggestionVolume := corev1.VolumeMount{
+			Name:      consts.ContainerSuggestionVolumeName,
+			MountPath: suggestionConfigData.VolumeMountPath,
 		}
+		suggestionContainer.VolumeMounts = append(suggestionContainer.VolumeMounts, suggestionVolume)
 	}
+
 	containers = append(containers, suggestionContainer)
 
 	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
@@ -254,6 +266,36 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 		containers = append(containers, earlyStoppingContainer)
 	}
 	return containers
+}
+
+func containsVolumeMountWithName(volumeMounts []corev1.VolumeMount, name string) bool {
+	for i := range volumeMounts {
+		if volumeMounts[i].Name == name {
+			return true
+		}
+	}
+
+	return false
+}
+
+func containsContainerPortWithName(ports []corev1.ContainerPort, name string) bool {
+	for i := range ports {
+		if ports[i].Name == name {
+			return true
+		}
+	}
+
+	return false
+}
+
+func containsContainerPort(ports []corev1.ContainerPort, port int32) bool {
+	for i := range ports {
+		if ports[i].ContainerPort == port {
+			return true
+		}
+	}
+
+	return false
 }
 
 // DesiredVolume returns desired PVC and PV for Suggestion.

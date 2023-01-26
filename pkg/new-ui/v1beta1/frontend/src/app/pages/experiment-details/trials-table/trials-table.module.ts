@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { TrialsTableComponent } from './trials-table.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -19,7 +18,6 @@ import { TrialDetailsModule } from './trial-details/trial-details.module';
     MatTableModule,
     MatDialogModule,
     MatIconModule,
-    NgxChartsModule,
     MatTooltipModule,
     MatButtonModule,
     KubeflowModule,

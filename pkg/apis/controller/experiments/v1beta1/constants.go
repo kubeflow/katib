@@ -21,7 +21,7 @@ const (
 	DefaultTrialParallelCount = 3
 
 	// DefaultResumePolicy is the default value of spec.resumePolicy.
-	DefaultResumePolicy = LongRunning
+	DefaultResumePolicy = NeverResume
 
 	// DefaultJobSuccessCondition is the default value of spec.trialTemplate.successCondition for Job.
 	DefaultJobSuccessCondition = "status.conditions.#(type==\"Complete\")#|#(status==\"True\")#"

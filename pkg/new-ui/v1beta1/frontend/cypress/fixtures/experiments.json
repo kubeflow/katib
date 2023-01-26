@@ -1,0 +1,203 @@
+[
+  {
+    "name": "dog-breed-katib-6cknw",
+    "namespace": "kubeflow-user",
+    "type": "hp",
+    "status": "Succeeded",
+    "startTime": "2022-04-14T10:12:09Z",
+    "completionTime": "2022-04-14T12:38:22Z",
+    "conditions": [
+      {
+        "type": "Created",
+        "status": "True",
+        "reason": "ExperimentCreated",
+        "message": "Experiment is created",
+        "lastUpdateTime": "2022-04-14T10:12:09Z",
+        "lastTransitionTime": "2022-04-14T10:12:09Z"
+      },
+      {
+        "type": "Running",
+        "status": "False",
+        "reason": "ExperimentRunning",
+        "message": "Experiment is running",
+        "lastUpdateTime": "2022-04-14T12:38:22Z",
+        "lastTransitionTime": "2022-04-14T12:38:22Z"
+      },
+      {
+        "type": "Succeeded",
+        "status": "True",
+        "reason": "ExperimentMaxTrialsReached",
+        "message": "Experiment has succeeded because max trial count has reached",
+        "lastUpdateTime": "2022-04-14T12:38:22Z",
+        "lastTransitionTime": "2022-04-14T12:38:22Z"
+      }
+    ],
+    "currentOptimalTrial": {
+      "bestTrialName": "dog-breed-katib-6cknw-623a5c8b",
+      "parameterAssignments": [
+        { "name": "nodes_number", "value": "1024" },
+        { "name": "learning_rate", "value": "0.0005" }
+      ],
+      "observation": {
+        "metrics": [
+          {
+            "name": "test-accuracy-resnet",
+            "min": "1.5037593984962405",
+            "max": "1.5037593984962405",
+            "latest": "1.5037593984962405"
+          }
+        ]
+      }
+    },
+    "succeededTrialList": [
+      "dog-breed-katib-6cknw-80a78352",
+      "dog-breed-katib-6cknw-c619218f",
+      "dog-breed-katib-6cknw-623a5c8b",
+      "dog-breed-katib-6cknw-6487aa2c",
+      "dog-breed-katib-6cknw-20d6fbad",
+      "dog-breed-katib-6cknw-821387e1",
+      "dog-breed-katib-6cknw-6dd91746",
+      "dog-breed-katib-6cknw-8937a9ae",
+      "dog-breed-katib-6cknw-10a5637b",
+      "dog-breed-katib-6cknw-66956233",
+      "dog-breed-katib-6cknw-21a750c9",
+      "dog-breed-katib-6cknw-639e513e",
+      "dog-breed-katib-6cknw-6345e894",
+      "dog-breed-katib-6cknw-ca0aef2e",
+      "dog-breed-katib-6cknw-84345cf1",
+      "dog-breed-katib-6cknw-030c20dc"
+    ],
+    "trials": 16,
+    "trialsSucceeded": 16
+  },
+  {
+    "name": "kale-automl-pfzaut",
+    "namespace": "kubeflow-user",
+    "type": "hp",
+    "status": "Succeeded",
+    "startTime": "2022-04-14T13:51:30Z",
+    "completionTime": "2022-04-14T14:16:50Z",
+    "conditions": [
+      {
+        "type": "Created",
+        "status": "True",
+        "reason": "ExperimentCreated",
+        "message": "Experiment is created",
+        "lastUpdateTime": "2022-04-14T13:51:30Z",
+        "lastTransitionTime": "2022-04-14T13:51:30Z"
+      },
+      {
+        "type": "Running",
+        "status": "False",
+        "reason": "ExperimentRunning",
+        "message": "Experiment is running",
+        "lastUpdateTime": "2022-04-14T14:16:50Z",
+        "lastTransitionTime": "2022-04-14T14:16:50Z"
+      },
+      {
+        "type": "Succeeded",
+        "status": "True",
+        "reason": "ExperimentMaxTrialsReached",
+        "message": "Experiment has succeeded because max trial count has reached",
+        "lastUpdateTime": "2022-04-14T14:16:50Z",
+        "lastTransitionTime": "2022-04-14T14:16:50Z"
+      }
+    ],
+    "currentOptimalTrial": {
+      "bestTrialName": "kale-automl-pfzaut-ab5a9937",
+      "parameterAssignments": [
+        { "name": "bootstrap", "value": "True" },
+        { "name": "criterion", "value": "friedman_mse" },
+        { "name": "max_features", "value": "0.1" },
+        { "name": "min_samples_leaf", "value": "1" },
+        { "name": "min_samples_split", "value": "2" }
+      ],
+      "observation": {
+        "metrics": [
+          {
+            "name": "mean_squared_log_error",
+            "min": "0.3525149502461068",
+            "max": "0.3525149502461068",
+            "latest": "0.3525149502461068"
+          }
+        ]
+      }
+    },
+    "succeededTrialList": [
+      "kale-automl-pfzaut-a1485dd0",
+      "kale-automl-pfzaut-ab5a9937"
+    ],
+    "trials": 2,
+    "trialsSucceeded": 2
+  },
+  {
+    "name": "open-vaccine-m39i7",
+    "namespace": "kubeflow-user",
+    "type": "hp",
+    "status": "Succeeded",
+    "startTime": "2022-04-14T11:37:51Z",
+    "completionTime": "2022-04-14T13:53:55Z",
+    "conditions": [
+      {
+        "type": "Created",
+        "status": "True",
+        "reason": "ExperimentCreated",
+        "message": "Experiment is created",
+        "lastUpdateTime": "2022-04-14T11:37:51Z",
+        "lastTransitionTime": "2022-04-14T11:37:51Z"
+      },
+      {
+        "type": "Running",
+        "status": "False",
+        "reason": "ExperimentRunning",
+        "message": "Experiment is running",
+        "lastUpdateTime": "2022-04-14T13:53:55Z",
+        "lastTransitionTime": "2022-04-14T13:53:55Z"
+      },
+      {
+        "type": "Succeeded",
+        "status": "True",
+        "reason": "ExperimentMaxTrialsReached",
+        "message": "Experiment has succeeded because max trial count has reached",
+        "lastUpdateTime": "2022-04-14T13:53:55Z",
+        "lastTransitionTime": "2022-04-14T13:53:55Z"
+      }
+    ],
+    "currentOptimalTrial": {
+      "bestTrialName": "open-vaccine-m39i7-6cd03cbf",
+      "parameterAssignments": [
+        { "name": "LR", "value": "0.0001" },
+        { "name": "BATCH_SIZE", "value": "32" },
+        { "name": "EMBED_DIM", "value": "20" },
+        { "name": "DROPOUT", "value": "0.2" },
+        { "name": "SP_DROPOUT", "value": "0.2" }
+      ],
+      "observation": {
+        "metrics": [
+          {
+            "name": "validation-loss",
+            "min": "0.7008482813835144",
+            "max": "0.7008482813835144",
+            "latest": "0.7008482813835144"
+          }
+        ]
+      }
+    },
+    "succeededTrialList": [
+      "open-vaccine-m39i7-a6e8de41",
+      "open-vaccine-m39i7-cf03fac3",
+      "open-vaccine-m39i7-484e3660",
+      "open-vaccine-m39i7-da039630",
+      "open-vaccine-m39i7-56a09ebe",
+      "open-vaccine-m39i7-6cd03cbf",
+      "open-vaccine-m39i7-9e2e22f1",
+      "open-vaccine-m39i7-d7f0ebe9",
+      "open-vaccine-m39i7-10f8954e",
+      "open-vaccine-m39i7-b4a80264",
+      "open-vaccine-m39i7-8ec17b8f",
+      "open-vaccine-m39i7-2bcc5c88"
+    ],
+    "trials": 12,
+    "trialsSucceeded": 12
+  }
+]

@@ -24,6 +24,7 @@ jobs:
         uses: ./.github/workflows/template-setup-e2e-test
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
+          python-version: "3.9"
 
       - name: Run e2e test with ${{ matrix.experiments }} experiments
         uses: ./.github/workflows/template-e2e-test
@@ -39,6 +40,6 @@ jobs:
         # Comma Delimited
         experiments:
           # suggestion-hyperopt
-          - "never-resume,from-volume-resume,median-stop"
+          - "long-running-resume,from-volume-resume,median-stop"
           # others
           - "grid,bayesian-optimization,tpe,multivariate-tpe,cma-es,hyperband"

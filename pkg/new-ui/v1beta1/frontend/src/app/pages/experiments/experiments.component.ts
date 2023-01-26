@@ -1,29 +1,22 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  TemplateRef,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { environment } from '@app/environment';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { combineLatest, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import isEqual from 'lodash-es/isEqual';
-import { startWith } from 'rxjs/operators';
 import {
   ConfirmDialogService,
   DIALOG_RESP,
   ExponentialBackoff,
   NamespaceService,
-  TemplateValue,
   ActionEvent,
   DashboardState,
   ToolbarButton,
 } from 'kubeflow';
 
 import { KWABackendService } from 'src/app/services/backend.service';
-import { Experiments, Experiment } from '../../models/experiment.model';
-import { StatusEnum } from '../../enumerations/status.enum';
+import {
+  Experiment,
+  ExperimentsProcessed,
+} from '../../models/experiment.model';
 import { experimentsTableConfig } from './config';
 import { getDeleteDialogConfig } from './delete-modal-config';
 import { Router } from '@angular/router';
@@ -34,7 +27,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./experiments.component.scss'],
 })
 export class ExperimentsComponent implements OnInit, OnDestroy {
-  experiments: Experiments = [];
+  experiments: ExperimentsProcessed = [];
   currNamespace: string;
   config = experimentsTableConfig;
   env = environment;
@@ -42,6 +35,8 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
   private poller: ExponentialBackoff;
+
+  private rawData: Experiment[] = [];
 
   buttons: ToolbarButton[] = [
     new ToolbarButton({
@@ -85,9 +80,6 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
   reactToAction(a: ActionEvent) {
     const exp = a.data as Experiment;
     switch (a.action) {
-      case 'name:link':
-        this.router.navigate([`/experiment/${exp.namespace}/${exp.name}`]);
-        break;
       case 'delete':
         this.onDeleteExperiment(exp.name);
         break;
@@ -141,11 +133,21 @@ export class ExperimentsComponent implements OnInit, OnDestroy {
         this.backend
           .getExperiments(this.currNamespace)
           .subscribe(experiments => {
-            if (isEqual(this.experiments, experiments)) {
+            if (isEqual(this.rawData, experiments)) {
               return;
             }
 
-            this.experiments = experiments;
+            this.experiments = experiments.map(row => {
+              return {
+                ...row,
+                link: {
+                  text: row.name,
+                  url: `/experiment/${row.namespace}/${row.name}`,
+                },
+              };
+            });
+
+            this.rawData = experiments;
             this.poller.reset();
           });
       }),

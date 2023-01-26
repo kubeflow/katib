@@ -74,7 +74,7 @@ spec:
       - ftrl
     name: optimizer
     parameterType: categorical
-  resumePolicy: LongRunning
+  resumePolicy: Never
   trialTemplate:
     failureCondition: status.conditions.#(type=="Failed")#|#(status=="True")#
     primaryContainerName: training-container
@@ -194,7 +194,7 @@ spec:
   algorithm:
     algorithmName: random
   requests: 12
-  resumePolicy: LongRunning
+  resumePolicy: Never
 status:
   conditions:
   - lastTransitionTime: "2021-10-01T21:27:46Z"
