@@ -50,3 +50,7 @@ Thumbs.db
 
 # Font files (automatically generating)
 /src/assets/fonts
+
+# Cypress
+cypress/screenshots
+cypress/downloads
