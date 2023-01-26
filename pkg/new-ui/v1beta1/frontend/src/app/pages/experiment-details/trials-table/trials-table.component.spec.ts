@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
@@ -34,7 +33,6 @@ describe('TrialsTableComponent', () => {
           MatTableModule,
           MatDialogModule,
           MatIconModule,
-          NgxChartsModule,
           MatTooltipModule,
           MatButtonModule,
           RouterTestingModule,

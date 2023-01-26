@@ -13,6 +13,7 @@ import {
   NamespaceService,
   TitleActionsToolbarModule,
 } from 'kubeflow';
+import { NgxEchartsModule } from 'ngx-echarts';
 
 let KWABackendServiceStub: Partial<KWABackendService>;
 let NamespaceServiceStub: Partial<NamespaceService>;
@@ -49,6 +50,9 @@ describe('TrialDetailsComponent', () => {
           BrowserAnimationsModule,
           TitleActionsToolbarModule,
           LoadingSpinnerModule,
+          NgxEchartsModule.forRoot({
+            echarts: () => import('echarts'),
+          }),
         ],
         declarations: [TrialDetailsComponent],
         providers: [
