@@ -8,6 +8,8 @@ import {
   TemplateValue,
   ChipsListValue,
   ComponentValue,
+  LinkValue,
+  LinkType,
 } from 'kubeflow';
 import {
   parseStatus,
@@ -31,9 +33,11 @@ export const experimentsTableConfig: TableConfig = {
     {
       matHeaderCellDef: 'Name',
       matColumnDef: 'name',
-      value: new PropertyValue({
-        field: 'name',
-        isLink: true,
+      value: new LinkValue({
+        field: 'link',
+        popoverField: 'name',
+        truncate: true,
+        linkType: LinkType.Internal,
       }),
       sort: true,
     },
