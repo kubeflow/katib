@@ -90,9 +90,6 @@ Follow these steps to cut a new Katib release:
    - Push above changes to the Katib upstream `release-X.Y` branch with this commit:
      `Katib official release vX.Y.Z`
 
-1. If the new branch was created, submit a PR to allow tests on the `release-X.Y` branch
-   (e.g. [`#965`](https://github.com/kubeflow/testing/pull/965)).
-
 1. Submit a PR to update the SDK version on the `master` branch to the latest release.
    (e.g. [`#1640`](https://github.com/kubeflow/katib/pull/1640)).
 
