@@ -70,8 +70,7 @@ data:
               "storage": "5Gi"
             }
           }
-        },
-        "volumeForceMount": true
+        }
       }
     }
   early-stopping: |-
