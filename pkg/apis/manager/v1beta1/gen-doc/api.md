@@ -95,6 +95,7 @@ HP or NAS algorithm specification.
 | ----- | ---- | ----- | ----------- |
 | algorithm_name | [string](#string) |  |  |
 | algorithm_settings | [AlgorithmSetting](#api-v1-beta1-AlgorithmSetting) | repeated |  |
+| suggestion_spec | [k8s.io.api.apps.v1.DeploymentSpec](#k8s-io-api-apps-v1-DeploymentSpec) |  |  |
 
 
 

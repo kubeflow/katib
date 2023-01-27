@@ -21,8 +21,13 @@ cd "$(dirname "$0")"
 
 proto="api.proto"
 
+git clone --depth 1 --branch kubernetes-1.22.17 https://github.com/kubernetes/api.git k8s.io/api
+git clone --depth 1 --branch kubernetes-1.22.17 https://github.com/kubernetes/apimachinery.git k8s.io/apimachinery
+
 docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
 docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto
+
+rm -rf k8s.io
 
 docker build -t protoc-gen-doc gen-doc/
 docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=markdown,api.md -I /protobuf -I /apiprotos $proto
