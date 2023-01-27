@@ -85,9 +85,9 @@ make generate
 # Change version in setup.py
 cd sdk/python/v1beta1
 if [[ $(uname) == "Darwin" ]]; then
-  sed -i '' -e "s@version='.*'@version='${sdk_version}'@" setup.py
+  sed -i '' -e "s@version=\".*\"@version=\"${sdk_version}\"@" setup.py
 else
-  sed -i -e "s@version='.*'@version='${sdk_version}'@" setup.py
+  sed -i -e "s@version=\".*\"@version=\"${sdk_version}\"@" setup.py
 fi
 # Generate SDK and upload new version to PyPi.
 python3 setup.py sdist bdist_wheel
