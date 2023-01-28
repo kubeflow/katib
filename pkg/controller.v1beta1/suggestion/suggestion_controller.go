@@ -192,14 +192,13 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	suggestionNsName := types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}
 	logger := log.WithValues("Suggestion", suggestionNsName)
 
-	// Check if algorithm overrides volume reconcile policy
 	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(instance.Spec.Algorithm.AlgorithmName, r.Client)
 	if err != nil {
 		return err
 	}
 
-	// If ResumePolicy = FromVolume (or overriden), volume is reconciled for suggestion
-	if suggestionConfigData.VolumeForceMount || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+	// If ResumePolicy is FromVolume or persistentVolumeClaimSpec provided, volume is reconciled for suggestion
+	if suggestionConfigData.persistentVolumeClaimSpec != nil || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 		pvc, pv, err := r.DesiredVolume(instance)
 		if err != nil {
 			return err

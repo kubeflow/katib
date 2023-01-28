@@ -40,7 +40,6 @@ type SuggestionConfig struct {
 	PersistentVolumeClaimSpec corev1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
 	PersistentVolumeSpec      corev1.PersistentVolumeSpec      `json:"persistentVolumeSpec,omitempty"`
 	PersistentVolumeLabels    map[string]string                `json:"persistentVolumeLabels,omitempty"`
-	VolumeForceMount          bool                             `json:"volumeForceMount,omitempty"`
 }
 
 // EarlyStoppingConfig is the JSON early stopping structure in Katib config.
