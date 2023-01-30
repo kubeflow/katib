@@ -10,6 +10,7 @@
 - Narrow down RBAC rules ([#2091](https://github.com/kubeflow/katib/pull/2091) by [@johnugeorge](https://github.com/johnugeorge))
 - Use Never Resume Policy as Default ([#2102](https://github.com/kubeflow/katib/pull/2102) by [@andreyvelich](https://github.com/andreyvelich))
 - Add Conformance Program Doc for AutoML and Training WG ([#2048](https://github.com/kubeflow/katib/pull/2048) by [@andreyvelich](https://github.com/andreyvelich))
+- Support for grid search algorithm in Optuna Suggestion Service ([#2060](https://github.com/kubeflow/katib/pull/2060) by [@tenzen-y](https://github.com/tenzen-y))
 - Add Trial Labels During Pod Mutation ([#2047](https://github.com/kubeflow/katib/pull/2047) by [@andreyvelich](https://github.com/andreyvelich))
 - Support for k8s v1.25 in CI ([#1997](https://github.com/kubeflow/katib/pull/1997) by [@johnugeorge](https://github.com/johnugeorge))
 - Add the CI to build multi-platform container images ([#1956](https://github.com/kubeflow/katib/pull/1956) by [@tenzen-y](https://github.com/tenzen-y))
@@ -17,7 +18,7 @@
 - Add --connect-timeout flag to katib-db-manager ([#1937](https://github.com/kubeflow/katib/pull/1937) by [@tenzen-y](https://github.com/tenzen-y))
 - Support postgres as a Katib DB ([#1921](https://github.com/kubeflow/katib/pull/1921) by [@anencore94](https://github.com/anencore94))
 - Implement validations for darts suggestion service ([#1926](https://github.com/kubeflow/katib/pull/1926) by [@tenzen-y](https://github.com/tenzen-y))
-- Implement validation for optuna suggestion service ([#1924](https://github.com/kubeflow/katib/pull/1924) by [@tenzen-y](https://github.com/tenzen-y))
+- Implement validation for Optuna suggestion service ([#1924](https://github.com/kubeflow/katib/pull/1924) by [@tenzen-y](https://github.com/tenzen-y))
 
 ### UI Improvements
 
@@ -86,7 +87,6 @@
 - Upgrade Tensorflow version ([#2079](https://github.com/kubeflow/katib/pull/2079) by [@tenzen-y](https://github.com/tenzen-y))
 - Upgrade Python version to 3.10 ([#2057](https://github.com/kubeflow/katib/pull/2057) by [@tenzen-y](https://github.com/tenzen-y))
 - Remove Chocolate Suggestion Service ([#2071](https://github.com/kubeflow/katib/pull/2071) by [@tenzen-y](https://github.com/tenzen-y))
-- Support for grid search algorithm in Optuna Suggestion Service ([#2060](https://github.com/kubeflow/katib/pull/2060) by [@tenzen-y](https://github.com/tenzen-y))
 - Pin the NumPy version with v1.23.5 in some images ([#2070](https://github.com/kubeflow/katib/pull/2070) by [@tenzen-y](https://github.com/tenzen-y))
 - Upgrade the actions-setup-minikube version to v2.7.2 ([#2064](https://github.com/kubeflow/katib/pull/2064) by [@tenzen-y](https://github.com/tenzen-y))
 - Remove Certificate Chain from Cert Generator ([#2045](https://github.com/kubeflow/katib/pull/2045) by [@andreyvelich](https://github.com/andreyvelich))
