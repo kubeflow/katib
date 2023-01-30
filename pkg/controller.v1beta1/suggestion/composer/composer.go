@@ -119,8 +119,8 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 		d.Spec.Template.Spec.ServiceAccountName = suggestionConfigData.ServiceAccountName
 	}
 
-	// Attach volume to the suggestion pod spec if ResumePolicy = FromVolume
-	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+	// Attach volume to the suggestion pod spec if ResumePolicy = FromVolume or persistentVolumeClaimSpec provided
+	if !equality.Semantic.DeepEqual(suggestionConfigData.PersistentVolumeSpec, corev1.PersistentVolumeSpec{}) || s.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 		d.Spec.Template.Spec.Volumes = []corev1.Volume{
 			{
 				Name: consts.ContainerSuggestionVolumeName,

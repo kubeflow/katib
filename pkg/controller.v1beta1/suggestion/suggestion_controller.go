@@ -18,10 +18,12 @@ package suggestion
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -192,13 +194,32 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	suggestionNsName := types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}
 	logger := log.WithValues("Suggestion", suggestionNsName)
 
-	suggestionConfigData, err := katibconfig.GetSuggestionConfigData(instance.Spec.Algorithm.AlgorithmName, r.Client)
+	// TODO(a9p): the next few blocks are from config.go::GetSuggestionConfigData, 
+	//            this should be pulled out into a utility function if correct
+	// Get katib config map
+	configMap := &corev1.ConfigMap{}
+	suggestionConfigData := katibconfig.SuggestionConfig{}
+	err := r.Get(
+		context.TODO(),
+		types.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace},
+		configMap)
 	if err != nil {
 		return err
 	}
+	// Try to find suggestion data in config map
+	config, ok := configMap.Data[consts.LabelSuggestionTag]
+	if ok {
+		// Parse suggestion data to map where key = algorithm name, value = SuggestionConfig
+		suggestionsConfig := map[string]katibconfig.SuggestionConfig{}
+		if err := json.Unmarshal([]byte(config), &suggestionsConfig); err != nil {
+			return err
+		}
+		// Try to find SuggestionConfig for the algorithm
+		suggestionConfigData, _ = suggestionsConfig[instance.Spec.Algorithm.AlgorithmName]
+	}
 
-	// If ResumePolicy is FromVolume or persistentVolumeClaimSpec provided, volume is reconciled for suggestion
-	if suggestionConfigData.persistentVolumeClaimSpec != nil || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
+	// If ResumePolicy is FromVolume or PersistentVolumeClaimSpec provided, volume is reconciled for suggestion
+	if !equality.Semantic.DeepEqual(suggestionConfigData.PersistentVolumeSpec, corev1.PersistentVolumeSpec{}) || instance.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 		pvc, pv, err := r.DesiredVolume(instance)
 		if err != nil {
 			return err
@@ -254,8 +275,10 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 		} else {
 			msg := "Deployment is ready"
 			instance.MarkSuggestionStatusDeploymentReady(corev1.ConditionTrue, SuggestionDeploymentReady, msg)
+			// TODO (a9p) this should be in utils, but breaks import due to it being fully-qualified
+			// instance.setSuggestionSpec(foundDeploy)
+			instance.Spec.Algorithm.SuggestionSpec = foundDeploy.Spec
 		}
-
 	}
 	experiment := &experimentsv1beta1.Experiment{}
 	trials := &trialsv1beta1.TrialList{}

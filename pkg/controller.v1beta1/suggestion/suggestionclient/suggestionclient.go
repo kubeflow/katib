@@ -109,7 +109,7 @@ func (g *General) SyncAssignments(
 		instance.Status.AlgorithmSettings)
 
 	requestSuggestion := &suggestionapi.GetSuggestionsRequest{
-		Experiment:           g.ConvertExperiment(filledE),
+		Experiment:           g.ConvertExperiment(instance, filledE),
 		Trials:               g.ConvertTrials(ts),
 		CurrentRequestNumber: int32(currentRequestNum),
 		TotalRequestNumber:   int32(instance.Spec.Requests),
@@ -143,7 +143,7 @@ func (g *General) SyncAssignments(
 		defer cancelEarlyStopping()
 
 		requestEarlyStopping := &suggestionapi.GetEarlyStoppingRulesRequest{
-			Experiment:       g.ConvertExperiment(filledE),
+			Experiment:       g.ConvertExperiment(instance, filledE),
 			Trials:           g.ConvertTrials(ts),
 			DbManagerAddress: katibmanagerv1beta1.GetDBManagerAddr(),
 		}
@@ -216,7 +216,7 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggest
 	defer cancel()
 
 	request := &suggestionapi.ValidateAlgorithmSettingsRequest{
-		Experiment: g.ConvertExperiment(e),
+		Experiment: g.ConvertExperiment(instance, e),
 	}
 
 	// See https://github.com/grpc/grpc-go/issues/2636
@@ -264,7 +264,7 @@ func (g *General) ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Sug
 	defer cancel()
 
 	request := &suggestionapi.ValidateEarlyStoppingSettingsRequest{
-		EarlyStopping: g.ConvertExperiment(e).Spec.EarlyStopping,
+		EarlyStopping: g.ConvertExperiment(instance, e).Spec.EarlyStopping,
 	}
 
 	// See https://github.com/grpc/grpc-go/issues/2636
@@ -294,13 +294,14 @@ func (g *General) ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Sug
 }
 
 // ConvertExperiment converts CRD to the GRPC definition.
-func (g *General) ConvertExperiment(e *experimentsv1beta1.Experiment) *suggestionapi.Experiment {
+func (g *General) ConvertExperiment(s *suggestionsv1beta1.Suggestion, e *experimentsv1beta1.Experiment) *suggestionapi.Experiment {
 	res := &suggestionapi.Experiment{}
 	res.Name = e.Name
 	res.Spec = &suggestionapi.ExperimentSpec{
 		Algorithm: &suggestionapi.AlgorithmSpec{
 			AlgorithmName:     e.Spec.Algorithm.AlgorithmName,
 			AlgorithmSettings: convertAlgorithmSettings(e.Spec.Algorithm.AlgorithmSettings),
+			SuggestionSpec: s.Spec.Algorithm.SuggestionSpec.DeepCopy(),
 		},
 		Objective: &suggestionapi.ObjectiveSpec{
 			Type:                  convertObjectiveType(e.Spec.Objective.Type),

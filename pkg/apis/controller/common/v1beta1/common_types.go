@@ -17,7 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
+	appsv1 "k8s.io/api/apps/v1"
 )
 
 // AlgorithmSpec is the specification for a HP or NAS algorithm.
@@ -28,6 +29,9 @@ type AlgorithmSpec struct {
 
 	// Key-value pairs representing settings for suggestion algorithms.
 	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings,omitempty"`
+
+	// Suggestion service Deployment spec
+	SuggestionSpec appsv1.DeploymentSpec `json:suggestionSpec,omitempty`
 }
 
 // AlgorithmSetting represents key-value pair for HP or NAS algorithm settings.
@@ -163,7 +167,7 @@ type MetricsCollectorSpec struct {
 type SourceSpec struct {
 	// Model-train source code can expose metrics by http, such as HTTP endpoint in
 	// prometheus metric format
-	HttpGet *v1.HTTPGetAction `json:"httpGet,omitempty"`
+	HttpGet *corev1.HTTPGetAction `json:"httpGet,omitempty"`
 	// During training model, metrics may be persisted into local file in source
 	// code, such as tfEvent use case
 	FileSystemPath *FileSystemPath `json:"fileSystemPath,omitempty"`
@@ -230,5 +234,5 @@ const (
 type CollectorSpec struct {
 	Kind CollectorKind `json:"kind,omitempty"`
 	// When kind is "customCollector", this field will be used
-	CustomCollector *v1.Container `json:"customCollector,omitempty"`
+	CustomCollector *corev1.Container `json:"customCollector,omitempty"`
 }
