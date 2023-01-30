@@ -194,7 +194,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	suggestionNsName := types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}
 	logger := log.WithValues("Suggestion", suggestionNsName)
 
-	// TODO(a9p): the next few blocks are from config.go::GetSuggestionConfigData, 
+	// TODO(a9p): the next few blocks are from config.go::GetSuggestionConfigData,
 	//            this should be pulled out into a utility function if correct
 	// Get katib config map
 	configMap := &corev1.ConfigMap{}
@@ -215,7 +215,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 			return err
 		}
 		// Try to find SuggestionConfig for the algorithm
-		suggestionConfigData, _ = suggestionsConfig[instance.Spec.Algorithm.AlgorithmName]
+		suggestionConfigData = suggestionsConfig[instance.Spec.Algorithm.AlgorithmName]
 	}
 
 	// If ResumePolicy is FromVolume or PersistentVolumeClaimSpec provided, volume is reconciled for suggestion

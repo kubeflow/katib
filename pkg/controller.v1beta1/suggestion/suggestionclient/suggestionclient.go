@@ -301,7 +301,7 @@ func (g *General) ConvertExperiment(s *suggestionsv1beta1.Suggestion, e *experim
 		Algorithm: &suggestionapi.AlgorithmSpec{
 			AlgorithmName:     e.Spec.Algorithm.AlgorithmName,
 			AlgorithmSettings: convertAlgorithmSettings(e.Spec.Algorithm.AlgorithmSettings),
-			SuggestionSpec: s.Spec.Algorithm.SuggestionSpec.DeepCopy(),
+			SuggestionSpec:    s.Spec.Algorithm.SuggestionSpec.DeepCopy(),
 		},
 		Objective: &suggestionapi.ObjectiveSpec{
 			Type:                  convertObjectiveType(e.Spec.Objective.Type),

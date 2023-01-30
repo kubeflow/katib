@@ -17,8 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // AlgorithmSpec is the specification for a HP or NAS algorithm.
@@ -31,7 +31,7 @@ type AlgorithmSpec struct {
 	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings,omitempty"`
 
 	// Suggestion service Deployment spec
-	SuggestionSpec appsv1.DeploymentSpec `json:suggestionSpec,omitempty`
+	SuggestionSpec appsv1.DeploymentSpec `json:"suggestionSpec,omitempty"`
 }
 
 // AlgorithmSetting represents key-value pair for HP or NAS algorithm settings.
