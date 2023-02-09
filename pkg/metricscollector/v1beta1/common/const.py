@@ -20,6 +20,9 @@ DEFAULT_TIMEOUT = 0
 DEFAULT_WAIT_ALL_PROCESSES = "True"
 # Default value for directory where TF event metrics are reported
 DEFAULT_METRICS_FILE_DIR = "/log"
+# Default value for directory where TF event metrics are reported
+DEFAULT_METRICS_FILE_KFPV1_DIR = "/tmp/outputs/mlpipeline_metrics"
+DEFAULT_METRICS_FILE_KFPV1_FILE = "data"
 # Job finished marker in $$$$.pid file when main process is completed
 TRAINING_COMPLETED = "completed"
 
