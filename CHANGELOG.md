@@ -2,13 +2,26 @@
 
 ## [v0.15.0-rc.0](https://github.com/kubeflow/katib/tree/v0.15.0-rc.0) (2023-01-27)
 
+## Breaking Changes
+
+- Use **Never** Resume Policy as Default ([#2102](https://github.com/kubeflow/katib/pull/2102) by [@andreyvelich](https://github.com/andreyvelich))
+- Chocolate Suggestion Service is removed ([#2071](https://github.com/kubeflow/katib/pull/2071) by [@tenzen-y](https://github.com/tenzen-y))
+- `request_number` is removed from the GRPC APIs ([#1994](https://github.com/kubeflow/katib/pull/1994) by [@johnugeorge](https://github.com/johnugeorge))
+
 ## New Features
+
+### Major Features
+
+- Narrow down Katib RBAC rules ([#2091](https://github.com/kubeflow/katib/pull/2091) by [@johnugeorge](https://github.com/johnugeorge))
+- Support Postgres as a Katib DB ([#1921](https://github.com/kubeflow/katib/pull/1921) by [@anencore94](https://github.com/anencore94))
+- More Suggestion container fields in Katib Config ([#2000](https://github.com/kubeflow/katib/pull/2000) by [@fischor](https://github.com/fischor))
+- Katib UI: Enable pagination/sorting/filtering ([#2017](https://github.com/kubeflow/katib/pull/2017) and [#2040](https://github.com/kubeflow/katib/pull/2040) by [@elenzio9](https://github.com/elenzio9))
+- Katib UI: Add authorization mechanisms ([#1983](https://github.com/kubeflow/katib/pull/1983) by [@apo-ger](https://github.com/apo-ger))
+- [SDK] Create Tune API in the Katib SDK ([#1951](https://github.com/kubeflow/katib/pull/1951) by [@andreyvelich](https://github.com/andreyvelich))
+- [SDK] Get Trial Metrics from Katib DB ([#2050](https://github.com/kubeflow/katib/pull/2050) by [@andreyvelich](https://github.com/andreyvelich))
 
 ### Core Features
 
-- More container fields for SuggestionConfig ([#2000](https://github.com/kubeflow/katib/pull/2000) by [@fischor](https://github.com/fischor))
-- Narrow down RBAC rules ([#2091](https://github.com/kubeflow/katib/pull/2091) by [@johnugeorge](https://github.com/johnugeorge))
-- Use Never Resume Policy as Default ([#2102](https://github.com/kubeflow/katib/pull/2102) by [@andreyvelich](https://github.com/andreyvelich))
 - Add Conformance Program Doc for AutoML and Training WG ([#2048](https://github.com/kubeflow/katib/pull/2048) by [@andreyvelich](https://github.com/andreyvelich))
 - Support for grid search algorithm in Optuna Suggestion Service ([#2060](https://github.com/kubeflow/katib/pull/2060) by [@tenzen-y](https://github.com/tenzen-y))
 - Add Trial Labels During Pod Mutation ([#2047](https://github.com/kubeflow/katib/pull/2047) by [@andreyvelich](https://github.com/andreyvelich))
@@ -16,13 +29,12 @@
 - Add the CI to build multi-platform container images ([#1956](https://github.com/kubeflow/katib/pull/1956) by [@tenzen-y](https://github.com/tenzen-y))
 - Drop Kubernetes v1.21 and introduce Kubernetes v1.24 ([#1953](https://github.com/kubeflow/katib/pull/1953) by [@tenzen-y](https://github.com/tenzen-y))
 - Add --connect-timeout flag to katib-db-manager ([#1937](https://github.com/kubeflow/katib/pull/1937) by [@tenzen-y](https://github.com/tenzen-y))
-- Support postgres as a Katib DB ([#1921](https://github.com/kubeflow/katib/pull/1921) by [@anencore94](https://github.com/anencore94))
-- Implement validations for darts suggestion service ([#1926](https://github.com/kubeflow/katib/pull/1926) by [@tenzen-y](https://github.com/tenzen-y))
+- Implement validations for DARTS suggestion service ([#1926](https://github.com/kubeflow/katib/pull/1926) by [@tenzen-y](https://github.com/tenzen-y))
 - Implement validation for Optuna suggestion service ([#1924](https://github.com/kubeflow/katib/pull/1924) by [@tenzen-y](https://github.com/tenzen-y))
 
 ### UI Improvements
 
-- [kwa-actual-links-in-tables] Make links in KWA's tables actual links ([#2090](https://github.com/kubeflow/katib/pull/2090) by [@elenzio9](https://github.com/elenzio9))
+- Make links in KWA's tables actual links ([#2090](https://github.com/kubeflow/katib/pull/2090) by [@elenzio9](https://github.com/elenzio9))
 - frontend: Rework the trial graph using ECharts in KWA ([#2089](https://github.com/kubeflow/katib/pull/2089) by [@elenzio9](https://github.com/elenzio9))
 - kwa(front): Add UI tests with Cypress ([#2088](https://github.com/kubeflow/katib/pull/2088) by [@orfeas-k](https://github.com/orfeas-k))
 - Update manifests to enable authorization check mechanisms for Katib UI in Kubeflow mode ([#2041](https://github.com/kubeflow/katib/pull/2041) by [@apo-ger](https://github.com/apo-ger))
@@ -30,18 +42,15 @@
 - frontend: Show message in case of uncompleted trial instead of the graph ([#2063](https://github.com/kubeflow/katib/pull/2063) by [@elenzio9](https://github.com/elenzio9))
 - frontend: Add source maps in the browser ([#2043](https://github.com/kubeflow/katib/pull/2043) by [@elenzio9](https://github.com/elenzio9))
 - Backend for getting logs of a trial ([#2039](https://github.com/kubeflow/katib/pull/2039) by [@d-gol](https://github.com/d-gol))
-- frontend: Enable sorting in KWA's main table ([#2017](https://github.com/kubeflow/katib/pull/2017) by [@elenzio9](https://github.com/elenzio9))
 - frontend: Show the successful trials in the experiment graph (#2013) ([#2033](https://github.com/kubeflow/katib/pull/2033) by [@elenzio9](https://github.com/elenzio9))
 - frontend: Migrate from tslint to eslint in KWA ([#2042](https://github.com/kubeflow/katib/pull/2042) by [@elenzio9](https://github.com/elenzio9))
-- frontend: Make trials table support pagination/sorting/filtering ([#2040](https://github.com/kubeflow/katib/pull/2040) by [@elenzio9](https://github.com/elenzio9))
 - Dedicated yaml tab for Trials ([#2034](https://github.com/kubeflow/katib/pull/2034) by [@elenzio9](https://github.com/elenzio9))
-- Add authorization mechanisms in new Katib UI backend ([#1983](https://github.com/kubeflow/katib/pull/1983) by [@apo-ger](https://github.com/apo-ger))
 - KWA: Use new Editor component (Monaco) ([#2023](https://github.com/kubeflow/katib/pull/2023) by [@orfeas-k](https://github.com/orfeas-k))
 - kwa(build): Introduce COMMIT file for building KWA ([#2014](https://github.com/kubeflow/katib/pull/2014) by [@orfeas-k](https://github.com/orfeas-k))
 - frontend: Fix 500 error after detail page refresh (#1967) ([#2001](https://github.com/kubeflow/katib/pull/2001) by [@elenzio9](https://github.com/elenzio9))
-- [kwa-kfp-component] Introduce KWA's frontend component for kfp links ([#1991](https://github.com/kubeflow/katib/pull/1991) by [@elenzio9](https://github.com/elenzio9))
+- Introduce KWA's frontend component for kfp links ([#1991](https://github.com/kubeflow/katib/pull/1991) by [@elenzio9](https://github.com/elenzio9))
 - UI: Rename and right align the age column ([#1989](https://github.com/kubeflow/katib/pull/1989) by [@elenzio9](https://github.com/elenzio9))
-- [kwa-show-status-first] Show the trials table's status column first ([#1990](https://github.com/kubeflow/katib/pull/1990) by [@elenzio9](https://github.com/elenzio9))
+- Show the trials table's status column first ([#1990](https://github.com/kubeflow/katib/pull/1990) by [@elenzio9](https://github.com/elenzio9))
 - UI: Make KWA's main table responsive and add toolbar ([#1982](https://github.com/kubeflow/katib/pull/1982) by [@elenzio9](https://github.com/elenzio9))
 - UI: Fix unit tests ([#1977](https://github.com/kubeflow/katib/pull/1977) by [@elenzio9](https://github.com/elenzio9))
 - UI: Format code ([#1979](https://github.com/kubeflow/katib/pull/1979) by [@orfeas-k](https://github.com/orfeas-k))
@@ -52,10 +61,8 @@
 
 - [SDK] Use Katib SDK for E2E Tests ([#2075](https://github.com/kubeflow/katib/pull/2075) by [@andreyvelich](https://github.com/andreyvelich))
 - [SDK] Use Katib Client without Kube Config ([#2098](https://github.com/kubeflow/katib/pull/2098) by [@andreyvelich](https://github.com/andreyvelich))
-- [SDK] Get Trial Metrics from Katib DB ([#2050](https://github.com/kubeflow/katib/pull/2050) by [@andreyvelich](https://github.com/andreyvelich))
 - [SDK] Fix namespace parameter in tune API ([#1981](https://github.com/kubeflow/katib/pull/1981) by [@andreyvelich](https://github.com/andreyvelich))
 - [SDK] Remove Final Keyword from constants ([#1980](https://github.com/kubeflow/katib/pull/1980) by [@andreyvelich](https://github.com/andreyvelich))
-- Create Tune API in the Katib SDK ([#1951](https://github.com/kubeflow/katib/pull/1951) by [@andreyvelich](https://github.com/andreyvelich))
 
 ## Bug fixes
 
@@ -86,16 +93,14 @@
 - Upgrade PyTorch version to v1.13.0 ([#2082](https://github.com/kubeflow/katib/pull/2082) by [@tenzen-y](https://github.com/tenzen-y))
 - Upgrade Tensorflow version ([#2079](https://github.com/kubeflow/katib/pull/2079) by [@tenzen-y](https://github.com/tenzen-y))
 - Upgrade Python version to 3.10 ([#2057](https://github.com/kubeflow/katib/pull/2057) by [@tenzen-y](https://github.com/tenzen-y))
-- Remove Chocolate Suggestion Service ([#2071](https://github.com/kubeflow/katib/pull/2071) by [@tenzen-y](https://github.com/tenzen-y))
 - Pin the NumPy version with v1.23.5 in some images ([#2070](https://github.com/kubeflow/katib/pull/2070) by [@tenzen-y](https://github.com/tenzen-y))
 - Upgrade the actions-setup-minikube version to v2.7.2 ([#2064](https://github.com/kubeflow/katib/pull/2064) by [@tenzen-y](https://github.com/tenzen-y))
 - Remove Certificate Chain from Cert Generator ([#2045](https://github.com/kubeflow/katib/pull/2045) by [@andreyvelich](https://github.com/andreyvelich))
-- add resources to earlystopping container ([#2038](https://github.com/kubeflow/katib/pull/2038) by [@zhixian82](https://github.com/zhixian82))
+- Add resources to earlystopping container ([#2038](https://github.com/kubeflow/katib/pull/2038) by [@zhixian82](https://github.com/zhixian82))
 - Add scripts to verify generated codes and Go Modules ([#1999](https://github.com/kubeflow/katib/pull/1999) by [@tenzen-y](https://github.com/tenzen-y))
 - [Test] Reduce Katib GitHub Action Runs ([#2036](https://github.com/kubeflow/katib/pull/2036) by [@andreyvelich](https://github.com/andreyvelich))
 - gh-actions: Extend action to run Frontend Unit tests ([#1998](https://github.com/kubeflow/katib/pull/1998) by [@orfeas-k](https://github.com/orfeas-k))
 - [chore] Upgrade docker/metadata-action, actions/checkout, and actions/setup-python version ([#1996](https://github.com/kubeflow/katib/pull/1996) by [@tenzen-y](https://github.com/tenzen-y))
-- Remove deprecated variable from GRPC definitions ([#1994](https://github.com/kubeflow/katib/pull/1994) by [@johnugeorge](https://github.com/johnugeorge))
 - [chore] Upgrade Go version to v1.19 ([#1995](https://github.com/kubeflow/katib/pull/1995) by [@tenzen-y](https://github.com/tenzen-y))
 - Support for arm64 in simple-pbt image ([#1948](https://github.com/kubeflow/katib/pull/1948) by [@tenzen-y](https://github.com/tenzen-y))
 - Support arm64 in darts-cnn-cifar10 image ([#1947](https://github.com/kubeflow/katib/pull/1947) by [@tenzen-y](https://github.com/tenzen-y))
