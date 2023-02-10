@@ -36,7 +36,7 @@ def parse_options():
 
     # TODO (andreyvelich): Add early stopping flags.
     parser.add_argument("-s-db", "--db_manager_server_addr", type=str, default="")
-    parser.add_argument("-t", "--trial_name", type=str, default="")
+    parser.add_argument("-t", "--pod_name", type=str, default="")
     parser.add_argument(
         "-path",
         "--metrics_file_dir",
@@ -76,6 +76,7 @@ if __name__ == "__main__":
     opt = parse_options()
     wait_all_processes = opt.wait_all_processes.lower() == "true"
     db_manager_server = opt.db_manager_server_addr.split(":")
+    trial_name = '-'.join(opt.pod_name.split('-')[:-1])
     if len(db_manager_server) != 2:
         raise Exception(
             "Invalid Katib DB manager service address: %s" % opt.db_manager_server_addr
@@ -99,14 +100,14 @@ if __name__ == "__main__":
     with api_pb2.beta_create_DBManager_stub(channel) as client:
         logger.info(
             "In "
-            + opt.trial_name
+            + trial_name
             + " "
             + str(len(observation_log.metric_logs))
             + " metrics will be reported."
         )
         client.ReportObservationLog(
             api_pb2.ReportObservationLogRequest(
-                trial_name=opt.trial_name, observation_log=observation_log
+                trial_name=trial_name, observation_log=observation_log
             ),
             timeout=timeout_in_seconds,
         )
