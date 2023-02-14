@@ -102,4 +102,25 @@ export class KWABackendService extends BackendService {
       .post(url, { postData: exp })
       .pipe(catchError(error => this.parseError(error)));
   }
+
+  getTrialLogs(name: string, namespace: string): Observable<any> {
+    const url = `/katib/fetch_trial_logs/?trialName=${name}&namespace=${namespace}`;
+
+    return this.http
+      .get(url)
+      .pipe(catchError(error => this.handleError(error, false)));
+  }
+
+  // ---------------------------Error Handling---------------------------------
+
+  // Override common service's getBackendErrorLog
+  // in order to properly show the message the backend has sent
+  public getBackendErrorLog(error: HttpErrorResponse): string {
+    if (error.error === null) {
+      return error.message;
+    } else {
+      // Show the message the backend has sent
+      return error.error.log ? error.error.log : error.error;
+    }
+  }
 }
