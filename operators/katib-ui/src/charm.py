@@ -42,7 +42,6 @@ class Operator(CharmBase):
 
     def set_pod_spec(self, event):
         try:
-
             self._check_leader()
 
             interfaces = self._get_interfaces()
