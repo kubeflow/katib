@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { EventsV1beta1Api } from '@kubernetes/client-node';
 
 @Component({
   selector: 'app-nas-operation',
