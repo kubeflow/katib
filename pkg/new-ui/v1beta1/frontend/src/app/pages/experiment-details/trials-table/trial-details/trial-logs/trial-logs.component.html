@@ -1,0 +1,15 @@
+<!--if no logs are present at all then show a warning message-->
+<ng-container *ngIf="logsRequestError">
+  <lib-panel icon="error" color="warn">
+    {{ logsRequestError }}
+  </lib-panel>
+</ng-container>
+
+<ng-container *ngIf="!logsRequestError">
+  <lib-logs-viewer
+    class="logs-viewer"
+    heading="Trial Logs"
+    [subHeading]="''"
+    [logs]="logs"
+  ></lib-logs-viewer>
+</ng-container>
