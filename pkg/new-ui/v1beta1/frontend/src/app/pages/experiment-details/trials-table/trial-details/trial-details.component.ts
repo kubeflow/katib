@@ -30,6 +30,8 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
   experimentName: string;
   showTrialGraph: boolean = false;
   options: {};
+  trialLogs: string;
+  logsRequestError: string;
   chartData: ChartPoint[] = [];
   yScaleMax = 0;
   yScaleMin = 1;
@@ -133,6 +135,17 @@ export class TrialDetailsComponent implements OnInit, OnDestroy {
         }
         this.pageLoading = false;
       });
+
+    this.backendService.getTrialLogs(this.trialName, this.namespace).subscribe(
+      logs => {
+        this.trialLogs = logs;
+        this.logsRequestError = null;
+      },
+      error => {
+        this.trialLogs = null;
+        this.logsRequestError = error;
+      },
+    );
   }
 
   private trialStatus(trial: TrialK8s): StatusEnum {

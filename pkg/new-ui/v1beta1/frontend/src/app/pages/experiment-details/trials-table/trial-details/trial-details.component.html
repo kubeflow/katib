@@ -46,6 +46,16 @@
           ></app-trial-overview>
         </ng-template>
       </mat-tab>
+
+      <mat-tab label="LOGS">
+        <ng-template matTabContent>
+          <app-trial-logs
+            [trialLogs]="trialLogs"
+            [logsRequestError]="logsRequestError"
+          ></app-trial-logs>
+        </ng-template>
+      </mat-tab>
+
       <mat-tab label="YAML">
         <ng-template matTabContent>
           <app-trial-yaml [trialJson]="trialDetails"></app-trial-yaml>

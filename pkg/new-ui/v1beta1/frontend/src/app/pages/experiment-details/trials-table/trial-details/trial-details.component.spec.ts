@@ -21,6 +21,7 @@ let NamespaceServiceStub: Partial<NamespaceService>;
 KWABackendServiceStub = {
   getTrial: () => of([]),
   getTrialInfo: () => of(),
+  getTrialLogs: () => of(),
 };
 
 NamespaceServiceStub = {
