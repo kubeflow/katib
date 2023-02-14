@@ -14,7 +14,12 @@ import {
   EXPERIMENT_KIND,
 } from 'src/app/models/experiment.k8s.model';
 import { KWABackendService } from 'src/app/services/backend.service';
-import { NamespaceService, SnackType, SnackBarService } from 'kubeflow';
+import {
+  NamespaceService,
+  SnackType,
+  SnackBarService,
+  SnackBarConfig,
+} from 'kubeflow';
 import { pipe } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { EarlyStoppingAlgorithmsEnum } from 'src/app/enumerations/algorithms.enum';
@@ -118,11 +123,14 @@ export class ExperimentCreationComponent implements OnInit {
 
         this.backend.createExperiment(exp).subscribe({
           next: () => {
-            this.snack.open(
-              'Experiment submitted successfully.',
-              SnackType.Success,
-              3000,
-            );
+            const config: SnackBarConfig = {
+              data: {
+                msg: 'Experiment submitted successfully.',
+                snackType: SnackType.Success,
+              },
+              duration: 3000,
+            };
+            this.snack.open(config);
             this.returnToExperiments();
           },
           error: err => {

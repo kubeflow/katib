@@ -5,7 +5,7 @@ import {
   EarlyStoppingAlgorithmsEnum,
 } from '../enumerations/algorithms.enum';
 import { createParameterGroup, createNasOperationGroup } from '../shared/utils';
-import { SnackBarService, SnackType } from 'kubeflow';
+import { SnackBarConfig, SnackBarService, SnackType } from 'kubeflow';
 import { load } from 'js-yaml';
 import {
   ObjectiveSpec,
@@ -398,11 +398,13 @@ export class ExperimentFormService {
       try {
         metrics.collector.customCollector = load(group.get('customYaml').value);
       } catch (e) {
-        this.snack.open(
-          'Metrics Colletor(Custom): ' + `${e.reason}`,
-          SnackType.Error,
-          4000,
-        );
+        const config: SnackBarConfig = {
+          data: {
+            msg: 'Metrics Colletor(Custom): ' + `${e.reason}`,
+            snackType: SnackType.Error,
+          },
+        };
+        this.snack.open(config);
       }
       return metrics;
     }
@@ -432,11 +434,13 @@ export class ExperimentFormService {
       try {
         trialTemplate.trialSpec = load(formValue.yaml);
       } catch (e) {
-        this.snack.open(
-          'Trial Template: ' + `${e.reason}`,
-          SnackType.Error,
-          4000,
-        );
+        const config: SnackBarConfig = {
+          data: {
+            msg: 'Trial Template: ' + `${e.reason}`,
+            snackType: SnackType.Error,
+          },
+        };
+        this.snack.open(config);
       }
 
       return trialTemplate;

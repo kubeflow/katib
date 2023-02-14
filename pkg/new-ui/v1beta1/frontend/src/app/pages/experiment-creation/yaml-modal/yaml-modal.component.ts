@@ -1,6 +1,6 @@
 import { Component, Input, Inject } from '@angular/core';
 import { load, dump } from 'js-yaml';
-import { SnackBarService, SnackType } from 'kubeflow';
+import { SnackBarConfig, SnackBarService, SnackType } from 'kubeflow';
 import {
   MatDialog,
   MatDialogRef,
@@ -27,7 +27,13 @@ export class YamlModalComponent {
     try {
       this.dialogRef.close(load(this.yaml));
     } catch (e) {
-      this.snack.open(`${e.reason}`, SnackType.Error, 4000);
+      const config: SnackBarConfig = {
+        data: {
+          msg: `${e.reason}`,
+          snackType: SnackType.Error,
+        },
+      };
+      this.snack.open(config);
     }
   }
 
