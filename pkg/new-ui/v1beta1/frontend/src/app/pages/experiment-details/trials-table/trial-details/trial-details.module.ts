@@ -16,6 +16,7 @@ import {
   PanelModule,
 } from 'kubeflow';
 import { NgxEchartsModule } from 'ngx-echarts';
+import { TrialLogsModule } from './trial-logs/trial-logs.module';
 
 @NgModule({
   declarations: [TrialDetailsComponent],
@@ -36,6 +37,7 @@ import { NgxEchartsModule } from 'ngx-echarts';
     NgxEchartsModule.forRoot({
       echarts: () => import('echarts'),
     }),
+    TrialLogsModule,
   ],
   exports: [TrialDetailsComponent],
 })
