@@ -5,6 +5,7 @@ import { Observable, throwError } from 'rxjs';
 import {
   BackendService,
   K8sObject,
+  SnackBarConfig,
   SnackBarService,
   SnackType,
 } from 'kubeflow';
@@ -33,7 +34,14 @@ export class KWABackendService extends BackendService {
       }
     }
 
-    this.snack.open(msg, SnackType.Error, 8000);
+    const config: SnackBarConfig = {
+      data: {
+        msg,
+        snackType: SnackType.Error,
+      },
+      duration: 8000,
+    };
+    this.snack.open(config);
 
     return throwError(msg);
   }
