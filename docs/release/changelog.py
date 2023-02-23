@@ -6,7 +6,9 @@ CHANGELOG_FILE = "CHANGELOG.md"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--token", type=str, help="GitHub Access Token")
-parser.add_argument("--range", type=str, help="Changelog is generated for this release range")
+parser.add_argument(
+    "--range", type=str, help="Changelog is generated for this release range"
+)
 args = parser.parse_args()
 
 if args.token is None:
@@ -42,21 +44,20 @@ for commit in reversed(commits):
             id=pr.number,
             pr_link=pr.html_url,
             user_id=pr.user.login,
-            user_url=pr.user.html_url
+            user_url=pr.user.html_url,
         )
         pr_list += new_pr
 
 change_log = [
-    "# Changelog"
-    "\n\n",
+    "# Changelog" "\n\n",
     "## [{}]({}) ({})".format(current_release, release_url, release_date),
     "\n\n",
-    "## TODO: Group PRs into Features, Bug fixes, Documentation, etc. " +
-    "For example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)",
+    "## TODO: Group PRs into Breaking Changes, New Features, Bug fixes, Documentation, etc. "
+    + "For example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)",
     "\n\n",
     pr_list,
-    "\n"
-    "[Full Changelog]({})\n".format(comparison.html_url)]
+    "\n" "[Full Changelog]({})\n".format(comparison.html_url),
+]
 
 # Update Changelog with the new changes.
 with open(CHANGELOG_FILE, "r+") as f:
