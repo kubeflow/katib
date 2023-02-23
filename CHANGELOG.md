@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.15.0-rc.1](https://github.com/kubeflow/katib/tree/v0.15.0-rc.1) (2023-02-15)
+
+## New Features
+
+- UI: Create the LOGS tab of Trial's details page ([#2117](https://github.com/kubeflow/katib/pull/2117) by [@elenzio9](https://github.com/elenzio9))
+
+## Bug Fixes
+
+- Format Katib Charm Operator ([#2115](https://github.com/kubeflow/katib/pull/2115) by [@tenzen-y](https://github.com/tenzen-y))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.15.0-rc.0...v0.15.0-rc.1)
+
 ## [v0.15.0-rc.0](https://github.com/kubeflow/katib/tree/v0.15.0-rc.0) (2023-01-27)
 
 ## Breaking Changes
