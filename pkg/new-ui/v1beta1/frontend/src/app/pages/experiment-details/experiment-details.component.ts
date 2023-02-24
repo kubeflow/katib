@@ -17,7 +17,7 @@ import {
   numberToExponential,
   transformStringResponses,
 } from '../../shared/utils';
-import { getDeleteDialogConfig } from '../experiments/delete-modal-config';
+import { generateDeleteConfig } from '../experiments/delete-modal-config';
 import { ExperimentK8s } from '../../models/experiment.k8s.model';
 
 @Component({
@@ -134,7 +134,7 @@ export class ExperimentDetailsComponent implements OnInit, OnDestroy {
   }
 
   private deleteExperiment(name: string, namespace: string) {
-    const deleteDialogConfig = getDeleteDialogConfig(name, namespace);
+    const deleteDialogConfig = generateDeleteConfig(name);
     const ref = this.confirmDialog.open(name, deleteDialogConfig);
 
     const delSub = ref.componentInstance.applying$.subscribe(applying => {

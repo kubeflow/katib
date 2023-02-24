@@ -46,7 +46,7 @@ export class KWABackendService extends BackendService {
     return throwError(msg);
   }
 
-  getExperiments(namespace: string): Observable<Experiments> {
+  getExperimentsSingleNamespace(namespace: string): Observable<Experiments> {
     // If the route doesn't end in a "/"" then the backend will return a 301 to
     // the url ending with "/".
     const url = `/katib/fetch_experiments/?namespace=${namespace}`;
@@ -57,6 +57,21 @@ export class KWABackendService extends BackendService {
         return resp;
       }),
     );
+  }
+
+  getExperimentsAllNamespaces(namespaces: string[]): Observable<Experiments> {
+    return this.getObjectsAllNamespaces(
+      this.getExperimentsSingleNamespace.bind(this),
+      namespaces,
+    );
+  }
+
+  getExperiments(ns: string | string[]): Observable<Experiments> {
+    if (Array.isArray(ns)) {
+      return this.getExperimentsAllNamespaces(ns);
+    }
+
+    return this.getExperimentsSingleNamespace(ns);
   }
 
   getExperimentTrialsInfo(name: string, namespace: string): Observable<any> {
