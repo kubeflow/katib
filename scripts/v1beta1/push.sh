@@ -50,6 +50,9 @@ docker push "${REGISTRY}/cert-generator:${TAG}"
 echo -e "\nPushing file metrics collector image...\n"
 docker push "${REGISTRY}/file-metrics-collector:${TAG}"
 
+echo -e "\nPushing kfpv1 metrics collector image...\n"
+docker push "${REGISTRY}/kfpv1-metrics-collector:${TAG}"
+
 echo -e "\nPushing TF Event metrics collector image...\n"
 docker push "${REGISTRY}/tfevent-metrics-collector:${TAG}"
 
