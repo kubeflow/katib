@@ -1,4 +1,4 @@
-# Copyright 2022 The Kubeflow Authors.
+# Copyright 2023 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ def parse_metrics(fn: str) -> List[api_pb2.MetricLog]:
         List[api_pb2.MetricLog]: A list of logged metrics
     """
     metrics = []
-    with open(fn, "r") as f:
+    with open(fn) as f:
         metrics_dict = json.load(f)
         for m in metrics_dict["metrics"]:
             name = m["name"]

@@ -1,4 +1,4 @@
-# Copyright 2022 The Kubeflow Authors.
+# Copyright 2023 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,11 +24,7 @@ from pns import WaitMainProcesses
 
 timeout_in_seconds = 60
 
-# Next steps:
-#
-# - check is it is possible to mount the argo share
-# - read the metrics from the tgz archive
-# -
+
 def parse_options():
     parser = argparse.ArgumentParser(
         description="KFP V1 MetricsCollector", add_help=True
@@ -76,7 +72,7 @@ if __name__ == "__main__":
     opt = parse_options()
     wait_all_processes = opt.wait_all_processes.lower() == "true"
     db_manager_server = opt.db_manager_server_addr.split(":")
-    trial_name = '-'.join(opt.pod_name.split('-')[:-1])
+    trial_name = "-".join(opt.pod_name.split("-")[:-1])
     if len(db_manager_server) != 2:
         raise Exception(
             "Invalid Katib DB manager service address: %s" % opt.db_manager_server_addr
