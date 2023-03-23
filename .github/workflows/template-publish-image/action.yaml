@@ -19,6 +19,16 @@ inputs:
 runs:
   using: composite
   steps:
+      # This step is a Workaround to avoid the "No space left on device" error.
+      # ref: https://github.com/actions/runner-images/issues/2840
+    - name: Remove unnecessary files
+      shell: bash
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
 
