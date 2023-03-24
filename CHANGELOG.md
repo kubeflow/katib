@@ -8,6 +8,7 @@
 - Chocolate Suggestion Service is removed ([#2071](https://github.com/kubeflow/katib/pull/2071) by [@tenzen-y](https://github.com/tenzen-y))
 - `request_number` is removed from the GRPC APIs ([#1994](https://github.com/kubeflow/katib/pull/1994) by [@johnugeorge](https://github.com/johnugeorge))
 - Enabling Authorization in Katib UI ([#1983](https://github.com/kubeflow/katib/pull/1983) and [#2041](https://github.com/kubeflow/katib/pull/2041) by [@apo-ger](https://github.com/apo-ger))
+- The new improved and refactored Katib SDK is not backward compatible ([#2075](https://github.com/kubeflow/katib/pull/2075) by [@andreyvelich](https://github.com/andreyvelich))
 
 ## New Features
 
@@ -139,6 +140,7 @@
 - Use **Never** Resume Policy as Default ([#2102](https://github.com/kubeflow/katib/pull/2102) by [@andreyvelich](https://github.com/andreyvelich))
 - Chocolate Suggestion Service is removed ([#2071](https://github.com/kubeflow/katib/pull/2071) by [@tenzen-y](https://github.com/tenzen-y))
 - `request_number` is removed from the GRPC APIs ([#1994](https://github.com/kubeflow/katib/pull/1994) by [@johnugeorge](https://github.com/johnugeorge))
+- The new improved and refactored Katib SDK is not backward compatible ([#2075](https://github.com/kubeflow/katib/pull/2075) by [@andreyvelich](https://github.com/andreyvelich))
 
 ## New Features
 
