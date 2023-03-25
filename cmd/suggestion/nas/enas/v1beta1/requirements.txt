@@ -1,4 +1,4 @@
 grpcio==1.41.1
 googleapis-common-protos==1.6.0
 cython>=0.29.24
-tensorflow==2.11.0
+tensorflow==2.11.1
