@@ -49,6 +49,9 @@ spec:
       kind: Job
       spec:
         template:
+          metadata:
+            annotations:
+              sidecar.istio.io/inject: "false"
           spec:
             containers:
               - name: training-container

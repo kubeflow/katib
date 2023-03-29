@@ -43,6 +43,9 @@ spec:
             replicas: 1
             restartPolicy: OnFailure
             template:
+              metadata:
+                annotations:
+                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                   - name: pytorch
@@ -58,6 +61,9 @@ spec:
             replicas: 1
             restartPolicy: OnFailure
             template:
+              metadata:
+                annotations:
+                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                   - name: pytorch

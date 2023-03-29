@@ -53,6 +53,9 @@ spec:
             replicas: 1
             restartPolicy: Never
             template:
+              metadata:
+                annotations:
+                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                   - name: xgboost
@@ -87,6 +90,9 @@ spec:
             replicas: 2
             restartPolicy: ExitCode
             template:
+              metadata:
+                annotations:
+                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                   - name: xgboost
