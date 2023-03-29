@@ -217,6 +217,9 @@ if __name__ == "__main__":
         help="Path to the Katib Experiment.",
     )
     parser.add_argument(
+        "--namespace", type=str, required=True, help="Namespace for the Katib E2E test",
+    )
+    parser.add_argument(
         "--verbose", action="store_true", help="Verbose output for the Katib E2E test",
     )
     args = parser.parse_args()
@@ -237,6 +240,7 @@ if __name__ == "__main__":
 
     # Convert to the Katib Experiment object.
     experiment = ApiClient().deserialize(experiment, "V1beta1Experiment")
+    experiment.metadata.namespace = args.namespace
     exp_name = experiment.metadata.name
     exp_namespace = experiment.metadata.namespace
 
