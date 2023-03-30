@@ -49,9 +49,6 @@ spec:
           Launcher:
             replicas: 1
             template:
-              metadata:
-                annotations:
-                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                   - image: docker.io/kubeflow/mpi-horovod-mnist
@@ -89,9 +86,6 @@ spec:
           Worker:
             replicas: 2
             template:
-              metadata:
-                annotations:
-                  sidecar.istio.io/inject: "false"
               spec:
                 containers:
                   - image: docker.io/kubeflow/mpi-horovod-mnist
