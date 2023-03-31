@@ -62,4 +62,8 @@ spec:
                   - "--lr=${trialParameters.learningRate}"
                   - "--num-layers=${trialParameters.numberLayers}"
                   - "--optimizer=${trialParameters.optimizer}"
+                resources:
+                  limits:
+                    memory: "1Gi"
+                    cpu: "0.5"
             restartPolicy: Never
