@@ -220,6 +220,9 @@ if __name__ == "__main__":
         "--namespace", type=str, required=True, help="Namespace for the Katib E2E test",
     )
     parser.add_argument(
+        "--trial-pod-annotations", type=str, help="Annotation for the pod created by trial",
+    )
+    parser.add_argument(
         "--verbose", action="store_true", help="Verbose output for the Katib E2E test",
     )
     args = parser.parse_args()
@@ -253,6 +256,11 @@ if __name__ == "__main__":
     if experiment.metadata.name == "random":
         MAX_TRIAL_COUNT += 1
         PARALLEL_TRIAL_COUNT += 1
+        if args.trial_pod_annotations:
+            trial_spec = experiment.spec.trial_template.trial_spec
+            trial_spec_metadata = trial_spec['spec']['template'].get('metadata', {})
+            trial_spec_metadata['annotations'] = eval(args.trial_pod_annotations)
+            trial_spec['spec']['template']['metadata'] = trial_spec_metadata
 
     # Hyperband will validate the parallel trial count, thus we should not change it.
     # We don't need to test parallel Trials for Darts.
