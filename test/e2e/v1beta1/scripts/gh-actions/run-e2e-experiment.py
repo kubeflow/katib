@@ -109,7 +109,6 @@ def verify_experiment_results(
     ):
         resource_name = exp_name + "-" + experiment.spec.algorithm.algorithm_name
 
-        config.load_kube_config()
         # Suggestion's Service and Deployment should be deleted.
         for i in range(10):
             try:
