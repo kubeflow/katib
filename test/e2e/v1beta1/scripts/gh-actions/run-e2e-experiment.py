@@ -256,6 +256,10 @@ if __name__ == "__main__":
         MAX_TRIAL_COUNT += 1
         PARALLEL_TRIAL_COUNT += 1
         if args.trial_pod_annotations:
+            kind = experiment.spec.trial_template.trial_spec['kind']
+            if kind != "Job":
+                raise NotImplementedError(f'Trail pod annotations not implemented for {kind}!')
+
             trial_spec_metadata = experiment.spec.trial_template.trial_spec['spec']['template'].get('metadata', {})
             trial_spec_pod_annotations = trial_spec_metadata.get('annotations', {})
             trial_spec_pod_annotations.update(eval(args.trial_pod_annotations))
