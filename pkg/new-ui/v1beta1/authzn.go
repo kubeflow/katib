@@ -16,17 +16,19 @@ import (
 
 // ENV variables
 var (
-	USER_HEADER  = env.GetEnvOrDefault("USERID_HEADER", "kubeflow-userid")
-	USER_PREFIX  = env.GetEnvOrDefault("USERID_PREFIX", ":")
-	DISABLE_AUTH = env.GetEnvOrDefault("APP_DISABLE_AUTH", "true")
+	USER_HEADER   = env.GetEnvOrDefault("USERID_HEADER", "kubeflow-userid")
+	GROUPS_HEADER = env.GetEnvOrDefault("GROUPS_HEADER", "kubeflow-groups")
+	USER_PREFIX   = env.GetEnvOrDefault("USERID_PREFIX", ":")
+	DISABLE_AUTH  = env.GetEnvOrDefault("APP_DISABLE_AUTH", "true")
 )
 
 // Function for constructing SubjectAccessReviews (SAR) objects
-func CreateSAR(user, verb, namespace, resource, subresource, name string, schema schema.GroupVersion) *v1.SubjectAccessReview {
+func CreateSAR(user string, userGroups []string, verb, namespace, resource, subresource, name string, schema schema.GroupVersion) *v1.SubjectAccessReview {
 
 	sar := &v1.SubjectAccessReview{
 		Spec: v1.SubjectAccessReviewSpec{
-			User: user,
+			User:   user,
+			Groups: userGroups,
 			ResourceAttributes: &v1.ResourceAttributes{
 				Namespace:   namespace,
 				Verb:        verb,
@@ -52,11 +54,17 @@ func IsAuthorized(verb, namespace, resource, subresource, name string, schema sc
 	if r.Header.Get(USER_HEADER) == "" {
 		return "", errors.New("user header not present")
 	}
+
 	user := r.Header.Get(USER_HEADER)
 	user = strings.Replace(user, USER_PREFIX, "", 1)
 
+	var groups []string
+	if header := r.Header.Get(GROUPS_HEADER); header != "" {
+		groups = strings.Split(header, ",")
+	}
+
 	// Check if the user is authorized to perform a given action on katib/k8s resources.
-	sar := CreateSAR(user, verb, namespace, resource, subresource, name, schema)
+	sar := CreateSAR(user, groups, verb, namespace, resource, subresource, name, schema)
 	err := client.Create(context.TODO(), sar)
 	if err != nil {
 		log.Printf("Error submitting SubjectAccessReview: %v, %s", sar, err.Error())
@@ -67,13 +75,13 @@ func IsAuthorized(verb, namespace, resource, subresource, name string, schema sc
 		return user, nil
 	}
 
-	msg := generateUnauthorizedMessage(user, verb, namespace, resource, subresource, schema, sar)
+	msg := generateUnauthorizedMessage(user, groups, verb, namespace, resource, subresource, schema, sar)
 	return user, errors.New(msg)
 }
 
-func generateUnauthorizedMessage(user, verb, namespace, resource, subresource string, schema schema.GroupVersion, sar *v1.SubjectAccessReview) string {
+func generateUnauthorizedMessage(user string, userGroups []string, verb, namespace, resource, subresource string, schema schema.GroupVersion, sar *v1.SubjectAccessReview) string {
 
-	msg := fmt.Sprintf("User: %s is not authorized to %s", user, verb)
+	msg := fmt.Sprintf("User: %s with groups %v is not authorized to %s", user, userGroups, verb)
 
 	if schema.Group == "" {
 		msg += fmt.Sprintf(" %s/%s", schema.Version, resource)
