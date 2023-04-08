@@ -2,7 +2,7 @@ import argparse
 import yaml
 import time
 import logging
-from kubernetes import client, config
+from kubernetes import client
 from kubeflow.katib import ApiClient, KatibClient, models
 from kubeflow.katib.utils.utils import FakeResponse
 from kubeflow.katib.constants import constants
@@ -277,6 +277,12 @@ if __name__ == "__main__":
         experiment.spec.max_failed_trial_count = MAX_FAILED_TRIAL_COUNT
 
     katib_client = KatibClient()
+
+    namespace_labels = client.CoreV1Api().read_namespace(args.namespace).metadata.labels
+    if 'katib.kubeflow.org/metrics-collector-injection' not in namespace_labels:
+        namespace_labels['katib.kubeflow.org/metrics-collector-injection'] = 'enabled'
+        client.CoreV1Api().patch_namespace(args.namespace, {'metadata': {'labels': namespace_labels}})
+
     try:
         run_e2e_experiment(katib_client, experiment, exp_name, exp_namespace)
         logging.info("---------------------------------------------------------------")
