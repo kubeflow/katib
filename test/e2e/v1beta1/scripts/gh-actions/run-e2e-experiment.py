@@ -2,7 +2,7 @@ import argparse
 import yaml
 import time
 import logging
-from kubernetes import client, config
+from kubernetes import client
 from kubeflow.katib import ApiClient, KatibClient, models
 from kubeflow.katib.utils.utils import FakeResponse
 from kubeflow.katib.constants import constants
@@ -109,7 +109,6 @@ def verify_experiment_results(
     ):
         resource_name = exp_name + "-" + experiment.spec.algorithm.algorithm_name
 
-        config.load_kube_config()
         # Suggestion's Service and Deployment should be deleted.
         for i in range(10):
             try:
@@ -217,6 +216,12 @@ if __name__ == "__main__":
         help="Path to the Katib Experiment.",
     )
     parser.add_argument(
+        "--namespace", type=str, required=True, help="Namespace for the Katib E2E test",
+    )
+    parser.add_argument(
+        "--trial-pod-annotations", type=str, help="Annotation for the pod created by trial",
+    )
+    parser.add_argument(
         "--verbose", action="store_true", help="Verbose output for the Katib E2E test",
     )
     args = parser.parse_args()
@@ -237,6 +242,7 @@ if __name__ == "__main__":
 
     # Convert to the Katib Experiment object.
     experiment = ApiClient().deserialize(experiment, "V1beta1Experiment")
+    experiment.metadata.namespace = args.namespace
     exp_name = experiment.metadata.name
     exp_namespace = experiment.metadata.namespace
 
@@ -249,6 +255,16 @@ if __name__ == "__main__":
     if experiment.metadata.name == "random":
         MAX_TRIAL_COUNT += 1
         PARALLEL_TRIAL_COUNT += 1
+        if args.trial_pod_annotations:
+            kind = experiment.spec.trial_template.trial_spec['kind']
+            if kind != "Job":
+                raise NotImplementedError(f'Trail pod annotations not implemented for {kind}!')
+
+            trial_spec_metadata = experiment.spec.trial_template.trial_spec['spec']['template'].get('metadata', {})
+            trial_spec_pod_annotations = trial_spec_metadata.get('annotations', {})
+            trial_spec_pod_annotations.update(eval(args.trial_pod_annotations))
+            trial_spec_metadata['annotations'] = trial_spec_pod_annotations
+            experiment.spec.trial_template.trial_spec['spec']['template']['metadata'] = trial_spec_metadata
 
     # Hyperband will validate the parallel trial count, thus we should not change it.
     # We don't need to test parallel Trials for Darts.
@@ -261,6 +277,12 @@ if __name__ == "__main__":
         experiment.spec.max_failed_trial_count = MAX_FAILED_TRIAL_COUNT
 
     katib_client = KatibClient()
+
+    namespace_labels = client.CoreV1Api().read_namespace(args.namespace).metadata.labels
+    if 'katib.kubeflow.org/metrics-collector-injection' not in namespace_labels:
+        namespace_labels['katib.kubeflow.org/metrics-collector-injection'] = 'enabled'
+        client.CoreV1Api().patch_namespace(args.namespace, {'metadata': {'labels': namespace_labels}})
+
     try:
         run_e2e_experiment(katib_client, experiment, exp_name, exp_namespace)
         logging.info("---------------------------------------------------------------")
