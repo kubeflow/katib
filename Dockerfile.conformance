@@ -20,6 +20,7 @@ WORKDIR /kubeflow/katib
 COPY sdk/ /kubeflow/katib/sdk/
 COPY examples/ /kubeflow/katib/examples/
 COPY test/ /kubeflow/katib/test/
+COPY pkg/ /kubeflow/katib/pkg/
 
 COPY conformance/run.sh .
 
