@@ -53,12 +53,7 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
     if (output_file == "sdk/python/v1beta1/kubeflow/katib/models/__init__.py"):
         lines.append("\n")
         lines.append("# Import Kubernetes models.\n")
-        lines.append("from kubernetes.client import V1ObjectMeta\n")
-        lines.append("from kubernetes.client import V1ListMeta\n")
-        lines.append("from kubernetes.client import V1Container\n")
-        lines.append("from kubernetes.client import V1HTTPGetAction\n")
-        lines.append("from kubernetes.client import V1ManagedFieldsEntry\n")
-        lines.append("from kubernetes.client import V1OwnerReference\n")
+        lines.append("from kubernetes.client import *\n")
 
     with open(output_file, 'w') as f:
         f.writelines(lines)
