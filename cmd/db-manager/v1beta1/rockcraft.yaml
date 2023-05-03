@@ -1,0 +1,36 @@
+name: katib-db-manager
+summary: Katib DB manager
+description: An entrypoint for running katib-db-manager.
+version: "1.0"
+base: ubuntu:20.04
+license: Apache-2.0
+platforms:
+  amd64: null
+
+parts:
+  katib-db-manager:
+    plugin: go
+    build-snaps:
+      - go
+    build-packages:
+      - wget
+    source: https://github.com/kubeflow/katib.git
+    build-environment:
+      - GRPC_HEALTH_PROBE_VERSION: v0.4.15
+      - CGO_ENABLED: "0"
+      - GOOS: linux
+      - TARGETARCH: amd64
+    override-build: |-
+      env
+      go mod download -x
+      go build -a -o $CRAFT_PART_INSTALL/katib-db-manager ./cmd/db-manager/v1beta1
+      wget -qO $CRAFT_PART_INSTALL/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-${CRAFT_TARGET_ARCH}
+      chmod +x $CRAFT_PART_INSTALL/grpc_health_probe
+    organize:
+      katib-db-manager: bin/katib-db-manager
+services:
+  katib-db-manager:
+    command: /bin/katib-db-manager
+    override: replace
+    startup: enabled
+    on_success: ignore
