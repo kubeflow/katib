@@ -4,20 +4,21 @@
 
 - Support advance HyperParameter tuning algorithms:
 
-  - Population Based Training - [#1382](https://github.com/kubeflow/katib/issues/1382)
+  - Population Based Training (PBT) - [#1382](https://github.com/kubeflow/katib/issues/1382)
   - Tree of Parzen Estimators (TPE)
   - Multivariate TPE
   - Sobol’s Quasirandom Sequence
   - Asynchronous Successive Halving - [ASHA](https://arxiv.org/pdf/1810.05934.pdf)
 
+- Support multi-objective optimization - [#1549](https://github.com/kubeflow/katib/issues/1549)
+- Support various HP distributions (log-uniform, uniform, normal) - [#1207](https://github.com/kubeflow/katib/issues/1207)
 - Support Auto Model Compression - [#460](https://github.com/kubeflow/katib/issues/460)
 - Support Auto Feature Engineering - [#475](https://github.com/kubeflow/katib/issues/475)
-- Improve Neural Architecture Search design.
+- Improve Neural Architecture Search design
 
 ## Backend and API Enhancements
 
 - Conformance tests for Katib - [#2044](https://github.com/kubeflow/katib/issues/2044)
-- Support various HP distributions (log-uniform, uniform, normal) - [#1207](https://github.com/kubeflow/katib/issues/1207)
 - Support push-based metrics collection in Katib - [#577](https://github.com/kubeflow/katib/issues/577)
 - Support PostgreSQL as a Katib DB - [#915](https://github.com/kubeflow/katib/issues/915)
 - Promote Katib CRDs (`Experiment`, `Suggestion`, and `Trial`) to the `v1` version
