@@ -21,6 +21,7 @@
 - Conformance tests for Katib - [#2044](https://github.com/kubeflow/katib/issues/2044)
 - Support push-based metrics collection in Katib - [#577](https://github.com/kubeflow/katib/issues/577)
 - Support PostgreSQL as a Katib DB - [#915](https://github.com/kubeflow/katib/issues/915)
+- Improve Katib scalability - [#1847](https://github.com/kubeflow/katib/issues/1847)
 - Promote Katib CRDs (`Experiment`, `Suggestion`, and `Trial`) to the `v1` version
 - Support multiple CRD versions (`v1beta1`, `v1`) with conversion webhook
 
