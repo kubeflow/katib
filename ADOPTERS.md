@@ -17,3 +17,4 @@ Please keep the list in alphabetical order.
 | [CyberAgent](https://www.cyberagent.co.jp/en/)   | [@tenzen-y](https://github.com/tenzen-y)             | Experiment in CyberAgent internal ML Platform on Private Cloud       |
 | [fuzhi](http://www.fuzhi.ai/)                    | [@planck0591](https://github.com/planck0591)         | Experiment and Trial in autoML Platform                              |
 | [karrot](https://uk.karrotmarket.com/)           | [@muik](https://github.com/muik)                     | Hyperparameter tuning in Karrot ML Platform                          |
+| [PITS Global Data Recovery Services](https://www.pitsdatarecovery.net/) | [@pheianox](https://github.com/pheianox) | CyberAgent and ML Platform |
