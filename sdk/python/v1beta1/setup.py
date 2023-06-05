@@ -27,6 +27,7 @@ REQUIRES = [
 ]
 
 katib_grpc_api_file = "../../../pkg/apis/manager/v1beta1/python/api_pb2.py"
+katib_grpc_api_k8s_dep = "../../../pkg/apis/manager/v1beta1/python/k8s"
 
 # Copy Katib gRPC Python APIs to use it in the Katib SDK Client.
 # We need to always copy this file only on the SDK building stage, not on SDK installation stage.
@@ -34,6 +35,15 @@ if os.path.exists(katib_grpc_api_file):
     shutil.copy(
         katib_grpc_api_file, "kubeflow/katib/katib_api_pb2.py",
     )
+    # The k8s path should exist if the api file exists (in a <py3.8 compliant way)
+    shutil.rmtree("k8s", ignore_errors=True)
+    shutil.copytree(
+        katib_grpc_api_k8s_dep, "k8s", ignore=shutil.ignore_patterns("__pycache__")
+    )
+    # Make k8s a valid setuptools package by adding __init__.py at all levels
+    for root, _, _ in os.walk("k8s"):
+        with open(os.path.join(root, "__init__.py"), "w"):
+            pass
 
 setuptools.setup(
     name="kubeflow-katib",
@@ -44,7 +54,7 @@ setuptools.setup(
     url="https://github.com/kubeflow/katib/tree/master/sdk/python/v1beta1",
     description="Katib Python SDK for APIVersion v1beta1",
     long_description="Katib Python SDK for APIVersion v1beta1",
-    packages=setuptools.find_packages(include=("kubeflow*")),
+    packages=setuptools.find_packages(include=("kubeflow*", "k8s*")),
     package_data={},
     include_package_data=False,
     zip_safe=False,

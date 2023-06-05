@@ -421,6 +421,11 @@
             "default": {},
             "$ref": "#/definitions/v1beta1.AlgorithmSetting"
           }
+        },
+        "suggestionSpec": {
+          "description": "Suggestion service Deployment spec",
+          "default": {},
+          "$ref": "#/definitions/v1.DeploymentSpec"
         }
       }
     },
