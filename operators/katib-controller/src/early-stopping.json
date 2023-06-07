@@ -1,5 +1,0 @@
-{
-  "medianstop": {
-    "image": "docker.io/kubeflowkatib/earlystopping-medianstop:v0.12.0"
-  }
-}

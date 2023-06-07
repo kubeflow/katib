@@ -1,5 +1,0 @@
-options:
-  port:
-    type: int
-    default: 8080
-    description: HTTP port
