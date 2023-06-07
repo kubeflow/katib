@@ -1,5 +1,0 @@
-options:
-  port:
-    type: int
-    default: 6789
-    description: API port
