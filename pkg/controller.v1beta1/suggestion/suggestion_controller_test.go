@@ -19,6 +19,7 @@ package suggestion
 import (
 	"encoding/json"
 	"fmt"
+	stdlog "log"
 	"strings"
 	"sync"
 	"testing"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/onsi/gomega"
+	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -36,6 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
+	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
@@ -44,7 +47,6 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/suggestion/composer"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	suggestionclientmock "github.com/kubeflow/katib/pkg/mock/v1beta1/suggestion/suggestionclient"
-	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
 
 const (
@@ -82,6 +84,7 @@ func TestReconcile(t *testing.T) {
 	// channel when it is finished.
 	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(configapi.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
 	r := &ReconcileSuggestion{
@@ -433,32 +436,44 @@ func newFakeInstance() *suggestionsv1beta1.Suggestion {
 
 func newKatibConfigMapInstance() *corev1.ConfigMap {
 	// Create suggestion config
-	suggestionConfig := map[string]katibconfig.SuggestionConfig{
-		"random": {
-			Container: corev1.Container{
-				Image: suggestionImage,
+	katibConfig := configapi.KatibConfig{
+		RuntimeConfig: configapi.RuntimeConfig{
+			SuggestionConfigs: []configapi.SuggestionConfig{
+				{
+					AlgorithmName: "random",
+					Container: corev1.Container{
+						Image: suggestionImage,
+					},
+				},
+			},
+			EarlyStoppingConfigs: []configapi.EarlyStoppingConfig{
+				{
+					AlgorithmName:   "median-stop",
+					Image:           "test-image",
+					ImagePullPolicy: corev1.PullAlways,
+				},
 			},
 		},
 	}
-	bSuggestionConfig, _ := json.Marshal(suggestionConfig)
-
-	// Create early stopping config
-	earlyStoppingConfig := map[string]katibconfig.EarlyStoppingConfig{
-		"median-stop": {
-			Image:           "test-image",
-			ImagePullPolicy: corev1.PullAlways,
-		},
+	bKatibConfig, err := json.Marshal(katibConfig)
+	if err != nil {
+		stdlog.Fatal(err)
 	}
-	bEarlyStoppingConfig, _ := json.Marshal(earlyStoppingConfig)
-
+	yamlKatibConfig := make(map[string]interface{})
+	if err = yaml.Unmarshal(bKatibConfig, yamlKatibConfig); err != nil {
+		stdlog.Fatal(err)
+	}
+	bKatibConfig, err = yaml.Marshal(yamlKatibConfig)
+	if err != nil {
+		stdlog.Fatal(err)
+	}
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      katibConfigName,
 			Namespace: namespace,
 		},
 		Data: map[string]string{
-			consts.LabelSuggestionTag:    string(bSuggestionConfig),
-			consts.LabelEarlyStoppingTag: string(bEarlyStoppingConfig),
+			consts.LabelKatibConfigTag: string(bKatibConfig),
 		},
 	}
 }

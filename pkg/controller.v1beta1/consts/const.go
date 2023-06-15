@@ -112,12 +112,8 @@ const (
 
 	// KatibConfigMapName is the configmap name which includes Katib's configuration.
 	KatibConfigMapName = "katib-config"
-	// LabelSuggestionTag is the name of suggestion config in Katib configmap.
-	LabelSuggestionTag = "suggestion"
-	// LabelMetricsCollectorSidecar is the name of metrics collector config in Katib configmap.
-	LabelMetricsCollectorSidecar = "metrics-collector-sidecar"
-	// LabelEarlyStoppingTag is the name of early stopping config in Katib configmap.
-	LabelEarlyStoppingTag = "early-stopping"
+	// LabelKatibConfigTag is the name of KatibConfig in Katib copnfigmap.
+	LabelKatibConfigTag = "katib-config.yaml"
 	// DefaultImagePullPolicy is the default value for image pull policy.
 	DefaultImagePullPolicy = corev1.PullIfNotPresent
 	// DefaultCPULimit is the default value for CPU limit.

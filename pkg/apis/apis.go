@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Kubeflow Authors.
+Copyright 2023 The Kubeflow Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,17 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package apis contains Kubernetes API groups.
+// Generate deepcopy, clientset, listers, informers for apis
+//go:generate ../../hack/update-codegen.sh
+
+// Generate open-api for apis
+//go:generate ../../hack/update-openapigen.sh
+
 package apis
-
-import (
-	"k8s.io/apimachinery/pkg/runtime"
-)
-
-// AddToSchemes may be used to add all resources defined in the project to a Scheme
-var AddToSchemes runtime.SchemeBuilder
-
-// AddToScheme adds all Resources to the Scheme
-func AddToScheme(s *runtime.Scheme) error {
-	return AddToSchemes.AddToScheme(s)
-}

@@ -81,7 +81,7 @@ echo "Katib pods"
 kubectl -n kubeflow get pod
 
 # Check that Katib is working with 2 Experiments.
-kubectl apply -f ../../testdata/valid-experiment.yaml
+kubectl apply -f ../../testdata/valid-experiment.yaml || (kubectl logs -n kubeflow deployments/katib-controller && exit 1)
 kubectl delete -f ../../testdata/valid-experiment.yaml
 
 # Check the ValidatingWebhookConfiguration works well.

@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
+	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -83,7 +84,7 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 	}
 
 	// If early stopping is used, get the config data.
-	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
+	earlyStoppingConfigData := configapi.EarlyStoppingConfig{}
 	if s.Spec.EarlyStopping != nil && s.Spec.EarlyStopping.AlgorithmName != "" {
 		earlyStoppingConfigData, err = katibconfig.GetEarlyStoppingConfigData(s.Spec.EarlyStopping.AlgorithmName, g.Client)
 		if err != nil {
@@ -183,8 +184,8 @@ func (g *General) DesiredService(s *suggestionsv1beta1.Suggestion) (*corev1.Serv
 }
 
 func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
-	suggestionConfigData katibconfig.SuggestionConfig,
-	earlyStoppingConfigData katibconfig.EarlyStoppingConfig) []corev1.Container {
+	suggestionConfigData configapi.SuggestionConfig,
+	earlyStoppingConfigData configapi.EarlyStoppingConfig) []corev1.Container {
 
 	var (
 		containers          []corev1.Container

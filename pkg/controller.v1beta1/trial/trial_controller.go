@@ -96,7 +96,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	trialResources := viper.Get(consts.ConfigTrialResources)
 	if trialResources != nil {
 		// Cast interface to gvk slice object
-		gvkList := trialResources.(trialutil.GvkListFlag)
+		gvkList := trialResources.([]schema.GroupVersionKind)
 
 		// Watch for changes in custom resources
 		for _, gvk := range gvkList {

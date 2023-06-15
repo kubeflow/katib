@@ -34,6 +34,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
+	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
@@ -290,7 +291,7 @@ func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 	return jobKind, jobName, nil
 }
 
-func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, metricsCollectorConfigData katibconfig.MetricsCollectorConfig, esRules []string) ([]string, error) {
+func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, metricsCollectorConfigData configapi.MetricsCollectorConfig, esRules []string) ([]string, error) {
 	args := []string{"-t", trial.Name, "-m", metricNames, "-o-type", string(trial.Spec.Objective.Type), "-s-db", katibmanagerv1beta1.GetDBManagerAddr()}
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)

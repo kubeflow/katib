@@ -29,13 +29,13 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
-	util "github.com/kubeflow/katib/pkg/controller.v1beta1/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
-	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
 
 func init() {
@@ -49,11 +49,11 @@ func TestValidateExperiment(t *testing.T) {
 	p := manifestmock.NewMockGenerator(mockCtrl)
 	g := New(p)
 
-	suggestionConfigData := katibconfig.SuggestionConfig{}
+	suggestionConfigData := configapi.SuggestionConfig{}
 	suggestionConfigData.Image = "algorithmImage"
-	metricsCollectorConfigData := katibconfig.MetricsCollectorConfig{}
+	metricsCollectorConfigData := configapi.MetricsCollectorConfig{}
 	metricsCollectorConfigData.Image = "metricsCollectorImage"
-	earlyStoppingConfigData := katibconfig.EarlyStoppingConfig{}
+	earlyStoppingConfigData := configapi.EarlyStoppingConfig{}
 
 	p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).AnyTimes()
 	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(metricsCollectorConfigData, nil).AnyTimes()
@@ -875,7 +875,7 @@ func TestValidateMetricsCollector(t *testing.T) {
 	p := manifestmock.NewMockGenerator(mockCtrl)
 	g := New(p)
 
-	metricsCollectorConfigData := katibconfig.MetricsCollectorConfig{}
+	metricsCollectorConfigData := configapi.MetricsCollectorConfig{}
 	metricsCollectorConfigData.Image = "metricsCollectorImage"
 
 	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(metricsCollectorConfigData, nil).AnyTimes()
@@ -1174,26 +1174,26 @@ func TestValidateConfigData(t *testing.T) {
 	p := manifestmock.NewMockGenerator(mockCtrl)
 	g := New(p)
 
-	suggestionConfigData := katibconfig.SuggestionConfig{}
+	suggestionConfigData := configapi.SuggestionConfig{}
 	suggestionConfigData.Image = "algorithmImage"
 
 	validConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(suggestionConfigData, nil).Times(2)
-	invalidConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(katibconfig.SuggestionConfig{}, errors.New("GetSuggestionConfigData failed"))
+	invalidConfigCall := p.EXPECT().GetSuggestionConfigData(gomock.Any()).Return(configapi.SuggestionConfig{}, errors.New("GetSuggestionConfigData failed"))
 
 	gomock.InOrder(
 		validConfigCall,
 		invalidConfigCall,
 	)
 
-	validEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(katibconfig.EarlyStoppingConfig{}, nil)
-	invalidEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(katibconfig.EarlyStoppingConfig{}, errors.New("GetEarlyStoppingConfigData failed"))
+	validEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(configapi.EarlyStoppingConfig{}, nil)
+	invalidEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(configapi.EarlyStoppingConfig{}, errors.New("GetEarlyStoppingConfigData failed"))
 
 	gomock.InOrder(
 		validEarlyStoppingConfigCall,
 		invalidEarlyStoppingConfigCall,
 	)
 
-	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(katibconfig.MetricsCollectorConfig{}, errors.New("GetMetricsCollectorConfigData failed"))
+	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(configapi.MetricsCollectorConfig{}, errors.New("GetMetricsCollectorConfigData failed"))
 
 	batchJobStr := convertBatchJobToString(newFakeBatchJob())
 	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()

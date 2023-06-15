@@ -26,13 +26,7 @@ spec:
           image: docker.io/kubeflowkatib/katib-controller
           command: ["./katib-controller"]
           args:
-            - "--webhook-port=8443"
-            - "--trial-resources=Job.v1.batch"
-            - "--trial-resources=TFJob.v1.kubeflow.org"
-            - "--trial-resources=PyTorchJob.v1.kubeflow.org"
-            - "--trial-resources=MPIJob.v1.kubeflow.org"
-            - "--trial-resources=XGBoostJob.v1.kubeflow.org"
-            - "--trial-resources=MXJob.v1.kubeflow.org"
+            - --katib-config=/katib-config.yaml
           ports:
             - containerPort: 8443
               name: webhook
@@ -60,8 +54,15 @@ spec:
             - mountPath: /tmp/cert
               name: cert
               readOnly: true
+            - mountPath: /katib-config.yaml
+              name: katib-config
+              subPath: katib-config.yaml
+              readOnly: true
       volumes:
         - name: cert
           secret:
             defaultMode: 420
             secretName: katib-webhook-cert
+        - name: katib-config
+          configMap:
+            name: katib-config

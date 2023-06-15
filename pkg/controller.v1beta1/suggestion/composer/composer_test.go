@@ -31,6 +31,7 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -45,13 +46,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
+	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 )
 
 var (
@@ -132,6 +133,7 @@ func TestDesiredDeployment(t *testing.T) {
 
 	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(configapi.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
 
 	// Start test manager.
 	wg := &sync.WaitGroup{}
@@ -175,12 +177,13 @@ func TestDesiredDeployment(t *testing.T) {
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
 				cm := newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig())
-				cm.Data["suggestion"] = strings.ReplaceAll(cm.Data["suggestion"], string(imagePullPolicy), "invalid")
+				cm.Data[consts.LabelKatibConfigTag] = strings.ReplaceAll(cm.Data[consts.LabelKatibConfigTag], string(imagePullPolicy), "invalid")
 				return cm
 			}(),
 			expectedDeployment: func() *appsv1.Deployment {
 				deploy := newFakeDeployment()
-				deploy.Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullIfNotPresent
+				deploy.Spec.Template.Spec.Containers[0].ImagePullPolicy = consts.DefaultImagePullPolicy
+				deploy.Spec.Template.Spec.Containers[1].ImagePullPolicy = consts.DefaultImagePullPolicy
 				return deploy
 			}(),
 			err:             false,
@@ -190,7 +193,7 @@ func TestDesiredDeployment(t *testing.T) {
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
 				cm := newFakeKatibConfig(newFakeSuggestionConfig(), newFakeEarlyStoppingConfig())
-				cm.Data["suggestion"] = strings.ReplaceAll(cm.Data["suggestion"], cpu, "invalid")
+				cm.Data[consts.LabelKatibConfigTag] = strings.ReplaceAll(cm.Data[consts.LabelKatibConfigTag], cpu, "invalid")
 				return cm
 			}(),
 			err:             true,
@@ -374,11 +377,11 @@ func TestDesiredService(t *testing.T) {
 }
 
 func TestDesiredVolume(t *testing.T) {
-
 	g := gomega.NewGomegaWithT(t)
 
 	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(configapi.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
 
 	// Start test manager.
 	wg := &sync.WaitGroup{}
@@ -640,12 +643,13 @@ func metaEqual(expected, actual metav1.ObjectMeta) bool {
 			len(actual.OwnerReferences) == 0)
 }
 
-func newFakeSuggestionConfig() katibconfig.SuggestionConfig {
+func newFakeSuggestionConfig() configapi.SuggestionConfig {
 	cpuQ, _ := resource.ParseQuantity(cpu)
 	memoryQ, _ := resource.ParseQuantity(memory)
 	diskQ, _ := resource.ParseQuantity(disk)
 
-	return katibconfig.SuggestionConfig{
+	return configapi.SuggestionConfig{
+		AlgorithmName: suggestionAlgorithm,
 		Container: corev1.Container{
 			Image:           image,
 			ImagePullPolicy: imagePullPolicy,
@@ -666,12 +670,13 @@ func newFakeSuggestionConfig() katibconfig.SuggestionConfig {
 	}
 }
 
-func newFakeEarlyStoppingConfig() katibconfig.EarlyStoppingConfig {
+func newFakeEarlyStoppingConfig() configapi.EarlyStoppingConfig {
 	cpuQ, _ := resource.ParseQuantity(cpu)
 	memoryQ, _ := resource.ParseQuantity(memory)
 	diskQ, _ := resource.ParseQuantity(disk)
 
-	return katibconfig.EarlyStoppingConfig{
+	return configapi.EarlyStoppingConfig{
+		AlgorithmName:   earlyStoppingAlgorithm,
 		Image:           image,
 		ImagePullPolicy: imagePullPolicy,
 		Resource: corev1.ResourceRequirements{
@@ -689,28 +694,36 @@ func newFakeEarlyStoppingConfig() katibconfig.EarlyStoppingConfig {
 	}
 }
 
-func newFakeKatibConfig(suggestionConfig katibconfig.SuggestionConfig, earlyStoppingConfig katibconfig.EarlyStoppingConfig) *corev1.ConfigMap {
-
-	jsonConfigSuggestion := map[string]katibconfig.SuggestionConfig{
-		suggestionAlgorithm: suggestionConfig,
+func newFakeKatibConfig(suggestionConfig configapi.SuggestionConfig, earlyStoppingConfig configapi.EarlyStoppingConfig) *corev1.ConfigMap {
+	katibConfig := configapi.KatibConfig{
+		RuntimeConfig: configapi.RuntimeConfig{
+			SuggestionConfigs: []configapi.SuggestionConfig{
+				suggestionConfig,
+			},
+			EarlyStoppingConfigs: []configapi.EarlyStoppingConfig{
+				earlyStoppingConfig,
+			},
+		},
 	}
-
-	bSuggestion, _ := json.Marshal(jsonConfigSuggestion)
-
-	jsonConfigEarlyStopping := map[string]katibconfig.EarlyStoppingConfig{
-		earlyStoppingAlgorithm: earlyStoppingConfig,
+	bKatibConfig, err := json.Marshal(katibConfig)
+	if err != nil {
+		stdlog.Fatal(err)
 	}
-
-	bEarlyStopping, _ := json.Marshal(jsonConfigEarlyStopping)
-
+	yamlKatibConfig := make(map[string]interface{})
+	if err = yaml.Unmarshal(bKatibConfig, yamlKatibConfig); err != nil {
+		stdlog.Fatal(err)
+	}
+	bKatibConfig, err = yaml.Marshal(yamlKatibConfig)
+	if err != nil {
+		stdlog.Fatal(err)
+	}
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      configMap,
 			Namespace: namespace,
 		},
 		Data: map[string]string{
-			consts.LabelSuggestionTag:    string(bSuggestion),
-			consts.LabelEarlyStoppingTag: string(bEarlyStopping),
+			consts.LabelKatibConfigTag: string(bKatibConfig),
 		},
 	}
 }

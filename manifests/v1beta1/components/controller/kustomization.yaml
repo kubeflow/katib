@@ -4,7 +4,12 @@ kind: Kustomization
 
 resources:
   - controller.yaml
-  - katib-config.yaml
   - rbac.yaml
   - service.yaml
   - trial-templates.yaml
+configMapGenerator:
+  - name: katib-config
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true
