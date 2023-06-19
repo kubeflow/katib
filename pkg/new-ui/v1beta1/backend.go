@@ -742,7 +742,14 @@ func fetchMasterPodName(clientset *kubernetes.Clientset, trial *trialsv1beta1.Tr
 	}
 
 	// Otherwise, return the first Failed Pod.
-	return podList.Items[0].Name, nil
+	for _, pod := range podList.Items {
+		if pod.Status.Phase == corev1.PodFailed {
+			return pod.Name, nil
+		}
+	}
+
+	// Otherwise, return error since Pod is in the Pending state.
+	return "", errors.New("Failed to get logs for this Trial. Pod is in the Pending or Unknown state.")
 }
 
 // fetchPodLogs returns logs of a pod for the given job name and namespace
