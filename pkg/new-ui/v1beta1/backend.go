@@ -733,10 +733,15 @@ func fetchMasterPodName(clientset *kubernetes.Clientset, trial *trialsv1beta1.Tr
 		field to "true" in the Experiment definition. If this error persists then the Pod's logs are not currently
 		persisted in the cluster.`)
 	}
-	if len(podList.Items) > 1 {
-		return "", errors.New("More than one master replica found")
+
+	// If Pod is Running or Succeeded Pod, return it.
+	for _, pod := range podList.Items {
+		if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodRunning {
+			return pod.Name, nil
+		}
 	}
 
+	// Otherwise, return the first Failed Pod.
 	return podList.Items[0].Name, nil
 }
 
