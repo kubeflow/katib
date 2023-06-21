@@ -2,8 +2,8 @@ FROM python:3.10-slim
 
 ARG TARGETARCH
 ENV TARGET_DIR /opt/katib
-ENV METRICS_COLLECTOR_DIR cmd/metricscollector/v1beta1/kfpv1-metricscollector
-ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python:${TARGET_DIR}/pkg/metricscollector/v1beta1/kfpv1-metricscollector/::${TARGET_DIR}/pkg/metricscollector/v1beta1/common/
+ENV METRICS_COLLECTOR_DIR cmd/metricscollector/v1beta1/kfp-metricscollector/v1
+ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python:${TARGET_DIR}/pkg/metricscollector/v1beta1/kfp-metricscollector/v1::${TARGET_DIR}/pkg/metricscollector/v1beta1/common/
 
 ADD ./pkg/ ${TARGET_DIR}/pkg/
 ADD ./${METRICS_COLLECTOR_DIR}/ ${TARGET_DIR}/${METRICS_COLLECTOR_DIR}/
