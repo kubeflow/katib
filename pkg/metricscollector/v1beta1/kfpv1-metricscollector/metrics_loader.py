@@ -12,17 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
-# When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
-# For example, in the Tensorflow MNIST Classification With Summaries:
-# https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py.
-# The "accuracy" and "loss" metric is saved under "train" and "test" directories.
-# So in the Metrics Collector specification, please specify name of "train" or "test" directory.
-# Check TFJob example for more information:
-# https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L16-L22
+# The Kubeflow pipeline metrics collector KFPMetricParser parses the metrics file 
+# and returns an ObservationLog of the metrics specified.
+# Some documentation on the metrics collector file structure can be found here:
+# https://v0-6.kubeflow.org/docs/pipelines/sdk/pipelines-metrics/
 
 from datetime import datetime
 from logging import getLogger, StreamHandler, INFO
+import os
 from typing import List
 import json
 
@@ -30,29 +27,38 @@ import rfc3339
 import api_pb2
 from pkg.metricscollector.v1beta1.common import const
 
+class KFPMetricParser:
+    def __init__(self, metric_names):
+        self.metric_names = metric_names
 
-def parse_metrics(fn: str) -> List[api_pb2.MetricLog]:
-    """Parse a kubeflow pipeline metrics file
+    @staticmethod
+    def find_all_files(directory):
+        for root, dirs, files in os.walk(directory):
+            for f in files:
+                yield os.path.join(root, f)
 
-    Args:
-        fn (function): path to metrics file
+    def parse_metrics(self, fn: str) -> List[api_pb2.MetricLog]:
+        """Parse a kubeflow pipeline metrics file
 
-    Returns:
-        List[api_pb2.MetricLog]: A list of logged metrics
-    """
-    metrics = []
-    with open(fn) as f:
-        metrics_dict = json.load(f)
-        for m in metrics_dict["metrics"]:
-            name = m["name"]
-            value = m["numberValue"]
-            ml = api_pb2.MetricLog(
-                time_stamp=rfc3339.rfc3339(datetime.now()),
-                metric=api_pb2.Metric(name=name, value=str(value)),
-            )
-            metrics.append(ml)
-    return metrics
+        Args:
+            fn (function): path to metrics file
 
+        Returns:
+            List[api_pb2.MetricLog]: A list of logged metrics
+        """
+        metrics = []
+        with open(fn) as f:
+            metrics_dict = json.load(f)
+            for m in metrics_dict["metrics"]:
+                name = m["name"]
+                value = m["numberValue"]
+                if name in self.metric_names:
+                    ml = api_pb2.MetricLog(
+                        time_stamp=rfc3339.rfc3339(datetime.now()),
+                        metric=api_pb2.Metric(name=name, value=str(value)),
+                    )
+                    metrics.append(ml)
+        return metrics
 
 class MetricsCollector:
     def __init__(self, metric_names):
@@ -63,10 +69,20 @@ class MetricsCollector:
         self.logger.addHandler(handler)
         self.logger.propagate = False
         self.metrics = metric_names
+        self.parser = KFPMetricParser(metric_names)
 
-    def parse_file(self, filename):
-        self.logger.info(filename + " will be parsed.")
-        mls = parse_metrics(filename)
+    def parse_file(self, directory):
+        """Parses the Kubeflow Pipeline metrics files"""
+        mls = []
+        for f in self.parser.find_all_files(directory):
+            if os.path.isdir(f):
+                continue
+            try:
+                self.logger.info(f + " will be parsed.")
+                mls.extend(self.parser.parse_metrics(f))
+            except Exception as e:
+                self.logger.warning("Unexpected error: " + str(e))
+                continue
 
         # Metrics logs must contain at least one objective metric value
         # Objective metric is located at first index

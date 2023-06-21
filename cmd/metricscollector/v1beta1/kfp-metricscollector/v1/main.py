@@ -51,13 +51,6 @@ def parse_options():
     parser.add_argument(
         "-w", "--wait_all_processes", type=str, default=const.DEFAULT_WAIT_ALL_PROCESSES
     )
-    parser.add_argument(
-        "-fn",
-        "--metrics_file_name",
-        type=str,
-        default=const.DEFAULT_METRICS_FILE_KFPV1_FILE,
-    )
-
     opt = parser.parse_args()
     return opt
 
@@ -86,8 +79,7 @@ if __name__ == "__main__":
     )
 
     mc = MetricsCollector(opt.metric_names.split(";"))
-    metrics_file = os.path.join(opt.metrics_file_dir, opt.metrics_file_name)
-    observation_log = mc.parse_file(metrics_file)
+    observation_log = mc.parse_file(opt.metrics_file_dir)
 
     channel = grpc.beta.implementations.insecure_channel(
         db_manager_server[0], int(db_manager_server[1])
