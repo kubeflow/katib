@@ -33,4 +33,4 @@ jobs:
           - component-name: tfevent-metrics-collector
             dockerfile: cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile
           - component-name: kfpv1-metrics-collector
-            dockerfile: cmd/metricscollector/v1beta1/kvpv1-metricscollector/Dockerfile
+            dockerfile: cmd/metricscollector/v1beta1/kfpv1-metricscollector/Dockerfile

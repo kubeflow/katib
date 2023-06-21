@@ -35,7 +35,7 @@ The following Pipelines are deployed from Kubeflow Notebook:
 
 2) [Katib Experiment with Early Stopping](early-stopping.ipynb)
 
-3) [Tune parameters of a `MNIST` kubeflow pipeline with Katib](pipeline-parameters.ipynb)
+3) [Tune parameters of a `MNIST` kubeflow pipeline with Katib](kubeflow-kfpv1-opt-mnist.ipynb)
 
 The following Pipelines have to be compiled and uploaded to the Kubeflow Pipelines UI for examples 1 & 2:
 
