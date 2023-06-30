@@ -144,6 +144,9 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return nil, err
 	}
 
+	// Add KATIB_TRIAL_NAME env name to all containers
+	mutatePodContainersEnv(mutatedPod, trial)
+
 	// Add Katib Trial labels to the Pod metadata.
 	mutatePodMetadata(mutatedPod, trial)
 

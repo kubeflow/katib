@@ -1065,3 +1065,68 @@ func TestMutatePodMetadata(t *testing.T) {
 		}
 	}
 }
+
+func TestMutatePodContainersEnv(t *testing.T) {
+	testTrialName := "hello-trial"
+
+	testCases := []struct {
+		pod             *v1.Pod
+		trial           *trialsv1beta1.Trial
+		mutatedPod      *v1.Pod
+		testDescription string
+	}{
+		{
+			pod: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "container-1",
+							Env:  []v1.EnvVar{},
+						},
+						{
+							Name: "container-2",
+							Env:  []v1.EnvVar{},
+						},
+					},
+				},
+			},
+			trial: &trialsv1beta1.Trial{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: testTrialName,
+				},
+			},
+			mutatedPod: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "container-1",
+							Env: []v1.EnvVar{
+								{
+									Name:  "KATIB_TRIAL_NAME",
+									Value: testTrialName,
+								},
+							},
+						},
+						{
+							Name: "container-2",
+							Env: []v1.EnvVar{
+								{
+									Name:  "KATIB_TRIAL_NAME",
+									Value: testTrialName,
+								},
+							},
+						},
+					},
+				},
+			},
+			testDescription: "todo",
+		},
+	}
+
+	for _, tc := range testCases {
+		mutatePodContainersEnv(tc.pod, tc.trial)
+		if !reflect.DeepEqual(tc.mutatedPod, tc.pod) {
+			t.Errorf("Case %v. Expected Pod %v, got %v", tc.testDescription, tc.mutatedPod, tc.pod)
+		}
+	}
+}

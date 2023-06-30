@@ -261,6 +261,16 @@ func mutateMetricsCollectorVolume(pod *v1.Pod, mountPath, sidecarContainerName, 
 	return nil
 }
 
+func mutatePodContainersEnv(pod *v1.Pod, trial *trialsv1beta1.Trial) {
+	for i := range pod.Spec.Containers {
+		container := &pod.Spec.Containers[i]
+		container.Env = append(container.Env, v1.EnvVar{
+			Name:  "KATIB_TRIAL_NAME",
+			Value: trial.Name,
+		})
+	}
+}
+
 func mutatePodMetadata(pod *v1.Pod, trial *trialsv1beta1.Trial) {
 	podLabels := map[string]string{}
 
