@@ -1102,7 +1102,7 @@ func TestMutatePodContainersEnv(t *testing.T) {
 							Name: "container-1",
 							Env: []v1.EnvVar{
 								{
-									Name:  "KATIB_TRIAL_NAME",
+									Name:  consts.KatibTrialEnvName,
 									Value: testTrialName,
 								},
 							},
@@ -1111,7 +1111,7 @@ func TestMutatePodContainersEnv(t *testing.T) {
 							Name: "container-2",
 							Env: []v1.EnvVar{
 								{
-									Name:  "KATIB_TRIAL_NAME",
+									Name:  consts.KatibTrialEnvName,
 									Value: testTrialName,
 								},
 							},
@@ -1119,7 +1119,7 @@ func TestMutatePodContainersEnv(t *testing.T) {
 					},
 				},
 			},
-			testDescription: "todo",
+			testDescription: "Mutated Pod should have all containers with KATIB_TRIAL_NAME env",
 		},
 	}
 
