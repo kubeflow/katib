@@ -234,6 +234,10 @@ func (s *SidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 		Args:            args,
 		ImagePullPolicy: metricsCollectorConfigData.ImagePullPolicy,
 		Resources:       metricsCollectorConfigData.Resource,
+		Env: []v1.EnvVar{{
+			Name:  consts.KatibTrialEnvName,
+			Value: trial.Name,
+		}},
 	}
 
 	// Inject the security context when the flag is enabled.

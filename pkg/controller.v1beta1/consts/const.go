@@ -103,6 +103,8 @@ const (
 	// DefaultKatibComposerEnvName is the default env name of katib suggestion composer
 	DefaultKatibComposerEnvName = "KATIB_SUGGESTION_COMPOSER"
 
+	KatibTrialEnvName = "KATIB_TRIAL_NAME"
+
 	// DefaultKatibDBManagerServiceNamespaceEnvName is the env name of Katib DB Manager namespace
 	DefaultKatibDBManagerServiceNamespaceEnvName = "KATIB_DB_MANAGER_SERVICE_NAMESPACE"
 	// DefaultKatibDBManagerServiceIPEnvName is the env name of Katib DB Manager IP

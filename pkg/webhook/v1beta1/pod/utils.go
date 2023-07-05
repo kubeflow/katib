@@ -265,7 +265,7 @@ func mutatePodContainersEnv(pod *v1.Pod, trial *trialsv1beta1.Trial) {
 	for i := range pod.Spec.Containers {
 		container := &pod.Spec.Containers[i]
 		container.Env = append(container.Env, v1.EnvVar{
-			Name:  "KATIB_TRIAL_NAME",
+			Name:  consts.KatibTrialEnvName,
 			Value: trial.Name,
 		})
 	}
