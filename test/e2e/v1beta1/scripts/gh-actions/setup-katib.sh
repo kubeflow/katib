@@ -25,7 +25,7 @@ DEPLOY_TRAINING_OPERATOR=${2:-false}
 WITH_DATABASE_TYPE=${3:-mysql}
 DEPLOY_KFP=${4:-false}
 
-E2E_TEST_IMAGE_TAG="e2e-test"
+E2E_TEST_IMAGE_TAG="v0.15.0"
 TRAINING_OPERATOR_VERSION="v1.6.0-rc.0"
 
 KFP_ENV=platform-agnostic-emissary
@@ -51,12 +51,12 @@ fi
 
 # If the user wants to deploy Katib UI, then use the kustomization file for Katib UI.
 if ! "$DEPLOY_KATIB_UI"; then
-  index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' $KUSTOMIZATION_FILE)"
-  index="$index" yq eval -i 'del(.resources.[env(index)])' $KUSTOMIZATION_FILE
+  index="$(yq -y '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' $KUSTOMIZATION_FILE)"
+  index="$index" yq -y -i 'del(.resources.[env(index)])' $KUSTOMIZATION_FILE
 fi
 
 # Since e2e test doesn't need to large storage, we use a small PVC for Katib.
-yq eval -i '.spec.resources.requests.storage|="2Gi"' $PVC_FILE
+yq -y -i '.spec.resources.requests.storage|="2Gi"' $PVC_FILE
 
 echo -e "\n The Katib will be deployed with the following configs"
 cat $KUSTOMIZATION_FILE
