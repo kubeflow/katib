@@ -77,6 +77,7 @@ if "$DEPLOY_KFP"; then
   kubectl apply -k "${KFP_BASE_URL}/env/${KFP_ENV}/?ref=${KFP_VERSION}"
   kubectl wait pods -l application-crd-id=kubeflow-pipelines -n kubeflow --for condition=Ready --timeout=1800s
   #kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
+  kubectl patch ClusterRole katib-controller -n kubeflow --type=json   -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["argoproj.io"],"resources":["workflows"],"verbs":["get", "list", "watch", "create", "delete"]}}]'
 fi
 
 echo "Deploying Katib"
