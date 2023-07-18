@@ -72,7 +72,7 @@ echo -e "\nBuilding file metrics collector image...\n"
 docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/file-metrics-collector:${TAG}" -f ${CMD_PREFIX}/metricscollector/${VERSION}/file-metricscollector/Dockerfile .
 
 echo -e "\nBuilding kfpv1 metrics collector image...\n"
-docker buildx build --platform "linux/${ARCH}" self, -t "${REGISTRY}/kfpv1-metrics-collector:${TAG}" -f ${CMD_PREFIX}/metricscollector/${VERSION}/kfp-metricscollector/v1/Dockerfile .
+docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/kfpv1-metrics-collector:${TAG}" -f ${CMD_PREFIX}/metricscollector/${VERSION}/kfp-metricscollector/v1/Dockerfile .
 
 echo -e "\nBuilding TF Event metrics collector image...\n"
 if [ "${ARCH}" == "ppc64le" ]; then
