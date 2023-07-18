@@ -37,7 +37,7 @@ class KFPMetricParser:
             for f in files:
                 yield os.path.join(root, f)
 
-    def parse_metrics(self, fn: str) -> List[api_pb2.MetricLog]:
+    def parse_metrics(self, metric_file_path: str) -> List[api_pb2.MetricLog]:
         """Parse a kubeflow pipeline metrics file
 
         Args:
@@ -47,7 +47,7 @@ class KFPMetricParser:
             List[api_pb2.MetricLog]: A list of logged metrics
         """
         metrics = []
-        with open(fn) as f:
+        with open(metric_file_path) as f:
             metrics_dict = json.load(f)
             for m in metrics_dict["metrics"]:
                 name = m["name"]
