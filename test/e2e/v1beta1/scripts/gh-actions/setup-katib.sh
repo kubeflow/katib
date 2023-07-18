@@ -23,9 +23,16 @@ cd "$(dirname "$0")"
 DEPLOY_KATIB_UI=${1:-false}
 DEPLOY_TRAINING_OPERATOR=${2:-false}
 WITH_DATABASE_TYPE=${3:-mysql}
+DEPLOY_KFP=${4:-false}
 
 E2E_TEST_IMAGE_TAG="e2e-test"
 TRAINING_OPERATOR_VERSION="v1.6.0-rc.0"
+
+KFP_ENV=platform-agnostic-emissary
+KFP_BASE_URL="github.com/kubeflow/pipelines/manifests/kustomize"
+# This is one of the latest KFPv1 version which was compatible with a
+# recent K8s version at the time of writing (eg 1.8.22 gave an error).
+KFP_VERSION="1.8.1"
 
 echo "Start to install Katib"
 
@@ -59,6 +66,17 @@ cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
 if "$DEPLOY_TRAINING_OPERATOR"; then
   echo "Deploying Training Operator $TRAINING_OPERATOR_VERSION"
   kustomize build "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION" | kubectl apply -f -
+fi
+
+# If the user wants to deploy kubeflow pipelines, then use the kustomization file for kubeflow pipelines.
+# found at: https://github.com/kubeflow/pipelines/tree/master/manifests/kustomize
+if "$DEPLOY_KFP"; then
+  echo "Deploying Kubeflow Pipelines version $KFP_VERSION"
+  kubectl apply -k "${KFP_BASE_URL}/cluster-scoped-resources/?ref=${KFP_VERSION}"
+  kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s
+  kubectl apply -k "${KFP_BASE_URL}/env/${KFP_ENV}/?ref=${KFP_VERSION}"
+  kubectl wait pods -l application-crd-id=kubeflow-pipelines -n kubeflow --for condition=Ready --timeout=1800s
+  #kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
 fi
 
 echo "Deploying Katib"
