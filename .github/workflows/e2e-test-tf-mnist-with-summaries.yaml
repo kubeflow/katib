@@ -9,9 +9,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
   e2e:
     runs-on: ubuntu-20.04
@@ -36,6 +33,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
+        kubernetes-version: ["v1.23.17", "v1.24.16", "v1.25.12"]
         # Comma Delimited
         experiments: ["tfjob-mnist-with-summaries"]
