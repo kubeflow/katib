@@ -1,0 +1,374 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  name: katib-e2e-2023-07-20-22h-37m-57s
+  namespace: kubeflow
+spec:
+  algorithm:
+    algorithmName: random
+  maxFailedTrialCount: 2
+  maxTrialCount: 5
+  metricsCollectorSpec:
+    collector:
+      customCollector:
+        args:
+        - -m
+        - val-accuracy;accuracy
+        - -s
+        - katib-db-manager.kubeflow:6789
+        - -t
+        - $(PodName)
+        - -path
+        - /tmp/outputs/mlpipeline_metrics
+        env:
+        - name: PodName
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        image: docker.io/votti/kfpv1-metricscollector:v0.0.10
+        imagePullPolicy: Always
+        name: custom-metrics-logger-and-collector
+      kind: Custom
+    source:
+      fileSystemPath:
+        kind: File
+        path: /tmp/outputs/mlpipeline_metrics/data
+  objective:
+    additionalMetricNames:
+    - accuracy
+    goal: 0.9
+    objectiveMetricName: val-accuracy
+    type: maximize
+  parallelTrialCount: 5
+  parameters:
+  - feasibleSpace:
+      max: '0.001'
+      min: '0.00001'
+    name: learning_rate
+    parameterType: double
+  - feasibleSpace:
+      max: '64'
+      min: '16'
+    name: batch_size
+    parameterType: int
+  - feasibleSpace:
+      list:
+      - '0'
+      - '1'
+    name: histogram_norm
+    parameterType: discrete
+  trialTemplate:
+    failureCondition: status.[@this].#(phase=="Failed")#
+    primaryContainerName: main
+    primaryPodLabels:
+      katib.kubeflow.org/model-training: 'true'
+    retain: false
+    successCondition: status.[@this].#(phase=="Succeeded")#
+    trialParameters:
+    - description: Learning rate for the training model
+      name: learningRate
+      reference: learning_rate
+    - description: Batch size for NN training
+      name: batchSize
+      reference: batch_size
+    - description: Histogram normalization of image on?
+      name: histogramNorm
+      reference: histogram_norm
+    trialSpec:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Workflow
+      metadata:
+        annotations:
+          pipelines.kubeflow.org/kfp_sdk_version: 1.8.12
+          pipelines.kubeflow.org/pipeline_compilation_time: '2023-07-20T22:37:57.355215'
+          pipelines.kubeflow.org/pipeline_spec: '{"inputs": [{"default": "0.0001",
+            "name": "lr", "optional": true, "type": "Float"}, {"default": "Adam",
+            "name": "optimizer", "optional": true, "type": "String"}, {"default":
+            "categorical_crossentropy", "name": "loss", "optional": true, "type":
+            "String"}, {"default": "3", "name": "epochs", "optional": true, "type":
+            "Integer"}, {"default": "5", "name": "batch_size", "optional": true, "type":
+            "Integer"}, {"default": "False", "name": "histogram_norm", "optional":
+            true, "type": "Boolean"}, {"default": "${trialParameters.learningRate}",
+            "name": "lr"}, {"default": "${trialParameters.batchSize}", "name": "batch_size"},
+            {"default": "${trialParameters.histogramNorm}", "name": "histogram_norm"}],
+            "name": "Minimal KFP1 pipeline for e2e testing"}'
+        generateName: minimal-kfp1-pipeline-for-e2e-testing-
+        labels:
+          pipelines.kubeflow.org/kfp_sdk_version: 1.8.12
+      spec:
+        arguments:
+          parameters:
+          - name: lr
+            value: ${trialParameters.learningRate}
+          - name: optimizer
+            value: Adam
+          - name: loss
+            value: categorical_crossentropy
+          - name: epochs
+            value: '3'
+          - name: batch_size
+            value: ${trialParameters.batchSize}
+          - name: histogram_norm
+            value: ${trialParameters.histogramNorm}
+        entrypoint: minimal-kfp1-pipeline-for-e2e-testing
+        serviceAccountName: pipeline-runner
+        templates:
+        - dag:
+            tasks:
+            - arguments:
+                parameters:
+                - name: histogram_norm
+                  value: '{{inputs.parameters.histogram_norm}}'
+              name: prep-e2e
+              template: prep-e2e
+            - arguments:
+                artifacts:
+                - from: '{{tasks.prep-e2e.outputs.artifacts.prep-e2e-output_nr}}'
+                  name: prep-e2e-output_nr
+                parameters:
+                - name: batch_size
+                  value: '{{inputs.parameters.batch_size}}'
+                - name: epochs
+                  value: '{{inputs.parameters.epochs}}'
+                - name: loss
+                  value: '{{inputs.parameters.loss}}'
+                - name: lr
+                  value: '{{inputs.parameters.lr}}'
+                - name: optimizer
+                  value: '{{inputs.parameters.optimizer}}'
+              dependencies:
+              - prep-e2e
+              name: train-e2e
+              template: train-e2e
+          inputs:
+            parameters:
+            - name: batch_size
+            - name: epochs
+            - name: histogram_norm
+            - name: loss
+            - name: lr
+            - name: optimizer
+          name: minimal-kfp1-pipeline-for-e2e-testing
+        - container:
+            args:
+            - --histogram-norm
+            - '{{inputs.parameters.histogram_norm}}'
+            - --output-nr
+            - /tmp/outputs/output_nr/data
+            command:
+            - sh
+            - -ec
+            - 'program_path=$(mktemp)
+
+              printf "%s" "$0" > "$program_path"
+
+              python3 -u "$program_path" "$@"
+
+              '
+            - "def _make_parent_dirs_and_return_path(file_path: str):\n    import\
+              \ os\n    os.makedirs(os.path.dirname(file_path), exist_ok=True)\n \
+              \   return file_path\n\ndef prep_e2e(\n    output_nr_path,  # type:\
+              \ ignore # noqa: F821\n    histogram_norm = True,\n):\n    with open(output_nr_path,\
+              \ 'w') as writer:\n        writer.write(str(int(histogram_norm)))\n\n\
+              def _deserialize_bool(s) -> bool:\n    from distutils.util import strtobool\n\
+              \    return strtobool(s) == 1\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Prep\
+              \ e2e', description='')\n_parser.add_argument(\"--histogram-norm\",\
+              \ dest=\"histogram_norm\", type=_deserialize_bool, required=False, default=argparse.SUPPRESS)\n\
+              _parser.add_argument(\"--output-nr\", dest=\"output_nr_path\", type=_make_parent_dirs_and_return_path,\
+              \ required=True, default=argparse.SUPPRESS)\n_parsed_args = vars(_parser.parse_args())\n\
+              \n_outputs = prep_e2e(**_parsed_args)\n"
+            image: python:3.7
+          inputs:
+            parameters:
+            - name: histogram_norm
+          metadata:
+            annotations:
+              pipelines.kubeflow.org/arguments.parameters: '{"histogram_norm": "{{inputs.parameters.histogram_norm}}"}'
+              pipelines.kubeflow.org/component_ref: '{}'
+              pipelines.kubeflow.org/component_spec: '{"implementation": {"container":
+                {"args": [{"if": {"cond": {"isPresent": "histogram_norm"}, "then":
+                ["--histogram-norm", {"inputValue": "histogram_norm"}]}}, "--output-nr",
+                {"outputPath": "output_nr"}], "command": ["sh", "-ec", "program_path=$(mktemp)\nprintf
+                \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+                "def _make_parent_dirs_and_return_path(file_path: str):\n    import
+                os\n    os.makedirs(os.path.dirname(file_path), exist_ok=True)\n    return
+                file_path\n\ndef prep_e2e(\n    output_nr_path,  # type: ignore #
+                noqa: F821\n    histogram_norm = True,\n):\n    with open(output_nr_path,
+                ''w'') as writer:\n        writer.write(str(int(histogram_norm)))\n\ndef
+                _deserialize_bool(s) -> bool:\n    from distutils.util import strtobool\n    return
+                strtobool(s) == 1\n\nimport argparse\n_parser = argparse.ArgumentParser(prog=''Prep
+                e2e'', description='''')\n_parser.add_argument(\"--histogram-norm\",
+                dest=\"histogram_norm\", type=_deserialize_bool, required=False, default=argparse.SUPPRESS)\n_parser.add_argument(\"--output-nr\",
+                dest=\"output_nr_path\", type=_make_parent_dirs_and_return_path, required=True,
+                default=argparse.SUPPRESS)\n_parsed_args = vars(_parser.parse_args())\n\n_outputs
+                = prep_e2e(**_parsed_args)\n"], "image": "python:3.7"}}, "inputs":
+                [{"default": "True", "name": "histogram_norm", "optional": true, "type":
+                "Boolean"}], "name": "Prep e2e", "outputs": [{"name": "output_nr",
+                "type": "Integer"}]}'
+              pipelines.kubeflow.org/task_display_name: Prepare a dummy output that
+                should be cached
+            labels:
+              pipelines.kubeflow.org/cache_enabled: 'true'
+              pipelines.kubeflow.org/enable_caching: 'true'
+              pipelines.kubeflow.org/kfp_sdk_version: 1.8.12
+              pipelines.kubeflow.org/pipeline-sdk-type: kfp
+          name: prep-e2e
+          outputs:
+            artifacts:
+            - name: prep-e2e-output_nr
+              path: /tmp/outputs/output_nr/data
+        - container:
+            args:
+            - --input-nr
+            - /tmp/inputs/input_nr/data
+            - --lr
+            - '{{inputs.parameters.lr}}'
+            - --optimizer
+            - '{{inputs.parameters.optimizer}}'
+            - --loss
+            - '{{inputs.parameters.loss}}'
+            - --epochs
+            - '{{inputs.parameters.epochs}}'
+            - --batch-size
+            - '{{inputs.parameters.batch_size}}'
+            - --mlpipeline-metrics
+            - /tmp/outputs/mlpipeline_metrics/data
+            command:
+            - sh
+            - -ec
+            - 'program_path=$(mktemp)
+
+              printf "%s" "$0" > "$program_path"
+
+              python3 -u "$program_path" "$@"
+
+              '
+            - "def _make_parent_dirs_and_return_path(file_path: str):\n    import\
+              \ os\n    os.makedirs(os.path.dirname(file_path), exist_ok=True)\n \
+              \   return file_path\n\ndef train_e2e(\n    input_nr_path,  # type:\
+              \ ignore # noqa: F821\n    mlpipeline_metrics_path,  # type: ignore\
+              \ # noqa: F821\n    lr = 1e-4,\n    optimizer = \"Adam\",\n    loss\
+              \ = \"categorical_crossentropy\",\n    epochs = 1,\n    batch_size =\
+              \ 32,\n):\n    \"\"\"\n    This is the simulated train part of our ML\
+              \ pipeline where training is performed\n    \"\"\"\n    import json\
+              \ \n    import time\n    with open(input_nr_path, 'r') as reader:\n\
+              \        line = reader.readline()\n        histogram_norm_value = int(line)\n\
+              \n    accuracy = (batch_size + histogram_norm_value)/ (batch_size +\
+              \ epochs+histogram_norm_value)\n    val_accuracy = accuracy * 0.9\n\
+              \    metrics = {\n        \"metrics\": [\n            {\n          \
+              \      \"name\": \"accuracy\",  # The name of the metric. Visualized\
+              \ as the column name in the runs table.\n                \"numberValue\"\
+              : accuracy,  # The value of the metric. Must be a numeric value.\n \
+              \               \"format\": \"PERCENTAGE\",  # The optional format of\
+              \ the metric. Supported values are \"RAW\" (displayed in raw format)\
+              \ and \"PERCENTAGE\" (displayed in percentage format).\n           \
+              \ },\n            {\n                \"name\": \"val-accuracy\",  #\
+              \ The name of the metric. Visualized as the column name in the runs\
+              \ table.\n                \"numberValue\": val_accuracy,  # The value\
+              \ of the metric. Must be a numeric value.\n                \"format\"\
+              : \"PERCENTAGE\",  # The optional format of the metric. Supported values\
+              \ are \"RAW\" (displayed in raw format) and \"PERCENTAGE\" (displayed\
+              \ in percentage format).\n            },\n        ]\n    }\n    with\
+              \ open(mlpipeline_metrics_path, \"w\") as f:\n        json.dump(metrics,\
+              \ f)\n\n    # If this step is to fast, the metrics collector fails as\
+              \ the\n    # pod is already finished before it can collect the metrics.\n\
+              \    time.sleep(10)\n\nimport argparse\n_parser = argparse.ArgumentParser(prog='Train\
+              \ e2e', description='This is the simulated train part of our ML pipeline\
+              \ where training is performed')\n_parser.add_argument(\"--input-nr\"\
+              , dest=\"input_nr_path\", type=str, required=True, default=argparse.SUPPRESS)\n\
+              _parser.add_argument(\"--lr\", dest=\"lr\", type=float, required=False,\
+              \ default=argparse.SUPPRESS)\n_parser.add_argument(\"--optimizer\",\
+              \ dest=\"optimizer\", type=str, required=False, default=argparse.SUPPRESS)\n\
+              _parser.add_argument(\"--loss\", dest=\"loss\", type=str, required=False,\
+              \ default=argparse.SUPPRESS)\n_parser.add_argument(\"--epochs\", dest=\"\
+              epochs\", type=int, required=False, default=argparse.SUPPRESS)\n_parser.add_argument(\"\
+              --batch-size\", dest=\"batch_size\", type=int, required=False, default=argparse.SUPPRESS)\n\
+              _parser.add_argument(\"--mlpipeline-metrics\", dest=\"mlpipeline_metrics_path\"\
+              , type=_make_parent_dirs_and_return_path, required=True, default=argparse.SUPPRESS)\n\
+              _parsed_args = vars(_parser.parse_args())\n\n_outputs = train_e2e(**_parsed_args)\n"
+            image: python:3.7
+          inputs:
+            artifacts:
+            - name: prep-e2e-output_nr
+              path: /tmp/inputs/input_nr/data
+            parameters:
+            - name: batch_size
+            - name: epochs
+            - name: loss
+            - name: lr
+            - name: optimizer
+          metadata:
+            annotations:
+              pipelines.kubeflow.org/arguments.parameters: '{"batch_size": "{{inputs.parameters.batch_size}}",
+                "epochs": "{{inputs.parameters.epochs}}", "loss": "{{inputs.parameters.loss}}",
+                "lr": "{{inputs.parameters.lr}}", "optimizer": "{{inputs.parameters.optimizer}}"}'
+              pipelines.kubeflow.org/component_ref: '{}'
+              pipelines.kubeflow.org/component_spec: '{"description": "This is the
+                simulated train part of our ML pipeline where training is performed",
+                "implementation": {"container": {"args": ["--input-nr", {"inputPath":
+                "input_nr"}, {"if": {"cond": {"isPresent": "lr"}, "then": ["--lr",
+                {"inputValue": "lr"}]}}, {"if": {"cond": {"isPresent": "optimizer"},
+                "then": ["--optimizer", {"inputValue": "optimizer"}]}}, {"if": {"cond":
+                {"isPresent": "loss"}, "then": ["--loss", {"inputValue": "loss"}]}},
+                {"if": {"cond": {"isPresent": "epochs"}, "then": ["--epochs", {"inputValue":
+                "epochs"}]}}, {"if": {"cond": {"isPresent": "batch_size"}, "then":
+                ["--batch-size", {"inputValue": "batch_size"}]}}, "--mlpipeline-metrics",
+                {"outputPath": "mlpipeline_metrics"}], "command": ["sh", "-ec", "program_path=$(mktemp)\nprintf
+                \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+                "def _make_parent_dirs_and_return_path(file_path: str):\n    import
+                os\n    os.makedirs(os.path.dirname(file_path), exist_ok=True)\n    return
+                file_path\n\ndef train_e2e(\n    input_nr_path,  # type: ignore #
+                noqa: F821\n    mlpipeline_metrics_path,  # type: ignore # noqa: F821\n    lr
+                = 1e-4,\n    optimizer = \"Adam\",\n    loss = \"categorical_crossentropy\",\n    epochs
+                = 1,\n    batch_size = 32,\n):\n    \"\"\"\n    This is the simulated
+                train part of our ML pipeline where training is performed\n    \"\"\"\n    import
+                json \n    import time\n    with open(input_nr_path, ''r'') as reader:\n        line
+                = reader.readline()\n        histogram_norm_value = int(line)\n\n    accuracy
+                = (batch_size + histogram_norm_value)/ (batch_size + epochs+histogram_norm_value)\n    val_accuracy
+                = accuracy * 0.9\n    metrics = {\n        \"metrics\": [\n            {\n                \"name\":
+                \"accuracy\",  # The name of the metric. Visualized as the column
+                name in the runs table.\n                \"numberValue\": accuracy,  #
+                The value of the metric. Must be a numeric value.\n                \"format\":
+                \"PERCENTAGE\",  # The optional format of the metric. Supported values
+                are \"RAW\" (displayed in raw format) and \"PERCENTAGE\" (displayed
+                in percentage format).\n            },\n            {\n                \"name\":
+                \"val-accuracy\",  # The name of the metric. Visualized as the column
+                name in the runs table.\n                \"numberValue\": val_accuracy,  #
+                The value of the metric. Must be a numeric value.\n                \"format\":
+                \"PERCENTAGE\",  # The optional format of the metric. Supported values
+                are \"RAW\" (displayed in raw format) and \"PERCENTAGE\" (displayed
+                in percentage format).\n            },\n        ]\n    }\n    with
+                open(mlpipeline_metrics_path, \"w\") as f:\n        json.dump(metrics,
+                f)\n\n    # If this step is to fast, the metrics collector fails as
+                the\n    # pod is already finished before it can collect the metrics.\n    time.sleep(10)\n\nimport
+                argparse\n_parser = argparse.ArgumentParser(prog=''Train e2e'', description=''This
+                is the simulated train part of our ML pipeline where training is performed'')\n_parser.add_argument(\"--input-nr\",
+                dest=\"input_nr_path\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--lr\",
+                dest=\"lr\", type=float, required=False, default=argparse.SUPPRESS)\n_parser.add_argument(\"--optimizer\",
+                dest=\"optimizer\", type=str, required=False, default=argparse.SUPPRESS)\n_parser.add_argument(\"--loss\",
+                dest=\"loss\", type=str, required=False, default=argparse.SUPPRESS)\n_parser.add_argument(\"--epochs\",
+                dest=\"epochs\", type=int, required=False, default=argparse.SUPPRESS)\n_parser.add_argument(\"--batch-size\",
+                dest=\"batch_size\", type=int, required=False, default=argparse.SUPPRESS)\n_parser.add_argument(\"--mlpipeline-metrics\",
+                dest=\"mlpipeline_metrics_path\", type=_make_parent_dirs_and_return_path,
+                required=True, default=argparse.SUPPRESS)\n_parsed_args = vars(_parser.parse_args())\n\n_outputs
+                = train_e2e(**_parsed_args)\n"], "image": "python:3.7"}}, "inputs":
+                [{"name": "input_nr", "type": "Integer"}, {"default": "0.0001", "name":
+                "lr", "optional": true, "type": "Float"}, {"default": "Adam", "name":
+                "optimizer", "optional": true, "type": "String"}, {"default": "categorical_crossentropy",
+                "name": "loss", "optional": true, "type": "String"}, {"default": "1",
+                "name": "epochs", "optional": true, "type": "Integer"}, {"default":
+                "32", "name": "batch_size", "optional": true, "type": "Integer"}],
+                "name": "Train e2e", "outputs": [{"name": "mlpipeline_metrics", "type":
+                "Metrics"}]}'
+              pipelines.kubeflow.org/max_cache_staleness: P0D
+              pipelines.kubeflow.org/task_display_name: Generate dummy metrics
+            labels:
+              katib.kubeflow.org/model-training: 'true'
+              pipelines.kubeflow.org/enable_caching: 'true'
+              pipelines.kubeflow.org/kfp_sdk_version: 1.8.12
+              pipelines.kubeflow.org/pipeline-sdk-type: kfp
+          name: train-e2e
+          outputs:
+            artifacts:
+            - name: mlpipeline-metrics
+              path: /tmp/outputs/mlpipeline_metrics/data
