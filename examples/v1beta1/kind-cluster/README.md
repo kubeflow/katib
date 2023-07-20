@@ -10,7 +10,7 @@ Install the following tools to run the example:
 
 - [Docker](https://docs.docker.com/get-docker) >= 20.10
 - [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) >= 0.13
-- [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl) >= 1.22
+- [`kubectl`](https://kubernetes.io/docs/tasks/tools/#kubectl) >= 1.24
 
 ## Installation
 
