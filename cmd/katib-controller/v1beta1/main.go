@@ -114,7 +114,7 @@ func main() {
 	mgr, err := manager.New(cfg, manager.Options{
 		MetricsBindAddress:     initConfig.ControllerConfig.MetricsAddr,
 		HealthProbeBindAddress: initConfig.ControllerConfig.HealthzAddr,
-		LeaderElection:         *initConfig.ControllerConfig.EnableLeaderElection,
+		LeaderElection:         initConfig.ControllerConfig.EnableLeaderElection,
 		LeaderElectionID:       initConfig.ControllerConfig.LeaderElectionID,
 		Scheme:                 scheme,
 		// TODO: Once the below issue is resolved, we need to switch discovery-client to the built-in one.

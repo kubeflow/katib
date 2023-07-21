@@ -73,7 +73,7 @@ type ControllerConfig struct {
 	// EnableLeaderElection indicates whether enable leader election for katib-controller.
 	// Enabling this will ensure there is only one active katib-controller.
 	// Defaults to 'false'.
-	EnableLeaderElection *bool `json:"enableLeaderElection,omitempty"`
+	EnableLeaderElection bool `json:"enableLeaderElection,omitempty"`
 	// LeaderElectionID is the ID for leader election.
 	// Defaults to '3fbc96e9.katib.kubeflow.org'.
 	LeaderElectionID string `json:"leaderElectionID,omitempty"`

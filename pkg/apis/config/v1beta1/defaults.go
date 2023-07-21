@@ -68,10 +68,6 @@ func setInitConfig(initConfig *InitConfig) {
 	if initConfig.ControllerConfig.WebhookPort == nil {
 		initConfig.ControllerConfig.WebhookPort = &DefaultWebhookPort
 	}
-	// Set EnableLeaderElection.
-	if initConfig.ControllerConfig.EnableLeaderElection == nil {
-		initConfig.ControllerConfig.EnableLeaderElection = &DefaultEnableLeaderElection
-	}
 	// Set LeaderElectionID.
 	if initConfig.ControllerConfig.LeaderElectionID == "" {
 		initConfig.ControllerConfig.LeaderElectionID = DefaultLeaderElectionID
