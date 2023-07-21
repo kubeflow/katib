@@ -13,11 +13,11 @@ init:
       - MXJob.v1.kubeflow.org
 runtime:
   metricsCollectorSidecars:
-    - collectorKind: StdOut
+    - kind: StdOut
       image: docker.io/kubeflowkatib/file-metrics-collector:latest
-    - collectorKind: File
+    - kind: File
       image: docker.io/kubeflowkatib/file-metrics-collector:latest
-    - collectorKind: TensorFlowEvent
+    - kind: TensorFlowEvent
       image: docker.io/kubeflowkatib/tfevent-metrics-collector:latest
       resources:
         limits:

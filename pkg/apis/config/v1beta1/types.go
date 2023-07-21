@@ -100,7 +100,7 @@ type EarlyStoppingConfig struct {
 
 // MetricsCollectorConfig is the metrics collector structure in Katib config.
 type MetricsCollectorConfig struct {
-	CollectorKind    string                      `json:"collectorKind"`
+	CollectorKind    string                      `json:"kind"`
 	Image            string                      `json:"image"`
 	ImagePullPolicy  corev1.PullPolicy           `json:"imagePullPolicy,omitempty"`
 	Resource         corev1.ResourceRequirements `json:"resources,omitempty"`
