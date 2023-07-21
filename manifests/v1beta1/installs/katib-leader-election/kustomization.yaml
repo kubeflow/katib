@@ -9,10 +9,10 @@ resources:
 replicas:
   - name: katib-controller
     count: 2
-patchesJson6902:
-  - target:
-      group: apps
-      version: v1
-      kind: Deployment
-      name: katib-controller
-    path: ./patches/controller.yaml
+configMapGenerator:
+  - name: katib-config
+    behavior: replace
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true
