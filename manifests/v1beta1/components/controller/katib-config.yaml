@@ -12,7 +12,7 @@ init:
       - XGBoostJob.v1.kubeflow.org
       - MXJob.v1.kubeflow.org
 runtime:
-  metricsCollectorSidecars:
+  metricsCollectors:
     - kind: StdOut
       image: docker.io/kubeflowkatib/file-metrics-collector:latest
     - kind: File

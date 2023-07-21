@@ -320,7 +320,7 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 			err:             true,
 		},
 		{
-			testDescription: "There is not runtime.metricsCollectorSidecars field in katib-config configMap",
+			testDescription: "There is not runtime.metricsCollectors field in katib-config configMap",
 			katibConfig:     &configapi.KatibConfig{},
 			err:             true,
 		},

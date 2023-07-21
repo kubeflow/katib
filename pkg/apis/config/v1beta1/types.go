@@ -35,7 +35,7 @@ type KatibConfig struct {
 type RuntimeConfig struct {
 	SuggestionConfigs       []SuggestionConfig       `json:"suggestions,omitempty"`
 	EarlyStoppingConfigs    []EarlyStoppingConfig    `json:"earlyStoppings,omitempty"`
-	MetricsCollectorConfigs []MetricsCollectorConfig `json:"metricsCollectorSidecars,omitempty"`
+	MetricsCollectorConfigs []MetricsCollectorConfig `json:"metricsCollectors,omitempty"`
 }
 
 // InitConfig is the YAML init structure in Katib config.
