@@ -68,18 +68,18 @@ func main() {
 
 	flag.Parse()
 
-	inintConfig, err := katibconfig.GetInitConfigData(scheme, katibConfigFile)
+	initConfig, err := katibconfig.GetInitConfigData(scheme, katibConfigFile)
 	if err != nil {
 		log.Error(err, "Failed to get KatibConfig")
 		os.Exit(1)
 	}
 
 	// Set the config in viper.
-	viper.Set(consts.ConfigExperimentSuggestionName, inintConfig.ControllerConfig.ExperimentSuggestionName)
-	viper.Set(consts.ConfigInjectSecurityContext, inintConfig.ControllerConfig.InjectSecurityContext)
-	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, inintConfig.ControllerConfig.EnableGRPCProbeInSuggestion)
+	viper.Set(consts.ConfigExperimentSuggestionName, initConfig.ControllerConfig.ExperimentSuggestionName)
+	viper.Set(consts.ConfigInjectSecurityContext, initConfig.ControllerConfig.InjectSecurityContext)
+	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, initConfig.ControllerConfig.EnableGRPCProbeInSuggestion)
 
-	trialGVKs, err := katibconfig.TrialResourcesToGVKs(inintConfig.ControllerConfig.TrialResources)
+	trialGVKs, err := katibconfig.TrialResourcesToGVKs(initConfig.ControllerConfig.TrialResources)
 	if err != nil {
 		log.Error(err, "Failed to parse trialResources")
 		os.Exit(1)
@@ -90,11 +90,11 @@ func main() {
 		consts.ConfigExperimentSuggestionName,
 		viper.GetString(consts.ConfigExperimentSuggestionName),
 		"webhook-port",
-		inintConfig.ControllerConfig.WebhookPort,
+		initConfig.ControllerConfig.WebhookPort,
 		"metrics-addr",
-		inintConfig.ControllerConfig.MetricsAddr,
+		initConfig.ControllerConfig.MetricsAddr,
 		"healthz-addr",
-		inintConfig.ControllerConfig.HealthzAddr,
+		initConfig.ControllerConfig.HealthzAddr,
 		consts.ConfigInjectSecurityContext,
 		viper.GetBool(consts.ConfigInjectSecurityContext),
 		consts.ConfigEnableGRPCProbeInSuggestion,
@@ -112,10 +112,10 @@ func main() {
 
 	// Create a new katib controller to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
-		MetricsBindAddress:     inintConfig.ControllerConfig.MetricsAddr,
-		HealthProbeBindAddress: inintConfig.ControllerConfig.HealthzAddr,
-		LeaderElection:         *inintConfig.ControllerConfig.EnableLeaderElection,
-		LeaderElectionID:       inintConfig.ControllerConfig.LeaderElectionID,
+		MetricsBindAddress:     initConfig.ControllerConfig.MetricsAddr,
+		HealthProbeBindAddress: initConfig.ControllerConfig.HealthzAddr,
+		LeaderElection:         *initConfig.ControllerConfig.EnableLeaderElection,
+		LeaderElectionID:       initConfig.ControllerConfig.LeaderElectionID,
 		Scheme:                 scheme,
 		// TODO: Once the below issue is resolved, we need to switch discovery-client to the built-in one.
 		// https://github.com/kubernetes-sigs/controller-runtime/issues/2354
@@ -137,7 +137,7 @@ func main() {
 	}
 
 	log.Info("Setting up webhooks.")
-	if err := webhook.AddToManager(mgr, *inintConfig.ControllerConfig.WebhookPort); err != nil {
+	if err := webhook.AddToManager(mgr, *initConfig.ControllerConfig.WebhookPort); err != nil {
 		log.Error(err, "Unable to register webhooks to the manager")
 		os.Exit(1)
 	}
