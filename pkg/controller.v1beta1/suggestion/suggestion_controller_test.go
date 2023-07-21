@@ -38,7 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
@@ -84,7 +84,7 @@ func TestReconcile(t *testing.T) {
 	// channel when it is finished.
 	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(configapi.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
+	g.Expect(configv1beta1.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
 	c := mgr.GetClient()
 
 	r := &ReconcileSuggestion{
@@ -436,9 +436,9 @@ func newFakeInstance() *suggestionsv1beta1.Suggestion {
 
 func newKatibConfigMapInstance() *corev1.ConfigMap {
 	// Create suggestion config
-	katibConfig := configapi.KatibConfig{
-		RuntimeConfig: configapi.RuntimeConfig{
-			SuggestionConfigs: []configapi.SuggestionConfig{
+	katibConfig := configv1beta1.KatibConfig{
+		RuntimeConfig: configv1beta1.RuntimeConfig{
+			SuggestionConfigs: []configv1beta1.SuggestionConfig{
 				{
 					AlgorithmName: "random",
 					Container: corev1.Container{
@@ -446,7 +446,7 @@ func newKatibConfigMapInstance() *corev1.ConfigMap {
 					},
 				},
 			},
-			EarlyStoppingConfigs: []configapi.EarlyStoppingConfig{
+			EarlyStoppingConfigs: []configv1beta1.EarlyStoppingConfig{
 				{
 					AlgorithmName:   "median-stop",
 					Image:           "test-image",

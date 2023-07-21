@@ -46,7 +46,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -133,7 +133,7 @@ func TestDesiredDeployment(t *testing.T) {
 
 	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(configapi.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
+	g.Expect(configv1beta1.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
 
 	// Start test manager.
 	wg := &sync.WaitGroup{}
@@ -381,7 +381,7 @@ func TestDesiredVolume(t *testing.T) {
 
 	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(configapi.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
+	g.Expect(configv1beta1.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
 
 	// Start test manager.
 	wg := &sync.WaitGroup{}
@@ -643,12 +643,12 @@ func metaEqual(expected, actual metav1.ObjectMeta) bool {
 			len(actual.OwnerReferences) == 0)
 }
 
-func newFakeSuggestionConfig() configapi.SuggestionConfig {
+func newFakeSuggestionConfig() configv1beta1.SuggestionConfig {
 	cpuQ, _ := resource.ParseQuantity(cpu)
 	memoryQ, _ := resource.ParseQuantity(memory)
 	diskQ, _ := resource.ParseQuantity(disk)
 
-	return configapi.SuggestionConfig{
+	return configv1beta1.SuggestionConfig{
 		AlgorithmName: suggestionAlgorithm,
 		Container: corev1.Container{
 			Image:           image,
@@ -670,12 +670,12 @@ func newFakeSuggestionConfig() configapi.SuggestionConfig {
 	}
 }
 
-func newFakeEarlyStoppingConfig() configapi.EarlyStoppingConfig {
+func newFakeEarlyStoppingConfig() configv1beta1.EarlyStoppingConfig {
 	cpuQ, _ := resource.ParseQuantity(cpu)
 	memoryQ, _ := resource.ParseQuantity(memory)
 	diskQ, _ := resource.ParseQuantity(disk)
 
-	return configapi.EarlyStoppingConfig{
+	return configv1beta1.EarlyStoppingConfig{
 		AlgorithmName:   earlyStoppingAlgorithm,
 		Image:           image,
 		ImagePullPolicy: imagePullPolicy,
@@ -694,13 +694,13 @@ func newFakeEarlyStoppingConfig() configapi.EarlyStoppingConfig {
 	}
 }
 
-func newFakeKatibConfig(suggestionConfig configapi.SuggestionConfig, earlyStoppingConfig configapi.EarlyStoppingConfig) *corev1.ConfigMap {
-	katibConfig := configapi.KatibConfig{
-		RuntimeConfig: configapi.RuntimeConfig{
-			SuggestionConfigs: []configapi.SuggestionConfig{
+func newFakeKatibConfig(suggestionConfig configv1beta1.SuggestionConfig, earlyStoppingConfig configv1beta1.EarlyStoppingConfig) *corev1.ConfigMap {
+	katibConfig := configv1beta1.KatibConfig{
+		RuntimeConfig: configv1beta1.RuntimeConfig{
+			SuggestionConfigs: []configv1beta1.SuggestionConfig{
 				suggestionConfig,
 			},
-			EarlyStoppingConfigs: []configapi.EarlyStoppingConfig{
+			EarlyStoppingConfigs: []configv1beta1.EarlyStoppingConfig{
 				earlyStoppingConfig,
 			},
 		},

@@ -36,7 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
@@ -84,7 +84,7 @@ func TestTrialResourcesToGVKs(t *testing.T) {
 func TestGetSuggestionConfigData(t *testing.T) {
 	const testAlgorithmName = "test-suggestion"
 	scm := runtime.NewScheme()
-	if err := configapi.AddToScheme(scm); err != nil {
+	if err := configv1beta1.AddToScheme(scm); err != nil {
 		t.Fatal(err)
 	}
 	if err := clientgoscheme.AddToScheme(scm); err != nil {
@@ -93,21 +93,21 @@ func TestGetSuggestionConfigData(t *testing.T) {
 
 	tests := []struct {
 		testDescription    string
-		katibConfig        *configapi.KatibConfig
-		expected           *configapi.SuggestionConfig
+		katibConfig        *configv1beta1.KatibConfig
+		expected           *configv1beta1.SuggestionConfig
 		inputAlgorithmName string
 		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfig: func() *configapi.KatibConfig {
-				kc := &configapi.KatibConfig{
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
 					TypeMeta: metav1.TypeMeta{
 						Kind:       "KatibConfig",
 						APIVersion: "config.kubeflow.org/v1beta1",
 					},
-					RuntimeConfig: configapi.RuntimeConfig{
-						SuggestionConfigs: []configapi.SuggestionConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						SuggestionConfigs: []configv1beta1.SuggestionConfig{
 							*newFakeSuggestionConfig(testAlgorithmName),
 						},
 					},
@@ -116,7 +116,7 @@ func TestGetSuggestionConfigData(t *testing.T) {
 				kc.RuntimeConfig.SuggestionConfigs[0].Resources = *newFakeCustomResourceRequirements()
 				return kc
 			}(),
-			expected: func() *configapi.SuggestionConfig {
+			expected: func() *configv1beta1.SuggestionConfig {
 				c := newFakeSuggestionConfig(testAlgorithmName)
 				c.ImagePullPolicy = corev1.PullAlways
 				c.Resources = *newFakeCustomResourceRequirements()
@@ -132,14 +132,14 @@ func TestGetSuggestionConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "There is not runtime.suggestions field in katib-config configMap",
-			katibConfig:     &configapi.KatibConfig{},
+			katibConfig:     &configv1beta1.KatibConfig{},
 			err:             true,
 		},
 		{
 			testDescription: "There is not the AlgorithmName",
-			katibConfig: &configapi.KatibConfig{
-				RuntimeConfig: configapi.RuntimeConfig{
-					SuggestionConfigs: []configapi.SuggestionConfig{
+			katibConfig: &configv1beta1.KatibConfig{
+				RuntimeConfig: configv1beta1.RuntimeConfig{
+					SuggestionConfigs: []configv1beta1.SuggestionConfig{
 						*newFakeSuggestionConfig(testAlgorithmName),
 					},
 				},
@@ -149,10 +149,10 @@ func TestGetSuggestionConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfig: func() *configapi.KatibConfig {
-				kc := &configapi.KatibConfig{
-					RuntimeConfig: configapi.RuntimeConfig{
-						SuggestionConfigs: []configapi.SuggestionConfig{
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						SuggestionConfigs: []configv1beta1.SuggestionConfig{
 							*newFakeSuggestionConfig(testAlgorithmName),
 						},
 					},
@@ -184,7 +184,7 @@ func TestGetSuggestionConfigData(t *testing.T) {
 func TestGetEarlyStoppingConfigData(t *testing.T) {
 	const testAlgorithmName = "test-early-stopping"
 	scm := runtime.NewScheme()
-	if err := configapi.AddToScheme(scm); err != nil {
+	if err := configv1beta1.AddToScheme(scm); err != nil {
 		t.Fatal(err)
 	}
 	if err := clientgoscheme.AddToScheme(scm); err != nil {
@@ -193,17 +193,17 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 
 	tests := []struct {
 		testDescription    string
-		katibConfig        *configapi.KatibConfig
-		expected           *configapi.EarlyStoppingConfig
+		katibConfig        *configv1beta1.KatibConfig
+		expected           *configv1beta1.EarlyStoppingConfig
 		inputAlgorithmName string
 		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfig: func() *configapi.KatibConfig {
-				kc := &configapi.KatibConfig{
-					RuntimeConfig: configapi.RuntimeConfig{
-						EarlyStoppingConfigs: []configapi.EarlyStoppingConfig{
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						EarlyStoppingConfigs: []configv1beta1.EarlyStoppingConfig{
 							*newFakeEarlyStoppingConfig(testAlgorithmName),
 						},
 					},
@@ -211,7 +211,7 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 				kc.RuntimeConfig.EarlyStoppingConfigs[0].ImagePullPolicy = corev1.PullIfNotPresent
 				return kc
 			}(),
-			expected: func() *configapi.EarlyStoppingConfig {
+			expected: func() *configv1beta1.EarlyStoppingConfig {
 				c := newFakeEarlyStoppingConfig(testAlgorithmName)
 				c.ImagePullPolicy = corev1.PullIfNotPresent
 				return c
@@ -226,14 +226,14 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "There is not runtime.earlyStoppings field in katib-config configMap",
-			katibConfig:     &configapi.KatibConfig{},
+			katibConfig:     &configv1beta1.KatibConfig{},
 			err:             true,
 		},
 		{
 			testDescription: "There is not the AlgorithmName",
-			katibConfig: &configapi.KatibConfig{
-				RuntimeConfig: configapi.RuntimeConfig{
-					EarlyStoppingConfigs: []configapi.EarlyStoppingConfig{
+			katibConfig: &configv1beta1.KatibConfig{
+				RuntimeConfig: configv1beta1.RuntimeConfig{
+					EarlyStoppingConfigs: []configv1beta1.EarlyStoppingConfig{
 						*newFakeEarlyStoppingConfig(testAlgorithmName),
 					},
 				},
@@ -243,10 +243,10 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfig: func() *configapi.KatibConfig {
-				kc := &configapi.KatibConfig{
-					RuntimeConfig: configapi.RuntimeConfig{
-						EarlyStoppingConfigs: []configapi.EarlyStoppingConfig{
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						EarlyStoppingConfigs: []configv1beta1.EarlyStoppingConfig{
 							*newFakeEarlyStoppingConfig(testAlgorithmName),
 						},
 					},
@@ -279,7 +279,7 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 		testCollectorKind    commonv1beta1.CollectorKind = "testCollector"
 	)
 	scm := runtime.NewScheme()
-	if err := configapi.AddToScheme(scm); err != nil {
+	if err := configv1beta1.AddToScheme(scm); err != nil {
 		t.Fatal(err)
 	}
 	if err := clientgoscheme.AddToScheme(scm); err != nil {
@@ -288,17 +288,17 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 
 	tests := []struct {
 		testDescription    string
-		katibConfig        *configapi.KatibConfig
-		expected           *configapi.MetricsCollectorConfig
+		katibConfig        *configv1beta1.KatibConfig
+		expected           *configv1beta1.MetricsCollectorConfig
 		inputCollectorKind commonv1beta1.CollectorKind
 		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfig: func() *configapi.KatibConfig {
-				kc := &configapi.KatibConfig{
-					RuntimeConfig: configapi.RuntimeConfig{
-						MetricsCollectorConfigs: []configapi.MetricsCollectorConfig{
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
 							*newFakeMetricsCollectorConfig(testCollectorKind),
 						},
 					},
@@ -306,7 +306,7 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 				kc.RuntimeConfig.MetricsCollectorConfigs[0].ImagePullPolicy = corev1.PullNever
 				return kc
 			}(),
-			expected: func() *configapi.MetricsCollectorConfig {
+			expected: func() *configv1beta1.MetricsCollectorConfig {
 				c := newFakeMetricsCollectorConfig(testCollectorKind)
 				c.ImagePullPolicy = corev1.PullNever
 				return c
@@ -321,14 +321,14 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "There is not runtime.metricsCollectors field in katib-config configMap",
-			katibConfig:     &configapi.KatibConfig{},
+			katibConfig:     &configv1beta1.KatibConfig{},
 			err:             true,
 		},
 		{
 			testDescription: "There is not the cKind",
-			katibConfig: &configapi.KatibConfig{
-				RuntimeConfig: configapi.RuntimeConfig{
-					MetricsCollectorConfigs: []configapi.MetricsCollectorConfig{
+			katibConfig: &configv1beta1.KatibConfig{
+				RuntimeConfig: configv1beta1.RuntimeConfig{
+					MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
 						*newFakeMetricsCollectorConfig(testCollectorKind),
 					},
 				},
@@ -338,10 +338,10 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfig: func() *configapi.KatibConfig {
-				kc := &configapi.KatibConfig{
-					RuntimeConfig: configapi.RuntimeConfig{
-						MetricsCollectorConfigs: []configapi.MetricsCollectorConfig{
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
 							*newFakeMetricsCollectorConfig(testCollectorKind),
 						},
 					},
@@ -375,7 +375,7 @@ func TestGetInitConfigData(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 	scm := runtime.NewScheme()
-	if err = configapi.AddToScheme(scm); err != nil {
+	if err = configv1beta1.AddToScheme(scm); err != nil {
 		t.Fatal(err)
 	}
 
@@ -410,20 +410,20 @@ runtime:
 
 	cases := map[string]struct {
 		katibConfigFile    string
-		wantInitConfigData configapi.InitConfig
+		wantInitConfigData configv1beta1.InitConfig
 		wantError          error
 	}{
 		"KatibConfigFile is empty": {
 			katibConfigFile: "",
-			wantInitConfigData: configapi.InitConfig{
-				ControllerConfig: configapi.ControllerConfig{
-					ExperimentSuggestionName:    configapi.DefaultExperimentSuggestionName,
-					MetricsAddr:                 configapi.DefaultMetricsAddr,
-					HealthzAddr:                 configapi.DefaultHealthzAddr,
-					EnableGRPCProbeInSuggestion: &configapi.DefaultEnableGRPCProbeInSuggestion,
-					TrialResources:              configapi.DefaultTrialResources,
-					WebhookPort:                 &configapi.DefaultWebhookPort,
-					LeaderElectionID:            configapi.DefaultLeaderElectionID,
+			wantInitConfigData: configv1beta1.InitConfig{
+				ControllerConfig: configv1beta1.ControllerConfig{
+					ExperimentSuggestionName:    configv1beta1.DefaultExperimentSuggestionName,
+					MetricsAddr:                 configv1beta1.DefaultMetricsAddr,
+					HealthzAddr:                 configv1beta1.DefaultHealthzAddr,
+					EnableGRPCProbeInSuggestion: &configv1beta1.DefaultEnableGRPCProbeInSuggestion,
+					TrialResources:              configv1beta1.DefaultTrialResources,
+					WebhookPort:                 &configv1beta1.DefaultWebhookPort,
+					LeaderElectionID:            configv1beta1.DefaultLeaderElectionID,
 				},
 			},
 		},
@@ -433,8 +433,8 @@ runtime:
 		},
 		"full init config": {
 			katibConfigFile: fullInitConfig,
-			wantInitConfigData: configapi.InitConfig{
-				ControllerConfig: configapi.ControllerConfig{
+			wantInitConfigData: configv1beta1.InitConfig{
+				ControllerConfig: configv1beta1.ControllerConfig{
 					ExperimentSuggestionName:    "test",
 					MetricsAddr:                 ":8081",
 					HealthzAddr:                 ":18081",
@@ -476,7 +476,7 @@ func newFakeKubeClient(scm *runtime.Scheme, katibConfigMap *corev1.ConfigMap) cl
 	return fakeClientBuilder.Build()
 }
 
-func newFakeKatibConfigMap(config *configapi.KatibConfig) *corev1.ConfigMap {
+func newFakeKatibConfigMap(config *configv1beta1.KatibConfig) *corev1.ConfigMap {
 	if config == nil {
 		return nil
 	}
@@ -510,10 +510,10 @@ func newFakeKatibConfigMap(config *configapi.KatibConfig) *corev1.ConfigMap {
 	}
 }
 
-func newFakeSuggestionConfig(algorithmName string) *configapi.SuggestionConfig {
+func newFakeSuggestionConfig(algorithmName string) *configv1beta1.SuggestionConfig {
 	defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
 
-	return &configapi.SuggestionConfig{
+	return &configv1beta1.SuggestionConfig{
 		AlgorithmName: algorithmName,
 		Container: corev1.Container{
 			Image:           "suggestion-image",
@@ -537,8 +537,8 @@ func newFakeSuggestionConfig(algorithmName string) *configapi.SuggestionConfig {
 	}
 }
 
-func newFakeEarlyStoppingConfig(algorithmName string) *configapi.EarlyStoppingConfig {
-	return &configapi.EarlyStoppingConfig{
+func newFakeEarlyStoppingConfig(algorithmName string) *configv1beta1.EarlyStoppingConfig {
+	return &configv1beta1.EarlyStoppingConfig{
 		AlgorithmName:   algorithmName,
 		Image:           "early-stopping-image",
 		ImagePullPolicy: consts.DefaultImagePullPolicy,
@@ -546,8 +546,8 @@ func newFakeEarlyStoppingConfig(algorithmName string) *configapi.EarlyStoppingCo
 	}
 }
 
-func newFakeMetricsCollectorConfig(collectorKind commonv1beta1.CollectorKind) *configapi.MetricsCollectorConfig {
-	return &configapi.MetricsCollectorConfig{
+func newFakeMetricsCollectorConfig(collectorKind commonv1beta1.CollectorKind) *configv1beta1.MetricsCollectorConfig {
+	return &configv1beta1.MetricsCollectorConfig{
 		CollectorKind:   string(collectorKind),
 		Image:           "metrics-collector-image",
 		ImagePullPolicy: consts.DefaultImagePullPolicy,

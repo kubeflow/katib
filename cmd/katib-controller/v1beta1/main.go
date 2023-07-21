@@ -34,7 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
-	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
@@ -48,7 +48,7 @@ var scheme = runtime.NewScheme()
 
 func init() {
 	utilruntime.Must(apis.AddToScheme(scheme))
-	utilruntime.Must(configapi.AddToScheme(scheme))
+	utilruntime.Must(configv1beta1.AddToScheme(scheme))
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 }
 

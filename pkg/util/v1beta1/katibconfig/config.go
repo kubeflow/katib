@@ -23,15 +23,16 @@ import (
 	"os"
 	"strings"
 
-	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
-	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
+	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
 var (
@@ -56,67 +57,67 @@ func TrialResourcesToGVKs(trialResources []string) ([]schema.GroupVersionKind, e
 }
 
 // GetSuggestionConfigData gets the config data for the given suggestion algorithm name.
-func GetSuggestionConfigData(algorithmName string, client client.Client) (configapi.SuggestionConfig, error) {
-	katibCfg := &configapi.KatibConfig{}
+func GetSuggestionConfigData(algorithmName string, client client.Client) (configv1beta1.SuggestionConfig, error) {
+	katibCfg := &configv1beta1.KatibConfig{}
 	if err := fromConfigMap(katibCfg, client); err != nil {
-		return configapi.SuggestionConfig{}, err
+		return configv1beta1.SuggestionConfig{}, err
 	}
 
 	// Try to find SuggestionConfig for the algorithm
-	var suggestionConfigData *configapi.SuggestionConfig
+	var suggestionConfigData *configv1beta1.SuggestionConfig
 	for i := range katibCfg.RuntimeConfig.SuggestionConfigs {
 		if katibCfg.RuntimeConfig.SuggestionConfigs[i].AlgorithmName == algorithmName {
 			suggestionConfigData = &katibCfg.RuntimeConfig.SuggestionConfigs[i]
 		}
 	}
 	if suggestionConfigData == nil {
-		return configapi.SuggestionConfig{}, fmt.Errorf("failed to find suggestion config for algorithm: %s in ConfigMap: %s", algorithmName, consts.KatibConfigMapName)
+		return configv1beta1.SuggestionConfig{}, fmt.Errorf("failed to find suggestion config for algorithm: %s in ConfigMap: %s", algorithmName, consts.KatibConfigMapName)
 	}
 
 	// Get image from config
 	image := suggestionConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return configapi.SuggestionConfig{}, fmt.Errorf("required value for image configuration of algorithm name: %s", algorithmName)
+		return configv1beta1.SuggestionConfig{}, fmt.Errorf("required value for image configuration of algorithm name: %s", algorithmName)
 	}
 	return *suggestionConfigData, nil
 }
 
 // GetEarlyStoppingConfigData gets the config data for the given early stopping algorithm name.
-func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (configapi.EarlyStoppingConfig, error) {
-	katibCfg := &configapi.KatibConfig{}
+func GetEarlyStoppingConfigData(algorithmName string, client client.Client) (configv1beta1.EarlyStoppingConfig, error) {
+	katibCfg := &configv1beta1.KatibConfig{}
 	if err := fromConfigMap(katibCfg, client); err != nil {
-		return configapi.EarlyStoppingConfig{}, err
+		return configv1beta1.EarlyStoppingConfig{}, err
 	}
 
 	// Try to find EarlyStoppingConfig for the algorithm
-	var earlyStoppingConfigData *configapi.EarlyStoppingConfig
+	var earlyStoppingConfigData *configv1beta1.EarlyStoppingConfig
 	for i := range katibCfg.RuntimeConfig.EarlyStoppingConfigs {
 		if katibCfg.RuntimeConfig.EarlyStoppingConfigs[i].AlgorithmName == algorithmName {
 			earlyStoppingConfigData = &katibCfg.RuntimeConfig.EarlyStoppingConfigs[i]
 		}
 	}
 	if earlyStoppingConfigData == nil {
-		return configapi.EarlyStoppingConfig{}, fmt.Errorf("failed to find early stopping config for algorithm: %s in ConfigMap: %s", algorithmName, consts.KatibConfigMapName)
+		return configv1beta1.EarlyStoppingConfig{}, fmt.Errorf("failed to find early stopping config for algorithm: %s in ConfigMap: %s", algorithmName, consts.KatibConfigMapName)
 	}
 
 	// Get image from config.
 	image := earlyStoppingConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return configapi.EarlyStoppingConfig{}, fmt.Errorf("required value for image configuration of algorithm name: %s", algorithmName)
+		return configv1beta1.EarlyStoppingConfig{}, fmt.Errorf("required value for image configuration of algorithm name: %s", algorithmName)
 	}
 
 	return *earlyStoppingConfigData, nil
 }
 
 // GetMetricsCollectorConfigData gets the config data for the given collector kind.
-func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Client) (configapi.MetricsCollectorConfig, error) {
-	katibCfg := &configapi.KatibConfig{}
+func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Client) (configv1beta1.MetricsCollectorConfig, error) {
+	katibCfg := &configv1beta1.KatibConfig{}
 	if err := fromConfigMap(katibCfg, client); err != nil {
-		return configapi.MetricsCollectorConfig{}, err
+		return configv1beta1.MetricsCollectorConfig{}, err
 	}
 
 	// Try to find MetricsCollectorConfig for the collector kind
-	var metricsCollectorConfigData *configapi.MetricsCollectorConfig
+	var metricsCollectorConfigData *configv1beta1.MetricsCollectorConfig
 	kind := string(cKind)
 	for i := range katibCfg.RuntimeConfig.MetricsCollectorConfigs {
 		if katibCfg.RuntimeConfig.MetricsCollectorConfigs[i].CollectorKind == kind {
@@ -124,28 +125,28 @@ func GetMetricsCollectorConfigData(cKind common.CollectorKind, client client.Cli
 		}
 	}
 	if metricsCollectorConfigData == nil {
-		return configapi.MetricsCollectorConfig{}, fmt.Errorf("failed to find metrics collector config for kind: %s in ConfigMap: %s", kind, consts.KatibConfigMapName)
+		return configv1beta1.MetricsCollectorConfig{}, fmt.Errorf("failed to find metrics collector config for kind: %s in ConfigMap: %s", kind, consts.KatibConfigMapName)
 	}
 
 	// Get image from config
 	image := metricsCollectorConfigData.Image
 	if strings.TrimSpace(image) == "" {
-		return configapi.MetricsCollectorConfig{}, fmt.Errorf("required value for image configuration of metrics collector kind: %s", kind)
+		return configv1beta1.MetricsCollectorConfig{}, fmt.Errorf("required value for image configuration of metrics collector kind: %s", kind)
 	}
 
 	return *metricsCollectorConfigData, nil
 }
 
 // GetInitConfigData gets the init config data.
-func GetInitConfigData(scheme *runtime.Scheme, katibCfgPath string) (configapi.InitConfig, error) {
-	var katibCfg configapi.KatibConfig
+func GetInitConfigData(scheme *runtime.Scheme, katibCfgPath string) (configv1beta1.InitConfig, error) {
+	var katibCfg configv1beta1.KatibConfig
 	if err := fromFile(scheme, &katibCfg, katibCfgPath); err != nil {
-		return configapi.InitConfig{}, fmt.Errorf("%w: %s", ErrKatibConfigNil, err.Error())
+		return configv1beta1.InitConfig{}, fmt.Errorf("%w: %s", ErrKatibConfigNil, err.Error())
 	}
 	return katibCfg.InitConfig, nil
 }
 
-func fromFile(scheme *runtime.Scheme, katibConfig *configapi.KatibConfig, katibConfigPath string) error {
+func fromFile(scheme *runtime.Scheme, katibConfig *configv1beta1.KatibConfig, katibConfigPath string) error {
 	if len(katibConfigPath) == 0 {
 		scheme.Default(katibConfig)
 		return nil
@@ -158,7 +159,7 @@ func fromFile(scheme *runtime.Scheme, katibConfig *configapi.KatibConfig, katibC
 	return runtime.DecodeInto(codecs.UniversalDecoder(), config, katibConfig)
 }
 
-func fromConfigMap(katibConfig *configapi.KatibConfig, client client.Client) error {
+func fromConfigMap(katibConfig *configv1beta1.KatibConfig, client client.Client) error {
 	configMap := &corev1.ConfigMap{}
 	err := client.Get(context.TODO(), apitypes.NamespacedName{Name: consts.KatibConfigMapName, Namespace: consts.DefaultKatibNamespace}, configMap)
 	if err != nil {

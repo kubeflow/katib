@@ -39,7 +39,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	configapi "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -322,7 +322,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 		MetricNames        string
 		MCSpec             common.MetricsCollectorSpec
 		EarlyStoppingRules []string
-		KatibConfig        configapi.MetricsCollectorConfig
+		KatibConfig        configv1beta1.MetricsCollectorConfig
 		ExpectedArgs       []string
 		Name               string
 		Err                bool
@@ -335,7 +335,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Kind: common.StdOutCollector,
 				},
 			},
-			KatibConfig: configapi.MetricsCollectorConfig{
+			KatibConfig: configv1beta1.MetricsCollectorConfig{
 				WaitAllProcesses: &waitAllProcessesValue,
 			},
 			ExpectedArgs: []string{
@@ -369,7 +369,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					},
 				},
 			},
-			KatibConfig: configapi.MetricsCollectorConfig{},
+			KatibConfig: configv1beta1.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -395,7 +395,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					},
 				},
 			},
-			KatibConfig: configapi.MetricsCollectorConfig{},
+			KatibConfig: configv1beta1.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -419,7 +419,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					},
 				},
 			},
-			KatibConfig: configapi.MetricsCollectorConfig{},
+			KatibConfig: configv1beta1.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -437,7 +437,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Kind: common.CustomCollector,
 				},
 			},
-			KatibConfig: configapi.MetricsCollectorConfig{},
+			KatibConfig: configv1beta1.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -459,7 +459,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					},
 				},
 			},
-			KatibConfig: configapi.MetricsCollectorConfig{},
+			KatibConfig: configv1beta1.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -477,7 +477,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 					Kind: common.PrometheusMetricCollector,
 				},
 			},
-			KatibConfig: configapi.MetricsCollectorConfig{},
+			KatibConfig: configv1beta1.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -495,7 +495,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				},
 			},
 			EarlyStoppingRules: earlyStoppingRules,
-			KatibConfig:        configapi.MetricsCollectorConfig{},
+			KatibConfig:        configv1beta1.MetricsCollectorConfig{},
 			ExpectedArgs: []string{
 				"-t", testTrialName,
 				"-m", testMetricName,
@@ -521,7 +521,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				},
 			},
 			EarlyStoppingRules: earlyStoppingRules,
-			KatibConfig:        configapi.MetricsCollectorConfig{},
+			KatibConfig:        configv1beta1.MetricsCollectorConfig{},
 			Name:               "Trial with invalid Experiment label name. Suggestion is not created",
 			Err:                true,
 		},
