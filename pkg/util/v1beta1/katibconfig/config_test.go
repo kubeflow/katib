@@ -511,19 +511,19 @@ func newFakeKatibConfigMap(config *configv1beta1.KatibConfig) *corev1.ConfigMap 
 }
 
 func newFakeSuggestionConfig(algorithmName string) *configv1beta1.SuggestionConfig {
-	defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
+	defaultVolumeStorage, _ := resource.ParseQuantity(configv1beta1.DefaultSuggestionVolumeStorage)
 
 	return &configv1beta1.SuggestionConfig{
 		AlgorithmName: algorithmName,
 		Container: corev1.Container{
 			Image:           "suggestion-image",
-			ImagePullPolicy: consts.DefaultImagePullPolicy,
+			ImagePullPolicy: configv1beta1.DefaultImagePullPolicy,
 			Resources:       *setFakeResourceRequirements(),
 		},
-		VolumeMountPath: consts.DefaultContainerSuggestionVolumeMountPath,
+		VolumeMountPath: configv1beta1.DefaultContainerSuggestionVolumeMountPath,
 		PersistentVolumeClaimSpec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: []corev1.PersistentVolumeAccessMode{
-				consts.DefaultSuggestionVolumeAccessMode,
+				configv1beta1.DefaultSuggestionVolumeAccessMode,
 			},
 			Resources: corev1.ResourceRequirements{
 				Requests: map[corev1.ResourceName]resource.Quantity{
@@ -541,7 +541,7 @@ func newFakeEarlyStoppingConfig(algorithmName string) *configv1beta1.EarlyStoppi
 	return &configv1beta1.EarlyStoppingConfig{
 		AlgorithmName:   algorithmName,
 		Image:           "early-stopping-image",
-		ImagePullPolicy: consts.DefaultImagePullPolicy,
+		ImagePullPolicy: configv1beta1.DefaultImagePullPolicy,
 		Resource:        *setFakeResourceRequirements(),
 	}
 }
@@ -550,19 +550,19 @@ func newFakeMetricsCollectorConfig(collectorKind commonv1beta1.CollectorKind) *c
 	return &configv1beta1.MetricsCollectorConfig{
 		CollectorKind:   string(collectorKind),
 		Image:           "metrics-collector-image",
-		ImagePullPolicy: consts.DefaultImagePullPolicy,
+		ImagePullPolicy: configv1beta1.DefaultImagePullPolicy,
 		Resource:        *setFakeResourceRequirements(),
 	}
 }
 
 func setFakeResourceRequirements() *corev1.ResourceRequirements {
-	defaultCPURequest, _ := resource.ParseQuantity(consts.DefaultCPURequest)
-	defaultMemoryRequest, _ := resource.ParseQuantity(consts.DefaultMemRequest)
-	defaultEphemeralStorageRequest, _ := resource.ParseQuantity(consts.DefaultDiskRequest)
+	defaultCPURequest, _ := resource.ParseQuantity(configv1beta1.DefaultCPURequest)
+	defaultMemoryRequest, _ := resource.ParseQuantity(configv1beta1.DefaultMemRequest)
+	defaultEphemeralStorageRequest, _ := resource.ParseQuantity(configv1beta1.DefaultDiskRequest)
 
-	defaultCPULimit, _ := resource.ParseQuantity(consts.DefaultCPULimit)
-	defaultMemoryLimit, _ := resource.ParseQuantity(consts.DefaultMemLimit)
-	defaultEphemeralStorageLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
+	defaultCPULimit, _ := resource.ParseQuantity(configv1beta1.DefaultCPULimit)
+	defaultMemoryLimit, _ := resource.ParseQuantity(configv1beta1.DefaultMemLimit)
+	defaultEphemeralStorageLimit, _ := resource.ParseQuantity(configv1beta1.DefaultDiskLimit)
 
 	return &corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{

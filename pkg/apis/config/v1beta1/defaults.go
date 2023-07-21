@@ -5,23 +5,46 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
-
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
 const (
+	// DefaultExperimentSuggestionName is the default name for the suggestions.
 	DefaultExperimentSuggestionName = "default"
-	DefaultMetricsAddr              = ":8080"
-	DefaultHealthzAddr              = ":18080"
-	DefaultLeaderElectionID         = "3fbc96e9.katib.kubeflow.org"
+	// DefaultMetricsAddr is the default address for the prometheus metrics.
+	DefaultMetricsAddr = ":8080"
+	// DefaultHealthzAddr is the default address for the health probe.
+	DefaultHealthzAddr = ":18080"
+	// DefaultLeaderElectionID is the default LeaderElectionID for the controller.
+	DefaultLeaderElectionID = "3fbc96e9.katib.kubeflow.org"
+	// DefaultContainerSuggestionVolumeMountPath is the default mount path in suggestion container.
+	DefaultContainerSuggestionVolumeMountPath = "/opt/katib/data"
+	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode.
+	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
+	// DefaultSuggestionVolumeStorage is the default value for suggestion's volume storage.
+	DefaultSuggestionVolumeStorage = "1Gi"
+	// DefaultImagePullPolicy is the default value for image pull policy.
+	DefaultImagePullPolicy = corev1.PullIfNotPresent
+	// DefaultCPULimit is the default value for CPU limit.
+	DefaultCPULimit = "500m"
+	// DefaultCPURequest is the default value for CPU request.
+	DefaultCPURequest = "50m"
+	// DefaultMemLimit is the default value for memory limit.
+	DefaultMemLimit = "100Mi"
+	// DefaultMemRequest is the default value for memory request.
+	DefaultMemRequest = "10Mi"
+	// DefaultDiskLimit is the default value for disk limit.
+	DefaultDiskLimit = "5Gi"
+	// DefaultDiskRequest is the default value for disk request.
+	DefaultDiskRequest = "500Mi"
 )
 
 var (
-	DefaultInjectSecurityContext       = false
+	// DefaultEnableGRPCProbeInSuggestion is the default value whether enable to gRPC probe in suggestions.
 	DefaultEnableGRPCProbeInSuggestion = true
-	DefaultWebhookPort                 = 8443
-	DefaultEnableLeaderElection        = false
-	DefaultTrialResources              = []string{"Job.v1.batch"}
+	// DefaultWebhookPort is the default port for the admission webhook.
+	DefaultWebhookPort = 8443
+	// DefaultTrialResources is the default resource which can be used as a trial template.
+	DefaultTrialResources = []string{"Job.v1.batch"}
 )
 
 func addDefaultingFuncs(scheme *runtime.Scheme) error {
@@ -86,7 +109,8 @@ func setSuggestionConfigs(suggestionConfigs []SuggestionConfig) {
 
 		// Set default suggestion container volume mount path
 		if suggestionConfigs[i].VolumeMountPath == "" {
-			suggestionConfigs[i].VolumeMountPath = consts.DefaultContainerSuggestionVolumeMountPath
+			suggestionConfigs[i].VolumeMountPath = DefaultContainerSuggestionVolumeMountPath
+
 		}
 
 		// Get persistent volume claim spec from config
@@ -95,13 +119,13 @@ func setSuggestionConfigs(suggestionConfigs []SuggestionConfig) {
 		// Set default access modes
 		if len(pvcSpec.AccessModes) == 0 {
 			pvcSpec.AccessModes = []corev1.PersistentVolumeAccessMode{
-				consts.DefaultSuggestionVolumeAccessMode,
+				DefaultSuggestionVolumeAccessMode,
 			}
 		}
 
 		// Set default resources
 		if len(pvcSpec.Resources.Requests) == 0 {
-			defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
+			defaultVolumeStorage, _ := resource.ParseQuantity(DefaultSuggestionVolumeStorage)
 			pvcSpec.Resources.Requests = make(map[corev1.ResourceName]resource.Quantity)
 			pvcSpec.Resources.Requests[corev1.ResourceStorage] = defaultVolumeStorage
 		}
@@ -142,7 +166,7 @@ func setEarlyStoppingConfigs(earlyStoppingConfigs []EarlyStoppingConfig) {
 
 func setImagePullPolicy(imagePullPolicy corev1.PullPolicy) corev1.PullPolicy {
 	if imagePullPolicy != corev1.PullAlways && imagePullPolicy != corev1.PullIfNotPresent && imagePullPolicy != corev1.PullNever {
-		return consts.DefaultImagePullPolicy
+		return DefaultImagePullPolicy
 	}
 	return imagePullPolicy
 }
@@ -160,15 +184,15 @@ func setResourceRequirements(configResource corev1.ResourceRequirements) corev1.
 
 	// If resource is empty set default value for CPU, Memory, Disk
 	if cpuRequest.IsZero() {
-		defaultCPURequest, _ := resource.ParseQuantity(consts.DefaultCPURequest)
+		defaultCPURequest, _ := resource.ParseQuantity(DefaultCPURequest)
 		configResource.Requests[corev1.ResourceCPU] = defaultCPURequest
 	}
 	if memRequest.IsZero() {
-		defaultMemRequest, _ := resource.ParseQuantity(consts.DefaultMemRequest)
+		defaultMemRequest, _ := resource.ParseQuantity(DefaultMemRequest)
 		configResource.Requests[corev1.ResourceMemory] = defaultMemRequest
 	}
 	if diskRequest.IsZero() {
-		defaultDiskRequest, _ := resource.ParseQuantity(consts.DefaultDiskRequest)
+		defaultDiskRequest, _ := resource.ParseQuantity(DefaultDiskRequest)
 		configResource.Requests[corev1.ResourceEphemeralStorage] = defaultDiskRequest
 	}
 
@@ -184,15 +208,15 @@ func setResourceRequirements(configResource corev1.ResourceRequirements) corev1.
 
 	// If limit is empty set default value for CPU, Memory, Disk
 	if cpuLimit.IsZero() {
-		defaultCPULimit, _ := resource.ParseQuantity(consts.DefaultCPULimit)
+		defaultCPULimit, _ := resource.ParseQuantity(DefaultCPULimit)
 		configResource.Limits[corev1.ResourceCPU] = defaultCPULimit
 	}
 	if memLimit.IsZero() {
-		defaultMemLimit, _ := resource.ParseQuantity(consts.DefaultMemLimit)
+		defaultMemLimit, _ := resource.ParseQuantity(DefaultMemLimit)
 		configResource.Limits[corev1.ResourceMemory] = defaultMemLimit
 	}
 	if diskLimit.IsZero() {
-		defaultDiskLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
+		defaultDiskLimit, _ := resource.ParseQuantity(DefaultDiskLimit)
 		configResource.Limits[corev1.ResourceEphemeralStorage] = defaultDiskLimit
 	}
 

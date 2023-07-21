@@ -19,8 +19,6 @@ package consts
 import (
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-
 	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 )
 
@@ -114,29 +112,6 @@ const (
 	KatibConfigMapName = "katib-config"
 	// LabelKatibConfigTag is the name of KatibConfig in Katib copnfigmap.
 	LabelKatibConfigTag = "katib-config.yaml"
-	// DefaultImagePullPolicy is the default value for image pull policy.
-	DefaultImagePullPolicy = corev1.PullIfNotPresent
-	// DefaultCPULimit is the default value for CPU limit.
-	DefaultCPULimit = "500m"
-	// DefaultCPURequest is the default value for CPU request.
-	DefaultCPURequest = "50m"
-	// DefaultMemLimit is the default value for memory limit.
-	DefaultMemLimit = "100Mi"
-	// DefaultMemRequest is the default value for memory request.
-	DefaultMemRequest = "10Mi"
-	// DefaultDiskLimit is the default value for disk limit.
-	DefaultDiskLimit = "5Gi"
-	// DefaultDiskRequest is the default value for disk request.
-	DefaultDiskRequest = "500Mi"
-
-	// DefaultContainerSuggestionVolumeMountPath is the default mount path in suggestion container
-	DefaultContainerSuggestionVolumeMountPath = "/opt/katib/data"
-
-	// DefaultSuggestionVolumeStorage is the default value for suggestion's volume storage
-	DefaultSuggestionVolumeStorage = "1Gi"
-
-	// DefaultSuggestionVolumeAccessMode is the default value for suggestion's volume access mode
-	DefaultSuggestionVolumeAccessMode = corev1.ReadWriteOnce
 
 	// SuggestionVolumeMountKey specifies the AlgorithmSettings key used to toggle Suggestion managed trial storage
 	SuggestionVolumeMountKey = "suggestion_trial_dir"

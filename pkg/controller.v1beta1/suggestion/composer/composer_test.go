@@ -182,8 +182,8 @@ func TestDesiredDeployment(t *testing.T) {
 			}(),
 			expectedDeployment: func() *appsv1.Deployment {
 				deploy := newFakeDeployment()
-				deploy.Spec.Template.Spec.Containers[0].ImagePullPolicy = consts.DefaultImagePullPolicy
-				deploy.Spec.Template.Spec.Containers[1].ImagePullPolicy = consts.DefaultImagePullPolicy
+				deploy.Spec.Template.Spec.Containers[0].ImagePullPolicy = configv1beta1.DefaultImagePullPolicy
+				deploy.Spec.Template.Spec.Containers[1].ImagePullPolicy = configv1beta1.DefaultImagePullPolicy
 				return deploy
 			}(),
 			err:             false,
@@ -853,7 +853,7 @@ func newFakeContainers() []corev1.Container {
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      consts.ContainerSuggestionVolumeName,
-					MountPath: consts.DefaultContainerSuggestionVolumeMountPath,
+					MountPath: configv1beta1.DefaultContainerSuggestionVolumeMountPath,
 				},
 			},
 		},
@@ -885,7 +885,7 @@ func newFakeContainers() []corev1.Container {
 
 func newFakePVC() *corev1.PersistentVolumeClaim {
 
-	volumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
+	volumeStorage, _ := resource.ParseQuantity(configv1beta1.DefaultSuggestionVolumeStorage)
 
 	return &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
@@ -903,7 +903,7 @@ func newFakePVC() *corev1.PersistentVolumeClaim {
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: []corev1.PersistentVolumeAccessMode{
-				consts.DefaultSuggestionVolumeAccessMode,
+				configv1beta1.DefaultSuggestionVolumeAccessMode,
 			},
 			Resources: corev1.ResourceRequirements{
 				Requests: corev1.ResourceList{
@@ -916,7 +916,7 @@ func newFakePVC() *corev1.PersistentVolumeClaim {
 
 func newFakePV() *corev1.PersistentVolume {
 	pvName := suggestionName + "-" + suggestionAlgorithm + "-" + namespace
-	volumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
+	volumeStorage, _ := resource.ParseQuantity(configv1beta1.DefaultSuggestionVolumeStorage)
 
 	return &corev1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
@@ -927,7 +927,7 @@ func newFakePV() *corev1.PersistentVolume {
 			StorageClassName:              storageClassName,
 			PersistentVolumeReclaimPolicy: corev1.PersistentVolumeReclaimDelete,
 			AccessModes: []corev1.PersistentVolumeAccessMode{
-				consts.DefaultSuggestionVolumeAccessMode,
+				configv1beta1.DefaultSuggestionVolumeAccessMode,
 			},
 			PersistentVolumeSource: corev1.PersistentVolumeSource{
 				HostPath: &corev1.HostPathVolumeSource{

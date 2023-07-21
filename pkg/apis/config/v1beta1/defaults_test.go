@@ -10,7 +10,6 @@ import (
 	"k8s.io/utils/pointer"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
 func TestSetSuggestionConfigs(t *testing.T) {
@@ -34,7 +33,7 @@ func TestSetSuggestionConfigs(t *testing.T) {
 				return []SuggestionConfig{*c}
 			}(),
 		},
-		fmt.Sprintf("GetSuggestionConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy): {
+		fmt.Sprintf("GetSuggestionConfigData sets %s to imagePullPolicy", DefaultImagePullPolicy): {
 			config: func() []SuggestionConfig {
 				suggestion := newFakeSuggestionConfig(testAlgorithmName)
 				suggestion.ImagePullPolicy = ""
@@ -50,7 +49,7 @@ func TestSetSuggestionConfigs(t *testing.T) {
 			}(),
 			wantConfig: []SuggestionConfig{*newFakeSuggestionConfig(testAlgorithmName)},
 		},
-		fmt.Sprintf("GetSuggestionConfigData sets %s to volumeMountPath", consts.DefaultContainerSuggestionVolumeMountPath): {
+		fmt.Sprintf("GetSuggestionConfigData sets %s to volumeMountPath", DefaultContainerSuggestionVolumeMountPath): {
 			config: func() []SuggestionConfig {
 				suggestion := newFakeSuggestionConfig(testAlgorithmName)
 				suggestion.VolumeMountPath = ""
@@ -113,7 +112,7 @@ func TestSetEarlyStoppingConfigs(t *testing.T) {
 				return []EarlyStoppingConfig{*c}
 			}(),
 		},
-		fmt.Sprintf("GetEarlyStoppingConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy): {
+		fmt.Sprintf("GetEarlyStoppingConfigData sets %s to imagePullPolicy", DefaultImagePullPolicy): {
 			config: func() []EarlyStoppingConfig {
 				c := newFakeEarlyStoppingConfig(testAlgorithmName)
 				c.ImagePullPolicy = ""
@@ -138,10 +137,7 @@ func TestSetEarlyStoppingConfigs(t *testing.T) {
 }
 
 func TestSetMetricsCollectorConfigs(t *testing.T) {
-	const (
-		invalidCollectorKind commonv1beta1.CollectorKind = "invalidCollector"
-		testCollectorKind    commonv1beta1.CollectorKind = "testCollector"
-	)
+	const testCollectorKind commonv1beta1.CollectorKind = "testCollector"
 	nukeResource, _ := resource.ParseQuantity("-1")
 	nukeResourceRequirements := map[corev1.ResourceName]resource.Quantity{
 		corev1.ResourceCPU:              nukeResource,
@@ -164,7 +160,7 @@ func TestSetMetricsCollectorConfigs(t *testing.T) {
 				return []MetricsCollectorConfig{*c}
 			}(),
 		},
-		fmt.Sprintf("GetMetricsConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy): {
+		fmt.Sprintf("GetMetricsConfigData sets %s to imagePullPolicy", DefaultImagePullPolicy): {
 			config: func() []MetricsCollectorConfig {
 				c := newFakeMetricsCollectorConfig(testCollectorKind)
 				c.ImagePullPolicy = ""
@@ -254,11 +250,9 @@ func TestSetInitConfig(t *testing.T) {
 					ExperimentSuggestionName:    DefaultExperimentSuggestionName,
 					MetricsAddr:                 DefaultMetricsAddr,
 					HealthzAddr:                 DefaultHealthzAddr,
-					InjectSecurityContext:       DefaultInjectSecurityContext,
 					EnableGRPCProbeInSuggestion: &DefaultEnableGRPCProbeInSuggestion,
 					TrialResources:              DefaultTrialResources,
 					WebhookPort:                 &DefaultWebhookPort,
-					EnableLeaderElection:        DefaultEnableLeaderElection,
 					LeaderElectionID:            DefaultLeaderElectionID,
 				},
 			},
@@ -278,19 +272,19 @@ func TestSetInitConfig(t *testing.T) {
 }
 
 func newFakeSuggestionConfig(algorithmName string) *SuggestionConfig {
-	defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
+	defaultVolumeStorage, _ := resource.ParseQuantity(DefaultSuggestionVolumeStorage)
 
 	return &SuggestionConfig{
 		AlgorithmName: algorithmName,
 		Container: corev1.Container{
 			Image:           "suggestion-image",
-			ImagePullPolicy: consts.DefaultImagePullPolicy,
+			ImagePullPolicy: DefaultImagePullPolicy,
 			Resources:       *setFakeResourceRequirements(),
 		},
-		VolumeMountPath: consts.DefaultContainerSuggestionVolumeMountPath,
+		VolumeMountPath: DefaultContainerSuggestionVolumeMountPath,
 		PersistentVolumeClaimSpec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: []corev1.PersistentVolumeAccessMode{
-				consts.DefaultSuggestionVolumeAccessMode,
+				DefaultSuggestionVolumeAccessMode,
 			},
 			Resources: corev1.ResourceRequirements{
 				Requests: map[corev1.ResourceName]resource.Quantity{
@@ -308,7 +302,7 @@ func newFakeEarlyStoppingConfig(algorithmName string) *EarlyStoppingConfig {
 	return &EarlyStoppingConfig{
 		AlgorithmName:   algorithmName,
 		Image:           "early-stopping-image",
-		ImagePullPolicy: consts.DefaultImagePullPolicy,
+		ImagePullPolicy: DefaultImagePullPolicy,
 		Resource:        *setFakeResourceRequirements(),
 	}
 }
@@ -317,19 +311,19 @@ func newFakeMetricsCollectorConfig(collectorKind commonv1beta1.CollectorKind) *M
 	return &MetricsCollectorConfig{
 		CollectorKind:   string(collectorKind),
 		Image:           "metrics-collector-image",
-		ImagePullPolicy: consts.DefaultImagePullPolicy,
+		ImagePullPolicy: DefaultImagePullPolicy,
 		Resource:        *setFakeResourceRequirements(),
 	}
 }
 
 func setFakeResourceRequirements() *corev1.ResourceRequirements {
-	defaultCPURequest, _ := resource.ParseQuantity(consts.DefaultCPURequest)
-	defaultMemoryRequest, _ := resource.ParseQuantity(consts.DefaultMemRequest)
-	defaultEphemeralStorageRequest, _ := resource.ParseQuantity(consts.DefaultDiskRequest)
+	defaultCPURequest, _ := resource.ParseQuantity(DefaultCPURequest)
+	defaultMemoryRequest, _ := resource.ParseQuantity(DefaultMemRequest)
+	defaultEphemeralStorageRequest, _ := resource.ParseQuantity(DefaultDiskRequest)
 
-	defaultCPULimit, _ := resource.ParseQuantity(consts.DefaultCPULimit)
-	defaultMemoryLimit, _ := resource.ParseQuantity(consts.DefaultMemLimit)
-	defaultEphemeralStorageLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
+	defaultCPULimit, _ := resource.ParseQuantity(DefaultCPULimit)
+	defaultMemoryLimit, _ := resource.ParseQuantity(DefaultMemLimit)
+	defaultEphemeralStorageLimit, _ := resource.ParseQuantity(DefaultDiskLimit)
 
 	return &corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{
