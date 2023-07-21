@@ -68,7 +68,7 @@ type ControllerConfig struct {
 	EnableGRPCProbeInSuggestion *bool `json:"enableGRPCProbeInSuggestion,omitempty"`
 	// TrialResources is the list of resources that can be used as trial template,
 	// in the form: Kind.Version.Group (e.g. TFJob.v1.kubeflow.org)
-	// It doesn't set as a default.
+	// Defaults to 'Job.v1.batch'
 	TrialResources []string `json:"trialResources,omitempty"`
 	// WebhookPort is the port number to be used for admission webhook server.
 	// Defaults to '8443'.
