@@ -42,8 +42,11 @@ type RuntimeConfig struct {
 type InitConfig struct {
 	ControllerConfig ControllerConfig `json:"controller,omitempty"`
 
-	// TODO (tenzen-y): Adding a config for the webhook certs here.
-	// Ref: https://github.com/kubeflow/katib/issues/2149
+	// TODO: Adding a config for the following components would be nice.
+	// - Webhook Certs
+	// - Katib DB
+	// - Katib DB Manager
+	// - Katib UI
 }
 
 // ControllerConfig is the controller structure in Katib config.
