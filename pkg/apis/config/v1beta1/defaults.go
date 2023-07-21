@@ -52,10 +52,6 @@ func setInitConfig(initConfig *InitConfig) {
 	if initConfig.ControllerConfig.HealthzAddr == "" {
 		initConfig.ControllerConfig.HealthzAddr = DefaultHealthzAddr
 	}
-	// Set InjectSecurityContext.
-	if initConfig.ControllerConfig.InjectSecurityContext == nil {
-		initConfig.ControllerConfig.InjectSecurityContext = &DefaultInjectSecurityContext
-	}
 	// Set EnableGRPCProbeInSuggestion.
 	if initConfig.ControllerConfig.EnableGRPCProbeInSuggestion == nil {
 		initConfig.ControllerConfig.EnableGRPCProbeInSuggestion = &DefaultEnableGRPCProbeInSuggestion

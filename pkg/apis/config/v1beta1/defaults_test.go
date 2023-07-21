@@ -217,7 +217,7 @@ func TestSetInitConfig(t *testing.T) {
 					ExperimentSuggestionName:    "test",
 					MetricsAddr:                 ":8081",
 					HealthzAddr:                 ":18081",
-					InjectSecurityContext:       pointer.Bool(true),
+					InjectSecurityContext:       true,
 					EnableGRPCProbeInSuggestion: pointer.Bool(false),
 					TrialResources: []string{
 						"Job.v1.batch",
@@ -233,7 +233,7 @@ func TestSetInitConfig(t *testing.T) {
 					ExperimentSuggestionName:    "test",
 					MetricsAddr:                 ":8081",
 					HealthzAddr:                 ":18081",
-					InjectSecurityContext:       pointer.Bool(true),
+					InjectSecurityContext:       true,
 					EnableGRPCProbeInSuggestion: pointer.Bool(false),
 					TrialResources: []string{
 						"Job.v1.batch",
@@ -254,7 +254,7 @@ func TestSetInitConfig(t *testing.T) {
 					ExperimentSuggestionName:    DefaultExperimentSuggestionName,
 					MetricsAddr:                 DefaultMetricsAddr,
 					HealthzAddr:                 DefaultHealthzAddr,
-					InjectSecurityContext:       &DefaultInjectSecurityContext,
+					InjectSecurityContext:       DefaultInjectSecurityContext,
 					EnableGRPCProbeInSuggestion: &DefaultEnableGRPCProbeInSuggestion,
 					TrialResources:              DefaultTrialResources,
 					WebhookPort:                 &DefaultWebhookPort,

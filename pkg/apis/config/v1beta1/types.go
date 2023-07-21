@@ -59,7 +59,7 @@ type ControllerConfig struct {
 	HealthzAddr string `json:"healthzAddr,omitempty"`
 	// InjectSecurityContext indicates whether inject the securityContext of container[0] in the sidecar.
 	// Defaults to 'false'.
-	InjectSecurityContext *bool `json:"injectSecurityContext,omitempty"`
+	InjectSecurityContext bool `json:"injectSecurityContext,omitempty"`
 	// EnableGRPCProbeInSuggestion indicates whether enable grpc probe in suggestions.
 	// Defaults to 'true'.
 	EnableGRPCProbeInSuggestion *bool `json:"enableGRPCProbeInSuggestion,omitempty"`
