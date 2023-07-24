@@ -25,7 +25,7 @@ jobs:
           - component-name: katib-db-manager
             dockerfile: cmd/db-manager/v1beta1/Dockerfile
           - component-name: katib-ui
-            dockerfile: cmd/new-ui/v1beta1/Dockerfile
+            dockerfile: cmd/ui/v1beta1/Dockerfile
           - component-name: cert-generator
             dockerfile: cmd/cert-generator/v1beta1/Dockerfile
           - component-name: file-metrics-collector

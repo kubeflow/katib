@@ -43,8 +43,7 @@ EXIT_HANDLER = "exit-handler"
 KATIB_IMAGES = {
     "katib-controller":              "cmd/katib-controller/v1beta1/Dockerfile",
     "katib-db-manager":              "cmd/db-manager/v1beta1/Dockerfile",
-    # TODO (andreyvelich): Change it to /cmd/ui/v1beta1/Dockerfile once old UI is deprecated.
-    "katib-ui":                      "cmd/new-ui/v1beta1/Dockerfile",
+    "katib-ui":                      "cmd/ui/v1beta1/Dockerfile",
     "cert-generator":                "cmd/cert-generator/v1beta1/Dockerfile",
     "file-metrics-collector":        "cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile",
     "tfevent-metrics-collector":     "cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile",

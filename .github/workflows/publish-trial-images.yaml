@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
     paths-ignore:
-      - "pkg/new-ui/v1beta1/frontend/**"
+      - "pkg/ui/v1beta1/frontend/**"
 
 jobs:
   trial:

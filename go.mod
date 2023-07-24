@@ -6,7 +6,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/awalterschulze/gographviz v2.0.3+incompatible
 	github.com/c-bata/goptuna v0.8.0
-	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.2

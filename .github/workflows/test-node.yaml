@@ -3,7 +3,7 @@ name: Frontend Test
 on:
   pull_request:
     paths:
-      - pkg/new-ui/v1beta1/frontend/**
+      - pkg/ui/v1beta1/frontend/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,12 +25,12 @@ jobs:
 
       - name: Format katib code
         run: |
-          npm install prettier --prefix ./pkg/new-ui/v1beta1/frontend
+          npm install prettier --prefix ./pkg/ui/v1beta1/frontend
           make prettier-check
 
       - name: Lint katib code
         run: |
-          cd pkg/new-ui/v1beta1/frontend
+          cd pkg/ui/v1beta1/frontend
           npm run lint-check
 
   frontend-unit-tests:
@@ -48,7 +48,7 @@ jobs:
 
       - name: Fetch Kubeflow and install common code dependencies
         run: |
-          COMMIT=$(cat pkg/new-ui/v1beta1/frontend/COMMIT)
+          COMMIT=$(cat pkg/ui/v1beta1/frontend/COMMIT)
           cd /tmp && git clone https://github.com/kubeflow/kubeflow.git
           cd kubeflow
           git checkout $COMMIT
@@ -59,13 +59,13 @@ jobs:
 
       - name: Install KWA dependencies
         run: |
-          cd pkg/new-ui/v1beta1/frontend
+          cd pkg/ui/v1beta1/frontend
           npm i
           npm link kubeflow
 
       - name: Run unit tests
         run: |
-          cd pkg/new-ui/v1beta1/frontend
+          cd pkg/ui/v1beta1/frontend
           npm run test:prod
 
   frontend-ui-tests:
@@ -81,7 +81,7 @@ jobs:
 
       - name: Fetch Kubeflow and install common code dependencies
         run: |
-          COMMIT=$(cat pkg/new-ui/v1beta1/frontend/COMMIT)
+          COMMIT=$(cat pkg/ui/v1beta1/frontend/COMMIT)
           cd /tmp && git clone https://github.com/kubeflow/kubeflow.git
           cd kubeflow
           git checkout $COMMIT
@@ -91,11 +91,11 @@ jobs:
           npm link ./dist/kubeflow
       - name: Install KWA dependencies
         run: |
-          cd pkg/new-ui/v1beta1/frontend
+          cd pkg/ui/v1beta1/frontend
           npm i
           npm link kubeflow
       - name: Serve UI & run Cypress tests in Chrome and Firefox
         run: |
-          cd pkg/new-ui/v1beta1/frontend
+          cd pkg/ui/v1beta1/frontend
           npm run start & npx wait-on http://localhost:4200
           npm run ui-test-ci-all
