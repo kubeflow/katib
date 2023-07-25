@@ -132,7 +132,7 @@ Please see [new-algorithm-service.md](./new-algorithm-service.md).
 
 ## Katib UI documentation
 
-Please see [Katib UI README](https://github.com/kubeflow/katib/tree/master/pkg/ui/v1beta1).
+Please see [Katib UI README](../pkg/ui/v1beta1).
 
 ## Design proposals
 

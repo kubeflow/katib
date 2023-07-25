@@ -3,7 +3,7 @@ name: E2E Test with enas-cnn-cifar10
 on:
   pull_request:
     paths-ignore:
-      - "pkg/new-ui/v1beta1/frontend/**"
+      - "pkg/ui/v1beta1/frontend/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

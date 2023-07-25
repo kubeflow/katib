@@ -135,7 +135,7 @@ run "katib-controller" "$CMD_PREFIX/katib-controller/$VERSION/Dockerfile"
 run "katib-db-manager" "$CMD_PREFIX/db-manager/$VERSION/Dockerfile"
 
 if "$DEPLOY_KATIB_UI"; then
-  run "katib-ui" "${CMD_PREFIX}/new-ui/${VERSION}/Dockerfile"
+  run "katib-ui" "${CMD_PREFIX}/ui/${VERSION}/Dockerfile"
 fi
 
 run "cert-generator" "$CMD_PREFIX/cert-generator/$VERSION/Dockerfile"

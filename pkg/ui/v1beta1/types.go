@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	v1beta1experiment "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 )
@@ -46,10 +47,11 @@ type Option struct {
 }
 
 type ExperimentView struct {
-	Name      string
-	Status    string
-	Namespace string
-	Type      string
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Type      string `json:"type"`
+	Status    string `json:"status"`
+	v1beta1experiment.ExperimentStatus
 }
 
 type TrialTemplatesDataView struct {
