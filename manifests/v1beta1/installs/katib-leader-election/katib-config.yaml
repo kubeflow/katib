@@ -2,6 +2,8 @@
 apiVersion: config.kubeflow.org/v1beta1
 kind: KatibConfig
 init:
+  certGenerator:
+    enable: true
   controller:
     webhookPort: 8443
     enableLeaderElection: true

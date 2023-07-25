@@ -50,6 +50,16 @@ rules:
     verbs:
       - "get"
   - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+  - apiGroups:
       - apps
     resources:
       - deployments
@@ -108,6 +118,16 @@ rules:
       - suggestions/finalizers
     verbs:
       - "*"
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - validatingwebhookconfigurations
+      - mutatingwebhookconfigurations
+    verbs:
+      - "get"
+      - "watch"
+      - "list"
+      - "patch"
 ---
 apiVersion: v1
 kind: ServiceAccount

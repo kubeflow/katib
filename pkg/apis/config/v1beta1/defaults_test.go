@@ -201,73 +201,114 @@ func TestSetMetricsCollectorConfigs(t *testing.T) {
 	}
 }
 
-func TestSetInitConfig(t *testing.T) {
+func TestSetControllerConfig(t *testing.T) {
 	disableGRPCProbeInSuggestion := false
 	customizedWebhookPort := 18443
 
 	cases := map[string]struct {
-		config     InitConfig
-		wantConfig InitConfig
+		config     ControllerConfig
+		wantConfig ControllerConfig
 	}{
 		"All parameters correctly are specified": {
-			config: InitConfig{
-				ControllerConfig: ControllerConfig{
-					ExperimentSuggestionName:    "test",
-					MetricsAddr:                 ":8081",
-					HealthzAddr:                 ":18081",
-					InjectSecurityContext:       true,
-					EnableGRPCProbeInSuggestion: &disableGRPCProbeInSuggestion,
-					TrialResources: []string{
-						"Job.v1.batch",
-						"TFJob.v1.kubeflow.org",
-					},
-					WebhookPort:          &customizedWebhookPort,
-					EnableLeaderElection: true,
-					LeaderElectionID:     "xyz0123",
+			config: ControllerConfig{
+				ExperimentSuggestionName:    "test",
+				MetricsAddr:                 ":8081",
+				HealthzAddr:                 ":18081",
+				InjectSecurityContext:       true,
+				EnableGRPCProbeInSuggestion: &disableGRPCProbeInSuggestion,
+				TrialResources: []string{
+					"Job.v1.batch",
+					"TFJob.v1.kubeflow.org",
 				},
+				WebhookPort:          &customizedWebhookPort,
+				EnableLeaderElection: true,
+				LeaderElectionID:     "xyz0123",
 			},
-			wantConfig: InitConfig{
-				ControllerConfig: ControllerConfig{
-					ExperimentSuggestionName:    "test",
-					MetricsAddr:                 ":8081",
-					HealthzAddr:                 ":18081",
-					InjectSecurityContext:       true,
-					EnableGRPCProbeInSuggestion: &disableGRPCProbeInSuggestion,
-					TrialResources: []string{
-						"Job.v1.batch",
-						"TFJob.v1.kubeflow.org",
-					},
-					WebhookPort:          &customizedWebhookPort,
-					EnableLeaderElection: true,
-					LeaderElectionID:     "xyz0123",
+			wantConfig: ControllerConfig{
+				ExperimentSuggestionName:    "test",
+				MetricsAddr:                 ":8081",
+				HealthzAddr:                 ":18081",
+				InjectSecurityContext:       true,
+				EnableGRPCProbeInSuggestion: &disableGRPCProbeInSuggestion,
+				TrialResources: []string{
+					"Job.v1.batch",
+					"TFJob.v1.kubeflow.org",
 				},
+				WebhookPort:          &customizedWebhookPort,
+				EnableLeaderElection: true,
+				LeaderElectionID:     "xyz0123",
 			},
 		},
 		"ControllerConfig is empty": {
-			config: InitConfig{
-				ControllerConfig: ControllerConfig{},
-			},
-			wantConfig: InitConfig{
-				ControllerConfig: ControllerConfig{
-					ExperimentSuggestionName:    DefaultExperimentSuggestionName,
-					MetricsAddr:                 DefaultMetricsAddr,
-					HealthzAddr:                 DefaultHealthzAddr,
-					EnableGRPCProbeInSuggestion: &DefaultEnableGRPCProbeInSuggestion,
-					TrialResources:              DefaultTrialResources,
-					WebhookPort:                 &DefaultWebhookPort,
-					LeaderElectionID:            DefaultLeaderElectionID,
-				},
+			config: ControllerConfig{},
+			wantConfig: ControllerConfig{
+				ExperimentSuggestionName:    DefaultExperimentSuggestionName,
+				MetricsAddr:                 DefaultMetricsAddr,
+				HealthzAddr:                 DefaultHealthzAddr,
+				EnableGRPCProbeInSuggestion: &DefaultEnableGRPCProbeInSuggestion,
+				TrialResources:              DefaultTrialResources,
+				WebhookPort:                 &DefaultWebhookPort,
+				LeaderElectionID:            DefaultLeaderElectionID,
 			},
 		},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			kc := &KatibConfig{
-				InitConfig: tc.config,
+				InitConfig: InitConfig{
+					ControllerConfig: tc.config,
+				},
 			}
 			SetDefaults_KatibConfig(kc)
-			if diff := cmp.Diff(tc.wantConfig, kc.InitConfig); len(diff) != 0 {
-				t.Errorf("Unexpected InitConfig (-want,+got):\n%s", diff)
+			if diff := cmp.Diff(tc.wantConfig, kc.InitConfig.ControllerConfig); len(diff) != 0 {
+				t.Errorf("Unexpected ControllerConfig (-want,+got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestSetCertGeneratorConfig(t *testing.T) {
+	cases := map[string]struct {
+		config     CertGeneratorConfig
+		wantConfig CertGeneratorConfig
+	}{
+		"All parameters correctly are specified": {
+			config: CertGeneratorConfig{
+				Enable:         true,
+				ServiceName:    "test",
+				ControllerName: "katib-test",
+			},
+			wantConfig: CertGeneratorConfig{
+				Enable:         true,
+				ServiceName:    "test",
+				ControllerName: "katib-test",
+			},
+		},
+		"CertGeneratorConfig is empty": {
+			config:     CertGeneratorConfig{},
+			wantConfig: CertGeneratorConfig{},
+		},
+		"Enable is true and serviceName is empty": {
+			config: CertGeneratorConfig{
+				Enable: true,
+			},
+			wantConfig: CertGeneratorConfig{
+				Enable:         true,
+				ServiceName:    DefaultWebhookServiceName,
+				ControllerName: DefaultControllerName,
+			},
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			kc := &KatibConfig{
+				InitConfig: InitConfig{
+					CertGeneratorConfig: tc.config,
+				},
+			}
+			SetDefaults_KatibConfig(kc)
+			if diff := cmp.Diff(tc.wantConfig, kc.InitConfig.CertGeneratorConfig); len(diff) != 0 {
+				t.Errorf("Unexpected CertGeneratorConfig (-want,+got):\n%s", diff)
 			}
 		})
 	}

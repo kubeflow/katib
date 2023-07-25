@@ -64,17 +64,6 @@ The following table shows images for the
         <a href="https://github.com/docker-library/mysql/blob/c506174eab8ae160f56483e8d72410f8f1e1470f/8.0/Dockerfile.debian">Dockerfile</a>
       </td>
     </tr>
-    <tr align="center">
-      <td>
-        <code>docker.io/kubeflowkatib/cert-generator</code>
-      </td>
-      <td>
-        Katib Cert Generator
-      </td>
-      <td>
-        <a href="https://github.com/kubeflow/katib/blob/master/cmd/cert-generator/v1beta1/Dockerfile">Dockerfile</a>
-      </td>
-    </tr>
   </tbody>
 </table>
 

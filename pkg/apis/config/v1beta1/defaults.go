@@ -36,6 +36,10 @@ const (
 	DefaultDiskLimit = "5Gi"
 	// DefaultDiskRequest is the default value for disk request.
 	DefaultDiskRequest = "500Mi"
+	// DefaultWebhookServiceName is the default service name for the admission webhooks.
+	DefaultWebhookServiceName = "katib-controller"
+	// DefaultControllerName is the default katib-controller deployment name.
+	DefaultControllerName = "katib-controller"
 )
 
 var (
@@ -63,33 +67,50 @@ func SetDefaults_KatibConfig(cfg *KatibConfig) {
 }
 
 func setInitConfig(initConfig *InitConfig) {
+	setControllerConfig(&initConfig.ControllerConfig)
+	setCertGeneratorConfig(&initConfig.CertGeneratorConfig)
+}
+
+func setControllerConfig(controllerConfig *ControllerConfig) {
 	// Set ExperimentSuggestionName.
-	if initConfig.ControllerConfig.ExperimentSuggestionName == "" {
-		initConfig.ControllerConfig.ExperimentSuggestionName = DefaultExperimentSuggestionName
+	if controllerConfig.ExperimentSuggestionName == "" {
+		controllerConfig.ExperimentSuggestionName = DefaultExperimentSuggestionName
 	}
 	// Set MetricsAddr.
-	if initConfig.ControllerConfig.MetricsAddr == "" {
-		initConfig.ControllerConfig.MetricsAddr = DefaultMetricsAddr
+	if controllerConfig.MetricsAddr == "" {
+		controllerConfig.MetricsAddr = DefaultMetricsAddr
 	}
 	// Set HealthzAddr.
-	if initConfig.ControllerConfig.HealthzAddr == "" {
-		initConfig.ControllerConfig.HealthzAddr = DefaultHealthzAddr
+	if controllerConfig.HealthzAddr == "" {
+		controllerConfig.HealthzAddr = DefaultHealthzAddr
 	}
 	// Set EnableGRPCProbeInSuggestion.
-	if initConfig.ControllerConfig.EnableGRPCProbeInSuggestion == nil {
-		initConfig.ControllerConfig.EnableGRPCProbeInSuggestion = &DefaultEnableGRPCProbeInSuggestion
+	if controllerConfig.EnableGRPCProbeInSuggestion == nil {
+		controllerConfig.EnableGRPCProbeInSuggestion = &DefaultEnableGRPCProbeInSuggestion
 	}
 	// Set TrialResources.
-	if len(initConfig.ControllerConfig.TrialResources) == 0 {
-		initConfig.ControllerConfig.TrialResources = DefaultTrialResources
+	if len(controllerConfig.TrialResources) == 0 {
+		controllerConfig.TrialResources = DefaultTrialResources
 	}
 	// Set WebhookPort.
-	if initConfig.ControllerConfig.WebhookPort == nil {
-		initConfig.ControllerConfig.WebhookPort = &DefaultWebhookPort
+	if controllerConfig.WebhookPort == nil {
+		controllerConfig.WebhookPort = &DefaultWebhookPort
 	}
 	// Set LeaderElectionID.
-	if initConfig.ControllerConfig.LeaderElectionID == "" {
-		initConfig.ControllerConfig.LeaderElectionID = DefaultLeaderElectionID
+	if controllerConfig.LeaderElectionID == "" {
+		controllerConfig.LeaderElectionID = DefaultLeaderElectionID
+	}
+}
+
+func setCertGeneratorConfig(certGeneratorConfig *CertGeneratorConfig) {
+	if len(certGeneratorConfig.ServiceName) != 0 {
+		certGeneratorConfig.Enable = true
+	}
+	if certGeneratorConfig.Enable && len(certGeneratorConfig.ServiceName) == 0 {
+		certGeneratorConfig.ServiceName = DefaultWebhookServiceName
+	}
+	if certGeneratorConfig.Enable && len(certGeneratorConfig.ControllerName) == 0 {
+		certGeneratorConfig.ControllerName = DefaultControllerName
 	}
 }
 
@@ -110,7 +131,6 @@ func setSuggestionConfigs(suggestionConfigs []SuggestionConfig) {
 		// Set default suggestion container volume mount path
 		if suggestionConfigs[i].VolumeMountPath == "" {
 			suggestionConfigs[i].VolumeMountPath = DefaultContainerSuggestionVolumeMountPath
-
 		}
 
 		// Get persistent volume claim spec from config

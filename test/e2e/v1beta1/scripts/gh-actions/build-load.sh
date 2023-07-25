@@ -138,7 +138,6 @@ if "$DEPLOY_KATIB_UI"; then
   run "katib-ui" "${CMD_PREFIX}/ui/${VERSION}/Dockerfile"
 fi
 
-run "cert-generator" "$CMD_PREFIX/cert-generator/$VERSION/Dockerfile"
 run "file-metrics-collector" "$CMD_PREFIX/metricscollector/$VERSION/file-metricscollector/Dockerfile"
 run "tfevent-metrics-collector" "$CMD_PREFIX/metricscollector/$VERSION/tfevent-metricscollector/Dockerfile"
 

@@ -16,20 +16,9 @@ limitations under the License.
 
 package v1beta1
 
-import (
-	"github.com/kubeflow/katib/pkg/cert-generator/v1beta1/consts"
-	"github.com/kubeflow/katib/pkg/cert-generator/v1beta1/generate"
-	"github.com/spf13/cobra"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+const (
+	Secret         = "katib-webhook-cert"
+	Webhook        = "katib.kubeflow.org"
+	serverKeyName  = "tls.key"
+	serverCertName = "tls.crt"
 )
-
-// NewKatibCertGeneratorCmd sets up `katib-cert-generator` command.
-func NewKatibCertGeneratorCmd(kubeClient client.Client) (*cobra.Command, error) {
-	cmd := &cobra.Command{
-		Use:   consts.JobName,
-		Short: consts.JobName,
-		Long:  consts.JobName,
-	}
-	cmd.AddCommand(generate.NewGenerateCmd(kubeClient))
-	return cmd, nil
-}
