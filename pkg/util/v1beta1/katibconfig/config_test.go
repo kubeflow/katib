@@ -17,7 +17,6 @@ limitations under the License.
 package katibconfig
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"path/filepath"
@@ -25,7 +24,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,6 +33,7 @@ import (
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/yaml"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
@@ -483,15 +482,7 @@ func newFakeKatibConfigMap(config *configv1beta1.KatibConfig) *corev1.ConfigMap 
 
 	data := map[string]string{}
 	if config != nil {
-		bKatibConfig, err := json.Marshal(config)
-		if err != nil {
-			log.Fatal(err)
-		}
-		yamlKatibConfig := make(map[string]interface{})
-		if err = yaml.Unmarshal(bKatibConfig, yamlKatibConfig); err != nil {
-			log.Fatal(err)
-		}
-		bKatibConfig, err = yaml.Marshal(yamlKatibConfig)
+		bKatibConfig, err := yaml.Marshal(config)
 		if err != nil {
 			log.Fatal(err)
 		}

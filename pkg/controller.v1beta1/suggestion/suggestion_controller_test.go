@@ -17,9 +17,9 @@ limitations under the License.
 package suggestion
 
 import (
-	"encoding/json"
 	"fmt"
 	stdlog "log"
+	"sigs.k8s.io/yaml"
 	"strings"
 	"sync"
 	"testing"
@@ -27,7 +27,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/onsi/gomega"
-	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -455,15 +454,7 @@ func newKatibConfigMapInstance() *corev1.ConfigMap {
 			},
 		},
 	}
-	bKatibConfig, err := json.Marshal(katibConfig)
-	if err != nil {
-		stdlog.Fatal(err)
-	}
-	yamlKatibConfig := make(map[string]interface{})
-	if err = yaml.Unmarshal(bKatibConfig, yamlKatibConfig); err != nil {
-		stdlog.Fatal(err)
-	}
-	bKatibConfig, err = yaml.Marshal(yamlKatibConfig)
+	bKatibConfig, err := yaml.Marshal(katibConfig)
 	if err != nil {
 		stdlog.Fatal(err)
 	}

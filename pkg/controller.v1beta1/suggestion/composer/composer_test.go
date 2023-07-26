@@ -18,7 +18,6 @@ package composer
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	stdlog "log"
 	"os"
@@ -31,7 +30,6 @@ import (
 
 	"github.com/onsi/gomega"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -45,6 +43,7 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/yaml"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
@@ -705,15 +704,8 @@ func newFakeKatibConfig(suggestionConfig configv1beta1.SuggestionConfig, earlySt
 			},
 		},
 	}
-	bKatibConfig, err := json.Marshal(katibConfig)
-	if err != nil {
-		stdlog.Fatal(err)
-	}
-	yamlKatibConfig := make(map[string]interface{})
-	if err = yaml.Unmarshal(bKatibConfig, yamlKatibConfig); err != nil {
-		stdlog.Fatal(err)
-	}
-	bKatibConfig, err = yaml.Marshal(yamlKatibConfig)
+
+	bKatibConfig, err := yaml.Marshal(katibConfig)
 	if err != nil {
 		stdlog.Fatal(err)
 	}
