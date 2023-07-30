@@ -73,11 +73,11 @@ update_yaml_files "${INSTALLS_PATH}" "newName: ${OLD_PREFIX}" "newName: ${NEW_PR
 update_yaml_files "${INSTALLS_PATH}" "newTag: .*" "newTag: ${TAG}"
 
 # Katib Config images.
-CONFIG_PATH="manifests/v1beta1/components/controller/katib-config.yaml"
+CONFIG_PATH="manifests/v1beta1/components/katib-config/"
 
 echo -e "Update Katib Metrics Collectors, Suggestions and EarlyStopping images\n"
-update_yaml_files "${CONFIG_PATH}" "${OLD_PREFIX}" "${NEW_PREFIX}"
-update_yaml_files "${CONFIG_PATH}" ":[^[:space:]].*\"" ":${TAG}\""
+update_yaml_files "${CONFIG_PATH}" "image: ${OLD_PREFIX}" "image: ${NEW_PREFIX}"
+update_yaml_files "${CONFIG_PATH}" "katib.kubeflow.org/version: .*" "katib.kubeflow.org/version: ${TAG}"
 
 # Katib Trial training container images.
 

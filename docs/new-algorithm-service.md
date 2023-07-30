@@ -90,21 +90,17 @@ Then build the Docker image.
 
 ### Use the algorithm in Katib.
 
-Update the [Katib config](../manifests/v1beta1/components/controller/katib-config.yaml) and [operator](../operators/katib-controller/src/suggestion.json) with the new algorithm entity:
+Update the [Katib config](../manifests/v1beta1/components/katib-config/katib-config.yaml) with the new algorithm entity:
 
 ```diff
-  suggestion: |-
-    {
-      "tpe": {
-        "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
-      },
-      "random": {
-        "image": "docker.io/kubeflowkatib/suggestion-hyperopt"
-      },
-+     "<new-algorithm-name>": {
-+       "image": "image built in the previous stage"
-+     }
-    }
+  runtime:
+    suggestions:
+      - algorithmName: random
+        image: docker.io/kubeflowkatib/suggestion-hyperopt:$(KATIB_VERSION)
+      - algorithmName: tpe
+        image: docker.io/kubeflowkatib/suggestion-hyperopt:$(KATIB_VERSION)
++     - algorithmName: <new-algorithm-name>
++       image: "image built in the previous stage":$(KATIB_VERSION)
 ```
 
 Learn more about Katib config in the

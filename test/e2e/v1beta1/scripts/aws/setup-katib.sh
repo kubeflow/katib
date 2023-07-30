@@ -36,7 +36,7 @@ make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="${ECR_REGIS
 
 echo -e "\n The Katib will be deployed with the following configs"
 cat "manifests/v1beta1/installs/katib-standalone/kustomization.yaml"
-cat "manifests/v1beta1/components/controller/katib-config.yaml"
+cat "manifests/v1beta1/components/katib-config/katib-config.yaml"
 
 echo "Creating Kubeflow namespace"
 kubectl create namespace kubeflow

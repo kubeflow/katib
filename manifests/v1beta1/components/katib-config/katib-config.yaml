@@ -1,12 +1,9 @@
-# This KatibConfig is mostly same as https://github.com/kubeflow/katib/manifests/v1beta1/components/katib-config/katib-config.yaml.
-# Only `.init.controller.enableLeaderElection` field is different.
 ---
 apiVersion: config.kubeflow.org/v1beta1
 kind: KatibConfig
 init:
   controller:
     webhookPort: 8443
-    enableLeaderElection: true
     trialResources:
       - Job.v1.batch
       - TFJob.v1.kubeflow.org
@@ -17,7 +14,7 @@ init:
 runtime:
   metricsCollectors:
     - kind: StdOut
-      image: docker.io/kubeflowkatib/file-metrics-collector:$(KATIB_VERSION)
+      image: docker.io/kubeflo`wkatib/file-metrics-collector:$(KATIB_VERSION)
     - kind: File
       image: docker.io/kubeflowkatib/file-metrics-collector:$(KATIB_VERSION)
     - kind: TensorFlowEvent
