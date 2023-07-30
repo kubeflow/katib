@@ -30,7 +30,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/yaml"
@@ -368,6 +367,9 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 }
 
 func TestGetInitConfigData(t *testing.T) {
+	diableGRPCProbeInSuggestion := false
+	customizedWebhookPort := 18443
+
 	tmpDir, err := os.MkdirTemp("", "temp")
 	if err != nil {
 		t.Fatal(err)
@@ -438,7 +440,7 @@ runtime:
 					MetricsAddr:                 ":8081",
 					HealthzAddr:                 ":18081",
 					InjectSecurityContext:       true,
-					EnableGRPCProbeInSuggestion: pointer.Bool(false),
+					EnableGRPCProbeInSuggestion: &diableGRPCProbeInSuggestion,
 					TrialResources: []string{
 						"Job.v1.batch",
 						"TFJob.v1.kubeflow.org",
@@ -447,7 +449,7 @@ runtime:
 						"XGBoostJob.v1.kubeflow.org",
 						"MXJob.v1.kubeflow.org",
 					},
-					WebhookPort:          pointer.Int(18443),
+					WebhookPort:          &customizedWebhookPort,
 					EnableLeaderElection: true,
 					LeaderElectionID:     "xyz0123",
 				},

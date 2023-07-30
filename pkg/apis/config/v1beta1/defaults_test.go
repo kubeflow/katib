@@ -7,7 +7,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/utils/pointer"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 )
@@ -203,6 +202,9 @@ func TestSetMetricsCollectorConfigs(t *testing.T) {
 }
 
 func TestSetInitConfig(t *testing.T) {
+	disableGRPCProbeInSuggestion := false
+	customizedWebhookPort := 18443
+
 	cases := map[string]struct {
 		config     InitConfig
 		wantConfig InitConfig
@@ -214,12 +216,12 @@ func TestSetInitConfig(t *testing.T) {
 					MetricsAddr:                 ":8081",
 					HealthzAddr:                 ":18081",
 					InjectSecurityContext:       true,
-					EnableGRPCProbeInSuggestion: pointer.Bool(false),
+					EnableGRPCProbeInSuggestion: &disableGRPCProbeInSuggestion,
 					TrialResources: []string{
 						"Job.v1.batch",
 						"TFJob.v1.kubeflow.org",
 					},
-					WebhookPort:          pointer.Int(18443),
+					WebhookPort:          &customizedWebhookPort,
 					EnableLeaderElection: true,
 					LeaderElectionID:     "xyz0123",
 				},
@@ -230,12 +232,12 @@ func TestSetInitConfig(t *testing.T) {
 					MetricsAddr:                 ":8081",
 					HealthzAddr:                 ":18081",
 					InjectSecurityContext:       true,
-					EnableGRPCProbeInSuggestion: pointer.Bool(false),
+					EnableGRPCProbeInSuggestion: &disableGRPCProbeInSuggestion,
 					TrialResources: []string{
 						"Job.v1.batch",
 						"TFJob.v1.kubeflow.org",
 					},
-					WebhookPort:          pointer.Int(18443),
+					WebhookPort:          &customizedWebhookPort,
 					EnableLeaderElection: true,
 					LeaderElectionID:     "xyz0123",
 				},
