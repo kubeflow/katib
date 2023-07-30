@@ -110,7 +110,7 @@ const (
 
 	// KatibConfigMapName is the configmap name which includes Katib's configuration.
 	KatibConfigMapName = "katib-config"
-	// LabelKatibConfigTag is the name of KatibConfig in Katib copnfigmap.
+	// LabelKatibConfigTag is the name of the config in Katib ConfigMap.
 	LabelKatibConfigTag = "katib-config.yaml"
 
 	// SuggestionVolumeMountKey specifies the AlgorithmSettings key used to toggle Suggestion managed trial storage
