@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import multiprocessing
-from typing import Callable, List, Dict, Any
 import inspect
+import multiprocessing
 import textwrap
-import grpc
 import time
+from typing import Any, Callable, Dict, List, Optional
 
-from kubernetes import client, config
+import grpc
+import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
-import kubeflow.katib.katib_api_pb2 as katib_api_pb2
+from kubernetes import client, config
 
 
 class KatibClient(object):
@@ -33,6 +33,7 @@ class KatibClient(object):
         config_file: str = None,
         context: str = None,
         client_configuration: client.Configuration = None,
+        namespace: str = utils.get_default_target_namespace(),
     ):
         """KatibClient constructor.
 
@@ -43,6 +44,7 @@ class KatibClient(object):
                 You have to provide valid configuration with Bearer token or
                 with username and password.
                 You can find an example here: https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
+            namespace: Target namespace. Can be overridden during method invocations.
         """
 
         self.in_cluster = False
@@ -58,9 +60,11 @@ class KatibClient(object):
         k8s_client = client.ApiClient(client_configuration)
         self.custom_api = client.CustomObjectsApi(k8s_client)
         self.api_client = ApiClient()
+        self.namespace = namespace
 
     def _is_ipython(self):
         """Returns whether we are running in notebook."""
+
         try:
             import IPython
 
@@ -74,7 +78,7 @@ class KatibClient(object):
     def create_experiment(
         self,
         experiment: models.V1beta1Experiment,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
     ):
         """Create the Katib Experiment.
 
@@ -86,6 +90,8 @@ class KatibClient(object):
             TimeoutError: Timeout to create Katib Experiment.
             RuntimeError: Failed to create Katib Experiment.
         """
+
+        namespace = namespace or self.namespace
 
         try:
             self.custom_api.create_namespaced_custom_object(
@@ -129,7 +135,7 @@ class KatibClient(object):
         objective: Callable,
         parameters: Dict[str, Any],
         base_image: str = constants.BASE_IMAGE_TENSORFLOW,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         algorithm_name: str = "random",
         objective_metric_name: str = None,
         additional_metric_names: List[str] = [],
@@ -182,6 +188,8 @@ class KatibClient(object):
             TimeoutError: Timeout to create Katib Experiment.
             RuntimeError: Failed to create Katib Experiment.
         """
+
+        namespace = namespace or self.namespace
 
         # Create Katib Experiment template.
         experiment = models.V1beta1Experiment(
@@ -316,7 +324,7 @@ class KatibClient(object):
     def get_experiment(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Katib Experiment.
@@ -334,6 +342,8 @@ class KatibClient(object):
             TimeoutError: Timeout to get Katib Experiment.
             RuntimeError: Failed to get Katib Experiment.
         """
+
+        namespace = namespace or self.namespace
 
         try:
             thread = self.custom_api.get_namespaced_custom_object(
@@ -355,7 +365,7 @@ class KatibClient(object):
 
     def list_experiments(
         self,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """List of all Katib Experiments in namespace.
@@ -373,6 +383,8 @@ class KatibClient(object):
             TimeoutError: Timeout to list Katib Experiments.
             RuntimeError: Failed to list Katib Experiments.
         """
+
+        namespace = namespace or self.namespace
 
         result = []
         try:
@@ -403,7 +415,7 @@ class KatibClient(object):
     def get_experiment_conditions(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         experiment: models.V1beta1Experiment = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
@@ -428,6 +440,8 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
+        namespace = namespace or self.namespace
+
         if experiment is None:
             experiment = self.get_experiment(name, namespace, timeout)
 
@@ -443,7 +457,7 @@ class KatibClient(object):
     def is_experiment_created(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         experiment: models.V1beta1Experiment = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
@@ -464,6 +478,8 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
+        namespace = namespace or self.namespace
+
         return utils.has_condition(
             self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_CREATED,
@@ -472,7 +488,7 @@ class KatibClient(object):
     def is_experiment_running(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         experiment: models.V1beta1Experiment = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
@@ -493,6 +509,8 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
+        namespace = namespace or self.namespace
+
         return utils.has_condition(
             self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_RUNNING,
@@ -501,7 +519,7 @@ class KatibClient(object):
     def is_experiment_restarting(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         experiment: models.V1beta1Experiment = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
@@ -521,6 +539,8 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
+        namespace = namespace or self.namespace
+
         return utils.has_condition(
             self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_RESTARTING,
@@ -529,7 +549,7 @@ class KatibClient(object):
     def is_experiment_succeeded(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         experiment: models.V1beta1Experiment = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
@@ -549,6 +569,8 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
+        namespace = namespace or self.namespace
+
         return utils.has_condition(
             self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_SUCCEEDED,
@@ -557,7 +579,7 @@ class KatibClient(object):
     def is_experiment_failed(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         experiment: models.V1beta1Experiment = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
@@ -577,6 +599,8 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
+        namespace = namespace or self.namespace
+
         return utils.has_condition(
             self.get_experiment_conditions(name, namespace, experiment, timeout),
             constants.EXPERIMENT_CONDITION_FAILED,
@@ -585,7 +609,7 @@ class KatibClient(object):
     def wait_for_experiment_condition(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         expected_condition: str = constants.EXPERIMENT_CONDITION_SUCCEEDED,
         timeout: int = 600,
         polling_interval: int = 15,
@@ -612,6 +636,8 @@ class KatibClient(object):
             TimeoutError: Timeout waiting for Experiment to reach required condition
                 or timeout to get Katib Experiment.
         """
+
+        namespace = namespace or self.namespace
 
         for _ in range(round(timeout / polling_interval)):
 
@@ -696,7 +722,7 @@ class KatibClient(object):
     def edit_experiment_budget(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         max_trial_count: int = None,
         parallel_trial_count: int = None,
         max_failed_trial_count: int = None,
@@ -724,6 +750,8 @@ class KatibClient(object):
             RuntimeError: Failed to edit/get Katib Experiment or Experiment
                 reaches Failed condition.
         """
+
+        namespace = namespace or self.namespace
 
         # The new Trial budget must be set.
         if (
@@ -766,7 +794,7 @@ class KatibClient(object):
     def delete_experiment(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         delete_options: client.V1DeleteOptions = None,
     ):
         """Delete the Katib Experiment.
@@ -781,6 +809,8 @@ class KatibClient(object):
             TimeoutError: Timeout to delete Katib Experiment.
             RuntimeError: Failed to delete Katib Experiment.
         """
+
+        namespace = namespace or self.namespace
 
         try:
             self.custom_api.delete_namespaced_custom_object(
@@ -804,7 +834,7 @@ class KatibClient(object):
     def get_suggestion(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Katib Suggestion.
@@ -822,6 +852,8 @@ class KatibClient(object):
             TimeoutError: Timeout to get Katib Suggestion.
             RuntimeError: Failed to get Katib Suggestion.
         """
+
+        namespace = namespace or self.namespace
 
         try:
             thread = self.custom_api.get_namespaced_custom_object(
@@ -843,7 +875,7 @@ class KatibClient(object):
 
     def list_suggestions(
         self,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """List of all Katib Suggestion in namespace.
@@ -861,6 +893,8 @@ class KatibClient(object):
             TimeoutError: Timeout to list Katib Suggestions.
             RuntimeError: Failed to list Katib Suggestions.
         """
+
+        namespace = namespace or self.namespace
 
         result = []
         try:
@@ -891,7 +925,7 @@ class KatibClient(object):
     def get_trial(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Katib Trial.
@@ -909,6 +943,8 @@ class KatibClient(object):
             TimeoutError: Timeout to get Katib Trial.
             RuntimeError: Failed to get Katib Trial.
         """
+
+        namespace = namespace or self.namespace
 
         try:
             thread = self.custom_api.get_namespaced_custom_object(
@@ -931,7 +967,7 @@ class KatibClient(object):
     def list_trials(
         self,
         experiment_name: str = None,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """List of all Trials in namespace. If Experiment name is set,
@@ -951,6 +987,8 @@ class KatibClient(object):
             TimeoutError: Timeout to list Katib Trials.
             RuntimeError: Failed to list Katib Trials.
         """
+
+        namespace = namespace or self.namespace
 
         result = []
         try:
@@ -989,7 +1027,7 @@ class KatibClient(object):
     def get_success_trial_details(
         self,
         experiment_name: str = None,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the Succeeded Trial details. If Experiment name is set,
@@ -1009,6 +1047,8 @@ class KatibClient(object):
             TimeoutError: Timeout to list Katib Trials.
             RuntimeError: Failed to list Katib Trials.
         """
+
+        namespace = namespace or self.namespace
 
         result = []
         try:
@@ -1060,7 +1100,7 @@ class KatibClient(object):
     def get_optimal_hyperparameters(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Get the current optimal Trial from the Experiment.
@@ -1080,6 +1120,8 @@ class KatibClient(object):
             RuntimeError: Failed to get Katib Experiment.
         """
 
+        namespace = namespace or self.namespace
+
         experiment = self.get_experiment(name, namespace, timeout)
         if (
             experiment.status
@@ -1093,7 +1135,7 @@ class KatibClient(object):
     def get_trial_metrics(
         self,
         name: str,
-        namespace: str = utils.get_default_target_namespace(),
+        namespace: Optional[str] = None,
         db_manager_address: str = constants.DEFAULT_DB_MANAGER_ADDRESS,
         timeout: str = constants.DEFAULT_TIMEOUT,
     ):
@@ -1124,6 +1166,8 @@ class KatibClient(object):
         Raises:
             RuntimeError: Unable to get Trial metrics.
         """
+
+        namespace = namespace or self.namespace
 
         db_manager_address = db_manager_address.split(":")
         channel = grpc.beta.implementations.insecure_channel(
