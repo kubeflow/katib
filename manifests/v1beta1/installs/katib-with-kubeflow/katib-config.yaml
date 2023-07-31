@@ -4,7 +4,6 @@ kind: KatibConfig
 init:
   controller:
     webhookPort: 8443
-    enableLeaderElection: true
     trialResources:
       - Job.v1.batch
       - TFJob.v1.kubeflow.org

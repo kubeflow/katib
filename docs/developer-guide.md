@@ -29,7 +29,7 @@ make build REGISTRY=<image-registry> TAG=<image-tag>
 
 To use your custom images for the Katib components, modify
 [Kustomization file](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/kustomization.yaml)
-and [Katib Config](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/katib-config/katib-config.yaml)
+and [Katib Config](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/katib-config.yaml)
 
 You can deploy Katib v1beta1 manifests into a Kubernetes cluster as follows:
 

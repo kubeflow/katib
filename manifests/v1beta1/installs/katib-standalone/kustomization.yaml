@@ -19,8 +19,6 @@ resources:
   - ../../components/cert-generator/
   # Katib webhooks.
   - ../../components/webhook/
-  # Katib Config.
-  - ../../components/katib-config/
 images:
   - name: docker.io/kubeflowkatib/katib-controller
     newName: docker.io/kubeflowkatib/katib-controller
@@ -34,3 +32,10 @@ images:
   - name: docker.io/kubeflowkatib/cert-generator
     newName: docker.io/kubeflowkatib/cert-generator
     newTag: latest
+configMapGenerator:
+  - name: katib-config
+    behavior: create
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true

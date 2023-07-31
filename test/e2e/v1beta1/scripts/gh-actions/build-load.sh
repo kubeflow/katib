@@ -80,7 +80,7 @@ run() {
       algorithm_name="$(yq eval '.spec.algorithm.algorithmName' "$exp_path")"
 
       suggestion_image_name="$(algorithm_name=$algorithm_name yq eval '.runtime.suggestions.[] | select(.algorithmName == env(algorithm_name)) | .image' \
-        manifests/v1beta1/components/katib-config/katib-config.yaml | cut -d: -f1)"
+        manifests/v1beta1/installs/katib-standalone/katib-config.yaml | cut -d: -f1)"
       suggestion_name="$(basename "$suggestion_image_name")"
 
       suggestions+=("$suggestion_name")
@@ -106,7 +106,7 @@ run() {
       algorithm_name="$(yq eval '.spec.earlyStopping.algorithmName' "$exp_path")"
 
       earlystopping_image_name="$(algorithm_name=$algorithm_name yq eval '.runtime.earlyStoppings.[] | select(.algorithmName == env(algorithm_name)) | .image' \
-        manifests/v1beta1/components/katib-config/katib-config.yaml | cut -d: -f1)"
+        manifests/v1beta1/installs/katib-standalone/katib-config.yaml | cut -d: -f1)"
       earlystopping_name="$(basename "$earlystopping_image_name")"
 
       earlystoppings+=("$earlystopping_name")

@@ -54,3 +54,11 @@ vars:
 
 configurations:
   - params.yaml
+
+configMapGenerator:
+  - name: katib-config
+    behavior: replace
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true

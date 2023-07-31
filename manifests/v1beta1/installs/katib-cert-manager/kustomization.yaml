@@ -19,8 +19,6 @@ resources:
   - ../../components/webhook/
   # Cert-manager certificate for webhooks
   - certificate.yaml
-  # Katib Config.
-  - ../../components/katib-config/
 images:
   - name: docker.io/kubeflowkatib/katib-controller
     newName: docker.io/kubeflowkatib/katib-controller
@@ -61,3 +59,11 @@ vars:
 
 configurations:
   - params.yaml
+
+configMapGenerator:
+  - name: katib-config
+    behavior: create
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true
