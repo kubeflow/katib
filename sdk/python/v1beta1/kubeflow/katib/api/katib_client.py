@@ -44,7 +44,7 @@ class KatibClient(object):
                 You have to provide valid configuration with Bearer token or
                 with username and password.
                 You can find an example here: https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
-            namespace: Target namespace. Can be overridden during method invocations.
+            namespace: Target Kubernetes namespace. Can be overridden during method invocations.
         """
 
         self.in_cluster = False
