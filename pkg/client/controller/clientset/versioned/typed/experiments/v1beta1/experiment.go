@@ -20,9 +20,12 @@ package v1beta1
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 	"time"
 
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/experiments/v1beta1"
 	scheme "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -47,6 +50,8 @@ type ExperimentInterface interface {
 	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.ExperimentList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Experiment, err error)
+	Apply(ctx context.Context, experiment *experimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Experiment, err error)
+	ApplyStatus(ctx context.Context, experiment *experimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Experiment, err error)
 	ExperimentExpansion
 }
 
@@ -188,6 +193,62 @@ func (c *experiments) Patch(ctx context.Context, name string, pt types.PatchType
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied experiment.
+func (c *experiments) Apply(ctx context.Context, experiment *experimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Experiment, err error) {
+	if experiment == nil {
+		return nil, fmt.Errorf("experiment provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(experiment)
+	if err != nil {
+		return nil, err
+	}
+	name := experiment.Name
+	if name == nil {
+		return nil, fmt.Errorf("experiment.Name must be provided to Apply")
+	}
+	result = &v1beta1.Experiment{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("experiments").
+		Name(*name).
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *experiments) ApplyStatus(ctx context.Context, experiment *experimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Experiment, err error) {
+	if experiment == nil {
+		return nil, fmt.Errorf("experiment provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(experiment)
+	if err != nil {
+		return nil, err
+	}
+
+	name := experiment.Name
+	if name == nil {
+		return nil, fmt.Errorf("experiment.Name must be provided to Apply")
+	}
+
+	result = &v1beta1.Experiment{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("experiments").
+		Name(*name).
+		SubResource("status").
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
 		Body(data).
 		Do(ctx).
 		Into(result)

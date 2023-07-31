@@ -37,6 +37,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
 	common "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
@@ -263,7 +264,7 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 	}()
 
 	c := mgr.GetClient()
-	si := NewSidecarInjector(c)
+	si := NewSidecarInjector(c, admission.NewDecoder(mgr.GetScheme()))
 
 	testTrialName := "test-trial"
 	testSuggestionName := "test-suggestion"
@@ -710,7 +711,7 @@ func TestGetKatibJob(t *testing.T) {
 	}()
 
 	c := mgr.GetClient()
-	si := NewSidecarInjector(c)
+	si := NewSidecarInjector(c, admission.NewDecoder(mgr.GetScheme()))
 
 	namespace := "default"
 	trialName := "trial-name"

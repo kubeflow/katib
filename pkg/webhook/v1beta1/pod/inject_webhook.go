@@ -57,20 +57,12 @@ type SidecarInjector struct {
 }
 
 // NewSidecarInjector returns a new sidecar injector with the given client.
-func NewSidecarInjector(c client.Client) *SidecarInjector {
+func NewSidecarInjector(c client.Client, d *admission.Decoder) *SidecarInjector {
 	return &SidecarInjector{
 		injectSecurityContext: viper.GetBool(consts.ConfigInjectSecurityContext),
 		client:                c,
+		decoder:               d,
 	}
-}
-
-// SidecarInjector implements admission.DecoderInjector.
-// A decoder will be automatically injected.
-
-// InjectDecoder injects the decoder.
-func (s *SidecarInjector) InjectDecoder(d *admission.Decoder) error {
-	s.decoder = d
-	return nil
 }
 
 func (s *SidecarInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
