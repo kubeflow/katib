@@ -14,7 +14,7 @@ init:
 runtime:
   metricsCollectors:
     - kind: StdOut
-      image: docker.io/kubeflo`wkatib/file-metrics-collector:$(KATIB_VERSION)
+      image: docker.io/kubeflowkatib/file-metrics-collector:$(KATIB_VERSION)
     - kind: File
       image: docker.io/kubeflowkatib/file-metrics-collector:$(KATIB_VERSION)
     - kind: TensorFlowEvent
