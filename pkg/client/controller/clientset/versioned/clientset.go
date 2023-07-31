@@ -39,8 +39,7 @@ type Interface interface {
 	TrialV1beta1() trialv1beta1.TrialV1beta1Interface
 }
 
-// Clientset contains the clients for groups. Each group has exactly one
-// version included in a Clientset.
+// Clientset contains the clients for groups.
 type Clientset struct {
 	*discovery.DiscoveryClient
 	commonV1beta1     *commonv1beta1.CommonV1beta1Client
