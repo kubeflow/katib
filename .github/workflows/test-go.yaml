@@ -63,5 +63,5 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Detail: `setup-envtest list --arch amd64`
+        # Detail: `setup-envtest list`
         kubernetes-version: ["1.25.0", "1.26.1", "1.27.1"]
