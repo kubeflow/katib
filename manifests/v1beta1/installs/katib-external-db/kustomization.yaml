@@ -37,3 +37,10 @@ secretGenerator:
   - name: katib-mysql-secrets
     envs:
       - secrets.env
+configMapGenerator:
+  - name: katib-config
+    behavior: create
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true

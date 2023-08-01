@@ -8,9 +8,9 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	v1beta10 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	katibconfig "github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
+	v1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
+	v1beta10 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
+	v1beta11 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -39,10 +39,10 @@ func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
 }
 
 // GetEarlyStoppingConfigData mocks base method.
-func (m *MockGenerator) GetEarlyStoppingConfigData(arg0 string) (katibconfig.EarlyStoppingConfig, error) {
+func (m *MockGenerator) GetEarlyStoppingConfigData(arg0 string) (v1beta1.EarlyStoppingConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetEarlyStoppingConfigData", arg0)
-	ret0, _ := ret[0].(katibconfig.EarlyStoppingConfig)
+	ret0, _ := ret[0].(v1beta1.EarlyStoppingConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -54,10 +54,10 @@ func (mr *MockGeneratorMockRecorder) GetEarlyStoppingConfigData(arg0 interface{}
 }
 
 // GetMetricsCollectorConfigData mocks base method.
-func (m *MockGenerator) GetMetricsCollectorConfigData(arg0 v1beta1.CollectorKind) (katibconfig.MetricsCollectorConfig, error) {
+func (m *MockGenerator) GetMetricsCollectorConfigData(arg0 v1beta10.CollectorKind) (v1beta1.MetricsCollectorConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMetricsCollectorConfigData", arg0)
-	ret0, _ := ret[0].(katibconfig.MetricsCollectorConfig)
+	ret0, _ := ret[0].(v1beta1.MetricsCollectorConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -69,7 +69,7 @@ func (mr *MockGeneratorMockRecorder) GetMetricsCollectorConfigData(arg0 interfac
 }
 
 // GetRunSpecWithHyperParameters mocks base method.
-func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1beta10.Experiment, arg1, arg2 string, arg3 []v1beta1.ParameterAssignment) (*unstructured.Unstructured, error) {
+func (m *MockGenerator) GetRunSpecWithHyperParameters(arg0 *v1beta11.Experiment, arg1, arg2 string, arg3 []v1beta10.ParameterAssignment) (*unstructured.Unstructured, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRunSpecWithHyperParameters", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(*unstructured.Unstructured)
@@ -84,10 +84,10 @@ func (mr *MockGeneratorMockRecorder) GetRunSpecWithHyperParameters(arg0, arg1, a
 }
 
 // GetSuggestionConfigData mocks base method.
-func (m *MockGenerator) GetSuggestionConfigData(arg0 string) (katibconfig.SuggestionConfig, error) {
+func (m *MockGenerator) GetSuggestionConfigData(arg0 string) (v1beta1.SuggestionConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSuggestionConfigData", arg0)
-	ret0, _ := ret[0].(katibconfig.SuggestionConfig)
+	ret0, _ := ret[0].(v1beta1.SuggestionConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -99,7 +99,7 @@ func (mr *MockGeneratorMockRecorder) GetSuggestionConfigData(arg0 interface{}) *
 }
 
 // GetTrialTemplate mocks base method.
-func (m *MockGenerator) GetTrialTemplate(arg0 *v1beta10.Experiment) (string, error) {
+func (m *MockGenerator) GetTrialTemplate(arg0 *v1beta11.Experiment) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTrialTemplate", arg0)
 	ret0, _ := ret[0].(string)

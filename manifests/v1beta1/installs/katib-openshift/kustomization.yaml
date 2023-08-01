@@ -62,3 +62,11 @@ patchesJson6902:
       kind: MutatingWebhookConfiguration
       name: katib.kubeflow.org
     path: patches/webhook-inject-cabundle.yaml
+
+configMapGenerator:
+  - name: katib-config
+    behavior: create
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true

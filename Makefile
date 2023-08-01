@@ -81,13 +81,18 @@ endif
 sync-go-mod:
 	go mod tidy -go $(GO_VERSION)
 
+CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
+.PHONY: controller-gen
+controller-gen:
+	@GOBIN=$(shell pwd)/bin GO111MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
+
 # Run this if you update any existing controller APIs.
 # 1. Generate deepcopy, clientset, listers, informers for the APIs (hack/update-codegen.sh)
 # 2. Generate open-api for the APIs (hack/update-openapigen)
 # 3. Generate Python SDK for Katib (hack/gen-python-sdk/gen-sdk.sh)
 # 4. Generate gRPC manager APIs (pkg/apis/manager/v1beta1/build.sh and pkg/apis/manager/health/build.sh)
 # 5. Generate Go mock codes
-generate:
+generate: controller-gen
 ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
 endif

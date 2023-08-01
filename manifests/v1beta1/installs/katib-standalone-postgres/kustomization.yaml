@@ -39,3 +39,10 @@ patchesJson6902:
       kind: Deployment
       name: katib-db-manager
     path: ./patches/db-manager.yaml
+configMapGenerator:
+  - name: katib-config
+    behavior: create
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true

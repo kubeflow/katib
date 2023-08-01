@@ -24,6 +24,7 @@ import (
 	"os"
 
 	"github.com/spf13/viper"
+	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -33,38 +34,32 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
-	controller "github.com/kubeflow/katib/pkg/controller.v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
-	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
+	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
 	webhook "github.com/kubeflow/katib/pkg/webhook/v1beta1"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 )
+
+var scheme = runtime.NewScheme()
+
+func init() {
+	utilruntime.Must(apis.AddToScheme(scheme))
+	utilruntime.Must(configv1beta1.AddToScheme(scheme))
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+}
 
 func main() {
 	logf.SetLogger(zap.New())
 	log := logf.Log.WithName("entrypoint")
 
-	var experimentSuggestionName string
-	var metricsAddr string
-	var healthzAddr string
-	var webhookPort int
-	var injectSecurityContext bool
-	var enableGRPCProbeInSuggestion bool
-	var trialResources trialutil.GvkListFlag
-	var enableLeaderElection bool
-	var leaderElectionID string
-
-	flag.StringVar(&experimentSuggestionName, "experiment-suggestion-name",
-		"default", "The implementation of suggestion interface in experiment controller (default)")
-	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
-	flag.StringVar(&healthzAddr, "healthz-addr", ":18080", "The address the healthz endpoint binds to.")
-	flag.BoolVar(&injectSecurityContext, "webhook-inject-securitycontext", false, "Inject the securityContext of container[0] in the sidecar")
-	flag.BoolVar(&enableGRPCProbeInSuggestion, "enable-grpc-probe-in-suggestion", true, "enable grpc probe in suggestions")
-	flag.Var(&trialResources, "trial-resources", "The list of resources that can be used as trial template, in the form: Kind.version.group (e.g. TFJob.v1.kubeflow.org)")
-	flag.IntVar(&webhookPort, "webhook-port", 8443, "The port number to be used for admission webhook server.")
-	// For leader election
-	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false, "Enable leader election for katib-controller. Enabling this will ensure there is only one active katib-controller.")
-	flag.StringVar(&leaderElectionID, "leader-election-id", "3fbc96e9.katib.kubeflow.org", "The ID for leader election.")
+	var katibConfigFile string
+	flag.StringVar(&katibConfigFile, "katib-config", "",
+		"The katib-controller will load its initial configuration from this file. "+
+			"Omit this flag to use the default configuration values. ")
 
 	// TODO (andreyvelich): Currently it is not possible to set different webhook service name.
 	// flag.StringVar(&serviceName, "webhook-service-name", "katib-controller", "The service name which will be used in webhook")
@@ -73,21 +68,33 @@ func main() {
 
 	flag.Parse()
 
+	initConfig, err := katibconfig.GetInitConfigData(scheme, katibConfigFile)
+	if err != nil {
+		log.Error(err, "Failed to get KatibConfig")
+		os.Exit(1)
+	}
+
 	// Set the config in viper.
-	viper.Set(consts.ConfigExperimentSuggestionName, experimentSuggestionName)
-	viper.Set(consts.ConfigInjectSecurityContext, injectSecurityContext)
-	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, enableGRPCProbeInSuggestion)
-	viper.Set(consts.ConfigTrialResources, trialResources)
+	viper.Set(consts.ConfigExperimentSuggestionName, initConfig.ControllerConfig.ExperimentSuggestionName)
+	viper.Set(consts.ConfigInjectSecurityContext, initConfig.ControllerConfig.InjectSecurityContext)
+	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, initConfig.ControllerConfig.EnableGRPCProbeInSuggestion)
+
+	trialGVKs, err := katibconfig.TrialResourcesToGVKs(initConfig.ControllerConfig.TrialResources)
+	if err != nil {
+		log.Error(err, "Failed to parse trialResources")
+		os.Exit(1)
+	}
+	viper.Set(consts.ConfigTrialResources, trialGVKs)
 
 	log.Info("Config:",
 		consts.ConfigExperimentSuggestionName,
 		viper.GetString(consts.ConfigExperimentSuggestionName),
 		"webhook-port",
-		webhookPort,
+		initConfig.ControllerConfig.WebhookPort,
 		"metrics-addr",
-		metricsAddr,
+		initConfig.ControllerConfig.MetricsAddr,
 		"healthz-addr",
-		healthzAddr,
+		initConfig.ControllerConfig.HealthzAddr,
 		consts.ConfigInjectSecurityContext,
 		viper.GetBool(consts.ConfigInjectSecurityContext),
 		consts.ConfigEnableGRPCProbeInSuggestion,
@@ -105,10 +112,11 @@ func main() {
 
 	// Create a new katib controller to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
-		MetricsBindAddress:     metricsAddr,
-		HealthProbeBindAddress: healthzAddr,
-		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       leaderElectionID,
+		MetricsBindAddress:     initConfig.ControllerConfig.MetricsAddr,
+		HealthProbeBindAddress: initConfig.ControllerConfig.HealthzAddr,
+		LeaderElection:         initConfig.ControllerConfig.EnableLeaderElection,
+		LeaderElectionID:       initConfig.ControllerConfig.LeaderElectionID,
+		Scheme:                 scheme,
 		// TODO: Once the below issue is resolved, we need to switch discovery-client to the built-in one.
 		// https://github.com/kubernetes-sigs/controller-runtime/issues/2354
 		// https://github.com/kubernetes-sigs/controller-runtime/issues/2424
@@ -121,12 +129,6 @@ func main() {
 
 	log.Info("Registering Components.")
 
-	// Setup Scheme for all resources
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "Unable to add APIs to scheme")
-		os.Exit(1)
-	}
-
 	// Setup all Controllers
 	log.Info("Setting up controller.")
 	if err := controller.AddToManager(mgr); err != nil {
@@ -135,7 +137,7 @@ func main() {
 	}
 
 	log.Info("Setting up webhooks.")
-	if err := webhook.AddToManager(mgr, webhookPort); err != nil {
+	if err := webhook.AddToManager(mgr, *initConfig.ControllerConfig.WebhookPort); err != nil {
 		log.Error(err, "Unable to register webhooks to the manager")
 		os.Exit(1)
 	}

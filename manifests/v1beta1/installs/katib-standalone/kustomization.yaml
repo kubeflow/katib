@@ -32,3 +32,10 @@ images:
   - name: docker.io/kubeflowkatib/cert-generator
     newName: docker.io/kubeflowkatib/cert-generator
     newTag: latest
+configMapGenerator:
+  - name: katib-config
+    behavior: create
+    files:
+      - katib-config.yaml
+    options:
+      disableNameSuffixHash: true

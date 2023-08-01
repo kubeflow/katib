@@ -29,6 +29,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -66,7 +67,7 @@ func TestAdd(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	// Set Trial resources.
-	trialResources := trialutil.GvkListFlag{
+	trialResources := []schema.GroupVersionKind{
 		{
 			Group:   "kubeflow.org",
 			Version: "v1",
@@ -122,7 +123,7 @@ func TestReconcileBatchJob(t *testing.T) {
 
 	recFn := SetupTestReconcile(r)
 	// Set Job resource
-	trialResources := trialutil.GvkListFlag{
+	trialResources := []schema.GroupVersionKind{
 		{
 			Group:   "batch",
 			Version: "v1",

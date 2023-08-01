@@ -26,7 +26,7 @@ if [[ -z "${GOPATH:-}" ]]; then
 fi
 
 # Grab code-generator version from go.mod
-CODEGEN_VERSION=$(cd ../../.. && grep 'k8s.io/code-generator' go.mod | awk '{print $2}')
+CODEGEN_VERSION=$(cd ../.. && grep 'k8s.io/code-generator' go.mod | awk '{print $2}')
 CODEGEN_PKG="${GOPATH}/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}"
 
 if [[ ! -d ${CODEGEN_PKG} ]]; then

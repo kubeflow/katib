@@ -24,6 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
@@ -37,9 +38,9 @@ type Generator interface {
 	InjectClient(c client.Client)
 	GetTrialTemplate(instance *experimentsv1beta1.Experiment) (string, error)
 	GetRunSpecWithHyperParameters(experiment *experimentsv1beta1.Experiment, trialName, trialNamespace string, assignments []commonapiv1beta1.ParameterAssignment) (*unstructured.Unstructured, error)
-	GetSuggestionConfigData(algorithmName string) (katibconfig.SuggestionConfig, error)
-	GetEarlyStoppingConfigData(algorithmName string) (katibconfig.EarlyStoppingConfig, error)
-	GetMetricsCollectorConfigData(cKind commonapiv1beta1.CollectorKind) (katibconfig.MetricsCollectorConfig, error)
+	GetSuggestionConfigData(algorithmName string) (configv1beta1.SuggestionConfig, error)
+	GetEarlyStoppingConfigData(algorithmName string) (configv1beta1.EarlyStoppingConfig, error)
+	GetMetricsCollectorConfigData(cKind commonapiv1beta1.CollectorKind) (configv1beta1.MetricsCollectorConfig, error)
 }
 
 // DefaultGenerator is the default implementation of Generator.
@@ -60,17 +61,17 @@ func (g *DefaultGenerator) InjectClient(c client.Client) {
 }
 
 // GetMetricsCollectorConfigData returns metrics collector configuration for a given collector kind.
-func (g *DefaultGenerator) GetMetricsCollectorConfigData(cKind commonapiv1beta1.CollectorKind) (katibconfig.MetricsCollectorConfig, error) {
+func (g *DefaultGenerator) GetMetricsCollectorConfigData(cKind commonapiv1beta1.CollectorKind) (configv1beta1.MetricsCollectorConfig, error) {
 	return katibconfig.GetMetricsCollectorConfigData(cKind, g.client.GetClient())
 }
 
 // GetSuggestionConfigData returns suggestion configuration for a given algorithm name.
-func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (katibconfig.SuggestionConfig, error) {
+func (g *DefaultGenerator) GetSuggestionConfigData(algorithmName string) (configv1beta1.SuggestionConfig, error) {
 	return katibconfig.GetSuggestionConfigData(algorithmName, g.client.GetClient())
 }
 
 // GetEarlyStoppingConfigData returns early stopping configuration for a given algorithm.
-func (g *DefaultGenerator) GetEarlyStoppingConfigData(algorithmName string) (katibconfig.EarlyStoppingConfig, error) {
+func (g *DefaultGenerator) GetEarlyStoppingConfigData(algorithmName string) (configv1beta1.EarlyStoppingConfig, error) {
 	return katibconfig.GetEarlyStoppingConfigData(algorithmName, g.client.GetClient())
 }
 

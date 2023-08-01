@@ -53,7 +53,7 @@ yq eval -i '.spec.resources.requests.storage|="2Gi"' $PVC_FILE
 
 echo -e "\n The Katib will be deployed with the following configs"
 cat $KUSTOMIZATION_FILE
-cat ../../../../../manifests/v1beta1/components/controller/katib-config.yaml
+cat ../../../../../manifests/v1beta1/installs/katib-standalone/katib-config.yaml
 
 # If the user wants to deploy training operator, then use the kustomization file for training operator.
 if "$DEPLOY_TRAINING_OPERATOR"; then

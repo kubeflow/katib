@@ -17,48 +17,105 @@ limitations under the License.
 package katibconfig
 
 import (
-	"encoding/json"
-	"fmt"
-	"reflect"
+	"log"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/yaml"
 
+	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
-type katibConfig struct {
-	suggestion       map[string]*SuggestionConfig
-	earlyStopping    map[string]*EarlyStoppingConfig
-	metricsCollector map[commonv1beta1.CollectorKind]*MetricsCollectorConfig
+func TestTrialResourcesToGVKs(t *testing.T) {
+	cases := map[string]struct {
+		trialResources []string
+		wantGVKs       []schema.GroupVersionKind
+		wantError      error
+	}{
+		"All GVKs are appropriate": {
+			trialResources: []string{
+				"Job.v1.batch",
+				"TFJob.v1.kubeflow.org",
+			},
+			wantGVKs: []schema.GroupVersionKind{
+				{Group: "batch", Version: "v1", Kind: "Job"},
+				{Group: "kubeflow.org", Version: "v1", Kind: "TFJob"},
+			},
+		},
+		"TrialResources are empty": {
+			trialResources: []string{},
+			wantError:      ErrTrialResourcesAreEmpty,
+		},
+		"GVK with invalid schema": {
+			trialResources: []string{
+				"invalid;;invalid",
+			},
+			wantError: ErrInvalidGVKFormat,
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			got, err := TrialResourcesToGVKs(tc.trialResources)
+			if diff := cmp.Diff(tc.wantError, err, cmpopts.EquateErrors()); len(diff) != 0 {
+				t.Errorf("Unexpected error from TrialResourcesToGVKs (-want,+got):\n%s", diff)
+			}
+			if diff := cmp.Diff(tc.wantGVKs, got); len(diff) != 0 {
+				t.Errorf("Unexpected gvks from TrialResourcesToGVKs (-want,+got):\n%s", diff)
+			}
+		})
+	}
 }
 
 func TestGetSuggestionConfigData(t *testing.T) {
 	const testAlgorithmName = "test-suggestion"
+	scm := runtime.NewScheme()
+	if err := configv1beta1.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
+	if err := clientgoscheme.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
 
 	tests := []struct {
 		testDescription    string
-		katibConfig        *katibConfig
-		expected           *SuggestionConfig
+		katibConfig        *configv1beta1.KatibConfig
+		expected           *configv1beta1.SuggestionConfig
 		inputAlgorithmName string
 		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
-				kc.suggestion[testAlgorithmName].ImagePullPolicy = corev1.PullAlways
-				kc.suggestion[testAlgorithmName].Resources = *newFakeCustomResourceRequirements()
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					TypeMeta: metav1.TypeMeta{
+						Kind:       "KatibConfig",
+						APIVersion: "config.kubeflow.org/v1beta1",
+					},
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						SuggestionConfigs: []configv1beta1.SuggestionConfig{
+							*newFakeSuggestionConfig(testAlgorithmName),
+						},
+					},
+				}
+				kc.RuntimeConfig.SuggestionConfigs[0].ImagePullPolicy = corev1.PullAlways
+				kc.RuntimeConfig.SuggestionConfigs[0].Resources = *newFakeCustomResourceRequirements()
 				return kc
 			}(),
-			expected: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
+			expected: func() *configv1beta1.SuggestionConfig {
+				c := newFakeSuggestionConfig(testAlgorithmName)
 				c.ImagePullPolicy = corev1.PullAlways
 				c.Resources = *newFakeCustomResourceRequirements()
 				return c
@@ -72,122 +129,88 @@ func TestGetSuggestionConfigData(t *testing.T) {
 			err:             true,
 		},
 		{
-			testDescription: fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelSuggestionTag),
-			katibConfig:     &katibConfig{},
+			testDescription: "There is not runtime.suggestions field in katib-config configMap",
+			katibConfig:     &configv1beta1.KatibConfig{},
 			err:             true,
 		},
 		{
-			testDescription:    "There is not the AlgorithmName",
-			katibConfig:        &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}},
+			testDescription: "There is not the AlgorithmName",
+			katibConfig: &configv1beta1.KatibConfig{
+				RuntimeConfig: configv1beta1.RuntimeConfig{
+					SuggestionConfigs: []configv1beta1.SuggestionConfig{
+						*newFakeSuggestionConfig(testAlgorithmName),
+					},
+				},
+			},
 			inputAlgorithmName: "invalid-algorithm-name",
 			err:                true,
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
-				kc.suggestion[testAlgorithmName].Image = ""
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						SuggestionConfigs: []configv1beta1.SuggestionConfig{
+							*newFakeSuggestionConfig(testAlgorithmName),
+						},
+					},
+				}
+				kc.RuntimeConfig.SuggestionConfigs[0].Image = ""
 				return kc
 			}(),
 			inputAlgorithmName: testAlgorithmName,
 			err:                true,
 		},
-		{
-			testDescription: fmt.Sprintf("GetSuggestionConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy),
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
-				kc.suggestion[testAlgorithmName].ImagePullPolicy = ""
-				return kc
-			}(),
-			expected:           newFakeSuggestionConfig(),
-			inputAlgorithmName: testAlgorithmName,
-			err:                false,
-		},
-		{
-			testDescription: "GetSuggestionConfigData sets resource.requests and resource.limits for the suggestion service",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
-				kc.suggestion[testAlgorithmName].Resources = corev1.ResourceRequirements{}
-				return kc
-			}(),
-			expected:           newFakeSuggestionConfig(),
-			inputAlgorithmName: testAlgorithmName,
-			err:                false,
-		},
-		{
-			testDescription: fmt.Sprintf("GetSuggestionConfigData sets %s to volumeMountPath", consts.DefaultContainerSuggestionVolumeMountPath),
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
-				kc.suggestion[testAlgorithmName].VolumeMountPath = ""
-				return kc
-			}(),
-			expected:           newFakeSuggestionConfig(),
-			inputAlgorithmName: testAlgorithmName,
-			err:                false,
-		},
-		{
-			testDescription: "GetSuggestionConfigData sets accessMode and resource.requests for PVC",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
-				kc.suggestion[testAlgorithmName].PersistentVolumeClaimSpec = corev1.PersistentVolumeClaimSpec{}
-				return kc
-			}(),
-			expected:           newFakeSuggestionConfig(),
-			inputAlgorithmName: testAlgorithmName,
-			err:                false,
-		},
-		{
-			testDescription: fmt.Sprintf("GetSuggestionConfigData does not set %s to persistentVolumeReclaimPolicy", corev1.PersistentVolumeReclaimDelete),
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{suggestion: map[string]*SuggestionConfig{testAlgorithmName: newFakeSuggestionConfig()}}
-				kc.suggestion[testAlgorithmName].PersistentVolumeSpec = corev1.PersistentVolumeSpec{}
-				return kc
-			}(),
-			expected: func() *SuggestionConfig {
-				c := newFakeSuggestionConfig()
-				c.PersistentVolumeSpec = corev1.PersistentVolumeSpec{}
-				return c
-			}(),
-			inputAlgorithmName: testAlgorithmName,
-			err:                false,
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.testDescription, func(t *testing.T) {
-			fakeKubeClient := newFakeKubeClient(newFakeKatibConfigMap(tt.katibConfig))
+			fakeKubeClient := newFakeKubeClient(scm, newFakeKatibConfigMap(tt.katibConfig))
 			actual, err := GetSuggestionConfigData(tt.inputAlgorithmName, fakeKubeClient)
 			if (err != nil) != tt.err {
 				t.Errorf("want error: %v, actual: %v", tt.err, err)
 			} else if tt.expected != nil {
-				if !reflect.DeepEqual(actual, *tt.expected) {
-					t.Errorf("Generated SuggestionConfig is invalid.\n\nactual:\n%v\n\nexpected:\n%v\n\n", actual, *tt.expected)
+				if diff := cmp.Diff(*tt.expected, actual); len(diff) != 0 {
+					t.Logf("katibConfig: %v", tt.katibConfig)
+					t.Errorf("Generated SuggestionConfig is invalid. (-want,+got):\n%s", diff)
 				}
 			}
 		})
 	}
-
 }
 
 func TestGetEarlyStoppingConfigData(t *testing.T) {
 	const testAlgorithmName = "test-early-stopping"
+	scm := runtime.NewScheme()
+	if err := configv1beta1.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
+	if err := clientgoscheme.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
 
 	tests := []struct {
 		testDescription    string
-		katibConfig        *katibConfig
-		expected           *EarlyStoppingConfig
+		katibConfig        *configv1beta1.KatibConfig
+		expected           *configv1beta1.EarlyStoppingConfig
 		inputAlgorithmName string
 		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
-				kc.earlyStopping[testAlgorithmName].ImagePullPolicy = corev1.PullIfNotPresent
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						EarlyStoppingConfigs: []configv1beta1.EarlyStoppingConfig{
+							*newFakeEarlyStoppingConfig(testAlgorithmName),
+						},
+					},
+				}
+				kc.RuntimeConfig.EarlyStoppingConfigs[0].ImagePullPolicy = corev1.PullIfNotPresent
 				return kc
 			}(),
-			expected: func() *EarlyStoppingConfig {
-				c := newFakeEarlyStoppingConfig()
+			expected: func() *configv1beta1.EarlyStoppingConfig {
+				c := newFakeEarlyStoppingConfig(testAlgorithmName)
 				c.ImagePullPolicy = corev1.PullIfNotPresent
 				return c
 			}(),
@@ -200,48 +223,48 @@ func TestGetEarlyStoppingConfigData(t *testing.T) {
 			err:             true,
 		},
 		{
-			testDescription: fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelEarlyStoppingTag),
-			katibConfig:     &katibConfig{},
+			testDescription: "There is not runtime.earlyStoppings field in katib-config configMap",
+			katibConfig:     &configv1beta1.KatibConfig{},
 			err:             true,
 		},
 		{
-			testDescription:    "There is not the AlgorithmName",
-			katibConfig:        &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}},
+			testDescription: "There is not the AlgorithmName",
+			katibConfig: &configv1beta1.KatibConfig{
+				RuntimeConfig: configv1beta1.RuntimeConfig{
+					EarlyStoppingConfigs: []configv1beta1.EarlyStoppingConfig{
+						*newFakeEarlyStoppingConfig(testAlgorithmName),
+					},
+				},
+			},
 			inputAlgorithmName: "invalid-algorithm-name",
 			err:                true,
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
-				kc.earlyStopping[testAlgorithmName].Image = ""
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						EarlyStoppingConfigs: []configv1beta1.EarlyStoppingConfig{
+							*newFakeEarlyStoppingConfig(testAlgorithmName),
+						},
+					},
+				}
+				kc.RuntimeConfig.EarlyStoppingConfigs[0].Image = ""
 				return kc
 			}(),
 			inputAlgorithmName: testAlgorithmName,
 			err:                true,
 		},
-		{
-			testDescription: fmt.Sprintf("GetEarlyStoppingConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy),
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{earlyStopping: map[string]*EarlyStoppingConfig{testAlgorithmName: newFakeEarlyStoppingConfig()}}
-				kc.earlyStopping[testAlgorithmName].ImagePullPolicy = ""
-				return kc
-			}(),
-			expected:           newFakeEarlyStoppingConfig(),
-			inputAlgorithmName: testAlgorithmName,
-			err:                false,
-		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.testDescription, func(t *testing.T) {
-			fakeKubeClient := newFakeKubeClient(newFakeKatibConfigMap(tt.katibConfig))
+			fakeKubeClient := newFakeKubeClient(scm, newFakeKatibConfigMap(tt.katibConfig))
 			actual, err := GetEarlyStoppingConfigData(tt.inputAlgorithmName, fakeKubeClient)
 			if (err != nil) != tt.err {
 				t.Errorf("want error: %v, actual: %v", tt.err, err)
 			} else if tt.expected != nil {
-				if !reflect.DeepEqual(actual, *tt.expected) {
-					t.Errorf("Generated EarlyStoppingConfig is invalid.\n\nactual:\n%v\n\nexpected:\n%v\n\n", actual, *tt.expected)
+				if diff := cmp.Diff(*tt.expected, actual); len(diff) != 0 {
+					t.Errorf("Generated EarlyStoppingConfig is invalid. (-want,+got):\n%s", diff)
 				}
 			}
 		})
@@ -253,30 +276,36 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 		invalidCollectorKind commonv1beta1.CollectorKind = "invalidCollector"
 		testCollectorKind    commonv1beta1.CollectorKind = "testCollector"
 	)
-
-	nukeResource, _ := resource.ParseQuantity("-1")
-	nukeResourceRequirements := map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:              nukeResource,
-		corev1.ResourceMemory:           nukeResource,
-		corev1.ResourceEphemeralStorage: nukeResource,
+	scm := runtime.NewScheme()
+	if err := configv1beta1.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
+	if err := clientgoscheme.AddToScheme(scm); err != nil {
+		t.Fatal(err)
 	}
 
 	tests := []struct {
 		testDescription    string
-		katibConfig        *katibConfig
-		expected           *MetricsCollectorConfig
+		katibConfig        *configv1beta1.KatibConfig
+		expected           *configv1beta1.MetricsCollectorConfig
 		inputCollectorKind commonv1beta1.CollectorKind
 		err                bool
 	}{
 		{
 			testDescription: "All parameters correctly are specified",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}}
-				kc.metricsCollector[testCollectorKind].ImagePullPolicy = corev1.PullNever
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
+							*newFakeMetricsCollectorConfig(testCollectorKind),
+						},
+					},
+				}
+				kc.RuntimeConfig.MetricsCollectorConfigs[0].ImagePullPolicy = corev1.PullNever
 				return kc
 			}(),
-			expected: func() *MetricsCollectorConfig {
-				c := newFakeMetricsCollectorConfig()
+			expected: func() *configv1beta1.MetricsCollectorConfig {
+				c := newFakeMetricsCollectorConfig(testCollectorKind)
 				c.ImagePullPolicy = corev1.PullNever
 				return c
 			}(),
@@ -289,102 +318,178 @@ func TestGetMetricsCollectorConfigData(t *testing.T) {
 			err:             true,
 		},
 		{
-			testDescription: fmt.Sprintf("There is not %s field in katib-config configMap", consts.LabelMetricsCollectorSidecar),
-			katibConfig:     &katibConfig{},
+			testDescription: "There is not runtime.metricsCollectors field in katib-config configMap",
+			katibConfig:     &configv1beta1.KatibConfig{},
 			err:             true,
 		},
 		{
-			testDescription:    "There is not the cKind",
-			katibConfig:        &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}},
+			testDescription: "There is not the cKind",
+			katibConfig: &configv1beta1.KatibConfig{
+				RuntimeConfig: configv1beta1.RuntimeConfig{
+					MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
+						*newFakeMetricsCollectorConfig(testCollectorKind),
+					},
+				},
+			},
 			inputCollectorKind: invalidCollectorKind,
 			err:                true,
 		},
 		{
 			testDescription: "Image filed is empty in katib-config configMap",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}}
-				kc.metricsCollector[testCollectorKind].Image = ""
+			katibConfig: func() *configv1beta1.KatibConfig {
+				kc := &configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
+							*newFakeMetricsCollectorConfig(testCollectorKind),
+						},
+					},
+				}
+				kc.RuntimeConfig.MetricsCollectorConfigs[0].Image = ""
 				return kc
 			}(),
 			inputCollectorKind: testCollectorKind,
 			err:                true,
 		},
-		{
-			testDescription: fmt.Sprintf("GetMetricsConfigData sets %s to imagePullPolicy", consts.DefaultImagePullPolicy),
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}}
-				kc.metricsCollector[testCollectorKind].ImagePullPolicy = ""
-				return kc
-			}(),
-			expected:           newFakeMetricsCollectorConfig(),
-			inputCollectorKind: testCollectorKind,
-			err:                false,
-		},
-		{
-			testDescription: "GetMetricsConfigData nukes resource.requests and resource.limits for the metrics collector",
-			katibConfig: func() *katibConfig {
-				kc := &katibConfig{metricsCollector: map[commonv1beta1.CollectorKind]*MetricsCollectorConfig{testCollectorKind: newFakeMetricsCollectorConfig()}}
-				kc.metricsCollector[testCollectorKind].Resource = corev1.ResourceRequirements{
-					Requests: nukeResourceRequirements,
-					Limits:   nukeResourceRequirements,
-				}
-				return kc
-			}(),
-			expected: func() *MetricsCollectorConfig {
-				c := newFakeMetricsCollectorConfig()
-				c.Resource = corev1.ResourceRequirements{
-					Requests: map[corev1.ResourceName]resource.Quantity{},
-					Limits:   map[corev1.ResourceName]resource.Quantity{},
-				}
-				return c
-			}(),
-			inputCollectorKind: testCollectorKind,
-			err:                false,
-		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.testDescription, func(t *testing.T) {
-			fakeKubeClient := newFakeKubeClient(newFakeKatibConfigMap(tt.katibConfig))
+			fakeKubeClient := newFakeKubeClient(scm, newFakeKatibConfigMap(tt.katibConfig))
 			actual, err := GetMetricsCollectorConfigData(tt.inputCollectorKind, fakeKubeClient)
 			if (err != nil) != tt.err {
 				t.Errorf("want error: %v, actual: %v", tt.err, err)
 			} else if tt.expected != nil {
-				if !reflect.DeepEqual(actual, *tt.expected) {
-					t.Errorf("Generated MetricsCollectorConfig is invalid.\n\nactual:\n%v\n\nexpected:\n%v\n\n", actual, *tt.expected)
+				if diff := cmp.Diff(*tt.expected, actual); len(diff) != 0 {
+					t.Errorf("Generated MetricsCollectorConfig is invalid. (-want,+got):\n%s", diff)
 				}
 			}
 		})
 	}
 }
 
-func newFakeKubeClient(katibConfigMap *corev1.ConfigMap) client.Client {
-	fakeClientBuilder := fake.NewClientBuilder().WithScheme(scheme.Scheme)
+func TestGetInitConfigData(t *testing.T) {
+	diableGRPCProbeInSuggestion := false
+	customizedWebhookPort := 18443
+
+	tmpDir, err := os.MkdirTemp("", "temp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+	scm := runtime.NewScheme()
+	if err = configv1beta1.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
+
+	fullInitConfig := filepath.Join(tmpDir, "fullInitConfig.yaml")
+	if err = os.WriteFile(fullInitConfig, []byte(`
+apiVersion: config.kubeflow.org/v1beta1
+kind: KatibConfig
+init:
+  controller:
+    experimentSuggestionName: test
+    metricsAddr: :8081
+    healthzAddr: :18081
+    injectSecurityContext: true
+    enableGRPCProbeInSuggestion: false
+    trialResources:
+    - Job.v1.batch
+    - TFJob.v1.kubeflow.org
+    - PyTorchJob.v1.kubeflow.org
+    - MPIJob.v1.kubeflow.org
+    - XGBoostJob.v1.kubeflow.org
+    - MXJob.v1.kubeflow.org
+    webhookPort: 18443
+    enableLeaderElection: true
+    leaderElectionID: xyz0123
+runtime:
+  suggestions:
+  - algorithmName: random
+    image: docker.io/kubeflowkatib/suggestion-hyperopt:latest
+`), os.FileMode(0600)); err != nil {
+		t.Fatal(err)
+	}
+
+	cases := map[string]struct {
+		katibConfigFile    string
+		wantInitConfigData configv1beta1.InitConfig
+		wantError          error
+	}{
+		"KatibConfigFile is empty": {
+			katibConfigFile: "",
+			wantInitConfigData: configv1beta1.InitConfig{
+				ControllerConfig: configv1beta1.ControllerConfig{
+					ExperimentSuggestionName:    configv1beta1.DefaultExperimentSuggestionName,
+					MetricsAddr:                 configv1beta1.DefaultMetricsAddr,
+					HealthzAddr:                 configv1beta1.DefaultHealthzAddr,
+					EnableGRPCProbeInSuggestion: &configv1beta1.DefaultEnableGRPCProbeInSuggestion,
+					TrialResources:              configv1beta1.DefaultTrialResources,
+					WebhookPort:                 &configv1beta1.DefaultWebhookPort,
+					LeaderElectionID:            configv1beta1.DefaultLeaderElectionID,
+				},
+			},
+		},
+		"invalid katibConfigFile": {
+			katibConfigFile: "invalid",
+			wantError:       ErrKatibConfigNil,
+		},
+		"full init config": {
+			katibConfigFile: fullInitConfig,
+			wantInitConfigData: configv1beta1.InitConfig{
+				ControllerConfig: configv1beta1.ControllerConfig{
+					ExperimentSuggestionName:    "test",
+					MetricsAddr:                 ":8081",
+					HealthzAddr:                 ":18081",
+					InjectSecurityContext:       true,
+					EnableGRPCProbeInSuggestion: &diableGRPCProbeInSuggestion,
+					TrialResources: []string{
+						"Job.v1.batch",
+						"TFJob.v1.kubeflow.org",
+						"PyTorchJob.v1.kubeflow.org",
+						"MPIJob.v1.kubeflow.org",
+						"XGBoostJob.v1.kubeflow.org",
+						"MXJob.v1.kubeflow.org",
+					},
+					WebhookPort:          &customizedWebhookPort,
+					EnableLeaderElection: true,
+					LeaderElectionID:     "xyz0123",
+				},
+			},
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			got, err := GetInitConfigData(scm, tc.katibConfigFile)
+			if diff := cmp.Diff(tc.wantError, err, cmpopts.EquateErrors()); len(diff) != 0 {
+				t.Errorf("Unexpected error from GetInitConfigData() (-want,+got):\n%s", diff)
+			}
+			if diff := cmp.Diff(tc.wantInitConfigData, got); len(diff) != 0 {
+				t.Errorf("Unexpected InitConfig from GetInitConfigData() (-want,+got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func newFakeKubeClient(scm *runtime.Scheme, katibConfigMap *corev1.ConfigMap) client.Client {
+	fakeClientBuilder := fake.NewClientBuilder().WithScheme(scm)
 	if katibConfigMap != nil {
 		fakeClientBuilder.WithObjects(katibConfigMap)
 	}
 	return fakeClientBuilder.Build()
 }
 
-func newFakeKatibConfigMap(config *katibConfig) *corev1.ConfigMap {
+func newFakeKatibConfigMap(config *configv1beta1.KatibConfig) *corev1.ConfigMap {
 	if config == nil {
 		return nil
 	}
 
 	data := map[string]string{}
-	if config.suggestion != nil {
-		bSuggestionConfig, _ := json.Marshal(config.suggestion)
-		data[consts.LabelSuggestionTag] = string(bSuggestionConfig)
+	if config != nil {
+		bKatibConfig, err := yaml.Marshal(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+		data[consts.LabelKatibConfigTag] = string(bKatibConfig)
 	}
-	if config.earlyStopping != nil {
-		bEarlyStoppingConfig, _ := json.Marshal(config.earlyStopping)
-		data[consts.LabelEarlyStoppingTag] = string(bEarlyStoppingConfig)
-	}
-	if config.metricsCollector != nil {
-		bMetricsCollector, _ := json.Marshal(config.metricsCollector)
-		data[consts.LabelMetricsCollectorSidecar] = string(bMetricsCollector)
-	}
-
 	return &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -398,19 +503,20 @@ func newFakeKatibConfigMap(config *katibConfig) *corev1.ConfigMap {
 	}
 }
 
-func newFakeSuggestionConfig() *SuggestionConfig {
-	defaultVolumeStorage, _ := resource.ParseQuantity(consts.DefaultSuggestionVolumeStorage)
+func newFakeSuggestionConfig(algorithmName string) *configv1beta1.SuggestionConfig {
+	defaultVolumeStorage, _ := resource.ParseQuantity(configv1beta1.DefaultSuggestionVolumeStorage)
 
-	return &SuggestionConfig{
+	return &configv1beta1.SuggestionConfig{
+		AlgorithmName: algorithmName,
 		Container: corev1.Container{
 			Image:           "suggestion-image",
-			ImagePullPolicy: consts.DefaultImagePullPolicy,
+			ImagePullPolicy: configv1beta1.DefaultImagePullPolicy,
 			Resources:       *setFakeResourceRequirements(),
 		},
-		VolumeMountPath: consts.DefaultContainerSuggestionVolumeMountPath,
+		VolumeMountPath: configv1beta1.DefaultContainerSuggestionVolumeMountPath,
 		PersistentVolumeClaimSpec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: []corev1.PersistentVolumeAccessMode{
-				consts.DefaultSuggestionVolumeAccessMode,
+				configv1beta1.DefaultSuggestionVolumeAccessMode,
 			},
 			Resources: corev1.ResourceRequirements{
 				Requests: map[corev1.ResourceName]resource.Quantity{
@@ -424,30 +530,32 @@ func newFakeSuggestionConfig() *SuggestionConfig {
 	}
 }
 
-func newFakeEarlyStoppingConfig() *EarlyStoppingConfig {
-	return &EarlyStoppingConfig{
+func newFakeEarlyStoppingConfig(algorithmName string) *configv1beta1.EarlyStoppingConfig {
+	return &configv1beta1.EarlyStoppingConfig{
+		AlgorithmName:   algorithmName,
 		Image:           "early-stopping-image",
-		ImagePullPolicy: consts.DefaultImagePullPolicy,
+		ImagePullPolicy: configv1beta1.DefaultImagePullPolicy,
 		Resource:        *setFakeResourceRequirements(),
 	}
 }
 
-func newFakeMetricsCollectorConfig() *MetricsCollectorConfig {
-	return &MetricsCollectorConfig{
+func newFakeMetricsCollectorConfig(collectorKind commonv1beta1.CollectorKind) *configv1beta1.MetricsCollectorConfig {
+	return &configv1beta1.MetricsCollectorConfig{
+		CollectorKind:   string(collectorKind),
 		Image:           "metrics-collector-image",
-		ImagePullPolicy: consts.DefaultImagePullPolicy,
+		ImagePullPolicy: configv1beta1.DefaultImagePullPolicy,
 		Resource:        *setFakeResourceRequirements(),
 	}
 }
 
 func setFakeResourceRequirements() *corev1.ResourceRequirements {
-	defaultCPURequest, _ := resource.ParseQuantity(consts.DefaultCPURequest)
-	defaultMemoryRequest, _ := resource.ParseQuantity(consts.DefaultMemRequest)
-	defaultEphemeralStorageRequest, _ := resource.ParseQuantity(consts.DefaultDiskRequest)
+	defaultCPURequest, _ := resource.ParseQuantity(configv1beta1.DefaultCPURequest)
+	defaultMemoryRequest, _ := resource.ParseQuantity(configv1beta1.DefaultMemRequest)
+	defaultEphemeralStorageRequest, _ := resource.ParseQuantity(configv1beta1.DefaultDiskRequest)
 
-	defaultCPULimit, _ := resource.ParseQuantity(consts.DefaultCPULimit)
-	defaultMemoryLimit, _ := resource.ParseQuantity(consts.DefaultMemLimit)
-	defaultEphemeralStorageLimit, _ := resource.ParseQuantity(consts.DefaultDiskLimit)
+	defaultCPULimit, _ := resource.ParseQuantity(configv1beta1.DefaultCPULimit)
+	defaultMemoryLimit, _ := resource.ParseQuantity(configv1beta1.DefaultMemLimit)
+	defaultEphemeralStorageLimit, _ := resource.ParseQuantity(configv1beta1.DefaultDiskLimit)
 
 	return &corev1.ResourceRequirements{
 		Requests: map[corev1.ResourceName]resource.Quantity{

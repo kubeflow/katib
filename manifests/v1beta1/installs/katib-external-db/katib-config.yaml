@@ -1,0 +1,59 @@
+---
+apiVersion: config.kubeflow.org/v1beta1
+kind: KatibConfig
+init:
+  controller:
+    webhookPort: 8443
+    trialResources:
+      - Job.v1.batch
+      - TFJob.v1.kubeflow.org
+      - PyTorchJob.v1.kubeflow.org
+      - MPIJob.v1.kubeflow.org
+      - XGBoostJob.v1.kubeflow.org
+      - MXJob.v1.kubeflow.org
+runtime:
+  metricsCollectors:
+    - kind: StdOut
+      image: docker.io/kubeflowkatib/file-metrics-collector:latest
+    - kind: File
+      image: docker.io/kubeflowkatib/file-metrics-collector:latest
+    - kind: TensorFlowEvent
+      image: docker.io/kubeflowkatib/tfevent-metrics-collector:latest
+      resources:
+        limits:
+          memory: 1Gi
+  suggestions:
+    - algorithmName: random
+      image: docker.io/kubeflowkatib/suggestion-hyperopt:latest
+    - algorithmName: tpe
+      image: docker.io/kubeflowkatib/suggestion-hyperopt:latest
+    - algorithmName: grid
+      image: docker.io/kubeflowkatib/suggestion-optuna:latest
+    - algorithmName: hyperband
+      image: docker.io/kubeflowkatib/suggestion-hyperband:latest
+    - algorithmName: bayesianoptimization
+      image: docker.io/kubeflowkatib/suggestion-skopt:latest
+    - algorithmName: cmaes
+      image: docker.io/kubeflowkatib/suggestion-goptuna:latest
+    - algorithmName: sobol
+      image: docker.io/kubeflowkatib/suggestion-goptuna:latest
+    - algorithmName: multivariate-tpe
+      image: docker.io/kubeflowkatib/suggestion-optuna:latest
+    - algorithmName: enas
+      image: docker.io/kubeflowkatib/suggestion-enas:latest
+      resources:
+        limits:
+          memory: 200Mi
+    - algorithmName: darts
+      image: docker.io/kubeflowkatib/suggestion-darts:latest
+    - algorithmName: pbt
+      image: docker.io/kubeflowkatib/suggestion-pbt:latest
+      persistentVolumeClaimSpec:
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 5Gi
+  earlyStoppings:
+    - algorithmName: medianstop
+      image: docker.io/kubeflowkatib/earlystopping-medianstop:latest
