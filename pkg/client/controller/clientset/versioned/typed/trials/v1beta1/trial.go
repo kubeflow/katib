@@ -20,9 +20,12 @@ package v1beta1
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 	"time"
 
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/trials/v1beta1"
 	scheme "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -47,6 +50,8 @@ type TrialInterface interface {
 	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.TrialList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Trial, err error)
+	Apply(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error)
+	ApplyStatus(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error)
 	TrialExpansion
 }
 
@@ -188,6 +193,62 @@ func (c *trials) Patch(ctx context.Context, name string, pt types.PatchType, dat
 		Name(name).
 		SubResource(subresources...).
 		VersionedParams(&opts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied trial.
+func (c *trials) Apply(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error) {
+	if trial == nil {
+		return nil, fmt.Errorf("trial provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(trial)
+	if err != nil {
+		return nil, err
+	}
+	name := trial.Name
+	if name == nil {
+		return nil, fmt.Errorf("trial.Name must be provided to Apply")
+	}
+	result = &v1beta1.Trial{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("trials").
+		Name(*name).
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
+		Body(data).
+		Do(ctx).
+		Into(result)
+	return
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *trials) ApplyStatus(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error) {
+	if trial == nil {
+		return nil, fmt.Errorf("trial provided to Apply must not be nil")
+	}
+	patchOpts := opts.ToPatchOptions()
+	data, err := json.Marshal(trial)
+	if err != nil {
+		return nil, err
+	}
+
+	name := trial.Name
+	if name == nil {
+		return nil, fmt.Errorf("trial.Name must be provided to Apply")
+	}
+
+	result = &v1beta1.Trial{}
+	err = c.client.Patch(types.ApplyPatchType).
+		Namespace(c.ns).
+		Resource("trials").
+		Name(*name).
+		SubResource("status").
+		VersionedParams(&patchOpts, scheme.ParameterCodec).
 		Body(data).
 		Do(ctx).
 		Into(result)

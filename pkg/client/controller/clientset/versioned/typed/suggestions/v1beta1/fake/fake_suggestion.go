@@ -20,11 +20,13 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/suggestions/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -36,9 +38,9 @@ type FakeSuggestions struct {
 	ns   string
 }
 
-var suggestionsResource = schema.GroupVersionResource{Group: "suggestion.kubeflow.org", Version: "v1beta1", Resource: "suggestions"}
+var suggestionsResource = v1beta1.SchemeGroupVersion.WithResource("suggestions")
 
-var suggestionsKind = schema.GroupVersionKind{Group: "suggestion.kubeflow.org", Version: "v1beta1", Kind: "Suggestion"}
+var suggestionsKind = v1beta1.SchemeGroupVersion.WithKind("Suggestion")
 
 // Get takes name of the suggestion, and returns the corresponding suggestion object, and an error if there is any.
 func (c *FakeSuggestions) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Suggestion, err error) {
@@ -134,6 +136,51 @@ func (c *FakeSuggestions) DeleteCollection(ctx context.Context, opts v1.DeleteOp
 func (c *FakeSuggestions) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Suggestion, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(suggestionsResource, c.ns, name, pt, data, subresources...), &v1beta1.Suggestion{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1beta1.Suggestion), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied suggestion.
+func (c *FakeSuggestions) Apply(ctx context.Context, suggestion *suggestionsv1beta1.SuggestionApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Suggestion, err error) {
+	if suggestion == nil {
+		return nil, fmt.Errorf("suggestion provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(suggestion)
+	if err != nil {
+		return nil, err
+	}
+	name := suggestion.Name
+	if name == nil {
+		return nil, fmt.Errorf("suggestion.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(suggestionsResource, c.ns, *name, types.ApplyPatchType, data), &v1beta1.Suggestion{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1beta1.Suggestion), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeSuggestions) ApplyStatus(ctx context.Context, suggestion *suggestionsv1beta1.SuggestionApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Suggestion, err error) {
+	if suggestion == nil {
+		return nil, fmt.Errorf("suggestion provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(suggestion)
+	if err != nil {
+		return nil, err
+	}
+	name := suggestion.Name
+	if name == nil {
+		return nil, fmt.Errorf("suggestion.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(suggestionsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1beta1.Suggestion{})
 
 	if obj == nil {
 		return nil, err

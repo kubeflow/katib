@@ -34,19 +34,11 @@ type ExperimentDefaulter struct {
 }
 
 // NewExperimentDefaulter returns a new Experiment defaulter with the given client.
-func NewExperimentDefaulter(c client.Client) *ExperimentDefaulter {
+func NewExperimentDefaulter(c client.Client, d *admission.Decoder) *ExperimentDefaulter {
 	return &ExperimentDefaulter{
-		client: c,
+		client:  c,
+		decoder: d,
 	}
-}
-
-// ExperimentDefaulter implements admission.DecoderInjector.
-// A decoder will be automatically injected.
-
-// InjectDecoder injects the decoder.
-func (e *ExperimentDefaulter) InjectDecoder(d *admission.Decoder) error {
-	e.decoder = d
-	return nil
 }
 
 func (e *ExperimentDefaulter) Handle(ctx context.Context, req admission.Request) admission.Response {

@@ -75,32 +75,18 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &suggestionsv1beta1.Suggestion{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
+	if err = c.Watch(source.Kind(mgr.GetCache(), &suggestionsv1beta1.Suggestion{}), &handler.EnqueueRequestForObject{}); err != nil {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &suggestionsv1beta1.Suggestion{},
-	})
-	if err != nil {
+	eventHandler := handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &suggestionsv1beta1.Suggestion{}, handler.OnlyControllerOwner())
+	if err = c.Watch(source.Kind(mgr.GetCache(), &appsv1.Deployment{}), eventHandler); err != nil {
 		return err
 	}
-
-	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &suggestionsv1beta1.Suggestion{},
-	})
-	if err != nil {
+	if err = c.Watch(source.Kind(mgr.GetCache(), &corev1.Service{}), eventHandler); err != nil {
 		return err
 	}
-
-	err = c.Watch(&source.Kind{Type: &corev1.PersistentVolumeClaim{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &suggestionsv1beta1.Suggestion{},
-	})
-	if err != nil {
+	if err = c.Watch(source.Kind(mgr.GetCache(), &corev1.PersistentVolumeClaim{}), eventHandler); err != nil {
 		return err
 	}
 

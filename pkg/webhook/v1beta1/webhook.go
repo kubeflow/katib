@@ -21,6 +21,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/experiment"
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/pod"
@@ -28,10 +29,10 @@ import (
 
 func AddToManager(mgr manager.Manager, port int) error {
 	// Create a webhook server.
-	hookServer := &webhook.Server{
+	hookServer := webhook.NewServer(webhook.Options{
 		Port:    port,
 		CertDir: "/tmp/cert",
-	}
+	})
 	if err := mgr.Add(hookServer); err != nil {
 		return fmt.Errorf("Add webhook server to the manager failed: %v", err)
 	}
@@ -39,9 +40,10 @@ func AddToManager(mgr manager.Manager, port int) error {
 		return fmt.Errorf("Add webhook server health checker to the manager failed: %v", err)
 	}
 
-	experimentValidator := experiment.NewExperimentValidator(mgr.GetClient())
-	experimentDefaulter := experiment.NewExperimentDefaulter(mgr.GetClient())
-	sidecarInjector := pod.NewSidecarInjector(mgr.GetClient())
+	decoder := admission.NewDecoder(mgr.GetScheme())
+	experimentValidator := experiment.NewExperimentValidator(mgr.GetClient(), decoder)
+	experimentDefaulter := experiment.NewExperimentDefaulter(mgr.GetClient(), decoder)
+	sidecarInjector := pod.NewSidecarInjector(mgr.GetClient(), decoder)
 
 	hookServer.Register("/validate-experiment", &webhook.Admission{Handler: experimentValidator})
 	hookServer.Register("/mutate-experiment", &webhook.Admission{Handler: experimentDefaulter})

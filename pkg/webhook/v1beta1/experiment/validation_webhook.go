@@ -47,21 +47,13 @@ type ExperimentValidator struct {
 }
 
 // NewExperimentValidator returns a new Experiment validator with the given client.
-func NewExperimentValidator(c client.Client) *ExperimentValidator {
+func NewExperimentValidator(c client.Client, d *admission.Decoder) *ExperimentValidator {
 	p := manifest.New(c)
 	return &ExperimentValidator{
 		client:    c,
 		Validator: validator.New(p),
+		decoder:   d,
 	}
-}
-
-// ExperimentValidator implements inject.Decoder.
-// A decoder will be automatically injected.
-
-// InjectDecoder injects the decoder.
-func (v *ExperimentValidator) InjectDecoder(d *admission.Decoder) error {
-	v.decoder = d
-	return nil
 }
 
 func (v *ExperimentValidator) Handle(ctx context.Context, req admission.Request) admission.Response {

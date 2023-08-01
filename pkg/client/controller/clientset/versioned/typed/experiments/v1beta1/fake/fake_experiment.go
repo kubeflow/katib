@@ -20,11 +20,13 @@ package fake
 
 import (
 	"context"
+	json "encoding/json"
+	"fmt"
 
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/experiments/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -36,9 +38,9 @@ type FakeExperiments struct {
 	ns   string
 }
 
-var experimentsResource = schema.GroupVersionResource{Group: "experiment.kubeflow.org", Version: "v1beta1", Resource: "experiments"}
+var experimentsResource = v1beta1.SchemeGroupVersion.WithResource("experiments")
 
-var experimentsKind = schema.GroupVersionKind{Group: "experiment.kubeflow.org", Version: "v1beta1", Kind: "Experiment"}
+var experimentsKind = v1beta1.SchemeGroupVersion.WithKind("Experiment")
 
 // Get takes name of the experiment, and returns the corresponding experiment object, and an error if there is any.
 func (c *FakeExperiments) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Experiment, err error) {
@@ -134,6 +136,51 @@ func (c *FakeExperiments) DeleteCollection(ctx context.Context, opts v1.DeleteOp
 func (c *FakeExperiments) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Experiment, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(experimentsResource, c.ns, name, pt, data, subresources...), &v1beta1.Experiment{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1beta1.Experiment), err
+}
+
+// Apply takes the given apply declarative configuration, applies it and returns the applied experiment.
+func (c *FakeExperiments) Apply(ctx context.Context, experiment *experimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Experiment, err error) {
+	if experiment == nil {
+		return nil, fmt.Errorf("experiment provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(experiment)
+	if err != nil {
+		return nil, err
+	}
+	name := experiment.Name
+	if name == nil {
+		return nil, fmt.Errorf("experiment.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(experimentsResource, c.ns, *name, types.ApplyPatchType, data), &v1beta1.Experiment{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1beta1.Experiment), err
+}
+
+// ApplyStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
+func (c *FakeExperiments) ApplyStatus(ctx context.Context, experiment *experimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Experiment, err error) {
+	if experiment == nil {
+		return nil, fmt.Errorf("experiment provided to Apply must not be nil")
+	}
+	data, err := json.Marshal(experiment)
+	if err != nil {
+		return nil, err
+	}
+	name := experiment.Name
+	if name == nil {
+		return nil, fmt.Errorf("experiment.Name must be provided to Apply")
+	}
+	obj, err := c.Fake.
+		Invokes(testing.NewPatchSubresourceAction(experimentsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1beta1.Experiment{})
 
 	if obj == nil {
 		return nil, err
