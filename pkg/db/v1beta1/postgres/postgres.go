@@ -17,11 +17,8 @@ limitations under the License.
 package postgres
 
 import (
-	crand "crypto/rand"
 	"database/sql"
 	"fmt"
-	"math/big"
-	"math/rand"
 	"os"
 	"time"
 
@@ -64,21 +61,7 @@ func NewDBInterface(connectTimeout time.Duration) (common.KatibDBInterface, erro
 	if err != nil {
 		return nil, fmt.Errorf("DB open failed: %v", err)
 	}
-	return NewWithSQLConn(db)
-}
-
-func NewWithSQLConn(db *sql.DB) (common.KatibDBInterface, error) {
-	d := new(dbConn)
-	d.db = db
-	seed, err := crand.Int(crand.Reader, big.NewInt(1<<63-1))
-	if err != nil {
-		return nil, fmt.Errorf("RNG initialization failed: %v", err)
-	}
-	// We can do the following instead, but it creates a locking issue
-	//d.rng = rand.New(rand.NewSource(seed.Int64()))
-	rand.Seed(seed.Int64())
-
-	return d, nil
+	return &dbConn{db: db}, nil
 }
 
 func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta1.ObservationLog) error {

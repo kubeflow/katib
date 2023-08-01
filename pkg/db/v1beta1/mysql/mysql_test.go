@@ -38,10 +38,7 @@ func TestMain(m *testing.M) {
 		fmt.Printf("error opening db: %v\n", err)
 		os.Exit(1)
 	}
-	dbInterface, err = NewWithSQLConn(db)
-	if err != nil {
-		fmt.Printf("error NewWithSQLConn: %v\n", err)
-	}
+	dbInterface = &dbConn{db: db}
 	mock.ExpectExec("CREATE TABLE IF NOT EXISTS observation_logs").WithArgs().WillReturnResult(sqlmock.NewResult(1, 1))
 	dbInterface.DBInit()
 	err = dbInterface.SelectOne()
