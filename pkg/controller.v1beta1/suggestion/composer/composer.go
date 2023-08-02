@@ -44,8 +44,6 @@ const (
 	defaultPeriodForReady      = 10
 	defaultPeriodForLive       = 120
 	defaultFailureThreshold    = 12
-	// Ref https://github.com/grpc-ecosystem/grpc-health-probe/
-	defaultGRPCHealthCheckProbe = "/bin/grpc_health_probe"
 )
 
 var (
@@ -210,12 +208,9 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) && suggestionContainer.ReadinessProbe == nil {
 		suggestionContainer.ReadinessProbe = &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
-				Exec: &corev1.ExecAction{
-					Command: []string{
-						defaultGRPCHealthCheckProbe,
-						fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-						fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
-					},
+				GRPC: &corev1.GRPCAction{
+					Port:    consts.DefaultSuggestionPort,
+					Service: &consts.DefaultGRPCService,
 				},
 			},
 			InitialDelaySeconds: defaultInitialDelaySeconds,
@@ -225,12 +220,9 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 	if viper.GetBool(consts.ConfigEnableGRPCProbeInSuggestion) && suggestionContainer.LivenessProbe == nil {
 		suggestionContainer.LivenessProbe = &corev1.Probe{
 			ProbeHandler: corev1.ProbeHandler{
-				Exec: &corev1.ExecAction{
-					Command: []string{
-						defaultGRPCHealthCheckProbe,
-						fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-						fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
-					},
+				GRPC: &corev1.GRPCAction{
+					Port:    consts.DefaultSuggestionPort,
+					Service: &consts.DefaultGRPCService,
 				},
 			},
 			// Ref https://srcco.de/posts/kubernetes-liveness-probes-are-dangerous.html

@@ -87,10 +87,6 @@ const (
 	// DefaultEarlyStoppingPort is the default port of EarlyStopping service.
 	DefaultEarlyStoppingPort = 6788
 
-	// DefaultGRPCService is the default suggestion service name,
-	// which is used to run healthz check using grpc probe.
-	DefaultGRPCService = "manager.v1beta1.Suggestion"
-
 	// DefaultGRPCRetryAttempts is the the maximum number of retries for gRPC calls
 	DefaultGRPCRetryAttempts = 10
 	// DefaultGRPCRetryPeriod is a fixed period of time between gRPC call retries
@@ -170,6 +166,10 @@ var (
 	DefaultKatibDBManagerServiceIP = env.GetEnvOrDefault(DefaultKatibDBManagerServiceIPEnvName, "katib-db-manager")
 	// DefaultKatibDBManagerServicePort is the default Port of Katib DB Manager
 	DefaultKatibDBManagerServicePort = env.GetEnvOrDefault(DefaultKatibDBManagerServicePortEnvName, "6789")
+
+	// DefaultGRPCService is the default suggestion service name,
+	// which is used to run healthz check using grpc probe.
+	DefaultGRPCService = "manager.v1beta1.Suggestion"
 
 	// List of all valid keys of trial metadata for substitution in Trial template
 	TrialTemplateMetaKeys = []string{
