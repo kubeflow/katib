@@ -16,7 +16,7 @@ import inspect
 import multiprocessing
 import textwrap
 import time
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import grpc
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
@@ -144,6 +144,7 @@ class KatibClient(object):
         max_trial_count: int = None,
         parallel_trial_count: int = None,
         max_failed_trial_count: int = None,
+        resources_per_trial: Union[dict, client.V1ResourceRequirements, None] = None,
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
@@ -177,6 +178,24 @@ class KatibClient(object):
                 values check this doc: https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
             parallel_trial_count: Number of Trials that Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
+            resources_per_trial: A parameter that lets you specify how much
+            resources each trial container should have. You can either specify a
+            kubernetes.client.V1ResourceRequirements object (documented here:
+            https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1ResourceRequirements.md)
+            or a dictionary that includes one or more of the following keys:
+            `cpu`, `memory`, or `gpu` (other keys will be ignored). Appropriate
+            values for these keys are documented here:
+            https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/.
+            For example:
+                {
+                    "cpu": "1",
+                    "gpu": "1",
+                    "memory": "2Gi",
+                }
+            Please note, `gpu` specifies a resource request with a key of
+            `nvidia.com/gpu`, i.e. an NVIDIA GPU. If you need a different type
+            of GPU, pass in a V1ResourceRequirement instance instead, since it's
+            more flexible. This parameter is optional and defaults to None.
             retain_trials: Whether Trials' resources (e.g. pods) are deleted after Succeeded state.
             packages_to_install: List of Python packages to install in addition
                 to the base image packages. These packages are installed before
@@ -280,6 +299,15 @@ class KatibClient(object):
                 + exec_script
             )
 
+        if isinstance(resources_per_trial, dict):
+            if "gpu" in resources_per_trial:
+                resources_per_trial["nvidia.com/gpu"] = resources_per_trial.pop("gpu")
+
+            resources_per_trial = client.V1ResourceRequirements(
+                requests=resources_per_trial,
+                limits=resources_per_trial,
+            )
+
         # Create Trial specification.
         trial_spec = client.V1Job(
             api_version="batch/v1",
@@ -297,6 +325,7 @@ class KatibClient(object):
                                 image=base_image,
                                 command=["bash", "-c"],
                                 args=[exec_script],
+                                resources=resources_per_trial,
                             )
                         ],
                     ),
@@ -640,7 +669,6 @@ class KatibClient(object):
         namespace = namespace or self.namespace
 
         for _ in range(round(timeout / polling_interval)):
-
             # We should get Experiment only once per cycle and check the statuses.
             experiment = self.get_experiment(name, namespace, apiserver_timeout)
 
@@ -1175,7 +1203,6 @@ class KatibClient(object):
         )
 
         with katib_api_pb2.beta_create_DBManager_stub(channel) as client:
-
             try:
                 # When metric name is empty, we select all logs from the Katib DB.
                 observation_logs = client.GetObservationLog(
