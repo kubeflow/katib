@@ -149,12 +149,11 @@ func main() {
 	go setupControllers(mgr, certsReady, hookServer)
 
 	log.Info("Setting up health checker.")
-	// TODO (@anencore94) need to more detailed check whether is it possible to communicate with k8s-apiserver or db-manager at '/readyz' ?
-	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+	if err := mgr.AddReadyzCheck("readyz", hookServer.StartedChecker()); err != nil {
 		log.Error(err, "Unable to add readyz endpoint to the manager")
 		os.Exit(1)
 	}
-	if err = mgr.AddHealthzCheck("healthz", hookServer.StartedChecker()); err != nil {
+	if err = mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		log.Error(err, "Add webhook server health checker to the manager failed")
 		os.Exit(1)
 	}
