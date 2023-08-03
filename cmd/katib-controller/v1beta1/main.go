@@ -125,6 +125,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	log.Info("Registering Components.")
+
 	// Create a webhook server.
 	hookServer := webhook.NewServer(webhook.Options{
 		Port:    *initConfig.ControllerConfig.WebhookPort,
