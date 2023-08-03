@@ -64,10 +64,6 @@ func main() {
 	flag.StringVar(&katibConfigFile, "katib-config", "",
 		"The katib-controller will load its initial configuration from this file. "+
 			"Omit this flag to use the default configuration values. ")
-
-	// TODO (andreyvelich): Currently is is not possible to store webhook cert in the local file system.
-	// flag.BoolVar(&certLocalFS, "cert-localfs", false, "Store the webhook cert in local file system")
-
 	flag.Parse()
 
 	initConfig, err := katibconfig.GetInitConfigData(scheme, katibConfigFile)
