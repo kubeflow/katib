@@ -37,7 +37,7 @@ import (
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
-	cert "github.com/kubeflow/katib/pkg/cert-generator/v1beta1"
+	cert "github.com/kubeflow/katib/pkg/certgenerator/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"

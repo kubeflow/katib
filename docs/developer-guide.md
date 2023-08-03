@@ -116,7 +116,7 @@ Once Katib is deployed in the Kubernetes cluster, the `cert-generator` follows t
 
 Once the `cert-generator` finished, the Katib controller starts to register controllers such as `experiment-controller` to the manager.
 
-You can find the `cert-generator` source code [here](../pkg/cert-generator/v1beta1).
+You can find the `cert-generator` source code [here](../pkg/certgenerator/v1beta1).
 
 ## Implement a new algorithm and use it in Katib
 
