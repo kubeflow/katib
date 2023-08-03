@@ -298,6 +298,26 @@ func TestSetCertGeneratorConfig(t *testing.T) {
 				WebhookSecretName:  DefaultWebhookSecretName,
 			},
 		},
+		"cert-generator is forcefully enabled due to set webhookSecretName": {
+			config: CertGeneratorConfig{
+				WebhookSecretName: "katib-test",
+			},
+			wantConfig: CertGeneratorConfig{
+				Enable:             true,
+				WebhookServiceName: DefaultWebhookServiceName,
+				WebhookSecretName:  "katib-test",
+			},
+		},
+		"cert-generator is forcefully enabled due to set webhookServiceName": {
+			config: CertGeneratorConfig{
+				WebhookServiceName: "katib-test",
+			},
+			wantConfig: CertGeneratorConfig{
+				Enable:             true,
+				WebhookServiceName: "katib-test",
+				WebhookSecretName:  DefaultWebhookSecretName,
+			},
+		},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
