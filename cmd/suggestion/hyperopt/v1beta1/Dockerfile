@@ -1,11 +1,3 @@
-FROM alpine:3.15 AS downloader
-
-ARG TARGETARCH
-ENV GRPC_HEALTH_PROBE_VERSION v0.4.15
-
-RUN wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-${TARGETARCH} \
-  && chmod +x /bin/grpc_health_probe
-
 FROM python:3.10-slim
 
 ARG TARGETARCH
@@ -22,7 +14,6 @@ RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
 
 ADD ./pkg/ ${TARGET_DIR}/pkg/
 ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
-COPY --from=downloader /bin/grpc_health_probe /bin/grpc_health_probe
 
 WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
 

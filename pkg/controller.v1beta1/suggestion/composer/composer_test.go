@@ -817,12 +817,9 @@ func newFakeContainers() []corev1.Container {
 			},
 			ReadinessProbe: &corev1.Probe{
 				ProbeHandler: corev1.ProbeHandler{
-					Exec: &corev1.ExecAction{
-						Command: []string{
-							defaultGRPCHealthCheckProbe,
-							fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-							fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
-						},
+					GRPC: &corev1.GRPCAction{
+						Port:    consts.DefaultSuggestionPort,
+						Service: &consts.DefaultGRPCService,
 					},
 				},
 				InitialDelaySeconds: defaultInitialDelaySeconds,
@@ -830,12 +827,9 @@ func newFakeContainers() []corev1.Container {
 			},
 			LivenessProbe: &corev1.Probe{
 				ProbeHandler: corev1.ProbeHandler{
-					Exec: &corev1.ExecAction{
-						Command: []string{
-							defaultGRPCHealthCheckProbe,
-							fmt.Sprintf("-addr=:%d", consts.DefaultSuggestionPort),
-							fmt.Sprintf("-service=%s", consts.DefaultGRPCService),
-						},
+					GRPC: &corev1.GRPCAction{
+						Port:    consts.DefaultSuggestionPort,
+						Service: &consts.DefaultGRPCService,
 					},
 				},
 				InitialDelaySeconds: defaultInitialDelaySeconds,
