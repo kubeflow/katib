@@ -87,10 +87,10 @@ type CertGeneratorConfig struct {
 	// Enable indicates the internal cert-generator is enabled.
 	// Defaults to 'false'.
 	Enable bool `json:"enable,omitempty"`
-	// ServiceName indicates which service is used for the admission webhook.
+	// WebhookServiceName indicates which service is used for the admission webhook.
 	// If it is set, the cert-generator forcefully is enabled even if the '.init.certGenerator.enable' is false.
 	// Defaults to 'katib-controller'.
-	ServiceName string `json:"serviceName,omitempty"`
+	WebhookServiceName string `json:"webhookServiceName,omitempty"`
 	// WebhookSecretName indicates which secrets is used to save the certs for the admission webhook.
 	// If it is set, the cert-generator forcefully is enabled even if the '.init.certGenerator.enable' is false.
 	// Defaults to 'katib-webhook-cert'.

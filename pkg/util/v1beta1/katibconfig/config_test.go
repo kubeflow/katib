@@ -387,7 +387,7 @@ kind: KatibConfig
 init:
   certGenerator:
     enable: true
-    serviceName: katib-test
+    webhookServiceName: katib-test
     webhookSecretName: katib-test-secret
   controller:
     experimentSuggestionName: test
@@ -440,9 +440,9 @@ runtime:
 			katibConfigFile: fullInitConfig,
 			wantInitConfigData: configv1beta1.InitConfig{
 				CertGeneratorConfig: configv1beta1.CertGeneratorConfig{
-					Enable:            true,
-					ServiceName:       "katib-test",
-					WebhookSecretName: "katib-test-secret",
+					Enable:             true,
+					WebhookServiceName: "katib-test",
+					WebhookSecretName:  "katib-test-secret",
 				},
 				ControllerConfig: configv1beta1.ControllerConfig{
 					ExperimentSuggestionName:    "test",

@@ -79,7 +79,7 @@ func (c *CertGenerator) NeedLeaderElection() bool {
 func AddToManager(mgr manager.Manager, config configv1beta1.CertGeneratorConfig, certsReady chan struct{}) error {
 	return mgr.Add(&CertGenerator{
 		namespace:   consts.DefaultKatibNamespace,
-		serviceName: config.ServiceName,
+		serviceName: config.WebhookServiceName,
 		secretName:  config.WebhookSecretName,
 		kubeClient:  mgr.GetClient(),
 		certsReady:  certsReady,

@@ -103,11 +103,11 @@ func setControllerConfig(controllerConfig *ControllerConfig) {
 }
 
 func setCertGeneratorConfig(certGeneratorConfig *CertGeneratorConfig) {
-	if len(certGeneratorConfig.ServiceName) != 0 || len(certGeneratorConfig.WebhookSecretName) != 0 {
+	if len(certGeneratorConfig.WebhookServiceName) != 0 || len(certGeneratorConfig.WebhookSecretName) != 0 {
 		certGeneratorConfig.Enable = true
 	}
-	if certGeneratorConfig.Enable && len(certGeneratorConfig.ServiceName) == 0 {
-		certGeneratorConfig.ServiceName = DefaultWebhookServiceName
+	if certGeneratorConfig.Enable && len(certGeneratorConfig.WebhookServiceName) == 0 {
+		certGeneratorConfig.WebhookServiceName = DefaultWebhookServiceName
 	}
 	if certGeneratorConfig.Enable && len(certGeneratorConfig.WebhookSecretName) == 0 {
 		certGeneratorConfig.WebhookSecretName = DefaultWebhookSecretName
