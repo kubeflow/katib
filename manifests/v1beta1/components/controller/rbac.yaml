@@ -58,7 +58,6 @@ rules:
       - "list"
       - "watch"
       - "update"
-      - "delete"
   - apiGroups:
       - apps
     resources:
