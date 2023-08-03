@@ -106,12 +106,8 @@ Once Katib is deployed in the Kubernetes cluster, the `cert-generator` follows t
 
 - Generate the self-signed certificate and private key.
 
-- Create a Kubernetes Secret with the self-signed TLS certificate and private key.
-  Secret has the `katib-webhook-cert` name and `cert-generator` controller Deployment's
-  `ownerReference` to clean-up resources once Katib is uninstalled.
-
-- Save the self-signed TLS certificate and private key on local path (`/tmp/cert`).
-
+- Update a Kubernetes Secret with the self-signed TLS certificate and private key.
+  
 - Patch the webhooks with the `CABundle`.
 
 Once the `cert-generator` finished, the Katib controller starts to register controllers such as `experiment-controller` to the manager.
