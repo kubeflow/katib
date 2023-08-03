@@ -51,11 +51,18 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
           volumeMounts:
+            - mountPath: /tmp/cert
+              name: cert
+              readOnly: true
             - mountPath: /katib-config.yaml
               name: katib-config
               subPath: katib-config.yaml
               readOnly: true
       volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: katib-webhook-cert
         - name: katib-config
           configMap:
             name: katib-config

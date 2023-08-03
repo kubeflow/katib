@@ -17,7 +17,6 @@ limitations under the License.
 package v1beta1
 
 const (
-	Secret         = "katib-webhook-cert"
 	Webhook        = "katib.kubeflow.org"
 	serverKeyName  = "tls.key"
 	serverCertName = "tls.crt"

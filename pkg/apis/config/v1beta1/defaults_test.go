@@ -274,14 +274,14 @@ func TestSetCertGeneratorConfig(t *testing.T) {
 	}{
 		"All parameters correctly are specified": {
 			config: CertGeneratorConfig{
-				Enable:         true,
-				ServiceName:    "test",
-				ControllerName: "katib-test",
+				Enable:            true,
+				ServiceName:       "test",
+				WebhookSecretName: "katib-test",
 			},
 			wantConfig: CertGeneratorConfig{
-				Enable:         true,
-				ServiceName:    "test",
-				ControllerName: "katib-test",
+				Enable:            true,
+				ServiceName:       "test",
+				WebhookSecretName: "katib-test",
 			},
 		},
 		"CertGeneratorConfig is empty": {
@@ -293,9 +293,9 @@ func TestSetCertGeneratorConfig(t *testing.T) {
 				Enable: true,
 			},
 			wantConfig: CertGeneratorConfig{
-				Enable:         true,
-				ServiceName:    DefaultWebhookServiceName,
-				ControllerName: DefaultControllerName,
+				Enable:            true,
+				ServiceName:       DefaultWebhookServiceName,
+				WebhookSecretName: DefaultWebhookSecretName,
 			},
 		},
 	}

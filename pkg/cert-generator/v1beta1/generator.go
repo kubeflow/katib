@@ -26,16 +26,11 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"os"
-	"path"
 	"strings"
 	"time"
 
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -49,17 +44,16 @@ var (
 	errCertCheckFail        = errors.New("failed to check if certs already exist")
 	errCreateCertFail       = errors.New("failed to create certs")
 	errCreateCertSecretFail = errors.New("failed to create secret embedded certs")
-	errSaveCertOnLocal      = errors.New("failed to save certs on local")
 	errInjectCertError      = errors.New("failed to inject certs into WebhookConfigurations")
 )
 
 // CertGenerator is the manager to generate certs.
 type CertGenerator struct {
-	namespace      string
-	serviceName    string
-	controllerName string
-	kubeClient     client.Client
-	certsReady     chan struct{}
+	namespace   string
+	serviceName string
+	secretName  string
+	kubeClient  client.Client
+	certsReady  chan struct{}
 
 	certs             *certificates
 	fullServiceDomain string
@@ -84,18 +78,18 @@ func (c *CertGenerator) NeedLeaderElection() bool {
 // AddToManager adds the cert-generator to the manager.
 func AddToManager(mgr manager.Manager, config configv1beta1.CertGeneratorConfig, certsReady chan struct{}) error {
 	return mgr.Add(&CertGenerator{
-		namespace:      consts.DefaultKatibNamespace,
-		serviceName:    config.ServiceName,
-		controllerName: config.ControllerName,
-		kubeClient:     mgr.GetClient(),
-		certsReady:     certsReady,
+		namespace:   consts.DefaultKatibNamespace,
+		serviceName: config.ServiceName,
+		secretName:  config.WebhookSecretName,
+		kubeClient:  mgr.GetClient(),
+		certsReady:  certsReady,
 	})
 }
 
 // generate generates certificates for the admission webhooks.
 func (c *CertGenerator) generate(ctx context.Context) error {
 	controllerService := &corev1.Service{}
-	if err := c.kubeClient.Get(ctx, client.ObjectKey{Namespace: c.namespace, Name: c.serviceName}, controllerService); err != nil {
+	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.serviceName, Namespace: c.namespace}, controllerService); err != nil {
 		return fmt.Errorf("%w: %v", errServiceNotFound, err)
 	}
 
@@ -109,12 +103,9 @@ func (c *CertGenerator) generate(ctx context.Context) error {
 		if err = c.createCert(); err != nil {
 			return fmt.Errorf("%w: %v", errCreateCertFail, err)
 		}
-		if err = c.createCertSecret(ctx); err != nil {
+		if err = c.updateCertSecret(ctx); err != nil {
 			return fmt.Errorf("%w: %v", errCreateCertSecretFail, err)
 		}
-	}
-	if err = c.saveCertOnLocal(); err != nil {
-		return fmt.Errorf("%w: %v", errSaveCertOnLocal, err)
 	}
 	if err = c.injectCert(ctx); err != nil {
 		return fmt.Errorf("%w: %v", errInjectCertError, err)
@@ -127,10 +118,7 @@ func (c *CertGenerator) generate(ctx context.Context) error {
 // since another controller pod will create the secret.
 func (c *CertGenerator) isCertExist(ctx context.Context) (bool, error) {
 	secret := &corev1.Secret{}
-	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: Secret, Namespace: c.namespace}, secret); err != nil {
-		if apierrors.IsNotFound(err) {
-			return false, nil
-		}
+	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.secretName, Namespace: c.namespace}, secret); err != nil {
 		return false, err
 	}
 	key := secret.Data[serverKeyName]
@@ -143,26 +131,6 @@ func (c *CertGenerator) isCertExist(ctx context.Context) (bool, error) {
 		return true, nil
 	}
 	return false, nil
-}
-
-// saveCertOnLocal saves the certs on local.
-func (c *CertGenerator) saveCertOnLocal() error {
-	if err := os.MkdirAll(consts.CertDir, 0760); err != nil {
-		return err
-	}
-	f, err := os.Create(path.Join(consts.CertDir, serverKeyName))
-	if err != nil {
-		return err
-	}
-	if _, err = f.Write(c.certs.keyPem); err != nil {
-		return err
-	}
-	f, err = os.Create(path.Join(consts.CertDir, serverCertName))
-	if err != nil {
-		return err
-	}
-	_, err = f.Write(c.certs.certPem)
-	return err
 }
 
 // createCert creates the self-signed certificate and private key.
@@ -198,51 +166,18 @@ func (c *CertGenerator) createCert() error {
 	return nil
 }
 
-// createCertSecret creates Secret embedded tls.key and tls.crt.
-func (c *CertGenerator) createCertSecret(ctx context.Context) error {
-	controller := &appsv1.Deployment{}
-	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.controllerName, Namespace: c.namespace}, controller); err != nil {
+// updateCertSecret updates Secret embedded tls.key and tls.crt.
+func (c *CertGenerator) updateCertSecret(ctx context.Context) error {
+	secret := &corev1.Secret{}
+	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.secretName, Namespace: c.namespace}, secret); err != nil {
 		return err
 	}
-
-	// Create secret with CA cert and server cert/key.
-	// Add ownerReferences to clean-up secret with controller Pod.
-	webhookCertSecret := &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      Secret,
-			Namespace: c.namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(controller, appsv1.SchemeGroupVersion.WithKind("Deployment")),
-			},
-		},
-		Type: corev1.SecretTypeTLS,
-		Data: map[string][]byte{
-			serverKeyName:  c.certs.keyPem,
-			serverCertName: c.certs.certPem,
-		},
+	if len(secret.Data) == 0 {
+		secret.Data = make(map[string][]byte, 2)
 	}
-
-	oldSecret := &corev1.Secret{}
-	err := c.kubeClient.Get(ctx, client.ObjectKey{Namespace: c.namespace, Name: Secret}, oldSecret)
-	if client.IgnoreNotFound(err) != nil {
-		return err
-	}
-	if err == nil {
-		klog.Warning("Previous secret was found and removed.")
-		if err = c.kubeClient.Delete(ctx, oldSecret); err != nil {
-			return err
-		}
-	}
-
-	klog.Infof("Creating Secret: %q", Secret)
-	if err = c.kubeClient.Create(ctx, webhookCertSecret); err != nil {
-		return err
-	}
-	return nil
+	secret.Data[serverKeyName] = c.certs.keyPem
+	secret.Data[serverCertName] = c.certs.certPem
+	return c.kubeClient.Update(ctx, secret)
 }
 
 // injectCert applies patch to ValidatingWebhookConfiguration and MutatingWebhookConfiguration.

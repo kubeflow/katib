@@ -38,8 +38,8 @@ const (
 	DefaultDiskRequest = "500Mi"
 	// DefaultWebhookServiceName is the default service name for the admission webhooks.
 	DefaultWebhookServiceName = "katib-controller"
-	// DefaultControllerName is the default katib-controller deployment name.
-	DefaultControllerName = "katib-controller"
+	// DefaultWebhookSecretName is the default secret name to save the certs for the admission webhooks.
+	DefaultWebhookSecretName = "katib-webhook-cert"
 )
 
 var (
@@ -103,14 +103,14 @@ func setControllerConfig(controllerConfig *ControllerConfig) {
 }
 
 func setCertGeneratorConfig(certGeneratorConfig *CertGeneratorConfig) {
-	if len(certGeneratorConfig.ServiceName) != 0 {
+	if len(certGeneratorConfig.ServiceName) != 0 || len(certGeneratorConfig.WebhookSecretName) != 0 {
 		certGeneratorConfig.Enable = true
 	}
 	if certGeneratorConfig.Enable && len(certGeneratorConfig.ServiceName) == 0 {
 		certGeneratorConfig.ServiceName = DefaultWebhookServiceName
 	}
-	if certGeneratorConfig.Enable && len(certGeneratorConfig.ControllerName) == 0 {
-		certGeneratorConfig.ControllerName = DefaultControllerName
+	if certGeneratorConfig.Enable && len(certGeneratorConfig.WebhookSecretName) == 0 {
+		certGeneratorConfig.WebhookSecretName = DefaultWebhookSecretName
 	}
 }
 
