@@ -98,9 +98,9 @@ func TestGenerate(t *testing.T) {
 	}{
 		"Generate successfully": {
 			opts: &CertGenerator{
-				namespace:   testNamespace,
-				serviceName: "katib-controller",
-				secretName:  "katib-test-secret",
+				namespace:          testNamespace,
+				webhookServiceName: "katib-controller",
+				webhookSecretName:  "katib-test-secret",
 			},
 			objects: []client.Object{
 				emptyVWebhookConfig,
@@ -111,9 +111,9 @@ func TestGenerate(t *testing.T) {
 		},
 		"There is not ValidatingWebhookConfiguration": {
 			opts: &CertGenerator{
-				namespace:   testNamespace,
-				serviceName: "katib-controller",
-				secretName:  "katib-test-secret",
+				namespace:          testNamespace,
+				webhookServiceName: "katib-controller",
+				webhookSecretName:  "katib-test-secret",
 			},
 			objects: []client.Object{
 				emptyMWebhookConfig,
@@ -124,9 +124,9 @@ func TestGenerate(t *testing.T) {
 		},
 		"There is not MutatingWebhookConfiguration": {
 			opts: &CertGenerator{
-				namespace:   testNamespace,
-				serviceName: "katib-controller",
-				secretName:  "katib-test-secret",
+				namespace:          testNamespace,
+				webhookServiceName: "katib-controller",
+				webhookSecretName:  "katib-test-secret",
 			},
 			objects: []client.Object{
 				emptyVWebhookConfig,
@@ -137,9 +137,9 @@ func TestGenerate(t *testing.T) {
 		},
 		"There is not Service katib-controller": {
 			opts: &CertGenerator{
-				namespace:   testNamespace,
-				serviceName: "katib-controller",
-				secretName:  "katib-test-secret",
+				namespace:          testNamespace,
+				webhookServiceName: "katib-controller",
+				webhookSecretName:  "katib-test-secret",
 			},
 			objects: []client.Object{
 				emptyVWebhookConfig,
@@ -150,9 +150,9 @@ func TestGenerate(t *testing.T) {
 		},
 		"There is not Secret katib-webhook-cert": {
 			opts: &CertGenerator{
-				namespace:   testNamespace,
-				serviceName: "katib-controller",
-				secretName:  "katib-test-secret",
+				namespace:          testNamespace,
+				webhookServiceName: "katib-controller",
+				webhookSecretName:  "katib-test-secret",
 			},
 			objects: []client.Object{
 				emptyVWebhookConfig,
@@ -173,7 +173,7 @@ func TestGenerate(t *testing.T) {
 
 			if tc.wantError == nil {
 				secret := &corev1.Secret{}
-				if err = kc.Get(context.Background(), client.ObjectKey{Name: tc.opts.secretName, Namespace: testNamespace}, secret); err != nil {
+				if err = kc.Get(context.Background(), client.ObjectKey{Name: tc.opts.webhookSecretName, Namespace: testNamespace}, secret); err != nil {
 					t.Fatalf("Failed to get a webhookSecret: %v", err)
 				}
 				if len(secret.Data[serverKeyName]) == 0 {

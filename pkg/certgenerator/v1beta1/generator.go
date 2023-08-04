@@ -50,11 +50,11 @@ var (
 
 // CertGenerator is the manager to generate certs.
 type CertGenerator struct {
-	namespace   string
-	serviceName string
-	secretName  string
-	kubeClient  client.Client
-	certsReady  chan struct{}
+	namespace          string
+	webhookServiceName string
+	webhookSecretName  string
+	kubeClient         client.Client
+	certsReady         chan struct{}
 
 	certs             *certificates
 	fullServiceDomain string
@@ -79,18 +79,18 @@ func (c *CertGenerator) NeedLeaderElection() bool {
 // AddToManager adds the cert-generator to the manager.
 func AddToManager(mgr manager.Manager, config configv1beta1.CertGeneratorConfig, certsReady chan struct{}) error {
 	return mgr.Add(&CertGenerator{
-		namespace:   consts.DefaultKatibNamespace,
-		serviceName: config.WebhookServiceName,
-		secretName:  config.WebhookSecretName,
-		kubeClient:  mgr.GetClient(),
-		certsReady:  certsReady,
+		namespace:          consts.DefaultKatibNamespace,
+		webhookServiceName: config.WebhookServiceName,
+		webhookSecretName:  config.WebhookSecretName,
+		kubeClient:         mgr.GetClient(),
+		certsReady:         certsReady,
 	})
 }
 
 // generate generates certificates for the admission webhooks.
 func (c *CertGenerator) generate(ctx context.Context) error {
 	controllerService := &corev1.Service{}
-	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.serviceName, Namespace: c.namespace}, controllerService); err != nil {
+	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.webhookServiceName, Namespace: c.namespace}, controllerService); err != nil {
 		return fmt.Errorf("%w: %v", errServiceNotFound, err)
 	}
 
@@ -99,7 +99,7 @@ func (c *CertGenerator) generate(ctx context.Context) error {
 		return fmt.Errorf("%w: %v", errCertCheckFail, err)
 	}
 	if !certExist {
-		c.fullServiceDomain = strings.Join([]string{c.serviceName, c.namespace, "svc"}, ".")
+		c.fullServiceDomain = strings.Join([]string{c.webhookServiceName, c.namespace, "svc"}, ".")
 
 		if err = c.createCert(); err != nil {
 			return fmt.Errorf("%w: %v", errCreateCertFail, err)
@@ -119,7 +119,7 @@ func (c *CertGenerator) generate(ctx context.Context) error {
 // since another controller pod will create the secret.
 func (c *CertGenerator) isCertExist(ctx context.Context) (bool, error) {
 	secret := &corev1.Secret{}
-	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.secretName, Namespace: c.namespace}, secret); err != nil {
+	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.webhookSecretName, Namespace: c.namespace}, secret); err != nil {
 		return false, err
 	}
 	key := secret.Data[serverKeyName]
@@ -170,7 +170,7 @@ func (c *CertGenerator) createCert() error {
 // updateCertSecret updates Secret embedded tls.key and tls.crt.
 func (c *CertGenerator) updateCertSecret(ctx context.Context) error {
 	secret := &corev1.Secret{}
-	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.secretName, Namespace: c.namespace}, secret); err != nil {
+	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.webhookSecretName, Namespace: c.namespace}, secret); err != nil {
 		return err
 	}
 	newSecret := &corev1.Secret{
