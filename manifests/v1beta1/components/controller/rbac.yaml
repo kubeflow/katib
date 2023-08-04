@@ -57,7 +57,7 @@ rules:
       - "get"
       - "list"
       - "watch"
-      - "update"
+      - "patch"
   - apiGroups:
       - apps
     resources:

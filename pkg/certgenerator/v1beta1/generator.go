@@ -31,6 +31,7 @@ import (
 
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -172,41 +173,89 @@ func (c *CertGenerator) updateCertSecret(ctx context.Context) error {
 	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: c.secretName, Namespace: c.namespace}, secret); err != nil {
 		return err
 	}
-	if len(secret.Data) == 0 {
-		secret.Data = make(map[string][]byte, 2)
+	newSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			UID:        secret.UID,
+			Name:       secret.Name,
+			Namespace:  secret.Namespace,
+			Generation: secret.Generation,
+		},
+		TypeMeta: secret.TypeMeta,
 	}
-	secret.Data[serverKeyName] = c.certs.keyPem
-	secret.Data[serverCertName] = c.certs.certPem
-	return c.kubeClient.Update(ctx, secret)
+	if len(newSecret.APIVersion) == 0 {
+		newSecret.APIVersion = corev1.SchemeGroupVersion.String()
+	}
+	if len(newSecret.Kind) == 0 {
+		newSecret.Kind = "Secret"
+	}
+	newSecret.Data = map[string][]byte{
+		serverKeyName:  c.certs.keyPem,
+		serverCertName: c.certs.certPem,
+	}
+	return c.kubeClient.Patch(ctx, newSecret, client.Apply, client.FieldOwner(ssaFieldOwnerName), client.ForceOwnership)
 }
 
 // injectCert applies patch to ValidatingWebhookConfiguration and MutatingWebhookConfiguration.
 func (c *CertGenerator) injectCert(ctx context.Context) error {
-	validatingConf := &admissionregistrationv1.ValidatingWebhookConfiguration{}
-	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: Webhook}, validatingConf); err != nil {
+	vWebhookConfig := &admissionregistrationv1.ValidatingWebhookConfiguration{}
+	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: Webhook}, vWebhookConfig); err != nil {
 		return err
 	}
-	if !bytes.Equal(validatingConf.Webhooks[0].ClientConfig.CABundle, c.certs.certPem) {
-		newValidatingConf := validatingConf.DeepCopy()
-		newValidatingConf.Webhooks[0].ClientConfig.CABundle = c.certs.certPem
+	if !bytes.Equal(vWebhookConfig.Webhooks[0].ClientConfig.CABundle, c.certs.certPem) {
+		newVWebhookConfig := &admissionregistrationv1.ValidatingWebhookConfiguration{
+			ObjectMeta: metav1.ObjectMeta{
+				UID:        vWebhookConfig.UID,
+				Name:       vWebhookConfig.Name,
+				Namespace:  vWebhookConfig.Namespace,
+				Generation: vWebhookConfig.Generation,
+			},
+			TypeMeta: vWebhookConfig.TypeMeta,
+		}
+		if len(newVWebhookConfig.APIVersion) == 0 {
+			newVWebhookConfig.APIVersion = admissionregistrationv1.SchemeGroupVersion.String()
+		}
+		if len(newVWebhookConfig.Kind) == 0 {
+			newVWebhookConfig.Kind = "ValidatingWebhookConfiguration"
+		}
+		newVWebhookConfig.Webhooks = vWebhookConfig.Webhooks
+		newVWebhookConfig.Webhooks[0].ClientConfig.CABundle = c.certs.certPem
+
 		klog.Info("Trying to patch ValidatingWebhookConfiguration adding the caBundle.")
-		if err := c.kubeClient.Patch(ctx, newValidatingConf, client.MergeFrom(validatingConf)); err != nil {
+		err := c.kubeClient.Patch(ctx, newVWebhookConfig, client.Apply, client.FieldOwner(ssaFieldOwnerName), client.ForceOwnership)
+		if err != nil {
 			klog.Errorf("Unable to patch ValidatingWebhookConfiguration %q", Webhook)
 			return err
 		}
 	}
 
-	mutatingConf := &admissionregistrationv1.MutatingWebhookConfiguration{}
-	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: Webhook}, mutatingConf); err != nil {
+	mWebhookConfig := &admissionregistrationv1.MutatingWebhookConfiguration{}
+	if err := c.kubeClient.Get(ctx, client.ObjectKey{Name: Webhook}, mWebhookConfig); err != nil {
 		return err
 	}
-	if !bytes.Equal(mutatingConf.Webhooks[0].ClientConfig.CABundle, c.certs.certPem) ||
-		!bytes.Equal(mutatingConf.Webhooks[1].ClientConfig.CABundle, c.certs.certPem) {
-		newMutatingConf := mutatingConf.DeepCopy()
-		newMutatingConf.Webhooks[0].ClientConfig.CABundle = c.certs.certPem
-		newMutatingConf.Webhooks[1].ClientConfig.CABundle = c.certs.certPem
+	if !bytes.Equal(mWebhookConfig.Webhooks[0].ClientConfig.CABundle, c.certs.certPem) ||
+		!bytes.Equal(mWebhookConfig.Webhooks[1].ClientConfig.CABundle, c.certs.certPem) {
+		newMWebhookConfig := &admissionregistrationv1.MutatingWebhookConfiguration{
+			ObjectMeta: metav1.ObjectMeta{
+				UID:        mWebhookConfig.UID,
+				Name:       mWebhookConfig.Name,
+				Namespace:  mWebhookConfig.Namespace,
+				Generation: mWebhookConfig.Generation,
+			},
+			TypeMeta: mWebhookConfig.TypeMeta,
+		}
+		if len(newMWebhookConfig.APIVersion) == 0 {
+			newMWebhookConfig.APIVersion = admissionregistrationv1.SchemeGroupVersion.String()
+		}
+		if len(newMWebhookConfig.Kind) == 0 {
+			newMWebhookConfig.Kind = "MutatingWebhookConfiguration"
+		}
+		newMWebhookConfig.Webhooks = mWebhookConfig.Webhooks
+		newMWebhookConfig.Webhooks[0].ClientConfig.CABundle = c.certs.certPem
+		newMWebhookConfig.Webhooks[1].ClientConfig.CABundle = c.certs.certPem
+
 		klog.Info("Trying to patch MutatingWebhookConfiguration adding the caBundle.")
-		if err := c.kubeClient.Patch(ctx, newMutatingConf, client.MergeFrom(mutatingConf)); err != nil {
+		err := c.kubeClient.Patch(ctx, newMWebhookConfig, client.Apply, client.FieldOwner(ssaFieldOwnerName), client.ForceOwnership)
+		if err != nil {
 			klog.Errorf("Unable to patch MutatingWebhookConfiguration %q", Webhook)
 			return err
 		}

@@ -17,7 +17,8 @@ limitations under the License.
 package certgenerator
 
 const (
-	Webhook        = "katib.kubeflow.org"
-	serverKeyName  = "tls.key"
-	serverCertName = "tls.crt"
+	Webhook           = "katib.kubeflow.org"
+	serverKeyName     = "tls.key"
+	serverCertName    = "tls.crt"
+	ssaFieldOwnerName = "cert-generator"
 )
