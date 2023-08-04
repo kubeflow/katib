@@ -73,7 +73,7 @@ func (c *CertGenerator) Start(ctx context.Context) error {
 }
 
 func (c *CertGenerator) NeedLeaderElection() bool {
-	return true
+	return false
 }
 
 // AddToManager adds the cert-generator to the manager.
