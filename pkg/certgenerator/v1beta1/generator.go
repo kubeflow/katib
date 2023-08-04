@@ -175,18 +175,11 @@ func (c *CertGenerator) updateCertSecret(ctx context.Context) error {
 	}
 	newSecret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			UID:        secret.UID,
-			Name:       secret.Name,
-			Namespace:  secret.Namespace,
-			Generation: secret.Generation,
+			UID:       secret.UID,
+			Name:      secret.Name,
+			Namespace: secret.Namespace,
 		},
 		TypeMeta: secret.TypeMeta,
-	}
-	if len(newSecret.APIVersion) == 0 {
-		newSecret.APIVersion = corev1.SchemeGroupVersion.String()
-	}
-	if len(newSecret.Kind) == 0 {
-		newSecret.Kind = "Secret"
 	}
 	newSecret.Data = map[string][]byte{
 		serverKeyName:  c.certs.keyPem,
@@ -210,12 +203,6 @@ func (c *CertGenerator) injectCert(ctx context.Context) error {
 				Generation: vWebhookConfig.Generation,
 			},
 			TypeMeta: vWebhookConfig.TypeMeta,
-		}
-		if len(newVWebhookConfig.APIVersion) == 0 {
-			newVWebhookConfig.APIVersion = admissionregistrationv1.SchemeGroupVersion.String()
-		}
-		if len(newVWebhookConfig.Kind) == 0 {
-			newVWebhookConfig.Kind = "ValidatingWebhookConfiguration"
 		}
 		newVWebhookConfig.Webhooks = vWebhookConfig.Webhooks
 		newVWebhookConfig.Webhooks[0].ClientConfig.CABundle = c.certs.certPem
@@ -242,12 +229,6 @@ func (c *CertGenerator) injectCert(ctx context.Context) error {
 				Generation: mWebhookConfig.Generation,
 			},
 			TypeMeta: mWebhookConfig.TypeMeta,
-		}
-		if len(newMWebhookConfig.APIVersion) == 0 {
-			newMWebhookConfig.APIVersion = admissionregistrationv1.SchemeGroupVersion.String()
-		}
-		if len(newMWebhookConfig.Kind) == 0 {
-			newMWebhookConfig.Kind = "MutatingWebhookConfiguration"
 		}
 		newMWebhookConfig.Webhooks = mWebhookConfig.Webhooks
 		newMWebhookConfig.Webhooks[0].ClientConfig.CABundle = c.certs.certPem
