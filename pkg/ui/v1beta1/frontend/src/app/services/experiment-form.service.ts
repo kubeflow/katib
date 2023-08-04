@@ -36,7 +36,7 @@ export class ExperimentFormService {
       parallelTrialCount: 3,
       maxTrialCount: 12,
       maxFailedTrialCount: 3,
-      resumePolicy: 'LongRunning',
+      resumePolicy: 'Never',
     });
   }
 
