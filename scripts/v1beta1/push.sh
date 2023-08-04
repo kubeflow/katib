@@ -44,9 +44,6 @@ docker push "${REGISTRY}/katib-db-manager:${TAG}"
 echo -e "\nPushing Katib UI image...\n"
 docker push "${REGISTRY}/katib-ui:${TAG}"
 
-echo -e "\nPushing Katib cert generator image...\n"
-docker push "${REGISTRY}/cert-generator:${TAG}"
-
 echo -e "\nPushing file metrics collector image...\n"
 docker push "${REGISTRY}/file-metrics-collector:${TAG}"
 

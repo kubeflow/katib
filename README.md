@@ -179,7 +179,6 @@ Make sure that all Katib components are running:
 $ kubectl get pods -n kubeflow
 
 NAME                                READY   STATUS      RESTARTS   AGE
-katib-cert-generator-rw95w          0/1     Completed   0          35s
 katib-controller-566595bdd8-hbxgf   1/1     Running     0          36s
 katib-db-manager-57cd769cdb-4g99m   1/1     Running     0          36s
 katib-mysql-7894994f88-5d4s5        1/1     Running     0          36s

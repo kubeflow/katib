@@ -27,7 +27,6 @@ If the above script was successful, Katib components will be running:
 $ kubectl get pods -n kubeflow
 
 NAME                                READY   STATUS      RESTARTS   AGE
-katib-cert-generator-tc2jt          0/1     Completed   0          67s
 katib-controller-566595bdd8-x7z6w   1/1     Running     0          67s
 katib-db-manager-57cd769cdb-x4lnz   1/1     Running     0          67s
 katib-mysql-7894994f88-7l8nd        1/1     Running     0          67s

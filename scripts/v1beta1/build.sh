@@ -64,9 +64,6 @@ docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/katib-db-manager:
 echo -e "\nBuilding Katib UI image...\n"
 docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/katib-ui:${TAG}" -f ${CMD_PREFIX}/ui/${VERSION}/Dockerfile .
 
-echo -e "\nBuilding Katib cert generator image...\n"
-docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/cert-generator:${TAG}" -f ${CMD_PREFIX}/cert-generator/${VERSION}/Dockerfile .
-
 echo -e "\nBuilding file metrics collector image...\n"
 docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/file-metrics-collector:${TAG}" -f ${CMD_PREFIX}/metricscollector/${VERSION}/file-metricscollector/Dockerfile .
 

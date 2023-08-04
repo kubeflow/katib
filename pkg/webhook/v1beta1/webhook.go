@@ -27,17 +27,9 @@ import (
 	"github.com/kubeflow/katib/pkg/webhook/v1beta1/pod"
 )
 
-func AddToManager(mgr manager.Manager, port int) error {
-	// Create a webhook server.
-	hookServer := webhook.NewServer(webhook.Options{
-		Port:    port,
-		CertDir: "/tmp/cert",
-	})
+func AddToManager(mgr manager.Manager, hookServer webhook.Server) error {
 	if err := mgr.Add(hookServer); err != nil {
 		return fmt.Errorf("Add webhook server to the manager failed: %v", err)
-	}
-	if err := mgr.AddHealthzCheck("healthz", hookServer.StartedChecker()); err != nil {
-		return fmt.Errorf("Add webhook server health checker to the manager failed: %v", err)
 	}
 
 	decoder := admission.NewDecoder(mgr.GetScheme())

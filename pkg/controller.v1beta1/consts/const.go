@@ -46,10 +46,8 @@ const (
 	// suggestion client implementation in experiment controller.
 	ConfigExperimentSuggestionName = "experiment-suggestion-name"
 
-	// ConfigCertLocalFS is the config name which indicates if we
-	// should store the cert in file system.
-	// TODO (andreyvelich): Currently is is not possible to store webhook cert in the local file system
-	// ConfigCertLocalFS = "cert-local-filesystem"
+	// CertDir is the location saved certs for the webhooks.
+	CertDir = "/tmp/cert"
 
 	// ConfigInjectSecurityContext is the config name which indicates
 	// if we should inject the security context into the metrics collector

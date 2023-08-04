@@ -100,23 +100,19 @@ plane CIDR source range to use the Katib webhooks
 
 ### Katib cert generator
 
-Katib uses the custom `cert-generator` [Kubernetes Job](https://kubernetes.io/docs/concepts/workloads/controllers/job/)
-to generate certificates for the webhooks.
+Katib Controller has the internal `cert-generator` to generate certificates for the webhooks.
 
-Once Katib is deployed in the Kubernetes cluster, the `cert-generator` Job follows these steps:
+Once Katib is deployed in the Kubernetes cluster, the `cert-generator` follows these steps:
 
 - Generate the self-signed certificate and private key.
 
-- Create a Kubernetes Secret with the self-signed TLS certificate and private key.
-  Secret has the `katib-webhook-cert` name and `cert-generator` Job's
-  `ownerReference` to clean-up resources once Katib is uninstalled.
-
-  Once Secret is created, the Katib controller Deployment spawns the Pod,
-  since the controller has the `katib-webhook-cert` Secret volume.
-
+- Update a Kubernetes Secret with the self-signed TLS certificate and private key.
+  
 - Patch the webhooks with the `CABundle`.
 
-You can find the `cert-generator` source code [here](../cmd/cert-generator/v1beta1).
+Once the `cert-generator` finished, the Katib controller starts to register controllers such as `experiment-controller` to the manager.
+
+You can find the `cert-generator` source code [here](../pkg/certgenerator/v1beta1).
 
 ## Implement a new algorithm and use it in Katib
 

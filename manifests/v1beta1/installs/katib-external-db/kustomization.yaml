@@ -13,8 +13,6 @@ resources:
   - ../../components/db-manager/
   # Katib UI.
   - ../../components/ui/
-  # Katib Cert Generator
-  - ../../components/cert-generator/
   # Katib webhooks.
   - ../../components/webhook/
 images:
@@ -26,9 +24,6 @@ images:
     newTag: latest
   - name: docker.io/kubeflowkatib/katib-ui
     newName: docker.io/kubeflowkatib/katib-ui
-    newTag: latest
-  - name: docker.io/kubeflowkatib/cert-generator
-    newName: docker.io/kubeflowkatib/cert-generator
     newTag: latest
 patchesStrategicMerge:
   - patches/db-manager.yaml

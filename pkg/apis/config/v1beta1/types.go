@@ -40,10 +40,10 @@ type RuntimeConfig struct {
 
 // InitConfig is the YAML init structure in Katib config.
 type InitConfig struct {
-	ControllerConfig ControllerConfig `json:"controller,omitempty"`
+	ControllerConfig    ControllerConfig    `json:"controller,omitempty"`
+	CertGeneratorConfig CertGeneratorConfig `json:"certGenerator,omitempty"`
 
 	// TODO: Adding a config for the following components would be nice.
-	// - Webhook Certs
 	// - Katib DB
 	// - Katib DB Manager
 	// - Katib UI
@@ -80,6 +80,21 @@ type ControllerConfig struct {
 	// LeaderElectionID is the ID for leader election.
 	// Defaults to '3fbc96e9.katib.kubeflow.org'.
 	LeaderElectionID string `json:"leaderElectionID,omitempty"`
+}
+
+// CertGeneratorConfig is the certGenerator structure in Katib config.
+type CertGeneratorConfig struct {
+	// Enable indicates the internal cert-generator is enabled.
+	// Defaults to 'false'.
+	Enable bool `json:"enable,omitempty"`
+	// WebhookServiceName indicates which service is used for the admission webhook.
+	// If it is set, the cert-generator forcefully is enabled even if the '.init.certGenerator.enable' is false.
+	// Defaults to 'katib-controller'.
+	WebhookServiceName string `json:"webhookServiceName,omitempty"`
+	// WebhookSecretName indicates which secrets is used to save the certs for the admission webhook.
+	// If it is set, the cert-generator forcefully is enabled even if the '.init.certGenerator.enable' is false.
+	// Defaults to 'katib-webhook-cert'.
+	WebhookSecretName string `json:"webhookSecretName,omitempty"`
 }
 
 // SuggestionConfig is the suggestion structure in Katib config.

@@ -385,6 +385,10 @@ func TestGetInitConfigData(t *testing.T) {
 apiVersion: config.kubeflow.org/v1beta1
 kind: KatibConfig
 init:
+  certGenerator:
+    enable: true
+    webhookServiceName: katib-test
+    webhookSecretName: katib-test-secret
   controller:
     experimentSuggestionName: test
     metricsAddr: :8081
@@ -435,6 +439,11 @@ runtime:
 		"full init config": {
 			katibConfigFile: fullInitConfig,
 			wantInitConfigData: configv1beta1.InitConfig{
+				CertGeneratorConfig: configv1beta1.CertGeneratorConfig{
+					Enable:             true,
+					WebhookServiceName: "katib-test",
+					WebhookSecretName:  "katib-test-secret",
+				},
 				ControllerConfig: configv1beta1.ControllerConfig{
 					ExperimentSuggestionName:    "test",
 					MetricsAddr:                 ":8081",
