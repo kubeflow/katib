@@ -18,6 +18,8 @@ package certgenerator
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -31,6 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
 func TestGenerate(t *testing.T) {
@@ -209,4 +212,61 @@ func buildFakeClient(kubeResources []client.Object) client.Client {
 		fakeClientBuilder.WithObjects(kubeResources...)
 	}
 	return fakeClientBuilder.Build()
+}
+
+func TestEnsureCertMounted(t *testing.T) {
+	tests := map[string]struct {
+		keyExist  bool
+		certExist bool
+		wantExist bool
+	}{
+		"key and cert exist": {
+			keyExist:  true,
+			certExist: true,
+			wantExist: true,
+		},
+		"key doesn't exist": {
+			keyExist:  false,
+			certExist: true,
+			wantExist: false,
+		},
+		"cert doesn't exist": {
+			keyExist:  true,
+			certExist: false,
+			wantExist: false,
+		},
+		"all files doesn't exist": {
+			keyExist:  false,
+			certExist: false,
+			wantExist: false,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if tc.keyExist || tc.certExist {
+				if err := os.MkdirAll(consts.CertDir, 0760); err != nil {
+					t.Fatalf("Failed to set up directory: %v", err)
+				}
+				defer func() {
+					if err := os.RemoveAll(consts.CertDir); err != nil {
+						t.Fatalf("Failed to clean up directory: %v", err)
+					}
+				}()
+			}
+			if tc.keyExist {
+				if _, err := os.Create(filepath.Join(consts.CertDir, serverKeyName)); err != nil {
+					t.Fatalf("Failed to create tls.key: %v", err)
+				}
+			}
+			if tc.certExist {
+				if _, err := os.Create(filepath.Join(consts.CertDir, serverCertName)); err != nil {
+					t.Fatalf("Failed to create tls.crt: %v", err)
+				}
+			}
+			got, _ := ensureCertMounted(context.Background())
+			if tc.wantExist != got {
+				t.Errorf("Unexpected value from ensureCertMounted: \n(want: %v, got: %v)\n", tc.wantExist, got)
+			}
+		})
+	}
 }

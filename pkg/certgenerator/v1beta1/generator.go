@@ -26,12 +26,15 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -67,9 +70,33 @@ func (c *CertGenerator) Start(ctx context.Context) error {
 	if err := c.generate(ctx); err != nil {
 		return err
 	}
+	klog.Info("Waiting for certs to get ready.")
+	if err := wait.ExponentialBackoffWithContext(ctx, wait.Backoff{
+		Duration: time.Second,
+		Factor:   2,
+		Jitter:   1,
+		Steps:    10,
+		Cap:      time.Minute * 5,
+	}, ensureCertMounted); err != nil {
+		return err
+	}
 	// Sending an empty data to a certsReady means it starts to register controllers to the manager.
 	c.certsReady <- struct{}{}
 	return nil
+}
+
+// ensureCertMounted ensures that the generated certs are mounted inside the container.
+func ensureCertMounted(context.Context) (bool, error) {
+	certFile := filepath.Join(consts.CertDir, serverCertName)
+	if _, err := os.Stat(certFile); err != nil {
+		return false, nil
+	}
+	keyFile := filepath.Join(consts.CertDir, serverKeyName)
+	if _, err := os.Stat(keyFile); err != nil {
+		return false, nil
+	}
+	klog.Info("Succeeded to be mounted certs inside the container.")
+	return true, nil
 }
 
 func (c *CertGenerator) NeedLeaderElection() bool {
