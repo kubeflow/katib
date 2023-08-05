@@ -135,13 +135,13 @@ func main() {
 
 	ctx := signals.SetupSignalHandler()
 	certsReady := make(chan struct{})
-
+	defer close(certsReady)
 	if initConfig.CertGeneratorConfig.Enable {
 		if err = cert.AddToManager(mgr, initConfig.CertGeneratorConfig, certsReady); err != nil {
 			log.Error(err, "Failed to set up cert-generator")
 		}
 	} else {
-		close(certsReady)
+		certsReady <- struct{}{}
 	}
 
 	// The setupControllers will register controllers to the manager

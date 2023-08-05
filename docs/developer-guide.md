@@ -114,6 +114,9 @@ Once the `cert-generator` finished, the Katib controller starts to register cont
 
 You can find the `cert-generator` source code [here](../pkg/certgenerator/v1beta1).
 
+NOTE: the Katib also supports the [cert-manager](https://cert-manager.io/) to generate certs for the admission webhooks instead of using cert-generator.
+You can find the installation with the cert-manager [here](../manifests/v1beta1/installs/katib-cert-manager).
+
 ## Implement a new algorithm and use it in Katib
 
 Please see [new-algorithm-service.md](./new-algorithm-service.md).

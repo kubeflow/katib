@@ -67,8 +67,8 @@ func (c *CertGenerator) Start(ctx context.Context) error {
 	if err := c.generate(ctx); err != nil {
 		return err
 	}
-	// Close a certsReady means start to register controllers to the manager.
-	close(c.certsReady)
+	// Sending an empty data to a certsReady means it starts to register controllers to the manager.
+	c.certsReady <- struct{}{}
 	return nil
 }
 
