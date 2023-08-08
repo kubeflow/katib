@@ -105,7 +105,11 @@ class KatibClient(object):
             raise TimeoutError(
                 f"Timeout to create Katib Experiment: {namespace}/{experiment.metadata.name}"
             )
-        except Exception:
+        except Exception as e:
+            if hasattr(e, "status") and e.status == 409:
+                raise Exception(
+                    f"A Katib Experiment with the name {namespace}/{experiment.metadata.name} already exists."
+                )
             raise RuntimeError(
                 f"Failed to create Katib Experiment: {namespace}/{experiment.metadata.name}"
             )
