@@ -63,6 +63,16 @@ webhooks:
     namespaceSelector:
       matchLabels:
         katib.kubeflow.org/metrics-collector-injection: enabled
+    # Once the AdmissionWebhookMatchConditions feature gate is enabled by default, we should switch to control based on userInfo.
+    # REF:
+    # - AdmissionWebhookMatchConditions: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-matchconditions
+    # - Tracking issue: https://github.com/kubeflow/katib/issues/2206
+    objectSelector:
+      matchExpressions:
+        - key: katib.kubeflow.org/metrics-collector-injection
+          operator: NotIn
+          values:
+            - disabled
     rules:
       - apiGroups:
           - ""
