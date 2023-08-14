@@ -50,7 +50,7 @@ for commit in reversed(commits):
 
 change_log = [
     "# Changelog" "\n\n",
-    "## [{}]({}) ({})".format(current_release, release_url, release_date),
+    "# [{}]({}) ({})".format(current_release, release_url, release_date),
     "\n\n",
     "## TODO: Group PRs into Breaking Changes, New Features, Bug fixes, Documentation, etc. "
     + "For example: [v0.11.0](https://github.com/kubeflow/katib/releases/tag/v0.11.0)",
