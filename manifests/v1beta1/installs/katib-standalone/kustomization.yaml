@@ -34,3 +34,8 @@ configMapGenerator:
       - katib-config.yaml
     options:
       disableNameSuffixHash: true
+# Secret for webhooks certs.
+secretGenerator:
+  - name: katib-webhook-cert
+    options:
+      disableNameSuffixHash: true
