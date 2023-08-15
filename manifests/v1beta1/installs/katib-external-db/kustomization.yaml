@@ -32,6 +32,10 @@ secretGenerator:
   - name: katib-mysql-secrets
     envs:
       - secrets.env
+  # Secret for webhooks certs.
+  - name: katib-webhook-cert
+    options:
+      disableNameSuffixHash: true
 configMapGenerator:
   - name: katib-config
     behavior: create
