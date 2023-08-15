@@ -56,11 +56,11 @@ type CertGenerator struct {
 	namespace          string
 	webhookServiceName string
 	webhookSecretName  string
+	fullServiceDomain  string
 	kubeClient         client.Client
 	certsReady         chan struct{}
 
-	certs             *certificates
-	fullServiceDomain string
+	certs *certificates
 }
 
 var _ manager.Runnable = &CertGenerator{}
@@ -109,8 +109,13 @@ func AddToManager(mgr manager.Manager, config configv1beta1.CertGeneratorConfig,
 		namespace:          consts.DefaultKatibNamespace,
 		webhookServiceName: config.WebhookServiceName,
 		webhookSecretName:  config.WebhookSecretName,
-		kubeClient:         mgr.GetClient(),
-		certsReady:         certsReady,
+		fullServiceDomain: strings.Join([]string{
+			config.WebhookServiceName,
+			consts.DefaultKatibNamespace,
+			"svc",
+		}, "."),
+		kubeClient: mgr.GetClient(),
+		certsReady: certsReady,
 	})
 }
 
@@ -126,8 +131,6 @@ func (c *CertGenerator) generate(ctx context.Context) error {
 		return fmt.Errorf("%w: %v", errCertCheckFail, err)
 	}
 	if !certExist {
-		c.fullServiceDomain = strings.Join([]string{c.webhookServiceName, c.namespace, "svc"}, ".")
-
 		if err = c.createCert(); err != nil {
 			return fmt.Errorf("%w: %v", errCreateCertFail, err)
 		}
