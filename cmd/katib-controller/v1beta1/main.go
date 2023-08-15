@@ -141,7 +141,7 @@ func main() {
 			log.Error(err, "Failed to set up cert-generator")
 		}
 	} else {
-		certsReady <- struct{}{}
+		close(certsReady)
 	}
 
 	// The setupControllers will register controllers to the manager
