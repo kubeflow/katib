@@ -26,12 +26,15 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -53,11 +56,11 @@ type CertGenerator struct {
 	namespace          string
 	webhookServiceName string
 	webhookSecretName  string
+	fullServiceDomain  string
 	kubeClient         client.Client
 	certsReady         chan struct{}
 
-	certs             *certificates
-	fullServiceDomain string
+	certs *certificates
 }
 
 var _ manager.Runnable = &CertGenerator{}
@@ -67,9 +70,48 @@ func (c *CertGenerator) Start(ctx context.Context) error {
 	if err := c.generate(ctx); err != nil {
 		return err
 	}
+	klog.Info("Waiting for certs to get ready.")
+	if err := wait.ExponentialBackoffWithContext(ctx, wait.Backoff{
+		Duration: time.Second,
+		Factor:   2,
+		Jitter:   1,
+		Steps:    10,
+		Cap:      time.Minute * 5,
+	}, ensureCertMounted(time.Now())); err != nil {
+		return err
+	}
 	// Sending an empty data to a certsReady means it starts to register controllers to the manager.
 	c.certsReady <- struct{}{}
 	return nil
+}
+
+// ensureCertMounted ensures that the generated certs are mounted inside the container.
+func ensureCertMounted(start time.Time) func(context.Context) (bool, error) {
+	return func(ctx context.Context) (bool, error) {
+		now := time.Now()
+		outputLog := false
+		if now.Sub(start) >= 15*time.Second {
+			start = now
+			outputLog = true
+		}
+
+		certFile := filepath.Join(consts.CertDir, serverCertName)
+		if _, err := os.Stat(certFile); err != nil {
+			if outputLog {
+				klog.Infof("Public key file %q doesn't exist in the container yet", certFile)
+			}
+			return false, nil
+		}
+		keyFile := filepath.Join(consts.CertDir, serverKeyName)
+		if _, err := os.Stat(keyFile); err != nil {
+			if outputLog {
+				klog.Infof("Private key file %q doesn't exist in the container yet", keyFile)
+			}
+			return false, nil
+		}
+		klog.Info("Succeeded to be mounted certs inside the container.")
+		return true, nil
+	}
 }
 
 func (c *CertGenerator) NeedLeaderElection() bool {
@@ -82,8 +124,13 @@ func AddToManager(mgr manager.Manager, config configv1beta1.CertGeneratorConfig,
 		namespace:          consts.DefaultKatibNamespace,
 		webhookServiceName: config.WebhookServiceName,
 		webhookSecretName:  config.WebhookSecretName,
-		kubeClient:         mgr.GetClient(),
-		certsReady:         certsReady,
+		fullServiceDomain: strings.Join([]string{
+			config.WebhookServiceName,
+			consts.DefaultKatibNamespace,
+			"svc",
+		}, "."),
+		kubeClient: mgr.GetClient(),
+		certsReady: certsReady,
 	})
 }
 
@@ -99,8 +146,6 @@ func (c *CertGenerator) generate(ctx context.Context) error {
 		return fmt.Errorf("%w: %v", errCertCheckFail, err)
 	}
 	if !certExist {
-		c.fullServiceDomain = strings.Join([]string{c.webhookServiceName, c.namespace, "svc"}, ".")
-
 		if err = c.createCert(); err != nil {
 			return fmt.Errorf("%w: %v", errCreateCertFail, err)
 		}
