@@ -77,7 +77,7 @@ func (c *CertGenerator) Start(ctx context.Context) error {
 		Jitter:   1,
 		Steps:    10,
 		Cap:      time.Minute * 5,
-	}, ensureCertMounted); err != nil {
+	}, ensureCertMounted(time.Now())); err != nil {
 		return err
 	}
 	// Sending an empty data to a certsReady means it starts to register controllers to the manager.
@@ -86,17 +86,32 @@ func (c *CertGenerator) Start(ctx context.Context) error {
 }
 
 // ensureCertMounted ensures that the generated certs are mounted inside the container.
-func ensureCertMounted(context.Context) (bool, error) {
-	certFile := filepath.Join(consts.CertDir, serverCertName)
-	if _, err := os.Stat(certFile); err != nil {
-		return false, nil
+func ensureCertMounted(start time.Time) func(context.Context) (bool, error) {
+	return func(ctx context.Context) (bool, error) {
+		now := time.Now()
+		outputLog := false
+		if now.Sub(start) >= 15*time.Second {
+			start = now
+			outputLog = true
+		}
+
+		certFile := filepath.Join(consts.CertDir, serverCertName)
+		if _, err := os.Stat(certFile); err != nil {
+			if outputLog {
+				klog.Infof("Public key file %q doesn't exist in the container yet", certFile)
+			}
+			return false, nil
+		}
+		keyFile := filepath.Join(consts.CertDir, serverKeyName)
+		if _, err := os.Stat(keyFile); err != nil {
+			if outputLog {
+				klog.Infof("Private key file %q doesn't exist in the container yet", keyFile)
+			}
+			return false, nil
+		}
+		klog.Info("Succeeded to be mounted certs inside the container.")
+		return true, nil
 	}
-	keyFile := filepath.Join(consts.CertDir, serverKeyName)
-	if _, err := os.Stat(keyFile); err != nil {
-		return false, nil
-	}
-	klog.Info("Succeeded to be mounted certs inside the container.")
-	return true, nil
 }
 
 func (c *CertGenerator) NeedLeaderElection() bool {

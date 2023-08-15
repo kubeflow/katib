@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -263,7 +264,8 @@ func TestEnsureCertMounted(t *testing.T) {
 					t.Fatalf("Failed to create tls.crt: %v", err)
 				}
 			}
-			got, _ := ensureCertMounted(context.Background())
+			ensureFunc := ensureCertMounted(time.Now())
+			got, _ := ensureFunc(context.Background())
 			if tc.wantExist != got {
 				t.Errorf("Unexpected value from ensureCertMounted: \n(want: %v, got: %v)\n", tc.wantExist, got)
 			}
