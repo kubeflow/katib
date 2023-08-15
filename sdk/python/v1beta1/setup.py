@@ -32,12 +32,13 @@ katib_grpc_api_file = "../../../pkg/apis/manager/v1beta1/python/api_pb2.py"
 # We need to always copy this file only on the SDK building stage, not on SDK installation stage.
 if os.path.exists(katib_grpc_api_file):
     shutil.copy(
-        katib_grpc_api_file, "kubeflow/katib/katib_api_pb2.py",
+        katib_grpc_api_file,
+        "kubeflow/katib/katib_api_pb2.py",
     )
 
 setuptools.setup(
     name="kubeflow-katib",
-    version="0.15.0",
+    version="0.16.0rc0",
     author="Kubeflow Authors",
     author_email="premnath.vel@gmail.com",
     license="Apache License Version 2.0",

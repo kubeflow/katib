@@ -19,6 +19,16 @@ This is the instruction on how to make a new release for the Katib project.
 
 - Install `twine` to publish the SDK package: `pip install twine==3.4.1`
 
+  - Create a [PyPI Token](https://pypi.org/help/#apitoken) to publish Katib SDK.
+
+  - Add the following config to your `~/.pypirc` file:
+
+    ```
+    [pypi]
+       username = __token__
+       password = <PYPI_TOKEN>
+    ```
+
 ## Release Process
 
 ### Versioning Policy
