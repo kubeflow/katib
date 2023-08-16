@@ -1,6 +1,65 @@
 # Changelog
 
-## [v0.15.0](https://github.com/kubeflow/katib/tree/v0.15.0) (2023-03-22)
+# [v0.16.0-rc.0](https://github.com/kubeflow/katib/tree/v0.16.0-rc.0) (2023-08-05)
+
+## Breaking Changes
+
+- Implement KatibConfig API ([#2176](https://github.com/kubeflow/katib/pull/2176) by [@tenzen-y](https://github.com/tenzen-y))
+- Drop Kubernetes v1.24 and support Kubernetes v1.27 ([#2182](https://github.com/kubeflow/katib/pull/2182) by [@tenzen-y](https://github.com/tenzen-y))
+- Drop Kubernetes v1.23 and support Kubernetes v1.26 ([#2177](https://github.com/kubeflow/katib/pull/2177) by [@tenzen-y](https://github.com/tenzen-y))
+- Change failurePolicy to Fail for Katib Webhooks ([#2018](https://github.com/kubeflow/katib/pull/2018) by [@andreyvelich](https://github.com/andreyvelich))
+
+## New Features
+
+### Core Features
+
+- Consolidate the Katib Cert Generator to the Katib Controller ([#2185](https://github.com/kubeflow/katib/pull/2185) by [@tenzen-y](https://github.com/tenzen-y))
+- Containerize tests for Katib Conformance ([#2146](https://github.com/kubeflow/katib/pull/2146) by [@nagar-ajay](https://github.com/nagar-ajay))
+
+### UI Improvements
+
+- [UI] Default Resume Policy to never from UI ([#2195](https://github.com/kubeflow/katib/pull/2195) by [@mChowdhury-91](https://github.com/mChowdhury-91))
+- [UI] Remove Deprecated Katib UI ([#2179](https://github.com/kubeflow/katib/pull/2179) by [@andreyvelich](https://github.com/andreyvelich))
+- [UI] Fix Trial Logs when Kubernetes Job Fails ([#2164](https://github.com/kubeflow/katib/pull/2164) by [@andreyvelich](https://github.com/andreyvelich))
+- kwa(front): Support all namespaces ([#2119](https://github.com/kubeflow/katib/pull/2119) by [@elenzio9](https://github.com/elenzio9))
+- kwa(front): Update the use of SnackBarService ([#2113](https://github.com/kubeflow/katib/pull/2113) by [@orfeas-k](https://github.com/orfeas-k))
+- UI: Remove an unsed import, EventV1beta1Api ([#2116](https://github.com/kubeflow/katib/pull/2116) by [@tenzen-y](https://github.com/tenzen-y))
+
+### SDK Improvements
+
+- [SDK] Enable resource specification for trial containers ([#2192](https://github.com/kubeflow/katib/pull/2192) by [@droctothorpe](https://github.com/droctothorpe))
+- [SDK] Add namespace parameter to KatibClient ([#2183](https://github.com/kubeflow/katib/pull/2183) by [@droctothorpe](https://github.com/droctothorpe))
+- [SDK] Import all Kubernetes Models ([#2148](https://github.com/kubeflow/katib/pull/2148) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Bug fixes
+
+- Sending an empty data to the certsReady channel ([#2196](https://github.com/kubeflow/katib/pull/2196) by [@tenzen-y](https://github.com/tenzen-y))
+- Fix conformance docker image ([#2147](https://github.com/kubeflow/katib/pull/2147) by [@nagar-ajay](https://github.com/nagar-ajay))
+
+## Documentation
+
+- Add PITS Global Data Recovery Services to the adopters list ([#2160](https://github.com/kubeflow/katib/pull/2160) by [@ghost](https://github.com/ghost))
+- Add SDK Breaking Change to Changelog ([#2133](https://github.com/kubeflow/katib/pull/2133) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Changelog for Katib v0.15.0 ([#2129](https://github.com/kubeflow/katib/pull/2129) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Changelog for Katib v0.15.0-rc.1 ([#2123](https://github.com/kubeflow/katib/pull/2123) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Changelog for Katib v0.15.0-rc.0 ([#2106](https://github.com/kubeflow/katib/pull/2106) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Misc
+
+- Upgrade Go version to v1.20 ([#2190](https://github.com/kubeflow/katib/pull/2190) by [@tenzen-y](https://github.com/tenzen-y))
+- Replace grpc_health_probe with the built-in gRPC container probe feature ([#2189](https://github.com/kubeflow/katib/pull/2189) by [@tenzen-y](https://github.com/tenzen-y))
+- Allow install binaries for the arm64 in the envtest ([#2188](https://github.com/kubeflow/katib/pull/2188) by [@tenzen-y](https://github.com/tenzen-y))
+- Replace action to setup minikube with medyagh/setup-minikube ([#2178](https://github.com/kubeflow/katib/pull/2178) by [@tenzen-y](https://github.com/tenzen-y))
+- Remove Charmed Operators for Katib ([#2161](https://github.com/kubeflow/katib/pull/2161) by [@ca-scribner](https://github.com/ca-scribner))
+- Namespace and trial pod annotations as CLI argument ([#2138](https://github.com/kubeflow/katib/pull/2138) by [@nagar-ajay](https://github.com/nagar-ajay))
+- Relax dependencies restriction for the gRPC libraries ([#2140](https://github.com/kubeflow/katib/pull/2140) by [@tenzen-y](https://github.com/tenzen-y))
+- Add SDK Breaking Change to Changelog ([#2133](https://github.com/kubeflow/katib/pull/2133) by [@andreyvelich](https://github.com/andreyvelich))
+- Increase the free spaces in CI ([#2131](https://github.com/kubeflow/katib/pull/2131) by [@tenzen-y](https://github.com/tenzen-y))
+- Reformat katib-operators ([#2114](https://github.com/kubeflow/katib/pull/2114) by [@tenzen-y](https://github.com/tenzen-y))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.15.0...v0.16.0-rc.0)
+
+# [v0.15.0](https://github.com/kubeflow/katib/tree/v0.15.0) (2023-03-22)
 
 ## Breaking Changes
 
@@ -121,7 +180,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.14.0...v0.15.0)
 
-## [v0.15.0-rc.1](https://github.com/kubeflow/katib/tree/v0.15.0-rc.1) (2023-02-15)
+# [v0.15.0-rc.1](https://github.com/kubeflow/katib/tree/v0.15.0-rc.1) (2023-02-15)
 
 ## New Features
 
@@ -133,7 +192,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.15.0-rc.0...v0.15.0-rc.1)
 
-## [v0.15.0-rc.0](https://github.com/kubeflow/katib/tree/v0.15.0-rc.0) (2023-01-27)
+# [v0.15.0-rc.0](https://github.com/kubeflow/katib/tree/v0.15.0-rc.0) (2023-01-27)
 
 ## Breaking Changes
 
@@ -253,7 +312,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.14.0...v0.15.0-rc.0)
 
-## [v0.14.0](https://github.com/kubeflow/katib/tree/v0.14.0) (2022-08-18)
+# [v0.14.0](https://github.com/kubeflow/katib/tree/v0.14.0) (2022-08-18)
 
 ## New Features
 
@@ -314,7 +373,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.13.0...v0.14.0).
 
-## [v0.13.0](https://github.com/kubeflow/katib/tree/v0.13.0) (2022-03-04)
+# [v0.13.0](https://github.com/kubeflow/katib/tree/v0.13.0) (2022-03-04)
 
 ## New Features
 
@@ -389,7 +448,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.12.0...v0.13.0)
 
-## [v0.13.0-rc.1](https://github.com/kubeflow/katib/tree/v0.13.0-rc.1) (2022-02-15)
+# [v0.13.0-rc.1](https://github.com/kubeflow/katib/tree/v0.13.0-rc.1) (2022-02-15)
 
 ## Bug fixes
 
@@ -398,7 +457,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.13.0-rc.0...v0.13.0-rc.1)
 
-## [v0.13.0-rc.0](https://github.com/kubeflow/katib/tree/v0.13.0-rc.0) (2022-01-25)
+# [v0.13.0-rc.0](https://github.com/kubeflow/katib/tree/v0.13.0-rc.0) (2022-01-25)
 
 ## New Features
 
@@ -471,7 +530,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.12.0...v0.13.0-rc.0)
 
-## [v0.12.0](https://github.com/kubeflow/katib/tree/v0.12.0) (2021-10-05)
+# [v0.12.0](https://github.com/kubeflow/katib/tree/v0.12.0) (2021-10-05)
 
 ## New Features
 
@@ -527,7 +586,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.11.1...v0.12.0)
 
-## [v0.12.0-rc.1](https://github.com/kubeflow/katib/tree/v0.12.0-rc.1) (2021-09-07)
+# [v0.12.0-rc.1](https://github.com/kubeflow/katib/tree/v0.12.0-rc.1) (2021-09-07)
 
 ## Bug Fixes
 
@@ -536,7 +595,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.12.0-rc.0...v0.12.0-rc.1)
 
-## [v0.12.0-rc.0](https://github.com/kubeflow/katib/tree/v0.12.0-rc.0) (2021-08-19)
+# [v0.12.0-rc.0](https://github.com/kubeflow/katib/tree/v0.12.0-rc.0) (2021-08-19)
 
 ## New Features
 
@@ -590,7 +649,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.11.1...v0.12.0-rc.0)
 
-## [v0.11.1](https://github.com/kubeflow/katib/tree/v0.11.1) (2021-06-09)
+# [v0.11.1](https://github.com/kubeflow/katib/tree/v0.11.1) (2021-06-09)
 
 ## Bug fixes
 
@@ -604,7 +663,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.11.0...v0.11.1)
 
-## [v0.11.0](https://github.com/kubeflow/katib/tree/v0.11.0) (2021-03-22)
+# [v0.11.0](https://github.com/kubeflow/katib/tree/v0.11.0) (2021-03-22)
 
 ## New Features
 
@@ -661,7 +720,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.10.1...v0.11.0)
 
-## [v0.10.1](https://github.com/kubeflow/katib/tree/v0.10.1) (2021-03-02)
+# [v0.10.1](https://github.com/kubeflow/katib/tree/v0.10.1) (2021-03-02)
 
 ## Features and Bug Fixes
 
@@ -695,7 +754,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.10.0...v0.10.1)
 
-## [v0.10.0](https://github.com/kubeflow/katib/tree/v0.10.0) (2020-11-07)
+# [v0.10.0](https://github.com/kubeflow/katib/tree/v0.10.0) (2020-11-07)
 
 ## New Features
 
@@ -739,7 +798,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.9.0...v0.10.0)
 
-## [v0.9.0](https://github.com/kubeflow/katib/tree/v0.9.0) (2020-06-10)
+# [v0.9.0](https://github.com/kubeflow/katib/tree/v0.9.0) (2020-06-10)
 
 ## Features and Bug Fixes
 
@@ -996,7 +1055,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.6.0-rc.0...v0.9.0)
 
-## [v0.6.0-rc.0](https://github.com/kubeflow/katib/tree/v0.6.0-rc.0) (2019-06-28)
+# [v0.6.0-rc.0](https://github.com/kubeflow/katib/tree/v0.6.0-rc.0) (2019-06-28)
 
 ## Features and Bug Fixes
 
@@ -1251,7 +1310,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/826657c14602a3f36263f3d6769451af0a75d18a...v0.6.0-rc.0)
 
-## [0.2](https://github.com/kubeflow/katib/tree/0.2) (2018-08-20)
+# [0.2](https://github.com/kubeflow/katib/tree/0.2) (2018-08-20)
 
 ## Features
 
@@ -1278,7 +1337,7 @@
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.1.2-alpha...826657c14602a3f36263f3d6769451af0a75d18a)
 
-## [v0.1.2-alpha](https://github.com/kubeflow/katib/tree/v0.1.2-alpha) (2018-06-05)
+# [v0.1.2-alpha](https://github.com/kubeflow/katib/tree/v0.1.2-alpha) (2018-06-05)
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.1.1-alpha...v0.1.2-alpha)
 
@@ -1309,7 +1368,7 @@
 - Refine API [\#74](https://github.com/kubeflow/katib/pull/74) ([YujiOshima](https://github.com/YujiOshima))
 - worker: Rename worker_interface to worker [\#70](https://github.com/kubeflow/katib/pull/70) ([gaocegege](https://github.com/gaocegege))
 
-## [v0.1.1-alpha](https://github.com/kubeflow/katib/tree/v0.1.1-alpha) (2018-04-24)
+# [v0.1.1-alpha](https://github.com/kubeflow/katib/tree/v0.1.1-alpha) (2018-04-24)
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.1.0-alpha...v0.1.1-alpha)
 
@@ -1347,7 +1406,7 @@
 - New db log schema [\#35](https://github.com/kubeflow/katib/pull/35) ([YujiOshima](https://github.com/YujiOshima))
 - Fix CI failures [\#27](https://github.com/kubeflow/katib/pull/27) ([gaocegege](https://github.com/gaocegege))
 
-## [v0.1.0-alpha](https://github.com/kubeflow/katib/tree/v0.1.0-alpha) (2018-04-10)
+# [v0.1.0-alpha](https://github.com/kubeflow/katib/tree/v0.1.0-alpha) (2018-04-10)
 
 **Closed issues:**
 
