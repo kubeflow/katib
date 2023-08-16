@@ -136,6 +136,11 @@ func main() {
 	ctx := signals.SetupSignalHandler()
 	certsReady := make(chan struct{})
 	defer close(certsReady)
+
+	// The setupControllers will register controllers to the manager
+	// after generated certs for the admission webhooks.
+	go setupControllers(mgr, certsReady, hookServer)
+
 	if initConfig.CertGeneratorConfig.Enable {
 		if err = cert.AddToManager(mgr, initConfig.CertGeneratorConfig, certsReady); err != nil {
 			log.Error(err, "Failed to set up cert-generator")
@@ -143,10 +148,6 @@ func main() {
 	} else {
 		certsReady <- struct{}{}
 	}
-
-	// The setupControllers will register controllers to the manager
-	// after generated certs for the admission webhooks.
-	go setupControllers(mgr, certsReady, hookServer)
 
 	log.Info("Setting up health checker.")
 	if err := mgr.AddReadyzCheck("readyz", hookServer.StartedChecker()); err != nil {
