@@ -1,5 +1,21 @@
 # Changelog
 
+# [v0.16.0-rc.1](https://github.com/kubeflow/katib/tree/v0.16.0-rc.1) (2023-08-16)
+
+## New Features
+
+- Upgrade Tensorflow version to v2.13.0 ([#2216](https://github.com/kubeflow/katib/pull/2216) by [@tenzen-y](https://github.com/tenzen-y))
+
+## Bug Fixes
+
+- Bug: Wait for the certs to be mounted inside the container ([#2213](https://github.com/kubeflow/katib/pull/2213) by [@tenzen-y](https://github.com/tenzen-y))
+- Start waiting for certs to be ready before sending data to the channel ([#2215](https://github.com/kubeflow/katib/pull/2215) by [@tenzen-y](https://github.com/tenzen-y))
+- E2E: Add additional checks to verify if the components are ready ([#2212](https://github.com/kubeflow/katib/pull/2212) by [@tenzen-y](https://github.com/tenzen-y))
+- Remove a katib-webhook-cert Secret from components ([#2214](https://github.com/kubeflow/katib/pull/2214) by [@tenzen-y](https://github.com/tenzen-y))
+- Skip to inject the metrics-collector pods to the Katib controller ([#2211](https://github.com/kubeflow/katib/pull/2211) by [@tenzen-y](https://github.com/tenzen-y))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.16.0-rc.0...v0.16.0-rc.1)
+
 # [v0.16.0-rc.0](https://github.com/kubeflow/katib/tree/v0.16.0-rc.0) (2023-08-05)
 
 ## Breaking Changes
