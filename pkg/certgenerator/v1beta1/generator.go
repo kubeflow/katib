@@ -35,8 +35,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
@@ -44,6 +44,8 @@ import (
 )
 
 var (
+	log = logf.Log.WithName("cert-generator")
+
 	errServiceNotFound      = errors.New("unable to locate controller service")
 	errCertCheckFail        = errors.New("failed to check if certs already exist")
 	errCreateCertFail       = errors.New("failed to create certs")
@@ -70,7 +72,7 @@ func (c *CertGenerator) Start(ctx context.Context) error {
 	if err := c.generate(ctx); err != nil {
 		return err
 	}
-	klog.Info("Waiting for certs to get ready.")
+	log.Info("Waiting for certs to get ready.")
 	if err := wait.ExponentialBackoffWithContext(ctx, wait.Backoff{
 		Duration: time.Second,
 		Factor:   2,
@@ -98,18 +100,18 @@ func ensureCertMounted(start time.Time) func(context.Context) (bool, error) {
 		certFile := filepath.Join(consts.CertDir, serverCertName)
 		if _, err := os.Stat(certFile); err != nil {
 			if outputLog {
-				klog.Infof("Public key file %q doesn't exist in the container yet", certFile)
+				log.Info("Public key file doesn't exist in the container yet.", "publicKeyFile", certFile)
 			}
 			return false, nil
 		}
 		keyFile := filepath.Join(consts.CertDir, serverKeyName)
 		if _, err := os.Stat(keyFile); err != nil {
 			if outputLog {
-				klog.Infof("Private key file %q doesn't exist in the container yet", keyFile)
+				log.Info("Private key file doesn't exist in the container yet.", "privateKeyFile", keyFile)
 			}
 			return false, nil
 		}
-		klog.Info("Succeeded to be mounted certs inside the container.")
+		log.Info("Succeeded to be mounted certs inside the container.")
 		return true, nil
 	}
 }
@@ -196,7 +198,7 @@ func (c *CertGenerator) createCert() error {
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 	}
 
-	klog.Info("Generating self-signed public certificate and private key.")
+	log.Info("Generating self-signed public certificate and private key.")
 	rawKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return err
@@ -252,10 +254,10 @@ func (c *CertGenerator) injectCert(ctx context.Context) error {
 		newVWebhookConfig.Webhooks = vWebhookConfig.Webhooks
 		newVWebhookConfig.Webhooks[0].ClientConfig.CABundle = c.certs.certPem
 
-		klog.Info("Trying to patch ValidatingWebhookConfiguration adding the caBundle.")
+		log.Info("Trying to patch ValidatingWebhookConfiguration adding the caBundle.")
 		err := c.kubeClient.Patch(ctx, newVWebhookConfig, client.Apply, client.FieldOwner(ssaFieldOwnerName), client.ForceOwnership)
 		if err != nil {
-			klog.Errorf("Unable to patch ValidatingWebhookConfiguration %q", Webhook)
+			log.Error(err, "Unable to patch ValidatingWebhookConfiguration", "ValidatingWebhookConfiguration", Webhook)
 			return err
 		}
 	}
@@ -279,10 +281,10 @@ func (c *CertGenerator) injectCert(ctx context.Context) error {
 		newMWebhookConfig.Webhooks[0].ClientConfig.CABundle = c.certs.certPem
 		newMWebhookConfig.Webhooks[1].ClientConfig.CABundle = c.certs.certPem
 
-		klog.Info("Trying to patch MutatingWebhookConfiguration adding the caBundle.")
+		log.Info("Trying to patch MutatingWebhookConfiguration adding the caBundle.")
 		err := c.kubeClient.Patch(ctx, newMWebhookConfig, client.Apply, client.FieldOwner(ssaFieldOwnerName), client.ForceOwnership)
 		if err != nil {
-			klog.Errorf("Unable to patch MutatingWebhookConfiguration %q", Webhook)
+			log.Error(err, "Unable to patch MutatingWebhookConfiguration", "MutatingWebhookConfiguration", Webhook)
 			return err
 		}
 	}
