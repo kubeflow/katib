@@ -12,7 +12,7 @@ concurrency:
 jobs:
   test:
     name: Code format and lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check out code
@@ -35,7 +35,7 @@ jobs:
 
   frontend-unit-tests:
     name: Frontend Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check out code
