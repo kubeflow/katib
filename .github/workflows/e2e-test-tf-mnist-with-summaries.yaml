@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   e2e:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 120
     steps:
       - name: Checkout

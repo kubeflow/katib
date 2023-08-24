@@ -19,17 +19,17 @@ set -o nounset
 set -o pipefail
 cd "$(dirname "$0")"
 
-# Download Arm Performance Libraries for Ubuntu 20.04
+# Download Arm Performance Libraries for Ubuntu 22.04
 # Ref: https://developer.arm.com/downloads/-/arm-performance-libraries
-echo "Downloading Arm Performance Libraries for Ubuntu 20.04..."
+echo "Downloading Arm Performance Libraries for Ubuntu 22.04..."
 wget -qO - \
-  "https://developer.arm.com/-/media/Files/downloads/hpc/arm-performance-libraries/22-0-2/Ubuntu20.04/arm-performance-libraries_22.0.2_Ubuntu-20.04_gcc-11.2.tar?rev=577d3dbcff7847b9af57399b2978f9a6&revision=577d3dbc-ff78-47b9-af57-399b2978f9a6" \
+  "https://developer.arm.com/-/media/Files/downloads/hpc/arm-performance-libraries/23-04-1/ubuntu-22/arm-performance-libraries_23.04.1_Ubuntu-22.04_gcc-11.3.tar?rev=207c1f7aaa16400e94eb9a980494a6eb&revision=207c1f7a-aa16-400e-94eb-9a980494a6eb" \
   | tar -xf -
 
 # Install Arm Performance Libraries
-echo "Installing Arm Performance Libraries for Ubuntu 20.04..."
-./arm-performance-libraries_22.0.2_Ubuntu-20.04/arm-performance-libraries_22.0.2_Ubuntu-20.04.sh -a
+echo "Installing Arm Performance Libraries for Ubuntu 22.04..."
+./arm-performance-libraries_23.04.1_Ubuntu-22.04/arm-performance-libraries_23.04.1_Ubuntu-22.04.sh -a
 
 # Clean up
 echo "Removing installer..."
-rm -rf ./arm-performance-libraries_22.0.2_Ubuntu-20.04
+rm -rf ./arm-performance-libraries_23.04.1_Ubuntu-22.04
