@@ -12,7 +12,7 @@ concurrency:
 jobs:
   generatetests:
     name: Generate And Format Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       GOPATH: ${{ github.workspace }}/go
     defaults:
@@ -34,7 +34,7 @@ jobs:
 
   unittests:
     name: Unit Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       GOPATH: ${{ github.workspace }}/go
     defaults:
