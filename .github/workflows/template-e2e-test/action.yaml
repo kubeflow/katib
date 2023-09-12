@@ -21,6 +21,15 @@ inputs:
     required: false
     description: mysql or postgres
     default: mysql
+  install-kfp:
+    required: false
+    description: whether kubeflow pipelines is required
+      as a dependency. If so provide version as string (eg 1.8.1)
+    default: false
+  experiment-namespace:
+    required: false
+    description: namespace to execute test experiment in
+    default: default
 
 runs:
   using: composite
@@ -31,8 +40,8 @@ runs:
 
     - name: Setup Katib
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh ${{ inputs.katib-ui }} ${{ inputs.training-operator }} ${{ inputs.database-type }}
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh ${{ inputs.katib-ui }} ${{ inputs.training-operator }} ${{ inputs.database-type }} ${{ inputs.install-kfp }}
 
     - name: Run E2E Experiment
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}
+      run: ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }} ${{ inputs.experiment-namespace }}
