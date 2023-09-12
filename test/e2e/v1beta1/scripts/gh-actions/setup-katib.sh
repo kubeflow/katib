@@ -68,17 +68,6 @@ if "$DEPLOY_TRAINING_OPERATOR"; then
   kustomize build "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION" | kubectl apply -f -
 fi
 
-# If the user wants to deploy kubeflow pipelines, then use the kustomization file for kubeflow pipelines.
-# found at: https://github.com/kubeflow/pipelines/tree/master/manifests/kustomize
-if "$DEPLOY_KFP"; then
-  echo "Deploying Kubeflow Pipelines version $KFP_VERSION"
-  kubectl apply -k "${KFP_BASE_URL}/cluster-scoped-resources/?ref=${KFP_VERSION}"
-  kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s
-  kubectl apply -k "${KFP_BASE_URL}/env/${KFP_ENV}/?ref=${KFP_VERSION}"
-  kubectl wait pods -l application-crd-id=kubeflow-pipelines -n kubeflow --for condition=Ready --timeout=1800s
-  #kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
-  kubectl patch ClusterRole katib-controller -n kubeflow --type=json   -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["argoproj.io"],"resources":["workflows"],"verbs":["get", "list", "watch", "create", "delete"]}}]'
-fi
 
 echo "Deploying Katib"
 cd ../../../../../ && WITH_DATABASE_TYPE=$WITH_DATABASE_TYPE make deploy && cd -
@@ -98,6 +87,19 @@ echo "Katib services"
 kubectl -n kubeflow get svc
 echo "Katib pods"
 kubectl -n kubeflow get pod
+
+# If the user wants to deploy kubeflow pipelines, then use the kustomization file for kubeflow pipelines.
+# found at: https://github.com/kubeflow/pipelines/tree/master/manifests/kustomize
+if [ $DEPLOY_KFP ]; then
+  echo "Deploying Kubeflow Pipelines version $KFP_VERSION"
+  kubectl apply -k "${KFP_BASE_URL}/cluster-scoped-resources/?ref=${KFP_VERSION}"
+  kubectl wait crd/applications.app.k8s.io --for condition=established --timeout=60s
+  kubectl apply -k "${KFP_BASE_URL}/env/${KFP_ENV}/?ref=${KFP_VERSION}"
+  kubectl wait pods -l application-crd-id=kubeflow-pipelines -n kubeflow --for condition=Ready --timeout=1800s
+  #kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
+  kubectl patch ClusterRole katib-controller -n kubeflow --type=json   -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["argoproj.io"],"resources":["workflows"],"verbs":["get", "list", "watch", "create", "delete"]}}]'
+  kubectl label namespace kubeflow katib.kubeflow.org/metrics-collector-injection=enabled
+fi
 
 # Check that Katib is working with 2 Experiments.
 kubectl apply -f ../../testdata/valid-experiment.yaml
