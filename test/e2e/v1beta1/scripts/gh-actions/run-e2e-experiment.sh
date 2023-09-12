@@ -15,7 +15,12 @@
 # limitations under the License.
 
 # This shell script is used to run Katib Experiment.
-# Input parameter - path to Experiment yaml.
+# Input parameters
+#   - comma separated list of experiment names (exp1,exp2).
+#     For each experiment name, the script will search the folder
+#     `examples/v1beta1` for a file "{exp_name}.yaml" that will be
+#     executed as a katib experiment. Default: ""
+#   - namespace to execute experiment in. Default: default
 
 set -o errexit
 set -o nounset
@@ -24,6 +29,7 @@ set -o pipefail
 cd "$(dirname "$0")"
 EXPERIMENT_FILES=${1:-""}
 IFS="," read -r -a EXPERIMENT_FILE_ARRAY <<< "$EXPERIMENT_FILES"
+NAMESPACE=${2:-"default"}
 
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
@@ -44,7 +50,7 @@ fi
 for exp_name in "${EXPERIMENT_FILE_ARRAY[@]}"; do
   echo "Running Experiment from $exp_name file"
   exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
-  python run-e2e-experiment.py --experiment-path "${exp_path}" --namespace default \
+  python run-e2e-experiment.py --experiment-path "${exp_path}" --namespace "${NAMESPACE}" \
   --verbose || (kubectl get pods -n kubeflow && exit 1)
 done
 
