@@ -141,6 +141,7 @@ class KatibClient(object):
         base_image: str = constants.BASE_IMAGE_TENSORFLOW,
         namespace: Optional[str] = None,
         algorithm_name: str = "random",
+        algorithm_settings: Union[dict, List[models.V1beta1AlgorithmSetting], None] = None,
         objective_metric_name: str = None,
         additional_metric_names: List[str] = [],
         objective_type: str = "maximize",
@@ -172,6 +173,8 @@ class KatibClient(object):
             base_image: Image to use when executing the objective function.
             namespace: Namespace for the Experiment.
             algorithm_name: Search algorithm for the HyperParameter tuning.
+            algorithm_settings: Settings for the search algorithm given.
+                For available fields, check this doc: https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail.
             objective_metric_name: Objective metric that Katib optimizes.
             additional_metric_names: List of metrics that Katib collects from the
                 objective function in addition to objective metric.
@@ -232,8 +235,12 @@ class KatibClient(object):
             experiment.spec.objective.goal = objective_goal
 
         # Add Algorithm to the Katib Experiment.
+        if isinstance(algorithm_settings, dict):
+            algorithm_settings = [models.V1beta1AlgorithmSetting(name=str(k), value=str(v)) for k, v in algorithm_settings.items()]
+
         experiment.spec.algorithm = models.V1beta1AlgorithmSpec(
-            algorithm_name=algorithm_name
+            algorithm_name=algorithm_name,
+            algorithm_settings=algorithm_settings,
         )
 
         # Add Trial budget to the Katib Experiment.
