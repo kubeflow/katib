@@ -25,6 +25,7 @@ from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
 from kubernetes import client, config
+from kubernetes.client.models import V1EnvVar, V1EnvFromSource
 
 
 class KatibClient(object):
@@ -140,6 +141,8 @@ class KatibClient(object):
         parameters: Dict[str, Any],
         base_image: str = constants.BASE_IMAGE_TENSORFLOW,
         namespace: Optional[str] = None,
+        env: Union[Dict[str, str], List[V1EnvVar], None] = None,
+        env_from: Union[V1EnvFromSource, List[V1EnvFromSource], None] = None,
         algorithm_name: str = "random",
         algorithm_settings: Union[dict, List[models.V1beta1AlgorithmSetting], None] = None,
         objective_metric_name: str = None,
@@ -172,6 +175,13 @@ class KatibClient(object):
                 objective function.
             base_image: Image to use when executing the objective function.
             namespace: Namespace for the Experiment.
+            env: Environment variable(s) to be attached to each trial container. You can either specifiy
+                a list of kubernetes.client.models.V1EnvVar (documented here:
+                https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvVar.md) or a dictionary  
+                corresponding to the environment variable name and value pair(s).
+            env_from: Source(s) of environment variables to be populated in each trial container. You can either specify
+                a kubernetes.client.models.V1EnvFromSource (documented here:
+                https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvFromSource.md) or a list of such a type.
             algorithm_name: Search algorithm for the HyperParameter tuning.
             algorithm_settings: Settings for the search algorithm given.
                 For available fields, check this doc: https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail.
@@ -319,6 +329,12 @@ class KatibClient(object):
                 limits=resources_per_trial,
             )
 
+        if isinstance(env, dict):
+            env = [V1EnvVar(name=str(k), value=str(v)) for k, v in env.items()]
+
+        if isinstance(env_from, V1EnvFromSource):
+            env_from = [env_from]
+
         # Create Trial specification.
         trial_spec = client.V1Job(
             api_version="batch/v1",
@@ -336,6 +352,8 @@ class KatibClient(object):
                                 image=base_image,
                                 command=["bash", "-c"],
                                 args=[exec_script],
+                                env=env,
+                                env_from=env_from,
                                 resources=resources_per_trial,
                             )
                         ],
