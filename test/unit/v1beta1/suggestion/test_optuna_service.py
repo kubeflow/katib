@@ -244,7 +244,22 @@ class TestOptuna:
                 "cmaes",
                 {"restart_strategy": "ipop", "sigma": "0.1", "random_state": "10"},
                 20,
-                [],
+                [
+                    {
+                        "name": "param-1",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="5", min="1", list=[]
+                        ),
+                    },
+                    {
+                        "name": "param-2",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="10", min="9", list=[]
+                        ),
+                    },
+                ],
                 grpc.StatusCode.OK,
             ],
             # [CMAES] Invalid parameter name
@@ -252,7 +267,22 @@ class TestOptuna:
                 "cmaes",
                 {"invalid": "invalid", "sigma": "0.1"},
                 100,
-                [],
+                [
+                    {
+                        "name": "param-1",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="5", min="1", list=[]
+                        ),
+                    },
+                    {
+                        "name": "param-2",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="10", min="9", list=[]
+                        ),
+                    },
+                ],
                 grpc.StatusCode.INVALID_ARGUMENT,
             ],
             # [CMAES] Invalid restart_strategy
@@ -260,7 +290,22 @@ class TestOptuna:
                 "cmaes",
                 {"restart_strategy": "invalid", "sigma": "0.1"},
                 15,
-                [],
+                [
+                    {
+                        "name": "param-1",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="5", min="1", list=[]
+                        ),
+                    },
+                    {
+                        "name": "param-2",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="10", min="9", list=[]
+                        ),
+                    },
+                ],
                 grpc.StatusCode.INVALID_ARGUMENT,
             ],
             # [CMAES] Invalid sigma
@@ -268,7 +313,22 @@ class TestOptuna:
                 "cmaes",
                 {"restart_strategy": "None", "sigma": "-10"},
                 55,
-                [],
+                [
+                    {
+                        "name": "param-1",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="5", min="1", list=[]
+                        ),
+                    },
+                    {
+                        "name": "param-2",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="10", min="9", list=[]
+                        ),
+                    },
+                ],
                 grpc.StatusCode.INVALID_ARGUMENT,
             ],
             # [CMAES] Invalid random_state
@@ -276,7 +336,22 @@ class TestOptuna:
                 "cmaes",
                 {"sigma": "0.2", "random_state": "-20"},
                 25,
-                [],
+                [
+                    {
+                        "name": "param-1",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="5", min="1", list=[]
+                        ),
+                    },
+                    {
+                        "name": "param-2",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="10", min="9", list=[]
+                        ),
+                    },
+                ],
                 grpc.StatusCode.INVALID_ARGUMENT,
             ],
             # [CMAES] Invalid number of parameters
@@ -296,7 +371,28 @@ class TestOptuna:
                 grpc.StatusCode.INVALID_ARGUMENT,
             ],
             # [RANDOM] Valid Case
-            ["random", {"random_state": "10"}, 23, [], grpc.StatusCode.OK],
+            [
+                "random",
+                {"random_state": "10"},
+                23,
+                [
+                    {
+                        "name": "param-1",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="5", min="1", list=[]
+                        ),
+                    },
+                    {
+                        "name": "param-2",
+                        "type": api_pb2.INT,
+                        "feasible_space": api_pb2.FeasibleSpace(
+                            max="10", min="9", list=[]
+                        ),
+                    },
+                ],
+                grpc.StatusCode.OK,
+            ],
             # [RANDOM] Invalid parameter name
             [
                 "random",
