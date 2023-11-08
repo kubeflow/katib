@@ -13,9 +13,8 @@
 import pprint
 import re  # noqa: F401
 
-import six
-
 from kubeflow.katib.configuration import Configuration
+import six
 
 
 class V1beta1TrialTemplate(object):

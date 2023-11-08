@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
-from logging import getLogger, StreamHandler
-
+from logging import getLogger
+from logging import StreamHandler
+import os
 
 FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")

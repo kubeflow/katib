@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from tensorflow import keras
-from keras.datasets import cifar10
-from ModelConstructor import ModelConstructor
-from tensorflow.keras.utils import to_categorical
-from keras.preprocessing.image import ImageDataGenerator
-import tensorflow as tf
 import argparse
+
+from keras.datasets import cifar10
+from keras.preprocessing.image import ImageDataGenerator
+from ModelConstructor import ModelConstructor
+from tensorflow import keras
+import tensorflow as tf
+from tensorflow.keras.utils import to_categorical
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TrainingContainer')

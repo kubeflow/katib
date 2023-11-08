@@ -16,7 +16,6 @@
 import numpy as np
 
 from pkg.apis.manager.v1beta1.python import api_pb2
-
 from pkg.suggestion.v1beta1.bayesianoptimization.utils import get_logger
 
 

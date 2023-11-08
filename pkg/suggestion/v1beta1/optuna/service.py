@@ -12,17 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import threading
-import grpc
-import logging
 import itertools
+import logging
+import threading
+
+import grpc
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
-from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
-from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
-from pkg.suggestion.v1beta1.optuna.base_service import BaseOptunaService
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
+from pkg.suggestion.v1beta1.internal.search_space import \
+    HyperParameterSearchSpace
+from pkg.suggestion.v1beta1.internal.trial import Assignment
+from pkg.suggestion.v1beta1.internal.trial import Trial
+from pkg.suggestion.v1beta1.optuna.base_service import BaseOptunaService
 
 logger = logging.getLogger(__name__)
 

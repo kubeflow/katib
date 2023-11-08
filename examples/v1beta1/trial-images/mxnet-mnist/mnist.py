@@ -18,15 +18,16 @@
 """
 Train mnist, see more explanation at https://mxnet.io/tutorials/python/mnist.html
 """
-import os
 import argparse
-import logging
-import mxnet as mx
-import numpy as np
 import gzip
+import logging
+import os
 import struct
+
 from common import fit
 from common import utils
+import mxnet as mx
+import numpy as np
 # This example only for mlp network
 from symbols import mlp
 
