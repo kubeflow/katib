@@ -16,7 +16,8 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-from pkg.suggestion.v1beta1.bayesianoptimization.global_optimizer import GlobalOptimizer
+from pkg.suggestion.v1beta1.bayesianoptimization.global_optimizer import \
+    GlobalOptimizer
 
 
 class BOAlgorithm:

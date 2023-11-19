@@ -1,5 +1,6 @@
-from github import Github
 import argparse
+
+from github import Github
 
 REPO_NAME = "kubeflow/katib"
 CHANGELOG_FILE = "CHANGELOG.md"

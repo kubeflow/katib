@@ -15,8 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import os
 import errno
+import os
 
 import mxnet as mx
 

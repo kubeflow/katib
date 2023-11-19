@@ -13,8 +13,9 @@
 # limitations under the License.
 
 """ module for gaussian process prior """
-from sklearn.gaussian_process.kernels import RBF, Matern
 from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import Matern
+from sklearn.gaussian_process.kernels import RBF
 
 
 class GaussianProcessModel:

@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import os
-import psutil
 import sys
 import time
+
 import const
+import psutil
 
 
 def WaitMainProcesses(pool_interval, timout, wait_all, completed_marked_dir):

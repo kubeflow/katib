@@ -17,10 +17,11 @@
 
 """ example train fit utility """
 import logging
-import os
-import time
-import re
 import math
+import os
+import re
+import time
+
 import mxnet as mx
 
 

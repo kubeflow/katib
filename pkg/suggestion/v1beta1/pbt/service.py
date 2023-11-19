@@ -12,22 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
 import logging
-import numpy as np
 import os
 import shutil
 import uuid
 
+import grpc
+import numpy as np
+
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
-from pkg.suggestion.v1beta1.internal.search_space import (
-    HyperParameter,
-    HyperParameterSearchSpace,
-)
-import pkg.suggestion.v1beta1.internal.constant as constant
-from pkg.suggestion.v1beta1.internal.trial import Trial, Assignment
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
+import pkg.suggestion.v1beta1.internal.constant as constant
+from pkg.suggestion.v1beta1.internal.search_space import HyperParameter
+from pkg.suggestion.v1beta1.internal.search_space import \
+    HyperParameterSearchSpace
+from pkg.suggestion.v1beta1.internal.trial import Assignment
+from pkg.suggestion.v1beta1.internal.trial import Trial
 
 logger = logging.getLogger(__name__)
 

@@ -15,11 +15,10 @@
 import grpc
 import grpc_testing
 import pytest
+import utils
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.suggestion.v1beta1.optuna.service import OptunaService
-
-import utils
 
 
 class TestOptuna:

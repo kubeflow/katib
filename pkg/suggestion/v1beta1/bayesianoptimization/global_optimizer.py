@@ -19,9 +19,12 @@ import copy
 
 import numpy as np
 
-from pkg.suggestion.v1beta1.bayesianoptimization.acquisition_func import AcquisitionFunc
-from pkg.suggestion.v1beta1.bayesianoptimization.model.gp import GaussianProcessModel
-from pkg.suggestion.v1beta1.bayesianoptimization.model.rf import RandomForestModel
+from pkg.suggestion.v1beta1.bayesianoptimization.acquisition_func import \
+    AcquisitionFunc
+from pkg.suggestion.v1beta1.bayesianoptimization.model.gp import \
+    GaussianProcessModel
+from pkg.suggestion.v1beta1.bayesianoptimization.model.rf import \
+    RandomForestModel
 from pkg.suggestion.v1beta1.bayesianoptimization.utils import get_logger
 
 
