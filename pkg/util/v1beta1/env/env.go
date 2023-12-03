@@ -16,11 +16,26 @@ limitations under the License.
 
 package env
 
-import "os"
+import (
+	"k8s.io/klog"
+	"os"
+	"strconv"
+)
 
 func GetEnvOrDefault(key string, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
+	}
+	return fallback
+}
+
+func GetBoolEnvOrDefault(key string, fallback bool) bool {
+	if value, ok := os.LookupEnv(key); ok {
+		parsedValue, err := strconv.ParseBool(value)
+		if err != nil {
+			klog.Fatalf("Failed converting %s env to bool", key)
+		}
+		return parsedValue
 	}
 	return fallback
 }

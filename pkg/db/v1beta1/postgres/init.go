@@ -18,22 +18,35 @@ package postgres
 
 import (
 	"fmt"
+	"github.com/kubeflow/katib/pkg/db/v1beta1/common"
+	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 
 	"k8s.io/klog"
 )
 
 func (d *dbConn) DBInit() {
 	db := d.db
-	klog.Info("Initializing v1beta1 DB schema")
+	skipDbMigration := env.GetBoolEnvOrDefault(common.SkipDbMigrationEnvName, false)
 
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs
+	if !skipDbMigration {
+		klog.Info("Initializing v1beta1 DB schema")
+
+		_, err := db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs
 		(trial_name VARCHAR(255) NOT NULL,
 		id serial PRIMARY KEY,
 		time TIMESTAMP(6),
 		metric_name VARCHAR(255) NOT NULL,
 		value TEXT NOT NULL)`)
-	if err != nil {
-		klog.Fatalf("Error creating observation_logs table: %v", err)
+		if err != nil {
+			klog.Fatalf("Error creating observation_logs table: %v", err)
+		}
+	} else {
+		klog.Info("Skipping v1beta1 DB schema initialization.")
+
+		_, err := db.Query(`SELECT trial_name, id, time, metric_name, value FROM observation_logs LIMIT 1`)
+		if err != nil {
+			klog.Fatalf("Error validating observation_logs table: %v", err)
+		}
 	}
 }
 
