@@ -26,9 +26,9 @@ import (
 
 func (d *dbConn) DBInit() {
 	db := d.db
-	skipDbMigration := env.GetBoolEnvOrDefault(common.SkipDbMigrationEnvName, false)
+	skipDbInitialization := env.GetEnvOrDefault(common.SkipDbInitializationEnvName, "false")
 
-	if !skipDbMigration {
+	if skipDbInitialization == "false" {
 		klog.Info("Initializing v1beta1 DB schema")
 
 		_, err := db.Exec(`CREATE TABLE IF NOT EXISTS observation_logs

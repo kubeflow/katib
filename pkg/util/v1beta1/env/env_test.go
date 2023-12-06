@@ -17,7 +17,6 @@ limitations under the License.
 package env
 
 import (
-	"fmt"
 	"os"
 	"testing"
 )
@@ -34,22 +33,5 @@ func TestGetEnvWithDefault(t *testing.T) {
 	v = GetEnvOrDefault(key, "")
 	if v != expected {
 		t.Errorf("Expected %s, got %s", expected, v)
-	}
-}
-
-func TestGetBoolEnvWithDefault(t *testing.T) {
-	expected := false
-	key := "TEST"
-	v := GetBoolEnvOrDefault(key, expected)
-	if v != expected {
-		t.Errorf("Expected %t, got %t", expected, v)
-	}
-
-	expected = true
-	envValue := fmt.Sprintf("%t", expected)
-	os.Setenv(key, envValue)
-	v = GetBoolEnvOrDefault(key, false)
-	if v != expected {
-		t.Errorf("Expected %t, got %t", expected, v)
 	}
 }
