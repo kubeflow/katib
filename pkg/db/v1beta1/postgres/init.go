@@ -18,10 +18,11 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/kubeflow/katib/pkg/db/v1beta1/common"
-	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 
 	"k8s.io/klog"
+
+	"github.com/kubeflow/katib/pkg/db/v1beta1/common"
+	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
 )
 
 func (d *dbConn) DBInit() {
