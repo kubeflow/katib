@@ -191,7 +191,7 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim,
 
         # Phase 1. Architect step (Alpha)
         alpha_optim.zero_grad()
-        architect.unrolled_backward(train_x, train_y, valid_x, valid_y, lr, w_optim)
+        architect.unrolled_backward(train_x, train_y, valid_x, valid_y, lr, w_optim, device)
         alpha_optim.step()
 
         # Phase 2. Child network step (W)
