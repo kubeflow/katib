@@ -26,7 +26,7 @@ class Architect():
         self.w_momentum = w_momentum
         self.w_weight_decay = w_weight_decay
 
-    def virtual_step(self, train_x, train_y, xi, w_optim):
+    def virtual_step(self, train_x, train_y, xi, w_optim, device):
         """
         Compute unrolled weight w' (virtual step)
         Step process:
@@ -53,20 +53,22 @@ class Architect():
             # be iterated also.
             for w, vw, g in zip(self.model.getWeights(), self.v_model.getWeights(), gradients):
                 m = w_optim.state[w].get("momentum_buffer", 0.) * self.w_momentum
-                vw.copy_(w - torch.FloatTensor(xi) * (m + g + self.w_weight_decay * w))
-
+                if(device == 'cuda'):
+                    vw.copy_(w - torch.cuda.FloatTensor(xi) * (m + g + self.w_weight_decay * w))
+                elif(device == 'cpu'):
+                    vw.copy_(w - torch.FloatTensor(xi) * (m + g + self.w_weight_decay * w))
             # Sync alphas
             for a, va in zip(self.model.getAlphas(), self.v_model.getAlphas()):
                 va.copy_(a)
 
-    def unrolled_backward(self, train_x, train_y, valid_x, valid_y, xi, w_optim):
+    def unrolled_backward(self, train_x, train_y, valid_x, valid_y, xi, w_optim, device):
         """ Compute unrolled loss and backward its gradients
         Args:
             xi: learning rate for virtual gradient step (same as model lr)
             w_optim: weights optimizer - for virtual step
         """
         # Do virtual step (calc w')
-        self.virtual_step(train_x, train_y, xi, w_optim)
+        self.virtual_step(train_x, train_y, xi, w_optim, device)
 
         # Calculate unrolled loss
         # Loss for validation with w'. L_valid(w')
@@ -85,7 +87,10 @@ class Architect():
         # Update final gradient = dalpha - xi * hessian
         with torch.no_grad():
             for alpha, da, h in zip(self.model.getAlphas(), dalpha, hessian):
-                alpha.grad = da - torch.FloatTensor(xi) * h
+                if(device == 'cuda'):
+                    alpha.grad = da - torch.cuda.FloatTensor(xi) * h
+                elif(device == 'cpu'):
+                    alpha.grad = da - torch.cpu.FloatTensor(xi) * h
 
     def compute_hessian(self, dws, train_x, train_y):
         """
