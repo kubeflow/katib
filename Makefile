@@ -165,6 +165,10 @@ prepare-pytest:
 	pip install --prefer-binary -r cmd/suggestion/pbt/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/earlystopping/medianstop/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/metricscollector/v1beta1/tfevent-metricscollector/requirements.txt
+	# The sqlalchemy on which optuna depends requires typing-extensions>=4.6.0.
+	# REF: https://github.com/kubeflow/katib/pull/2251
+	# TODO (tenzen-y): Once we upgrade libraries depended on typing-extensions==4.5.0, we can remove this line.
+	pip install typing-extensions==4.6.3
 
 prepare-pytest-testdata:
 ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
