@@ -43,6 +43,25 @@ You can undeploy Katib v1beta1 manifests from a Kubernetes cluster as follows:
 make undeploy
 ```
 
+## Technical and style guide
+
+The following guidelines apply primarily to Katib, 
+but other projects like [Training Operator](https://github.com/kubeflow/training-operator) might also adhere to them. 
+
+## Go Development
+
+When coding:
+
+- Follow [effective go](https://go.dev/doc/effective_go) guidelines.
+- Run locally [`make check`](https://github.com/kubeflow/katib/blob/46173463027e4fd2e604e25d7075b2b31a702049/Makefile#L31)
+to verify if changes follow best practices before submitting PRs.
+
+Testing:
+
+- Use [`cmp.Diff`](https://pkg.go.dev/github.com/google/go-cmp/cmp#Diff) instead of `reflect.Equal`, to provide useful comparisons.
+- Define test cases as maps instead of slices to avoid dependencies on the running order.
+Map key should be equal to the test case name.
+
 ## Modify controller APIs
 
 If you want to modify Katib controller APIs, you have to
