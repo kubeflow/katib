@@ -46,4 +46,6 @@ const (
 	DefaultPostgreSQLDatabase = "katib"
 	DefaultPostgreSQLHost     = "katib-postgres"
 	DefaultPostgreSQLPort     = "5432"
+
+	SkipDbInitializationEnvName = "SKIP_DB_INITIALIZATION"
 )
