@@ -16,7 +16,9 @@ limitations under the License.
 
 package env
 
-import "os"
+import (
+	"os"
+)
 
 func GetEnvOrDefault(key string, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
