@@ -5,11 +5,9 @@
 Package grpc_health_v1 is a generated protocol buffer package.
 
 It is generated from these files:
-
 	health.proto
 
 It has these top-level messages:
-
 	HealthCheckRequest
 	HealthCheckResponse
 */

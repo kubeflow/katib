@@ -104,8 +104,6 @@ Check the following images for the Trial containers:
 
 - [Tensorflow MNIST with summaries](./trial-images/tf-mnist-with-summaries)
 
-- [MXNet MNIST](./trial-images/mxnet-mnist)
-
 - [PyTorch MNIST](./trial-images/pytorch-mnist)
 
 - [ENAS Keras CNN CIFAR-10](./trial-images/enas-cnn-cifar10)

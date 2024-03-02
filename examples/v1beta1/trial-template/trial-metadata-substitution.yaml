@@ -7,11 +7,9 @@ metadata:
   name: trial-metadata-substitution
 spec:
   objective:
-    type: maximize
-    goal: 0.99
-    objectiveMetricName: Validation-accuracy
-    additionalMetricNames:
-      - Train-accuracy
+    type: minimize
+    goal: 0.001
+    objectiveMetricName: loss
   algorithm:
     algorithmName: random
   parallelTrialCount: 3
@@ -22,13 +20,21 @@ spec:
       parameterType: double
       feasibleSpace:
         min: "0.01"
-        max: "0.03"
+        max: "0.05"
+    - name: momentum
+      parameterType: double
+      feasibleSpace:
+        min: "0.5"
+        max: "0.9"
   trialTemplate:
     primaryContainerName: training-container
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
         reference: lr
+      - name: momentum
+        description: Momentum for the training model
+        reference: momentum
       - name: trialName
         description: Name of the current trial's job
         reference: ${trialSpec.Name}
@@ -60,12 +66,14 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/mxnet-mnist:latest
+                image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                 command:
                   - "python3"
-                  - "/opt/mxnet-mnist/mnist.py"
-                  - "--batch-size=64"
+                  - "/opt/pytorch-mnist/mnist.py"
+                  - "--epochs=1"
+                  - "--batch-size=16"
                   - "--lr=${trialParameters.learningRate}"
+                  - "--momentum=${trialParameters.momentum}"
                 env:
                   - name: TRIAL_NAME
                     value: ${trialParameters.trialName}

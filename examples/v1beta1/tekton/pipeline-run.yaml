@@ -13,11 +13,9 @@ metadata:
   name: tekton-pipeline-run
 spec:
   objective:
-    type: maximize
-    goal: 0.99
-    objectiveMetricName: Validation-accuracy
-    additionalMetricNames:
-      - Train-accuracy
+    type: minimize
+    goal: 0.001
+    objectiveMetricName: loss
   algorithm:
     algorithmName: random
   parallelTrialCount: 2
@@ -45,53 +43,55 @@ spec:
       kind: PipelineRun
       spec:
         params:
-          - name: lr
-            value: ${trialParameters.learningRate}
-          - name: num-examples-init
+          - name: learningRate
+            description: Learning rate for the training model
+            reference: lr
+          - name: epochs-init
             value: "60000"
         pipelineSpec:
           params:
             - name: lr
               description: Learning rate for the training model
-            - name: num-examples-init
+            - name: epochs-init
               description: Initial value for number of training examples
           tasks:
             - name: data-preprocessing
               params:
-                - name: num-examples-pre
-                  value: $(params.num-examples-init)
+                - name: epochs-pre
+                  value: $(params.epochs-init)
               taskSpec:
                 params:
-                  - name: num-examples-pre
+                  - name: epochs-pre
                     description: Number of training examples before optimization
                 results:
-                  - name: num-examples-post
+                  - name: epochs-post
                     description: Number of training examples after optimization
                 steps:
-                  - name: num-examples-optimize
+                  - name: epochs-optimize
                     image: python:alpine3.6
                     command:
                       - sh
                       - -c
                     args:
-                      - python3 -c "import random; print($(params.num-examples-pre)//random.randint(10,100),end='')" | tee $(results.num-examples-post.path)
+                      - python3 -c "import random; print($(params.epochs-pre)//random.randint(3000,30000),end='')" | tee $(results.epochs-post.path)
             - name: model-training
               params:
                 - name: lr
                   value: $(params.lr)
-                - name: num-examples
-                  value: $(tasks.data-preprocessing.results.num-examples-post)
+                - name: epochs
+                  value: $(tasks.data-preprocessing.results.epochs-post)
               taskSpec:
                 params:
                   - name: lr
                     description: Learning rate for the training model
-                  - name: num-examples
-                    description: Number of training examples
+                  - name: epochs
+                    description: Number of epochs
                 steps:
                   - name: model-training
-                    image: docker.io/kubeflowkatib/mxnet-mnist:latest
+                    image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                     command:
                       - "python3"
-                      - "/opt/mxnet-mnist/mnist.py"
-                      - "--num-examples=$(params.num-examples)"
-                      - "--lr=$(params.lr)"
+                      - "/opt/pytorch-mnist/mnist.py"
+                      - "--epochs=$(params.epochs)"
+                      - "--batch-size=16"
+                      - "--lr=$(trialParameters.lr)"

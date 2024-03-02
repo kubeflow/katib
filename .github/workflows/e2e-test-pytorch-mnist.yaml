@@ -37,5 +37,9 @@ jobs:
         kubernetes-version: ["v1.25.12", "v1.26.6", "v1.27.3"]
         # Comma Delimited
         experiments:
+          # suggestion-hyperopt
+          - "long-running-resume,from-volume-resume,median-stop"
+          # others
+          - "grid,bayesian-optimization,tpe,multivariate-tpe,cma-es,hyperband"
           - "file-metrics-collector,pytorchjob-mnist"
           - "median-stop-with-json-format,file-metrics-collector-with-json-format"

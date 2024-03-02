@@ -57,7 +57,6 @@ find_python_files=$(
   find ./cmd ./pkg ./hack ./test ./examples -name "*.py" \
     ! -path "./pkg/apis/manager/*" \
     ! -path "*__init__.py" \
-    ! -path "./examples/v1beta1/trial-images/mxnet-mnist/*"
 )
 
 for i in ${find_python_files}; do

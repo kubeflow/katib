@@ -5,11 +5,9 @@
 Package api_v1_beta1 is a generated protocol buffer package.
 
 It is generated from these files:
-
 	api.proto
 
 It has these top-level messages:
-
 	Experiment
 	ExperimentSpec
 	ParameterSpec
@@ -1140,12 +1138,10 @@ func (m *ValidateAlgorithmSettingsRequest) GetExperiment() *Experiment {
 type ValidateAlgorithmSettingsReply struct {
 }
 
-func (m *ValidateAlgorithmSettingsReply) Reset()         { *m = ValidateAlgorithmSettingsReply{} }
-func (m *ValidateAlgorithmSettingsReply) String() string { return proto.CompactTextString(m) }
-func (*ValidateAlgorithmSettingsReply) ProtoMessage()    {}
-func (*ValidateAlgorithmSettingsReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor0, []int{29}
-}
+func (m *ValidateAlgorithmSettingsReply) Reset()                    { *m = ValidateAlgorithmSettingsReply{} }
+func (m *ValidateAlgorithmSettingsReply) String() string            { return proto.CompactTextString(m) }
+func (*ValidateAlgorithmSettingsReply) ProtoMessage()               {}
+func (*ValidateAlgorithmSettingsReply) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{29} }
 
 type GetEarlyStoppingRulesRequest struct {
 	Experiment       *Experiment `protobuf:"bytes,1,opt,name=experiment" json:"experiment,omitempty"`
