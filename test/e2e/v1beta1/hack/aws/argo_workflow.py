@@ -55,7 +55,6 @@ KATIB_IMAGES = {
     "suggestion-enas":               "cmd/suggestion/nas/enas/v1beta1/Dockerfile",
     "suggestion-darts":              "cmd/suggestion/nas/darts/v1beta1/Dockerfile",
     "earlystopping-medianstop":      "cmd/earlystopping/medianstop/v1beta1/Dockerfile",
-    "trial-mxnet-mnist":             "examples/v1beta1/trial-images/mxnet-mnist/Dockerfile",
     "trial-pytorch-mnist":           "examples/v1beta1/trial-images/pytorch-mnist/Dockerfile",
     "trial-tf-mnist-with-summaries": "examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile",
     "trial-enas-cnn-cifar10-gpu":    "examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu",

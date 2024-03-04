@@ -1273,10 +1273,10 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					},
 				},
 				{
-					Name:          "num-layers",
+					Name:          "momentum",
 					ParameterType: experimentsv1beta1.ParameterTypeCategorical,
 					FeasibleSpace: experimentsv1beta1.FeasibleSpace{
-						List: []string{"1", "2", "3"},
+						List: []string{"0.95", "0.85", "0.75"},
 					},
 				},
 			},
@@ -1298,12 +1298,14 @@ func newFakeBatchJob() *batchv1.Job {
 					Containers: []v1.Container{
 						{
 							Name:  "training-container",
-							Image: "docker.io/kubeflowkatib/mxnet-mnist",
+							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
-								"/opt/mxnet-mnist/mnist.py",
+								"--epochs=1",
+								"--batch-size=16",
+								"/opt/pytorch-mnist/mnist.py",
 								"--lr=${trialParameters.learningRate}",
-								"--num-layers=${trialParameters.numberLayers}",
+								"--momentum=${trialParameters.momentum}",
 							},
 						},
 					},
@@ -1321,9 +1323,9 @@ func newFakeTrialParamters() []experimentsv1beta1.TrialParameterSpec {
 			Reference:   "lr",
 		},
 		{
-			Name:        "numberLayers",
-			Description: "Number of layers",
-			Reference:   "num-layers",
+			Name:        "momentum",
+			Description: "Momentum for the training model",
+			Reference:   "momentum",
 		},
 	}
 }

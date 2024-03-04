@@ -25,7 +25,7 @@ jobs:
         with:
           experiments: random
           # Comma Delimited
-          trial-images: mxnet-mnist
+          trial-images: pytorch-mnist-cpu
           katib-ui: true
           database-type: postgres
 

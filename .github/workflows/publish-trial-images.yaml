@@ -22,9 +22,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - trial-name: mxnet-mnist
-            platforms: linux/amd64,linux/arm64
-            dockerfile: examples/v1beta1/trial-images/mxnet-mnist/Dockerfile
           - trial-name: pytorch-mnist-cpu
             platforms: linux/amd64,linux/arm64
             dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile.cpu

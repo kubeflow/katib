@@ -13,11 +13,9 @@ metadata:
   name: katib-argo-workflow
 spec:
   objective:
-    type: maximize
-    goal: 0.99
-    objectiveMetricName: Validation-accuracy
-    additionalMetricNames:
-      - Train-accuracy
+    type: minimize
+    goal: 0.001
+    objectiveMetricName: loss
   algorithm:
     algorithmName: random
   parallelTrialCount: 2
@@ -50,22 +48,22 @@ spec:
           - name: hp-workflow
             steps:
               - - name: data-preprocessing
-                  template: gen-num-examples
+                  template: gen-epochs
               - - name: model-training
                   template: model-training
                   arguments:
                     parameters:
-                      - name: num-examples
+                      - name: epochs
                         value: "{{steps.data-preprocessing.outputs.result}}"
 
-          - name: gen-num-examples
+          - name: gen-epochs
             script:
               image: python:alpine3.6
               command:
                 - python
               source: |
                 import random
-                print(60000//random.randint(10, 100))
+                print(60000//random.randint(3000, 30000))
 
           - name: model-training
             metadata:
@@ -73,12 +71,13 @@ spec:
                 katib.kubeflow.org/model-training: "true"
             inputs:
               parameters:
-                - name: num-examples
+                - name: epochs
             container:
               name: model-training
-              image: docker.io/kubeflowkatib/mxnet-mnist:latest
+              image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
               command:
                 - "python3"
-                - "/opt/mxnet-mnist/mnist.py"
+                - "/opt/pytorch-mnist/mnist.py"
                 - "--lr=${trialParameters.learningRate}"
-                - "--num-examples={{inputs.parameters.num-examples}}"
+                - "--epochs={{inputs.parameters.epochs}}"
+                - "--batch-size=16"

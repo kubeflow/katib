@@ -477,12 +477,14 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					Containers: []corev1.Container{
 						{
 							Name:  primaryContainer,
-							Image: "docker.io/kubeflowkatib/mxnet-mnist",
+							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
-								"/opt/mxnet-mnist/mnist.py",
+								"/opt/pytorch-mnist/mnist.py",
+								"--epochs=1",
+								"--batch-size=16",
 								"--lr=${trialParameters.learningRate}",
-								"--num-layers=${trialParameters.numberLayers}",
+								"--momentum=${trialParameters.momentum}",
 							},
 						},
 					},
@@ -611,12 +613,14 @@ func newFakeBatchJob() *batchv1.Job {
 					Containers: []corev1.Container{
 						{
 							Name:  primaryContainer,
-							Image: "docker.io/kubeflowkatib/mxnet-mnist",
+							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
-								"/opt/mxnet-mnist/mnist.py",
-								"--lr=0.01",
-								"--num-layers=5",
+								"/opt/pytorch-mnist/mnist.py",
+								"--epochs=1",
+								"--batch-size=16",
+								"--lr=${trialParameters.learningRate}",
+								"--momentum=${trialParameters.momentum}",
 							},
 						},
 					},

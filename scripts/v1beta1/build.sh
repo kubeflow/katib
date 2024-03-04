@@ -119,9 +119,6 @@ docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/darts-cnn-cifar10
 echo -e "\nBuilding PyTorch CIFAR-10 CNN training container example for DARTS with GPU support...\n"
 docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/darts-cnn-cifar10-gpu:${TAG}" -f examples/${VERSION}/trial-images/darts-cnn-cifar10/Dockerfile.gpu .
 
-echo -e "\nBuilding mxnet mnist training container example...\n"
-docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/mxnet-mnist:${TAG}" -f examples/${VERSION}/trial-images/mxnet-mnist/Dockerfile .
-
 echo -e "\nBuilding PyTorch mnist training container example with CPU support...\n"
 docker buildx build --platform "linux/${ARCH}" -t "${REGISTRY}/pytorch-mnist-cpu:${TAG}" -f examples/${VERSION}/trial-images/pytorch-mnist/Dockerfile.cpu .
 

@@ -46,14 +46,13 @@ using `kubectl`:
 kubectl create -f https://raw.githubusercontent.com/kubeflow/katib/master/examples/v1beta1/hp-tuning/random.yaml
 ```
 
-This example uses a MXNet neural network to train an image classification model
+This example uses a PyTorch neural network to train an image classification model
 using the MNIST dataset. You can check the training container source code
-[here](../trial-images/mxnet-mnist).
+[here](../trial-images/pytorch-mnist).
 The Experiment runs twelve training jobs (Trials) and tunes the following hyperparameters:
 
 - Learning Rate (`lr`).
-- Number of layers (`num-layers`).
-- Neural network optimizer (`optimizer`).
+- Momentum (`momentum`).
 
 After creating above example, check the
 [Experiment](https://www.kubeflow.org/docs/components/katib/overview/#experiment) status:
@@ -92,8 +91,7 @@ You can get the best hyperparameters with the following command:
 $ kubectl get experiment random -n kubeflow -o jsonpath='{range .status.currentOptimalTrial.parameterAssignments[*]}{.name}: {.value}{"\n"}{end}'
 
 lr: 0.028162244250364066
-num-layers: 5
-optimizer: sgd
+momentum: 0.583672196492823
 ```
 
 To view created Experiment in Katib UI, follow

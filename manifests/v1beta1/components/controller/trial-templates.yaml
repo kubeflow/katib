@@ -15,14 +15,14 @@ data:
         spec:
           containers:
             - name: training-container
-              image: docker.io/kubeflowkatib/mxnet-mnist:latest
+              image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
               command:
                 - "python3"
-                - "/opt/mxnet-mnist/mnist.py"
-                - "--batch-size=64"
+                - "/opt/pytorch-mnist/mnist.py"
+                - "--epochs=1"
+                - "--batch-size=16"
                 - "--lr=${trialParameters.learningRate}"
-                - "--num-layers=${trialParameters.numberLayers}"
-                - "--optimizer=${trialParameters.optimizer}"
+                - "--momentum=${trialParameters.momentum}"
           restartPolicy: Never
   # For ConfigMap templates double quotes must set in commands to correct parse JSON parameters in Trial Template (e.g nn_config, architecture)
   enasCPUTemplate: |-
