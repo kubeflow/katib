@@ -26,7 +26,7 @@ class Architect():
         self.w_momentum = w_momentum
         self.w_weight_decay = w_weight_decay
 
-    def virtual_step(self, train_x, train_y, xi, w_optim, device):
+    def virtual_step(self, train_x, train_y, xi, w_optim):
         """
         Compute unrolled weight w' (virtual step)
         Step process:
@@ -40,12 +40,16 @@ class Architect():
             w_optim: weights optimizer
         """
 
+        
         # Forward and calculate loss
         # Loss for train with w. L_train(w)
         loss = self.model.loss(train_x, train_y)
         # Compute gradient
         gradients = torch.autograd.grad(loss, self.model.getWeights())
-
+        
+        # Check device use cuda or cpu 
+        device = torch.device("cuda" if use_cuda else "cpu")
+        
         # Do virtual step (Update gradient)
         # Below operations do not need gradient tracking
         with torch.no_grad():
@@ -61,19 +65,22 @@ class Architect():
             for a, va in zip(self.model.getAlphas(), self.v_model.getAlphas()):
                 va.copy_(a)
 
-    def unrolled_backward(self, train_x, train_y, valid_x, valid_y, xi, w_optim, device):
+    def unrolled_backward(self, train_x, train_y, valid_x, valid_y, xi, w_optim):
         """ Compute unrolled loss and backward its gradients
         Args:
             xi: learning rate for virtual gradient step (same as model lr)
             w_optim: weights optimizer - for virtual step
         """
         # Do virtual step (calc w')
-        self.virtual_step(train_x, train_y, xi, w_optim, device)
-
+        self.virtual_step(train_x, train_y, xi, w_optim)
+        
         # Calculate unrolled loss
         # Loss for validation with w'. L_valid(w')
         loss = self.v_model.loss(valid_x, valid_y)
 
+        # Check device use cuda or cpu 
+        device = torch.device("cuda" if use_cuda else "cpu")
+        
         # Calculate gradient
         v_alphas = tuple(self.v_model.getAlphas())
         v_weights = tuple(self.v_model.getWeights())
