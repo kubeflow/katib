@@ -8,11 +8,9 @@ spec:
   parallelTrialCount: 2
   maxTrialCount: 2
   objective:
-    type: maximize
-    goal: 0.99
-    objectiveMetricName: Validation-accuracy
-    additionalMetricNames:
-      - Train-accuracy
+    type: minimize
+    goal: 0.001
+    objectiveMetricName: loss
   algorithm:
     algorithmName: hyperband
     algorithmSettings:
@@ -28,19 +26,12 @@ spec:
       parameterType: double
       feasibleSpace:
         min: "0.01"
-        max: "0.03"
-    - name: num-layers
-      parameterType: int
+        max: "0.05"
+    - name: momentum
+      parameterType: double
       feasibleSpace:
-        min: "2"
-        max: "5"
-    - name: optimizer
-      parameterType: categorical
-      feasibleSpace:
-        list:
-          - sgd
-          - adam
-          - ftrl
+        min: "0.5"
+        max: "0.9"
     - name: num-epochs
       parameterType: int
       feasibleSpace:
@@ -52,12 +43,9 @@ spec:
       - name: learningRate
         description: Learning rate for the training model
         reference: lr
-      - name: numberLayers
-        description: Number of training model layers
-        reference: num-layers
-      - name: optimizer
-        description: Training model optimizer (sdg, adam or ftrl)
-        reference: optimizer
+      - name: momentum
+        description: Momentum for the training model
+        reference: momentum
       - name: numberEpochs
         description: Number of epochs to train the model
         reference: num-epochs
@@ -69,13 +57,12 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/mxnet-mnist:latest
+                image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                 command:
                   - "python3"
-                  - "/opt/mxnet-mnist/mnist.py"
-                  - "--batch-size=32"
+                  - "/opt/pytorch-mnist/mnist.py"
+                  - "--epochs=${trialParameters.numberEpochs}"
+                  - "--batch-size=16"
                   - "--lr=${trialParameters.learningRate}"
-                  - "--num-layers=${trialParameters.numberLayers}"
-                  - "--optimizer=${trialParameters.optimizer}"
-                  - "--num-epochs=${trialParameters.numberEpochs}"
+                  - "--momentum=${trialParameters.momentum}"
             restartPolicy: Never

@@ -86,9 +86,6 @@ docker push "${REGISTRY}/earlystopping-medianstop:${TAG}"
 # Training container images
 echo -e "\nPushing training container images..."
 
-echo -e "\nPushing mxnet mnist training container example...\n"
-docker push "${REGISTRY}/mxnet-mnist:${TAG}"
-
 echo -e "\nPushing Tensorflow with summaries mnist training container example...\n"
 docker push "${REGISTRY}/tf-mnist-with-summaries:${TAG}"
 

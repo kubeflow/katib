@@ -8,11 +8,9 @@ metadata:
   name: median-stop
 spec:
   objective:
-    type: maximize
-    goal: 0.99
-    objectiveMetricName: Validation-accuracy
-    additionalMetricNames:
-      - Train-accuracy
+    type: minimize
+    goal: 0.001
+    objectiveMetricName: loss
   algorithm:
     algorithmName: random
   earlyStopping:
@@ -30,12 +28,12 @@ spec:
       parameterType: double
       feasibleSpace:
         min: "0.01"
-        max: "0.5"
-    - name: num-epochs
-      parameterType: int
+        max: "0.05"
+    - name: momentum
+      parameterType: double
       feasibleSpace:
-        min: "3"
-        max: "4"
+        min: "0.5"
+        max: "0.9"
   trialTemplate:
     retain: true
     primaryContainerName: training-container
@@ -43,9 +41,9 @@ spec:
       - name: learningRate
         description: Learning rate for the training model
         reference: lr
-      - name: numberEpochs
-        description: Number of epochs to train the model
-        reference: num-epochs
+      - name: momentum
+        description: Momentum for the training model
+        reference: momentum
     trialSpec:
       apiVersion: batch/v1
       kind: Job
@@ -54,11 +52,12 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/mxnet-mnist:latest
+                image: docker.io/kubeflowkatib/pytorch-mnist-cpu:latest
                 command:
                   - "python3"
-                  - "/opt/mxnet-mnist/mnist.py"
-                  - "--batch-size=64"
+                  - "/opt/pytorch-mnist/mnist.py"
+                  - "--epochs=1"
+                  - "--batch-size=16"
                   - "--lr=${trialParameters.learningRate}"
-                  - "--num-epochs=${trialParameters.numberEpochs}"
+                  - "--momentum=${trialParameters.momentum}"
             restartPolicy: Never

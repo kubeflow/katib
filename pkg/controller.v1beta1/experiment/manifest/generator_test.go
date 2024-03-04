@@ -61,12 +61,14 @@ func TestGetRunSpecWithHP(t *testing.T) {
 					Containers: []v1.Container{
 						{
 							Name:  "training-container",
-							Image: "docker.io/kubeflowkatib/mxnet-mnist",
+							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
-								"/opt/mxnet-mnist/mnist.py",
+								"/opt/pytorch-mnist/mnist.py",
+								"--epochs=1",
+								"--batch-size=16",
 								"--lr=0.05",
-								"--num-layers=5",
+								"--momentum=0.9",
 							},
 							Env: []v1.EnvVar{
 								{Name: consts.TrialTemplateMetaKeyOfName, Value: "trial-name"},
@@ -176,12 +178,14 @@ spec:
     spec:
       containers:
         - name: training-container
-          image: docker.io/kubeflowkatib/mxnet-mnist
+          image: docker.io/kubeflowkatib/pytorch-mnist-cpu
           command:
             - "python3"
-            - "/opt/mxnet-mnist/mnist.py"
+            - "/opt/pytorch-mnist/mnist.py"
+            - "--epochs=1"
+            - "--batch-size=16"
             - "--lr=${trialParameters.learningRate}"
-            - "--num-layers=${trialParameters.numberLayers}"`
+            - "--momentum=${trialParameters.momentum}"`
 
 	invalidTrialSpec := `apiVersion: batch/v1
 kind: Job
@@ -190,12 +194,14 @@ spec:
     spec:
       containers:
         - name: training-container
-          image: docker.io/kubeflowkatib/mxnet-mnist
+          image: docker.io/kubeflowkatib/pytorch-mnist-cpu
           command:
             - python3
-            - /opt/mxnet-mnist/mnist.py
+            - /opt/pytorch-mnist/mnist.py
+            - --epochs=1
+            - --batch-size=16
             - --lr=${trialParameters.learningRate}
-            - --num-layers=${trialParameters.numberLayers}
+            - --momentum=${trialParameters.momentum}
             - --invalidParameter={'num_layers': 2, 'input_sizes': [32, 32, 3]}`
 
 	validGetConfigMap1 := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
@@ -228,12 +234,14 @@ spec:
     spec:
       containers:
         - name: training-container
-          image: docker.io/kubeflowkatib/mxnet-mnist
+          image: docker.io/kubeflowkatib/pytorch-mnist-cpu
           command:
             - "python3"
-            - "/opt/mxnet-mnist/mnist.py"
+            - "/opt/pytorch-mnist/mnist.py"
+            - "--epochs=1"
+            - "--batch-size=16"
             - "--lr=0.05"
-            - "--num-layers=5"`
+            - "--momentum=0.9"`
 
 	expectedRunSpec, err := util.ConvertStringToUnstructured(expectedStr)
 	if err != nil {
@@ -347,12 +355,14 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					Containers: []v1.Container{
 						{
 							Name:  "training-container",
-							Image: "docker.io/kubeflowkatib/mxnet-mnist",
+							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
-								"/opt/mxnet-mnist/mnist.py",
+								"/opt/pytorch-mnist/mnist.py",
+								"--epochs=1",
+								"--batch-size=16",
 								"--lr=${trialParameters.learningRate}",
-								"--num-layers=${trialParameters.numberLayers}",
+								"--momentum=${trialParameters.momentum}",
 							},
 							Env: []v1.EnvVar{
 								{Name: consts.TrialTemplateMetaKeyOfName, Value: "${trialParameters.trialName}"},
@@ -381,9 +391,9 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 						Reference:   "lr",
 					},
 					{
-						Name:        "numberLayers",
-						Description: "Number of layers",
-						Reference:   "num-layers",
+						Name:        "momentum",
+						Description: "Momentum for the training model",
+						Reference:   "momentum",
 					},
 					{
 						Name:        "trialName",
@@ -418,8 +428,8 @@ func newFakeParameterAssignment() []commonapiv1beta1.ParameterAssignment {
 			Value: "0.05",
 		},
 		{
-			Name:  "num-layers",
-			Value: "5",
+			Name:  "momentum",
+			Value: "0.9",
 		},
 	}
 }

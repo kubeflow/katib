@@ -82,7 +82,6 @@ done
 # Katib Trial training container images.
 
 # Postfixes for the each Trial image.
-MXNET_MNIST="mxnet-mnist"
 PYTORCH_MNIST_CPU="pytorch-mnist-cpu"
 PYTORCH_MNIST_GPU="pytorch-mnist-gpu"
 TF_MNIST_WITH_SUMMARIES="tf-mnist-with-summaries"
@@ -93,7 +92,6 @@ DARTS_CPU="darts-cnn-cifar10-cpu"
 SIMPLE_PBT="simple-pbt"
 
 echo -e "Update Katib Trial training container images\n"
-update_yaml_files "./" "${OLD_PREFIX}${MXNET_MNIST}:.*" "${NEW_PREFIX}${MXNET_MNIST}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${PYTORCH_MNIST_CPU}:.*" "${NEW_PREFIX}${PYTORCH_MNIST_CPU}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${PYTORCH_MNIST_GPU}:.*" "${NEW_PREFIX}${PYTORCH_MNIST_GPU}:${TAG}"
 update_yaml_files "./" "${OLD_PREFIX}${TF_MNIST_WITH_SUMMARIES}:.*" "${NEW_PREFIX}${TF_MNIST_WITH_SUMMARIES}:${TAG}"

@@ -240,17 +240,6 @@ The following table shows images for training containers which are used in the
     </tr>
     <tr align="center">
       <td>
-        <code>docker.io/kubeflowkatib/mxnet-mnist</code>
-      </td>
-      <td>
-        MXNet MNIST example with collecting metrics time
-      </td>
-      <td>
-        <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/mxnet-mnist/Dockerfile">Dockerfile</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
         <code>docker.io/kubeflowkatib/pytorch-mnist-cpu</code>
       </td>
       <td>
