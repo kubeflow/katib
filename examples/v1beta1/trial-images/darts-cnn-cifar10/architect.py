@@ -39,7 +39,6 @@ class Architect():
             xi: learning rate for virtual gradient step (same as weights lr)
             w_optim: weights optimizer
         """
-       
         # Forward and calculate loss
         # Loss for train with w. L_train(w)
         loss = self.model.loss(train_x, train_y)
@@ -71,7 +70,8 @@ class Architect():
             w_optim: weights optimizer - for virtual step
         """
         # Do virtual step (calc w')
-        self.virtual_step(train_x, train_y, xi, w_optim)   
+        self.virtual_step(train_x, train_y, xi, w_optim)
+        
         # Calculate unrolled loss
         # Loss for validation with w'. L_valid(w')
         loss = self.v_model.loss(valid_x, valid_y)
