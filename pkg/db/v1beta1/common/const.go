@@ -41,11 +41,13 @@ const (
 	PostgreSQLDBHostEnvName = "KATIB_POSTGRESQL_DB_HOST"
 	PostgreSQLDBPortEnvName = "KATIB_POSTGRESQL_DB_PORT"
 	PostgreSQLDatabase      = "KATIB_POSTGRESQL_DB_DATABASE"
+	PostgreSSLMode          = "KATIB_POSTGRESQL_SSL_MODE"
 
 	DefaultPostgreSQLUser     = "katib"
 	DefaultPostgreSQLDatabase = "katib"
 	DefaultPostgreSQLHost     = "katib-postgres"
 	DefaultPostgreSQLPort     = "5432"
+	DefaultPostgreSSLMode     = "disable"
 
 	SkipDbInitializationEnvName = "SKIP_DB_INITIALIZATION"
 )
