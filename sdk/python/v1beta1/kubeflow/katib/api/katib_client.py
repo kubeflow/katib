@@ -93,8 +93,9 @@ class KatibClient(object):
 
         namespace = namespace or self.namespace
 
-        experiment_name = experiment.metadata.name
-        if not experiment_name:
+        if 'name' in experiment.metadata and experiment.metadata.name:
+            experiment_name = experiment.metadata.name
+        else:
             experiment_name = experiment.metadata.generate_name
 
         try:
