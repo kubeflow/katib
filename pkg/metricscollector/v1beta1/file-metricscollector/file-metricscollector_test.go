@@ -23,22 +23,23 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
-var testJsonDataPath = filepath.Join("testdata", "JSON")
+var (
+	testJsonDataPath = filepath.Join("testdata", "JSON")
+	testTextDataPath = filepath.Join("testdata", "TEXT")
+)
 
-func TestCollectObservationLog(t *testing.T) {
-
-	if err := generateTestFiles(); err != nil {
+func TestCollectJsonObservationLog(t *testing.T) {
+	if err := generateJsonTestFiles(); err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(filepath.Dir(testJsonDataPath))
 
-	// TODO (tenzen-y): We should add tests for logs in TEXT format.
-	// Ref: https://github.com/kubeflow/katib/issues/1756
 	testCases := []struct {
 		description string
 		filePath    string
@@ -167,7 +168,131 @@ func TestCollectObservationLog(t *testing.T) {
 	}
 }
 
-func generateTestFiles() error {
+func TestCollectTextObservationLog(t *testing.T) {
+	if err := generateTextTestFiles(); err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(filepath.Dir(testTextDataPath))
+
+	testCases := map[string]struct{
+		filePath    string
+		metrics     []string
+		filters     []string
+		fileFormat  commonv1beta1.FileFormat
+		err         bool
+		expected    *v1beta1.ObservationLog
+	}{
+		"Positive case for logs in TEXT format": {
+			filePath: 	 filepath.Join(testTextDataPath, "good.log"),
+			metrics: 	 []string{"accuracy", "loss"},
+			filters: 	 []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
+			fileFormat:  commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: "0.8078",
+						},
+					},
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.5183",
+						},
+					},
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: "0.6752",
+						},
+					},
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.3634",
+						},
+					},
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.8671",
+						},
+					},
+				},
+			},
+		},
+		"Invalid file name": {
+			filePath:    "invalid",
+			err:         true,
+		},
+		"Invalid file format": {
+			filePath:    filepath.Join(testTextDataPath, "good.log"),
+			fileFormat:  "invalid",
+			err:         true,
+		},
+		"Invalid timestamp for logs in TEXT format": {
+			filePath:    filepath.Join(testTextDataPath, "invalid-timestamp.log"),
+			metrics:     []string{"accuracy", "loss"},
+			filters:     []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
+			fileFormat:  commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: "0.6752",
+						},
+					},
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.3634",
+						},
+					},
+				},
+			},
+		},
+		"Missing objective metric in training logs": {
+			filePath:    filepath.Join(testTextDataPath, "missing-objective-metric.log"),
+			fileFormat:  commonv1beta1.TextFormat,
+			metrics:     []string{"accuracy", "loss"},
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: consts.UnavailableMetricValue,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for name, test := range testCases {
+		t.Run(name, func(t *testing.T) {
+			actual, err := CollectObservationLog(test.filePath, test.metrics, test.filters, test.fileFormat)
+			if (err != nil) != test.err {
+				t.Errorf("\nGOT: \n%v\nWANT: %v\n", err, test.err)
+			} else {
+				if cmp.Diff(actual, test.expected) != "" {
+					t.Errorf("Expected %v\n got %v", test.expected, actual)
+				}
+			}
+		})
+	}
+}
+
+func generateJsonTestFiles() error {
 	if _, err := os.Stat(testJsonDataPath); err != nil {
 		if err = os.MkdirAll(testJsonDataPath, 0700); err != nil {
 			return err
@@ -208,6 +333,46 @@ func generateTestFiles() error {
 
 	for _, td := range testData {
 		filePath := filepath.Join(testJsonDataPath, td.fileName)
+		if err := os.WriteFile(filePath, []byte(td.data), 0600); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func generateTextTestFiles() error {
+	if _, err := os.Stat(testTextDataPath); err != nil {
+		if err = os.MkdirAll(testTextDataPath, 0700); err != nil {
+			return err
+		}
+	}
+
+	testData := []struct {
+		fileName string
+		data     string
+	}{
+		{
+			fileName: "good.log",
+			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.8078};{metricName: loss, metricValue: 0.5183}
+2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
+2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
+{metricName: loss, metricValue: 0.8671}`,
+		},
+		{
+			fileName: "invalid-timestamp.log",
+			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
+invalid INFO     {metricName: loss, metricValue: 0.3634}`,
+		},
+		{
+			fileName: "missing-objective-metric.log",
+			data: `2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
+2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.8671}`,
+		},
+	}
+
+	for _, td := range testData {
+		filePath := filepath.Join(testTextDataPath, td.fileName)
 		if err := os.WriteFile(filePath, []byte(td.data), 0600); err != nil {
 			return err
 		}
