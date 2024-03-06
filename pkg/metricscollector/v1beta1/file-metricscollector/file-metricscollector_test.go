@@ -19,7 +19,6 @@ package sidecarmetricscollector
 import (
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 	"time"
 
@@ -34,26 +33,29 @@ var (
 	testTextDataPath = filepath.Join("testdata", "TEXT")
 )
 
-func TestCollectJsonObservationLog(t *testing.T) {
+func TestCollectObservationLog(t *testing.T) {
 	if err := generateJsonTestFiles(); err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(filepath.Dir(testJsonDataPath))
 
-	testCases := []struct {
-		description string
-		filePath    string
-		metrics     []string
-		filters     []string
-		fileFormat  commonv1beta1.FileFormat
-		err         bool
-		expected    *v1beta1.ObservationLog
+	if err := generateTextTestFiles(); err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(filepath.Dir(testTextDataPath))
+
+	testCases := map[string]struct {
+		filePath   string
+		metrics    []string
+		filters    []string
+		fileFormat commonv1beta1.FileFormat
+		err        bool
+		expected   *v1beta1.ObservationLog
 	}{
-		{
-			description: "Positive case for logs in JSON format",
-			filePath:    filepath.Join(testJsonDataPath, "good.json"),
-			metrics:     []string{"acc", "loss"},
-			fileFormat:  commonv1beta1.JsonFormat,
+		"Positive case for logs in JSON format": {
+			filePath:   filepath.Join(testJsonDataPath, "good.json"),
+			metrics:    []string{"acc", "loss"},
+			fileFormat: commonv1beta1.JsonFormat,
 			expected: &v1beta1.ObservationLog{
 				MetricLogs: []*v1beta1.MetricLog{
 					{
@@ -94,94 +96,6 @@ func TestCollectJsonObservationLog(t *testing.T) {
 				},
 			},
 		},
-		{
-			description: "Invalid file name",
-			filePath:    "invalid",
-			err:         true,
-		},
-		{
-			description: "Invalid file format",
-			filePath:    filepath.Join(testJsonDataPath, "good.json"),
-			fileFormat:  "invalid",
-			err:         true,
-		},
-		{
-			description: "Invalid formatted file for logs in JSON format",
-			filePath:    filepath.Join(testJsonDataPath, "invalid-format.json"),
-			fileFormat:  commonv1beta1.JsonFormat,
-			err:         true,
-		},
-		{
-			description: "Invalid timestamp for logs in JSON format",
-			filePath:    filepath.Join(testJsonDataPath, "invalid-timestamp.json"),
-			fileFormat:  commonv1beta1.JsonFormat,
-			metrics:     []string{"acc", "loss"},
-			expected: &v1beta1.ObservationLog{
-				MetricLogs: []*v1beta1.MetricLog{
-					{
-						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
-						Metric: &v1beta1.Metric{
-							Name:  "loss",
-							Value: "0.22082142531871796",
-						},
-					},
-					{
-						TimeStamp: "2021-12-02T05:27:27Z",
-						Metric: &v1beta1.Metric{
-							Name:  "acc",
-							Value: "0.9349666833877563",
-						},
-					},
-				},
-			},
-		},
-		{
-			description: "Missing objective metric in training logs",
-			filePath:    filepath.Join(testJsonDataPath, "missing-objective-metric.json"),
-			fileFormat:  commonv1beta1.JsonFormat,
-			metrics:     []string{"acc", "loss"},
-			expected: &v1beta1.ObservationLog{
-				MetricLogs: []*v1beta1.MetricLog{
-					{
-						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
-						Metric: &v1beta1.Metric{
-							Name:  "acc",
-							Value: consts.UnavailableMetricValue,
-						},
-					},
-				},
-			},
-		},
-	}
-
-	for _, test := range testCases {
-		t.Run(test.description, func(t *testing.T) {
-			actual, err := CollectObservationLog(test.filePath, test.metrics, test.filters, test.fileFormat)
-			if (err != nil) != test.err {
-				t.Errorf("\nGOT: \n%v\nWANT: %v\n", err, test.err)
-			} else {
-				if !reflect.DeepEqual(actual, test.expected) {
-					t.Errorf("Expected %v\n got %v", test.expected, actual)
-				}
-			}
-		})
-	}
-}
-
-func TestCollectTextObservationLog(t *testing.T) {
-	if err := generateTextTestFiles(); err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(filepath.Dir(testTextDataPath))
-
-	testCases := map[string]struct {
-		filePath   string
-		metrics    []string
-		filters    []string
-		fileFormat commonv1beta1.FileFormat
-		err        bool
-		expected   *v1beta1.ObservationLog
-	}{
 		"Positive case for logs in TEXT format": {
 			filePath:   filepath.Join(testTextDataPath, "good.log"),
 			metrics:    []string{"accuracy", "loss"},
@@ -236,6 +150,51 @@ func TestCollectTextObservationLog(t *testing.T) {
 			fileFormat: "invalid",
 			err:        true,
 		},
+		"Invalid formatted file for logs in JSON format": {
+			filePath:   filepath.Join(testJsonDataPath, "invalid-format.json"),
+			fileFormat: commonv1beta1.JsonFormat,
+			err:        true,
+		},
+		"Invalid formatted file for logs in TEXT format": {
+			filePath:   filepath.Join(testTextDataPath, "invalid-format.log"),
+			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
+			metrics:    []string{"accuracy", "loss"},
+			fileFormat: commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: consts.UnavailableMetricValue,
+						},
+					},
+				},
+			},
+		},
+		"Invalid timestamp for logs in JSON format": {
+			filePath:   filepath.Join(testJsonDataPath, "invalid-timestamp.json"),
+			fileFormat: commonv1beta1.JsonFormat,
+			metrics:    []string{"acc", "loss"},
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.22082142531871796",
+						},
+					},
+					{
+						TimeStamp: "2021-12-02T05:27:27Z",
+						Metric: &v1beta1.Metric{
+							Name:  "acc",
+							Value: "0.9349666833877563",
+						},
+					},
+				},
+			},
+		},
 		"Invalid timestamp for logs in TEXT format": {
 			filePath:   filepath.Join(testTextDataPath, "invalid-timestamp.log"),
 			metrics:    []string{"accuracy", "loss"},
@@ -260,7 +219,23 @@ func TestCollectTextObservationLog(t *testing.T) {
 				},
 			},
 		},
-		"Missing objective metric in training logs": {
+		"Missing objective metric in JSON training logs": {
+			filePath:   filepath.Join(testJsonDataPath, "missing-objective-metric.json"),
+			fileFormat: commonv1beta1.JsonFormat,
+			metrics:    []string{"acc", "loss"},
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "acc",
+							Value: consts.UnavailableMetricValue,
+						},
+					},
+				},
+			},
+		},
+		"Missing objective metric in TEXT training logs": {
 			filePath:   filepath.Join(testTextDataPath, "missing-objective-metric.log"),
 			fileFormat: commonv1beta1.TextFormat,
 			metrics:    []string{"accuracy", "loss"},
@@ -284,8 +259,8 @@ func TestCollectTextObservationLog(t *testing.T) {
 			if (err != nil) != test.err {
 				t.Errorf("\nGOT: \n%v\nWANT: %v\n", err, test.err)
 			} else {
-				if cmp.Diff(actual, test.expected) != "" {
-					t.Errorf("Expected %v\n got %v", test.expected, actual)
+				if diff := cmp.Diff(actual, test.expected); diff != "" {
+					t.Errorf("Expected %v\n got %v\ndiff: %v", test.expected, actual, diff)
 				}
 			}
 		})
@@ -358,6 +333,11 @@ func generateTextTestFiles() error {
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
 2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
 {metricName: loss, metricValue: 0.8671}`,
+		},
+		{
+			fileName: "invalid-format.log",
+			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752
+2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}`,
 		},
 		{
 			fileName: "invalid-timestamp.log",
