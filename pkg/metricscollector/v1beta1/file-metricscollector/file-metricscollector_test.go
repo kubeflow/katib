@@ -174,19 +174,19 @@ func TestCollectTextObservationLog(t *testing.T) {
 	}
 	defer os.RemoveAll(filepath.Dir(testTextDataPath))
 
-	testCases := map[string]struct{
-		filePath    string
-		metrics     []string
-		filters     []string
-		fileFormat  commonv1beta1.FileFormat
-		err         bool
-		expected    *v1beta1.ObservationLog
+	testCases := map[string]struct {
+		filePath   string
+		metrics    []string
+		filters    []string
+		fileFormat commonv1beta1.FileFormat
+		err        bool
+		expected   *v1beta1.ObservationLog
 	}{
 		"Positive case for logs in TEXT format": {
-			filePath: 	 filepath.Join(testTextDataPath, "good.log"),
-			metrics: 	 []string{"accuracy", "loss"},
-			filters: 	 []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
-			fileFormat:  commonv1beta1.TextFormat,
+			filePath:   filepath.Join(testTextDataPath, "good.log"),
+			metrics:    []string{"accuracy", "loss"},
+			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
+			fileFormat: commonv1beta1.TextFormat,
 			expected: &v1beta1.ObservationLog{
 				MetricLogs: []*v1beta1.MetricLog{
 					{
@@ -228,19 +228,19 @@ func TestCollectTextObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid file name": {
-			filePath:    "invalid",
-			err:         true,
+			filePath: "invalid",
+			err:      true,
 		},
 		"Invalid file format": {
-			filePath:    filepath.Join(testTextDataPath, "good.log"),
-			fileFormat:  "invalid",
-			err:         true,
+			filePath:   filepath.Join(testTextDataPath, "good.log"),
+			fileFormat: "invalid",
+			err:        true,
 		},
 		"Invalid timestamp for logs in TEXT format": {
-			filePath:    filepath.Join(testTextDataPath, "invalid-timestamp.log"),
-			metrics:     []string{"accuracy", "loss"},
-			filters:     []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
-			fileFormat:  commonv1beta1.TextFormat,
+			filePath:   filepath.Join(testTextDataPath, "invalid-timestamp.log"),
+			metrics:    []string{"accuracy", "loss"},
+			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
+			fileFormat: commonv1beta1.TextFormat,
 			expected: &v1beta1.ObservationLog{
 				MetricLogs: []*v1beta1.MetricLog{
 					{
@@ -261,9 +261,9 @@ func TestCollectTextObservationLog(t *testing.T) {
 			},
 		},
 		"Missing objective metric in training logs": {
-			filePath:    filepath.Join(testTextDataPath, "missing-objective-metric.log"),
-			fileFormat:  commonv1beta1.TextFormat,
-			metrics:     []string{"accuracy", "loss"},
+			filePath:   filepath.Join(testTextDataPath, "missing-objective-metric.log"),
+			fileFormat: commonv1beta1.TextFormat,
+			metrics:    []string{"accuracy", "loss"},
 			expected: &v1beta1.ObservationLog{
 				MetricLogs: []*v1beta1.MetricLog{
 					{
