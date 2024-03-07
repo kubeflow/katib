@@ -93,10 +93,14 @@ class KatibClient(object):
 
         namespace = namespace or self.namespace
 
-        if 'name' in experiment.metadata and experiment.metadata.name:
+        experiment_name = None
+        if experiment.metadata.name is not None:
             experiment_name = experiment.metadata.name
-        else:
+        elif experiment.metadata.generate_name is not None:
             experiment_name = experiment.metadata.generate_name
+
+        if experiment_name is None:
+            raise ValueError("Experiment must have a name or generateName")
 
         try:
             outputs = self.custom_api.create_namespaced_custom_object(
