@@ -110,7 +110,7 @@ class KatibClient(object):
                 constants.EXPERIMENT_PLURAL,
                 experiment,
             )
-            experiment_name = outputs.metadata.name # if "generate_name" is used, "name" gets a prefix from server
+            experiment_name = outputs["metadata"]["name"] # if "generate_name" is used, "name" gets a prefix from server
         except multiprocessing.TimeoutError:
             raise TimeoutError(
                 f"Timeout to create Katib Experiment: {namespace}/{experiment_name}"
