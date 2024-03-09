@@ -131,10 +131,48 @@ func TestCollectObservationLog(t *testing.T) {
 						},
 					},
 					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: "100",
+						},
+					},
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: "888.333",
+						},
+					},
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: "-0.4759",
+						},
+					},
+					{
 						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
 						Metric: &v1beta1.Metric{
 							Name:  "loss",
 							Value: "0.8671",
+						},
+					},
+				},
+			},
+		},
+		"Invalid case for logs in TEXT format": {
+			filePath:   filepath.Join(testTextDataPath, "invalid-value.log"),
+			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
+			metrics:    []string{"accuracy", "loss"},
+			fileFormat: commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "accuracy",
+							Value: consts.UnavailableMetricValue,
 						},
 					},
 				},
@@ -331,7 +369,17 @@ func generateTEXTTestFiles() error {
 			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.8078};{metricName: loss, metricValue: 0.5183}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
 2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
+2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 100}
+2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 888.333}
+2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: -0.4759}
 {metricName: loss, metricValue: 0.8671}`,
+		},
+		{
+			fileName: "invalid-value.log",
+			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: .333}
+2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: -.333}
+2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: - 345.333}
+2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 888.}`,
 		},
 		{
 			fileName: "invalid-format.log",
