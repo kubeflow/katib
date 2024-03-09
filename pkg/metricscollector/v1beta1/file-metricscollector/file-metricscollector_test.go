@@ -258,8 +258,8 @@ func TestCollectObservationLog(t *testing.T) {
 			if (err != nil) != test.err {
 				t.Errorf("\nGOT: \n%v\nWANT: %v\n", err, test.err)
 			} else {
-				if diff := cmp.Diff(actual, test.expected); diff != "" {
-					t.Errorf("Expected %v\n got %v\ndiff: %v", test.expected, actual, diff)
+				if diff := cmp.Diff(test.expected, actual); diff != "" {
+					t.Errorf("Unexpected parsed result (-want,+got):\n%s", diff)
 				}
 			}
 		})
@@ -356,6 +356,5 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 			return err
 		}
 	}
-
 	return nil
 }
