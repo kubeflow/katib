@@ -34,12 +34,11 @@ var (
 )
 
 func TestCollectObservationLog(t *testing.T) {
-	if err := generateJsonTestFiles(); err != nil {
+	if err := generateJSONTestFiles(); err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(filepath.Dir(testJsonDataPath))
-
-	if err := generateTextTestFiles(); err != nil {
+	if err := generateTEXTTestFiles(); err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(filepath.Dir(testTextDataPath))
@@ -267,7 +266,7 @@ func TestCollectObservationLog(t *testing.T) {
 	}
 }
 
-func generateJsonTestFiles() error {
+func generateJSONTestFiles() error {
 	if _, err := os.Stat(testJsonDataPath); err != nil {
 		if err = os.MkdirAll(testJsonDataPath, 0700); err != nil {
 			return err
@@ -316,7 +315,7 @@ func generateJsonTestFiles() error {
 	return nil
 }
 
-func generateTextTestFiles() error {
+func generateTEXTTestFiles() error {
 	if _, err := os.Stat(testTextDataPath); err != nil {
 		if err = os.MkdirAll(testTextDataPath, 0700); err != nil {
 			return err
