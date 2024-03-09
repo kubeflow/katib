@@ -1,0 +1,27 @@
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/kubeflow/katib/.
+    except:
+      - buf.build/googleapis/googleapis
+plugins:
+  - plugin: buf.build/grpc/go:v1.3.0
+    out: ./
+    opt:
+      - paths=source_relative
+  # Choose one of the following protocol buffers plugin configurations
+  # based on your requirements
+  - plugin: buf.build/protocolbuffers/go:v1.33.0
+    out: ./
+    opt:
+      - paths=source_relative
+  # OR
+  # - plugin: buf.build/protocolbuffers/go
+  #   out: ./
+  #   opt:
+  #     - paths=source_relative
+  - plugin: buf.build/grpc/python:v1.62.0
+    out: python
+  - plugin: buf.build/protocolbuffers/python
+    out: python

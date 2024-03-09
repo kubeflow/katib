@@ -32,6 +32,7 @@ const (
 )
 
 type healthService struct {
+	health_pb.UnimplementedHealthServer
 }
 
 func (s *healthService) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*health_pb.HealthCheckResponse, error) {

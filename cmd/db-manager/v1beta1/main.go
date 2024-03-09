@@ -42,6 +42,8 @@ const (
 var dbIf common.KatibDBInterface
 
 type server struct {
+	api_pb.UnimplementedDBManagerServer
+	health_pb.UnimplementedHealthServer
 }
 
 // Report a log of Observations for a Trial.
