@@ -2,5 +2,5 @@ psutil==5.9.4
 rfc3339>=6.2
 grpcio>=1.41.1
 googleapis-common-protos==1.6.0
-tensorflow==2.13.0
+tensorflow==2.16.1
 protobuf<=3.20.3
