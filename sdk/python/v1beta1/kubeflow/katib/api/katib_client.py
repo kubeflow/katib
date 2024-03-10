@@ -94,10 +94,15 @@ class KatibClient(object):
         namespace = namespace or self.namespace
 
         experiment_name = None
-        if experiment.metadata.name is not None:
-            experiment_name = experiment.metadata.name
-        elif experiment.metadata.generate_name is not None:
-            experiment_name = experiment.metadata.generate_name
+        if type(experiment) == models.V1beta1Experiment:
+            if experiment.metadata.name is not None:
+                experiment_name = experiment.metadata.name
+            elif experiment.metadata.generate_name is not None:
+                experiment_name = experiment.metadata.generate_name
+        elif "name" in experiment["metadata"]:
+            experiment_name = experiment["metadata"]["name"]
+        elif "generate_name" in experiment["metadata"]:
+            experiment_name = experiment["metadata"]["generate_name"]
 
         if experiment_name is None:
             raise ValueError("Experiment must have a name or generateName")
