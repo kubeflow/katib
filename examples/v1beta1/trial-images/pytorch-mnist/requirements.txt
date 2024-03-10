@@ -1,4 +1,2 @@
 cloudml-hypertune==0.1.0.dev6
-torch==1.13.1
-torchvision==0.14.1
 Pillow>=9.1.1
