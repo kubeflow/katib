@@ -28,6 +28,22 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
+const (
+	invalidFileName   = "invalid"
+	invalidFileFormat = "invalid"
+
+	validJSONTestFile            = "good.json"
+	invalidFormatJSONTestFile    = "invalid-format.json"
+	invalidTimestampJSONTestFile = "invalid-timestamp.json"
+	missingMetricJSONTestFile    = "missing-objective-metric.json"
+
+	validTEXTTestFile            = "good.log"
+	invalidValueTEXTTestFile     = "invalid-value.log"
+	invalidFormatTEXTTestFile    = "invalid-format.log"
+	invalidTimestampTEXTTestFile = "invalid-timestamp.log"
+	missingMetricTEXTTestFile    = "missing-objective-metric.log"
+)
+
 var (
 	testJsonDataPath = filepath.Join("testdata", "JSON")
 	testTextDataPath = filepath.Join("testdata", "TEXT")
@@ -52,7 +68,7 @@ func TestCollectObservationLog(t *testing.T) {
 		expected   *v1beta1.ObservationLog
 	}{
 		"Positive case for logs in JSON format": {
-			filePath:   filepath.Join(testJsonDataPath, "good.json"),
+			filePath:   filepath.Join(testJsonDataPath, validJSONTestFile),
 			metrics:    []string{"acc", "loss"},
 			fileFormat: commonv1beta1.JsonFormat,
 			expected: &v1beta1.ObservationLog{
@@ -96,7 +112,7 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Positive case for logs in TEXT format": {
-			filePath:   filepath.Join(testTextDataPath, "good.log"),
+			filePath:   filepath.Join(testTextDataPath, validTEXTTestFile),
 			metrics:    []string{"accuracy", "loss"},
 			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
 			fileFormat: commonv1beta1.TextFormat,
@@ -162,7 +178,7 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid case for logs in TEXT format": {
-			filePath:   filepath.Join(testTextDataPath, "invalid-value.log"),
+			filePath:   filepath.Join(testTextDataPath, invalidValueTEXTTestFile),
 			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
 			metrics:    []string{"accuracy", "loss"},
 			fileFormat: commonv1beta1.TextFormat,
@@ -179,21 +195,21 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid file name": {
-			filePath: "invalid",
+			filePath: invalidFileName,
 			err:      true,
 		},
 		"Invalid file format": {
-			filePath:   filepath.Join(testTextDataPath, "good.log"),
-			fileFormat: "invalid",
+			filePath:   filepath.Join(testTextDataPath, validTEXTTestFile),
+			fileFormat: invalidFileFormat,
 			err:        true,
 		},
 		"Invalid formatted file for logs in JSON format": {
-			filePath:   filepath.Join(testJsonDataPath, "invalid-format.json"),
+			filePath:   filepath.Join(testJsonDataPath, invalidFormatJSONTestFile),
 			fileFormat: commonv1beta1.JsonFormat,
 			err:        true,
 		},
 		"Invalid formatted file for logs in TEXT format": {
-			filePath:   filepath.Join(testTextDataPath, "invalid-format.log"),
+			filePath:   filepath.Join(testTextDataPath, invalidFormatTEXTTestFile),
 			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
 			metrics:    []string{"accuracy", "loss"},
 			fileFormat: commonv1beta1.TextFormat,
@@ -210,7 +226,7 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid timestamp for logs in JSON format": {
-			filePath:   filepath.Join(testJsonDataPath, "invalid-timestamp.json"),
+			filePath:   filepath.Join(testJsonDataPath, invalidTimestampJSONTestFile),
 			fileFormat: commonv1beta1.JsonFormat,
 			metrics:    []string{"acc", "loss"},
 			expected: &v1beta1.ObservationLog{
@@ -233,7 +249,7 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid timestamp for logs in TEXT format": {
-			filePath:   filepath.Join(testTextDataPath, "invalid-timestamp.log"),
+			filePath:   filepath.Join(testTextDataPath, invalidTimestampTEXTTestFile),
 			metrics:    []string{"accuracy", "loss"},
 			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
 			fileFormat: commonv1beta1.TextFormat,
@@ -257,7 +273,7 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Missing objective metric in JSON training logs": {
-			filePath:   filepath.Join(testJsonDataPath, "missing-objective-metric.json"),
+			filePath:   filepath.Join(testJsonDataPath, missingMetricJSONTestFile),
 			fileFormat: commonv1beta1.JsonFormat,
 			metrics:    []string{"acc", "loss"},
 			expected: &v1beta1.ObservationLog{
@@ -273,7 +289,7 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Missing objective metric in TEXT training logs": {
-			filePath:   filepath.Join(testTextDataPath, "missing-objective-metric.log"),
+			filePath:   filepath.Join(testTextDataPath, missingMetricTEXTTestFile),
 			fileFormat: commonv1beta1.TextFormat,
 			metrics:    []string{"accuracy", "loss"},
 			expected: &v1beta1.ObservationLog{
@@ -316,7 +332,7 @@ func generateJSONTestFiles() error {
 		data     string
 	}{
 		{
-			fileName: "good.json",
+			fileName: validJSONTestFile,
 			data: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"}
 {"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847.287801, "trial": "0"}
 {"checkpoint_path": "", "global_step": "1", "loss": "0.1414974331855774", "timestamp": "2021-12-02T14:27:50.000035161Z", "trial": "0"}
@@ -325,18 +341,18 @@ func generateJSONTestFiles() error {
 `,
 		},
 		{
-			fileName: "invalid-format.json",
+			fileName: invalidFormatJSONTestFile,
 			data: `"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"
 {"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847.287801, "trial": "0
 `,
 		},
 		{
-			fileName: "invalid-timestamp.json",
+			fileName: invalidTimestampJSONTestFile,
 			data: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": "invalid", "trial": "0"}
 {"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847, "trial": "0"}
 `,
 		}, {
-			fileName: "missing-objective-metric.json",
+			fileName: missingMetricJSONTestFile,
 			data: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"}
 {"checkpoint_path": "", "global_step": "1", "loss": "0.1414974331855774", "timestamp": "2021-12-02T14:27:50.000035161+09:00", "trial": "0"}
 {"checkpoint_path": "", "global_step": "2", "loss": "0.10683439671993256", "trial": "0"}`,
@@ -365,7 +381,7 @@ func generateTEXTTestFiles() error {
 		data     string
 	}{
 		{
-			fileName: "good.log",
+			fileName: validTEXTTestFile,
 			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.8078};{metricName: loss, metricValue: 0.5183}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
 2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
@@ -375,24 +391,24 @@ func generateTEXTTestFiles() error {
 {metricName: loss, metricValue: 0.8671}`,
 		},
 		{
-			fileName: "invalid-value.log",
+			fileName: invalidValueTEXTTestFile,
 			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: .333}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: -.333}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: - 345.333}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 888.}`,
 		},
 		{
-			fileName: "invalid-format.log",
+			fileName: invalidFormatTEXTTestFile,
 			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752
 2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}`,
 		},
 		{
-			fileName: "invalid-timestamp.log",
+			fileName: invalidTimestampTEXTTestFile,
 			data: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
 invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 		},
 		{
-			fileName: "missing-objective-metric.log",
+			fileName: missingMetricTEXTTestFile,
 			data: `2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
 2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.8671}`,
 		},
