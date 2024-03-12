@@ -16,7 +16,7 @@ see the following user guides:
 - [Docker](https://docs.docker.com/) (20.10 or later)
 - [Docker Buildx](https://docs.docker.com/build/buildx/) (0.8.0 or later)
 - [Java](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) (8 or later)
-- [Python](https://www.python.org/) (3.10 or later)
+- [Python](https://www.python.org/) (3.11 or later)
 - [kustomize](https://kustomize.io/) (4.0.5 or later)
 
 ## Build from source code
