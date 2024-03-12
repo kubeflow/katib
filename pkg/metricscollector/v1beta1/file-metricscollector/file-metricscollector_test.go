@@ -42,8 +42,9 @@ const (
 )
 
 var (
-	testJsonDataPath = filepath.Join("testdata", "JSON")
-	testTextDataPath = filepath.Join("testdata", "TEXT")
+	testDir          = "testdata"
+	testJsonDataPath = filepath.Join(testDir, "JSON")
+	testTextDataPath = filepath.Join(testDir, "TEXT")
 )
 
 func TestCollectObservationLog(t *testing.T) {
@@ -56,7 +57,7 @@ func TestCollectObservationLog(t *testing.T) {
 	if err := generateTEXTTestFiles(); err != nil {
 		t.Fatal(err)
 	}
-	defer deleteTestDirs()
+	defer os.RemoveAll(testDir)
 
 	testCases := map[string]struct {
 		filePath   string
@@ -332,18 +333,6 @@ func generateTestDirs() error {
 		if err = os.MkdirAll(testTextDataPath, 0700); err != nil {
 			return err
 		}
-	}
-
-	return nil
-}
-
-func deleteTestDirs() error {
-	if err := os.RemoveAll(filepath.Dir(testJsonDataPath)); err != nil {
-		return err
-	}
-
-	if err := os.RemoveAll(filepath.Dir(testTextDataPath)); err != nil {
-		return err
 	}
 
 	return nil
