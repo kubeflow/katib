@@ -29,9 +29,6 @@ import (
 )
 
 const (
-	invalidFileName   = "invalid"
-	invalidFileFormat = "invalid"
-
 	validJSONTestFile            = "good.json"
 	invalidFormatJSONTestFile    = "invalid-format.json"
 	invalidTimestampJSONTestFile = "invalid-timestamp.json"
@@ -197,12 +194,12 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid file name": {
-			filePath: invalidFileName,
+			filePath: "invalid",
 			err:      true,
 		},
 		"Invalid file format": {
 			filePath:   filepath.Join(testTextDataPath, validTEXTTestFile),
-			fileFormat: invalidFileFormat,
+			fileFormat: "invalid",
 			err:        true,
 		},
 		"Invalid formatted file for logs in JSON format": {
