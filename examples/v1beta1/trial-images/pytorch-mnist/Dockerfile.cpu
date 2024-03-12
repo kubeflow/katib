@@ -6,6 +6,7 @@ WORKDIR /opt/pytorch-mnist
 
 # Add folder for the logs.
 RUN mkdir /katib
+RUN pip install --prefer-binary --no-cache-dir torch==2.2.1 torchvision==0.17.1
 RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
 
 RUN chgrp -R 0 /opt/pytorch-mnist \
