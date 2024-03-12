@@ -50,14 +50,16 @@ var (
 )
 
 func TestCollectObservationLog(t *testing.T) {
+	if err := generateTestDirs(); err != nil {
+		t.Fatal(err)
+	}
 	if err := generateJSONTestFiles(); err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(filepath.Dir(testJsonDataPath))
 	if err := generateTEXTTestFiles(); err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(filepath.Dir(testTextDataPath))
+	defer deleteTestDirs()
 
 	testCases := map[string]struct {
 		filePath   string
@@ -320,13 +322,37 @@ func TestCollectObservationLog(t *testing.T) {
 	}
 }
 
-func generateJSONTestFiles() error {
+func generateTestDirs() error {
+	// Generate JSON files' dir
 	if _, err := os.Stat(testJsonDataPath); err != nil {
 		if err = os.MkdirAll(testJsonDataPath, 0700); err != nil {
 			return err
 		}
 	}
 
+	// Generate TEXT files' dir
+	if _, err := os.Stat(testTextDataPath); err != nil {
+		if err = os.MkdirAll(testTextDataPath, 0700); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func deleteTestDirs() error {
+	if err := os.RemoveAll(filepath.Dir(testJsonDataPath)); err != nil {
+		return err
+	}
+
+	if err := os.RemoveAll(filepath.Dir(testTextDataPath)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func generateJSONTestFiles() error {
 	testData := []struct {
 		fileName string
 		data     string
@@ -370,12 +396,6 @@ func generateJSONTestFiles() error {
 }
 
 func generateTEXTTestFiles() error {
-	if _, err := os.Stat(testTextDataPath); err != nil {
-		if err = os.MkdirAll(testTextDataPath, 0700); err != nil {
-			return err
-		}
-	}
-
 	testData := []struct {
 		fileName string
 		data     string
@@ -420,5 +440,6 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 			return err
 		}
 	}
+
 	return nil
 }
