@@ -52,7 +52,7 @@ TRIAL_CONDITION_SUCCEEDED = "Succeeded"
 # TODO (andreyvelich): Implement list_base_images function to get each image description.
 BASE_IMAGE_TENSORFLOW = "docker.io/tensorflow/tensorflow:2.13.0"
 BASE_IMAGE_TENSORFLOW_GPU = "docker.io/tensorflow/tensorflow:2.13.0-gpu"
-BASE_IMAGE_PYTORCH = "docker.io/pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime"
+BASE_IMAGE_PYTORCH = "docker.io/pytorch/pytorch:2.2.1-cuda12.1-cudnn8-runtime"
 BASE_IMAGE_MXNET = "docker.io/mxnet/python:1.9.1_native_py3"
 
 DEFAULT_DB_MANAGER_ADDRESS = "katib-db-manager.kubeflow:6789"
