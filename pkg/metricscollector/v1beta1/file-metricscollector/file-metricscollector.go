@@ -18,6 +18,7 @@ package sidecarmetricscollector
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -34,20 +35,27 @@ import (
 	"github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
 
+var (
+	ErrFileFormat = fmt.Errorf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
+	ErrOpenFile   = errors.New("failed to open the file")
+	ErrReadFile   = errors.New("failed to read the file")
+	ErrParseJson  = errors.New("failed to parse the json object")
+)
+
 func CollectObservationLog(fileName string, metrics []string, filters []string, fileFormat commonv1beta1.FileFormat) (*v1beta1.ObservationLog, error) {
 	// we should check fileFormat first in case of opening an invalid file
 	if fileFormat != commonv1beta1.JsonFormat && fileFormat != commonv1beta1.TextFormat {
-		return nil, fmt.Errorf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
+		return nil, ErrFileFormat
 	}
-	
+
 	file, err := os.Open(fileName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %s", ErrOpenFile, err.Error())
 	}
 	defer file.Close()
 	content, err := io.ReadAll(file)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %s", ErrReadFile, err.Error())
 	}
 	logs := string(content)
 
@@ -125,7 +133,7 @@ func parseLogsInJsonFormat(logs []string, metrics []string) (*v1beta1.Observatio
 		}
 		var jsonObj map[string]interface{}
 		if err := json.Unmarshal([]byte(logline), &jsonObj); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %s", ErrParseJson, err.Error())
 		}
 
 		timestamp := time.Time{}.UTC().Format(time.RFC3339)

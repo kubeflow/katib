@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
@@ -30,17 +31,17 @@ import (
 
 func TestCollectObservationLog(t *testing.T) {
 	testCases := map[string]struct {
-		fileName    string
-		testData    string
-		metrics     []string
-		filters     []string
-		fileFormat  commonv1beta1.FileFormat
-		errCause    string
-		expected    *v1beta1.ObservationLog
+		fileName   string
+		testData   string
+		metrics    []string
+		filters    []string
+		fileFormat commonv1beta1.FileFormat
+		wantError  error
+		expected   *v1beta1.ObservationLog
 	}{
 		"Positive case for logs in JSON format": {
-			fileName: 	"good.json",
-			testData:   `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"}
+			fileName: "good.json",
+			testData: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"}
 {"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847.287801, "trial": "0"}
 {"checkpoint_path": "", "global_step": "1", "loss": "0.1414974331855774", "timestamp": "2021-12-02T14:27:50.000035161Z", "trial": "0"}
 {"acc": "0.9586416482925415", "checkpoint_path": "", "global_step": "1", "timestamp": "2021-12-02T14:27:50.000037459Z", "trial": "0"}
@@ -88,8 +89,8 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Positive case for logs in TEXT format": {
-			fileName:   "good.log",
-			testData:   `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.8078};{metricName: loss, metricValue: 0.5183}
+			fileName: "good.log",
+			testData: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.8078};{metricName: loss, metricValue: 0.5183}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
 2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 100}
@@ -161,8 +162,8 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid case for logs in TEXT format": {
-			fileName:   "invalid-value.log",
-			testData:   `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: .333}
+			fileName: "invalid-value.log",
+			testData: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: .333}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: -.333}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: - 345.333}
 2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 888.}`,
@@ -184,23 +185,23 @@ func TestCollectObservationLog(t *testing.T) {
 		"Invalid file name": {
 			fileName:   "invalid",
 			fileFormat: commonv1beta1.JsonFormat,
-			errCause:   "open invalid: no such file or directory",
+			wantError:  ErrOpenFile,
 		},
 		"Invalid file format": {
 			fileName:   "good.log",
 			fileFormat: "invalid",
-			errCause:   "format must be set TEXT or JSON",
+			wantError:  ErrFileFormat,
 		},
 		"Invalid formatted file for logs in JSON format": {
-			fileName:   "invalid-format.json",
-			testData:   `"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"
+			fileName: "invalid-format.json",
+			testData: `"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"
 {"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847.287801, "trial": "0`,
 			fileFormat: commonv1beta1.JsonFormat,
-			errCause:   "invalid character ':' after top-level value",
+			wantError:  ErrParseJson,
 		},
 		"Invalid formatted file for logs in TEXT format": {
-			fileName:   "invalid-format.log",
-			testData:   `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752
+			fileName: "invalid-format.log",
+			testData: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752
 2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}`,
 			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
 			metrics:    []string{"accuracy", "loss"},
@@ -218,8 +219,8 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid timestamp for logs in JSON format": {
-			fileName:   "invalid-timestamp.json",
-			testData:   `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": "invalid", "trial": "0"}
+			fileName: "invalid-timestamp.json",
+			testData: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": "invalid", "trial": "0"}
 {"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847, "trial": "0"}`,
 			fileFormat: commonv1beta1.JsonFormat,
 			metrics:    []string{"acc", "loss"},
@@ -243,8 +244,8 @@ func TestCollectObservationLog(t *testing.T) {
 			},
 		},
 		"Invalid timestamp for logs in TEXT format": {
-			fileName:   "invalid-timestamp.log",
-			testData:   `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
+			fileName: "invalid-timestamp.log",
+			testData: `2024-03-04T17:55:08Z INFO     {metricName: accuracy, metricValue: 0.6752}
 invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 			metrics:    []string{"accuracy", "loss"},
 			filters:    []string{"{metricName: ([\\w|-]+), metricValue: ((-?\\d+)(\\.\\d+)?)}"},
@@ -269,8 +270,8 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 			},
 		},
 		"Missing objective metric in JSON training logs": {
-			fileName:   "missing-objective-metric.json",
-			testData:   `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"}
+			fileName: "missing-objective-metric.json",
+			testData: `{"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"}
 {"checkpoint_path": "", "global_step": "1", "loss": "0.1414974331855774", "timestamp": "2021-12-02T14:27:50.000035161+09:00", "trial": "0"}
 {"checkpoint_path": "", "global_step": "2", "loss": "0.10683439671993256", "trial": "0"}`,
 			fileFormat: commonv1beta1.JsonFormat,
@@ -288,8 +289,8 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 			},
 		},
 		"Missing objective metric in TEXT training logs": {
-			fileName:   "missing-objective-metric.log",
-			testData:   `2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
+			fileName: "missing-objective-metric.log",
+			testData: `2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.3634}
 2024-03-04T17:55:08Z INFO     {metricName: loss, metricValue: 0.8671}`,
 			fileFormat: commonv1beta1.TextFormat,
 			metrics:    []string{"accuracy", "loss"},
@@ -316,12 +317,11 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 				}
 			}
 			actual, err := CollectObservationLog(filepath.Join(tmpDir, test.fileName), test.metrics, test.filters, test.fileFormat)
-			if err != nil && err.Error() != test.errCause {
-				t.Errorf("Unexpected error (-want,+got):\n%s", cmp.Diff(test.errCause, err.Error()))
-			} else {
-				if diff := cmp.Diff(test.expected, actual); diff != "" {
-					t.Errorf("Unexpected parsed result (-want,+got):\n%s", diff)
-				}
+			if diff := cmp.Diff(test.wantError, err, cmpopts.EquateErrors()); len(diff) != 0 {
+				t.Errorf("Unexpected error (-want,+got):\n%s", diff)
+			}
+			if diff := cmp.Diff(test.expected, actual); len(diff) != 0 {
+				t.Errorf("Unexpected parsed result (-want,+got):\n%s", diff)
 			}
 		})
 	}
