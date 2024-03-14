@@ -41,23 +41,14 @@ const (
 	missingMetricTEXTTestFile    = "missing-objective-metric.log"
 )
 
-var (
-	testDir          = "testdata"
-	testJsonDataPath = filepath.Join(testDir, "JSON")
-	testTextDataPath = filepath.Join(testDir, "TEXT")
-)
-
 func TestCollectObservationLog(t *testing.T) {
-	if err := generateTestDirs(); err != nil {
+	testJsonDataPath, testTextDataPath := t.TempDir(), t.TempDir()
+	if err := generateJSONTestFiles(testJsonDataPath); err != nil {
 		t.Fatal(err)
 	}
-	if err := generateJSONTestFiles(); err != nil {
+	if err := generateTEXTTestFiles(testTextDataPath); err != nil {
 		t.Fatal(err)
 	}
-	if err := generateTEXTTestFiles(); err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(testDir)
 
 	testCases := map[string]struct {
 		filePath   string
@@ -320,25 +311,7 @@ func TestCollectObservationLog(t *testing.T) {
 	}
 }
 
-func generateTestDirs() error {
-	// Generate JSON files' dir
-	if _, err := os.Stat(testJsonDataPath); err != nil {
-		if err = os.MkdirAll(testJsonDataPath, 0700); err != nil {
-			return err
-		}
-	}
-
-	// Generate TEXT files' dir
-	if _, err := os.Stat(testTextDataPath); err != nil {
-		if err = os.MkdirAll(testTextDataPath, 0700); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func generateJSONTestFiles() error {
+func generateJSONTestFiles(tmpDir string) error {
 	testData := []struct {
 		fileName string
 		data     string
@@ -372,7 +345,7 @@ func generateJSONTestFiles() error {
 	}
 
 	for _, td := range testData {
-		filePath := filepath.Join(testJsonDataPath, td.fileName)
+		filePath := filepath.Join(tmpDir, td.fileName)
 		if err := os.WriteFile(filePath, []byte(td.data), 0600); err != nil {
 			return err
 		}
@@ -381,7 +354,7 @@ func generateJSONTestFiles() error {
 	return nil
 }
 
-func generateTEXTTestFiles() error {
+func generateTEXTTestFiles(tmpDir string) error {
 	testData := []struct {
 		fileName string
 		data     string
@@ -421,7 +394,7 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 	}
 
 	for _, td := range testData {
-		filePath := filepath.Join(testTextDataPath, td.fileName)
+		filePath := filepath.Join(tmpDir, td.fileName)
 		if err := os.WriteFile(filePath, []byte(td.data), 0600); err != nil {
 			return err
 		}
