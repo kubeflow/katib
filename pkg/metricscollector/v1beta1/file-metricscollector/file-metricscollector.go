@@ -35,6 +35,11 @@ import (
 )
 
 func CollectObservationLog(fileName string, metrics []string, filters []string, fileFormat commonv1beta1.FileFormat) (*v1beta1.ObservationLog, error) {
+	// we should check fileFormat first in case of opening an invalid file
+	if fileFormat != commonv1beta1.JsonFormat && fileFormat != commonv1beta1.TextFormat {
+		return nil, fmt.Errorf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
+	}
+	
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -52,7 +57,7 @@ func CollectObservationLog(fileName string, metrics []string, filters []string, 
 	case commonv1beta1.JsonFormat:
 		return parseLogsInJsonFormat(strings.Split(logs, "\n"), metrics)
 	}
-	return nil, fmt.Errorf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
+	return nil, nil
 }
 
 func parseLogsInTextFormat(logs []string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
