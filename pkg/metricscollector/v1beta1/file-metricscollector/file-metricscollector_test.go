@@ -55,7 +55,7 @@ func TestCollectObservationLog(t *testing.T) {
 		metrics    []string
 		filters    []string
 		fileFormat commonv1beta1.FileFormat
-		err        bool
+		errCause   string
 		expected   *v1beta1.ObservationLog
 	}{
 		"Positive case for logs in JSON format": {
@@ -187,17 +187,17 @@ func TestCollectObservationLog(t *testing.T) {
 		},
 		"Invalid file name": {
 			filePath: "invalid",
-			err:      true,
+			errCause: "open invalid: no such file or directory",
 		},
 		"Invalid file format": {
 			filePath:   filepath.Join(testTextDataPath, validTEXTTestFile),
 			fileFormat: "invalid",
-			err:        true,
+			errCause:   "format must be set TEXT or JSON",
 		},
 		"Invalid formatted file for logs in JSON format": {
 			filePath:   filepath.Join(testJsonDataPath, invalidFormatJSONTestFile),
 			fileFormat: commonv1beta1.JsonFormat,
-			err:        true,
+			errCause:   "invalid character ':' after top-level value",
 		},
 		"Invalid formatted file for logs in TEXT format": {
 			filePath:   filepath.Join(testTextDataPath, invalidFormatTEXTTestFile),
@@ -300,8 +300,8 @@ func TestCollectObservationLog(t *testing.T) {
 	for name, test := range testCases {
 		t.Run(name, func(t *testing.T) {
 			actual, err := CollectObservationLog(test.filePath, test.metrics, test.filters, test.fileFormat)
-			if (err != nil) != test.err {
-				t.Errorf("\nGOT: \n%v\nWANT: %v\n", err, test.err)
+			if err != nil && err.Error() != test.errCause {
+				t.Errorf("Unexpected error (-want,+got):\n%s", cmp.Diff(test.errCause, err.Error()))
 			} else {
 				if diff := cmp.Diff(test.expected, actual); diff != "" {
 					t.Errorf("Unexpected parsed result (-want,+got):\n%s", diff)
