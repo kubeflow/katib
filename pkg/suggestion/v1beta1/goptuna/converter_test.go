@@ -17,7 +17,6 @@ limitations under the License.
 package suggestion_goptuna_v1beta1
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"

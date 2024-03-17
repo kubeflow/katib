@@ -19,7 +19,6 @@ package manifest
 import (
 	"errors"
 	"math"
-	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"

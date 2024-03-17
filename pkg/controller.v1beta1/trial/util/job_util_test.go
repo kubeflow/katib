@@ -17,7 +17,6 @@ limitations under the License.
 package util
 
 import (
-	"reflect"
 	"testing"
 
 	batchv1 "k8s.io/api/batch/v1"

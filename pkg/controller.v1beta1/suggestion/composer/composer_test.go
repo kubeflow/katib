@@ -22,7 +22,6 @@ import (
 	stdlog "log"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"sync"
 	"testing"

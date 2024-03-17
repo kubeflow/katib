@@ -19,7 +19,6 @@ package suggestionclient
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"testing"
 	"time"
 
