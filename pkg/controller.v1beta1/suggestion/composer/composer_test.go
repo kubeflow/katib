@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/onsi/gomega"
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
@@ -631,8 +632,8 @@ func TestDesiredRBAC(t *testing.T) {
 func metaEqual(expected, actual metav1.ObjectMeta) bool {
 	return expected.Name == actual.Name &&
 		expected.Namespace == actual.Namespace &&
-		reflect.DeepEqual(expected.Labels, actual.Labels) &&
-		reflect.DeepEqual(expected.Annotations, actual.Annotations) &&
+		cmp.Equal(expected.Labels, actual.Labels) &&
+		cmp.Equal(expected.Annotations, actual.Annotations) &&
 		(len(actual.OwnerReferences) > 0 &&
 			expected.OwnerReferences[0].APIVersion == actual.OwnerReferences[0].APIVersion &&
 			expected.OwnerReferences[0].Kind == actual.OwnerReferences[0].Kind &&
