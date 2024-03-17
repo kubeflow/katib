@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -541,8 +542,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.Name, err)
 		} else if tc.Err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.Name)
-		} else if !tc.Err && !reflect.DeepEqual(tc.ExpectedArgs, args) {
-			t.Errorf("Case %v failed. ExpectedArgs: %v, got %v", tc.Name, tc.ExpectedArgs, args)
+		} else if !tc.Err && diff := cmp.Diff(tc.ExpectedArgs, args); diff != "" {
+			t.Errorf("Case %v failed. Difference in ExpectedArgs:\n%s", tc.Name, diff)
 		}
 	}
 }
@@ -1061,8 +1062,8 @@ func TestMutatePodMetadata(t *testing.T) {
 
 	for _, tc := range testCases {
 		mutatePodMetadata(tc.pod, tc.trial)
-		if !reflect.DeepEqual(tc.mutatedPod, tc.pod) {
-			t.Errorf("Case %v. Expected Pod %v, got %v", tc.testDescription, tc.mutatedPod, tc.pod)
+		if diff := cmp.Diff(tc.mutatedPod, tc.pod); diff != "" {
+			t.Errorf("Case %v. Difference in Pod:\n%s", tc.testDescription, diff)
 		}
 	}
 }

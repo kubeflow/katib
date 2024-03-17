@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/c-bata/goptuna"
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
@@ -119,7 +120,7 @@ func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int
 			continue
 		}
 
-		if reflect.DeepEqual(ktrial.Params, trials[i].Params) {
+		if diff := cmp.Diff(ktrial.Params, trials[i].Params); diff == "" {
 			return trials[i].ID, nil
 		}
 	}

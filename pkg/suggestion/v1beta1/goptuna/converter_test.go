@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/c-bata/goptuna"
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
@@ -185,8 +186,8 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 				t.Errorf("toGoptunaSearchSpace() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("toGoptunaSearchSpace() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("toGoptunaSearchSpace() mismatch (-got +want):\n%s", diff)
 			}
 		})
 	}

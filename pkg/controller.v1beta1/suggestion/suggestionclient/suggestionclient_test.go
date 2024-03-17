@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/golang/mock/gomock"
 	"github.com/onsi/gomega"
 	"google.golang.org/grpc"
@@ -578,8 +579,8 @@ func TestConvertTrialObservation(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		actualObservation := convertTrialObservation(tc.strategies, tc.inObservation)
-		if !reflect.DeepEqual(actualObservation, tc.expectedObservation) {
-			t.Errorf("Case: %v failed.\nExpected observation: %v \ngot: %v", tc.testDescription, tc.expectedObservation, actualObservation)
+		if diff := cmp.Diff(tc.expectedObservation, actualObservation); diff != "" {
+			t.Errorf("Case: %v failed.\n%s", tc.testDescription, diff)
 		}
 	}
 }
