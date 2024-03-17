@@ -17,6 +17,7 @@ limitations under the License.
 package manifest
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -31,6 +32,15 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibclient"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/katibconfig"
+)
+
+var (
+	ErrConfigMapNotFound                  = errors.New("ConfigMap not found")
+	ErrConvertStringToUnstructuredFailed  = errors.New("ConvertStringToUnstructured failed")
+	ErrConvertUnstructuredToStringFailed  = errors.New("ConvertUnstructuredToString failed")
+	ErrParamNotFoundInParameterAssignment = errors.New("unable to find non-meta paramater from TrialParameters in ParameterAssignment")
+	ErrParamNotFoundInTrialParameters     = errors.New("unable to find parameter from ParameterAssignment in TrialParameters")
+	ErrTemplatePathNotFound               = errors.New("TemplatePath not found in ConfigMap")
 )
 
 // Generator is the type for manifests Generator.
@@ -86,7 +96,7 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 	// Convert Trial template to unstructured
 	runSpec, err := util.ConvertStringToUnstructured(replacedTemplate)
 	if err != nil {
-		return nil, fmt.Errorf("ConvertStringToUnstructured failed: %v", err)
+		return nil, fmt.Errorf("%w: %s", ErrConvertStringToUnstructuredFailed, err.Error())
 	}
 
 	// Set name and namespace for Run Spec
@@ -108,7 +118,7 @@ func (g *DefaultGenerator) applyParameters(experiment *experimentsv1beta1.Experi
 	if trialSpec == nil {
 		trialSpec, err = util.ConvertStringToUnstructured(trialTemplate)
 		if err != nil {
-			return "", fmt.Errorf("ConvertStringToUnstructured failed: %v", err)
+			return "", fmt.Errorf("%w: %s", ErrConvertStringToUnstructuredFailed, err.Error())
 		}
 	}
 
@@ -131,7 +141,7 @@ func (g *DefaultGenerator) applyParameters(experiment *experimentsv1beta1.Experi
 				nonMetaParamCount += 1
 				continue
 			} else {
-				return "", fmt.Errorf("Unable to find parameter: %v in parameter assignment %v", param.Reference, assignmentsMap)
+				return "", fmt.Errorf("%w: parameter: %v, parameter assignment: %v", ErrParamNotFoundInParameterAssignment, param.Reference, assignmentsMap)
 			}
 		}
 		metaRefKey = sub[1]
@@ -172,9 +182,10 @@ func (g *DefaultGenerator) applyParameters(experiment *experimentsv1beta1.Experi
 		}
 	}
 
-	// Number of parameters must be equal
+	// Number of assignment parameters must be equal to the number of non-meta trial parameters
+	// i.e. all parameters in ParameterAssignment must be in TrialParameters
 	if len(assignments) != nonMetaParamCount {
-		return "", fmt.Errorf("Number of TrialAssignment: %v != number of nonMetaTrialParameters in TrialSpec: %v", len(assignments), nonMetaParamCount)
+		return "", fmt.Errorf("%w: parameter assignments: %v, non-meta trial parameter count: %v", ErrParamNotFoundInTrialParameters, assignments, nonMetaParamCount)
 	}
 
 	// Replacing placeholders with parameter values
@@ -194,7 +205,7 @@ func (g *DefaultGenerator) GetTrialTemplate(instance *experimentsv1beta1.Experim
 	if trialSource.TrialSpec != nil {
 		trialTemplateString, err = util.ConvertUnstructuredToString(trialSource.TrialSpec)
 		if err != nil {
-			return "", fmt.Errorf("ConvertUnstructuredToString failed: %v", err)
+			return "", fmt.Errorf("%w: %s", ErrConvertUnstructuredToStringFailed, err.Error())
 		}
 	} else {
 		configMapNS := trialSource.ConfigMap.ConfigMapNamespace
@@ -202,12 +213,12 @@ func (g *DefaultGenerator) GetTrialTemplate(instance *experimentsv1beta1.Experim
 		templatePath := trialSource.ConfigMap.TemplatePath
 		configMap, err := g.client.GetConfigMap(configMapName, configMapNS)
 		if err != nil {
-			return "", fmt.Errorf("GetConfigMap failed: %v", err)
+			return "", fmt.Errorf("%w: %v", ErrConfigMapNotFound, err)
 		}
 		var ok bool
 		trialTemplateString, ok = configMap[templatePath]
 		if !ok {
-			return "", fmt.Errorf("TemplatePath: %v not found in configMap: %v", templatePath, configMap)
+			return "", fmt.Errorf("%w: TemplatePath: %v, ConfigMap: %v", ErrTemplatePathNotFound, templatePath, configMap)
 		}
 	}
 

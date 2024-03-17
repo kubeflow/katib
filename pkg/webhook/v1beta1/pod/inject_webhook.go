@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -46,6 +47,13 @@ import (
 )
 
 var log = logf.Log.WithName("injector-webhook")
+
+var (
+	ErrInvalidOwnerAPIVersion = errors.New("invalid owner API version")
+	ErrInvaidSuggestionName   = errors.New("invalid suggestion name")
+	ErrPodNotBelongToKatibJob = errors.New("pod does not belong to Katib Job")
+	ErrNestedObjectNotFound   = errors.New("nested object not found in the cluster")
+)
 
 // SidecarInjector injects metrics collect sidecar to the primary pod.
 type SidecarInjector struct {
@@ -259,7 +267,7 @@ func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 			// Get group and version from owner API version
 			gv, err := schema.ParseGroupVersion(owners[i].APIVersion)
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("%w: %s", ErrInvalidOwnerAPIVersion, err.Error())
 			}
 			gvk := schema.GroupVersionKind{
 				Group:   gv.Group,
@@ -272,7 +280,7 @@ func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 			// Nested object namespace must be equal to object namespace
 			err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: owners[i].Name, Namespace: namespace}, nestedJob)
 			if err != nil {
-				return "", "", err
+				return "", "", fmt.Errorf("%w: %s", ErrNestedObjectNotFound, err.Error())
 			}
 			// Recursively search for Trial ownership in nested object
 			jobKind, jobName, err = s.getKatibJob(nestedJob, namespace)
@@ -285,7 +293,7 @@ func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 
 	// If jobKind is empty after the loop, Trial doesn't own the object
 	if jobKind == "" {
-		return "", "", errors.New("The Pod doesn't belong to Katib Job")
+		return "", "", ErrPodNotBelongToKatibJob
 	}
 
 	return jobKind, jobName, nil
@@ -322,7 +330,7 @@ func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, me
 		suggestion := &suggestionsv1beta1.Suggestion{}
 		err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: suggestionName, Namespace: trial.Namespace}, suggestion)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %s", ErrInvaidSuggestionName, err.Error())
 		}
 		args = append(args, "-s-earlystop", util.GetEarlyStoppingEndpoint(suggestion))
 	}
