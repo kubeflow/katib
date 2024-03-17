@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	"github.com/google/go-cmp/cmp"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 )
 
@@ -114,8 +115,8 @@ func TestGetDeployedJobStatus(t *testing.T) {
 		} else if !tc.err {
 			if err != nil {
 				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-			} else if !reflect.DeepEqual(tc.expectedTrialJobStatus, actualTrialJobStatus) {
-				t.Errorf("Case: %v failed. Expected %v\n got %v", tc.testDescription, tc.expectedTrialJobStatus, actualTrialJobStatus)
+			} else if diff := cmp.Diff(tc.expectedTrialJobStatus, actualTrialJobStatus); diff != "" {
+				t.Errorf("Case: %v failed.\n%s", tc.testDescription, diff)
 			}
 		}
 	}

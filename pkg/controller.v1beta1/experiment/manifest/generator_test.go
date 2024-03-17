@@ -22,6 +22,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/golang/mock/gomock"
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
@@ -152,8 +153,8 @@ func TestGetRunSpecWithHP(t *testing.T) {
 		} else if !tc.Err {
 			if err != nil {
 				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-			} else if !reflect.DeepEqual(tc.expectedRunSpec, actualRunSpec) {
-				t.Errorf("Case: %v failed. Expected %v\n got %v", tc.testDescription, tc.expectedRunSpec.Object, actualRunSpec.Object)
+			} else if diff:=cmp.diff(tc.expectedRunSpec,actualRunSpec); diff != ""{
+				t.Errorf("Case: %v failed. Difference in RunSpec:\n%s", tc.testDescription,diff)
 			}
 		}
 	}
@@ -335,8 +336,8 @@ spec:
 		} else if !tc.Err {
 			if err != nil {
 				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-			} else if !reflect.DeepEqual(expectedRunSpec, actualRunSpec) {
-				t.Errorf("Case: %v failed. Expected %v\n got %v", tc.testDescription, expectedRunSpec.Object, actualRunSpec.Object)
+			} else if diff := cmp.Diff(expectedRunSpec, actualRunSpec); diff != "" {
+				t.Errorf("Case: %v failed. Difference in RunSpec:\n%s", tc.testDescription, diff)
 			}
 		}
 	}
