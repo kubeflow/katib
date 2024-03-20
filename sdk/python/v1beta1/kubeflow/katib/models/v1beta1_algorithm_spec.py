@@ -34,15 +34,17 @@ class V1beta1AlgorithmSpec(object):
     """
     openapi_types = {
         'algorithm_name': 'str',
-        'algorithm_settings': 'list[V1beta1AlgorithmSetting]'
+        'algorithm_settings': 'list[V1beta1AlgorithmSetting]',
+        'suggestion_spec': 'V1DeploymentSpec'
     }
 
     attribute_map = {
         'algorithm_name': 'algorithmName',
-        'algorithm_settings': 'algorithmSettings'
+        'algorithm_settings': 'algorithmSettings',
+        'suggestion_spec': 'suggestionSpec'
     }
 
-    def __init__(self, algorithm_name=None, algorithm_settings=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, algorithm_name=None, algorithm_settings=None, suggestion_spec=None, local_vars_configuration=None):  # noqa: E501
         """V1beta1AlgorithmSpec - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -50,12 +52,15 @@ class V1beta1AlgorithmSpec(object):
 
         self._algorithm_name = None
         self._algorithm_settings = None
+        self._suggestion_spec = None
         self.discriminator = None
 
         if algorithm_name is not None:
             self.algorithm_name = algorithm_name
         if algorithm_settings is not None:
             self.algorithm_settings = algorithm_settings
+        if suggestion_spec is not None:
+            self.suggestion_spec = suggestion_spec
 
     @property
     def algorithm_name(self):
@@ -102,6 +107,27 @@ class V1beta1AlgorithmSpec(object):
         """
 
         self._algorithm_settings = algorithm_settings
+
+    @property
+    def suggestion_spec(self):
+        """Gets the suggestion_spec of this V1beta1AlgorithmSpec.  # noqa: E501
+
+
+        :return: The suggestion_spec of this V1beta1AlgorithmSpec.  # noqa: E501
+        :rtype: V1DeploymentSpec
+        """
+        return self._suggestion_spec
+
+    @suggestion_spec.setter
+    def suggestion_spec(self, suggestion_spec):
+        """Sets the suggestion_spec of this V1beta1AlgorithmSpec.
+
+
+        :param suggestion_spec: The suggestion_spec of this V1beta1AlgorithmSpec.  # noqa: E501
+        :type: V1DeploymentSpec
+        """
+
+        self._suggestion_spec = suggestion_spec
 
     def to_dict(self):
         """Returns the model properties as a dict"""

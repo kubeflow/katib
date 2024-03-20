@@ -129,11 +129,18 @@ func schema_apis_controller_common_v1beta1_AlgorithmSpec(ref common.ReferenceCal
 							},
 						},
 					},
+					"suggestionSpec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Suggestion service Deployment spec",
+							Default:     map[string]interface{}{},
+							Ref:         ref("k8s.io/api/apps/v1.DeploymentSpec"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSetting"},
+			"github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1.AlgorithmSetting", "k8s.io/api/apps/v1.DeploymentSpec"},
 	}
 }
 

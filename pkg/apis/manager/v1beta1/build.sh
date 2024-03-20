@@ -21,9 +21,50 @@ cd "$(dirname "$0")"
 
 proto="api.proto"
 
-docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
-docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto
+# Get host paths for kubernetes api modules
+GO_MOD_K8S_API=$(go list -m -f '{{.Dir}}' k8s.io/api)
+GO_MOD_K8S_APIMACHINERY=$(go list -m -f '{{.Dir}}' k8s.io/apimachinery)
+
+# Generate python k8s api files
+docker run -i --rm \
+	-v "$PWD:$PWD" \
+	-v "$GO_MOD_K8S_APIMACHINERY:$GOPATH/pkg/mod/k8s.io/apimachinery" \
+	-v "$GO_MOD_K8S_API:$GOPATH/pkg/mod/k8s.io/api" \
+	-w "$PWD" \
+	znly/protoc \
+	-I "${GOPATH}/pkg/mod" --python_out=python \
+	"${GOPATH}/pkg/mod/k8s.io/api/apps/v1/generated.proto" \
+	"${GOPATH}/pkg/mod/k8s.io/api/core/v1/generated.proto" \
+	"${GOPATH}/pkg/mod/k8s.io/apimachinery/pkg/runtime/generated.proto" \
+	"${GOPATH}/pkg/mod/k8s.io/apimachinery/pkg/api/resource/generated.proto" \
+	"${GOPATH}/pkg/mod/k8s.io/apimachinery/pkg/runtime/schema/generated.proto" \
+	"${GOPATH}/pkg/mod/k8s.io/apimachinery/pkg/util/intstr/generated.proto" \
+	"${GOPATH}/pkg/mod/k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto"
+
+# Generate $proto files
+docker run -i --rm \
+	-v "$PWD:$PWD" \
+	-v "$GO_MOD_K8S_API:$GOPATH/pkg/mod/k8s.io/api" \
+	-v "$GO_MOD_K8S_APIMACHINERY:$GOPATH/pkg/mod/k8s.io/apimachinery" \
+	-w "$PWD" \
+	znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I="$GOPATH/pkg/mod/" -I. $proto
+docker run -i --rm \
+	-v "$PWD:$PWD" \
+	-v "$GO_MOD_K8S_API:$GOPATH/pkg/mod/k8s.io/api" \
+	-v "$GO_MOD_K8S_APIMACHINERY:$GOPATH/pkg/mod/k8s.io/apimachinery" \
+	-w "$PWD" \
+	znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I "$GOPATH/pkg/mod/" -I. $proto
 
 docker build -t protoc-gen-doc gen-doc/
-docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=markdown,api.md -I /protobuf -I /apiprotos $proto
-docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=html,index.html -I /protobuf -I /apiprotos $proto
+docker run --rm \
+	-v "$PWD/gen-doc:/out" \
+	-v "$PWD:/apiprotos" \
+	-v "$GO_MOD_K8S_API:$GOPATH/pkg/mod/k8s.io/api" \
+	-v "$GO_MOD_K8S_APIMACHINERY:$GOPATH/pkg/mod/k8s.io/apimachinery" \
+	protoc-gen-doc --doc_opt=markdown,api.md -I "$GOPATH/pkg/mod/" -I /protobuf -I /apiprotos $proto
+docker run --rm \
+	-v "$PWD/gen-doc:/out" \
+	-v "$PWD:/apiprotos" \
+	-v "$GO_MOD_K8S_API:$GOPATH/pkg/mod/k8s.io/api" \
+	-v "$GO_MOD_K8S_APIMACHINERY:$GOPATH/pkg/mod/k8s.io/apimachinery" \
+	protoc-gen-doc --doc_opt=html,index.html -I "$GOPATH/pkg/mod/" -I /protobuf -I /apiprotos $proto

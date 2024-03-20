@@ -28,6 +28,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -976,6 +977,7 @@ func newFakeRequest() *suggestionapi.GetSuggestionsRequest {
 							Value: "value",
 						},
 					},
+					SuggestionSpec: &appsv1.DeploymentSpec{},
 				},
 				EarlyStopping: &suggestionapi.EarlyStoppingSpec{
 					AlgorithmName: earlyStoppingAlgorithmName,

@@ -75,6 +75,10 @@ def update_python_sdk(src, dest, versions=('v1beta1')):
                             '[**V1Container**](https://github.com/kubernetes-client/'
                             'python/blob/master/kubernetes/docs/V1Container.md)'),
 
+        lambda l: l.replace('[**V1DeploymentSpec**](V1DeploymentSpec.md)',
+                            '[**V1DeploymentSpec**](https://github.com/kubernetes-client/'
+                            'python/blob/master/kubernetes/docs/V1DeploymentSpec.md)'),
+
         lambda l: l.replace('[**V1ObjectMeta**](V1ObjectMeta.md)',
                             '[**V1ObjectMeta**](https://github.com/kubernetes-client/'
                             'python/blob/master/kubernetes/docs/V1ObjectMeta.md)'),

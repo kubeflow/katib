@@ -49,6 +49,7 @@ func (in *AlgorithmSpec) DeepCopyInto(out *AlgorithmSpec) {
 		*out = make([]AlgorithmSetting, len(*in))
 		copy(*out, *in)
 	}
+	in.SuggestionSpec.DeepCopyInto(&out.SuggestionSpec)
 	return
 }
 

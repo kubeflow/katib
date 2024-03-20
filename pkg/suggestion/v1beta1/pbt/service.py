@@ -32,7 +32,12 @@ from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 logger = logging.getLogger(__name__)
 
 
-_REQUIRED_SETTINGS = ["suggestion_trial_dir", "n_population", "truncation_threshold"]
+_REQUIRED_ALGORITHM_SETTINGS = ["suggestion_trial_dir", "n_population", "truncation_threshold"]
+# DeploymentSpec suggestion_spec: https://github.com/kubernetes/api/blob/master/apps/v1/generated.proto#L268
+#   PodTemplateSpec template: https://github.com/kubernetes/api/blob/master/core/v1/generated.proto#L3976
+#     PodSpec spec: https://github.com/kubernetes/api/blob/master/core/v1/generated.proto#L3513
+#       []Volume volumes: https://github.com/kubernetes/api/blob/master/core/v1/generated.proto#L5677
+_REQUIRED_DEPLOYMENT_SETTINGS = ["template.spec.volumes"]
 _DATA_PATH = "/opt/katib/data"
 
 
@@ -44,29 +49,44 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         self.job_queue = None
 
     def ValidateAlgorithmSettings(self, request, context):
-        settings = {
+        algorithm_settings = {
             entry.name: entry.value
             for entry in request.experiment.spec.algorithm.algorithm_settings
         }
-        missing_settings = [k for k in _REQUIRED_SETTINGS if k not in settings]
+
+        missing_settings = [k for k in _REQUIRED_ALGORITHM_SETTINGS if k not in algorithm_settings]
         if len(missing_settings) > 0:
             return self._set_validate_context_error(
                 context,
-                "Required params missing: {}".format(", ".join(missing_settings)),
+                "Required params missing: algorithm_settings[{}]".format(", ".join(missing_settings)),
             )
 
-        if int(settings["n_population"]) < 5:
+        missing_spec = []
+        for setting in _REQUIRED_DEPLOYMENT_SETTINGS:
+            value = reduce(
+                lambda obj, key: getattr(obj, key) if hasattr(obj, key) else None,
+                setting.split("."),
+                request.experiment.spec.algorithm.suggestion_spec)
+            if value is None:
+                missing_spec.append(setting)
+        if len(missing_spec) > 0:
+            return self._set_validate_context_error(
+                context,
+                "Required params missing: suggestion_spec[{}]".format(", ".join(missing_spec)),
+            )
+
+        if int(algorithm_settings["n_population"]) < 5:
             return self._set_validate_context_error(
                 context, "Param(n_population) should be >= 5"
             )
-        if not 0 <= float(settings["truncation_threshold"]) <= 1:
+        if not 0 <= float(algorithm_settings["truncation_threshold"]) <= 1:
             return self._set_validate_context_error(
                 context,
                 "Param(truncation_threshold) should be between 0 and 1, inclusive",
             )
         if (
-            "resample_probability" in settings
-            and not 0 <= settings["resample_probability"] <= 1
+            "resample_probability" in algorithm_settings
+            and not 0 <= algorithm_settings["resample_probability"] <= 1
         ):
             return self._set_validate_context_error(
                 context,
@@ -77,7 +97,7 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def GetSuggestions(self, request, context):
         if self.is_first_run:
-            settings = {
+            algorithm_settings = {
                 entry.name: entry.value
                 for entry in request.experiment.spec.algorithm.algorithm_settings
             }  # all type:str
@@ -94,11 +114,11 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             # Create Job Manager
             self.job_queue = PbtJobQueue(
                 request.experiment.name,
-                int(settings["n_population"]),
-                float(settings["truncation_threshold"]),
+                int(algorithm_settings["n_population"]),
+                float(algorithm_settings["truncation_threshold"]),
                 None
-                if not "resample_probability" in settings
-                else float(settings["resample_probability"]),
+                if not "resample_probability" in algorithm_settings
+                else float(algorithm_settings["resample_probability"]),
                 search_space,
                 objective_metric,
                 objective_scale,
