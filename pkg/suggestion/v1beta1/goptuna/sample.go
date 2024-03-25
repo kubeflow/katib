@@ -18,10 +18,10 @@ package suggestion_goptuna_v1beta1
 
 import (
 	"fmt"
-	"reflect"
 	"strconv"
 
 	"github.com/c-bata/goptuna"
+	"github.com/google/go-cmp/cmp"
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
@@ -119,9 +119,9 @@ func findGoptunaTrialIDByParam(study *goptuna.Study, trialMapping map[string]int
 			continue
 		}
 
-		if reflect.DeepEqual(ktrial.Params, trials[i].Params) {
+		if diff := cmp.Diff(ktrial.Params, trials[i].Params); diff == "" {
 			return trials[i].ID, nil
 		}
 	}
-	return -1, fmt.Errorf("Same parameter is not found for Trial: %v", ktrial)
+	return -1, fmt.Errorf("same parameter is not found for Trial: %v", ktrial)
 }

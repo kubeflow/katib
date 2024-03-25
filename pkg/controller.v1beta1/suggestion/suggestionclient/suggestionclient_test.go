@@ -19,11 +19,11 @@ package suggestionclient
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/go-cmp/cmp"
 	"github.com/onsi/gomega"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -578,8 +578,8 @@ func TestConvertTrialObservation(t *testing.T) {
 	}
 	for _, tc := range tcs {
 		actualObservation := convertTrialObservation(tc.strategies, tc.inObservation)
-		if !reflect.DeepEqual(actualObservation, tc.expectedObservation) {
-			t.Errorf("Case: %v failed.\nExpected observation: %v \ngot: %v", tc.testDescription, tc.expectedObservation, actualObservation)
+		if diff := cmp.Diff(actualObservation, tc.expectedObservation); diff != "" {
+			t.Errorf("Case: %v failed. Diff (-want,+got):\n%s", tc.testDescription, diff)
 		}
 	}
 }
