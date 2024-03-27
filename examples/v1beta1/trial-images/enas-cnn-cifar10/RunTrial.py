@@ -16,7 +16,7 @@ from tensorflow import keras
 from keras.datasets import cifar10
 from ModelConstructor import ModelConstructor
 from tensorflow.keras.utils import to_categorical
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.layers import RandomFlip, RandomTranslation, Rescaling
 import tensorflow as tf
 import argparse
 
@@ -76,18 +76,21 @@ if __name__ == "__main__":
     y_train = to_categorical(y_train)
     y_test = to_categorical(y_test)
 
-    augmentation = ImageDataGenerator(
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        horizontal_flip=True)
+    augmentation = tf.keras.Sequential([
+        Rescaling(1./255),
+        RandomFlip('horizontal'),
+        RandomTranslation(height_factor=0.1, width_factor=0.1),
+    ])
 
+    train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+    train_dataset = train_dataset.map(lambda x, y: (augmentation(x, training=True), y))
     # TODO: Add batch size to args
-    aug_data_flow = augmentation.flow(x_train, y_train, batch_size=128)
+    train_dataset = train_dataset.batch(128)
 
     print(">>> Data Loaded. Training starts.")
     for e in range(num_epochs):
         print("\nTotal Epoch {}/{}".format(e + 1, num_epochs))
-        history = test_model.fit(aug_data_flow,
+        history = test_model.fit(train_dataset,
                                  steps_per_epoch=int(len(x_train) / 128) + 1,
                                  epochs=1, verbose=1,
                                  validation_data=(x_test, y_test))
