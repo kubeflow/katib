@@ -49,6 +49,7 @@ type SuggestionService struct {
 	searchSpace  map[string]interface{}
 	study        *goptuna.Study
 	trialMapping map[string]int // Katib trial name -> Goptuna trial id
+	api_v1_beta1.UnimplementedSuggestionServer
 }
 
 func (s *SuggestionService) GetSuggestions(

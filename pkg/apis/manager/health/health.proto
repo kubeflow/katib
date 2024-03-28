@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package grpc.health.v1;
 
+option go_package = "./";
+
 service Health {
     rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
 }

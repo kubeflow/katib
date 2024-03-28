@@ -20,5 +20,4 @@ set -e
 cd "$(dirname "$0")"
 
 proto="health.proto"
-docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
-docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto
+buf generate --template=buf.gen.yaml $proto

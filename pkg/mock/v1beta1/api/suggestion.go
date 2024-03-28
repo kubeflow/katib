@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	__ "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	grpc "google.golang.org/grpc"
 )
 
@@ -37,14 +37,14 @@ func (m *MockSuggestionClient) EXPECT() *MockSuggestionClientMockRecorder {
 }
 
 // GetSuggestions mocks base method.
-func (m *MockSuggestionClient) GetSuggestions(arg0 context.Context, arg1 *api_v1_beta1.GetSuggestionsRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.GetSuggestionsReply, error) {
+func (m *MockSuggestionClient) GetSuggestions(arg0 context.Context, arg1 *__.GetSuggestionsRequest, arg2 ...grpc.CallOption) (*__.GetSuggestionsReply, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetSuggestions", varargs...)
-	ret0, _ := ret[0].(*api_v1_beta1.GetSuggestionsReply)
+	ret0, _ := ret[0].(*__.GetSuggestionsReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -57,14 +57,14 @@ func (mr *MockSuggestionClientMockRecorder) GetSuggestions(arg0, arg1 interface{
 }
 
 // ValidateAlgorithmSettings mocks base method.
-func (m *MockSuggestionClient) ValidateAlgorithmSettings(arg0 context.Context, arg1 *api_v1_beta1.ValidateAlgorithmSettingsRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.ValidateAlgorithmSettingsReply, error) {
+func (m *MockSuggestionClient) ValidateAlgorithmSettings(arg0 context.Context, arg1 *__.ValidateAlgorithmSettingsRequest, arg2 ...grpc.CallOption) (*__.ValidateAlgorithmSettingsReply, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ValidateAlgorithmSettings", varargs...)
-	ret0, _ := ret[0].(*api_v1_beta1.ValidateAlgorithmSettingsReply)
+	ret0, _ := ret[0].(*__.ValidateAlgorithmSettingsReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

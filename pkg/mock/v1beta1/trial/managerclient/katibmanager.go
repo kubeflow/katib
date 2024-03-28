@@ -9,7 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
-	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	__ "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
 // MockManagerClient is a mock of ManagerClient interface.
@@ -36,10 +36,10 @@ func (m *MockManagerClient) EXPECT() *MockManagerClientMockRecorder {
 }
 
 // DeleteTrialObservationLog mocks base method.
-func (m *MockManagerClient) DeleteTrialObservationLog(arg0 *v1beta1.Trial) (*api_v1_beta1.DeleteObservationLogReply, error) {
+func (m *MockManagerClient) DeleteTrialObservationLog(arg0 *v1beta1.Trial) (*__.DeleteObservationLogReply, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteTrialObservationLog", arg0)
-	ret0, _ := ret[0].(*api_v1_beta1.DeleteObservationLogReply)
+	ret0, _ := ret[0].(*__.DeleteObservationLogReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -51,10 +51,10 @@ func (mr *MockManagerClientMockRecorder) DeleteTrialObservationLog(arg0 interfac
 }
 
 // GetTrialObservationLog mocks base method.
-func (m *MockManagerClient) GetTrialObservationLog(arg0 *v1beta1.Trial) (*api_v1_beta1.GetObservationLogReply, error) {
+func (m *MockManagerClient) GetTrialObservationLog(arg0 *v1beta1.Trial) (*__.GetObservationLogReply, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTrialObservationLog", arg0)
-	ret0, _ := ret[0].(*api_v1_beta1.GetObservationLogReply)
+	ret0, _ := ret[0].(*__.GetObservationLogReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	__ "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
 // MockKatibDBInterface is a mock of KatibDBInterface interface.
@@ -61,10 +61,10 @@ func (mr *MockKatibDBInterfaceMockRecorder) DeleteObservationLog(arg0 interface{
 }
 
 // GetObservationLog mocks base method.
-func (m *MockKatibDBInterface) GetObservationLog(arg0, arg1, arg2, arg3 string) (*api_v1_beta1.ObservationLog, error) {
+func (m *MockKatibDBInterface) GetObservationLog(arg0, arg1, arg2, arg3 string) (*__.ObservationLog, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetObservationLog", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(*api_v1_beta1.ObservationLog)
+	ret0, _ := ret[0].(*__.ObservationLog)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -76,7 +76,7 @@ func (mr *MockKatibDBInterfaceMockRecorder) GetObservationLog(arg0, arg1, arg2, 
 }
 
 // RegisterObservationLog mocks base method.
-func (m *MockKatibDBInterface) RegisterObservationLog(arg0 string, arg1 *api_v1_beta1.ObservationLog) error {
+func (m *MockKatibDBInterface) RegisterObservationLog(arg0 string, arg1 *__.ObservationLog) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterObservationLog", arg0, arg1)
 	ret0, _ := ret[0].(error)
