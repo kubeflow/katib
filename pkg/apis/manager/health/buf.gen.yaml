@@ -1,0 +1,10 @@
+version: v1
+plugins:
+ - plugin: buf.build/protocolbuffers/python:v26.0
+   out: python
+ - plugin: buf.build/grpc/python:v1.62.1
+   out: python
+ - plugin: buf.build/protocolbuffers/go:v1.33.0
+   out: ./
+ - plugin: buf.build/grpc/go
+   out: ./

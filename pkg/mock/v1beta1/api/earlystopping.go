@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	__ "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	grpc "google.golang.org/grpc"
 )
 
@@ -37,14 +37,14 @@ func (m *MockEarlyStoppingClient) EXPECT() *MockEarlyStoppingClientMockRecorder 
 }
 
 // GetEarlyStoppingRules mocks base method.
-func (m *MockEarlyStoppingClient) GetEarlyStoppingRules(arg0 context.Context, arg1 *api_v1_beta1.GetEarlyStoppingRulesRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.GetEarlyStoppingRulesReply, error) {
+func (m *MockEarlyStoppingClient) GetEarlyStoppingRules(arg0 context.Context, arg1 *__.GetEarlyStoppingRulesRequest, arg2 ...grpc.CallOption) (*__.GetEarlyStoppingRulesReply, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetEarlyStoppingRules", varargs...)
-	ret0, _ := ret[0].(*api_v1_beta1.GetEarlyStoppingRulesReply)
+	ret0, _ := ret[0].(*__.GetEarlyStoppingRulesReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -57,14 +57,14 @@ func (mr *MockEarlyStoppingClientMockRecorder) GetEarlyStoppingRules(arg0, arg1 
 }
 
 // SetTrialStatus mocks base method.
-func (m *MockEarlyStoppingClient) SetTrialStatus(arg0 context.Context, arg1 *api_v1_beta1.SetTrialStatusRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.SetTrialStatusReply, error) {
+func (m *MockEarlyStoppingClient) SetTrialStatus(arg0 context.Context, arg1 *__.SetTrialStatusRequest, arg2 ...grpc.CallOption) (*__.SetTrialStatusReply, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "SetTrialStatus", varargs...)
-	ret0, _ := ret[0].(*api_v1_beta1.SetTrialStatusReply)
+	ret0, _ := ret[0].(*__.SetTrialStatusReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -77,14 +77,14 @@ func (mr *MockEarlyStoppingClientMockRecorder) SetTrialStatus(arg0, arg1 interfa
 }
 
 // ValidateEarlyStoppingSettings mocks base method.
-func (m *MockEarlyStoppingClient) ValidateEarlyStoppingSettings(arg0 context.Context, arg1 *api_v1_beta1.ValidateEarlyStoppingSettingsRequest, arg2 ...grpc.CallOption) (*api_v1_beta1.ValidateEarlyStoppingSettingsReply, error) {
+func (m *MockEarlyStoppingClient) ValidateEarlyStoppingSettings(arg0 context.Context, arg1 *__.ValidateEarlyStoppingSettingsRequest, arg2 ...grpc.CallOption) (*__.ValidateEarlyStoppingSettingsReply, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0, arg1}
 	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "ValidateEarlyStoppingSettings", varargs...)
-	ret0, _ := ret[0].(*api_v1_beta1.ValidateEarlyStoppingSettingsReply)
+	ret0, _ := ret[0].(*__.ValidateEarlyStoppingSettingsReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

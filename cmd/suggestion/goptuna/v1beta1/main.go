@@ -32,6 +32,7 @@ const (
 )
 
 type healthService struct {
+	health_pb.HealthServer
 }
 
 func (s *healthService) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*health_pb.HealthCheckResponse, error) {
@@ -46,7 +47,8 @@ func main() {
 		klog.Fatalf("Failed to listen: %v", err)
 	}
 	srv := grpc.NewServer()
-	api_v1_beta1.RegisterSuggestionServer(srv, suggestion.NewSuggestionService())
+	api_v1_beta1.RegisterSuggestionServer(srv, &suggestion.SuggestionService{}) // Updated code
+
 	health_pb.RegisterHealthServer(srv, &healthService{})
 
 	klog.Infof("Start Goptuna suggestion service: %s", address)
