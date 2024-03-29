@@ -185,19 +185,19 @@ func TestCollectObservationLog(t *testing.T) {
 		"Invalid file name": {
 			fileName:   "invalid",
 			fileFormat: commonv1beta1.JsonFormat,
-			wantError:  ErrOpenFile,
+			wantError:  errOpenFile,
 		},
 		"Invalid file format": {
 			fileName:   "good.log",
 			fileFormat: "invalid",
-			wantError:  ErrFileFormat,
+			wantError:  errFileFormat,
 		},
 		"Invalid formatted file for logs in JSON format": {
 			fileName: "invalid-format.json",
 			testData: `"checkpoint_path": "", "global_step": "0", "loss": "0.22082142531871796", "timestamp": 1638422847.28721, "trial": "0"
 {"acc": "0.9349666833877563", "checkpoint_path": "", "global_step": "0", "timestamp": 1638422847.287801, "trial": "0`,
 			fileFormat: commonv1beta1.JsonFormat,
-			wantError:  ErrParseJson,
+			wantError:  errParseJson,
 		},
 		"Invalid formatted file for logs in TEXT format": {
 			fileName: "invalid-format.log",
@@ -313,7 +313,7 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 		t.Run(name, func(t *testing.T) {
 			if test.testData != "" {
 				if err := os.WriteFile(filepath.Join(tmpDir, test.fileName), []byte(test.testData), 0600); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write test data: %v", err)
 				}
 			}
 			actual, err := CollectObservationLog(filepath.Join(tmpDir, test.fileName), test.metrics, test.filters, test.fileFormat)

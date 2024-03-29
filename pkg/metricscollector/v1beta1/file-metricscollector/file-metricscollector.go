@@ -36,26 +36,26 @@ import (
 )
 
 var (
-	ErrFileFormat = fmt.Errorf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
-	ErrOpenFile   = errors.New("failed to open the file")
-	ErrReadFile   = errors.New("failed to read the file")
-	ErrParseJson  = errors.New("failed to parse the json object")
+	errFileFormat = fmt.Errorf("format must be set %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
+	errOpenFile   = errors.New("failed to open the file")
+	errReadFile   = errors.New("failed to read the file")
+	errParseJson  = errors.New("failed to parse the json object")
 )
 
 func CollectObservationLog(fileName string, metrics []string, filters []string, fileFormat commonv1beta1.FileFormat) (*v1beta1.ObservationLog, error) {
 	// we should check fileFormat first in case of opening an invalid file
 	if fileFormat != commonv1beta1.JsonFormat && fileFormat != commonv1beta1.TextFormat {
-		return nil, ErrFileFormat
+		return nil, errFileFormat
 	}
 
 	file, err := os.Open(fileName)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrOpenFile, err.Error())
+		return nil, fmt.Errorf("%w: %s", errOpenFile, err.Error())
 	}
 	defer file.Close()
 	content, err := io.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrReadFile, err.Error())
+		return nil, fmt.Errorf("%w: %s", errReadFile, err.Error())
 	}
 	logs := string(content)
 
@@ -64,8 +64,9 @@ func CollectObservationLog(fileName string, metrics []string, filters []string, 
 		return parseLogsInTextFormat(strings.Split(logs, "\n"), metrics, filters)
 	case commonv1beta1.JsonFormat:
 		return parseLogsInJsonFormat(strings.Split(logs, "\n"), metrics)
+	default:
+		return nil, nil
 	}
-	return nil, nil
 }
 
 func parseLogsInTextFormat(logs []string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
@@ -133,7 +134,7 @@ func parseLogsInJsonFormat(logs []string, metrics []string) (*v1beta1.Observatio
 		}
 		var jsonObj map[string]interface{}
 		if err := json.Unmarshal([]byte(logline), &jsonObj); err != nil {
-			return nil, fmt.Errorf("%w: %s", ErrParseJson, err.Error())
+			return nil, fmt.Errorf("%w: %s", errParseJson, err.Error())
 		}
 
 		timestamp := time.Time{}.UTC().Format(time.RFC3339)
