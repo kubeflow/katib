@@ -59,9 +59,19 @@ jobs:
         with:
           path-to-profile: coverage.out
           working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+          parallel: true
 
     strategy:
       fail-fast: false
       matrix:
         # Detail: `setup-envtest list`
         kubernetes-version: ["1.25.0", "1.26.1", "1.27.1"]
+
+  # notifies that all test jobs are finished.
+  finish:
+    needs: unittests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          parallel-finished: true
