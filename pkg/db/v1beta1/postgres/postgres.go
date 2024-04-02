@@ -48,10 +48,12 @@ func getDbName() string {
 		common.PostgreSQLDBPortEnvName, common.DefaultPostgreSQLPort)
 	dbName := env.GetEnvOrDefault(common.PostgreSQLDatabase,
 		common.DefaultPostgreSQLDatabase)
+	sslMode := env.GetEnvOrDefault(common.PostgreSSLMode,
+		common.DefaultPostgreSSLMode)
 
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		dbHost, dbPort, dbUser, dbPass, dbName)
+		"password=%s dbname=%s sslmode=%s",
+		dbHost, dbPort, dbUser, dbPass, dbName, sslMode)
 
 	return psqlInfo
 }

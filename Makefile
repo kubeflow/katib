@@ -157,7 +157,6 @@ update-boilerplate:
 prepare-pytest:
 	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/hyperopt/v1beta1/requirements.txt
-	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/optuna/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/hyperband/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/nas/enas/v1beta1/requirements.txt
@@ -176,6 +175,16 @@ ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
 endif
 
 pytest: prepare-pytest prepare-pytest-testdata
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion
+	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/earlystopping
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/metricscollector
+
+# The skopt service doesn't work appropriately with Python 3.11.
+# So, we need to run the test with Python 3.9.
+# TODO (tenzen-y): Once we stop to support skopt, we can remove this test.
+# REF: https://github.com/kubeflow/katib/issues/2280
+pytest-skopt:
+	pip install six
+	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
+	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
+	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py

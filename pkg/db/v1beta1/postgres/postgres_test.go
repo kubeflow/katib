@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
+	"github.com/google/go-cmp/cmp"
 	_ "github.com/lib/pq"
 
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
@@ -129,11 +130,60 @@ func TestDeleteObservationLog(t *testing.T) {
 }
 
 func TestGetDbName(t *testing.T) {
-	// dbName := "root:@tcp(katib-mysql:3306)/katib?timeout=5s"
-	dbName := "host=katib-postgres port=5432 user=katib password= dbname=katib sslmode=disable"
-
-	if getDbName() != dbName {
-		t.Errorf("getDbName returns wrong value %v", getDbName())
+	cases := map[string]struct {
+		updateEnvs map[string]string
+		wantName   string
+	}{
+		"All parameters are default": {
+			wantName: "host=katib-postgres port=5432 user=katib password= dbname=katib sslmode=disable",
+		},
+		"Set DB_USER": {
+			updateEnvs: map[string]string{
+				common.DBUserEnvName: "testUser",
+			},
+			wantName: "host=katib-postgres port=5432 user=testUser password= dbname=katib sslmode=disable",
+		},
+		"Set KATIB_POSTGRESQL_DB_HOST": {
+			updateEnvs: map[string]string{
+				common.PostgreSQLDBHostEnvName: "testHost",
+			},
+			wantName: "host=testHost port=5432 user=katib password= dbname=katib sslmode=disable",
+		},
+		"Set KATIB_POSTGRESQL_DB_PORT": {
+			updateEnvs: map[string]string{
+				common.PostgreSQLDBPortEnvName: "1234",
+			},
+			wantName: "host=katib-postgres port=1234 user=katib password= dbname=katib sslmode=disable",
+		},
+		"Set KATIB_POSTGRESQL_DB_DATABASE": {
+			updateEnvs: map[string]string{
+				common.PostgreSQLDatabase: "testDB",
+			},
+			wantName: "host=katib-postgres port=5432 user=katib password= dbname=testDB sslmode=disable",
+		},
+		"Set DB_PASSWORD": {
+			updateEnvs: map[string]string{
+				common.DBPasswordEnvName: "testPassword",
+			},
+			wantName: "host=katib-postgres port=5432 user=katib password=testPassword dbname=katib sslmode=disable",
+		},
+		"Set KATIB_POSTGRESQL_SSL_MODE": {
+			updateEnvs: map[string]string{
+				common.PostgreSSLMode: "require",
+			},
+			wantName: "host=katib-postgres port=5432 user=katib password= dbname=katib sslmode=require",
+		},
 	}
 
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			for k, v := range tc.updateEnvs {
+				t.Setenv(k, v)
+			}
+			gotName := getDbName()
+			if diff := cmp.Diff(tc.wantName, gotName); len(diff) != 0 {
+				t.Errorf("Unexpected DBName (-want,+got):\n%s", diff)
+			}
+		})
+	}
 }
