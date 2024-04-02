@@ -140,7 +140,7 @@ def main():
         num_epochs,
         eta_min=w_lr_min)
 
-    architect = Architect(model, w_momentum, w_weight_decay)
+    architect = Architect(model, w_momentum, w_weight_decay, device)
 
     # Start training
     best_top1 = 0.
