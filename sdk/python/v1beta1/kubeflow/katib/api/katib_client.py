@@ -93,29 +93,44 @@ class KatibClient(object):
 
         namespace = namespace or self.namespace
 
+        experiment_name = None
+        if type(experiment) == models.V1beta1Experiment:
+            if experiment.metadata.name is not None:
+                experiment_name = experiment.metadata.name
+            elif experiment.metadata.generate_name is not None:
+                experiment_name = experiment.metadata.generate_name
+        elif "name" in experiment["metadata"]:
+            experiment_name = experiment["metadata"]["name"]
+        elif "generate_name" in experiment["metadata"]:
+            experiment_name = experiment["metadata"]["generate_name"]
+
+        if experiment_name is None:
+            raise ValueError("Experiment must have a name or generateName")
+
         try:
-            self.custom_api.create_namespaced_custom_object(
+            outputs = self.custom_api.create_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace,
                 constants.EXPERIMENT_PLURAL,
                 experiment,
             )
+            experiment_name = outputs["metadata"]["name"] # if "generate_name" is used, "name" gets a prefix from server
         except multiprocessing.TimeoutError:
             raise TimeoutError(
-                f"Timeout to create Katib Experiment: {namespace}/{experiment.metadata.name}"
+                f"Timeout to create Katib Experiment: {namespace}/{experiment_name}"
             )
         except Exception as e:
             if hasattr(e, "status") and e.status == 409:
                 raise Exception(
-                    f"A Katib Experiment with the name {namespace}/{experiment.metadata.name} already exists."
+                    f"A Katib Experiment with the name {namespace}/{experiment_name} already exists."
                 )
             raise RuntimeError(
-                f"Failed to create Katib Experiment: {namespace}/{experiment.metadata.name}"
+                f"Failed to create Katib Experiment: {namespace}/{experiment_name}"
             )
 
         # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{experiment.metadata.name} has been created")
+        print(f"Experiment {namespace}/{experiment_name} has been created")
 
         if self._is_ipython():
             if self.in_cluster:
@@ -125,9 +140,9 @@ class KatibClient(object):
                     IPython.display.HTML(
                         "Katib Experiment {} "
                         'link <a href="/_/katib/#/katib/hp_monitor/{}/{}" target="_blank">here</a>'.format(
-                            experiment.metadata.name,
+                            experiment_name,
                             namespace,
-                            experiment.metadata.name,
+                            experiment_name,
                         )
                     )
                 )
