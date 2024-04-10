@@ -33,6 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
@@ -110,7 +111,9 @@ func main() {
 
 	// Create a new katib controller to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
-		MetricsBindAddress:     initConfig.ControllerConfig.MetricsAddr,
+		Metrics: metricsserver.Options{
+			BindAddress: initConfig.ControllerConfig.MetricsAddr,
+		},
 		HealthProbeBindAddress: initConfig.ControllerConfig.HealthzAddr,
 		LeaderElection:         initConfig.ControllerConfig.EnableLeaderElection,
 		LeaderElectionID:       initConfig.ControllerConfig.LeaderElectionID,

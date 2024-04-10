@@ -36,8 +36,8 @@ if [ -z "$(command -v kubectl)" ]; then
   exit 1
 fi
 
-# Step 1. Create Kind cluster with Kubernetes v1.27.3
-kind create cluster --image kindest/node:v1.27.3
+# Step 1. Create Kind cluster with Kubernetes v1.28.7
+kind create cluster --image kindest/node:v1.28.7
 echo -e "\nKind cluster has been created\n"
 
 # Step 2. Set context for kubectl
