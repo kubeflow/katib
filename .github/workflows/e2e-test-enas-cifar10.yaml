@@ -33,6 +33,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes-version: ["v1.25.12", "v1.26.6", "v1.27.3"]
+        kubernetes-version: ["v1.26.14", "v1.27.11", "v1.28.7"]
         # Comma Delimited
         experiments: ["enas-cpu"]
