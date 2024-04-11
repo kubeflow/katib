@@ -178,6 +178,7 @@ pytest: prepare-pytest prepare-pytest-testdata
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/earlystopping
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/metricscollector
+	PYTHONPATH=$(PYTHONPATH) pytest ./sdk/python/v1beta1/kubeflow/katib/api/katib_client_test.py
 
 # The skopt service doesn't work appropriately with Python 3.11.
 # So, we need to run the test with Python 3.9.

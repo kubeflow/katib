@@ -129,8 +129,9 @@ class KatibClient(object):
                 f"Failed to create Katib Experiment: {namespace}/{experiment_name}"
             )
 
-        # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{experiment_name} has been created")
+        success_message = f"Experiment {namespace}/{experiment_name} has been created"
+        print(success_message)
+        return success_message
 
         if self._is_ipython():
             if self.in_cluster:
