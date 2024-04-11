@@ -29,9 +29,11 @@ import (
 	admissionregistration "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
@@ -208,11 +210,41 @@ func TestGenerate(t *testing.T) {
 }
 
 func buildFakeClient(kubeResources []client.Object) client.Client {
-	fakeClientBuilder := fake.NewClientBuilder().WithScheme(scheme.Scheme)
+	fakeClientBuilder := fake.NewClientBuilder().
+		WithScheme(scheme.Scheme).
+		WithInterceptorFuncs(interceptor.Funcs{Patch: ssaAsStrategicMergePatchFunc})
 	if len(kubeResources) > 0 {
 		fakeClientBuilder.WithObjects(kubeResources...)
 	}
 	return fakeClientBuilder.Build()
+}
+
+type ssaPatchAsStrategicMerge struct {
+	client.Patch
+}
+
+func (*ssaPatchAsStrategicMerge) Type() types.PatchType {
+	return types.StrategicMergePatchType
+}
+
+func wrapSSAPatch(patch client.Patch) client.Patch {
+	if patch.Type() == types.ApplyPatchType {
+		return &ssaPatchAsStrategicMerge{Patch: patch}
+	}
+	return patch
+}
+
+// ssaAsStrategicMergePatchFunc returns the patch interceptor.
+// TODO (tenzen-y): Once the fake client supports server-side apply, we should remove these interceptor.
+// REF: https://github.com/kubernetes/kubernetes/issues/115598
+func ssaAsStrategicMergePatchFunc(
+	ctx context.Context,
+	cli client.WithWatch,
+	obj client.Object,
+	patch client.Patch,
+	opts ...client.PatchOption,
+) error {
+	return cli.Patch(ctx, obj, wrapSSAPatch(patch), opts...)
 }
 
 func TestEnsureCertMounted(t *testing.T) {

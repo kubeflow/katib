@@ -892,7 +892,7 @@ func newFakePVC() *corev1.PersistentVolumeClaim {
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				configv1beta1.DefaultSuggestionVolumeAccessMode,
 			},
-			Resources: corev1.ResourceRequirements{
+			Resources: corev1.VolumeResourceRequirements{
 				Requests: corev1.ResourceList{
 					corev1.ResourceStorage: volumeStorage,
 				},

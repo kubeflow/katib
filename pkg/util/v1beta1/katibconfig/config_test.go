@@ -527,7 +527,7 @@ func newFakeSuggestionConfig(algorithmName string) *configv1beta1.SuggestionConf
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				configv1beta1.DefaultSuggestionVolumeAccessMode,
 			},
-			Resources: corev1.ResourceRequirements{
+			Resources: corev1.VolumeResourceRequirements{
 				Requests: map[corev1.ResourceName]resource.Quantity{
 					corev1.ResourceStorage: defaultVolumeStorage,
 				},
