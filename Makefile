@@ -35,7 +35,7 @@ fmt:
 
 lint:
 ifndef HAS_LINT
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
 	$(info "golangci-lint has been installed")
 endif
 	hack/verify-golangci-lint.sh
@@ -84,7 +84,7 @@ sync-go-mod:
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 .PHONY: controller-gen
 controller-gen:
-	@GOBIN=$(shell pwd)/bin GO111MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
+	@GOBIN=$(shell pwd)/bin GO111MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0
 
 # Run this if you update any existing controller APIs.
 # 1. Generate deepcopy, clientset, listers, informers for the APIs (hack/update-codegen.sh)
