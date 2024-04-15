@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -118,10 +117,6 @@ func main() {
 		LeaderElection:         initConfig.ControllerConfig.EnableLeaderElection,
 		LeaderElectionID:       initConfig.ControllerConfig.LeaderElectionID,
 		Scheme:                 scheme,
-		// TODO: Once the below issue is resolved, we need to switch discovery-client to the built-in one.
-		// https://github.com/kubernetes-sigs/controller-runtime/issues/2354
-		// https://github.com/kubernetes-sigs/controller-runtime/issues/2424
-		MapperProvider: apiutil.NewDiscoveryRESTMapper,
 	})
 	if err != nil {
 		log.Error(err, "Failed to create the manager")
