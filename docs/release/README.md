@@ -75,7 +75,10 @@ Follow these steps to cut a new Katib release:
    git clone git@github.com:kubeflow/katib.git $GOPATH/src/github.com/kubeflow/katib
    ```
 
-1. Make sure that you can build all Katib images:
+1. Make sure that you can build all Katib images. **Note** that
+   your Docker Desktop should
+   [enable containerd image store](https://docs.docker.com/desktop/containerd/#enable-the-containerd-image-store)
+   to build multi-arch images:
 
    ```
    make build REGISTRY=private-registry TAG=latest

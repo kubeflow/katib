@@ -6,7 +6,7 @@ HAS_MOCKGEN := $(shell command -v mockgen;)
 
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
-CPU_ARCH ?= amd64
+CPU_ARCH ?= linux/amd64,linux/arm64
 ENVTEST_K8S_VERSION ?= 1.29
 MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
