@@ -19,6 +19,9 @@ set -e
 
 cd "$(dirname "$0")"
 
-proto="health.proto"
-docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
-docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto
+# proto="health.proto"
+
+# TODO (andreyvelich): Temporarily disable gRPC code generation since znly/protoc doesn't work on ARM machines.
+# Track migration to buf in https://github.com/kubeflow/katib/issues/2141
+# docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
+# docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto

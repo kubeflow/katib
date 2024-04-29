@@ -19,11 +19,13 @@ set -e
 
 cd "$(dirname "$0")"
 
-proto="api.proto"
+# proto="api.proto"
 
-docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
-docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto
+# TODO (andreyvelich): Temporarily disable gRPC code generation since znly/protoc doesn't work on ARM machines.
+# Track migration to buf in https://github.com/kubeflow/katib/issues/2141
+# docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --python_out=plugins=grpc:./python --go_out=plugins=grpc:. -I. $proto
+# docker run -i --rm -v "$PWD:$PWD" -w "$PWD" znly/protoc --plugin=protoc-gen-grpc=/usr/bin/grpc_python_plugin --python_out=./python --grpc_out=./python -I. $proto
 
-docker build -t protoc-gen-doc gen-doc/
-docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=markdown,api.md -I /protobuf -I /apiprotos $proto
-docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=html,index.html -I /protobuf -I /apiprotos $proto
+# docker build -t protoc-gen-doc gen-doc/
+# docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=markdown,api.md -I /protobuf -I /apiprotos $proto
+# docker run --rm -v "$PWD/gen-doc:/out" -v "$PWD:/apiprotos" protoc-gen-doc --doc_opt=html,index.html -I /protobuf -I /apiprotos $proto
