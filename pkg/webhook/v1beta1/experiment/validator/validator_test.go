@@ -65,140 +65,140 @@ func TestValidateExperiment(t *testing.T) {
 	fakeNegativeInt := int32(-1)
 
 	tcs := []struct {
-		Instance        *experimentsv1beta1.Experiment
-		Err             bool
+		instance        *experimentsv1beta1.Experiment
+		err             bool
 		oldInstance     *experimentsv1beta1.Experiment
 		testDescription string
 	}{
 		// Name
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Name = "1234-test"
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Name is invalid",
 		},
 		// Objective
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Objective = nil
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Objective is nil",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Objective.Type = commonv1beta1.ObjectiveTypeUnknown
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Objective type is unknown",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Objective.ObjectiveMetricName = ""
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Objective metric name is empty",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Objective.ObjectiveMetricName = "objective"
 				i.Spec.Objective.AdditionalMetricNames = []string{"objective", "objective-1"}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "additionalMetricNames should not contain objective metric name",
 		},
 		// Algorithm
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Algorithm = nil
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Algorithm is nil",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Algorithm.AlgorithmName = ""
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Algorithm name is empty",
 		},
 		// EarlyStopping
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.EarlyStopping = nil
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "EarlyStopping is nil",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.EarlyStopping.AlgorithmName = ""
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "EarlyStopping AlgorithmName is empty",
 		},
 		// Valid Experiment
 		{
-			Instance:        newFakeInstance(),
-			Err:             false,
+			instance:        newFakeInstance(),
+			err:             false,
 			testDescription: "Run validator for correct experiment",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MaxFailedTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Max failed trial count is negative",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MaxTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Max trial count is negative",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.ParallelTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Parallel trial count is negative",
 		},
 		// Validate Resume Experiment
 		{
-			Instance:        newFakeInstance(),
-			Err:             false,
+			instance:        newFakeInstance(),
+			err:             false,
 			oldInstance:     newFakeInstance(),
 			testDescription: "Run validator to correct resume experiment",
 		},
 		{
-			Instance: newFakeInstance(),
-			Err:      true,
+			instance: newFakeInstance(),
+			err:      true,
 			oldInstance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.MarkExperimentStatusSucceeded(experimentutil.ExperimentMaxTrialsReachedReason, "Experiment is succeeded")
@@ -208,8 +208,8 @@ func TestValidateExperiment(t *testing.T) {
 			testDescription: "Resume succeeded experiment with ResumePolicy = NeverResume",
 		},
 		{
-			Instance: newFakeInstance(),
-			Err:      true,
+			instance: newFakeInstance(),
+			err:      true,
 			oldInstance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Status = experimentsv1beta1.ExperimentStatus{
@@ -222,8 +222,8 @@ func TestValidateExperiment(t *testing.T) {
 			testDescription: "Resume experiment with MaxTrialCount <= Status.Trials",
 		},
 		{
-			Instance: newFakeInstance(),
-			Err:      true,
+			instance: newFakeInstance(),
+			err:      true,
 			oldInstance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Algorithm.AlgorithmName = "not-test"
@@ -232,27 +232,27 @@ func TestValidateExperiment(t *testing.T) {
 			testDescription: "Change algorithm name when resuming experiment",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.ResumePolicy = "invalid-policy"
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid resume policy",
 		},
 		// Validate NAS Config
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Parameters = []experimentsv1beta1.ParameterSpec{}
 				i.Spec.NasConfig = nil
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Parameters and NAS config is nil",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.NasConfig = &experimentsv1beta1.NasConfig{
 					Operations: []experimentsv1beta1.Operation{
@@ -263,29 +263,29 @@ func TestValidateExperiment(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Parameters and NAS config is not nil",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate = nil
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template is nil",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Parameters[1].FeasibleSpace.Max = "5"
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid feasible space in parameters",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				maxTrialCount := int32(5)
 				invalidMaxFailedTrialCount := int32(6)
 				i := newFakeInstance()
@@ -293,11 +293,11 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.MaxFailedTrialCount = &invalidMaxFailedTrialCount
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "maxFailedTrialCount greater than maxTrialCount",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				maxTrialCount := int32(5)
 				validMaxFailedTrialCount := int32(5)
 				i := newFakeInstance()
@@ -305,11 +305,11 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.MaxFailedTrialCount = &validMaxFailedTrialCount
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "maxFailedTrialCount equal to maxTrialCount",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				maxTrialCount := int32(5)
 				invalidParallelTrialCount := int32(6)
 				i := newFakeInstance()
@@ -317,11 +317,11 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.ParallelTrialCount = &invalidParallelTrialCount
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "parallelTrialCount greater than maxTrialCount",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				maxTrialCount := int32(5)
 				validParallelTrialCount := int32(5)
 				i := newFakeInstance()
@@ -329,16 +329,16 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.ParallelTrialCount = &validParallelTrialCount
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "parallelTrialCount equal to maxTrialCount",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.ValidateExperiment(tc.Instance, tc.oldInstance)
-		if !tc.Err && err != nil {
+		err := g.ValidateExperiment(tc.instance, tc.oldInstance)
+		if !tc.err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-		} else if tc.Err && err == nil {
+		} else if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
@@ -504,45 +504,45 @@ spec:
 	)
 
 	tcs := []struct {
-		Instance        *experimentsv1beta1.Experiment
-		Err             bool
+		instance        *experimentsv1beta1.Experiment
+		err             bool
 		testDescription string
 	}{
 		// TrialParamters is nil
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters = nil
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial parameters is nil",
 		},
 		// TrialSpec and ConfigMap is nil
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSpec = nil
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial spec nil",
 		},
 		// TrialSpec and ConfigMap is not nil
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource.ConfigMap = &experimentsv1beta1.ConfigMapSource{
 					ConfigMapName: "config-map-name",
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial spec and ConfigMap is not nil",
 		},
 		// ConfigMap missed template path
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
 					ConfigMap: &experimentsv1beta1.ConfigMapSource{
@@ -552,13 +552,13 @@ spec:
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Missed template path in ConfigMap",
 		},
 		// Wrong path in configMap
 		// emptyConfigMap case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSpec = nil
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
@@ -570,188 +570,188 @@ spec:
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Wrong template path in ConfigMap",
 		},
 		// Empty Reference or Name in trialParameters
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters[0].Reference = ""
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Empty reference or name in Trial parameters",
 		},
 		// Wrong Name in trialParameters
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters[0].Name = "{invalid-name}"
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Wrong name in Trial parameters",
 		},
 		// Duplicate Name in trialParameters
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters[1].Name = i.Spec.TrialTemplate.TrialParameters[0].Name
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Duplicate name in Trial parameters",
 		},
 		// Duplicate Reference in trialParameters
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = i.Spec.TrialTemplate.TrialParameters[0].Reference
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Duplicate reference in Trial parameters",
 		},
 		// Trial template contains Trial parameters which weren't referenced from spec.parameters
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "wrong-ref"
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template contains Trial parameters which weren't referenced from spec.parameters",
 		},
 		// Trial template contains Trial parameters when spec.parameters is empty
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Parameters = nil
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "wrong-ref"
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "Trial template contains Trial parameters when spec.parameters is empty",
 		},
 		// Trial template contains Trial metadata parameter substitution
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Name}"
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "Trial template contains Trial metadata reference as parameter",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Annotations[test-annotation]}"
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "Trial template contains Trial annotation reference as parameter",
 		},
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Labels[test-label]}"
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "Trial template contains Trial's label reference as parameter",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
 		// missedParameterTemplate case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template doesn't contain parameter from Trial parameters",
 		},
 		// Trial Template contains extra parameter
 		// oddParameterTemplate case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template contains extra parameter",
 		},
 		// Trial Template parameter is invalid after substitution
 		// Unable convert string to unstructured
 		// invalidParameterTemplate case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template is unable to convert to unstructured after substitution",
 		},
 		// Trial Template contains Name and Namespace
 		// notEmptyMetadataTemplate case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSpec.SetName("trial-name")
 				i.Spec.TrialTemplate.TrialSpec.SetNamespace("trial-namespace")
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template contains metadata.name or metadata.namespace",
 		},
 		// Trial Template doesn't contain APIVersion or Kind
 		// emptyAPIVersionTemplate case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template doesn't contain APIVersion or Kind",
 		},
 		// Trial Template has custom Kind
 		// customJobTypeTemplate case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "Trial template has custom Kind",
 		},
 		// Trial Template doesn't have PrimaryContainerName
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.PrimaryContainerName = ""
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template doesn't have PrimaryContainerName",
 		},
 		// Trial Template doesn't have SuccessCondition
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.SuccessCondition = ""
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial template doesn't have SuccessCondition",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.(*DefaultValidator).validateTrialTemplate(tc.Instance)
-		if !tc.Err && err != nil {
+		err := g.(*DefaultValidator).validateTrialTemplate(tc.instance)
+		if !tc.err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-		} else if tc.Err && err == nil {
+		} else if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
@@ -823,14 +823,14 @@ spec:
 	}
 
 	tcs := []struct {
-		RunSpec         *unstructured.Unstructured
-		Err             bool
+		runSpec         *unstructured.Unstructured
+		err             bool
 		testDescription string
 	}{
 		// Invalid Field Batch Job
 		{
-			RunSpec:         invalidFieldBatchJobUnstr,
-			Err:             true,
+			runSpec:         invalidFieldBatchJobUnstr,
+			err:             true,
 			testDescription: "Trial template has invalid Batch Job parameter",
 		},
 		// Invalid Structure Batch Job
@@ -838,29 +838,29 @@ spec:
 		// Patch must have only "remove" operations
 		// Then all parameters from trial Template were correctly merged
 		{
-			RunSpec:         invalidStructureBatchJobUnstr,
-			Err:             true,
+			runSpec:         invalidStructureBatchJobUnstr,
+			err:             true,
 			testDescription: "Trial template has invalid Batch Job structure",
 		},
 		// Valid case with not default Kubernetes resource (nvidia.com/gpu: 1)
 		{
-			RunSpec:         notDefaultResourceBatchUnstr,
-			Err:             false,
+			runSpec:         notDefaultResourceBatchUnstr,
+			err:             false,
 			testDescription: "Valid case with nvidia.com/gpu resource in Trial template",
 		},
 		// Not kubernetes batch job
 		{
-			RunSpec:         notKubernetesBatchJobUnstr,
-			Err:             false,
+			runSpec:         notKubernetesBatchJobUnstr,
+			err:             false,
 			testDescription: "Only validate Kuernetes Job",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.(*DefaultValidator).validateTrialJob(tc.RunSpec)
-		if !tc.Err && err != nil {
+		err := g.(*DefaultValidator).validateTrialJob(tc.runSpec)
+		if !tc.err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-		} else if tc.Err && err == nil {
+		} else if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
@@ -881,13 +881,13 @@ func TestValidateMetricsCollector(t *testing.T) {
 	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(metricsCollectorConfigData, nil).AnyTimes()
 
 	tcs := []struct {
-		Instance        *experimentsv1beta1.Experiment
-		Err             bool
+		instance        *experimentsv1beta1.Experiment
+		err             bool
 		testDescription string
 	}{
 		// Invalid Metrics Collector Kind
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -896,12 +896,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid metrics collector Kind",
 		},
 		// FileCollector invalid Path
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -916,12 +916,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid path for File metrics collector",
 		},
 		// TfEventCollector invalid Path
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -935,12 +935,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid path for TF event metrics collector",
 		},
 		// TfEventCollector invalid file format
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -956,12 +956,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid file format for TF event metrics collector",
 		},
 		// PrometheusMetricCollector invalid Port
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -977,12 +977,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid port for Prometheus metrics collector",
 		},
 		// PrometheusMetricCollector invalid Path
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -999,12 +999,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid path for Prometheus metrics collector",
 		},
 		//  CustomCollector empty CustomCollector
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -1013,12 +1013,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Empty container for Custom metrics collector",
 		},
 		//  CustomCollector invalid Path
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -1035,12 +1035,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid path for Custom metrics collector",
 		},
 		// FileMetricCollector invalid regexp in metrics format
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -1061,12 +1061,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid metrics format regex for File metrics collector",
 		},
 		// FileMetricCollector one subexpression in metrics format
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -1087,12 +1087,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "One subexpression in metrics format",
 		},
 		// FileMetricCollector invalid file format
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -1108,12 +1108,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid file format for File metrics collector",
 		},
 		// FileMetricCollector invalid metrics filter
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -1130,12 +1130,12 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Invalid metrics filer for File metrics collector when file format is `JSON`",
 		},
 		// Valid FileMetricCollector
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.MetricsCollectorSpec = &commonv1beta1.MetricsCollectorSpec{
 					Collector: &commonv1beta1.CollectorSpec{
@@ -1151,16 +1151,16 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			Err:             false,
+			err:             false,
 			testDescription: "Run validator for correct File metrics collector",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.(*DefaultValidator).validateMetricsCollector(tc.Instance)
-		if !tc.Err && err != nil {
+		err := g.(*DefaultValidator).validateMetricsCollector(tc.instance)
+		if !tc.err && err != nil {
 			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-		} else if tc.Err && err == nil {
+		} else if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
@@ -1199,25 +1199,25 @@ func TestValidateConfigData(t *testing.T) {
 	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()
 
 	tcs := []struct {
-		Instance        *experimentsv1beta1.Experiment
+		instance        *experimentsv1beta1.Experiment
 		testDescription string
 	}{
 		{
-			Instance:        newFakeInstance(),
+			instance:        newFakeInstance(),
 			testDescription: "Get metrics collector config data error",
 		},
 		{
-			Instance:        newFakeInstance(),
+			instance:        newFakeInstance(),
 			testDescription: "Get early stopping config data error",
 		},
 		{
-			Instance:        newFakeInstance(),
+			instance:        newFakeInstance(),
 			testDescription: "Get suggestion config data error",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.ValidateExperiment(tc.Instance, nil)
+		err := g.ValidateExperiment(tc.instance, nil)
 		if err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
