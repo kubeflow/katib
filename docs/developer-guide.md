@@ -12,8 +12,8 @@ see the following user guides:
 
 ## Requirements
 
-- [Go](https://golang.org/) (1.20 or later)
-- [Docker](https://docs.docker.com/) (20.10 or later)
+- [Go](https://golang.org/) (1.22 or later)
+- [Docker](https://docs.docker.com/) (24.0 or later)
 - [Docker Buildx](https://docs.docker.com/build/buildx/) (0.8.0 or later)
 - [Java](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) (8 or later)
 - [Python](https://www.python.org/) (3.11 or later)
@@ -21,7 +21,9 @@ see the following user guides:
 
 ## Build from source code
 
-Check source code as follows:
+**Note** that your Docker Desktop should
+[enable containerd image store](https://docs.docker.com/desktop/containerd/#enable-the-containerd-image-store)
+to build multi-arch images. Check source code as follows:
 
 ```bash
 make build REGISTRY=<image-registry> TAG=<image-tag>
@@ -45,8 +47,8 @@ make undeploy
 
 ## Technical and style guide
 
-The following guidelines apply primarily to Katib, 
-but other projects like [Training Operator](https://github.com/kubeflow/training-operator) might also adhere to them. 
+The following guidelines apply primarily to Katib,
+but other projects like [Training Operator](https://github.com/kubeflow/training-operator) might also adhere to them.
 
 ## Go Development
 
@@ -54,13 +56,13 @@ When coding:
 
 - Follow [effective go](https://go.dev/doc/effective_go) guidelines.
 - Run locally [`make check`](https://github.com/kubeflow/katib/blob/46173463027e4fd2e604e25d7075b2b31a702049/Makefile#L31)
-to verify if changes follow best practices before submitting PRs.
+  to verify if changes follow best practices before submitting PRs.
 
 Testing:
 
 - Use [`cmp.Diff`](https://pkg.go.dev/github.com/google/go-cmp/cmp#Diff) instead of `reflect.Equal`, to provide useful comparisons.
 - Define test cases as maps instead of slices to avoid dependencies on the running order.
-Map key should be equal to the test case name.
+  Map key should be equal to the test case name.
 
 ## Modify controller APIs
 
@@ -77,7 +79,7 @@ make generate
 Below is a list of command-line flags accepted by Katib controller:
 
 | Name         | Type   | Default | Description                                                                                                                      |
-|--------------|--------|---------|----------------------------------------------------------------------------------------------------------------------------------|
+| ------------ | ------ | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | katib-config | string | ""      | The katib-controller will load its initial configuration from this file. Omit this flag to use the default configuration values. |
 
 ## DB Manager Flags
@@ -126,7 +128,6 @@ Once Katib is deployed in the Kubernetes cluster, the `cert-generator` follows t
 - Generate the self-signed certificate and private key.
 
 - Update a Kubernetes Secret with the self-signed TLS certificate and private key.
-  
 - Patch the webhooks with the `CABundle`.
 
 Once the `cert-generator` finished, the Katib controller starts to register controllers such as `experiment-controller` to the manager.

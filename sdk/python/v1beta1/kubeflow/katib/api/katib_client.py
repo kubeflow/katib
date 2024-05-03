@@ -93,29 +93,46 @@ class KatibClient(object):
 
         namespace = namespace or self.namespace
 
+        experiment_name = None
+        if type(experiment) == models.V1beta1Experiment:
+            if experiment.metadata.name is not None:
+                experiment_name = experiment.metadata.name
+            elif experiment.metadata.generate_name is not None:
+                experiment_name = experiment.metadata.generate_name
+        elif "name" in experiment["metadata"]:
+            experiment_name = experiment["metadata"]["name"]
+        elif "generate_name" in experiment["metadata"]:
+            experiment_name = experiment["metadata"]["generate_name"]
+
+        if experiment_name is None:
+            raise ValueError("Experiment must have a name or generateName")
+
         try:
-            self.custom_api.create_namespaced_custom_object(
+            outputs = self.custom_api.create_namespaced_custom_object(
                 constants.KUBEFLOW_GROUP,
                 constants.KATIB_VERSION,
                 namespace,
                 constants.EXPERIMENT_PLURAL,
                 experiment,
             )
+            experiment_name = outputs["metadata"][
+                "name"
+            ]  # if "generate_name" is used, "name" gets a prefix from server
         except multiprocessing.TimeoutError:
             raise TimeoutError(
-                f"Timeout to create Katib Experiment: {namespace}/{experiment.metadata.name}"
+                f"Timeout to create Katib Experiment: {namespace}/{experiment_name}"
             )
         except Exception as e:
             if hasattr(e, "status") and e.status == 409:
                 raise Exception(
-                    f"A Katib Experiment with the name {namespace}/{experiment.metadata.name} already exists."
+                    f"A Katib Experiment with the name {namespace}/{experiment_name} already exists."
                 )
             raise RuntimeError(
-                f"Failed to create Katib Experiment: {namespace}/{experiment.metadata.name}"
+                f"Failed to create Katib Experiment: {namespace}/{experiment_name}"
             )
 
         # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{experiment.metadata.name} has been created")
+        print(f"Experiment {namespace}/{experiment_name} has been created")
 
         if self._is_ipython():
             if self.in_cluster:
@@ -125,9 +142,9 @@ class KatibClient(object):
                     IPython.display.HTML(
                         "Katib Experiment {} "
                         'link <a href="/_/katib/#/katib/hp_monitor/{}/{}" target="_blank">here</a>'.format(
-                            experiment.metadata.name,
+                            experiment_name,
                             namespace,
-                            experiment.metadata.name,
+                            experiment_name,
                         )
                     )
                 )
@@ -140,9 +157,13 @@ class KatibClient(object):
         parameters: Dict[str, Any],
         base_image: str = constants.BASE_IMAGE_TENSORFLOW,
         namespace: Optional[str] = None,
-        env_per_trial: Optional[Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]] = None,
+        env_per_trial: Optional[
+            Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]
+        ] = None,
         algorithm_name: str = "random",
-        algorithm_settings: Union[dict, List[models.V1beta1AlgorithmSetting], None] = None,
+        algorithm_settings: Union[
+            dict, List[models.V1beta1AlgorithmSetting], None
+        ] = None,
         objective_metric_name: str = None,
         additional_metric_names: List[str] = [],
         objective_type: str = "maximize",
@@ -173,9 +194,10 @@ class KatibClient(object):
                 objective function.
             base_image: Image to use when executing the objective function.
             namespace: Namespace for the Experiment.
-            env_per_trial: Environment variable(s) to be attached to each trial container. 
-                You can specify a dictionary as a mapping object representing the environment variables. 
-                Otherwise, you can specify a list, in which the element can either be a kubernetes.client.models.V1EnvVar (documented here: 
+            env_per_trial: Environment variable(s) to be attached to each trial container.
+                You can specify a dictionary as a mapping object representing the environment
+                variables. Otherwise, you can specify a list, in which the element can either
+                be a kubernetes.client.models.V1EnvVar (documented here:
                 https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvVar.md)
                 or a kubernetes.client.models.V1EnvFromSource (documented here:
                 https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvFromSource.md)
@@ -217,7 +239,7 @@ class KatibClient(object):
             pip_index_url: The PyPI url from which to install Python packages.
 
         Raises:
-            ValueError: Objective function has invalid arguments.
+            ValueError: Function arguments have incorrect type or value.
             TimeoutError: Timeout to create Katib Experiment.
             RuntimeError: Failed to create Katib Experiment.
         """
@@ -243,7 +265,10 @@ class KatibClient(object):
 
         # Add Algorithm to the Katib Experiment.
         if isinstance(algorithm_settings, dict):
-            algorithm_settings = [models.V1beta1AlgorithmSetting(name=str(k), value=str(v)) for k, v in algorithm_settings.items()]
+            algorithm_settings = [
+                models.V1beta1AlgorithmSetting(name=str(k), value=str(v))
+                for k, v in algorithm_settings.items()
+            ]
 
         experiment.spec.algorithm = models.V1beta1AlgorithmSpec(
             algorithm_name=algorithm_name,
@@ -325,15 +350,24 @@ class KatibClient(object):
                 requests=resources_per_trial,
                 limits=resources_per_trial,
             )
-        
+
+        env = []
+        env_from = []
         if isinstance(env_per_trial, dict):
-            env, env_from = [client.V1EnvVar(name=str(k), value=str(v)) for k, v in env_per_trial.items()] or None, None
-        
-        if env_per_trial:
-            env = [x for x in env_per_trial if isinstance(x, client.V1EnvVar)] or None
-            env_from = [x for x in env_per_trial if isinstance(x, client.V1EnvFromSource)] or None
-        else:
-            env, env_from = None, None
+            env = [
+                client.V1EnvVar(name=str(k), value=str(v))
+                for k, v in env_per_trial.items()
+            ]
+        elif env_per_trial:
+            for x in env_per_trial:
+                if isinstance(x, client.V1EnvVar):
+                    env.append(x)
+                elif isinstance(x, client.V1EnvFromSource):
+                    env_from.append(x)
+                else:
+                    raise ValueError(
+                        f"Incorrect value for env_per_trial: {env_per_trial}"
+                    )
 
         # Create Trial specification.
         trial_spec = client.V1Job(
@@ -1141,9 +1175,9 @@ class KatibClient(object):
                     ):
                         output = {}
                         output["name"] = trial.metadata.name
-                        output[
-                            "parameter_assignments"
-                        ] = trial.spec.parameter_assignments
+                        output["parameter_assignments"] = (
+                            trial.spec.parameter_assignments
+                        )
                         output["metrics"] = trial.status.observation.metrics
                         result.append(output)
         except multiprocessing.TimeoutError:

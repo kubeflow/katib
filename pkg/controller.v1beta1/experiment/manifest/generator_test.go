@@ -89,23 +89,23 @@ func TestGetRunSpecWithHP(t *testing.T) {
 	}
 
 	tcs := []struct {
-		Instance             *experimentsv1beta1.Experiment
-		ParameterAssignments []commonapiv1beta1.ParameterAssignment
+		instance             *experimentsv1beta1.Experiment
+		parameterAssignments []commonapiv1beta1.ParameterAssignment
 		expectedRunSpec      *unstructured.Unstructured
-		Err                  bool
+		err                  bool
 		testDescription      string
 	}{
 		// Valid run
 		{
-			Instance:             newFakeInstance(),
-			ParameterAssignments: newFakeParameterAssignment(),
+			instance:             newFakeInstance(),
+			parameterAssignments: newFakeParameterAssignment(),
 			expectedRunSpec:      expectedRunSpec,
-			Err:                  false,
+			err:                  false,
 			testDescription:      "Run with valid parameters",
 		},
 		// Invalid JSON in unstructured
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				trialSpec := i.Spec.TrialTemplate.TrialSource.TrialSpec
 				trialSpec.Object = map[string]interface{}{
@@ -113,25 +113,25 @@ func TestGetRunSpecWithHP(t *testing.T) {
 				}
 				return i
 			}(),
-			ParameterAssignments: newFakeParameterAssignment(),
-			Err:                  true,
+			parameterAssignments: newFakeParameterAssignment(),
+			err:                  true,
 			testDescription:      "Invalid JSON in Trial template",
 		},
 		// len(parameterAssignment) != len(trialParameters)
 		{
-			Instance: newFakeInstance(),
-			ParameterAssignments: func() []commonapiv1beta1.ParameterAssignment {
+			instance: newFakeInstance(),
+			parameterAssignments: func() []commonapiv1beta1.ParameterAssignment {
 				pa := newFakeParameterAssignment()
 				pa = pa[1:]
 				return pa
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Number of parameter assignments is not equal to number of Trial parameters",
 		},
 		// Parameter from assignments not found in Trial parameters
 		{
-			Instance: newFakeInstance(),
-			ParameterAssignments: func() []commonapiv1beta1.ParameterAssignment {
+			instance: newFakeInstance(),
+			parameterAssignments: func() []commonapiv1beta1.ParameterAssignment {
 				pa := newFakeParameterAssignment()
 				pa[0] = commonapiv1beta1.ParameterAssignment{
 					Name:  "invalid-name",
@@ -139,17 +139,17 @@ func TestGetRunSpecWithHP(t *testing.T) {
 				}
 				return pa
 			}(),
-			Err:             true,
+			err:             true,
 			testDescription: "Trial parameters don't have parameter from assignments",
 		},
 	}
 
 	for _, tc := range tcs {
-		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments)
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.instance, "trial-name", "trial-namespace", tc.parameterAssignments)
 
-		if tc.Err && err == nil {
+		if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-		} else if !tc.Err {
+		} else if !tc.err {
 			if err != nil {
 				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 			} else if !reflect.DeepEqual(tc.expectedRunSpec, actualRunSpec) {
@@ -249,15 +249,15 @@ spec:
 	}
 
 	tcs := []struct {
-		Instance             *experimentsv1beta1.Experiment
-		ParameterAssignments []commonapiv1beta1.ParameterAssignment
-		Err                  bool
+		instance             *experimentsv1beta1.Experiment
+		parameterAssignments []commonapiv1beta1.ParameterAssignment
+		err                  bool
 		testDescription      string
 	}{
 		// Valid run
 		// validGetConfigMap1 case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
 					ConfigMap: &experimentsv1beta1.ConfigMapSource{
@@ -268,14 +268,14 @@ spec:
 				}
 				return i
 			}(),
-			ParameterAssignments: newFakeParameterAssignment(),
-			Err:                  false,
+			parameterAssignments: newFakeParameterAssignment(),
+			err:                  false,
 			testDescription:      "Run with valid parameters",
 		},
 		// Invalid ConfigMap name
 		// invalidConfigMapName case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
 					ConfigMap: &experimentsv1beta1.ConfigMapSource{
@@ -284,14 +284,14 @@ spec:
 				}
 				return i
 			}(),
-			ParameterAssignments: newFakeParameterAssignment(),
-			Err:                  true,
+			parameterAssignments: newFakeParameterAssignment(),
+			err:                  true,
 			testDescription:      "Invalid ConfigMap name",
 		},
 		// Invalid template path in ConfigMap name
 		// validGetConfigMap3 case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
 					ConfigMap: &experimentsv1beta1.ConfigMapSource{
@@ -302,8 +302,8 @@ spec:
 				}
 				return i
 			}(),
-			ParameterAssignments: newFakeParameterAssignment(),
-			Err:                  true,
+			parameterAssignments: newFakeParameterAssignment(),
+			err:                  true,
 			testDescription:      "Invalid template path in ConfigMap",
 		},
 		// Invalid Trial template spec in ConfigMap
@@ -311,7 +311,7 @@ spec:
 		// Because of that, user can specify not valid unstructured template
 		// invalidTemplate case
 		{
-			Instance: func() *experimentsv1beta1.Experiment {
+			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
 					ConfigMap: &experimentsv1beta1.ConfigMapSource{
@@ -322,17 +322,17 @@ spec:
 				}
 				return i
 			}(),
-			ParameterAssignments: newFakeParameterAssignment(),
-			Err:                  true,
+			parameterAssignments: newFakeParameterAssignment(),
+			err:                  true,
 			testDescription:      "Invalid Trial spec in ConfigMap",
 		},
 	}
 
 	for _, tc := range tcs {
-		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.Instance, "trial-name", "trial-namespace", tc.ParameterAssignments)
-		if tc.Err && err == nil {
+		actualRunSpec, err := p.GetRunSpecWithHyperParameters(tc.instance, "trial-name", "trial-namespace", tc.parameterAssignments)
+		if tc.err && err == nil {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
-		} else if !tc.Err {
+		} else if !tc.err {
 			if err != nil {
 				t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
 			} else if !reflect.DeepEqual(expectedRunSpec, actualRunSpec) {

@@ -21,7 +21,7 @@ REQUIRES = [
     "six>=1.10",
     "setuptools>=21.0.0",
     "urllib3>=1.15.1",
-    "kubernetes>=23.6.0",
+    "kubernetes>=27.2.0",
     "grpcio>=1.41.1",
     "protobuf>=3.19.5, <=3.20.3",
 ]
@@ -38,7 +38,7 @@ if os.path.exists(katib_grpc_api_file):
 
 setuptools.setup(
     name="kubeflow-katib",
-    version="0.16.0",
+    version="0.17.0rc0",
     author="Kubeflow Authors",
     author_email="premnath.vel@gmail.com",
     license="Apache License Version 2.0",

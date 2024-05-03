@@ -185,62 +185,62 @@ func TestSyncAssignments(t *testing.T) {
 	)
 
 	tcs := []struct {
-		Experiment      *experimentsv1beta1.Experiment
-		Suggestion      *suggestionsv1beta1.Suggestion
-		Trials          []trialsv1beta1.Trial
-		Err             bool
-		TestDescription string
+		experiment      *experimentsv1beta1.Experiment
+		suggestion      *suggestionsv1beta1.Suggestion
+		trials          []trialsv1beta1.Trial
+		err             bool
+		testDescription string
 	}{
 		// Experiment contains HP and NAS config just for the test purpose
 		// validRunGetSuggestions + validRunGetEarlyStopRules case
 		{
-			Experiment:      newFakeExperiment(),
-			Suggestion:      newFakeSuggestion(),
-			Trials:          newFakeTrials(),
-			Err:             false,
-			TestDescription: "SyncAssignments valid run",
+			experiment:      newFakeExperiment(),
+			suggestion:      newFakeSuggestion(),
+			trials:          newFakeTrials(),
+			err:             false,
+			testDescription: "SyncAssignments valid run",
 		},
 		{
-			Suggestion: func() *suggestionsv1beta1.Suggestion {
+			suggestion: func() *suggestionsv1beta1.Suggestion {
 				s := newFakeSuggestion()
 				s.Spec.Requests = 4
 				s.Status.SuggestionCount = 6
 				return s
 			}(),
-			Err:             false,
-			TestDescription: "Negative request number",
+			err:             false,
+			testDescription: "Negative request number",
 		},
 		// getSuggestionsFail case
 		{
-			Experiment:      newFakeExperiment(),
-			Suggestion:      newFakeSuggestion(),
-			Trials:          newFakeTrials(),
-			Err:             true,
-			TestDescription: "Unable to execute GetSuggestions",
+			experiment:      newFakeExperiment(),
+			suggestion:      newFakeSuggestion(),
+			trials:          newFakeTrials(),
+			err:             true,
+			testDescription: "Unable to execute GetSuggestions",
 		},
 		// invalidAssignmentsCount case
 		{
-			Experiment:      newFakeExperiment(),
-			Suggestion:      newFakeSuggestion(),
-			Trials:          newFakeTrials(),
-			Err:             true,
-			TestDescription: "ParameterAssignments from response != request number",
+			experiment:      newFakeExperiment(),
+			suggestion:      newFakeSuggestion(),
+			trials:          newFakeTrials(),
+			err:             true,
+			testDescription: "ParameterAssignments from response != request number",
 		},
 		// validRunGetSuggestions2 + getEarlyStopRulesFail case
 		{
-			Experiment:      newFakeExperiment(),
-			Suggestion:      newFakeSuggestion(),
-			Trials:          newFakeTrials(),
-			Err:             true,
-			TestDescription: "Unable to execute GetEarlyStoppingRules",
+			experiment:      newFakeExperiment(),
+			suggestion:      newFakeSuggestion(),
+			trials:          newFakeTrials(),
+			err:             true,
+			testDescription: "Unable to execute GetEarlyStoppingRules",
 		},
 	}
 	for _, tc := range tcs {
-		err := suggestionClient.SyncAssignments(tc.Suggestion, tc.Experiment, tc.Trials)
-		if !tc.Err && err != nil {
-			t.Errorf("Case: %v failed. Expected nil, got %v", tc.TestDescription, err)
-		} else if tc.Err && err == nil {
-			t.Errorf("Case: %v failed. Expected err, got nil", tc.TestDescription)
+		err := suggestionClient.SyncAssignments(tc.suggestion, tc.experiment, tc.trials)
+		if !tc.err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
 }
@@ -286,46 +286,46 @@ func TestValidateAlgorithmSettings(t *testing.T) {
 		unimplementedMethod)
 
 	tcs := []struct {
-		Experiment      *experimentsv1beta1.Experiment
-		Suggestion      *suggestionsv1beta1.Suggestion
-		Err             bool
-		TestDescription string
+		experiment      *experimentsv1beta1.Experiment
+		suggestion      *suggestionsv1beta1.Suggestion
+		err             bool
+		testDescription string
 	}{
 		// validRun case
 		{
-			Experiment:      exp,
-			Suggestion:      sug,
-			Err:             false,
-			TestDescription: "ValidateAlgorithmSettings valid run",
+			experiment:      exp,
+			suggestion:      sug,
+			err:             false,
+			testDescription: "ValidateAlgorithmSettings valid run",
 		},
 		// invalidExperiment case
 		{
-			Experiment:      exp,
-			Suggestion:      sug,
-			Err:             true,
-			TestDescription: "Invalid argument return in Experiment validation",
+			experiment:      exp,
+			suggestion:      sug,
+			err:             true,
+			testDescription: "Invalid argument return in Experiment validation",
 		},
 		// connectionError case
 		{
-			Experiment:      exp,
-			Suggestion:      sug,
-			Err:             true,
-			TestDescription: "Connection to suggestion service error",
+			experiment:      exp,
+			suggestion:      sug,
+			err:             true,
+			testDescription: "Connection to suggestion service error",
 		},
 		// unimplementedMethod case
 		{
-			Experiment:      exp,
-			Suggestion:      sug,
-			Err:             false,
-			TestDescription: "Unimplemented ValidateAlgorithmSettings method",
+			experiment:      exp,
+			suggestion:      sug,
+			err:             false,
+			testDescription: "Unimplemented ValidateAlgorithmSettings method",
 		},
 	}
 	for _, tc := range tcs {
-		err := suggestionClient.ValidateAlgorithmSettings(tc.Suggestion, tc.Experiment)
-		if !tc.Err && err != nil {
-			t.Errorf("Case: %v failed. Expected nil, got %v", tc.TestDescription, err)
-		} else if tc.Err && err == nil {
-			t.Errorf("Case: %v failed. Expected err, got nil", tc.TestDescription)
+		err := suggestionClient.ValidateAlgorithmSettings(tc.suggestion, tc.experiment)
+		if !tc.err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
 }
@@ -365,46 +365,46 @@ func TestValidateEarlyStoppingSettings(t *testing.T) {
 		unimplementedMethod)
 
 	tcs := []struct {
-		Experiment      *experimentsv1beta1.Experiment
-		Suggestion      *suggestionsv1beta1.Suggestion
-		Err             bool
-		TestDescription string
+		experiment      *experimentsv1beta1.Experiment
+		suggestion      *suggestionsv1beta1.Suggestion
+		err             bool
+		testDescription string
 	}{
 		// validRun case
 		{
-			Experiment:      exp,
-			Suggestion:      sug,
-			Err:             false,
-			TestDescription: "ValidateEarlyStoppingSettings valid run",
+			experiment:      exp,
+			suggestion:      sug,
+			err:             false,
+			testDescription: "ValidateEarlyStoppingSettings valid run",
 		},
 		// invalidExperiment case
 		{
-			Experiment:      exp,
-			Suggestion:      sug,
-			Err:             true,
-			TestDescription: "Invalid argument return in Experiment validation",
+			experiment:      exp,
+			suggestion:      sug,
+			err:             true,
+			testDescription: "Invalid argument return in Experiment validation",
 		},
 		// connectionError case
 		{
-			Experiment:      exp,
-			Suggestion:      sug,
-			Err:             true,
-			TestDescription: "Connection to early stopping service error",
+			experiment:      exp,
+			suggestion:      sug,
+			err:             true,
+			testDescription: "Connection to early stopping service error",
 		},
 		// unimplementedMethod case
 		{
-			Experiment:      exp,
-			Suggestion:      sug,
-			Err:             false,
-			TestDescription: "Unimplemented ValidateEarlyStoppingSettings method",
+			experiment:      exp,
+			suggestion:      sug,
+			err:             false,
+			testDescription: "Unimplemented ValidateEarlyStoppingSettings method",
 		},
 	}
 	for _, tc := range tcs {
-		err := suggestionClient.ValidateEarlyStoppingSettings(tc.Suggestion, tc.Experiment)
-		if !tc.Err && err != nil {
-			t.Errorf("Case: %v failed. Expected nil, got %v", tc.TestDescription, err)
-		} else if tc.Err && err == nil {
-			t.Errorf("Case: %v failed. Expected err, got nil", tc.TestDescription)
+		err := suggestionClient.ValidateEarlyStoppingSettings(tc.suggestion, tc.experiment)
+		if !tc.err && err != nil {
+			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
+		} else if tc.err && err == nil {
+			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
 }
@@ -412,50 +412,50 @@ func TestValidateEarlyStoppingSettings(t *testing.T) {
 func TestConvertTrialConditionType(t *testing.T) {
 
 	tcs := []struct {
-		InCondition       trialsv1beta1.TrialConditionType
-		ExpectedCondition suggestionapi.TrialStatus_TrialConditionType
-		TestDescription   string
+		inCondition       trialsv1beta1.TrialConditionType
+		expectedCondition suggestionapi.TrialStatus_TrialConditionType
+		testDescription   string
 	}{
 		{
-			InCondition:       trialsv1beta1.TrialCreated,
-			ExpectedCondition: suggestionapi.TrialStatus_CREATED,
-			TestDescription:   "Convert created Trial condition",
+			inCondition:       trialsv1beta1.TrialCreated,
+			expectedCondition: suggestionapi.TrialStatus_CREATED,
+			testDescription:   "Convert created Trial condition",
 		},
 		{
-			InCondition:       trialsv1beta1.TrialRunning,
-			ExpectedCondition: suggestionapi.TrialStatus_RUNNING,
-			TestDescription:   "Convert running Trial condition",
+			inCondition:       trialsv1beta1.TrialRunning,
+			expectedCondition: suggestionapi.TrialStatus_RUNNING,
+			testDescription:   "Convert running Trial condition",
 		},
 		{
-			InCondition:       trialsv1beta1.TrialSucceeded,
-			ExpectedCondition: suggestionapi.TrialStatus_SUCCEEDED,
-			TestDescription:   "Convert succeeded Trial condition",
+			inCondition:       trialsv1beta1.TrialSucceeded,
+			expectedCondition: suggestionapi.TrialStatus_SUCCEEDED,
+			testDescription:   "Convert succeeded Trial condition",
 		},
 		{
-			InCondition:       trialsv1beta1.TrialKilled,
-			ExpectedCondition: suggestionapi.TrialStatus_KILLED,
-			TestDescription:   "Convert killed Trial condition",
+			inCondition:       trialsv1beta1.TrialKilled,
+			expectedCondition: suggestionapi.TrialStatus_KILLED,
+			testDescription:   "Convert killed Trial condition",
 		},
 		{
-			InCondition:       trialsv1beta1.TrialFailed,
-			ExpectedCondition: suggestionapi.TrialStatus_FAILED,
-			TestDescription:   "Convert failed Trial condition",
+			inCondition:       trialsv1beta1.TrialFailed,
+			expectedCondition: suggestionapi.TrialStatus_FAILED,
+			testDescription:   "Convert failed Trial condition",
 		},
 		{
-			InCondition:       trialsv1beta1.TrialEarlyStopped,
-			ExpectedCondition: suggestionapi.TrialStatus_EARLYSTOPPED,
-			TestDescription:   "Convert early stopped Trial condition",
+			inCondition:       trialsv1beta1.TrialEarlyStopped,
+			expectedCondition: suggestionapi.TrialStatus_EARLYSTOPPED,
+			testDescription:   "Convert early stopped Trial condition",
 		},
 		{
-			InCondition:       "Unknown",
-			ExpectedCondition: suggestionapi.TrialStatus_UNKNOWN,
-			TestDescription:   "Convert unknown Trial condition",
+			inCondition:       "Unknown",
+			expectedCondition: suggestionapi.TrialStatus_UNKNOWN,
+			testDescription:   "Convert unknown Trial condition",
 		},
 	}
 	for _, tc := range tcs {
-		actualCondition := convertTrialConditionType(tc.InCondition)
-		if actualCondition != tc.ExpectedCondition {
-			t.Errorf("Case: %v failed. Expected Trial condition %v, got %v", tc.TestDescription, tc.ExpectedCondition, actualCondition)
+		actualCondition := convertTrialConditionType(tc.inCondition)
+		if actualCondition != tc.expectedCondition {
+			t.Errorf("Case: %v failed. Expected Trial condition %v, got %v", tc.testDescription, tc.expectedCondition, actualCondition)
 		}
 	}
 }
@@ -463,31 +463,31 @@ func TestConvertTrialConditionType(t *testing.T) {
 func TestConvertObjectiveType(t *testing.T) {
 
 	tcs := []struct {
-		InType          commonapiv1beta1.ObjectiveType
-		ExpectedType    suggestionapi.ObjectiveType
-		TestDescription string
+		inType          commonapiv1beta1.ObjectiveType
+		expectedType    suggestionapi.ObjectiveType
+		testDescription string
 	}{
 		{
-			InType:          commonv1beta1.ObjectiveTypeMaximize,
-			ExpectedType:    suggestionapi.ObjectiveType_MAXIMIZE,
-			TestDescription: "Convert maximize objective type",
+			inType:          commonv1beta1.ObjectiveTypeMaximize,
+			expectedType:    suggestionapi.ObjectiveType_MAXIMIZE,
+			testDescription: "Convert maximize objective type",
 		},
 
 		{
-			InType:          commonv1beta1.ObjectiveTypeMinimize,
-			ExpectedType:    suggestionapi.ObjectiveType_MINIMIZE,
-			TestDescription: "Convert minimize objective type",
+			inType:          commonv1beta1.ObjectiveTypeMinimize,
+			expectedType:    suggestionapi.ObjectiveType_MINIMIZE,
+			testDescription: "Convert minimize objective type",
 		},
 		{
-			InType:          commonv1beta1.ObjectiveTypeUnknown,
-			ExpectedType:    suggestionapi.ObjectiveType_UNKNOWN,
-			TestDescription: "Convert unknown objective type",
+			inType:          commonv1beta1.ObjectiveTypeUnknown,
+			expectedType:    suggestionapi.ObjectiveType_UNKNOWN,
+			testDescription: "Convert unknown objective type",
 		},
 	}
 	for _, tc := range tcs {
-		actualType := convertObjectiveType(tc.InType)
-		if actualType != tc.ExpectedType {
-			t.Errorf("Case: %v failed. Expected objective type %v, got %v", tc.TestDescription, tc.ExpectedType, actualType)
+		actualType := convertObjectiveType(tc.inType)
+		if actualType != tc.expectedType {
+			t.Errorf("Case: %v failed. Expected objective type %v, got %v", tc.testDescription, tc.expectedType, actualType)
 		}
 	}
 }
@@ -495,40 +495,40 @@ func TestConvertObjectiveType(t *testing.T) {
 func TestConvertParameterType(t *testing.T) {
 
 	tcs := []struct {
-		InType          experimentsv1beta1.ParameterType
-		ExpectedType    suggestionapi.ParameterType
-		TestDescription string
+		inType          experimentsv1beta1.ParameterType
+		expectedType    suggestionapi.ParameterType
+		testDescription string
 	}{
 		{
-			InType:          experimentsv1beta1.ParameterTypeDiscrete,
-			ExpectedType:    suggestionapi.ParameterType_DISCRETE,
-			TestDescription: "Convert discrete parameter type",
+			inType:          experimentsv1beta1.ParameterTypeDiscrete,
+			expectedType:    suggestionapi.ParameterType_DISCRETE,
+			testDescription: "Convert discrete parameter type",
 		},
 		{
-			InType:          experimentsv1beta1.ParameterTypeCategorical,
-			ExpectedType:    suggestionapi.ParameterType_CATEGORICAL,
-			TestDescription: "Convert categorical parameter type",
+			inType:          experimentsv1beta1.ParameterTypeCategorical,
+			expectedType:    suggestionapi.ParameterType_CATEGORICAL,
+			testDescription: "Convert categorical parameter type",
 		},
 		{
-			InType:          experimentsv1beta1.ParameterTypeDouble,
-			ExpectedType:    suggestionapi.ParameterType_DOUBLE,
-			TestDescription: "Convert double parameter type",
+			inType:          experimentsv1beta1.ParameterTypeDouble,
+			expectedType:    suggestionapi.ParameterType_DOUBLE,
+			testDescription: "Convert double parameter type",
 		},
 		{
-			InType:          experimentsv1beta1.ParameterTypeInt,
-			ExpectedType:    suggestionapi.ParameterType_INT,
-			TestDescription: "Convert int parameter type",
+			inType:          experimentsv1beta1.ParameterTypeInt,
+			expectedType:    suggestionapi.ParameterType_INT,
+			testDescription: "Convert int parameter type",
 		},
 		{
-			InType:          experimentsv1beta1.ParameterTypeUnknown,
-			ExpectedType:    suggestionapi.ParameterType_UNKNOWN_TYPE,
-			TestDescription: "Convert unknown parameter type",
+			inType:          experimentsv1beta1.ParameterTypeUnknown,
+			expectedType:    suggestionapi.ParameterType_UNKNOWN_TYPE,
+			testDescription: "Convert unknown parameter type",
 		},
 	}
 	for _, tc := range tcs {
-		actualType := convertParameterType(tc.InType)
-		if actualType != tc.ExpectedType {
-			t.Errorf("Case: %v failed. Expected parameter type %v, got %v", tc.TestDescription, tc.ExpectedType, actualType)
+		actualType := convertParameterType(tc.inType)
+		if actualType != tc.expectedType {
+			t.Errorf("Case: %v failed. Expected parameter type %v, got %v", tc.testDescription, tc.expectedType, actualType)
 		}
 	}
 }
@@ -586,35 +586,35 @@ func TestConvertTrialObservation(t *testing.T) {
 
 func TestConvertComparison(t *testing.T) {
 	tcs := []struct {
-		InComparison       suggestionapi.ComparisonType
-		ExpectedComparison commonapiv1beta1.ComparisonType
-		TestDescription    string
+		inComparison       suggestionapi.ComparisonType
+		expectedComparison commonapiv1beta1.ComparisonType
+		testDescription    string
 	}{
 		{
-			InComparison:       suggestionapi.ComparisonType_EQUAL,
-			ExpectedComparison: commonapiv1beta1.ComparisonTypeEqual,
-			TestDescription:    "Convert equal comparison type",
+			inComparison:       suggestionapi.ComparisonType_EQUAL,
+			expectedComparison: commonapiv1beta1.ComparisonTypeEqual,
+			testDescription:    "Convert equal comparison type",
 		},
 		{
-			InComparison:       suggestionapi.ComparisonType_LESS,
-			ExpectedComparison: commonapiv1beta1.ComparisonTypeLess,
-			TestDescription:    "Convert less comparison type",
+			inComparison:       suggestionapi.ComparisonType_LESS,
+			expectedComparison: commonapiv1beta1.ComparisonTypeLess,
+			testDescription:    "Convert less comparison type",
 		},
 		{
-			InComparison:       suggestionapi.ComparisonType_GREATER,
-			ExpectedComparison: commonapiv1beta1.ComparisonTypeGreater,
-			TestDescription:    "Convert greater comparison type",
+			inComparison:       suggestionapi.ComparisonType_GREATER,
+			expectedComparison: commonapiv1beta1.ComparisonTypeGreater,
+			testDescription:    "Convert greater comparison type",
 		},
 		{
-			InComparison:       suggestionapi.ComparisonType_UNKNOWN_COMPARISON,
-			ExpectedComparison: commonapiv1beta1.ComparisonTypeEqual,
-			TestDescription:    "Convert unknown comparison type",
+			inComparison:       suggestionapi.ComparisonType_UNKNOWN_COMPARISON,
+			expectedComparison: commonapiv1beta1.ComparisonTypeEqual,
+			testDescription:    "Convert unknown comparison type",
 		},
 	}
 	for _, tc := range tcs {
-		actualComparison := convertComparison(tc.InComparison)
-		if actualComparison != tc.ExpectedComparison {
-			t.Errorf("Case: %v failed. Expected comparison type %v, got %v", tc.TestDescription, tc.ExpectedComparison, actualComparison)
+		actualComparison := convertComparison(tc.inComparison)
+		if actualComparison != tc.expectedComparison {
+			t.Errorf("Case: %v failed. Expected comparison type %v, got %v", tc.testDescription, tc.expectedComparison, actualComparison)
 		}
 	}
 }

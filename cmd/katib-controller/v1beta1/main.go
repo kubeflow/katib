@@ -26,13 +26,13 @@ import (
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
@@ -110,15 +110,13 @@ func main() {
 
 	// Create a new katib controller to provide shared dependencies and start components
 	mgr, err := manager.New(cfg, manager.Options{
-		MetricsBindAddress:     initConfig.ControllerConfig.MetricsAddr,
+		Metrics: metricsserver.Options{
+			BindAddress: initConfig.ControllerConfig.MetricsAddr,
+		},
 		HealthProbeBindAddress: initConfig.ControllerConfig.HealthzAddr,
 		LeaderElection:         initConfig.ControllerConfig.EnableLeaderElection,
 		LeaderElectionID:       initConfig.ControllerConfig.LeaderElectionID,
 		Scheme:                 scheme,
-		// TODO: Once the below issue is resolved, we need to switch discovery-client to the built-in one.
-		// https://github.com/kubernetes-sigs/controller-runtime/issues/2354
-		// https://github.com/kubernetes-sigs/controller-runtime/issues/2424
-		MapperProvider: apiutil.NewDiscoveryRESTMapper,
 	})
 	if err != nil {
 		log.Error(err, "Failed to create the manager")

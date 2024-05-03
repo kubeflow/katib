@@ -43,6 +43,7 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/yaml"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
@@ -130,7 +131,7 @@ func TestMain(m *testing.M) {
 func TestDesiredDeployment(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
+	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(configv1beta1.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
 
@@ -293,7 +294,7 @@ func TestDesiredDeployment(t *testing.T) {
 func TestDesiredService(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
+	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	composer := New(mgr)
@@ -378,7 +379,7 @@ func TestDesiredService(t *testing.T) {
 func TestDesiredVolume(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
+	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(configv1beta1.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
 
@@ -511,7 +512,7 @@ func TestDesiredVolume(t *testing.T) {
 func TestDesiredRBAC(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
-	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
+	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	composer := New(mgr)
@@ -891,7 +892,7 @@ func newFakePVC() *corev1.PersistentVolumeClaim {
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				configv1beta1.DefaultSuggestionVolumeAccessMode,
 			},
-			Resources: corev1.ResourceRequirements{
+			Resources: corev1.VolumeResourceRequirements{
 				Requests: corev1.ResourceList{
 					corev1.ResourceStorage: volumeStorage,
 				},

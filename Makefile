@@ -6,8 +6,8 @@ HAS_MOCKGEN := $(shell command -v mockgen;)
 
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
-CPU_ARCH ?= amd64
-ENVTEST_K8S_VERSION ?= 1.27
+CPU_ARCH ?= linux/amd64,linux/arm64
+ENVTEST_K8S_VERSION ?= 1.29
 MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
 
@@ -23,7 +23,7 @@ test: envtest
 
 envtest:
 ifndef HAS_SETUP_ENVTEST
-	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@935faeba70039b5403616e73f109f4b6b1115b9f #v0.15.0
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@bf15e44028f908c790721fc8fe67c7bf2d06a611 #v0.17.3
 	$(info "setup-envtest has been installed")
 endif
 	$(info "setup-envtest has already installed")
@@ -35,7 +35,7 @@ fmt:
 
 lint:
 ifndef HAS_LINT
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
 	$(info "golangci-lint has been installed")
 endif
 	hack/verify-golangci-lint.sh
@@ -84,7 +84,7 @@ sync-go-mod:
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 .PHONY: controller-gen
 controller-gen:
-	@GOBIN=$(shell pwd)/bin GO111MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
+	@GOBIN=$(shell pwd)/bin GO111MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0
 
 # Run this if you update any existing controller APIs.
 # 1. Generate deepcopy, clientset, listers, informers for the APIs (hack/update-codegen.sh)
