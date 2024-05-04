@@ -32,12 +32,12 @@ runs:
         df -h
 
     - name: Setup kubectl
-      uses: azure/setup-kubectl@v3
+      uses: azure/setup-kubectl@v4
       with:
         version: ${{ inputs.kubernetes-version }}
 
     - name: Setup Minikube Cluster
-      uses: medyagh/setup-minikube@v0.0.14
+      uses: medyagh/setup-minikube@v0.0.16
       with:
         network-plugin: cni
         cni: flannel
@@ -47,10 +47,10 @@ runs:
         start-args: --wait-timeout=120s
 
     - name: Setup Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
 

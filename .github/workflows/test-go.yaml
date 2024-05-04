@@ -20,12 +20,12 @@ jobs:
         working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
 
@@ -42,12 +42,12 @@ jobs:
         working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
 
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
 
