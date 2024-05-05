@@ -251,7 +251,7 @@ class KatibClient(object):
 
         # Create Katib Experiment template.
         experiment = models.V1beta1Experiment(
-            api_version=f"{constants.KUBEFLOW_GROUP}/{constants.KATIB_VERSION}",
+            api_version=constants.API_VERSION,
             kind=constants.EXPERIMENT_KIND,
             metadata=models.V1ObjectMeta(name=name, namespace=namespace),
             spec=models.V1beta1ExperimentSpec(),

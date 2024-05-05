@@ -22,6 +22,7 @@ KATIB_VERSION = os.environ.get("EXPERIMENT_VERSION", "v1beta1")
 
 # Katib K8S constants
 KUBEFLOW_GROUP = "kubeflow.org"
+API_VERSION = f"{KUBEFLOW_GROUP}/{KATIB_VERSION}"
 EXPERIMENT_KIND = "Experiment"
 EXPERIMENT_PLURAL = "experiments"
 SUGGESTION_PLURAL = "suggestions"
