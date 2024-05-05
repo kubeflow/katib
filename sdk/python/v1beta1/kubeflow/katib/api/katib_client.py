@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import inspect
+import logging
 import multiprocessing
 import textwrap
 import time
@@ -25,6 +26,9 @@ from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
 from kubernetes import client, config
+
+
+logger = logging.getLogger(__name__)
 
 
 class KatibClient(object):
@@ -131,8 +135,7 @@ class KatibClient(object):
                 f"Failed to create Katib Experiment: {namespace}/{experiment_name}"
             )
 
-        # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{experiment_name} has been created")
+        logger.debug(f"Experiment {namespace}/{experiment_name} has been created")
 
         if self._is_ipython():
             if self.in_cluster:
@@ -743,7 +746,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Raise exception if Experiment is Failed.
@@ -763,7 +766,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Running condition.
@@ -774,7 +777,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
@@ -785,7 +788,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
@@ -796,12 +799,12 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.
             utils.print_experiment_status(experiment)
-            print(
+            logger.debug(
                 f"Waiting for Experiment: {namespace}/{name} to reach {expected_condition} condition\n\n\n"
             )
             time.sleep(polling_interval)
@@ -880,7 +883,7 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to edit Katib Experiment: {namespace}/{name}")
 
-        print(f"Experiment {namespace}/{name} has been updated")
+        logger.debug(f"Experiment {namespace}/{name} has been updated")
 
     def delete_experiment(
         self,
@@ -919,8 +922,7 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to delete Katib Experiment: {namespace}/{name}")
 
-        # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{name} has been deleted")
+        logger.debug(f"Experiment {namespace}/{name} has been deleted")
 
     def get_suggestion(
         self,
