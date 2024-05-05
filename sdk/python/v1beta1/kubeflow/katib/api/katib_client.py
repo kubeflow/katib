@@ -34,21 +34,29 @@ logger = logging.getLogger(__name__)
 class KatibClient(object):
     def __init__(
         self,
-        config_file: str = None,
-        context: str = None,
-        client_configuration: client.Configuration = None,
+        config_file: Optional[str] = None,
+        context: Optional[str] = None,
+        client_configuration: Optional[client.Configuration] = None,
         namespace: str = utils.get_default_target_namespace(),
     ):
-        """KatibClient constructor.
+        """KatibClient constructor. Configure logging in your application
+            as follows to see detailed information from the KatibClient APIs:
+            .. code-block:: python
+                import logging
+                logging.basicConfig()
+                log = logging.getLogger("kubeflow.katib.api.katib_client")
+                log.setLevel(logging.DEBUG)
 
         Args:
             config_file: Path to the kube-config file. Defaults to ~/.kube/config.
             context: Set the active context. Defaults to current_context from the kube-config.
             client_configuration: Client configuration for cluster authentication.
                 You have to provide valid configuration with Bearer token or
-                with username and password.
-                You can find an example here: https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
-            namespace: Target Kubernetes namespace. Can be overridden during method invocations.
+                with username and password. You can find an example here:
+                https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
+            namespace: Target Kubernetes namespace. By default it takes namespace
+                from `/var/run/secrets/kubernetes.io/serviceaccount/namespace` location
+                or set as `default`. Namespace can be overridden during method invocations.
         """
 
         self.in_cluster = False
