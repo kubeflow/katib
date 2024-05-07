@@ -12,7 +12,6 @@ from __future__ import absolute_import
 
 import atexit
 import datetime
-from dateutil.parser import parse
 import json
 import mimetypes
 from multiprocessing.pool import ThreadPool
@@ -20,14 +19,15 @@ import os
 import re
 import tempfile
 
+from dateutil.parser import parse
+from kubeflow.katib import rest
+from kubeflow.katib.configuration import Configuration
+from kubeflow.katib.exceptions import ApiException
+from kubeflow.katib.exceptions import ApiValueError
+import kubeflow.katib.models
 # python 2 and python 3 compatibility library
 import six
 from six.moves.urllib.parse import quote
-
-from kubeflow.katib.configuration import Configuration
-import kubeflow.katib.models
-from kubeflow.katib import rest
-from kubeflow.katib.exceptions import ApiValueError, ApiException
 
 
 class ApiClient(object):

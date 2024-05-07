@@ -27,18 +27,17 @@
 # Follow this guide to install MPIJob on your cluster: https://www.kubeflow.org/docs/components/training/mpi/
 
 import kfp
-import kfp.dsl as dsl
 from kfp import components
-
+import kfp.dsl as dsl
 from kubeflow.katib import ApiClient
-from kubeflow.katib import V1beta1ExperimentSpec
-from kubeflow.katib import V1beta1AlgorithmSpec
 from kubeflow.katib import V1beta1AlgorithmSetting
+from kubeflow.katib import V1beta1AlgorithmSpec
+from kubeflow.katib import V1beta1ExperimentSpec
+from kubeflow.katib import V1beta1FeasibleSpace
 from kubeflow.katib import V1beta1ObjectiveSpec
 from kubeflow.katib import V1beta1ParameterSpec
-from kubeflow.katib import V1beta1FeasibleSpace
-from kubeflow.katib import V1beta1TrialTemplate
 from kubeflow.katib import V1beta1TrialParameterSpec
+from kubeflow.katib import V1beta1TrialTemplate
 
 
 @dsl.pipeline(

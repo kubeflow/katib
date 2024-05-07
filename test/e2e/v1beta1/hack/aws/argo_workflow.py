@@ -16,7 +16,6 @@
 
 from kubeflow.testing import argo_build_util
 
-
 # Main worker image to execute Workflow.
 IMAGE_WORKER = "public.ecr.aws/j1r0q0g6/kubeflow-testing:latest"
 # Kaniko image to build Katib images.

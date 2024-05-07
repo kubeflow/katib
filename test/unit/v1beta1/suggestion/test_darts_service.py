@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import unittest
+
 import grpc
 import grpc_testing
-import unittest
-import json
 
 from pkg.apis.manager.v1beta1.python import api_pb2
-
-from pkg.suggestion.v1beta1.nas.darts.service import DartsService, validate_algorithm_settings
+from pkg.suggestion.v1beta1.nas.darts.service import DartsService
+from pkg.suggestion.v1beta1.nas.darts.service import \
+    validate_algorithm_settings
 
 
 class TestDarts(unittest.TestCase):
