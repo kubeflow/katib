@@ -22,6 +22,56 @@ Fig.1 Architecture of the new design
 
 ## API
 
-### New parameter in Python SDK function `tune`
+### New Parameter in Python SDK Function `tune`
 
-          
+We decided to add `metrics_collection_mechanism` to `tune` function in Python SDK.
+
+```Python
+def tune(
+    self,
+    name: str,
+    objective: Callable,
+    parameters: Dict[str, Any],
+    base_image: str = constants.BASE_IMAGE_TENSORFLOW,
+    namespace: Optional[str] = None,
+    env_per_trial: Optional[Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]] = None,
+    algorithm_name: str = "random",
+    algorithm_settings: Union[dict, List[models.V1beta1AlgorithmSetting], None] = None,
+    objective_metric_name: str = None,
+    additional_metric_names: List[str] = [],
+    objective_type: str = "maximize",
+    objective_goal: float = None,
+    max_trial_count: int = None,
+    parallel_trial_count: int = None,
+    max_failed_trial_count: int = None,
+    resources_per_trial: Union[dict, client.V1ResourceRequirements, None] = None,
+    retain_trials: bool = False,
+    packages_to_install: List[str] = None,
+    pip_index_url: str = "https://pypi.org/simple",
+    metrics_collection_mechanism: str = "pull", # The newly added parameter
+)
+```
+
+## Implementation
+
+### Add New Parameter in `tune`
+
+As is mentioned above, we decided to add `metrics_collection_mechanism` to the tune function in Python SDK. Also, we have some changes to be made:
+
+1. Disable injection: set `katib.kubeflow.org/metrics-collector-injection` to `disabled` when the push-based way of metrics collection is adopted so as to disable the injection of the metrics collection sidecar container.
+
+2. Configure the way of metrics collection: set the configuration `spec.metricsCollectionSpec.collector.kind`(specify the way of metrics collection) to `NoneCollector`.
+
+### Code Injection in Webhook
+
+We decided to implement a code replacing function in Experiment Mutating Webhook. When `spec.metricsCollectionSpec.collector.kind` is set to `NoneCollector`, the code replacing function will recognize the metrics output lines (e.g. print, log.Info, e.t.c.) and replace them with push-based metrics collection code which will be discussed in the next section. It’s a better decision compared with offering users a `katib_client.push`-like interface, for that users can’t use a yaml file to define this operation.
+
+### Push-based Metrics Collection Code
+
+The push-based metrics collection code is a function making a grpc call to the persistent API to store training metrics. It will be injected to container args in the Experiment Mutating Webhook and then be called inside the Trial Worker Pod to push metrics to Katib DB.
+
+### Collection of Final Metrics
+
+The final metrics of worker pods should be pushed to Katib DB directly in the push mode of metrics collection.
+
+\#WIP
