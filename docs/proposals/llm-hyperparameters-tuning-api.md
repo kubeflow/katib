@@ -7,7 +7,7 @@
   * [Design for API](#design-for-api)
     + [Example](#example)
   * [Implementation](#implementation)
-  * [Future Functionalities](#future-functionalities)
+  * [Advanced Functionalities](#advanced-functionalities)
 
 ## Links
 
