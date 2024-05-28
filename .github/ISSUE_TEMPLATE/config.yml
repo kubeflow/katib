@@ -1,9 +1,9 @@
-blank_issues_enabled: false
+blank_issues_enabled: true
 
 contact_links:
   - name: Katib Documentation
     url: https://www.kubeflow.org/docs/components/katib/
     about: Much help can be found in the docs
-  - name: AutoML Slack Channel
-    url: https://kubeflow.slack.com/archives/C018PMV53NW
+  - name: Kubeflow Katib Slack Channel
+    url: https://cloud-native.slack.com/archives/C073N7AS48P
     about: Ask the Katib community on Slack
