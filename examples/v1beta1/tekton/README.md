@@ -84,30 +84,21 @@ kubectl patch ClusterRole katib-controller -n kubeflow --type=json \
   -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["tekton.dev"],"resources":["pipelineruns", "taskruns"],"verbs":["get", "list", "watch", "create", "delete"]}}]'
 ```
 
-In addition to that, you have to modify Katib
-[Controller args](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/controller/controller.yaml#L27)
-with the new flag `--trial-resources`.
+Modify Katib Config [controller parameters](https://github.com/kubeflow/katib/blob/fc858d15dd41ff69166a2020efa200199063f9ba/manifests/v1beta1/installs/katib-standalone/katib-config.yaml#L9-L15) with the new entity:
 
-Run the following command to update Katib Controller args:
-
-```bash
-kubectl patch Deployment katib-controller -n kubeflow --type=json \
-  -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--trial-resources=PipelineRun.v1beta1.tekton.dev"}]'
+```
+trialResources:
+ - <object-kind>.<object-API-version>.<object-API-group>
 ```
 
-Check that Katib Controller's pod was restarted:
+For example, to support Tekton Pipelines:
 
-```bash
-$ kubectl get pods -n kubeflow
-
-NAME                                         READY   STATUS      RESTARTS   AGE
-katib-controller-784994d449-9bgj9            1/1     Running     0          28s
-katib-db-manager-78697c7bd4-ck7l8            1/1     Running     0          6m13s
-katib-mysql-854cdb87c4-krcm9                 1/1     Running     0          6m13s
-katib-ui-57b9d7f6dd-cv6gn                    1/1     Running     0          6m13s
+```
+trialResources:
+  - PipelineRun.v1beta1.tekton.dev
 ```
 
-Check logs from Katib Controller to verify Tekton Pipelines integration:
+After these changes, deploy Katib as described in the [install guide](https://www.kubeflow.org/docs/components/katib/installation/) and wait until the katib-controller Pod is created. You can check logs from the Katib controller to verify your resource integration:
 
 ```bash
 $ kubectl logs $(kubectl get pods -n kubeflow -o name | grep katib-controller) -n kubeflow | grep '"CRD Kind":"PipelineRun"'
@@ -118,4 +109,4 @@ $ kubectl logs $(kubectl get pods -n kubeflow -o name | grep katib-controller) -
 If you ran the above steps successfully, you should be able to run Tekton Pipelines examples.
 
 Learn more about using custom Kubernetes resource as a Trial template in the
-[official Kubeflow guides](https://www.kubeflow.org/docs/components/katib/trial-template/#use-custom-kubernetes-resource-as-a-trial-template).
+[official Kubeflow guides](https://www.kubeflow.org/docs/components/katib/user-guides/trial-template/#use-crds-with-trial-template).
