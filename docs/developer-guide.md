@@ -29,6 +29,8 @@ to build multi-arch images. Check source code as follows:
 make build REGISTRY=<image-registry> TAG=<image-tag>
 ```
 
+If you are using an Apple Silicon machine and encounter the "rosetta error: bss_size overflow," go to Docker Desktop -> General and uncheck "Use Rosetta for x86_64/amd64 emulation on Apple Silicon."
+
 To use your custom images for the Katib components, modify
 [Kustomization file](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/kustomization.yaml)
 and [Katib Config](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/katib-config.yaml)
