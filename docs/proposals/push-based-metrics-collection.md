@@ -10,15 +10,23 @@
 
 In the procedure of tuning hyperparameters, Metrics Collector, which is implemented as a sidecar container attached to each training container in the [current design](https://github.com/kubeflow/katib/blob/master/docs/proposals/metrics-collector.md), will collect training logs from Trials once the training is complete. Then, the Metrics Collector will parse training logs to get appropriate metrics like accuracy or loss and pass the evaluation results to the HyperParameter tuning algorithm.
 
-However, current implementation of Metrics Collector is pull-based, raising some [design problems](https://github.com/kubeflow/training-operator/issues/722#issuecomment-405669269) such as determining the frequency we scrape the metrics, performance issues like the overhead caused by too many sidecar containers, and restrictions on developing environments which must support sidecar containers. Thus, we should implement a new API for Katib Python SDK to offer users a push-based way to store metrics directly into the Kaitb DB and resolve those issues raised by pull-based metrics collection.
+However, current implementation of Metrics Collector is pull-based, raising some [design problems](https://github.com/kubeflow/training-operator/issues/722#issuecomment-405669269) such as determining the frequency we scrape the metrics, performance issues like the overhead caused by too many sidecar containers, and restrictions on developing environments which must support sidecar containers. Thus, we should implement a new API for Katib Python SDK to offer users a push-based way to store metrics directly into the Katib DB and resolve those issues raised by pull-based metrics collection.
 
 ![](../images/push-based-metrics-collection.png)
 Fig.1 Architecture of the new design
 
-## Goal
+### Goals
 1. **A new parameter in Python SDK function `tune`**: allow users to specify the method of collecting metrics(push-based/pull-based).
+
 2. **A code injection function in mutating webhook**: recognize the metrics output lines and replace them with push-based metrics collection code.
+
 3. The final metrics of worker pods should be **pushed to Katib DB directly** in the push mode of metrics collection.
+
+### Non-Goals
+1. Implement authentication model for Katib DB to push metrics.
+
+2. Support pushing data to different types of storage system(prometheus, self-defined interface etc.)
+
 
 ## API
 
@@ -48,8 +56,49 @@ def tune(
     retain_trials: bool = False,
     packages_to_install: List[str] = None,
     pip_index_url: str = "https://pypi.org/simple",
-    metrics_collection_mechanism: str = "pull", # The newly added parameter
+    # The newly added parameter metrics_collector_config.
+    # It specifies the config of metrics collector, for example,
+    # the kind of metrics collector.
+    metrics_collecter_config: Dict[str, Any] = None, 
 )
+```
+
+With a small example:
+
+```Python
+import kubeflow.katib as katib
+
+# Step 1. Create an objective function.
+def objective(parameters):
+    # Import required packages.
+    import time
+    time.sleep(5)
+    # Calculate objective function.
+    result = 4 * int(parameters["a"]) - float(parameters["b"]) ** 2
+    # Katib parses metrics in this format: <metric-name>=<metric-value>.
+    print(f"result={result}")
+
+# Step 2. Create HyperParameter search space.
+parameters = {
+    "a": katib.search.int(min=10, max=20),
+    "b": katib.search.double(min=0.1, max=0.2)
+}
+
+# Step 3. Create Katib Experiment with 12 Trials and 2 CPUs per Trial.
+katib_client = katib.KatibClient(namespace="kubeflow")
+name = "tune-experiment"
+katib_client.tune(
+    name=name,
+    objective=objective,
+    parameters=parameters,
+    objective_metric_name="result",
+    max_trial_count=12,
+    resources_per_trial={"cpu": "2"},
+    metrics_collector_config={"kind": "None"},
+)
+
+# Step 4. Get the best HyperParameters.
+print(katib_client.get_optimal_hyperparameters(name))
 ```
 
 ## Implementation
