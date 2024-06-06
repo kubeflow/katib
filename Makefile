@@ -10,6 +10,7 @@ CPU_ARCH ?= linux/amd64,linux/arm64
 ENVTEST_K8S_VERSION ?= 1.29
 MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
+GOPATH ?= $(shell go env GOPATH)
 
 # for pytest
 PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
@@ -93,9 +94,6 @@ controller-gen:
 # 4. Generate gRPC manager APIs (pkg/apis/manager/v1beta1/build.sh and pkg/apis/manager/health/build.sh)
 # 5. Generate Go mock codes
 generate: controller-gen
-ifndef GOPATH
-	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
-endif
 ifndef HAS_MOCKGEN
 	go install github.com/golang/mock/mockgen@$(MOCKGEN_VERSION)
 	$(info "mockgen has been installed")

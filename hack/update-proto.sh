@@ -25,9 +25,6 @@ done
 ROOT_DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 
 mkdir -p $ROOT_DIR/bin
-
-PROGRAM=$(basename "$0")
-
 export GOBIN=$ROOT_DIR/bin
 
 if [ ! -f $GOBIN/buf ]; then 

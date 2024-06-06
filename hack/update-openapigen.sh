@@ -39,7 +39,7 @@ echo ">> Using ${CODEGEN_PKG} for the code generator"
 # Ensure we can execute.
 chmod +x "${CODEGEN_PKG}/generate-groups.sh"
 
-PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 VERSION_LIST=(v1beta1)
 SWAGGER_VERSION="0.1"
 
