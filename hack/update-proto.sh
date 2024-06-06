@@ -24,21 +24,21 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 ROOT_DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
 
-mkdir -p $ROOT_DIR/bin
+mkdir -p "${ROOT_DIR}/bin"
 export GOBIN=$ROOT_DIR/bin
 
-if [ ! -f $GOBIN/buf ]; then 
+if [ ! -f "${GOBIN}/buf" ]; then 
   go install github.com/bufbuild/buf/cmd/buf@v1.32.2
 fi
 
-pushd $ROOT_DIR
-  $GOBIN/buf generate
+pushd "${ROOT_DIR}"
+  "${GOBIN}/buf" generate
 popd
 
-pushd $ROOT_DIR/pkg/apis/manager/health
-  $GOBIN/buf generate
+pushd "${ROOT_DIR}/pkg/apis/manager/health"
+  "${GOBIN}/buf" generate
 popd
 
-pushd $ROOT_DIR/pkg/apis/manager/v1beta1
-  $GOBIN/buf generate
+pushd "${ROOT_DIR}/pkg/apis/manager/v1beta1"
+  "${GOBIN}/buf" generate
 popd
