@@ -102,8 +102,7 @@ ifndef HAS_MOCKGEN
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
-	pkg/apis/manager/v1beta1/build.sh
-	pkg/apis/manager/health/build.sh
+	hack/update-proto.sh
 	hack/update-mockgen.sh
 
 # Build images for the Katib v1beta1 components.
