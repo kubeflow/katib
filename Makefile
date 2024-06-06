@@ -12,9 +12,6 @@ MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
 GOPATH ?= $(shell go env GOPATH)
 
-# for pytest
-PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
-PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/metricscollector/v1beta1/common:$(CURDIR)/pkg/metricscollector/v1beta1/tfevent-metricscollector
 TEST_TENSORFLOW_EVENT_FILE_PATH ?= $(CURDIR)/test/unit/v1beta1/metricscollector/testdata/tfevent-metricscollector/logs
 
 # Run tests
@@ -172,9 +169,9 @@ ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
 endif
 
 pytest: prepare-pytest prepare-pytest-testdata
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/earlystopping
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/metricscollector
+	pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
+	pytest ./test/unit/v1beta1/earlystopping
+	pytest ./test/unit/v1beta1/metricscollector
 
 # The skopt service doesn't work appropriately with Python 3.11.
 # So, we need to run the test with Python 3.9.
@@ -184,4 +181,4 @@ pytest-skopt:
 	pip install six
 	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py
+	pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py
