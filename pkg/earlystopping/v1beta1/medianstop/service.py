@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+from typing import Iterable
 from kubernetes import client, config
 import multiprocessing
 from datetime import datetime
@@ -97,7 +98,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
         return True, ""
 
-    def GetEarlyStoppingRules(self, request, context):
+    def GetEarlyStoppingRules(self, request: api_pb2.GetEarlyStoppingRulesRequest, context):
         logger.info("Get new early stopping rules")
 
         # Get required values for the first call.
@@ -137,21 +138,21 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
             early_stopping_rules=early_stopping_rules
         )
 
-    def get_early_stopping_settings(self, early_stopping_settings):
+    def get_early_stopping_settings(self, early_stopping_settings: Iterable[api_pb2.EarlyStoppingSetting]):
         for setting in early_stopping_settings:
             if setting.name == "min_trials_required":
                 self.min_trials_required = int(setting.value)
             elif setting.name == "start_step":
                 self.start_step = int(setting.value)
 
-    def get_median_value(self, trials):
+    def get_median_value(self, trials: Iterable[api_pb2.Trial]):
         for trial in trials:
             # Get metrics only for the new succeeded Trials.
             if trial.name not in self.trials_avg_history and trial.status.condition == SUCCEEDED_TRIAL:
-                channel = grpc.beta.implementations.insecure_channel(
-                    self.db_manager_address[0], int(self.db_manager_address[1]))
-                with api_pb2.beta_create_DBManager_stub(channel) as client:
-                    get_log_response = client.GetObservationLog(api_pb2.GetObservationLogRequest(
+                with grpc.beta.implementations.insecure_channel(
+                    self.db_manager_address[0], int(self.db_manager_address[1])) as channel:
+                    stub = api_pb2_grpc.DBManagerStub(channel)
+                    get_log_response = stub.GetObservationLog(api_pb2.GetObservationLogRequest(
                         trial_name=trial.name,
                         metric_name=self.objective_metric
                     ), timeout=APISERVER_TIMEOUT)
