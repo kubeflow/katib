@@ -31,6 +31,7 @@ const Webhook = "katib.kubeflow.org"
 
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update
 // +kubebuilder:rbac:groups="admissionregistration.k8s.io",resources=validatingwebhookconfigurations,verbs=get;list;watch;update
+// +kubebuilder:rbac:groups="admissionregistration.k8s.io",resources=mutatingwebhookconfigurations,verbs=get;list;watch;update
 
 // AddToManager adds the cert-generator to the manager.
 func AddToManager(mgr manager.Manager, cfg configv1beta1.CertGeneratorConfig, certsReady chan struct{}) error {
@@ -44,10 +45,10 @@ func AddToManager(mgr manager.Manager, cfg configv1beta1.CertGeneratorConfig, ce
 		CAOrganization: "katib",
 		DNSName:        fmt.Sprintf("%s.%s.svc", cfg.WebhookServiceName, consts.DefaultKatibNamespace),
 		IsReady:        certsReady,
-		Webhooks: []cert.WebhookInfo{{
-			Type: cert.Validating,
-			Name: Webhook,
-		}},
+		Webhooks: []cert.WebhookInfo{
+			{Name: Webhook, Type: cert.Validating},
+			{Name: Webhook, Type: cert.Mutating},
+		},
 		FieldOwner: "cert-generator",
 		// When training-operator is running in the leader election mode,
 		// we expect webhook server will run in primary and secondary instance
