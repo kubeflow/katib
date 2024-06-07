@@ -29,6 +29,9 @@ import (
 
 const Webhook = "katib.kubeflow.org"
 
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;update
+// +kubebuilder:rbac:groups="admissionregistration.k8s.io",resources=validatingwebhookconfigurations,verbs=get;list;watch;update
+
 // AddToManager adds the cert-generator to the manager.
 func AddToManager(mgr manager.Manager, cfg configv1beta1.CertGeneratorConfig, certsReady chan struct{}) error {
 	return cert.AddRotator(mgr, &cert.CertRotator{
