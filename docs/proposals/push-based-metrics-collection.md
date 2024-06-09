@@ -161,7 +161,18 @@ We'll create a DBManager Stub and make a grpc call to report metrics to Katib DB
 
 ### Compatibility Changes in Trial Controller
 
-We need to make appropriate changes in the Trial controller to make sure we insert unavailable value into Katib DB, if user doesn't report metric accidentally.
+We need to make appropriate changes in the Trial controller to make sure we insert unavailable value into Katib DB, if user doesn't report metric accidentally. The current implementation handles unavailable metrics in:
+
+```Golang
+// If observation is empty metrics collector doesn't finish.
+// For early stopping metrics collector are reported logs before Trial status is changed to EarlyStopped.
+if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation == nil {
+	logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
+	return errMetricsNotReported
+}
+```
+
+We decide to add a if-else statement to distinguish pull-based and push-based metrics collection. In the push-based collection, the trial does not need to be requeued. Instead, we'll insert a unavailable value to Katib DB and change the status of trial to `MetricsUnavailable`
 
 ### Collection of Final Metrics
 
