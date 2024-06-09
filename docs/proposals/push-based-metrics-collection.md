@@ -18,7 +18,7 @@ Fig.1 Architecture of the new design
 ### Goals
 1. **A new parameter in Python SDK function `tune`**: allow users to specify the method of collecting metrics(push-based/pull-based).
 
-2. **A code injection function in mutating webhook**: recognize the metrics output lines and replace them with push-based metrics collection code.
+2. **A new interface `report_metrics` in Python SDK**: push the metrics to Katib DB directly.
 
 3. The final metrics of worker pods should be **pushed to Katib DB directly** in the push mode of metrics collection.
 
@@ -57,26 +57,60 @@ def tune(
     packages_to_install: List[str] = None,
     pip_index_url: str = "https://pypi.org/simple",
     # The newly added parameter metrics_collector_config.
-    # It specifies the config of metrics collector, for example,
-    # the kind of metrics collector.
-    metrics_collecter_config: Dict[str, Any] = None, 
+    # It specifies the config of metrics collector, for example, 
+    # metrics_collector_config={"kind": "Push"},
+    metrics_collector_config: Dict[str, Any] = None, 
 )
 ```
 
-With a small example:
+### New Interface `report_metrics` in Python SDK
+
+```Python
+"""Push Metrics Directly to Katib DB
+    Katib DB Manager service should be accessible while calling this API.
+
+    If you run this API in-cluster (e.g. from the Kubeflow Notebook) you can
+    use the default Katib DB Manager address: `katib-db-manager.kubeflow:6789`.
+
+    If you run this API outside the cluster, you have to port-forward the
+    Katib DB Manager before getting the Trial metrics: `kubectl port-forward svc/katib-db-manager -n kubeflow 6789`.
+    In that case, you can use this Katib DB Manager address: `localhost:6789`.
+
+    You can use `curl` to verify that Katib DB Manager is reachable: `curl <db-manager-address>`.
+
+    [!!!] Trial name should always be passed into Katib Trials as env variable `KATIB_TRIAL_NAME`.
+
+    Args:
+        metrics: Dict of metrics pushed to Katib DB.
+            For examle, `metrics = {"loss": 0.01, "accuracy": 0.99}`.
+        namespace: Namespace for the trial metrics.
+        db-manager-address: Address for the Katib DB Manager in this format: `ip-address:port`.
+    
+    Raises:
+        RuntimeError: Unable to push Trial metrics to Katib DB.
+"""
+def report_metrics(
+    self,
+    metrics: Dict[str, Any],
+    namespace: Optional[str] = None,
+    db_manager_address: str = constants.DEFAULT_DB_MANAGER_ADDRESS,
+)
+```
+
+### A Simple Example:
 
 ```Python
 import kubeflow.katib as katib
 
-# Step 1. Create an objective function.
+# Step 1. Create an objective function with push-based metrics collection.
 def objective(parameters):
     # Import required packages.
-    import time
-    time.sleep(5)
+    import kubeflow.katib as katib
     # Calculate objective function.
     result = 4 * int(parameters["a"]) - float(parameters["b"]) ** 2
-    # Katib parses metrics in this format: <metric-name>=<metric-value>.
-    print(f"result={result}")
+    # Push metrics to Katib DB.
+    katib_client = katib.KatibClient(namespace="kubeflow")
+    katib_client.report_metrics({"result": result})
 
 # Step 2. Create HyperParameter search space.
 parameters = {
@@ -84,7 +118,7 @@ parameters = {
     "b": katib.search.double(min=0.1, max=0.2)
 }
 
-# Step 3. Create Katib Experiment with 12 Trials and 2 CPUs per Trial.
+# Step 3. Create Katib Experiment with 12 Trials and 2 GPUs per Trial.
 katib_client = katib.KatibClient(namespace="kubeflow")
 name = "tune-experiment"
 katib_client.tune(
@@ -93,8 +127,8 @@ katib_client.tune(
     parameters=parameters,
     objective_metric_name="result",
     max_trial_count=12,
-    resources_per_trial={"cpu": "2"},
-    metrics_collector_config={"kind": "None"},
+    resources_per_trial={"gpu": "2"},
+    metrics_collector_config={"kind": "Push"},
 )
 
 # Step 4. Get the best HyperParameters.
@@ -105,19 +139,29 @@ print(katib_client.get_optimal_hyperparameters(name))
 
 ### Add New Parameter in `tune`
 
-As is mentioned above, we decided to add `metrics_collection_mechanism` to the tune function in Python SDK. Also, we have some changes to be made:
+As is mentioned above, we decided to add `metrics_collector_config` to the tune function in Python SDK. Also, we have some changes to be made:
 
 1. Disable injection: set `katib.kubeflow.org/metrics-collector-injection` to `disabled` when the push-based way of metrics collection is adopted so as to disable the injection of the metrics collection sidecar container.
 
-2. Configure the way of metrics collection: set the configuration `spec.metricsCollectionSpec.collector.kind`(specify the way of metrics collection) to `NoneCollector`.
+2. Configure the way of metrics collection: set the configuration `spec.metricsCollectionSpec.collector.kind`(specify the way of metrics collection) to `Push`.
 
-### Code Injection in Webhook
+3. Rename metrics collector from `None` to `Push`: It's not correct to call push-based metrics collection `None`. We should modify related code to rename it.
 
-We decided to implement a code replacing function in Experiment Mutating Webhook. When `spec.metricsCollectionSpec.collector.kind` is set to `NoneCollector`, the code replacing function will recognize the metrics output lines (e.g. print, log.Info, e.t.c.) and replace them with push-based metrics collection code which will be discussed in the next section. It’s a better decision compared with offering users a `katib_client.push`-like interface, for that users can’t use a yaml file to define this operation.
+### New Interface `report_metrics` in Python SDK
 
-### Push-based Metrics Collection Code
+We decide to implement this function to push metrics directly to Katib DB with the help of grpc. Trial name should always be passed into Katib Trials (and then into this function) as env variable `KATIB_TRIAL_NAME`. Steps:
 
-The push-based metrics collection code is a function making a grpc call to the persistent API to store training metrics. It will be injected to container args in the Experiment Mutating Webhook and then be called inside the Trial Worker Pod to push metrics to Katib DB.
+1. Wrap metrics into `katib_api_pb2.ReportObservationLogRequest`:
+
+Firstly, convert metrics (in dict format) into `katib_api_pb2.ReportObservationLogRequest` type for the following grpc call, referring to https://github.com/kubeflow/katib/blob/master/pkg/apis/manager/v1beta1/gen-doc/api.md#reportobservationlogrequest
+
+2. Dial Katib DBManager Service
+
+We'll create a DBManager Stub and make a grpc call to report metrics to Katib DB.
+
+### Compatibility Changes in Trial Controller
+
+We need to make appropriate changes in the Trial controller to make sure we insert unavailable value into Katib DB, if user doesn't report metric accidentally.
 
 ### Collection of Final Metrics
 
