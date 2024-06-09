@@ -13,6 +13,7 @@ In the procedure of tuning hyperparameters, Metrics Collector, which is implemen
 However, current implementation of Metrics Collector is pull-based, raising some [design problems](https://github.com/kubeflow/training-operator/issues/722#issuecomment-405669269) such as determining the frequency we scrape the metrics, performance issues like the overhead caused by too many sidecar containers, and restrictions on developing environments which must support sidecar containers. Thus, we should implement a new API for Katib Python SDK to offer users a push-based way to store metrics directly into the Katib DB and resolve those issues raised by pull-based metrics collection.
 
 ![](../images/push-based-metrics-collection.png)
+
 Fig.1 Architecture of the new design
 
 ### Goals
