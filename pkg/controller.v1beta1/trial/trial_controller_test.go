@@ -231,7 +231,6 @@ func TestReconcileBatchJob(t *testing.T) {
 		g.Eventually(func() bool {
 			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
 		}, timeout).Should(gomega.BeTrue())
-
 	})
 
 	t.Run(`Trail with "Complete" BatchJob and Available metrics.`, func(t *testing.T) {
