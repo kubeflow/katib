@@ -253,7 +253,6 @@ func TestReconcileBatchJob(t *testing.T) {
 		}
 		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
 
-		t.Log("before create")
 		// Create the Trial
 		trial := newFakeTrialBatchJob()
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
@@ -266,29 +265,11 @@ func TestReconcileBatchJob(t *testing.T) {
 				t.Log(time.Since(start), err)
 				return false
 			}
-			ok := trial.IsSucceeded() &&
+			return trial.IsSucceeded() &&
 				len(trial.Status.Observation.Metrics) > 0 &&
 				trial.Status.Observation.Metrics[0].Min == "0.11" &&
 				trial.Status.Observation.Metrics[0].Max == "0.99" &&
 				trial.Status.Observation.Metrics[0].Latest == "0.11"
-			if !ok {
-				switch {
-				case len(trial.Status.Conditions) == 0:
-					t.Log(time.Since(start), trial.UID, "not created")
-				case trial.IsFailed(), trial.IsKilled(), trial.IsEarlyStopped():
-					t.Log(time.Since(start), trial.UID, trial.Status)
-					panic("trial failed")
-				case trial.IsMetricsUnavailable():
-					t.Log(time.Since(start), trial.UID, "metrics unavailable", trial.Status.Conditions)
-				case trial.IsRunning():
-					t.Log(time.Since(start), trial.UID, "running")
-				case trial.IsCreated():
-					t.Log(time.Since(start), trial.UID, "created")
-				default:
-					t.Logf("%s %s %+v", time.Since(start), trial.UID, trial.Status.Conditions)
-				}
-			}
-			return ok
 		}, timeout).Should(gomega.BeTrue())
 
 		// Delete the Trial
