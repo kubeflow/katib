@@ -277,16 +277,16 @@ func TestReconcileBatchJob(t *testing.T) {
 		if !ok {
 			switch {
 			case len(trial.Status.Conditions) == 0:
-				t.Log(time.Since(start), "not created")
+				t.Log(time.Since(start), trial.UID, "not created")
 			case trial.IsFailed(), trial.IsKilled(), trial.IsEarlyStopped():
-				t.Log(time.Since(start), trial.Status)
+				t.Log(time.Since(start), trial.UID, trial.Status)
 				panic("trial failed")
 			case trial.IsRunning():
-				t.Log(time.Since(start), "running")
+				t.Log(time.Since(start), trial.UID, "running")
 			case trial.IsCreated():
-				t.Log(time.Since(start), "created")
+				t.Log(time.Since(start), trial.UID, "created")
 			default:
-				t.Logf("%s %+v", time.Since(start), trial.Status.Conditions)
+				t.Logf("%s %s %+v", time.Since(start), trial.UID, trial.Status.Conditions)
 			}
 		}
 		return ok
