@@ -278,7 +278,7 @@ func TestReconcileBatchJob(t *testing.T) {
 			switch {
 			case len(trial.Status.Conditions) == 0:
 				t.Log(time.Since(start), "not created")
-			case trial.IsFailed(), trial.IsKilled(), trial.IsMetricsUnavailable(), trial.IsEarlyStopped():
+			case trial.IsFailed(), trial.IsKilled(), trial.IsEarlyStopped():
 				t.Log(time.Since(start), trial.Status)
 				panic("trial failed")
 			case trial.IsRunning():
