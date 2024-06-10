@@ -58,7 +58,7 @@ var trialKey = types.NamespacedName{Name: trialName, Namespace: namespace}
 var batchJobKey = types.NamespacedName{Name: batchJobName, Namespace: namespace}
 
 func init() {
-	logf.SetLogger(zap.New())
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 }
 
 func TestAdd(t *testing.T) {
