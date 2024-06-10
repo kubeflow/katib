@@ -1,4 +1,3 @@
-HAS_LINT := $(shell command -v golangci-lint;)
 HAS_YAMLLINT := $(shell command -v yamllint;)
 HAS_SHELLCHECK := $(shell command -v shellcheck;)
 HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
@@ -10,6 +9,13 @@ CPU_ARCH ?= linux/amd64,linux/arm64
 ENVTEST_K8S_VERSION ?= 1.29
 MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
+
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
 
 # for pytest
 PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
@@ -33,12 +39,9 @@ check: generated-codes go-mod fmt vet lint
 fmt:
 	hack/verify-gofmt.sh
 
-lint:
-ifndef HAS_LINT
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
-	$(info "golangci-lint has been installed")
-endif
-	hack/verify-golangci-lint.sh
+.PHONY: lint
+lint: golangci-lint ## Run golangci-lint linter
+	$(GOLANGCI_LINT) run --timeout 5m --go 1.22
 
 yamllint:
 ifndef HAS_YAMLLINT
@@ -188,3 +191,33 @@ pytest-skopt:
 	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py
+
+##@ Dependencies
+GOLANGCI_LINT = $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
+
+## Tool Versions
+GOLANGCI_LINT_VERSION ?= v1.57.2
+
+## Location to install dependencies to
+LOCALBIN ?= $(shell pwd)/bin
+$(LOCALBIN):
+	mkdir -p $(LOCALBIN)
+
+.PHONY: golangci-lint
+golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
+$(GOLANGCI_LINT): $(LOCALBIN)
+	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,${GOLANGCI_LINT_VERSION})
+
+# go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
+# $1 - target path with name of binary (ideally with version)
+# $2 - package url which can be installed
+# $3 - specific version of package
+define go-install-tool
+@[ -f $(1) ] || { \
+set -e; \
+package=$(2)@$(3) ;\
+echo "Downloading $${package}" ;\
+GOBIN=$(LOCALBIN) go install $${package} ;\
+mv "$$(echo "$(1)" | sed "s/-$(3)$$//")" $(1) ;\
+}
+endef
