@@ -15,13 +15,13 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Test Env
         uses: ./.github/workflows/template-setup-e2e-test
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
-          python-version: "3.7"
+          python-version: "3.11"
 
       - name: Run e2e test with ${{ matrix.experiments }} experiments
         uses: ./.github/workflows/template-e2e-test
