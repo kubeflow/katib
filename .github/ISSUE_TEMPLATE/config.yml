@@ -5,5 +5,8 @@ contact_links:
     url: https://www.kubeflow.org/docs/components/katib/
     about: Much help can be found in the docs
   - name: Kubeflow Katib Slack Channel
-    url: https://cloud-native.slack.com/archives/C073N7AS48P
-    about: Ask the Katib community on Slack
+    url: https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels
+    about: Ask the Katib community on CNCF Slack
+  - name: Kubeflow Katib Community Meeting
+    url: https://bit.ly/2PWVCkV
+    about: Join the Kubeflow AutoML working group meeting
