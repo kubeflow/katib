@@ -176,6 +176,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	}
 
 	t.Run(`Trial run with "Failed" BatchJob.`, func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		mockMC.msg = observationLogUnavailable
 		trial := newFakeTrialBatchJob()
 		batchJob := &batchv1.Job{}
@@ -234,6 +235,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	})
 
 	t.Run(`Trail with "Complete" BatchJob and Available metrics.`, func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		mockMC.msg = observationLogAvailable
 		batchJob := &batchv1.Job{}
 		batchJobCompleteMessage := "BatchJob completed test message"
@@ -281,6 +283,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	})
 
 	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics.`, func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		mockMC.msg = observationLogUnavailable
 		// Create the Trial
 		trial := newFakeTrialBatchJob()
@@ -309,6 +312,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	})
 
 	t.Run("Update status for empty Trial", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		g.Expect(r.updateStatus(&trialsv1beta1.Trial{})).To(gomega.HaveOccurred())
 	})
 }
