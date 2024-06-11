@@ -28,6 +28,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
+          cache-dependency-path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.sum
 
       - name: Check Go Modules, Generated Go/Python codes, and Format
         run: make check
@@ -50,6 +51,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
+          cache-dependency-path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.sum
 
       - name: Run Go test
         run: go mod download && make test ENVTEST_K8S_VERSION=${{ matrix.kubernetes-version }}
