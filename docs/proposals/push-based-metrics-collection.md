@@ -79,21 +79,18 @@ def tune(
 
     You can use `curl` to verify that Katib DB Manager is reachable: `curl <db-manager-address>`.
 
-    [!!!] Trial name should always be passed into Katib Trials as env variable `KATIB_TRIAL_NAME`.
+    [!!!] Trial's namespace and name should always be passed into Katib Trials as env variable `KATIB_TRIAL_NAMESPACE` and `KATIB_TRIAL_NAME`.
 
     Args:
         metrics: Dict of metrics pushed to Katib DB.
             For examle, `metrics = {"loss": 0.01, "accuracy": 0.99}`.
-        namespace: Namespace for the trial metrics.
         db-manager-address: Address for the Katib DB Manager in this format: `ip-address:port`.
     
     Raises:
         RuntimeError: Unable to push Trial metrics to Katib DB.
 """
 def report_metrics(
-    self,
     metrics: Dict[str, Any],
-    namespace: Optional[str] = None,
     db_manager_address: str = constants.DEFAULT_DB_MANAGER_ADDRESS,
 )
 ```
@@ -110,8 +107,7 @@ def objective(parameters):
     # Calculate objective function.
     result = 4 * int(parameters["a"]) - float(parameters["b"]) ** 2
     # Push metrics to Katib DB.
-    katib_client = katib.KatibClient(namespace="kubeflow")
-    katib_client.report_metrics({"result": result})
+    katib.report_metrics({"result": result})
 
 # Step 2. Create HyperParameter search space.
 parameters = {
@@ -148,9 +144,15 @@ As is mentioned above, we decided to add `metrics_collector_config` to the tune 
 
 3. Rename metrics collector from `None` to `Push`: It's not correct to call push-based metrics collection `None`. We should modify related code to rename it.
 
+4. Write env variables into trial spec: set `KATIB_TRIAL_NAMEPSACE` and `KATIB_TRIAL_NAME` for `report_metrics` function to dial db manager.
+
 ### New Interface `report_metrics` in Python SDK
 
-We decide to implement this function to push metrics directly to Katib DB with the help of grpc. Trial name should always be passed into Katib Trials (and then into this function) as env variable `KATIB_TRIAL_NAME`. Steps:
+We decide to implement this funcion to push metrics directly to Katib DB with the help of grpc. Trial's namespace and name should always be passed into Katib Trials (and then into this function) as env variable `KATIB_TRIAL_NAMESPACE` and `KATIB_TRIAL_NAME`. 
+
+Also, the function is supposed to be implemented as **global function** because it is called in the user container.
+
+Steps:
 
 1. Wrap metrics into `katib_api_pb2.ReportObservationLogRequest`:
 
@@ -172,8 +174,19 @@ if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation 
 	return errMetricsNotReported
 }
 ```
+1. Distinguish pull-based and push-based metrics collection
 
-We decide to add a if-else statement to distinguish pull-based and push-based metrics collection. In the push-based collection, the trial does not need to be requeued. Instead, we'll insert a unavailable value to Katib DB and change the status of trial to `MetricsUnavailable`
+We decide to add a if-else statement in the code above to distinguish pull-based and push-based metrics collection. In the push-based collection, the trial does not need to be requeued. Instead, we'll insert a unavailable value to Katib DB.
+
+2. Update the status of trial to `MetricsUnavailable`
+
+In the current implementation of pull-based metrics collection, trials will be re-queued when the metrics collector finds the `.Status.Observation` is empty. However, it's not compatible with push-based metrics collection because the forgotten metrics won't be reported in the new round of reconcile. So, we need to update its status in the function `UpdateTrialStatusCondition` in accomodation with the pull-based metrics collection.
+
+```Golang
+else if instance.Spec.MetricCollector.Collector.Kind == "Push" && instance.Status.Obeservation == nil {
+    ... // Update the status of this trial to `MetricsUnavailable` and output the reason.
+}
+```
 
 ### Collection of Final Metrics
 
