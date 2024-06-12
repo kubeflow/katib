@@ -50,7 +50,7 @@ func AddToManager(mgr manager.Manager, cfg configv1beta1.CertGeneratorConfig, ce
 			{Name: Webhook, Type: cert.Mutating},
 		},
 		FieldOwner: "cert-generator",
-		// When training-operator is running in the leader election mode,
+		// When the Katib is running in the leader election mode,
 		// we expect webhook server will run in primary and secondary instance
 		RequireLeaderElection: false,
 	})
