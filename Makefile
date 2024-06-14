@@ -184,6 +184,8 @@ pytest-skopt:
 	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py
 
+##@ Dependencies
+
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
