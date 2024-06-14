@@ -26,11 +26,11 @@ SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
 cd "${SCRIPT_ROOT}"
 
 # Grab mockgen version from go.mod
-MOCKGEN_VERSION=$(grep 'github.com/golang/mock' go.mod | awk '{print $2}')
+MOCKGEN_VERSION=$(grep 'go.uber.org/mock' go.mod | awk '{print $2}')
 
 if [[ ! $(mockgen -version) == "${MOCKGEN_VERSION}" ]]; then
   echo "You must use ${MOCKGEN_VERSION} mockgen version to run this script"
-  echo "To install mockgen follow this doc: https://github.com/golang/mock/tree/main#installation"
+  echo "To install mockgen follow this doc: https://github.com/uber-go/mock#installation"
   echo "Run 'mockgen -version' to check the installed version"
   exit 1
 fi

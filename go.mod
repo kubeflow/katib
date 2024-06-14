@@ -7,7 +7,6 @@ require (
 	github.com/awalterschulze/gographviz v2.0.3+incompatible
 	github.com/c-bata/goptuna v0.8.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-containerregistry v0.15.2
 	github.com/google/go-containerregistry/pkg/authn/k8schain v0.0.0-20230517160804-b7ad3f13a62c
@@ -16,10 +15,12 @@ require (
 	github.com/lib/pq v1.10.6
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a
 	github.com/onsi/gomega v1.30.0
+	github.com/open-policy-agent/cert-controller v0.10.1
 	github.com/prometheus/client_golang v1.18.0
 	github.com/shirou/gopsutil/v3 v3.22.5
 	github.com/spf13/viper v1.9.0
 	github.com/tidwall/gjson v1.14.1
+	go.uber.org/mock v0.4.0
 	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.33.0
 	k8s.io/api v0.29.3
@@ -123,6 +124,7 @@ require (
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/vbatts/tar-split v0.11.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
