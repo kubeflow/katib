@@ -28,26 +28,25 @@ cd "${SCRIPT_ROOT}"
 # Grab mockgen version from go.mod
 MOCKGEN_VERSION=$(grep 'github.com/golang/mock' go.mod | awk '{print $2}')
 
-if [[ ! $(mockgen -version) == "${MOCKGEN_VERSION}" ]]; then
-  echo "You must use ${MOCKGEN_VERSION} mockgen version to run this script"
-  echo "To install mockgen follow this doc: https://github.com/golang/mock/tree/main#installation"
-  echo "Run 'mockgen -version' to check the installed version"
+MOCKGEN="./bin/mockgen-${MOCKGEN_VERSION}"
+if [ ! -f "${MOCKGEN}" ]; then
+  echo "Please run 'make mockgen' first"
   exit 1
 fi
 
 echo "Generating v1beta1 Suggestion RPC Client..."
-mockgen -package mock -destination pkg/mock/v1beta1/api/suggestion.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 SuggestionClient
+"${MOCKGEN}" -package mock -destination pkg/mock/v1beta1/api/suggestion.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 SuggestionClient
 echo "Generating v1beta1 EarlyStopping RPC Client..."
-mockgen -package mock -destination pkg/mock/v1beta1/api/earlystopping.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 EarlyStoppingClient
+"${MOCKGEN}" -package mock -destination pkg/mock/v1beta1/api/earlystopping.go github.com/kubeflow/katib/pkg/apis/manager/v1beta1 EarlyStoppingClient
 echo "Generating v1beta1 KatibDBInterface..."
-mockgen -package mock -destination pkg/mock/v1beta1/db/db.go github.com/kubeflow/katib/pkg/db/v1beta1/common KatibDBInterface
+"${MOCKGEN}" -package mock -destination pkg/mock/v1beta1/db/db.go github.com/kubeflow/katib/pkg/db/v1beta1/common KatibDBInterface
 echo "Generating v1beta1 Generator..."
-mockgen -package mock -destination pkg/mock/v1beta1/experiment/manifest/generator.go github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest Generator
+"${MOCKGEN}" -package mock -destination pkg/mock/v1beta1/experiment/manifest/generator.go github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/manifest Generator
 echo "Generating v1beta1 KatibClient..."
-mockgen -package mock -destination pkg/mock/v1beta1/util/katibclient/katibclient.go github.com/kubeflow/katib/pkg/util/v1beta1/katibclient Client
+"${MOCKGEN}" -package mock -destination pkg/mock/v1beta1/util/katibclient/katibclient.go github.com/kubeflow/katib/pkg/util/v1beta1/katibclient Client
 echo "Generating v1beta1 ManagerClient in Trial Controller..."
-mockgen -package mock -destination pkg/mock/v1beta1/trial/managerclient/katibmanager.go github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient ManagerClient
+"${MOCKGEN}" -package mock -destination pkg/mock/v1beta1/trial/managerclient/katibmanager.go github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient ManagerClient
 echo "Generating v1beta1 Suggestion in Experiment Controller..."
-mockgen -package mock -destination pkg/mock/v1beta1/experiment/suggestion/suggestion.go github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/suggestion Suggestion
+"${MOCKGEN}" -package mock -destination pkg/mock/v1beta1/experiment/suggestion/suggestion.go github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/suggestion Suggestion
 echo "Generating v1beta1 SuggestionClient in Suggestion Controller..."
-mockgen -package mock -destination pkg/mock/v1beta1/suggestion/suggestionclient/suggestionclient.go github.com/kubeflow/katib/pkg/controller.v1beta1/suggestion/suggestionclient SuggestionClient
+"${MOCKGEN}" -package mock -destination pkg/mock/v1beta1/suggestion/suggestionclient/suggestionclient.go github.com/kubeflow/katib/pkg/controller.v1beta1/suggestion/suggestionclient SuggestionClient
