@@ -7,7 +7,6 @@ require (
 	github.com/awalterschulze/gographviz v2.0.3+incompatible
 	github.com/c-bata/goptuna v0.8.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-containerregistry v0.15.2
@@ -22,6 +21,7 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.5
 	github.com/spf13/viper v1.9.0
 	github.com/tidwall/gjson v1.14.1
+	go.uber.org/mock v0.4.0
 	golang.org/x/net v0.23.0
 	google.golang.org/grpc v1.58.3
 	k8s.io/api v0.29.3

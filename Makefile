@@ -8,7 +8,7 @@ COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= linux/amd64,linux/arm64
 ENVTEST_K8S_VERSION ?= 1.29
-MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 2)
+MOCKGEN_VERSION ?= $(shell grep 'go.uber.org/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
 
 # for pytest
@@ -97,7 +97,7 @@ ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
 endif
 ifndef HAS_MOCKGEN
-	go install github.com/golang/mock/mockgen@$(MOCKGEN_VERSION)
+	go install go.uber.org/mock/mockgen@$(MOCKGEN_VERSION)
 	$(info "mockgen has been installed")
 endif
 	go generate ./pkg/... ./cmd/...
