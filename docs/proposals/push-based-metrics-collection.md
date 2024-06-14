@@ -79,7 +79,7 @@ def tune(
 
     You can use `curl` to verify that Katib DB Manager is reachable: `curl <db-manager-address>`.
 
-    [!!!] Trial's namespace and name should always be passed into Katib Trials as env variable `KATIB_TRIAL_NAMESPACE` and `KATIB_TRIAL_NAME`.
+    [!!!] Trial name should always be passed into Katib Trials as env variable `KATIB_TRIAL_NAME`.
 
     Args:
         metrics: Dict of metrics pushed to Katib DB.
@@ -144,11 +144,11 @@ As is mentioned above, we decided to add `metrics_collector_config` to the tune 
 
 3. Rename metrics collector from `None` to `Push`: It's not correct to call push-based metrics collection `None`. We should modify related code to rename it.
 
-4. Write env variables into trial spec: set `KATIB_TRIAL_NAMEPSACE` and `KATIB_TRIAL_NAME` for `report_metrics` function to dial db manager.
+4. Write env variables into trial spec: set `KATIB_TRIAL_NAME` for `report_metrics` function to dial db manager.
 
 ### New Interface `report_metrics` in Python SDK
 
-We decide to implement this funcion to push metrics directly to Katib DB with the help of grpc. Trial's namespace and name should always be passed into Katib Trials (and then into this function) as env variable `KATIB_TRIAL_NAMESPACE` and `KATIB_TRIAL_NAME`. 
+We decide to implement this funcion to push metrics directly to Katib DB with the help of grpc. Trial name should always be passed into Katib Trials (and then into this function) as env variable `KATIB_TRIAL_NAME`. 
 
 Also, the function is supposed to be implemented as **global function** because it is called in the user container.
 
@@ -180,7 +180,8 @@ We decide to add a if-else statement in the code above to distinguish pull-based
 
 2. Update the status of trial to `MetricsUnavailable`
 
-In the current implementation of pull-based metrics collection, trials will be re-queued when the metrics collector finds the `.Status.Observation` is empty. However, it's not compatible with push-based metrics collection because the forgotten metrics won't be reported in the new round of reconcile. So, we need to update its status in the function `UpdateTrialStatusCondition` in accomodation with the pull-based metrics collection.
+In the current implementation of pull-based metrics collection, trials will be re-queued when the metrics collector finds the `.Status.Observation` is empty. However, it's not compatible with push-based metrics collection because the forgotten metrics won't be reported in the new round of reconcile. So, we need to update its status in the function `UpdateTrialStatusCondition` in accomodation with the pull-based metrics collection. The following code will be insert into lines before [trial_controller_util.go#L69](https://github.com/kubeflow/katib/blob/7959ffd54851216dbffba791e1da13c8485d1085/pkg/controller.v1beta1/trial/trial_controller_util.go#L69)
+
 
 ```Golang
 else if instance.Spec.MetricCollector.Collector.Kind == "Push" && instance.Status.Obeservation == nil {
