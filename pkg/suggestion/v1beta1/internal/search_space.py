@@ -13,10 +13,14 @@
 # limitations under the License.
 
 import logging
+
 import numpy as np
 
 from pkg.apis.manager.v1beta1.python import api_pb2 as api
-from pkg.suggestion.v1beta1.internal.constant import INTEGER, DOUBLE, CATEGORICAL, DISCRETE
+from pkg.suggestion.v1beta1.internal.constant import CATEGORICAL
+from pkg.suggestion.v1beta1.internal.constant import DISCRETE
+from pkg.suggestion.v1beta1.internal.constant import DOUBLE
+from pkg.suggestion.v1beta1.internal.constant import INTEGER
 import pkg.suggestion.v1beta1.internal.constant as constant
 
 logging.basicConfig(level=logging.DEBUG)

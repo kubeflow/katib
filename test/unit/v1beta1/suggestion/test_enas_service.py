@@ -14,15 +14,13 @@
 
 import os
 import shutil
+import unittest
 
 import grpc
 import grpc_testing
-import unittest
-
 import pytest
 
 from pkg.apis.manager.v1beta1.python import api_pb2
-
 from pkg.suggestion.v1beta1.nas.enas.service import EnasService
 
 

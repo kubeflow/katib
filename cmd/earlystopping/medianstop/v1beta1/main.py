@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
-import time
+from concurrent import futures
 import logging
+import time
+
+import grpc
+
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
 from pkg.earlystopping.v1beta1.medianstop.service import MedianStopService
-from concurrent import futures
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 DEFAULT_PORT = "0.0.0.0:6788"

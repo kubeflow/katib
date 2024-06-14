@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from tfevent_loader import MetricsCollector
 from google.protobuf import json_format
+from tfevent_loader import MetricsCollector
 
 
 def get_metric_logs(logs_dir, metric_names):

@@ -14,10 +14,12 @@
 
 import argparse
 import os
-import tensorflow as tf
 
-from tensorflow.keras.layers import Dense, Flatten, Conv2D
+import tensorflow as tf
 from tensorflow.keras import Model
+from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Flatten
 
 
 class MyModel(Model):

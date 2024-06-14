@@ -19,13 +19,12 @@ import re
 import ssl
 
 import certifi
+from kubeflow.katib.exceptions import ApiException
+from kubeflow.katib.exceptions import ApiValueError
 # python 2 and python 3 compatibility library
 import six
 from six.moves.urllib.parse import urlencode
 import urllib3
-
-from kubeflow.katib.exceptions import ApiException, ApiValueError
-
 
 logger = logging.getLogger(__name__)
 
