@@ -2,13 +2,12 @@ HAS_LINT := $(shell command -v golangci-lint;)
 HAS_YAMLLINT := $(shell command -v yamllint;)
 HAS_SHELLCHECK := $(shell command -v shellcheck;)
 HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
-HAS_MOCKGEN := $(shell command -v mockgen;)
 
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= linux/amd64,linux/arm64
 ENVTEST_K8S_VERSION ?= 1.29
-MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 2)
+MOCKGEN_VERSION ?= $(shell grep 'go.uber.org/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
 
 # for pytest
@@ -92,13 +91,9 @@ controller-gen:
 # 3. Generate Python SDK for Katib (hack/gen-python-sdk/gen-sdk.sh)
 # 4. Generate gRPC manager APIs (pkg/apis/manager/v1beta1/build.sh and pkg/apis/manager/health/build.sh)
 # 5. Generate Go mock codes
-generate: controller-gen
+generate: controller-gen mockgen
 ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
-endif
-ifndef HAS_MOCKGEN
-	go install github.com/golang/mock/mockgen@$(MOCKGEN_VERSION)
-	$(info "mockgen has been installed")
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
@@ -188,3 +183,29 @@ pytest-skopt:
 	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py
+
+## Location to install dependencies to
+LOCALBIN ?= $(shell pwd)/bin
+$(LOCALBIN):
+	mkdir -p $(LOCALBIN)
+
+MOCKGEN = $(LOCALBIN)/mockgen-$(MOCKGEN_VERSION)
+
+.PHONY: mockgen
+mockgen: $(MOCKGEN) ## Download mockgen locally if necessary.
+$(MOCKGEN): $(LOCALBIN)
+	$(call go-install-tool,$(MOCKGEN),go.uber.org/mock/mockgen,${MOCKGEN_VERSION})
+
+# go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
+# $1 - target path with name of binary (ideally with version)
+# $2 - package url which can be installed
+# $3 - specific version of package
+define go-install-tool
+@[ -f $(1) ] || { \
+set -e; \
+package=$(2)@$(3) ;\
+echo "Downloading $${package}" ;\
+GOBIN=$(LOCALBIN) go install $${package} ;\
+mv "$$(echo "$(1)" | sed "s/-$(3)$$//")" $(1) ;\
+}
+endef

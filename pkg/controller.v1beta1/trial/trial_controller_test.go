@@ -21,10 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
+	"go.uber.org/mock/gomock"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
