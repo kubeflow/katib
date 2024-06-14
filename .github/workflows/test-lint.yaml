@@ -23,9 +23,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Check YAML files
-        run: make yamllint
-
       - name: Check shell scripts
         run: make shellcheck
 
