@@ -2,6 +2,7 @@ HAS_LINT := $(shell command -v golangci-lint;)
 HAS_YAMLLINT := $(shell command -v yamllint;)
 HAS_SHELLCHECK := $(shell command -v shellcheck;)
 HAS_SETUP_ENVTEST := $(shell command -v setup-envtest;)
+HAS_MOCKGEN := $(shell command -v mockgen;)
 
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
@@ -95,6 +96,10 @@ generate: controller-gen mockgen
 ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
 endif
+ifndef HAS_MOCKGEN
+	go install go.uber.org/mock/mockgen@$(MOCKGEN_VERSION)
+	$(info "mockgen has been installed")
+endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
 	pkg/apis/manager/v1beta1/build.sh
@@ -183,31 +188,3 @@ pytest-skopt:
 	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
 	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py
-
-##@ Dependencies
-
-## Location to install dependencies to
-LOCALBIN ?= $(shell pwd)/bin
-$(LOCALBIN):
-	mkdir -p $(LOCALBIN)
-
-MOCKGEN = $(LOCALBIN)/mockgen-$(MOCKGEN_VERSION)
-
-.PHONY: mockgen
-mockgen: $(MOCKGEN) ## Download mockgen locally if necessary.
-$(MOCKGEN): $(LOCALBIN)
-	$(call go-install-tool,$(MOCKGEN),go.uber.org/mock/mockgen,${MOCKGEN_VERSION})
-
-# go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
-# $1 - target path with name of binary (ideally with version)
-# $2 - package url which can be installed
-# $3 - specific version of package
-define go-install-tool
-@[ -f $(1) ] || { \
-set -e; \
-package=$(2)@$(3) ;\
-echo "Downloading $${package}" ;\
-GOBIN=$(LOCALBIN) go install $${package} ;\
-mv "$$(echo "$(1)" | sed "s/-$(3)$$//")" $(1) ;\
-}
-endef
