@@ -60,7 +60,7 @@ def tune(
     # The newly added parameter metrics_collector_config.
     # It specifies the config of metrics collector, for example, 
     # metrics_collector_config={"kind": "Push"},
-    metrics_collector_config: Dict[str, Any] = None, 
+    metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"}, 
 )
 ```
 
@@ -68,16 +68,6 @@ def tune(
 
 ```Python
 """Push Metrics Directly to Katib DB
-    Katib DB Manager service should be accessible while calling this API.
-
-    If you run this API in-cluster (e.g. from the Kubeflow Notebook) you can
-    use the default Katib DB Manager address: `katib-db-manager.kubeflow:6789`.
-
-    If you run this API outside the cluster, you have to port-forward the
-    Katib DB Manager before getting the Trial metrics: `kubectl port-forward svc/katib-db-manager -n kubeflow 6789`.
-    In that case, you can use this Katib DB Manager address: `localhost:6789`.
-
-    You can use `curl` to verify that Katib DB Manager is reachable: `curl <db-manager-address>`.
 
     [!!!] Trial name should always be passed into Katib Trials as env variable `KATIB_TRIAL_NAME`.
 
@@ -136,15 +126,13 @@ print(katib_client.get_optimal_hyperparameters(name))
 
 ### Add New Parameter in `tune`
 
-As is mentioned above, we decided to add `metrics_collector_config` to the tune function in Python SDK. Also, we have some changes to be made:
+As mentioned above, we decided to add `metrics_collector_config` to the tune function in Python SDK. Also, we have some changes to be made:
 
-1. Disable injection: set `katib.kubeflow.org/metrics-collector-injection` to `disabled` when the push-based way of metrics collection is adopted so as to disable the injection of the metrics collection sidecar container.
+1. Configure the way of metrics collection: set the configuration `spec.metricsCollectionSpec.collector.kind`(specify the way of metrics collection) to `Push`.
 
-2. Configure the way of metrics collection: set the configuration `spec.metricsCollectionSpec.collector.kind`(specify the way of metrics collection) to `Push`.
+2. Rename metrics collector from `None` to `Push`: It's not correct to call push-based metrics collection `None`. We should modify related code to rename it.
 
-3. Rename metrics collector from `None` to `Push`: It's not correct to call push-based metrics collection `None`. We should modify related code to rename it.
-
-4. Write env variables into trial spec: set `KATIB_TRIAL_NAME` for `report_metrics` function to dial db manager.
+3. Write env variables into Trial spec: set `KATIB_TRIAL_NAME` for `report_metrics` function to dial db manager.
 
 ### New Interface `report_metrics` in Python SDK
 
@@ -176,16 +164,16 @@ if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation 
 ```
 1. Distinguish pull-based and push-based metrics collection
 
-We decide to add a if-else statement in the code above to distinguish pull-based and push-based metrics collection. In the push-based collection, the trial does not need to be requeued. Instead, we'll insert a unavailable value to Katib DB.
+We decide to add a if-else statement in the code above to distinguish pull-based and push-based metrics collection. In the push-based collection, the Trial does not need to be requeued. Instead, we'll insert a unavailable value to Katib DB.
 
-2. Update the status of trial to `MetricsUnavailable`
+2. Update the status of Trial to `MetricsUnavailable`
 
-In the current implementation of pull-based metrics collection, trials will be re-queued when the metrics collector finds the `.Status.Observation` is empty. However, it's not compatible with push-based metrics collection because the forgotten metrics won't be reported in the new round of reconcile. So, we need to update its status in the function `UpdateTrialStatusCondition` in accomodation with the pull-based metrics collection. The following code will be insert into lines before [trial_controller_util.go#L69](https://github.com/kubeflow/katib/blob/7959ffd54851216dbffba791e1da13c8485d1085/pkg/controller.v1beta1/trial/trial_controller_util.go#L69)
+In the current implementation of pull-based metrics collection, Trials will be re-queued when the metrics collector finds the `.Status.Observation` is empty. However, it's not compatible with push-based metrics collection because the forgotten metrics won't be reported in the new round of reconcile. So, we need to update its status in the function `UpdateTrialStatusCondition` in accommodation with the pull-based metrics collection. The following code will be insert into lines before [trial_controller_util.go#L69](https://github.com/kubeflow/katib/blob/7959ffd54851216dbffba791e1da13c8485d1085/pkg/controller.v1beta1/trial/trial_controller_util.go#L69)
 
 
 ```Golang
-else if instance.Spec.MetricCollector.Collector.Kind == "Push" && instance.Status.Obeservation == nil {
-    ... // Update the status of this trial to `MetricsUnavailable` and output the reason.
+else if instance.Spec.MetricCollector.Collector.Kind == "Push" {
+    ... // Update the status of this Trial to `MetricsUnavailable` and output the reason.
 }
 ```
 
