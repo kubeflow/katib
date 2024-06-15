@@ -27,6 +27,7 @@ import (
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
+	"google.golang.org/protobuf/testing/protocmp"
 )
 
 func TestCollectObservationLog(t *testing.T) {
@@ -320,7 +321,7 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 			if diff := cmp.Diff(test.wantError, err, cmpopts.EquateErrors()); len(diff) != 0 {
 				t.Errorf("Unexpected error (-want,+got):\n%s", diff)
 			}
-			if diff := cmp.Diff(test.expected, actual); len(diff) != 0 {
+			if diff := cmp.Diff(test.expected, actual, protocmp.Transform()); len(diff) != 0 {
 				t.Errorf("Unexpected parsed result (-want,+got):\n%s", diff)
 			}
 		})
