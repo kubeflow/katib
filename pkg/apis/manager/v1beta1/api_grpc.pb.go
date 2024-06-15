@@ -5,7 +5,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             (unknown)
-// source: v1beta1/api.proto
+// source: api.proto
 
 package api_v1_beta1
 
@@ -198,7 +198,7 @@ var DBManager_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "v1beta1/api.proto",
+	Metadata: "api.proto",
 }
 
 const (
@@ -323,7 +323,7 @@ var Suggestion_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "v1beta1/api.proto",
+	Metadata: "api.proto",
 }
 
 const (
@@ -485,5 +485,5 @@ var EarlyStopping_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "v1beta1/api.proto",
+	Metadata: "api.proto",
 }

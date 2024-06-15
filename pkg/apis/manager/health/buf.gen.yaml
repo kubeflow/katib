@@ -1,5 +1,13 @@
 version: v2
 plugins:
+- remote: buf.build/protocolbuffers/go:v1.33.0
+  out: .
+  opt: module=github.com/kubeflow/katib/pkg/apis/manager/health
+
+- remote: buf.build/grpc/go:v1.3.0
+  out: .
+  opt: module=github.com/kubeflow/katib/pkg/apis/manager/health,require_unimplemented_servers=false
+
 - remote: buf.build/protocolbuffers/python:v26.1
   out: python
 

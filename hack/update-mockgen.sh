@@ -21,7 +21,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-SCRIPT_ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
+SCRIPT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
 
 cd "${SCRIPT_ROOT}"
 
