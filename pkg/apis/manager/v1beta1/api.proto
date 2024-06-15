@@ -5,6 +5,8 @@ syntax = "proto3";
 
 package api.v1.beta1;
 
+option go_package = "github.com/kubeflow/katib/pkg/apis/manager/v1beta1;api_v1_beta1";
+
 /**
  * DBManager service defines APIs to manage Katib database.
  */
