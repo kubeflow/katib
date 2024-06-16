@@ -42,19 +42,18 @@ class KatibClient(object):
 		additional_metric_names: Optional,
 		objective_goal: Optional,
 		algorithm_setting: Optional,
-		max_trail_count: Optional,
-		max_failed_trail_count: Optional,
-		parallel_trail_count: Optional,
-		resources_per_trail: Optional,
+		max_trial_count: Optional,
+		max_failed_trial_count: Optional,
+		parallel_trial_count: Optional,
+		resources_per_trial: Optional,
 		num_workers: Optional,
 		num_procs_per_worker: Optional,
 		resources_per_worker: Optional,
 		retain_trials: Optional,
-		env_per_trial, # TBD
-		storage_config, # TBD
-		base_image, # TBD
-		packages_to_install, # TBD
-		pip_index_url, # TBD
+		env_per_trial: Optional,
+		packages_to_install: Optional,
+		pip_index_url: Optional,
+		base_image, # Not sure if we need it anymore
 	):
 		"""
         Initiates a hyperparameter tuning experiment in Katib.
@@ -77,12 +76,11 @@ class KatibClient(object):
         - num_workers: Number of PyTorchJob workers for distributed jobs.
         - num_procs_per_worker: Number of processes per worker for distributed jobs.
         - resources_per_worker: Resources allocated per worker.
-        - env_per_trial: Environment variables for worker containers.
-        - storage_config: PVC configuration for pre-trained model and dataset storage.
         - retain_trials: Whether to retain trial resources after completion.
-        - base_image: Base Docker image for running the objective function.
+		- env_per_trial: Environment variables for worker containers.
         - packages_to_install: Additional Python packages to install.
         - pip_index_url: URL of the PyPI index for installing packages.
+		- base_image: Base Docker image for running the objective function.
         """
         pass  # Implementation logic for initiating the experiment
 ```
