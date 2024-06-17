@@ -23,7 +23,7 @@ We aim to develop a high-level API for tuning hyperparameters of LLMs. This API 
 
 ## Design for API
 
-![Design for API](../images/design_api.jpg)
+![Design for API](images/design_api.jpg)
 
 ```python
 import kubeflow.katib as katib
@@ -48,7 +48,6 @@ class KatibClient(object):
 		resources_per_trial: Optional,
 		num_workers: Optional,
 		num_procs_per_worker: Optional,
-		resources_per_worker: Optional,
 		retain_trials: Optional,
 		env_per_trial: Optional,
 		packages_to_install: Optional,
@@ -75,7 +74,6 @@ class KatibClient(object):
         - resources_per_trial: Resources required per trial.
         - num_workers: Number of PyTorchJob workers for distributed jobs.
         - num_procs_per_worker: Number of processes per worker for distributed jobs.
-        - resources_per_worker: Resources allocated per worker.
         - retain_trials: Whether to retain trial resources after completion.
 		- env_per_trial: Environment variables for worker containers.
         - packages_to_install: Additional Python packages to install.
@@ -164,11 +162,6 @@ katib_client.tune(
 	},
 	num_workers=4,
 	num_procs_per_worker=2,
-	resources_per_worker={
-		"gpu": 2,
-		"cpu": 5,
-		"memory": "10G",
-	}
 )
 
 # Get the best hyperparameters
