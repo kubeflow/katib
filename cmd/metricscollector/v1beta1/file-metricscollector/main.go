@@ -146,7 +146,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 
 	rules, err := filemc.NewRuleSet(objMetric, objType, stopRules)
 	if err != nil {
-		panic(err)
+		klog.Fatalf("NewRuleSet failed: %v", err)
 	}
 
 	// Check that metric file exists.
