@@ -397,8 +397,8 @@ class KatibClient(object):
                                 image=base_image,
                                 command=["bash", "-c"],
                                 args=[exec_script],
-                                env=env,
-                                env_from=env_from,
+                                env=env if env else None,
+                                env_from=env_from if env_from else None,
                                 resources=resources_per_trial,
                             )
                         ],
