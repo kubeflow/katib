@@ -18,6 +18,11 @@ package validator
 
 import (
 	"errors"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"testing"
 
 	"go.uber.org/mock/gomock"
@@ -25,14 +30,12 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 
 	manifestmock "github.com/kubeflow/katib/pkg/mock/v1beta1/experiment/manifest"
@@ -66,7 +69,7 @@ func TestValidateExperiment(t *testing.T) {
 
 	tcs := []struct {
 		instance        *experimentsv1beta1.Experiment
-		err             bool
+		wantErr         field.ErrorList
 		oldInstance     *experimentsv1beta1.Experiment
 		testDescription string
 	}{
@@ -77,7 +80,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Name = "1234-test"
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("metadata").Child("name"), "", ""),
+			},
 			testDescription: "Name is invalid",
 		},
 		// Objective
@@ -87,7 +92,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Objective = nil
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("objective"), ""),
+			},
 			testDescription: "Objective is nil",
 		},
 		{
@@ -96,7 +103,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Objective.Type = commonv1beta1.ObjectiveTypeUnknown
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("objective").Child("type"), "", ""),
+			},
 			testDescription: "Objective type is unknown",
 		},
 		{
@@ -105,7 +114,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Objective.ObjectiveMetricName = ""
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("objective").Child("objectiveMetricName"), ""),
+			},
 			testDescription: "Objective metric name is empty",
 		},
 		{
@@ -115,7 +126,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Objective.AdditionalMetricNames = []string{"objective", "objective-1"}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("objective").Child("additionalMetricNames"), "", ""),
+			},
 			testDescription: "additionalMetricNames should not contain objective metric name",
 		},
 		// Algorithm
@@ -125,7 +138,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Algorithm = nil
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("algorithm"), ""),
+			},
 			testDescription: "Algorithm is nil",
 		},
 		{
@@ -134,7 +149,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Algorithm.AlgorithmName = ""
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("algorithm").Child("algorithmName"), ""),
+			},
 			testDescription: "Algorithm name is empty",
 		},
 		// EarlyStopping
@@ -144,7 +161,6 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.EarlyStopping = nil
 				return i
 			}(),
-			err:             false,
 			testDescription: "EarlyStopping is nil",
 		},
 		{
@@ -153,13 +169,14 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.EarlyStopping.AlgorithmName = ""
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("earlyStopping").Child("algorithmName"), ""),
+			},
 			testDescription: "EarlyStopping AlgorithmName is empty",
 		},
 		// Valid Experiment
 		{
 			instance:        newFakeInstance(),
-			err:             false,
 			testDescription: "Run validator for correct experiment",
 		},
 		{
@@ -168,7 +185,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.MaxFailedTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("maxFailedTrialCount"), "", ""),
+			},
 			testDescription: "Max failed trial count is negative",
 		},
 		{
@@ -177,7 +196,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.MaxTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("maxTrialCount"), "", ""),
+			},
 			testDescription: "Max trial count is negative",
 		},
 		{
@@ -186,19 +207,23 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.ParallelTrialCount = &fakeNegativeInt
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("parallelTrialCount"), "", ""),
+			},
 			testDescription: "Parallel trial count is negative",
 		},
 		// Validate Resume Experiment
 		{
 			instance:        newFakeInstance(),
-			err:             false,
 			oldInstance:     newFakeInstance(),
 			testDescription: "Run validator to correct resume experiment",
 		},
 		{
 			instance: newFakeInstance(),
-			err:      true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("resumePolicy"), "", ""),
+				field.Forbidden(field.NewPath("spec"), ""),
+			},
 			oldInstance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.MarkExperimentStatusSucceeded(experimentutil.ExperimentMaxTrialsReachedReason, "Experiment is succeeded")
@@ -209,7 +234,9 @@ func TestValidateExperiment(t *testing.T) {
 		},
 		{
 			instance: newFakeInstance(),
-			err:      true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("maxTrialCount"), "", ""),
+			},
 			oldInstance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Status = experimentsv1beta1.ExperimentStatus{
@@ -223,7 +250,9 @@ func TestValidateExperiment(t *testing.T) {
 		},
 		{
 			instance: newFakeInstance(),
-			err:      true,
+			wantErr: field.ErrorList{
+				field.Forbidden(field.NewPath("spec"), ""),
+			},
 			oldInstance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.Algorithm.AlgorithmName = "not-test"
@@ -237,7 +266,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.ResumePolicy = "invalid-policy"
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("resumePolicy"), "", ""),
+			},
 			testDescription: "Invalid resume policy",
 		},
 		// Validate NAS Config
@@ -248,7 +279,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.NasConfig = nil
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec"), ""),
+			},
 			testDescription: "Parameters and NAS config is nil",
 		},
 		{
@@ -263,7 +296,9 @@ func TestValidateExperiment(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec"), "", ""),
+			},
 			testDescription: "Parameters and NAS config is not nil",
 		},
 		{
@@ -272,7 +307,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.TrialTemplate = nil
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("trialTemplate"), ""),
+			},
 			testDescription: "Trial template is nil",
 		},
 		{
@@ -281,7 +318,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.Parameters[1].FeasibleSpace.Max = "5"
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("parameters").Index(1).Child("feasibleSpace"), "", ""),
+			},
 			testDescription: "Invalid feasible space in parameters",
 		},
 		{
@@ -293,7 +332,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.MaxFailedTrialCount = &invalidMaxFailedTrialCount
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("maxFailedTrialCount"), "", ""),
+			},
 			testDescription: "maxFailedTrialCount greater than maxTrialCount",
 		},
 		{
@@ -305,7 +346,6 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.MaxFailedTrialCount = &validMaxFailedTrialCount
 				return i
 			}(),
-			err:             false,
 			testDescription: "maxFailedTrialCount equal to maxTrialCount",
 		},
 		{
@@ -317,7 +357,9 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.ParallelTrialCount = &invalidParallelTrialCount
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("parallelTrialCount"), "", ""),
+			},
 			testDescription: "parallelTrialCount greater than maxTrialCount",
 		},
 		{
@@ -329,17 +371,14 @@ func TestValidateExperiment(t *testing.T) {
 				i.Spec.ParallelTrialCount = &validParallelTrialCount
 				return i
 			}(),
-			err:             false,
 			testDescription: "parallelTrialCount equal to maxTrialCount",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.ValidateExperiment(tc.instance, tc.oldInstance)
-		if !tc.err && err != nil {
-			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-		} else if tc.err && err == nil {
-			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		gotError := g.ValidateExperiment(tc.instance, tc.oldInstance)
+		if diff := cmp.Diff(tc.wantErr, gotError, cmpopts.IgnoreFields(field.Error{}, "Detail", "BadValue")); len(diff) != 0 {
+			t.Errorf("Unexpected errors (-want,+got):\n%s", diff)
 		}
 	}
 }
@@ -353,7 +392,7 @@ func TestValidateParameters(t *testing.T) {
 
 	tcs := []struct {
 		parameters      []experimentsv1beta1.ParameterSpec
-		err             bool
+		wantErr         field.ErrorList
 		testDescription string
 	}{
 		{
@@ -362,7 +401,9 @@ func TestValidateParameters(t *testing.T) {
 				ps[0].ParameterType = "invalid-type"
 				return ps
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("parameters").Index(0).Child("parameterType"), "", ""),
+			},
 			testDescription: "Invalid parameter type",
 		},
 		{
@@ -371,7 +412,9 @@ func TestValidateParameters(t *testing.T) {
 				ps[0].FeasibleSpace = experimentsv1beta1.FeasibleSpace{}
 				return ps
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("parameters").Index(0).Child("feasibleSpace"), ""),
+			},
 			testDescription: "Feasible space is nil",
 		},
 		{
@@ -380,7 +423,9 @@ func TestValidateParameters(t *testing.T) {
 				ps[0].FeasibleSpace.List = []string{"invalid-list"}
 				return ps
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("parameters").Index(0).Child("feasibleSpace").Child("list"), "", ""),
+			},
 			testDescription: "Not empty list for int parameter type",
 		},
 		{
@@ -393,7 +438,9 @@ func TestValidateParameters(t *testing.T) {
 				}
 				return ps
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("parameters").Index(0).Child("feasibleSpace").Child("max"), ""),
+			},
 			testDescription: "Empty max and min for int parameter type",
 		},
 		{
@@ -402,17 +449,17 @@ func TestValidateParameters(t *testing.T) {
 				ps[1].FeasibleSpace.Max = "1"
 				return ps
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("parameters").Index(1).Child("feasibleSpace"), "", ""),
+			},
 			testDescription: "Not empty max for categorical parameter type",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.(*DefaultValidator).validateParameters(tc.parameters)
-		if !tc.err && err != nil {
-			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-		} else if tc.err && err == nil {
-			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		gotError := g.(*DefaultValidator).validateParameters(tc.parameters)
+		if diff := cmp.Diff(tc.wantErr, gotError, cmpopts.IgnoreFields(field.Error{}, "Detail", "BadValue")); len(diff) != 0 {
+			t.Errorf("Unexpected errors (-want,+got):\n%s", diff)
 		}
 	}
 }
@@ -476,6 +523,8 @@ spec:
 	validTemplate7 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate8 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 	validTemplate9 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate10 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
+	validTemplate11 := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(validJobStr, nil)
 
 	missedParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(missedParameterJobStr, nil)
 	oddParameterTemplate := p.EXPECT().GetTrialTemplate(gomock.Any()).Return(oddParameterJobStr, nil)
@@ -501,21 +550,25 @@ spec:
 		notEmptyMetadataTemplate,
 		emptyAPIVersionTemplate,
 		customJobTypeTemplate,
+		validTemplate10,
+		validTemplate11,
 	)
 
 	tcs := []struct {
 		instance        *experimentsv1beta1.Experiment
-		err             bool
+		wantErr         field.ErrorList
 		testDescription string
 	}{
-		// TrialParamters is nil
+		// TrialParameters is nil
 		{
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialParameters = nil
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("trialTemplate").Child("trialParameters"), ""),
+			},
 			testDescription: "Trial parameters is nil",
 		},
 		// TrialSpec and ConfigMap is nil
@@ -525,7 +578,9 @@ spec:
 				i.Spec.TrialTemplate.TrialSpec = nil
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("trialTemplate").Child("TrialSource"), ""),
+			},
 			testDescription: "Trial spec nil",
 		},
 		// TrialSpec and ConfigMap is not nil
@@ -533,11 +588,15 @@ spec:
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource.ConfigMap = &experimentsv1beta1.ConfigMapSource{
-					ConfigMapName: "config-map-name",
+					ConfigMapName:      "config-map-name",
+					ConfigMapNamespace: "config-map-namespace",
+					TemplatePath:       "config-map-template-path",
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("trialTemplate"), ""),
+			},
 			testDescription: "Trial spec and ConfigMap is not nil",
 		},
 		// ConfigMap missed template path
@@ -552,7 +611,9 @@ spec:
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("trialTemplate").Child("configMap"), ""),
+			},
 			testDescription: "Missed template path in ConfigMap",
 		},
 		// Wrong path in configMap
@@ -570,7 +631,9 @@ spec:
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate"), "", ""),
+			},
 			testDescription: "Wrong template path in ConfigMap",
 		},
 		// Empty Reference or Name in trialParameters
@@ -580,7 +643,10 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[0].Reference = ""
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate").Child("trialParameters").Index(0), "", ""),
+				field.Invalid(field.NewPath("spec").Child("trialTemplate"), "", ""),
+			},
 			testDescription: "Empty reference or name in Trial parameters",
 		},
 		// Wrong Name in trialParameters
@@ -590,7 +656,10 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[0].Name = "{invalid-name}"
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate").Child("trialParameters").Index(0), "", ""),
+				field.Invalid(field.NewPath("spec").Child("trialTemplate"), "", ""),
+			},
 			testDescription: "Wrong name in Trial parameters",
 		},
 		// Duplicate Name in trialParameters
@@ -600,7 +669,10 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Name = i.Spec.TrialTemplate.TrialParameters[0].Name
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate").Child("trialParameters").Index(1).Child("name"), "", ""),
+				field.Invalid(field.NewPath("spec").Child("trialTemplate"), "", ""),
+			},
 			testDescription: "Duplicate name in Trial parameters",
 		},
 		// Duplicate Reference in trialParameters
@@ -610,7 +682,10 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = i.Spec.TrialTemplate.TrialParameters[0].Reference
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate").Child("trialParameters").Index(1).Child("reference"), "", ""),
+				field.Invalid(field.NewPath("spec").Child("trialTemplate"), "", ""),
+			},
 			testDescription: "Duplicate reference in Trial parameters",
 		},
 		// Trial template contains Trial parameters which weren't referenced from spec.parameters
@@ -620,7 +695,9 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "wrong-ref"
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate").Child("trialParameters").Index(1).Child("reference"), "", ""),
+			},
 			testDescription: "Trial template contains Trial parameters which weren't referenced from spec.parameters",
 		},
 		// Trial template contains Trial parameters when spec.parameters is empty
@@ -631,7 +708,6 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "wrong-ref"
 				return i
 			}(),
-			err:             false,
 			testDescription: "Trial template contains Trial parameters when spec.parameters is empty",
 		},
 		// Trial template contains Trial metadata parameter substitution
@@ -641,7 +717,6 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Name}"
 				return i
 			}(),
-			err:             false,
 			testDescription: "Trial template contains Trial metadata reference as parameter",
 		},
 		{
@@ -650,7 +725,6 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Annotations[test-annotation]}"
 				return i
 			}(),
-			err:             false,
 			testDescription: "Trial template contains Trial annotation reference as parameter",
 		},
 		{
@@ -659,7 +733,6 @@ spec:
 				i.Spec.TrialTemplate.TrialParameters[1].Reference = "${trialSpec.Labels[test-label]}"
 				return i
 			}(),
-			err:             false,
 			testDescription: "Trial template contains Trial's label reference as parameter",
 		},
 		// Trial Template doesn't contain parameter from trialParameters
@@ -669,7 +742,9 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate"), "", ""),
+			},
 			testDescription: "Trial template doesn't contain parameter from Trial parameters",
 		},
 		// Trial Template contains extra parameter
@@ -679,7 +754,9 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate"), "", ""),
+			},
 			testDescription: "Trial template contains extra parameter",
 		},
 		// Trial Template parameter is invalid after substitution
@@ -690,7 +767,9 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate").Child("trialParameters").Index(1).Child("name"), "", ""),
+			},
 			testDescription: "Trial template is unable to convert to unstructured after substitution",
 		},
 		// Trial Template contains Name and Namespace
@@ -702,7 +781,9 @@ spec:
 				i.Spec.TrialTemplate.TrialSpec.SetNamespace("trial-namespace")
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("trialTemplate"), "", ""),
+			},
 			testDescription: "Trial template contains metadata.name or metadata.namespace",
 		},
 		// Trial Template doesn't contain APIVersion or Kind
@@ -712,7 +793,9 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("trialTemplate"), ""),
+			},
 			testDescription: "Trial template doesn't contain APIVersion or Kind",
 		},
 		// Trial Template has custom Kind
@@ -722,7 +805,6 @@ spec:
 				i := newFakeInstance()
 				return i
 			}(),
-			err:             false,
 			testDescription: "Trial template has custom Kind",
 		},
 		// Trial Template doesn't have PrimaryContainerName
@@ -732,7 +814,9 @@ spec:
 				i.Spec.TrialTemplate.PrimaryContainerName = ""
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("trialTemplate").Child("primaryContainerName"), ""),
+			},
 			testDescription: "Trial template doesn't have PrimaryContainerName",
 		},
 		// Trial Template doesn't have SuccessCondition
@@ -742,17 +826,17 @@ spec:
 				i.Spec.TrialTemplate.SuccessCondition = ""
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("trialTemplate"), ""),
+			},
 			testDescription: "Trial template doesn't have SuccessCondition",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.(*DefaultValidator).validateTrialTemplate(tc.instance)
-		if !tc.err && err != nil {
-			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-		} else if tc.err && err == nil {
-			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		gotError := g.(*DefaultValidator).validateTrialTemplate(tc.instance)
+		if diff := cmp.Diff(tc.wantErr, gotError, cmpopts.IgnoreFields(field.Error{}, "Detail", "BadValue")); len(diff) != 0 {
+			t.Errorf("Unexpected errors (-want,+got):\n%s", diff)
 		}
 	}
 }
@@ -882,7 +966,7 @@ func TestValidateMetricsCollector(t *testing.T) {
 
 	tcs := []struct {
 		instance        *experimentsv1beta1.Experiment
-		err             bool
+		wantErr         field.ErrorList
 		testDescription string
 	}{
 		// Invalid Metrics Collector Kind
@@ -896,7 +980,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("collector").Child("kind"), "", ""),
+			},
 			testDescription: "Invalid metrics collector Kind",
 		},
 		// FileCollector invalid Path
@@ -916,7 +1002,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("fileSystemPath").Child("path"), ""),
+			},
 			testDescription: "Invalid path for File metrics collector",
 		},
 		// TfEventCollector invalid Path
@@ -935,7 +1023,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("metricsCollectorSpec").Child("source"), ""),
+			},
 			testDescription: "Invalid path for TF event metrics collector",
 		},
 		// TfEventCollector invalid file format
@@ -956,7 +1046,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("fileSystemPath").Child("format"), "", ""),
+			},
 			testDescription: "Invalid file format for TF event metrics collector",
 		},
 		// PrometheusMetricCollector invalid Port
@@ -977,8 +1069,11 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
-			testDescription: "Invalid port for Prometheus metrics collector",
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("httpGet").Child("port"), "", ""),
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("httpGet").Child("path"), "", ""),
+			},
+			testDescription: "Invalid port and path for Prometheus metrics collector",
 		},
 		// PrometheusMetricCollector invalid Path
 		{
@@ -999,7 +1094,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("httpGet").Child("path"), "", ""),
+			},
 			testDescription: "Invalid path for Prometheus metrics collector",
 		},
 		//  CustomCollector empty CustomCollector
@@ -1013,7 +1110,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("metricsCollectorSpec").Child("collector").Child("customCollector"), ""),
+			},
 			testDescription: "Empty container for Custom metrics collector",
 		},
 		//  CustomCollector invalid Path
@@ -1035,7 +1134,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("fileSystemPath"), "", ""),
+			},
 			testDescription: "Invalid path for Custom metrics collector",
 		},
 		// FileMetricCollector invalid regexp in metrics format
@@ -1061,7 +1162,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("filter").Child("metricsFormat"), "", ""),
+			},
 			testDescription: "Invalid metrics format regex for File metrics collector",
 		},
 		// FileMetricCollector one subexpression in metrics format
@@ -1087,7 +1190,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("filter").Child("metricsFormat"), "", ""),
+			},
 			testDescription: "One subexpression in metrics format",
 		},
 		// FileMetricCollector invalid file format
@@ -1108,7 +1213,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Required(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("fileSystemPath").Child("format"), ""),
+			},
 			testDescription: "Invalid file format for File metrics collector",
 		},
 		// FileMetricCollector invalid metrics filter
@@ -1130,7 +1237,9 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             true,
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("metricsCollectorSpec").Child("source").Child("filter"), "", ""),
+			},
 			testDescription: "Invalid metrics filer for File metrics collector when file format is `JSON`",
 		},
 		// Valid FileMetricCollector
@@ -1151,17 +1260,14 @@ func TestValidateMetricsCollector(t *testing.T) {
 				}
 				return i
 			}(),
-			err:             false,
 			testDescription: "Run validator for correct File metrics collector",
 		},
 	}
 
 	for _, tc := range tcs {
-		err := g.(*DefaultValidator).validateMetricsCollector(tc.instance)
-		if !tc.err && err != nil {
-			t.Errorf("Case: %v failed. Expected nil, got %v", tc.testDescription, err)
-		} else if tc.err && err == nil {
-			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
+		gotError := g.(*DefaultValidator).validateMetricsCollector(tc.instance)
+		if diff := cmp.Diff(tc.wantErr, gotError, cmpopts.IgnoreFields(field.Error{}, "Detail", "BadValue")); len(diff) != 0 {
+			t.Errorf("Unexpected errors (-want,+got):\n%s", diff)
 		}
 	}
 
@@ -1185,7 +1291,7 @@ func TestValidateConfigData(t *testing.T) {
 		invalidConfigCall,
 	)
 
-	validEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(configv1beta1.EarlyStoppingConfig{}, nil)
+	validEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(configv1beta1.EarlyStoppingConfig{}, nil).Times(2)
 	invalidEarlyStoppingConfigCall := p.EXPECT().GetEarlyStoppingConfigData(gomock.Any()).Return(configv1beta1.EarlyStoppingConfig{}, errors.New("GetEarlyStoppingConfigData failed"))
 
 	gomock.InOrder(
@@ -1193,7 +1299,7 @@ func TestValidateConfigData(t *testing.T) {
 		invalidEarlyStoppingConfigCall,
 	)
 
-	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(configv1beta1.MetricsCollectorConfig{}, errors.New("GetMetricsCollectorConfigData failed"))
+	p.EXPECT().GetMetricsCollectorConfigData(gomock.Any()).Return(configv1beta1.MetricsCollectorConfig{}, errors.New("GetMetricsCollectorConfigData failed")).Times(3)
 
 	batchJobStr := convertBatchJobToString(newFakeBatchJob())
 	p.EXPECT().GetTrialTemplate(gomock.Any()).Return(batchJobStr, nil).AnyTimes()
@@ -1217,8 +1323,8 @@ func TestValidateConfigData(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		err := g.ValidateExperiment(tc.instance, nil)
-		if err == nil {
+		gotError := g.ValidateExperiment(tc.instance, nil)
+		if len(gotError) == 0 {
 			t.Errorf("Case: %v failed. Expected err, got nil", tc.testDescription)
 		}
 	}
