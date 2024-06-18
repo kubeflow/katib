@@ -41,17 +41,38 @@ func TestRuleSet(t *testing.T) {
 			},
 			action: func(t *testing.T, s *RuleSet) {
 				diff(t, []string{"a", "b", "c"}, s.LiveMetrics())
-				s.UpdateMetric("c", 1)
+				err := s.UpdateMetric("c", 1)
+				if err != nil {
+					t.Error(err)
+				}
 				diff(t, []string{"a", "b"}, s.LiveMetrics())
-				s.UpdateMetric("a", 1)
-				s.UpdateMetric("b", 0)
-				s.UpdateMetric("b", 0)
+				err = s.UpdateMetric("a", 1)
+				if err != nil {
+					t.Error(err)
+				}
+				err = s.UpdateMetric("b", 0)
+				if err != nil {
+					t.Error(err)
+				}
+				err = s.UpdateMetric("b", 0)
+				if err != nil {
+					t.Error(err)
+				}
 				diff(t, []string{"a", "b"}, s.LiveMetrics())
-				s.UpdateMetric("a", 0.1)
+				err = s.UpdateMetric("a", 0.1)
+				if err != nil {
+					t.Error(err)
+				}
 				diff(t, []string{"a", "b"}, s.LiveMetrics())
-				s.UpdateMetric("a", 0.21)
+				err = s.UpdateMetric("a", 0.21)
+				if err != nil {
+					t.Error(err)
+				}
 				diff(t, []string{"b"}, s.LiveMetrics())
-				s.UpdateMetric("b", 0.2)
+				err = s.UpdateMetric("b", 0.2)
+				if err != nil {
+					t.Error(err)
+				}
 				diff(t, []string{}, s.LiveMetrics())
 			},
 		},
@@ -75,11 +96,23 @@ func TestRuleSet(t *testing.T) {
 			},
 			action: func(t *testing.T, s *RuleSet) {
 				diff(t, []string{"obj", "a"}, s.LiveMetrics())
-				s.UpdateMetric("obj", 1)
-				s.UpdateMetric("a", 0.6)
+				err := s.UpdateMetric("obj", 1)
+				if err != nil {
+					t.Error(err)
+				}
+				err = s.UpdateMetric("a", 0.6)
+				if err != nil {
+					t.Error(err)
+				}
 				diff(t, []string{"obj", "a"}, s.LiveMetrics())
-				s.UpdateMetric("obj", 0.7)
-				s.UpdateMetric("a", 0.6)
+				err = s.UpdateMetric("obj", 0.7)
+				if err != nil {
+					t.Error(err)
+				}
+				err = s.UpdateMetric("a", 0.6)
+				if err != nil {
+					t.Error(err)
+				}
 				diff(t, []string{"a"}, s.LiveMetrics())
 			},
 		},
