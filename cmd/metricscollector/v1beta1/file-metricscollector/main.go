@@ -210,7 +210,10 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 						if metricName != name {
 							continue
 						}
-						rules.UpdateMetric(name, metricValue)
+						err = rules.UpdateMetric(name, metricValue)
+						if err != nil {
+							klog.Fatalf("Unable to UpdateMetric %s %v", name, err)
+						}
 					}
 				}
 			}
@@ -230,7 +233,10 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 				if err != nil {
 					klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, name)
 				}
-				rules.UpdateMetric(name, metricValue)
+				err = rules.UpdateMetric(name, metricValue)
+				if err != nil {
+					klog.Fatalf("Unable to UpdateMetric %s %v", name, err)
+				}
 			}
 		default:
 			klog.Fatalf("Format must be set to %v or %v", commonv1beta1.TextFormat, commonv1beta1.JsonFormat)
