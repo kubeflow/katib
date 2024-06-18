@@ -180,5 +180,3 @@ else if instance.Spec.MetricCollector.Collector.Kind == "Push" {
 ### Collection of Final Metrics
 
 The final metrics of worker pods should be pushed to Katib DB directly in the push mode of metrics collection.
-
-\#WIP
