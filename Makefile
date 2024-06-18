@@ -8,12 +8,10 @@ COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= linux/amd64,linux/arm64
 ENVTEST_K8S_VERSION ?= 1.29
-MOCKGEN_VERSION ?= $(shell grep 'github.com/golang/mock' go.mod | cut -d ' ' -f 2)
+MOCKGEN_VERSION ?= $(shell grep 'go.uber.org/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
+GOPATH ?= $(shell go env GOPATH)
 
-# for pytest
-PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/apis/manager/v1beta1/python:$(CURDIR)/pkg/apis/manager/health/python
-PYTHONPATH := $(PYTHONPATH):$(CURDIR)/pkg/metricscollector/v1beta1/common:$(CURDIR)/pkg/metricscollector/v1beta1/tfevent-metricscollector
 TEST_TENSORFLOW_EVENT_FILE_PATH ?= $(CURDIR)/test/unit/v1beta1/metricscollector/testdata/tfevent-metricscollector/logs
 
 # Run tests
@@ -93,17 +91,13 @@ controller-gen:
 # 4. Generate gRPC manager APIs (pkg/apis/manager/v1beta1/build.sh and pkg/apis/manager/health/build.sh)
 # 5. Generate Go mock codes
 generate: controller-gen
-ifndef GOPATH
-	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
-endif
 ifndef HAS_MOCKGEN
-	go install github.com/golang/mock/mockgen@$(MOCKGEN_VERSION)
+	go install go.uber.org/mock/mockgen@$(MOCKGEN_VERSION)
 	$(info "mockgen has been installed")
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
-	pkg/apis/manager/v1beta1/build.sh
-	pkg/apis/manager/health/build.sh
+	hack/update-proto.sh
 	hack/update-mockgen.sh
 
 # Build images for the Katib v1beta1 components.
@@ -175,9 +169,9 @@ ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
 endif
 
 pytest: prepare-pytest prepare-pytest-testdata
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/earlystopping
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/metricscollector
+	pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
+	pytest ./test/unit/v1beta1/earlystopping
+	pytest ./test/unit/v1beta1/metricscollector
 
 # The skopt service doesn't work appropriately with Python 3.11.
 # So, we need to run the test with Python 3.9.
@@ -187,4 +181,4 @@ pytest-skopt:
 	pip install six
 	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
 	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
-	PYTHONPATH=$(PYTHONPATH) pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py
+	pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py

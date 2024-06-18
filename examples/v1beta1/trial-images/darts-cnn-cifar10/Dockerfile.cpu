@@ -4,10 +4,12 @@ ENV TARGET_DIR /opt/darts-cnn-cifar10
 
 ADD examples/v1beta1/trial-images/darts-cnn-cifar10 ${TARGET_DIR}
 
-WORKDIR  ${TARGET_DIR}
+WORKDIR ${TARGET_DIR}
 
+# TODO (andreyvelich): This is required since torchvision==0.17.1 is incompatible with numpy 2.0
+RUN pip install numpy==1.26.0
 RUN pip install --prefer-binary --no-cache-dir torch==2.2.1 torchvision==0.17.1
-RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
+
 RUN chgrp -R 0 ${TARGET_DIR} \
   && chmod -R g+rwX ${TARGET_DIR}
 
