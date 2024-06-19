@@ -3,11 +3,11 @@
 - [HyperParameter Optimization API for LLM Fine-Tuning](#hyperparameter-optimization-api-for-llm-fine-tuning)
   * [Links](#links)
   * [Motivation](#motivation)
-  * [Goal](#goal)
+  * [Goals](#goals)
+  * [Non-Goals](#non-goals)
   * [Design for API](#design-for-api)
     + [Example](#example)
   * [Implementation](#implementation)
-  * [Advanced Functionalities](#advanced-functionalities)
 
 ## Links
 
@@ -17,9 +17,16 @@
 
 The rapid advancements and growing popularity of Large Language Models (LLMs) have driven an increased need for effective LLMOps in Kubernetes environments. To address this, we developed a [train API](https://www.kubeflow.org/docs/components/training/user-guides/fine-tuning/) within the Training Python SDK, simplifying the process of fine-tuning LLMs using distributed PyTorchJob workers. However, hyperparameter optimization remains a crucial yet labor-intensive task for enhancing model performance. Automating this tuning process through a dedicated API will facilitate efficient and scalable exploration of hyperparameters, ultimately improving model performance and reducing manual effort.
 
-## Goal
+## Goals
 
 Our goal is to develop a high-level API for tuning hyperparameters of LLMs that simplifies the process of hyperparameter optimization in Kubernetes. This API will seamlessly integrate with external platforms like HuggingFace and S3 for importing pretrained models and datasets. By specifying parameters for the training objective, trial configurations, and PyTorch worker configurations, the API will automate the creation of experiments and execution of trials. This abstraction of Kubernetes infrastructure complexities will enable data scientists to optimize hyperparameters efficiently and effectively.
+
+## Non-Goals
+
+1. Incorporate early stopping strategy into the API to optimize training efficiency.
+2. Expand support for distributed training in frameworks beyond PyTorch by leveraging their distributed training capabilities.
+3. Support adding custom providers through configmap or CRD approach to enhance flexibility.
+4. Enable users to deploy tuned models for inference within their applications or seamlessly integrate them into existing NLP pipelines for specialized tasks.
 
 ## Design for API
 
@@ -125,7 +132,7 @@ katib_client.tune(
 			disable_tqdm = True,
 			log_level = "info",
 			learning_rate = katib.search.double(min=1e-05, max=5e-05),
-			per_device_train_batch_size = katib.search.int(min=8, max=64),
+			per_device_train_batch_size = katib.search.categorical([8, 16, 32]),
 			num_train_epochs = katib.search.int(min=1, max=10),
 			weight_decay = katib.search.double(min=0.0, max=1.0),
 		),
@@ -157,17 +164,24 @@ best_hps = katib_client.get_optimal_hyperparameters(exp_name)
 
 ## Implementation
 
-By passing the specified parameters, the `tune` function will automate hyperparameter optimization for LLMs. The implementation focuses on two parts:
+By passing the specified parameters, this API will automate hyperparameter optimization for LLMs. The implementation will focus on the following aspects:
 
-**Model and Dataset Downloading**: We will leverage the [storage_initializer](https://github.com/kubeflow/training-operator/tree/master/sdk/python/kubeflow/storage_initializer) defined in the Training Python SDK for seamless integration of pretrained models and datasets from platforms like HuggingFace and S3. It will manage downloading and storing pretrained models and datasets via a PersistentVolumeClaim (PVC). This volume will be shared across containers, ensuring efficient access to the pretrained model and dataset without redundant downloads.
+**Model and Dataset Management**: We will leverage the [storage_initializer](https://github.com/kubeflow/training-operator/tree/master/sdk/python/kubeflow/storage_initializer) from the Training Python SDK for seamless integration of pretrained models and datasets from platforms like HuggingFace and S3. This component manages downloading and storing pretrained models and datasets via a PersistentVolumeClaim (PVC), which is shared across containers, ensuring efficient access to the pretrained model and dataset without redundant downloads.
 
-**Experiment and Trial Configuration**: Similar to the [existing tune API](https://github.com/kubeflow/katib/blob/0d190b94373c2f8f6150bf17d6dfa3698f4b2961/sdk/python/v1beta1/kubeflow/katib/api/katib_client.py#L152), we will create an experiment that defines the objective metric, search space, optimization algorithm, etc. The Experiment orchestrates the hyperparameter optimization process, including generating Trials, tracking their results, and identifying the optimal hyperparameters. Each Trial, implemented as a Kubernetes PyTorchJob, runs model training with specific hyperparameters. In the Trial specification for PyTorchJob, we will define the init container, master, and worker containers, allowing effective distribution across workers. Trial results will be fed back into the Experiment for evaluation, which then generates new Trials to further explore the hyperparameter space or concludes the tuning process.
+**Hyperparameter Configuration**: Users specify training parameters and the hyperparameters to be optimized within `trainer_parameters`. The API will parse `trainer_parameters` to identify tunable hyperparameters marked with `katib.search` and also defined in Huggingface's [transformers.TrainingArguments](https://huggingface.co/docs/transformers/en/main_classes/trainer#transformers.TrainingArguments) or [peft.LoraConfig](https://huggingface.co/docs/peft/en/package_reference/lora#peft.LoraConfig). These identified tunable hyperparameters will then be configured in each Trial with different values for hyperparameter optimization.
 
-## Advanced Functionalities
+**Hyperparameter Optimization**: This API will create an Experiment that defines the search space for identified tunable hyperparameters, the objective metric, optimization algorithm, etc. The Experiment will orchestrate the hyperparameter tuning process, generating Trials for each configuratin. Each Trial will be implemented as a Kubernete PyTorchJob, with the `trialTemplate` specifying the exact values for hyperparameters. The `trialTemplate` will also define master and worker containers, facilitating effective resource distribution and parallel execution of Trials. Trial results will then be fed back to the Experiment, which will evaluate the outcomes to identify the optimal set of hyperparameters.
 
-1. Incorporate early stopping strategy into the API to optimize training efficiency.
-2. Expand support for distributed training in frameworks beyond PyTorch by leveraging their distributed training capabilities.
-3. Support adding custom providers through configmap or CRD approach to enhance flexibility.
-4. Enable users to deploy tuned models for inference within their applications or seamlessly integrate them into existing NLP pipelines for specialized tasks.
+ **Dependencies Update**: To reuse existing assets from the Training Python SDK and integrate packages from HuggingFace, dependencies will be added to the `setup.py` of the Katib Python SDK as follows:
+
+```python
+setuptools.setup(
+	...// Configurations of the package
+	extras_require={
+			"kubeflow-training": ["kubeflow-training==1.7.0"],
+			"huggingface": ["transformers==4.38.0", "peft==0.3.0"],
+	},
+)
+```
 
 _#WIP_
