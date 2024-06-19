@@ -83,18 +83,14 @@ ref: https://scikit-optimize.github.io/stable/modules/classes.html#module-skopt.
 | Distribution Type             | Hyperopt              | Optuna                               | Ray Tune              |
 |-------------------------------|-----------------------|--------------------------------------|-----------------------|
 | **Uniform Continuous**        | `hp.uniform`          | `FloatDistribution`                  | `tune.uniform`        |
-| **Quantized Uniform**         | `hp.quniform`         | `DiscreteUniformDistribution`(deprecated)  Use FloatDistribution instead. | `tune.quniform`       |
-| **Log Uniform**               | `hp.loguniform`       | `LogUniformDistribution`(deprecated)  Use FloatDistribution instead. | `tune.loguniform`     |
+| **Quantized Uniform**         | `hp.quniform`         | `DiscreteUniformDistribution`(deprecated)  Use `FloatDistribution` instead. | `tune.quniform`       |
+| **Log Uniform**               | `hp.loguniform`       | `LogUniformDistribution`(deprecated)  Use `FloatDistribution` instead. | `tune.loguniform`     |
 | **Uniform Integer**           | `hp.randint`          | `IntDistribution`                    | `tune.randint`        |
 | **Categorical**               | `hp.choice`           | `CategoricalDistribution`            | `tune.choice`         |
-
 | **Quantized Log Uniform**     | `hp.qloguniform`      |                                      | `tune.qloguniform`    |
-| **Quantized Integer**         | `hp.quniformint`      | `IntUniformDistribution`             |                       |
-| **Log Integer**               |                       | `IntLogUniformDistribution`          | `tune.lograndint`     |
+| **Quantized Integer**         | `hp.quniformint`      | `IntUniformDistribution`(deprecated)  Use `IntDistribution` instead.          |                       |
+| **Log Integer**               |                       | `IntLogUniformDistribution`(deprecated)  Use `IntDistribution` instead.          | `tune.lograndint`     |
 | **Normal**                    | `hp.normal`           |                                      | `tune.randn`          |
-| **Quantized Normal**          | `hp.qnormal`          |                                      | `tune.qrandn`         |
-| **Log Normal**                | `hp.lognormal`        |                                      |                       |
-| **Quantized Log Normal**      | `hp.qlognormal`       |                                      |                       |
 
 
 ### Testing
