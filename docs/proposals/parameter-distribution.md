@@ -79,6 +79,24 @@ ref: http://hyperopt.github.io/hyperopt/getting-started/search_spaces/#parameter
 #### Scikit Optimize
 ref: https://scikit-optimize.github.io/stable/modules/classes.html#module-skopt.space.space
 
+#### Parameter Distribution Table
+| Distribution Type             | Hyperopt              | Optuna                               | Ray Tune              |
+|-------------------------------|-----------------------|--------------------------------------|-----------------------|
+| **Uniform Continuous**        | `hp.uniform`          | `FloatDistribution`                  | `tune.uniform`        |
+| **Quantized Uniform**         | `hp.quniform`         | `DiscreteUniformDistribution`(deprecated)  Use FloatDistribution instead. | `tune.quniform`       |
+| **Log Uniform**               | `hp.loguniform`       | `LogUniformDistribution`(deprecated)  Use FloatDistribution instead. | `tune.loguniform`     |
+| **Uniform Integer**           | `hp.randint`          | `IntDistribution`                    | `tune.randint`        |
+| **Categorical**               | `hp.choice`           | `CategoricalDistribution`            | `tune.choice`         |
+
+| **Quantized Log Uniform**     | `hp.qloguniform`      |                                      | `tune.qloguniform`    |
+| **Quantized Integer**         | `hp.quniformint`      | `IntUniformDistribution`             |                       |
+| **Log Integer**               |                       | `IntLogUniformDistribution`          | `tune.lograndint`     |
+| **Normal**                    | `hp.normal`           |                                      | `tune.randn`          |
+| **Quantized Normal**          | `hp.qnormal`          |                                      | `tune.qrandn`         |
+| **Log Normal**                | `hp.lognormal`        |                                      |                       |
+| **Quantized Log Normal**      | `hp.qlognormal`       |                                      |                       |
+
+
 ### Testing
 - Write unit tests for the conversion webhook to ensure all fields are correctly converted.
 - Write unit tests for the new parameter distributions to ensure they are processed correctly by the controller.
