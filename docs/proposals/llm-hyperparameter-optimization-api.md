@@ -53,10 +53,10 @@ class KatibClient(object):
 		max_trial_count: int = None,
 		parallel_trial_count: int = None,
 		max_failed_trial_count: int = None,
-		resources_per_trial: Union[dict, client.V1ResourceRequirements, None] = None,
-		pytorch_config=katib.PyTorchConfig(
+		pytorch_config = katib.PyTorchConfig(
 			num_workers: int = 1,
 			num_procs_per_worker: int = 1,
+			resources_per_worker: Union[dict, client.V1ResourceRequirements, None] = None,
 		),
 		retain_trials: bool = False,
 		env_per_trial: Optional[Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]] = None,
@@ -81,8 +81,7 @@ class KatibClient(object):
         - max_trial_count: Maximum number of trials to run.
         - parallel_trial_count: Number of trials to run in parallel.
 		- max_failed_trial_count: Maximum number of allowed failed trials.
-        - resources_per_trial: Resources required per trial.
-		- pytorch_config: Configuration for PyTorch jobs, including number of workers and processes per worker.
+		- pytorch_config: Configuration for PyTorch jobs, including number of workers, processes per worker and resources per worker.
         - retain_trials: Whether to retain trial resources after completion.
 		- env_per_trial: Environment variables for worker containers.
         - packages_to_install: Additional Python packages to install.
@@ -149,13 +148,15 @@ katib_client.tune(
 	algorithm_name = "random",
 	max_trial_count = 50,
 	parallel_trial_count = 2,
-	resources_per_trial = {
-		"gpu": 8,
-		"cpu": 20,
-		"memory": "40G",
-	},
-	num_workers = 4,
-	num_procs_per_worker = 2,
+	pytorch_config = katib.PyTorchConfig(
+		num_workers = 4,
+		num_procs_per_worker = 2,
+		resources_per_worker = {
+			"gpu": 2,
+			"cpu": 5,
+			"memory": "10G",
+		},
+	),
 )
 
 # Get the best hyperparameters
