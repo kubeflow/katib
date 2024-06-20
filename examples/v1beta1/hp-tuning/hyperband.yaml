@@ -57,7 +57,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/pytorch-mnist-cpu:v0.17.0-rc.0
+                image: docker.io/kubeflowkatib/pytorch-mnist-cpu:v0.17.0-rc.1
                 command:
                   - "python3"
                   - "/opt/pytorch-mnist/mnist.py"
