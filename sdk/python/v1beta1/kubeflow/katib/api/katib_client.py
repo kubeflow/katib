@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import inspect
+import logging
 import multiprocessing
 import textwrap
 import time
@@ -27,24 +28,35 @@ from kubeflow.katib.utils import utils
 from kubernetes import client, config
 
 
+logger = logging.getLogger(__name__)
+
+
 class KatibClient(object):
     def __init__(
         self,
-        config_file: str = None,
-        context: str = None,
-        client_configuration: client.Configuration = None,
+        config_file: Optional[str] = None,
+        context: Optional[str] = None,
+        client_configuration: Optional[client.Configuration] = None,
         namespace: str = utils.get_default_target_namespace(),
     ):
-        """KatibClient constructor.
+        """KatibClient constructor. Configure logging in your application
+            as follows to see detailed information from the KatibClient APIs:
+            .. code-block:: python
+                import logging
+                logging.basicConfig()
+                log = logging.getLogger("kubeflow.katib.api.katib_client")
+                log.setLevel(logging.DEBUG)
 
         Args:
             config_file: Path to the kube-config file. Defaults to ~/.kube/config.
             context: Set the active context. Defaults to current_context from the kube-config.
             client_configuration: Client configuration for cluster authentication.
                 You have to provide valid configuration with Bearer token or
-                with username and password.
-                You can find an example here: https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
-            namespace: Target Kubernetes namespace. Can be overridden during method invocations.
+                with username and password. You can find an example here:
+                https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
+            namespace: Target Kubernetes namespace. By default it takes namespace
+                from `/var/run/secrets/kubernetes.io/serviceaccount/namespace` location
+                or set as `default`. Namespace can be overridden during method invocations.
         """
 
         self.in_cluster = False
@@ -131,8 +143,7 @@ class KatibClient(object):
                 f"Failed to create Katib Experiment: {namespace}/{experiment_name}"
             )
 
-        # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{experiment_name} has been created")
+        logger.debug(f"Experiment {namespace}/{experiment_name} has been created")
 
         if self._is_ipython():
             if self.in_cluster:
@@ -248,7 +259,7 @@ class KatibClient(object):
 
         # Create Katib Experiment template.
         experiment = models.V1beta1Experiment(
-            api_version=f"{constants.KUBEFLOW_GROUP}/{constants.KATIB_VERSION}",
+            api_version=constants.API_VERSION,
             kind=constants.EXPERIMENT_KIND,
             metadata=models.V1ObjectMeta(name=name, namespace=namespace),
             spec=models.V1beta1ExperimentSpec(),
@@ -743,7 +754,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Raise exception if Experiment is Failed.
@@ -763,7 +774,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Running condition.
@@ -774,7 +785,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
@@ -785,7 +796,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
@@ -796,12 +807,12 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.
             utils.print_experiment_status(experiment)
-            print(
+            logger.debug(
                 f"Waiting for Experiment: {namespace}/{name} to reach {expected_condition} condition\n\n\n"
             )
             time.sleep(polling_interval)
@@ -880,7 +891,7 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to edit Katib Experiment: {namespace}/{name}")
 
-        print(f"Experiment {namespace}/{name} has been updated")
+        logger.debug(f"Experiment {namespace}/{name} has been updated")
 
     def delete_experiment(
         self,
@@ -919,8 +930,7 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to delete Katib Experiment: {namespace}/{name}")
 
-        # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{name} has been deleted")
+        logger.debug(f"Experiment {namespace}/{name} has been deleted")
 
     def get_suggestion(
         self,
