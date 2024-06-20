@@ -79,8 +79,6 @@ if [[ ${sdk_version} == *"-rc."* ]]; then
   sdk_version=${sdk_version//-rc./rc}
 fi
 echo -e "\nPublishing Katib Python SDK, version: ${sdk_version}\n"
-# Run generate script.
-make generate
 
 # Change version in setup.py
 cd sdk/python/v1beta1
