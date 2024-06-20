@@ -38,7 +38,7 @@ if os.path.exists(katib_grpc_api_file):
 
 setuptools.setup(
     name="kubeflow-katib",
-    version="0.17.0rc0",
+    version="0.17.0rc1",
     author="Kubeflow Authors",
     author_email="premnath.vel@gmail.com",
     license="Apache License Version 2.0",
