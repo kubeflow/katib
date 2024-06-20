@@ -115,14 +115,12 @@ push-latest: generate
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
 
 # Build and push Katib images for the given tag.
-push-tag: generate
+push-tag:
 ifeq ($(TAG),)
 	$(error TAG must be set. Usage: make push-tag TAG=<release-tag>)
 endif
 	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(TAG) $(CPU_ARCH)
-	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(COMMIT) $(CPU_ARCH)
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(TAG)
-	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(COMMIT)
 
 # Release a new version of Katib.
 release:
