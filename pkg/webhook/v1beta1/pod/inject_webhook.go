@@ -147,8 +147,8 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return mutatedPod, nil
 	}
 
-	// If Metrics Collector in None, skip the mutation.
-	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
+	// If Metrics Collector is Push, skip the mutation.
+	if trial.Spec.MetricsCollector.Collector.Kind == common.PushCollector {
 		return mutatedPod, nil
 	}
 
