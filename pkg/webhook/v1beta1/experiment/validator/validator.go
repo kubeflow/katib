@@ -434,7 +434,7 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 	}
 	// TODO(hougangliu): log warning message if some field will not be used for the metricsCollector kind
 	switch mcKind {
-	case commonapiv1beta1.NoneCollector, commonapiv1beta1.StdOutCollector:
+	case commonapiv1beta1.PushCollector, commonapiv1beta1.StdOutCollector:
 		return nil
 	case commonapiv1beta1.FileCollector:
 		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||
