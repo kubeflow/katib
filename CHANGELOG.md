@@ -1,5 +1,31 @@
 # Changelog
 
+# [v0.17.0-rc.1](https://github.com/kubeflow/katib/tree/v0.17.0-rc.1) (2024-06-20)
+
+## Breaking Changes
+
+- [SDK] Drop Python 3.7 and Support Python 3.11 ([#2337](https://github.com/kubeflow/katib/pull/2337) by [@tenzen-y](https://github.com/tenzen-y))
+- [SDK] Upgrade the protobuf version to >=4.21.12,<5 ([#2358](https://github.com/kubeflow/katib/pull/2358) by [@tenzen-y](https://github.com/tenzen-y))
+
+## New Features
+
+- Replace gRPC code generation tool from Znly/protoc to Buf ([#2344](https://github.com/kubeflow/katib/pull/2344) by [@forsaken628](https://github.com/forsaken628))
+
+## Bug Fixes
+
+- Remove code generation from release script ([#2364](https://github.com/kubeflow/katib/pull/2364) by [@andreyvelich](https://github.com/andreyvelich))
+- [SDK] Fix empty list for env variables and numpy version ([#2360](https://github.com/kubeflow/katib/pull/2360) by [@andreyvelich](https://github.com/andreyvelich))
+- Use cache-dependency-path in actions/setup-go for CI workflow ([#2355](https://github.com/kubeflow/katib/pull/2355) by [@forsaken628](https://github.com/forsaken628))
+- Fix TestReconcileBatchJob ([#2350](https://github.com/kubeflow/katib/pull/2350) by [@forsaken628](https://github.com/forsaken628))
+- Fix Scikit-Learn Version for Skopt Tests ([#2336](https://github.com/kubeflow/katib/pull/2336) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Misc
+
+- Replace already closed github.com/golang/mock with go.uber.org/mock ([#2357](https://github.com/kubeflow/katib/pull/2357) by [@forsaken628](https://github.com/forsaken628))
+- Update outdated actions ([#2324](https://github.com/kubeflow/katib/pull/2324) by [@Mersho](https://github.com/Mersho))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.17.0-rc.0...v0.17.0-rc.1)
+
 # [v0.17.0-rc.0](https://github.com/kubeflow/katib/tree/v0.17.0-rc.0) (2024-04-29)
 
 ## Breaking Changes
