@@ -82,9 +82,9 @@ class KatibClient(object):
         - parallel_trial_count: Number of trials to run in parallel.
 		- max_failed_trial_count: Maximum number of allowed failed trials.
 		- resources_per_trial: Resources assigned to per trial. Since the "tune" API now supports distributed training in PyTorch, you can specify the following parameters:
-			- num_workers: Number of PyTorchJob workers.
-			- num_procs_per_worker: Number of processes per PyTorchJob worker.
-			- resources_per_worker: Resources assigned to per PyTorchJob worker container.
+		- num_workers: Number of PyTorchJob workers.
+		- num_procs_per_worker: Number of processes per PyTorchJob worker.
+		- resources_per_worker: Resources assigned to per PyTorchJob worker container.
         - retain_trials: Whether to retain trial resources after completion.
 		- env_per_trial: Environment variables for worker containers.
         - packages_to_install: Additional Python packages to install.
