@@ -67,7 +67,7 @@ class KatibClient(object):
         Initiates a hyperparameter tuning experiment in Katib.
 
         Parameters:
-        - name: Name for the experiment.
+		- name: Name for the experiment.
 		- namespace: Namespace for the experiment. Defaults to the namespace of the 'KatibClient' object.
 		- model_provider_parameters: Parameters for providing the model. Compatible with model providers like HuggingFace.
 		- dataset_provider_parameters: Parameters for providing the dataset. Compatible with dataset providers like HuggingFace or S3.
