@@ -70,25 +70,25 @@ class KatibClient(object):
         - name: Name for the experiment.
 		- namespace: Namespace for the experiment. Defaults to the namespace of the 'KatibClient' object.
 		- model_provider_parameters: Parameters for providing the model. Compatible with model providers like HuggingFace.
-    	- dataset_provider_parameters: Parameters for providing the dataset. Compatible with dataset providers like HuggingFace or S3.
-    	- trainer_parameters: Parameters for configuring the training process, including settings for hyperparameters search space.
+		- dataset_provider_parameters: Parameters for providing the dataset. Compatible with dataset providers like HuggingFace or S3.
+		- trainer_parameters: Parameters for configuring the training process, including settings for hyperparameters search space.
 		- algorithm_name: Tuning algorithm name (e.g., 'random', 'bayesian').
 		- algorithm_settings: Settings for the tuning algorithm.
-        - objective_metric_name: Primary metric to optimize.
+		- objective_metric_name: Primary metric to optimize.
 		- additional_metric_names: List of additional metrics to collect.
-        - objective_type: Optimization direction for the objective metric, "minimize" or "maximize".
+		- objective_type: Optimization direction for the objective metric, "minimize" or "maximize".
 		- objective_goal: Desired value of the objective metric.
-        - max_trial_count: Maximum number of trials to run.
-        - parallel_trial_count: Number of trials to run in parallel.
+		- max_trial_count: Maximum number of trials to run.
+		- parallel_trial_count: Number of trials to run in parallel.
 		- max_failed_trial_count: Maximum number of allowed failed trials.
 		- resources_per_trial: Resources assigned to per trial. Since the "tune" API now supports distributed training in PyTorch, you can specify the following parameters:
-		- num_workers: Number of PyTorchJob workers.
-		- num_procs_per_worker: Number of processes per PyTorchJob worker.
-		- resources_per_worker: Resources assigned to per PyTorchJob worker container.
-        - retain_trials: Whether to retain trial resources after completion.
+			- num_workers: Number of PyTorchJob workers.
+			- num_procs_per_worker: Number of processes per PyTorchJob worker.
+			- resources_per_worker: Resources assigned to per PyTorchJob worker container.
+		- retain_trials: Whether to retain trial resources after completion.
 		- env_per_trial: Environment variables for worker containers.
-        - packages_to_install: Additional Python packages to install.
-        - pip_index_url: URL of the PyPI index for installing packages.
+		- packages_to_install: Additional Python packages to install.
+		- pip_index_url: URL of the PyPI index for installing packages.
         """
         pass  # Implementation logic for initiating the experiment
 ```
