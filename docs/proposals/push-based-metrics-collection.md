@@ -75,6 +75,7 @@ def tune(
         metrics: Dict of metrics pushed to Katib DB.
             For examle, `metrics = {"loss": 0.01, "accuracy": 0.99}`.
         db-manager-address: Address for the Katib DB Manager in this format: `ip-address:port`.
+        timeout: Optional, gRPC API Server timeout in seconds to report metrics.
     
     Raises:
         RuntimeError: Unable to push Trial metrics to Katib DB.
@@ -82,6 +83,7 @@ def tune(
 def report_metrics(
     metrics: Dict[str, Any],
     db_manager_address: str = constants.DEFAULT_DB_MANAGER_ADDRESS,
+    timeout: int = constants.DEFAULT_TIMEOUT,
 )
 ```
 
