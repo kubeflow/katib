@@ -251,6 +251,7 @@ class KatibClient(object):
             pip_index_url: The PyPI url from which to install Python packages.
             metrics_collector_config: Specify the config of metrics collector, 
                 for example, `metrics_collector_config = {"kind": "Push"}`.
+                Currently, we only support `StdOut` and `Push` metrics collector.
 
         Raises:
             ValueError: Function arguments have incorrect type or value.
