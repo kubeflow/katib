@@ -220,8 +220,8 @@ const (
 	CustomCollector CollectorKind = "Custom"
 
 	// When model training source code persists metrics into persistent layer
-	// directly, metricsCollector isn't in need, and its kind is "noneCollector"
-	NoneCollector CollectorKind = "None"
+	// directly, sidecar container isn't in need, and its kind is "pushCollector"
+	PushCollector CollectorKind = "Push"
 
 	MetricsVolume = "metrics-volume"
 )
