@@ -33,7 +33,7 @@ Fig.1 Architecture of the new design
 
 ### New Parameter in Python SDK Function `tune`
 
-We decided to add `metrics_collection_mechanism` to `tune` function in Python SDK.
+We decided to add `metrics_collector_config` to `tune` function in Python SDK.
 
 ```Python
 def tune(
