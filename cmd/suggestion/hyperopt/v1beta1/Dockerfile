@@ -7,7 +7,7 @@ ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python:${TAR
 
 RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
     apt-get -y update && \
-    apt-get -y install gfortran libopenblas-dev liblapack-dev && \
+    apt-get -y install gfortran libopenblas-dev liblapack-dev libssl-dev pkg-config gcc g++ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*; \
     fi
@@ -17,7 +17,11 @@ ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
 
 WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
 
-RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
+RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
+      export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 ; \
+    fi && \
+    pip install --prefer-binary --no-cache-dir -r requirements.txt
+
 RUN chgrp -R 0 ${TARGET_DIR} \
   && chmod -R g+rwX ${TARGET_DIR}
 
