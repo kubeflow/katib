@@ -156,7 +156,7 @@ katib_client.tune(
 		num_procs_per_worker = 2,
 		resources_per_worker = {
 			"gpu": 2,
-			"cpu": 5,
+			"cpu": 1,
 			"memory": "10G",
 		},
 	),
