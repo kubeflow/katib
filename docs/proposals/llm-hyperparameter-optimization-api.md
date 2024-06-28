@@ -53,11 +53,11 @@ class KatibClient(object):
 		max_trial_count: int = None,
 		parallel_trial_count: int = None,
 		max_failed_trial_count: int = None,
-		resources_per_trial = {
+		resources_per_trial = models.DistributedResources(
 			num_workers: int = 1,
 			num_procs_per_worker: int = 1,
 			resources_per_worker: Union[dict, client.V1ResourceRequirements, None] = None,
-		},
+		),
 		retain_trials: bool = False,
 		env_per_trial: Optional[Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]] = None,
 		packages_to_install: List[str] = None,
@@ -151,7 +151,7 @@ katib_client.tune(
 	algorithm_name = "random",
 	max_trial_count = 50,
 	parallel_trial_count = 2,
-	resources_per_trial = {
+	resources_per_trial = DistributedResources(
 		num_workers = 4,
 		num_procs_per_worker = 2,
 		resources_per_worker = {
@@ -159,7 +159,7 @@ katib_client.tune(
 			"cpu": 5,
 			"memory": "10G",
 		},
-	},
+	),
 )
 
 # Get the best hyperparameters
@@ -172,7 +172,52 @@ By passing the specified parameters, this API will automate hyperparameter optim
 
 **Model and Dataset Management**: We will leverage the [storage_initializer](https://github.com/kubeflow/training-operator/tree/master/sdk/python/kubeflow/storage_initializer) from the Training Python SDK for seamless integration of pretrained models and datasets from platforms like HuggingFace and S3. This component manages downloading and storing pretrained models and datasets via a PersistentVolumeClaim (PVC), which is shared across containers, ensuring efficient access to the pretrained model and dataset without redundant downloads.
 
-**Hyperparameter Configuration**: Users specify training parameters and the hyperparameters to be optimized within `trainer_parameters`. The API will parse `trainer_parameters` to identify tunable hyperparameters marked with `katib.search` and also defined in Huggingface's [transformers.TrainingArguments](https://huggingface.co/docs/transformers/en/main_classes/trainer#transformers.TrainingArguments) or [peft.LoraConfig](https://huggingface.co/docs/peft/en/package_reference/lora#peft.LoraConfig). These identified tunable hyperparameters will then be configured in each Trial with different values for hyperparameter optimization.
+**Hyperparameter Configuration**: Users specify training parameters and the hyperparameters to be optimized within `trainer_parameters`. The API will first traverse `trainer_parameters.training_parameters` and `trainer_parameters.lora_config` to identify tunable hyperparameters and set up their values for the Experiment and Trials. These parameters are then passed as `args` to the container spec of workers.
+
+```python
+# Traverse and set up hyperparameters
+input_params = {}
+experiment_params = []
+trial_params = []
+
+training_args = trainer_parameters.training_parameters
+for p_name, p_value in training_args.to_dict().items():
+	if not hasattr(training_args, p_name):
+		logger.warning(f"Training parameter {p_name} is not supported by the current transformer.")
+		continue
+	if isinstance(p_value, models.V1beta1ParameterSpec):
+		value = f"${{trialParameters.{p_name}}}"
+		setattr(training_args, p_name, value)
+		p_value.name = p_name
+		experiment_params.append(p_value)
+		trial_params.append(models.V1beta1TrialParameterSpec(name=p_name, reference=p_name))
+	elif p_value is not None:
+		value = type(old_attr)(p_value)
+		setattr(training_args, p_name, value)
+input_params['training_args'] = training_args
+
+# Note: Repeat similar logic for `lora_config`
+
+# create container spec of worker
+container_spec = client.V1Container(
+	...
+	args=[
+		"--model_uri",
+		model_provider_parameters.model_uri,
+		"--transformer_type",
+		model_provider_parameters.transformer_type.__name__,
+		"--model_dir",
+		"REPLACE_WITH_ACTUAL_MODEL_PATH", 
+		"--dataset_dir",
+		"REPLACE_WITH_ACTUAL_DATASET_PATH",
+		"--lora_config",
+		json.dumps(input_params['lora_config'].__dict__, cls=utils.SetEncoder),
+		"--training_parameters",
+		json.dumps(input_params['training_args'].to_dict()),
+	],
+	...
+)
+```
 
 **Hyperparameter Optimization**: This API will create an Experiment that defines the search space for identified tunable hyperparameters, the objective metric, optimization algorithm, etc. The Experiment will orchestrate the hyperparameter tuning process, generating Trials for each configuratin. Each Trial will be implemented as a Kubernete PyTorchJob, with the `trialTemplate` specifying the exact values for hyperparameters. The `trialTemplate` will also define master and worker containers, facilitating effective resource distribution and parallel execution of Trials. Trial results will then be fed back to the Experiment, which will evaluate the outcomes to identify the optimal set of hyperparameters.
 
@@ -182,8 +227,7 @@ By passing the specified parameters, this API will automate hyperparameter optim
 setuptools.setup(
 	...// Configurations of the package
 	extras_require={
-			"kubeflow-training": ["kubeflow-training==1.7.0"],
-			"huggingface": ["transformers==4.38.0", "peft==0.3.0"],
+		"huggingface": ["kubeflow-training[huggingface]==1.8.0rc1"],
 	},
 )
 ```
