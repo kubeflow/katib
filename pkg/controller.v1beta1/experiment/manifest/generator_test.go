@@ -196,25 +196,6 @@ spec:
             - --momentum=${trialParameters.momentum}
             - --invalidParameter={'num_layers': 2, 'input_sizes': [32, 32, 3]}`
 
-	validGetConfigMap1 := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-		map[string]string{templatePath: trialSpec}, nil)
-
-	invalidConfigMapName := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-		nil, errConfigMapNotFound)
-
-	validGetConfigMap3 := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-		map[string]string{templatePath: trialSpec}, nil)
-
-	invalidTemplate := c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-		map[string]string{templatePath: invalidTrialSpec}, nil)
-
-	gomock.InOrder(
-		validGetConfigMap1,
-		invalidConfigMapName,
-		validGetConfigMap3,
-		invalidTemplate,
-	)
-
 	// We can't compare structures, because in ConfigMap trialSpec is a string and creationTimestamp was not added
 	expectedStr := `apiVersion: batch/v1
 kind: Job
@@ -241,13 +222,17 @@ spec:
 	}
 
 	cases := map[string]struct {
+		prepareConfigMap               func()
 		instance                       *experimentsv1beta1.Experiment
 		parameterAssignments           []commonapiv1beta1.ParameterAssignment
 		wantRunSpecWithHyperParameters *unstructured.Unstructured
 		wantError                      error
 	}{
-		// validGetConfigMap1 case
 		"Run with valid parameters": {
+			prepareConfigMap: func() {
+				c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+					map[string]string{templatePath: trialSpec}, nil)
+			},
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
@@ -262,8 +247,11 @@ spec:
 			parameterAssignments:           newFakeParameterAssignment(),
 			wantRunSpecWithHyperParameters: expectedRunSpec,
 		},
-		// invalidConfigMapName case
 		"Invalid ConfigMap name": {
+			prepareConfigMap: func() {
+				c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+					nil, errConfigMapNotFound)
+			},
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
@@ -276,8 +264,11 @@ spec:
 			parameterAssignments: newFakeParameterAssignment(),
 			wantError:            errConfigMapNotFound,
 		},
-		// validGetConfigMap3 case
 		"Invalid template path in ConfigMap name": {
+			prepareConfigMap: func() {
+				c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+					map[string]string{templatePath: trialSpec}, nil)
+			},
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
@@ -292,10 +283,13 @@ spec:
 			parameterAssignments: newFakeParameterAssignment(),
 			wantError:            errTrialTemplateNotFound,
 		},
-		// invalidTemplate case
 		// Trial template is a string in ConfigMap
 		// Because of that, user can specify not valid unstructured template
 		"Invalid trial spec in ConfigMap": {
+			prepareConfigMap: func() {
+				c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+					map[string]string{templatePath: invalidTrialSpec}, nil)
+			},
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
 				i.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{
@@ -314,6 +308,7 @@ spec:
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
+			tc.prepareConfigMap()
 			got, err := p.GetRunSpecWithHyperParameters(tc.instance, "trial-name", "trial-namespace", tc.parameterAssignments)
 			if diff := cmp.Diff(tc.wantError, err, cmpopts.EquateErrors()); len(diff) != 0 {
 				t.Errorf("Unexpected error from GetRunSpecWithHyperParameters (-want,+got):\n%s", diff)
