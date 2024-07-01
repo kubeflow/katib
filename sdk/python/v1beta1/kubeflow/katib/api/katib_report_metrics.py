@@ -13,11 +13,10 @@
 # limitations under the License.
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 import grpc
-import pytz
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
@@ -29,7 +28,7 @@ def report_metrics(
 ):
     """Push Metrics Directly to Katib DB
 
-    [!!!] Trial name should always be passed into Katib Trials as env variable `KATIB_TRIAL_NAME`.
+    Katib always pass Trial name as env variable `KATIB_TRIAL_NAME` to the training container.
 
     Args:
         metrics: Dict of metrics pushed to Katib DB.
@@ -56,7 +55,7 @@ def report_metrics(
     
     with katib_api_pb2.beta_create_DBManager_stub(channel) as client:
         try:
-            timestamp = datetime.now(pytz.UTC).isoformat(timespec="nanoseconds")
+            timestamp = datetime.now(timezone.utc).strftime(constants.RFC3339_FORMAT)
             client.ReportObservationLog(
                 request=katib_api_pb2.ReportObservationLogRequest(
                     trial_name=name,
@@ -76,3 +75,4 @@ def report_metrics(
             raise RuntimeError(
                 f"Unable to push metrics to Katib DB for Trial {namespace}/{name}. Exception: {e}"
             )
+        
