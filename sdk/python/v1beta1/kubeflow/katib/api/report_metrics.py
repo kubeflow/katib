@@ -83,5 +83,3 @@ def report_metrics(
             raise RuntimeError(
                 f"Unable to push metrics to Katib DB for Trial {namespace}/{name}. Exception: {e}"
             )
-        
-        
