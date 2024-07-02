@@ -171,6 +171,7 @@ class KatibClient(object):
         env_per_trial: Optional[
             Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]
         ] = None,
+        
         algorithm_name: str = "random",
         algorithm_settings: Union[
             dict, List[models.V1beta1AlgorithmSetting], None

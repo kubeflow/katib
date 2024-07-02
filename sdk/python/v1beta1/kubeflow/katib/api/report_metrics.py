@@ -41,6 +41,7 @@ def report_metrics(
         RuntimeError: Unable to push Trial metrics to Katib DB.
     """
 
+    # Get Trial's namespace and name
     namespace = utils.get_current_k8s_namespace()
     name = os.getenv("KATIB_TRIAL_NAME")
     if name is None:
@@ -48,11 +49,17 @@ def report_metrics(
             "The Trial name is not passed to environment variables"
         )
 
+    # Get channel for grpc call to db manager
     db_manager_address = db_manager_address.split(":")
     channel = grpc.beta.implementations.insecure_channel(
         db_manager_address[0], int(db_manager_address[1])
     )
+
+    # Validate metrics value in dict
+    for value in metrics.values():
+        utils.validate_metrics_value(value)
     
+    # Dial katib db manager to report metrics
     with katib_api_pb2.beta_create_DBManager_stub(channel) as client:
         try:
             timestamp = datetime.now(timezone.utc).strftime(constants.RFC3339_FORMAT)
@@ -63,7 +70,7 @@ def report_metrics(
                         metric_logs=[
                             katib_api_pb2.MetricLog(
                                 time_stamp=timestamp,
-                                metric=katib_api_pb2.Metric(name=name,value=value)   
+                                metric=katib_api_pb2.Metric(name=name,value=str(value))   
                             )
                             for name, value in metrics.items()
                         ]
