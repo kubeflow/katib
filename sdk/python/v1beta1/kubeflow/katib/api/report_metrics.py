@@ -28,7 +28,7 @@ def report_metrics(
 ):
     """Push Metrics Directly to Katib DB
 
-    Katib always pass Trial name as env variable `KATIB_TRIAL_NAME` to the training container.
+    Katib always passes Trial name as env variable `KATIB_TRIAL_NAME` to the training container.
 
     Args:
         metrics: Dict of metrics pushed to Katib DB.
@@ -38,7 +38,8 @@ def report_metrics(
     
     Raises:
         ValueError: The Trial name is not passed to environment variables.
-        RuntimeError: Unable to push Trial metrics to Katib DB.
+        RuntimeError: Unable to push Trial metrics to Katib DB or
+            metrics value has incorrect format (cannot be converted to type `float`).
     """
 
     # Get Trial's namespace and name
@@ -82,4 +83,5 @@ def report_metrics(
             raise RuntimeError(
                 f"Unable to push metrics to Katib DB for Trial {namespace}/{name}. Exception: {e}"
             )
+        
         
