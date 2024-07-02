@@ -5,9 +5,12 @@ ENV TARGET_DIR /opt/katib
 ENV SUGGESTION_DIR cmd/suggestion/hyperband/v1beta1
 ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python:${TARGET_DIR}/pkg/apis/manager/health/python
 
-RUN if [ "${TARGETARCH}" = "ppc64le" ] || [ "${TARGETARCH}" = "arm64" ]; then \
+RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
     apt-get -y update && \
-    apt-get -y install gfortran libopenblas-dev liblapack-dev && \
+    apt-get -y install gfortran libopenblas-dev liblapack-dev libssl-dev gcc g++ pkg-config git && \
+    export REPO_ROOT=grpc && git clone -b v1.60.1 https://github.com/grpc/grpc $REPO_ROOT && \
+    cd $REPO_ROOT && git submodule update --init && \
+    pip install -r requirements.txt && GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 pip install . && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*; \
     fi
