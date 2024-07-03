@@ -39,11 +39,19 @@ from kubeflow.katib import KatibClient
 class KatibClient(object):
 	
 	def tune(
+		self,
 		name: str, 
 		namespace: Optional[str] = None,
-		model_provider_parameters = None,
-		dataset_provider_parameters = None,
-		trainer_parameters = None,
+		model_provider_parameters: Optional[kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams] = None,
+		dataset_provider_parameters: Optional[kubeflow.storage_initializer.hugging_face.HuggingFaceDatasetParams, kubeflow.storage_initializer.s3.S3DatasetParams] = None,
+		trainer_parameters: Union[kubeflow.storage_initializer.HuggingFaceTrainerParams, Dict[str, Any]] = None,
+		storage_config: Dict[str, Optional[Union[str, List[str]]]] = {
+            "size": constants.PVC_DEFAULT_SIZE,
+            "storage_class": None,
+            "access_modes": constants.PVC_DEFAULT_ACCESS_MODES,
+        },
+		objective: Optional[Callable] = None,
+		base_image: Optional[str] = None,
 		algorithm_name: str = "random",
 		algorithm_settings: Union[dict, List[models.V1beta1AlgorithmSetting], None] = None,
 		objective_metric_name: str = "eval_accuracy",
@@ -53,11 +61,7 @@ class KatibClient(object):
 		max_trial_count: int = None,
 		parallel_trial_count: int = None,
 		max_failed_trial_count: int = None,
-		resources_per_trial = models.DistributedResources(
-			num_workers: int = 1,
-			num_procs_per_worker: int = 1,
-			resources_per_worker: Union[dict, client.V1ResourceRequirements, None] = None,
-		),
+		resources_per_trial = Union[dict, client.V1ResourceRequirements, types.TrainerResources, None] = None,
 		retain_trials: bool = False,
 		env_per_trial: Optional[Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]] = None,
 		packages_to_install: List[str] = None,
@@ -65,6 +69,9 @@ class KatibClient(object):
 	):
 		"""
         Initiates a hyperparameter tuning experiment in Katib.
+		Model, dataset and parameters can be configured using one of the following options:
+		- Using the Storage Initializer: Specify `model_provider_parameters`, `dataset_provider_parameters`, and `trainer_parameters`. This option downloads models and datasets from external platforms like HuggingFace and S3, and utilizes `Trainer.train()` in HuggingFace to train the model.
+		- Defining a custom objective function: Specify the `objective` parameter to define your own objective function, and use the `base_image` parameter to execute the objective function.
 
         Parameters:
 		- name: Name for the experiment.
@@ -72,6 +79,9 @@ class KatibClient(object):
 		- model_provider_parameters: Parameters for providing the model. Compatible with model providers like HuggingFace.
 		- dataset_provider_parameters: Parameters for providing the dataset. Compatible with dataset providers like HuggingFace or S3.
 		- trainer_parameters: Parameters for configuring the training process, including settings for hyperparameters search space.
+		- storage_config: Configuration for Storage Initializer PVC to download pre-trained model and dataset.
+		- objective: Objective function that Katib uses to train the model.
+		- base_image: Image to use when executing the objective function.
 		- algorithm_name: Tuning algorithm name (e.g., 'random', 'bayesian').
 		- algorithm_settings: Settings for the tuning algorithm.
 		- objective_metric_name: Primary metric to optimize.
@@ -81,10 +91,12 @@ class KatibClient(object):
 		- max_trial_count: Maximum number of trials to run.
 		- parallel_trial_count: Number of trials to run in parallel.
 		- max_failed_trial_count: Maximum number of allowed failed trials.
-		- resources_per_trial: Resources assigned to per trial. Since the "tune" API now supports distributed training in PyTorch, you can specify the following parameters:
-			- num_workers: Number of PyTorchJob workers.
-			- num_procs_per_worker: Number of processes per PyTorchJob worker.
-			- resources_per_worker: Resources assigned to per PyTorchJob worker container.
+		- resources_per_trial: Resources assigned to per trial, which can be specified using one of the following options:
+			- Non-distributed Training: Specify a kubernetes.client.V1ResourceRequirements object or a dicitionary that includes one or more of the following keys: `cpu`, `memory`, or `gpu` (other keys will be ignored).
+			- Distributed Training in Pytorch: Specify a types.TrainerResources, which includes the following parameters:
+				- num_workers: Number of PyTorchJob workers.
+				- num_procs_per_worker: Number of processes per PyTorchJob worker.
+				- resources_per_worker: Resources assigned to per PyTorchJob worker container, specified as either a kubernetes.client.V1ResourceRequirements object or a dicitionary that includes one or more of the following keys: `cpu`, `memory`, or `gpu` (other keys will be ignored).
 		- retain_trials: Whether to retain trial resources after completion.
 		- env_per_trial: Environment variables for worker containers.
 		- packages_to_install: Additional Python packages to install.
@@ -151,7 +163,7 @@ katib_client.tune(
 	algorithm_name = "random",
 	max_trial_count = 50,
 	parallel_trial_count = 2,
-	resources_per_trial = DistributedResources(
+	resources_per_trial = types.TrainerResources(
 		num_workers = 4,
 		num_procs_per_worker = 2,
 		resources_per_worker = {
@@ -159,7 +171,8 @@ katib_client.tune(
 			"cpu": 1,
 			"memory": "10G",
 		},
-	),
+	), 
+	# For non-distributed training in PyTorch, specify resources like this: resources_per_trial = {"gpu": 2, "cpu": 10, "memory": "20G"}
 )
 
 # Get the best hyperparameters
