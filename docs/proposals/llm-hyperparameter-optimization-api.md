@@ -42,9 +42,9 @@ class KatibClient(object):
 		self,
 		name: str, 
 		namespace: Optional[str] = None,
-		model_provider_parameters: Optional[kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams] = None,
-		dataset_provider_parameters: Optional[kubeflow.storage_initializer.hugging_face.HuggingFaceDatasetParams, kubeflow.storage_initializer.s3.S3DatasetParams] = None,
-		trainer_parameters: Union[kubeflow.storage_initializer.HuggingFaceTrainerParams, Dict[str, Any]] = None,
+		model_provider_parameters: Optional[HuggingFaceModelParams] = None,
+		dataset_provider_parameters: Optional[Union[HuggingFaceDatasetParams, S3DatasetParams]] = None,
+		trainer_parameters: Union[HuggingFaceTrainerParams, Dict[str, Any]] = None,
 		storage_config: Dict[str, Optional[Union[str, List[str]]]] = {
             "size": constants.PVC_DEFAULT_SIZE,
             "storage_class": None,
