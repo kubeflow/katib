@@ -207,11 +207,21 @@ const (
 )
 
 type FeasibleSpace struct {
-	Max  string   `json:"max,omitempty"`
-	Min  string   `json:"min,omitempty"`
-	List []string `json:"list,omitempty"`
-	Step string   `json:"step,omitempty"`
+	Max          string       `json:"max,omitempty"`
+	Min          string       `json:"min,omitempty"`
+	List         []string     `json:"list,omitempty"`
+	Step         string       `json:"step,omitempty"`
+	Distribution Distribution `json:"distribution,omitempty"`
 }
+
+type Distribution string
+
+const (
+	DistributionUniform    Distribution = "uniform"
+	DistributionLogUniform Distribution = "logUniform"
+	DistributionNormal     Distribution = "normal"
+	DistributionLogNormal  Distribution = "logNormal"
+)
 
 // TrialTemplate describes structure of trial template
 type TrialTemplate struct {

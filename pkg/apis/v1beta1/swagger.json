@@ -781,6 +781,9 @@
     "v1beta1.FeasibleSpace": {
       "type": "object",
       "properties": {
+        "distribution": {
+          "type": "string"
+        },
         "list": {
           "type": "array",
           "items": {
