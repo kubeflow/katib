@@ -190,8 +190,6 @@ class KatibClient(object):
     ):
         """Create HyperParameter Tuning Katib Experiment from the objective function.
 
-        Katib always passes Trial name as env variable `KATIB_TRIAL_NAME` to the training container.
-
         Args:
             name: Name for the Experiment.
             objective: Objective function that Katib uses to train the model.
@@ -390,14 +388,6 @@ class KatibClient(object):
         # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector. 
         experiment.spec.metrics_collector = models.V1beta1MetricsCollectorSpec(
             collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
-        )
-
-        # Pass Trial name as env variable `KATIB_TRIAL_NAME` to the training containers.
-        trial_params.append(
-            models.V1beta1TrialParameterSpec(name="trialName", reference="${{trialSpec.Name}}")
-        )
-        env.append(
-            client.V1EnvVar(name="KATIB_TRIAL_NAME", value="${{trialParameters.trialName}}")
         )
 
         # Create Trial specification.
