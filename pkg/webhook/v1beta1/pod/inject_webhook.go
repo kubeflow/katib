@@ -148,7 +148,7 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 			mutatedPod.Spec.Containers[index].Env = []v1.EnvVar{}
 		}
 		mutatedPod.Spec.Containers[index].Env = append(
-			mutatedPod.Spec.Containers[index].Env, 
+			mutatedPod.Spec.Containers[index].Env,
 			v1.EnvVar{
 				Name: consts.EnvTrialName,
 				ValueFrom: &v1.EnvVarSource{
