@@ -14,40 +14,40 @@ init:
 runtime:
   metricsCollectors:
     - kind: StdOut
-      image: docker.io/kubeflowkatib/file-metrics-collector:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/file-metrics-collector:v0.17.0
     - kind: File
-      image: docker.io/kubeflowkatib/file-metrics-collector:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/file-metrics-collector:v0.17.0
     - kind: TensorFlowEvent
-      image: docker.io/kubeflowkatib/tfevent-metrics-collector:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/tfevent-metrics-collector:v0.17.0
       resources:
         limits:
           memory: 1Gi
   suggestions:
     - algorithmName: random
-      image: docker.io/kubeflowkatib/suggestion-hyperopt:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-hyperopt:v0.17.0
     - algorithmName: tpe
-      image: docker.io/kubeflowkatib/suggestion-hyperopt:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-hyperopt:v0.17.0
     - algorithmName: grid
-      image: docker.io/kubeflowkatib/suggestion-optuna:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-optuna:v0.17.0
     - algorithmName: hyperband
-      image: docker.io/kubeflowkatib/suggestion-hyperband:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-hyperband:v0.17.0
     - algorithmName: bayesianoptimization
-      image: docker.io/kubeflowkatib/suggestion-skopt:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-skopt:v0.17.0
     - algorithmName: cmaes
-      image: docker.io/kubeflowkatib/suggestion-goptuna:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-goptuna:v0.17.0
     - algorithmName: sobol
-      image: docker.io/kubeflowkatib/suggestion-goptuna:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-goptuna:v0.17.0
     - algorithmName: multivariate-tpe
-      image: docker.io/kubeflowkatib/suggestion-optuna:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-optuna:v0.17.0
     - algorithmName: enas
-      image: docker.io/kubeflowkatib/suggestion-enas:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-enas:v0.17.0
       resources:
         limits:
           memory: 400Mi
     - algorithmName: darts
-      image: docker.io/kubeflowkatib/suggestion-darts:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-darts:v0.17.0
     - algorithmName: pbt
-      image: docker.io/kubeflowkatib/suggestion-pbt:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/suggestion-pbt:v0.17.0
       persistentVolumeClaimSpec:
         accessModes:
           - ReadWriteMany
@@ -56,4 +56,4 @@ runtime:
             storage: 5Gi
   earlyStoppings:
     - algorithmName: medianstop
-      image: docker.io/kubeflowkatib/earlystopping-medianstop:v0.17.0-rc.1
+      image: docker.io/kubeflowkatib/earlystopping-medianstop:v0.17.0
