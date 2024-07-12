@@ -141,14 +141,14 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	// Add Katib Trial labels to the Pod metadata.
 	mutatePodMetadata(mutatedPod, trial)
 
-
-	// Pass env variable KATIB_TRIAL_NAME to training containers using fieldPath.
-	for idx := range mutatedPod.Spec.Containers {
-		if mutatedPod.Spec.Containers[idx].Env == nil {
-			mutatedPod.Spec.Containers[idx].Env = []v1.EnvVar{}
+	// Pass env variable KATIB_TRIAL_NAME to the primary container using fieldPath.
+	index := getPrimaryContainerIndex(mutatedPod.Spec.Containers, trial.Spec.PrimaryContainerName)
+	if index >= 0 {
+		if mutatedPod.Spec.Containers[index].Env == nil {
+			mutatedPod.Spec.Containers[index].Env = []v1.EnvVar{}
 		}
-		mutatedPod.Spec.Containers[idx].Env = append(
-			mutatedPod.Spec.Containers[idx].Env, 
+		mutatedPod.Spec.Containers[index].Env = append(
+			mutatedPod.Spec.Containers[index].Env, 
 			v1.EnvVar{
 				Name: consts.EnvTrialName,
 				ValueFrom: &v1.EnvVarSource{
@@ -158,6 +158,9 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 				},
 			},
 		)
+	} else {
+		return nil, fmt.Errorf("Unable to find primary container %v in mutated pod containers %v",
+			trial.Spec.PrimaryContainerName, pod.Spec.Containers)
 	}
 
 	// Do the following mutation only for the Primary pod.
