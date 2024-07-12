@@ -1,5 +1,69 @@
 # Changelog
 
+# [v0.17.0](https://github.com/kubeflow/katib/tree/v0.17.0) (2024-07-12)
+
+## Breaking Changes
+
+- [SDK] Drop Python 3.7 and Support Python 3.11 ([#2337](https://github.com/kubeflow/katib/pull/2337) by [@tenzen-y](https://github.com/tenzen-y))
+- [SDK] Upgrade the protobuf version to >=4.21.12,<5 ([#2358](https://github.com/kubeflow/katib/pull/2358) by [@tenzen-y](https://github.com/tenzen-y))
+- Drop Kubernetes v1.26, and support Kubernetes v1.29 ([#2308](https://github.com/kubeflow/katib/pull/2308) by [@tenzen-y](https://github.com/tenzen-y))
+- Drop Kubernetes v1.25, and Support Kubernetes v1.28 ([#2303](https://github.com/kubeflow/katib/pull/2303) by [@tenzen-y](https://github.com/tenzen-y))
+- Remove MXNet examples ([#2267](https://github.com/kubeflow/katib/pull/2267) by [@tenzen-y](https://github.com/tenzen-y))
+
+## New Features
+
+### Core Features
+
+- Replace gRPC code generation tool from Znly/protoc to Buf ([#2344](https://github.com/kubeflow/katib/pull/2344) by [@forsaken628](https://github.com/forsaken628))
+- Support ARM64 arch for release images ([#2315](https://github.com/kubeflow/katib/pull/2315) by [@andreyvelich](https://github.com/andreyvelich))
+- DB: Add environment variable option to skip DB table creationˆ ([#2245](https://github.com/kubeflow/katib/pull/2245) by [@lkaybob](https://github.com/lkaybob))
+- Add environment variable option to set postgres ssl mode ([#2266](https://github.com/kubeflow/katib/pull/2266) by [@ckcd](https://github.com/ckcd))
+- Upgrade TensorFlow version to v2.16.1 ([#2282](https://github.com/kubeflow/katib/pull/2282) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade PyTorch version to v2.2.1 ([#2279](https://github.com/kubeflow/katib/pull/2279) by [@tenzen-y](https://github.com/tenzen-y))
+
+### SDK Features
+
+- [SDK] Generate Name functionality for creating experiments. ([#2272](https://github.com/kubeflow/katib/pull/2272) by [@bharathk005](https://github.com/bharathk005))
+- [SDK] Add `env` & `env_from` in client tune ([#2235](https://github.com/kubeflow/katib/pull/2235) by [@shipengcheng1230](https://github.com/shipengcheng1230))
+- [SDK] Add 'algorithm_settings' in client tune ([#2227](https://github.com/kubeflow/katib/pull/2227) by [@shipengcheng1230](https://github.com/shipengcheng1230))
+- [SDK] Raise more human-readable name conflict exception ([#2199](https://github.com/kubeflow/katib/pull/2199) by [@droctothorpe](https://github.com/droctothorpe))
+
+## Bug Fixes
+
+- Remove code generation from release script ([#2364](https://github.com/kubeflow/katib/pull/2364) by [@andreyvelich](https://github.com/andreyvelich))
+- [SDK] Fix empty list for env variables and numpy version ([#2360](https://github.com/kubeflow/katib/pull/2360) by [@andreyvelich](https://github.com/andreyvelich))
+- Use cache-dependency-path in actions/setup-go for CI workflow ([#2355](https://github.com/kubeflow/katib/pull/2355) by [@forsaken628](https://github.com/forsaken628))
+- Fix TestReconcileBatchJob ([#2350](https://github.com/kubeflow/katib/pull/2350) by [@forsaken628](https://github.com/forsaken628))
+- Fix Scikit-Learn Version for Skopt Tests ([#2336](https://github.com/kubeflow/katib/pull/2336) by [@andreyvelich](https://github.com/andreyvelich))
+- [SDK] Fix env per Trial parameter in tune API ([#2304](https://github.com/kubeflow/katib/pull/2304) by [@andreyvelich](https://github.com/andreyvelich))
+- Fix: clean up UTs for file metrics collector ([#2285](https://github.com/kubeflow/katib/pull/2285) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- Fix tensor devices for DARTS Trial ([#2273](https://github.com/kubeflow/katib/pull/2273) by [@sifa1024](https://github.com/sifa1024))
+- Typo fix stale.yaml ([#2257](https://github.com/kubeflow/katib/pull/2257) by [@tarilabs](https://github.com/tarilabs))
+- Fix Optuna Validation for CMA-ES ([#2240](https://github.com/kubeflow/katib/pull/2240) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Misc
+
+- Replace already closed github.com/golang/mock with go.uber.org/mock ([#2357](https://github.com/kubeflow/katib/pull/2357) by [@forsaken628](https://github.com/forsaken628))
+- Update outdated actions ([#2324](https://github.com/kubeflow/katib/pull/2324) by [@Mersho](https://github.com/Mersho))
+- Upgrade Go version to v1.22 ([#2309](https://github.com/kubeflow/katib/pull/2309) by [@tenzen-y](https://github.com/tenzen-y))
+- CI: Enable parallel mode for the coveralls ([#2297](https://github.com/kubeflow/katib/pull/2297) by [@tenzen-y](https://github.com/tenzen-y))
+- Upgrade Python version to 3.11 ([#2278](https://github.com/kubeflow/katib/pull/2278) by [@tenzen-y](https://github.com/tenzen-y))
+- chore: add unit testcases for files in Text format. ([#2274](https://github.com/kubeflow/katib/pull/2274) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- Upgrade google/go-containerregistry/pkg/authn/k8schain ([#2252](https://github.com/kubeflow/katib/pull/2252) by [@tenzen-y](https://github.com/tenzen-y))
+- Add Technical and style guide to the contribution guide ([#2250](https://github.com/kubeflow/katib/pull/2250) by [@tenzen-y](https://github.com/tenzen-y))
+- Install typing-extensions v4.6.3 for Optuna ([#2251](https://github.com/kubeflow/katib/pull/2251) by [@tenzen-y](https://github.com/tenzen-y))
+- Remove legacy BO code ([#2246](https://github.com/kubeflow/katib/pull/2246) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Changelog for Katib v0.16.0 ([#2239](https://github.com/kubeflow/katib/pull/2239) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Katib ROADMAP 2022/2023 ([#2153](https://github.com/kubeflow/katib/pull/2153) by [@andreyvelich](https://github.com/andreyvelich))
+- Update Ubuntu to 22.04 for E2E Tests ([#2222](https://github.com/kubeflow/katib/pull/2222) by [@andreyvelich](https://github.com/andreyvelich))
+- Run Stale Action Every 5th Hour ([#2221](https://github.com/kubeflow/katib/pull/2221) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Stale GitHub Action ([#2220](https://github.com/kubeflow/katib/pull/2220) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Changelog for Katib v0.16.0-rc.1 ([#2218](https://github.com/kubeflow/katib/pull/2218) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Changelog for Katib v0.16.0-rc.0 ([#2204](https://github.com/kubeflow/katib/pull/2204) by [@andreyvelich](https://github.com/andreyvelich))
+- Use the controller-runtime logger in the cert-generator ([#2219](https://github.com/kubeflow/katib/pull/2219) by [@tenzen-y](https://github.com/tenzen-y))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.16.0...v0.17.0)
+
 # [v0.17.0-rc.1](https://github.com/kubeflow/katib/tree/v0.17.0-rc.1) (2024-06-20)
 
 ## Breaking Changes
