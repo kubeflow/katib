@@ -13,17 +13,16 @@
 # limitations under the License.
 
 
-import torch.nn as nn
-
-import torch
 import argparse
 import json
-import numpy as np
 
-from model import NetworkCNN
 from architect import Architect
-import utils
+from model import NetworkCNN
+import numpy as np
 from search_space import SearchSpace
+import torch
+import torch.nn as nn
+import utils
 
 
 def main():

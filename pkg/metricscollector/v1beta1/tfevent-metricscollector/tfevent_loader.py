@@ -21,14 +21,20 @@
 # Check TFJob example for more information:
 # https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L16-L22
 
-import tensorflow as tf
-from tensorboard.backend.event_processing.event_accumulator import EventAccumulator, TensorEvent
-from tensorboard.backend.event_processing.tag_types import TENSORS
-import os
-import rfc3339
 from datetime import datetime
+from logging import getLogger
+from logging import INFO
+from logging import StreamHandler
+import os
+
 import api_pb2
-from logging import getLogger, StreamHandler, INFO
+import rfc3339
+from tensorboard.backend.event_processing.event_accumulator import \
+    EventAccumulator
+from tensorboard.backend.event_processing.event_accumulator import TensorEvent
+from tensorboard.backend.event_processing.tag_types import TENSORS
+import tensorflow as tf
+
 from pkg.metricscollector.v1beta1.common import const
 
 

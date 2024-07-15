@@ -12,21 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-from logging import getLogger, StreamHandler, INFO
 import json
+import logging
+from logging import getLogger
+from logging import INFO
+from logging import StreamHandler
 import os
-import tensorflow as tf
+
 import grpc
+import tensorflow as tf
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc
-from pkg.suggestion.v1beta1.nas.enas.Controller import Controller
-from pkg.suggestion.v1beta1.nas.enas.Operation import SearchSpace
-from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import (
-    parseAlgorithmSettings, algorithmSettingsValidator, enableNoneSettingsList)
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 from pkg.suggestion.v1beta1.nas.common.validation import validate_operations
+from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import \
+    algorithmSettingsValidator
+from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import \
+    enableNoneSettingsList
+from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import \
+    parseAlgorithmSettings
+from pkg.suggestion.v1beta1.nas.enas.Controller import Controller
+from pkg.suggestion.v1beta1.nas.enas.Operation import SearchSpace
 
 
 class EnasExperiment:

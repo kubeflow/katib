@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+  - repo: https://github.com/pycqa/isort
+    rev: 5.11.5
+    hooks:
+      - id: isort
+        name: isort
+        entry: isort --profile google
+exclude: |
+  (?x)^(
+    .*zz_generated.deepcopy.*|
+    .*pb.go|
+    pkg/apis/manager/.*pb2(?:_grpc)?.py|
+    pkg/apis/v1beta1/openapi_generated.go|
+    pkg/mock/.*|
+    pkg/client/controller/informers/externalversions/.*|
+    pkg/client/controller/applyconfiguration/.*|
+    pkg/client/controller/listers/.*|
+    pkg/client/controller/clientset/versioned/.*|
+    sdk/python/v1beta1/kubeflow/katib/configuration.py|
+    sdk/python/v1beta1/kubeflow/katib/rest.py|
+    sdk/python/v1beta1/kubeflow/katib/__init__.py|
+    sdk/python/v1beta1/kubeflow/katib/exceptions.py|
+    sdk/python/v1beta1/kubeflow/katib/api_client.py|
+    sdk/python/v1beta1/kubeflow/katib/models/.*
+  )$

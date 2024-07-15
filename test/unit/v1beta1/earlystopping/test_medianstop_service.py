@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
-import grpc_testing
 import unittest
 from unittest.mock import patch
 
-from pkg.apis.manager.v1beta1.python import api_pb2
-
-from pkg.earlystopping.v1beta1.medianstop.service import MedianStopService
-
+import grpc
+import grpc_testing
 import utils
+
+from pkg.apis.manager.v1beta1.python import api_pb2
+from pkg.earlystopping.v1beta1.medianstop.service import MedianStopService
 
 
 class TestMedianStop(unittest.TestCase):

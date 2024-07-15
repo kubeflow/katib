@@ -20,13 +20,13 @@ import time
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import grpc
-import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
+import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib.utils import utils
-from kubernetes import client, config
-
+from kubernetes import client
+from kubernetes import config
 
 logger = logging.getLogger(__name__)
 
