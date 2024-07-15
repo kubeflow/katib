@@ -244,5 +244,3 @@ setuptools.setup(
 	},
 )
 ```
-
-_#WIP_
