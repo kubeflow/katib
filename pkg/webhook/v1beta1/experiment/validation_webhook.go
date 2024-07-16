@@ -90,7 +90,8 @@ func (v *ExperimentValidator) Handle(ctx context.Context, req admission.Request)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	err = v.ValidateExperiment(inst, oldInst)
+	allErrs := v.ValidateExperiment(inst, oldInst)
+	err = allErrs.ToAggregate()
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}

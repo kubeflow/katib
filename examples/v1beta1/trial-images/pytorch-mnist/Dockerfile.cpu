@@ -6,6 +6,9 @@ WORKDIR /opt/pytorch-mnist
 
 # Add folder for the logs.
 RUN mkdir /katib
+
+# TODO (andreyvelich): This is required since torchvision==0.17.1 is incompatible with numpy 2.0
+RUN pip install numpy==1.26.0
 RUN pip install --prefer-binary --no-cache-dir torch==2.2.1 torchvision==0.17.1
 RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
 

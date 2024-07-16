@@ -23,7 +23,7 @@ REQUIRES = [
     "urllib3>=1.15.1",
     "kubernetes>=27.2.0",
     "grpcio>=1.41.1",
-    "protobuf>=3.19.5, <=3.20.3",
+    "protobuf>=4.21.12,<5",
 ]
 
 katib_grpc_api_file = "../../../pkg/apis/manager/v1beta1/python/api_pb2.py"
@@ -38,7 +38,7 @@ if os.path.exists(katib_grpc_api_file):
 
 setuptools.setup(
     name="kubeflow-katib",
-    version="0.17.0rc0",
+    version="0.17.0",
     author="Kubeflow Authors",
     author_email="premnath.vel@gmail.com",
     license="Apache License Version 2.0",

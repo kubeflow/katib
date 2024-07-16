@@ -9,7 +9,6 @@ webhooks:
     admissionReviewVersions:
       - v1
     clientConfig:
-      caBundle: Cg==
       service:
         name: katib-controller
         namespace: kubeflow
@@ -35,7 +34,6 @@ webhooks:
     admissionReviewVersions:
       - v1
     clientConfig:
-      caBundle: Cg==
       service:
         name: katib-controller
         namespace: kubeflow
@@ -55,7 +53,6 @@ webhooks:
     admissionReviewVersions:
       - v1
     clientConfig:
-      caBundle: Cg==
       service:
         name: katib-controller
         namespace: kubeflow

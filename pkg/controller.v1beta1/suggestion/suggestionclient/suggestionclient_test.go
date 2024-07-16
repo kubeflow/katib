@@ -23,11 +23,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,7 +53,12 @@ type k8sMatcher struct {
 }
 
 func (k8s k8sMatcher) Matches(x interface{}) bool {
-	return equality.Semantic.DeepEqual(k8s.x, x)
+	switch ex := k8s.x.(type) {
+	case proto.Message:
+		return proto.Equal(ex, x.(proto.Message))
+	default:
+		return equality.Semantic.DeepEqual(k8s.x, x)
+	}
 }
 
 func (k8s k8sMatcher) String() string {

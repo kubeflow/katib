@@ -15,6 +15,7 @@
 import grpc
 import argparse
 import api_pb2
+import api_pb2_grpc
 from pns import WaitMainProcesses
 import const
 from tfevent_loader import MetricsCollector
@@ -55,25 +56,28 @@ if __name__ == '__main__':
     wait_all_processes = opt.wait_all_processes.lower() == "true"
     db_manager_server = opt.db_manager_server_addr.split(':')
     if len(db_manager_server) != 2:
-        raise Exception("Invalid Katib DB manager service address: %s" %
-                        opt.db_manager_server_addr)
+        raise Exception(
+            f"Invalid Katib DB manager service address: {opt.db_manager_server_addr}"
+        )
 
     WaitMainProcesses(
         pool_interval=opt.poll_interval,
         timout=opt.timeout,
         wait_all=wait_all_processes,
-        completed_marked_dir=opt.metrics_file_dir)
+        completed_marked_dir=opt.metrics_file_dir,
+    )
 
-    mc = MetricsCollector(opt.metric_names.split(';'))
+    mc = MetricsCollector(opt.metric_names.split(";"))
     observation_log = mc.parse_file(opt.metrics_file_dir)
 
-    channel = grpc.beta.implementations.insecure_channel(
-        db_manager_server[0], int(db_manager_server[1]))
-
-    with api_pb2.beta_create_DBManager_stub(channel) as client:
-        logger.info("In " + opt.trial_name + " " +
-                    str(len(observation_log.metric_logs)) + " metrics will be reported.")
-        client.ReportObservationLog(api_pb2.ReportObservationLogRequest(
-            trial_name=opt.trial_name,
-            observation_log=observation_log
-        ), timeout=timeout_in_seconds)
+    with grpc.insecure_channel(opt.db_manager_server_addr) as channel:
+        stub = api_pb2_grpc.DBManagerStub(channel)
+        logger.info(
+            f"In {opt.trial_name} {str(len(observation_log.metric_logs))} metrics will be reported."
+        )
+        stub.ReportObservationLog(
+            api_pb2.ReportObservationLogRequest(
+                trial_name=opt.trial_name, observation_log=observation_log
+            ),
+            timeout=timeout_in_seconds,
+        )
