@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -141,26 +140,11 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	// Add Katib Trial labels to the Pod metadata.
 	mutatePodMetadata(mutatedPod, trial)
 
-	// Pass env variable KATIB_TRIAL_NAME to the primary container using fieldPath.
-	index := getPrimaryContainerIndex(mutatedPod.Spec.Containers, trial.Spec.PrimaryContainerName)
-	if index >= 0 {
-		if mutatedPod.Spec.Containers[index].Env == nil {
-			mutatedPod.Spec.Containers[index].Env = []v1.EnvVar{}
-		}
-		mutatedPod.Spec.Containers[index].Env = append(
-			mutatedPod.Spec.Containers[index].Env,
-			v1.EnvVar{
-				Name: consts.EnvTrialName,
-				ValueFrom: &v1.EnvVarSource{
-					FieldRef: &v1.ObjectFieldSelector{
-						FieldPath: fmt.Sprintf("metadata.labels['%s']", consts.LabelTrialName),
-					},
-				},
-			},
-		)
-	} else {
-		return nil, fmt.Errorf("Unable to find primary container %v in mutated pod containers %v",
-			trial.Spec.PrimaryContainerName, pod.Spec.Containers)
+	// Add env variables to the Pod's primary container.
+	// We add this function because of push-based metrics collection function `report_metrics` in Python SDK.
+	// Currently, we only pass the Trial name as env variable `KATIB_TRIAL_NAME` to the training container.
+	if err := mutatePodEnv(mutatedPod, trial); err != nil {
+		return nil, err
 	}
 
 	// Do the following mutation only for the Primary pod.
