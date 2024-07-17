@@ -79,15 +79,23 @@ kubectl patch ClusterRole katib-controller -n kubeflow --type=json \
   -p='[{"op": "add", "path": "/rules/-", "value": {"apiGroups":["argoproj.io"],"resources":["workflows"],"verbs":["get", "list", "watch", "create", "delete"]}}]'
 ```
 
-In addition to that, you have to modify Katib
-[Controller args](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/components/controller/controller.yaml#L27)
-with the new flag `--trial-resources`.
-
-Run the following command to update Katib Controller args:
+Run the following command to update [Katib config](https://www.kubeflow.org/docs/components/katib/user-guides/katib-config/#katib-controller-parameters):
 
 ```bash
-kubectl patch Deployment katib-controller -n kubeflow --type=json \
-  -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--trial-resources=Workflow.v1alpha1.argoproj.io"}]'
+kubectl edit configMap katib-config -n kubeflow
+```
+
+For example, to support Workflow Pipelines, add `Workflow.v1alpha1.argoproj.io` in `trialResources`:
+
+```bash
+trialResources:
+  - Workflow.v1alpha1.argoproj.io
+```
+
+After that, you need to restart the Katib controller Pod:
+
+```bash
+kubectl delete pod -n kubeflow -l katib.kubeflow.org/component=controller
 ```
 
 Check that Katib Controller's pod was restarted:
@@ -107,7 +115,7 @@ Check logs from Katib Controller to verify Argo Workflow integration:
 ```bash
 $ kubectl logs $(kubectl get pods -n kubeflow -o name | grep katib-controller) -n kubeflow | grep '"CRD Kind":"Workflow"'
 
-{"level":"info","ts":1628032648.6285546,"logger":"trial-controller","msg":"Job watch added successfully","CRD Group":"argoproj.io","CRD Version":"v1alpha1","CRD Kind":"Workflow"}
+{"level":"info","ts":"2024-07-13T10:02:10Z","logger":"trial-controller","msg":"Job watch added successfully","CRD Group":"argoproj.io","CRD Version":"v1alpha1","CRD Kind":"Workflow"}
 ```
 
 If you ran the above steps successfully, you should be able to run Argo Workflow examples.
