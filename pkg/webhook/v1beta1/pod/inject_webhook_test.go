@@ -28,7 +28,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/onsi/gomega"
-	"google.golang.org/protobuf/testing/protocmp"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -1164,7 +1163,7 @@ func TestMutatePodEnv(t *testing.T) {
 				)
 			}
 			// Compare Pod with expected pod after mutation
-			if diff := cmp.Diff(testcase.mutatedPod, testcase.pod, protocmp.Transform()); len(diff) != 0 {
+			if diff := cmp.Diff(testcase.mutatedPod, testcase.pod); len(diff) != 0 {
 				t.Errorf("Unexpected mutated result (-want,+got):\n%s", diff)
 			}
 		})
