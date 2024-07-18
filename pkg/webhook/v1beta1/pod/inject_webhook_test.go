@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -1065,5 +1067,105 @@ func TestMutatePodMetadata(t *testing.T) {
 		if !reflect.DeepEqual(tc.mutatedPod, tc.pod) {
 			t.Errorf("Case %v. Expected Pod %v, got %v", tc.testDescription, tc.mutatedPod, tc.pod)
 		}
+	}
+}
+
+func TestMutatePodEnv(t *testing.T) {
+	testcases := map[string]struct {
+		pod        *v1.Pod
+		trial      *trialsv1beta1.Trial
+		mutatedPod *v1.Pod
+		wantError  error
+	}{
+		"Valid case for mutating Pod's env variable": {
+			pod: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "training-container",
+						},
+					},
+				},
+			},
+			trial: &trialsv1beta1.Trial{
+				Spec: trialsv1beta1.TrialSpec{
+					PrimaryContainerName: "training-container",
+				},
+			},
+			mutatedPod: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "training-container",
+							Env: []v1.EnvVar{
+								{
+									Name: consts.EnvTrialName,
+									ValueFrom: &v1.EnvVarSource{
+										FieldRef: &v1.ObjectFieldSelector{
+											FieldPath: fmt.Sprintf("metadata.labels['%s']", consts.LabelTrialName),
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"Mismatch for Pod name and primaryContainerName in Trial": {
+			pod: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "training-container",
+						},
+					},
+				},
+			},
+			trial: &trialsv1beta1.Trial{
+				Spec: trialsv1beta1.TrialSpec{
+					PrimaryContainerName: "training-containers",
+				},
+			},
+			mutatedPod: &v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "training-container",
+						},
+					},
+				},
+			},
+			wantError: fmt.Errorf(
+				"Unable to find primary container %v in mutated pod containers %v",
+				"training-containers",
+				[]v1.Container{
+					{
+						Name: "training-container",
+					},
+				},
+			),
+		},
+	}
+
+	for name, testcase := range testcases {
+		t.Run(name, func(t *testing.T) {
+			err := mutatePodEnv(testcase.pod, testcase.trial)
+			// Compare error with expected error
+			if testcase.wantError != nil && err != nil {
+				if diff := cmp.Diff(testcase.wantError.Error(), err.Error()); len(diff) != 0 {
+					t.Errorf("Unexpected error (-want,+got):\n%s", diff)
+				}
+			} else if testcase.wantError != nil || err != nil {
+				t.Errorf(
+					"Unexpected error (-want,+got):\n%s",
+					cmp.Diff(testcase.wantError, err, cmpopts.EquateErrors()),
+				)
+			}
+			// Compare Pod with expected pod after mutation
+			if diff := cmp.Diff(testcase.mutatedPod, testcase.pod); len(diff) != 0 {
+				t.Errorf("Unexpected mutated result (-want,+got):\n%s", diff)
+			}
+		})
 	}
 }

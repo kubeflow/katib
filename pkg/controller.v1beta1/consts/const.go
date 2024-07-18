@@ -60,6 +60,9 @@ const (
 	// resources list which can be used as trial template
 	ConfigTrialResources = "trial-resources"
 
+	// EnvTrialName is the env variable of Trial name
+	EnvTrialName = "KATIB_TRIAL_NAME"
+
 	// LabelExperimentName is the label of experiment name.
 	LabelExperimentName = "katib.kubeflow.org/experiment"
 	// LabelSuggestionName is the label of suggestion name.

@@ -186,6 +186,7 @@ class KatibClient(object):
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
+        metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
         """Create HyperParameter Tuning Katib Experiment from the objective function.
 
@@ -248,6 +249,9 @@ class KatibClient(object):
                 to the base image packages. These packages are installed before
                 executing the objective function.
             pip_index_url: The PyPI url from which to install Python packages.
+            metrics_collector_config: Specify the config of metrics collector, 
+                for example, `metrics_collector_config = {"kind": "Push"}`.
+                Currently, we only support `StdOut` and `Push` metrics collector.
 
         Raises:
             ValueError: Function arguments have incorrect type or value.
@@ -379,6 +383,12 @@ class KatibClient(object):
                     raise ValueError(
                         f"Incorrect value for env_per_trial: {env_per_trial}"
                     )
+
+        # Add metrics collector to the Katib Experiment.
+        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector. 
+        experiment.spec.metrics_collector = models.V1beta1MetricsCollectorSpec(
+            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
+        )
 
         # Create Trial specification.
         trial_spec = client.V1Job(

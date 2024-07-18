@@ -140,6 +140,13 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	// Add Katib Trial labels to the Pod metadata.
 	mutatePodMetadata(mutatedPod, trial)
 
+	// Add env variables to the Pod's primary container.
+	// We add this function because of push-based metrics collection function `report_metrics` in Python SDK.
+	// Currently, we only pass the Trial name as env variable `KATIB_TRIAL_NAME` to the training container.
+	if err := mutatePodEnv(mutatedPod, trial); err != nil {
+		return nil, err
+	}
+
 	// Do the following mutation only for the Primary pod.
 	// If PrimaryPodLabel is not set we mutate all pods which are related to Trial job.
 	// Otherwise, mutate pod only with the appropriate labels.
@@ -147,8 +154,8 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 		return mutatedPod, nil
 	}
 
-	// If Metrics Collector in None, skip the mutation.
-	if trial.Spec.MetricsCollector.Collector.Kind == common.NoneCollector {
+	// If Metrics Collector is Push, skip the mutation.
+	if trial.Spec.MetricsCollector.Collector.Kind == common.PushCollector {
 		return mutatedPod, nil
 	}
 
