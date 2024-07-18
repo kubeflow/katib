@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
+from datetime import timezone
 import os
-from datetime import datetime, timezone
 from typing import Any, Dict
 
 import grpc
-import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib.constants import constants
+import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib.utils import utils
+
 
 def report_metrics(
     metrics: Dict[str, Any],

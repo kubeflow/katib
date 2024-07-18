@@ -23,8 +23,8 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Check YAML files
-        run: make yamllint
-
       - name: Check shell scripts
         run: make shellcheck
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1

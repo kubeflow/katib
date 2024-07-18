@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import logging
-from pkg.apis.manager.v1beta1.python import api_pb2 as api
 
+from pkg.apis.manager.v1beta1.python import api_pb2 as api
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

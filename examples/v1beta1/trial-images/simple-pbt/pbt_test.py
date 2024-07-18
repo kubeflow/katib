@@ -17,11 +17,12 @@
 # limitations under the License.
 
 import argparse
-import numpy as np
 import os
 import pickle
 import random
 import time
+
+import numpy as np
 
 # Ensure job runs for at least this long (secs) to allow metrics collector to
 # read PID correctly before cleanup

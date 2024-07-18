@@ -16,11 +16,10 @@ import unittest
 
 import grpc
 import grpc_testing
+import utils
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.suggestion.v1beta1.skopt.service import SkoptService
-
-import utils
 
 
 class TestSkopt(unittest.TestCase):

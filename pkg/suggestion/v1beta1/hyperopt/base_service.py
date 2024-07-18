@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import hyperopt
-import numpy as np
 import logging
 
-from pkg.suggestion.v1beta1.internal.constant import INTEGER, DOUBLE, CATEGORICAL, DISCRETE, MAX_GOAL
+import hyperopt
+import numpy as np
+
+from pkg.suggestion.v1beta1.internal.constant import CATEGORICAL
+from pkg.suggestion.v1beta1.internal.constant import DISCRETE
+from pkg.suggestion.v1beta1.internal.constant import DOUBLE
+from pkg.suggestion.v1beta1.internal.constant import INTEGER
+from pkg.suggestion.v1beta1.internal.constant import MAX_GOAL
 from pkg.suggestion.v1beta1.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)

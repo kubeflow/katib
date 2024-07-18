@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import itertools
+
 import numpy as np
+
 from pkg.apis.manager.v1beta1.python import api_pb2
 
 

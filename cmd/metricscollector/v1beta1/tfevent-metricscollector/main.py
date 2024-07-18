@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
 import argparse
+from logging import getLogger
+from logging import INFO
+from logging import StreamHandler
+
 import api_pb2
 import api_pb2_grpc
-from pns import WaitMainProcesses
 import const
+import grpc
+from pns import WaitMainProcesses
 from tfevent_loader import MetricsCollector
-from logging import getLogger, StreamHandler, INFO
 
 timeout_in_seconds = 60
 

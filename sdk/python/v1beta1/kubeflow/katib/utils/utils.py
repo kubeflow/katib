@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 import json
 import os
 import textwrap
-from typing import Callable, Any
-import inspect
+from typing import Any, Callable
 
 from kubeflow.katib import models
 from kubeflow.katib.constants import constants
