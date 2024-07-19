@@ -133,11 +133,6 @@ func main() {
 		CertDir: consts.CertDir,
 	})
 
-	if err := mgr.AddReadyzCheck("webhook", hookServer.StartedChecker()); err != nil {
-		log.Error(err, "Unable to add readyz check cert")
-		os.Exit(1)
-	}
-
 	ctx := signals.SetupSignalHandler()
 	certsReady := make(chan struct{})
 
@@ -151,7 +146,7 @@ func main() {
 			case <-certsReady:
 				return nil
 			default:
-				return fmt.Errorf("cert not ready")
+				return fmt.Errorf("certificates are not ready")
 			}
 		})
 		if err != nil {
@@ -167,6 +162,10 @@ func main() {
 	}
 
 	log.Info("Setting up health checker.")
+	if err := mgr.AddReadyzCheck("webhook", hookServer.StartedChecker()); err != nil {
+		log.Error(err, "Unable to add readyz check webhook")
+		os.Exit(1)
+	}
 	if err = mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		log.Error(err, "Add webhook server health checker to the manager failed")
 		os.Exit(1)
