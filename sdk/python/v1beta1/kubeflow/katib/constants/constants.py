@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import os
+from kubernetes import client
+from kubeflow.storage_initializer.constants import INIT_CONTAINER_MOUNT_PATH
 
 # How long to wait in seconds for requests to the Kubernetes or gRPC API Server.
 DEFAULT_TIMEOUT = 120
@@ -56,3 +58,26 @@ BASE_IMAGE_PYTORCH = "docker.io/pytorch/pytorch:2.2.1-cuda12.1-cudnn8-runtime"
 BASE_IMAGE_MXNET = "docker.io/mxnet/python:1.9.1_native_py3"
 
 DEFAULT_DB_MANAGER_ADDRESS = "katib-db-manager.kubeflow:6789"
+
+# Constants for Tune API.
+STORAGE_INITIALIZER = "storage-initializer"
+# The default value for dataset and model storage PVC.
+PVC_DEFAULT_SIZE = "10Gi"
+# The default value for PVC access modes.
+PVC_DEFAULT_ACCESS_MODES = ["ReadWriteOnce", "ReadOnlyMany"]
+
+STORAGE_INITIALIZER_IMAGE = "docker.io/kubeflow/storage-initializer"
+
+STORAGE_INITIALIZER_VOLUME_MOUNT = client.V1VolumeMount(
+    name=STORAGE_INITIALIZER,
+    mount_path=INIT_CONTAINER_MOUNT_PATH,
+)
+
+STORAGE_INITIALIZER_VOLUME = client.V1Volume(
+    name=STORAGE_INITIALIZER,
+    persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(
+        claim_name=STORAGE_INITIALIZER
+    ),
+)
+
+TRAINER_TRANSFORMER_IMAGE = "" # Need to be built using the `trainer` file

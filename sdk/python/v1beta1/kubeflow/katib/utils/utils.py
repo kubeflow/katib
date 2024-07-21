@@ -20,6 +20,8 @@ import inspect
 
 from kubeflow.katib import models
 from kubeflow.katib.constants import constants
+from typing import Any, Callable, Dict, List, Optional, Union
+import transformers
 
 
 def is_running_in_k8s():
@@ -118,3 +120,44 @@ class FakeResponse:
 
     def __init__(self, obj):
         self.data = json.dumps(obj)
+
+
+def get_pvc_spec(
+    pvc_name: str,
+    namespace: str,
+    storage_config: Dict[str, Optional[Union[str, List[str]]]],
+):
+    if pvc_name is None or namespace is None:
+        raise ValueError("One of the required storage config argument is None")
+
+    if "size" not in storage_config:
+        storage_config["size"] = constants.PVC_DEFAULT_SIZE
+
+    if "access_modes" not in storage_config:
+        storage_config["access_modes"] = constants.PVC_DEFAULT_ACCESS_MODES
+
+    pvc_spec = models.V1PersistentVolumeClaim(
+        api_version="v1",
+        kind="PersistentVolumeClaim",
+        metadata={"name": pvc_name, "namepsace": namespace},
+        spec=models.V1PersistentVolumeClaimSpec(
+            access_modes=storage_config["access_modes"],
+            resources=models.V1ResourceRequirements(
+                requests={"storage": storage_config["size"]}
+            ),
+        ),
+    )
+
+    if "storage_class" in storage_config:
+        pvc_spec.spec.storage_class_name = storage_config["storage_class"]
+
+    return pvc_spec
+
+
+class SetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+        if isinstance(obj, type):
+            return obj.__name__
+        return json.JSONEncoder.default(self, obj)
