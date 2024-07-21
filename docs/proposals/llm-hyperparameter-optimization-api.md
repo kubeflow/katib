@@ -135,7 +135,7 @@ cl.tune(
 	# Use 3000 samples from Yelp dataset.
 	dataset_provider_parameters = HuggingFaceDatasetParams(
 		repo_id = "yelp_review_full",
-		split = "train[:100]",
+		split = "train[:3000]",
 	),
 	# Specify HuggingFace Trainer parameters.
 	trainer_parameters = HuggingFaceTrainerParams(
