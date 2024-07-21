@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import grpc
 from concurrent import futures
 import time
-from pkg.apis.manager.v1beta1.python import api_pb2_grpc
-from pkg.apis.manager.health.python import health_pb2_grpc
-from pkg.suggestion.v1beta1.nas.darts.service import DartsService
 
+import grpc
+
+from pkg.apis.manager.health.python import health_pb2_grpc
+from pkg.apis.manager.v1beta1.python import api_pb2_grpc
+from pkg.suggestion.v1beta1.nas.darts.service import DartsService
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 DEFAULT_PORT = "0.0.0.0:6789"

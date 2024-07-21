@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+from logging import DEBUG
+from logging import getLogger
+from logging import StreamHandler
 import math
 import traceback
+
 import grpc
-import logging
-from logging import getLogger, StreamHandler, DEBUG
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.apis.manager.v1beta1.python import api_pb2_grpc

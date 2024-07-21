@@ -4,7 +4,10 @@ Python SDK for Kubeflow Katib
 
 ## Requirements.
 
-Python 2.7 and 3.4+
+Python >= 3.8
+
+Katib Python SDK follows [Python release cycle](https://devguide.python.org/versions/#python-release-cycle)
+for supported Python versions.
 
 ## Installation & Usage
 

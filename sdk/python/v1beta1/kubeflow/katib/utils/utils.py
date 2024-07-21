@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 import json
 import os
 import textwrap
-from typing import Callable
-import inspect
+from typing import Any, Callable
 
 from kubeflow.katib import models
 from kubeflow.katib.constants import constants
@@ -73,6 +73,16 @@ def print_experiment_status(experiment: models.V1beta1Experiment):
         )
         print(f"Current Optimal Trial:\n {experiment.status.current_optimal_trial}")
         print(f"Experiment conditions:\n {experiment.status.conditions}")
+
+def validate_metrics_value(value: Any):
+    """Validate if the metrics value can be converted to type `float`."""
+    try:
+        float(value)
+    except Exception:
+        raise ValueError(
+            f"Invalid value {value} for metrics value. "
+            "The metrics value should have or can be converted to type `float`. "
+        )
 
 
 def validate_objective_function(objective: Callable):

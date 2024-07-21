@@ -18,6 +18,7 @@ see the following user guides:
 - [Java](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) (8 or later)
 - [Python](https://www.python.org/) (3.11 or later)
 - [kustomize](https://kustomize.io/) (4.0.5 or later)
+- [pre-commit](https://pre-commit.com/)
 
 ## Build from source code
 
@@ -28,6 +29,8 @@ to build multi-arch images. Check source code as follows:
 ```bash
 make build REGISTRY=<image-registry> TAG=<image-tag>
 ```
+
+If you are using an Apple Silicon machine and encounter the "rosetta error: bss_size overflow," go to Docker Desktop -> General and uncheck "Use Rosetta for x86_64/amd64 emulation on Apple Silicon."
 
 To use your custom images for the Katib components, modify
 [Kustomization file](https://github.com/kubeflow/katib/blob/master/manifests/v1beta1/installs/katib-standalone/kustomization.yaml)
@@ -148,3 +151,21 @@ Please see [Katib UI README](../pkg/ui/v1beta1).
 ## Design proposals
 
 Please see [proposals](./proposals).
+
+## Code Style
+
+### pre-commit
+
+Make sure to install [pre-commit](https://pre-commit.com/) (`pip install
+pre-commit`) and run `pre-commit install` from the root of the repository at
+least once before creating git commits.
+
+The pre-commit [hooks](../.pre-commit-config.yaml) ensure code quality and
+consistency. They are executed in CI. PRs that fail to comply with the hooks
+will not be able to pass the corresponding CI gate. The hooks are only executed
+against staged files unless you run `pre-commit run --all`, in which case,
+they'll be executed against every file in the repository.
+
+Specific programmatically generated files listed in the `exclude` field in
+[.pre-commit-config.yaml](../.pre-commit-config.yaml) are deliberately excluded
+from the hooks. 

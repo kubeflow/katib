@@ -58,6 +58,7 @@ rules:
       - "list"
       - "watch"
       - "patch"
+      - "update"
   - apiGroups:
       - apps
     resources:
@@ -127,6 +128,7 @@ rules:
       - "watch"
       - "list"
       - "patch"
+      - "update"
 ---
 apiVersion: v1
 kind: ServiceAccount

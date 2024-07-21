@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import inspect
+import logging
 import multiprocessing
 import textwrap
 import time
@@ -22,32 +23,43 @@ import logging
 logger = logging.getLogger(__name__)
 
 import grpc
-import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
+import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib.utils import utils
-from kubernetes import client, config
+from kubernetes import client
+from kubernetes import config
+
+logger = logging.getLogger(__name__)
 
 
 class KatibClient(object):
     def __init__(
         self,
-        config_file: str = None,
-        context: str = None,
-        client_configuration: client.Configuration = None,
+        config_file: Optional[str] = None,
+        context: Optional[str] = None,
+        client_configuration: Optional[client.Configuration] = None,
         namespace: str = utils.get_default_target_namespace(),
     ):
-        """KatibClient constructor.
+        """KatibClient constructor. Configure logging in your application
+            as follows to see detailed information from the KatibClient APIs:
+            .. code-block:: python
+                import logging
+                logging.basicConfig()
+                log = logging.getLogger("kubeflow.katib.api.katib_client")
+                log.setLevel(logging.DEBUG)
 
         Args:
             config_file: Path to the kube-config file. Defaults to ~/.kube/config.
             context: Set the active context. Defaults to current_context from the kube-config.
             client_configuration: Client configuration for cluster authentication.
                 You have to provide valid configuration with Bearer token or
-                with username and password.
-                You can find an example here: https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
-            namespace: Target Kubernetes namespace. Can be overridden during method invocations.
+                with username and password. You can find an example here:
+                https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
+            namespace: Target Kubernetes namespace. By default it takes namespace
+                from `/var/run/secrets/kubernetes.io/serviceaccount/namespace` location
+                or set as `default`. Namespace can be overridden during method invocations.
         """
 
         self.in_cluster = False
@@ -135,8 +147,7 @@ class KatibClient(object):
                 f"Failed to create Katib Experiment: {namespace}/{experiment_name}"
             )
 
-        # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{experiment_name} has been created")
+        logger.debug(f"Experiment {namespace}/{experiment_name} has been created")
 
         if self._is_ipython():
             if self.in_cluster:
@@ -186,6 +197,7 @@ class KatibClient(object):
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
+        metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
         """Create HyperParameter Tuning Katib Experiment using one of the following options:
         - External models and datasets: Specify both `model_provider_parameters` and `dataset_provider_parameters` to download models and datasets from external platforms (currently supports HuggingFace and Amazon S3) using the Storage Initializer. The `trainer_parameters` should be of type `HuggingFaceTrainerParams` to set the hyperparameters search space. This API will automatically define the "Trainer" class in HuggingFace with the provided parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics for optimizing hyperparameters. 
@@ -264,6 +276,9 @@ class KatibClient(object):
                 to the base image packages. These packages are installed before
                 executing the objective function.
             pip_index_url: The PyPI url from which to install Python packages.
+            metrics_collector_config: Specify the config of metrics collector, 
+                for example, `metrics_collector_config = {"kind": "Push"}`.
+                Currently, we only support `StdOut` and `Push` metrics collector.
 
         Raises:
             ValueError: Function arguments have incorrect type or value.
@@ -293,7 +308,7 @@ class KatibClient(object):
 
         # Create Katib Experiment template.
         experiment = models.V1beta1Experiment(
-            api_version=f"{constants.KUBEFLOW_GROUP}/{constants.KATIB_VERSION}",
+            api_version=constants.API_VERSION,
             kind=constants.EXPERIMENT_KIND,
             metadata=models.V1ObjectMeta(name=name, namespace=namespace),
             spec=models.V1beta1ExperimentSpec(),
@@ -357,6 +372,7 @@ class KatibClient(object):
                         f"Incorrect value for env_per_trial: {env_per_trial}"
                     )
 
+<<<<<<< HEAD
         # Create Container and Pod specifications.
         # If users choose to use a custom objective function.
         if objective is not None:
@@ -594,12 +610,42 @@ class KatibClient(object):
                 ),
             )
         
+=======
+        # Add metrics collector to the Katib Experiment.
+        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector. 
+        experiment.spec.metrics_collector = models.V1beta1MetricsCollectorSpec(
+            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
+        )
+
+>>>>>>> upstream/master
         # Create Trial specification.
         trial_spec = client.V1Job(
             api_version="batch/v1",
             kind="Job",
             spec=client.V1JobSpec(
+<<<<<<< HEAD
                 template=pod_spec,
+=======
+                template=client.V1PodTemplateSpec(
+                    metadata=models.V1ObjectMeta(
+                        annotations={"sidecar.istio.io/inject": "false"}
+                    ),
+                    spec=client.V1PodSpec(
+                        restart_policy="Never",
+                        containers=[
+                            client.V1Container(
+                                name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+                                image=base_image,
+                                command=["bash", "-c"],
+                                args=[exec_script],
+                                env=env if env else None,
+                                env_from=env_from if env_from else None,
+                                resources=resources_per_trial,
+                            )
+                        ],
+                    ),
+                )
+>>>>>>> upstream/master
             ),
         )
 
@@ -950,7 +996,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Raise exception if Experiment is Failed.
@@ -970,7 +1016,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Running condition.
@@ -981,7 +1027,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
@@ -992,7 +1038,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
@@ -1003,12 +1049,12 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                print(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.
             utils.print_experiment_status(experiment)
-            print(
+            logger.debug(
                 f"Waiting for Experiment: {namespace}/{name} to reach {expected_condition} condition\n\n\n"
             )
             time.sleep(polling_interval)
@@ -1087,7 +1133,7 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to edit Katib Experiment: {namespace}/{name}")
 
-        print(f"Experiment {namespace}/{name} has been updated")
+        logger.debug(f"Experiment {namespace}/{name} has been updated")
 
     def delete_experiment(
         self,
@@ -1126,8 +1172,7 @@ class KatibClient(object):
         except Exception:
             raise RuntimeError(f"Failed to delete Katib Experiment: {namespace}/{name}")
 
-        # TODO (andreyvelich): Use proper logger.
-        print(f"Experiment {namespace}/{name} has been deleted")
+        logger.debug(f"Experiment {namespace}/{name} has been deleted")
 
     def get_suggestion(
         self,

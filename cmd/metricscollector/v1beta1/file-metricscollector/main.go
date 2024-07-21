@@ -49,7 +49,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hpcloud/tail"
+	"github.com/nxadm/tail"
 	psutil "github.com/shirou/gopsutil/v3/process"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -134,7 +134,11 @@ func printMetricsFile(mFile string) {
 	checkMetricFile(mFile)
 
 	// Print lines from metrics file.
-	t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
+	t, err := tail.TailFile(mFile, tail.Config{Follow: true, ReOpen: true})
+	if err != nil {
+		klog.Errorf("Failed to open metrics file: %v", err)
+	}
+
 	for line := range t.Lines {
 		klog.Info(line.Text)
 	}

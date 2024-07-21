@@ -7,22 +7,22 @@ require (
 	github.com/awalterschulze/gographviz v2.0.3+incompatible
 	github.com/c-bata/goptuna v0.8.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang/mock v1.6.0
-	github.com/golang/protobuf v1.5.4
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-containerregistry v0.15.2
 	github.com/google/go-containerregistry/pkg/authn/k8schain v0.0.0-20230517160804-b7ad3f13a62c
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
-	github.com/hpcloud/tail v1.0.1-0.20180514194441-a1dbeea552b7
 	github.com/lib/pq v1.10.6
 	github.com/mattbaird/jsonpatch v0.0.0-20171005235357-81af80346b1a
+	github.com/nxadm/tail v1.4.11
 	github.com/onsi/gomega v1.30.0
+	github.com/open-policy-agent/cert-controller v0.10.1
 	github.com/prometheus/client_golang v1.18.0
 	github.com/shirou/gopsutil/v3 v3.22.5
 	github.com/spf13/viper v1.9.0
 	github.com/tidwall/gjson v1.14.1
-	golang.org/x/net v0.23.0
+	go.uber.org/mock v0.4.0
 	google.golang.org/grpc v1.58.3
+	google.golang.org/protobuf v1.33.0
 	k8s.io/api v0.29.3
 	k8s.io/apimachinery v0.29.3
 	k8s.io/client-go v0.29.3
@@ -84,6 +84,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-containerregistry/pkg/authn/kubernetes v0.0.0-20230516205744-dbecb1de8cfa // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
@@ -123,11 +124,13 @@ require (
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/vbatts/tar-split v0.11.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
@@ -139,8 +142,6 @@ require (
 	gonum.org/v1/gonum v0.8.2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
-	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
