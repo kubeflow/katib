@@ -371,8 +371,13 @@ class KatibClient(object):
                     raise ValueError(
                         f"Incorrect value for env_per_trial: {env_per_trial}"
                     )
-
-<<<<<<< HEAD
+        
+        # Add metrics collector to the Katib Experiment.
+        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector. 
+        experiment.spec.metrics_collector = models.V1beta1MetricsCollectorSpec(
+            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
+        )
+        
         # Create Container and Pod specifications.
         # If users choose to use a custom objective function.
         if objective is not None:
@@ -609,43 +614,13 @@ class KatibClient(object):
                     volumes=[constants.STORAGE_INITIALIZER_VOLUME],
                 ),
             )
-        
-=======
-        # Add metrics collector to the Katib Experiment.
-        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector. 
-        experiment.spec.metrics_collector = models.V1beta1MetricsCollectorSpec(
-            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
-        )
 
->>>>>>> upstream/master
         # Create Trial specification.
         trial_spec = client.V1Job(
             api_version="batch/v1",
             kind="Job",
             spec=client.V1JobSpec(
-<<<<<<< HEAD
                 template=pod_spec,
-=======
-                template=client.V1PodTemplateSpec(
-                    metadata=models.V1ObjectMeta(
-                        annotations={"sidecar.istio.io/inject": "false"}
-                    ),
-                    spec=client.V1PodSpec(
-                        restart_policy="Never",
-                        containers=[
-                            client.V1Container(
-                                name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                                image=base_image,
-                                command=["bash", "-c"],
-                                args=[exec_script],
-                                env=env if env else None,
-                                env_from=env_from if env_from else None,
-                                resources=resources_per_trial,
-                            )
-                        ],
-                    ),
-                )
->>>>>>> upstream/master
             ),
         )
 
