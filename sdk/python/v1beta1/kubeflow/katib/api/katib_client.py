@@ -572,11 +572,6 @@ class KatibClient(object):
                 volume_mounts=[constants.STORAGE_INITIALIZER_VOLUME_MOUNT],
             )
 
-            from kubeflow.storage_initializer.constants import (
-                VOLUME_PATH_DATASET,
-                VOLUME_PATH_MODEL,
-            )   
-
             lora_config = json.dumps(lora_config.__dict__, cls=utils.SetEncoder)
             training_args = json.dumps(training_args.to_dict())
             # create app container spec.
@@ -589,9 +584,9 @@ class KatibClient(object):
                     "--transformer_type",
                     model_provider_parameters.transformer_type.__name__,
                     "--model_dir",
-                    VOLUME_PATH_MODEL,
+                    constants.VOLUME_PATH_MODEL,
                     "--dataset_dir",
-                    VOLUME_PATH_DATASET,
+                    constants.VOLUME_PATH_DATASET,
                     "--lora_config",
                     f"'{lora_config}'",
                     "--training_parameters",

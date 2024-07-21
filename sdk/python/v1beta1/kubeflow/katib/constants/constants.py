@@ -14,7 +14,6 @@
 
 import os
 from kubernetes import client
-from kubeflow.storage_initializer.constants import INIT_CONTAINER_MOUNT_PATH
 
 # How long to wait in seconds for requests to the Kubernetes or gRPC API Server.
 DEFAULT_TIMEOUT = 120
@@ -70,7 +69,9 @@ PVC_DEFAULT_SIZE = "10Gi"
 # The default value for PVC access modes.
 PVC_DEFAULT_ACCESS_MODES = ["ReadWriteOnce", "ReadOnlyMany"]
 
-STORAGE_INITIALIZER_IMAGE = "docker.io/kubeflow/storage-initializer"
+INIT_CONTAINER_MOUNT_PATH = "/workspace"
+VOLUME_PATH_DATASET = INIT_CONTAINER_MOUNT_PATH + "/dataset"
+VOLUME_PATH_MODEL = INIT_CONTAINER_MOUNT_PATH + "/model"
 
 STORAGE_INITIALIZER_VOLUME_MOUNT = client.V1VolumeMount(
     name=STORAGE_INITIALIZER,
@@ -83,5 +84,7 @@ STORAGE_INITIALIZER_VOLUME = client.V1Volume(
         claim_name=STORAGE_INITIALIZER
     ),
 )
+
+STORAGE_INITIALIZER_IMAGE = "docker.io/kubeflow/storage-initializer"
 
 TRAINER_TRANSFORMER_IMAGE = "" # Need to be built using the `trainer` file

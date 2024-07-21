@@ -21,7 +21,6 @@ from typing import Any, Callable
 from kubeflow.katib import models
 from kubeflow.katib.constants import constants
 from typing import Any, Callable, Dict, List, Optional, Union
-import transformers
 
 
 def is_running_in_k8s():
