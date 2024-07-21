@@ -108,6 +108,9 @@ class KatibClient(object):
 ### Example
 
 ```python
+import kubeflow.katib as katib
+from kubeflow.katib import KatibClient
+
 import transformers
 from peft import LoraConfig
 
@@ -117,15 +120,12 @@ from kubeflow.storage_initializer.hugging_face import (
 	HuggingFaceTrainerParams,
 )
 
-import kubeflow.katib as katib
-from kubeflow.katib import KatibClient
+# Create a Katib client.
+cl = KatibClient(namespace="kubeflow")
 
-# Create a Katib client
-katib_client = KatibClient(namespace='kubeflow')
-
-# Run the tuning Experiment
-exp_name = "llm-hp-optimization-test"
-katib_client.tune(
+# Run the tuning experiment.
+exp_name = "llm-experiment1"
+cl.tune(
 	name = exp_name,
 	# BERT model URI and type of Transformer to train it.
 	model_provider_parameters = HuggingFaceModelParams(
@@ -135,20 +135,17 @@ katib_client.tune(
 	# Use 3000 samples from Yelp dataset.
 	dataset_provider_parameters = HuggingFaceDatasetParams(
 		repo_id = "yelp_review_full",
-		split = "train[:3000]",
+		split = "train[:100]",
 	),
 	# Specify HuggingFace Trainer parameters.
 	trainer_parameters = HuggingFaceTrainerParams(
 		training_parameters = transformers.TrainingArguments(
-			output_dir = "test_trainer",
+			output_dir = "test_tune_api",
 			save_strategy = "no",
-			eval_strategy = "epoch",
-			disable_tqdm = True,
-			log_level = "info",
 			learning_rate = katib.search.double(min=1e-05, max=5e-05),
-			per_device_train_batch_size = katib.search.categorical([8, 16, 32]),
-			num_train_epochs = katib.search.int(min=1, max=10),
-			weight_decay = katib.search.double(min=0.0, max=1.0),
+			num_train_epochs=3,
+            # If you are using CPU instead of GPU, please set: no_cuda=True,
+            # If you are using CPU instead of GPU, please set: use_cpu=True,
 		),
 		# Set LoRA config to reduce number of trainable model parameters.
 		lora_config = LoraConfig(
@@ -158,25 +155,21 @@ katib_client.tune(
 			bias = "none",
 		),
 	),	
-	objective_metric_name = "eval_accuracy", 
-	objective_type = "maximize", 
+	objective_metric_name = "train_loss", 
+	objective_type = "minimize", 
 	algorithm_name = "random",
-	max_trial_count = 50,
+	max_trial_count = 10,
 	parallel_trial_count = 2,
-	resources_per_trial = types.TrainerResources(
-		num_workers = 4,
-		num_procs_per_worker = 2,
-		resources_per_worker = {
-			"gpu": 2,
-			"cpu": 1,
-			"memory": "10G",
-		},
-	), 
-	# For non-distributed training in PyTorch, specify resources like this: resources_per_trial = {"gpu": 2, "cpu": 10, "memory": "20G"}
+    resources_per_trial={
+		"gpu": "2",
+        "cpu": "4",
+        "memory": "10G",
+    },
+	# For distribued training, please specify `resources_per_trial` using `types.TrainerResources` (To be implemented).
 )
 
-# Get the best hyperparameters
-best_hps = katib_client.get_optimal_hyperparameters(exp_name)
+# Get the best hyperparameters.
+print(cl.get_optimal_hyperparameters(exp_name))
 ```
 
 ## Implementation
