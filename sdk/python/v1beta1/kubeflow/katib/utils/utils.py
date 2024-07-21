@@ -16,11 +16,10 @@ import inspect
 import json
 import os
 import textwrap
-from typing import Any, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from kubeflow.katib import models
 from kubeflow.katib.constants import constants
-from typing import Any, Callable, Dict, List, Optional, Union
 
 
 def is_running_in_k8s():

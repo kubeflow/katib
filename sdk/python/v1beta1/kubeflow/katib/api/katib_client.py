@@ -13,13 +13,13 @@
 # limitations under the License.
 
 import inspect
+import json
 import logging
 import multiprocessing
 import textwrap
 import time
 from typing import Any, Callable, Dict, List, Optional, Union
-import json
-import logging
+
 logger = logging.getLogger(__name__)
 
 import grpc
@@ -464,14 +464,15 @@ class KatibClient(object):
         # If users choose to use external models and datasets.
         else:
             try:
+                from kubeflow.storage_initializer.hugging_face import \
+                    HuggingFaceDatasetParams
+                from kubeflow.storage_initializer.hugging_face import \
+                    HuggingFaceModelParams
+                from kubeflow.storage_initializer.hugging_face import \
+                    HuggingFaceTrainerParams
+                from kubeflow.storage_initializer.s3 import S3DatasetParams
                 import peft
                 import transformers
-                from kubeflow.storage_initializer.s3 import S3DatasetParams
-                from kubeflow.storage_initializer.hugging_face import (
-                    HuggingFaceModelParams,
-                    HuggingFaceDatasetParams,
-                    HuggingFaceTrainerParams,
-                )
             except ImportError:
                 raise ImportError(
                     "Tune API dependencies not installed. "
