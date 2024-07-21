@@ -17,7 +17,6 @@ from transformers import DataCollatorForLanguageModeling
 from transformers import Trainer
 from transformers import TrainingArguments
 
-
 # Configure logger.
 log_formatter = logging.Formatter(
     "%(asctime)s %(levelname)-8s %(message)s", "%Y-%m-%dT%H:%M:%SZ"
