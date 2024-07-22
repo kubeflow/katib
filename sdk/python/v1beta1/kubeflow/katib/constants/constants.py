@@ -88,4 +88,4 @@ STORAGE_INITIALIZER_VOLUME = client.V1Volume(
 
 STORAGE_INITIALIZER_IMAGE = "docker.io/kubeflow/storage-initializer"
 
-TRAINER_TRANSFORMER_IMAGE = "" # Need to be built using the `trainer` file
+TRAINER_TRANSFORMER_IMAGE = "docker.io/kubeflow/trainer-huggingface"
