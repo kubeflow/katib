@@ -144,8 +144,6 @@ cl.tune(
 			save_strategy = "no",
 			learning_rate = katib.search.double(min=1e-05, max=5e-05),
 			num_train_epochs=3,
-            # If you are using CPU instead of GPU, please set: no_cuda=True,
-            # If you are using CPU instead of GPU, please set: use_cpu=True,
 		),
 		# Set LoRA config to reduce number of trainable model parameters.
 		lora_config = LoraConfig(
@@ -167,6 +165,9 @@ cl.tune(
     },
 	# For distribued training, please specify `resources_per_trial` using `types.TrainerResources` (To be implemented).
 )
+
+# Wait until Katib Experiment is complete
+cl.wait_for_experiment_condition(name=exp_name)
 
 # Get the best hyperparameters.
 print(cl.get_optimal_hyperparameters(exp_name))
