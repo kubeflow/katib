@@ -70,6 +70,11 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			msg := "Metrics are not available"
 			reason := TrialMetricsUnavailableReason
 
+			// If the type of metrics collector is Push, We should insert an `unavailable` value to DB
+			if instance.Spec.MetricsCollector.Collector.Kind == commonv1beta1.PushCollector {
+				
+			}
+
 			// Get message and reason from deployed job
 			if jobStatus.Message != "" {
 				msg = fmt.Sprintf("%v. Job message: %v", msg, jobStatus.Message)

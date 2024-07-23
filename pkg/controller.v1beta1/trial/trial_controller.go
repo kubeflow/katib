@@ -46,6 +46,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
+	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 )
 
 const (
@@ -244,9 +245,12 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 			}
 		}
 
-		// If observation is empty metrics collector doesn't finish.
-		// For early stopping metrics collector are reported logs before Trial status is changed to EarlyStopped.
-		if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation == nil {
+		// If observation is empty, metrics collector doesn't finish.
+		// For early stopping scenario, metrics collector will report logs before Trial status is changed to EarlyStopped.
+		// We need to requeue reconcile when the Trial is succeeded, metrics collector's type is not `Push`, and metrics are not reported.
+		if jobStatus.Condition == trialutil.JobSucceeded && 
+			instance.Spec.MetricsCollector.Collector.Kind != commonapiv1beta1.PushCollector && 
+			instance.Status.Observation == nil {
 			logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
 			return errMetricsNotReported
 		}
