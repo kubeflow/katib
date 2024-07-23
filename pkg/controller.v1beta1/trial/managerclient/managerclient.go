@@ -17,9 +17,12 @@ limitations under the License.
 package managerclient
 
 import (
+	"time"
+
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	common "github.com/kubeflow/katib/pkg/common/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
 // ManagerClient is the interface for katib manager client in trial controller.
@@ -28,6 +31,8 @@ type ManagerClient interface {
 		instance *trialsv1beta1.Trial) (*api_pb.GetObservationLogReply, error)
 	DeleteTrialObservationLog(
 		instance *trialsv1beta1.Trial) (*api_pb.DeleteObservationLogReply, error)
+	ReportTrialUnavailableMetrics(
+		instance *trialsv1beta1.Trial) (*api_pb.ReportObservationLogReply, error)
 }
 
 // DefaultClient implements the Client interface.
@@ -83,6 +88,29 @@ func (d *DefaultClient) DeleteTrialObservationLog(
 		TrialName: instance.Name,
 	}
 	reply, err := common.DeleteObservationLog(request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (d *DefaultClient) ReportTrialUnavailableMetrics(
+	instance *trialsv1beta1.Trial) (*api_pb.ReportObservationLogReply, error) {
+	request := &api_pb.ReportObservationLogRequest{
+		TrialName: instance.Name,
+		ObservationLog: &api_pb.ObservationLog{
+			MetricLogs: []*api_pb.MetricLog{
+				{
+					TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+					Metric: &api_pb.Metric{
+						Name:  instance.Spec.Objective.ObjectiveMetricName,
+						Value: consts.UnavailableMetricValue,
+					},
+				},
+			},
+		},
+	}
+	reply, err := common.ReportObservationLog(request)
 	if err != nil {
 		return nil, err
 	}
