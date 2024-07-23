@@ -70,17 +70,17 @@ func (mr *MockManagerClientMockRecorder) GetTrialObservationLog(arg0 any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTrialObservationLog", reflect.TypeOf((*MockManagerClient)(nil).GetTrialObservationLog), arg0)
 }
 
-// ReportTrialUnavailableMetrics mocks base method.
-func (m *MockManagerClient) ReportTrialUnavailableMetrics(arg0 *v1beta1.Trial) (*api_v1_beta1.ReportObservationLogReply, error) {
+// ReportTrialObservationLog mocks base method.
+func (m *MockManagerClient) ReportTrialObservationLog(arg0 *v1beta1.Trial, arg1 *api_v1_beta1.ObservationLog) (*api_v1_beta1.ReportObservationLogReply, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteTrialObservationLog", arg0)
+	ret := m.ctrl.Call(m, "ReportTrialObservationLog", arg0, arg1)
 	ret0, _ := ret[0].(*api_v1_beta1.ReportObservationLogReply)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ReportTrialUnavailableMetrics indicated an expected call of ReportTrialUnavailableMetrics.
-func (mr *MockManagerClientMockRecorder) ReportTrialUnavailableMetrics(arg0 any) *gomock.Call {
+// ReportTrialObservationLog indicated an expected call of ReportTrialObservationLog.
+func (mr *MockManagerClientMockRecorder) ReportTrialObservationLog(arg0 any, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReportTrialUnavailableMetrics", reflect.TypeOf((*MockManagerClient)(nil).ReportTrialUnavailableMetrics), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReportTrialObservationLog", reflect.TypeOf((*MockManagerClient)(nil).ReportTrialObservationLog), arg0, arg1)
 }

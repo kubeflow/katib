@@ -70,9 +70,11 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			msg := "Metrics are not available"
 			reason := TrialMetricsUnavailableReason
 
-			// If the type of metrics collector is Push, We should insert an `unavailable` value to DB
+			// If the type of metrics collector is Push, We should insert an unavailable value to Katib DB
 			if instance.Spec.MetricsCollector.Collector.Kind == commonv1beta1.PushCollector {
-				
+				if err := r.reportUnavailableMetrics(instance); err != nil {
+					logger.Error(err, "Failed to insert unavailable value to Katib DB")
+				}
 			}
 
 			// Get message and reason from deployed job
@@ -165,6 +167,23 @@ func (r *ReconcileTrial) updateFinalizers(instance *trialsv1beta1.Trial, finaliz
 		// Need to requeue because finalizer update does not change metadata.generation
 		return reconcile.Result{Requeue: true}, err
 	}
+}
+
+func (r *ReconcileTrial) reportUnavailableMetrics(instance *trialsv1beta1.Trial) error {
+	observationLog := &api_pb.ObservationLog{
+		MetricLogs: []*api_pb.MetricLog{
+			{
+				TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+				Metric: &api_pb.Metric{
+					Name:  instance.Spec.Objective.ObjectiveMetricName,
+					Value: consts.UnavailableMetricValue,
+				},
+			},
+		},
+	}
+	_, err := r.ReportTrialObservationLog(instance, observationLog)
+
+	return err
 }
 
 func getMetrics(metricLogs []*api_pb.MetricLog, strategies []commonv1beta1.MetricStrategy) (*commonv1beta1.Observation, error) {
