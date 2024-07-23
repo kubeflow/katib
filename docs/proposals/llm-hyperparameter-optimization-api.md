@@ -158,11 +158,11 @@ cl.tune(
 	algorithm_name = "random",
 	max_trial_count = 10,
 	parallel_trial_count = 2,
-    resources_per_trial={
+	resources_per_trial={
 		"gpu": "2",
-        "cpu": "4",
-        "memory": "10G",
-    },
+		"cpu": "4",
+		"memory": "10G",
+	},
 	# For distribued training, please specify `resources_per_trial` using `types.TrainerResources` (To be implemented).
 )
 
