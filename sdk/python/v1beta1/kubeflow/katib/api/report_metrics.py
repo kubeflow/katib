@@ -20,6 +20,7 @@ from typing import Any, Dict
 import grpc
 from kubeflow.katib.constants import constants
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
+import kubeflow.katib.katib_api_pb2_grpc as katib_api_pb2_grpc
 from kubeflow.katib.utils import utils
 
 
@@ -53,35 +54,32 @@ def report_metrics(
         )
 
     # Get channel for grpc call to db manager
-    db_manager_address = db_manager_address.split(":")
-    channel = grpc.beta.implementations.insecure_channel(
-        db_manager_address[0], int(db_manager_address[1])
-    )
+    channel = grpc.insecure_channel(db_manager_address)
 
     # Validate metrics value in dict
     for value in metrics.values():
         utils.validate_metrics_value(value)
     
     # Dial katib db manager to report metrics
-    with katib_api_pb2.beta_create_DBManager_stub(channel) as client:
-        try:
-            timestamp = datetime.now(timezone.utc).strftime(constants.RFC3339_FORMAT)
-            client.ReportObservationLog(
-                request=katib_api_pb2.ReportObservationLogRequest(
-                    trial_name=name,
-                    observation_logs=katib_api_pb2.ObservationLog(
-                        metric_logs=[
-                            katib_api_pb2.MetricLog(
-                                time_stamp=timestamp,
-                                metric=katib_api_pb2.Metric(name=name,value=str(value))   
-                            )
-                            for name, value in metrics.items()
-                        ]
-                    )
-                ),
-                timeout=timeout,
-            )
-        except Exception as e:
-            raise RuntimeError(
-                f"Unable to push metrics to Katib DB for Trial {namespace}/{name}. Exception: {e}"
-            )
+    client = katib_api_pb2_grpc.DBManagerStub(channel)
+    try:
+        timestamp = datetime.now(timezone.utc).strftime(constants.RFC3339_FORMAT)
+        client.ReportObservationLog(
+            request=katib_api_pb2.ReportObservationLogRequest(
+                trial_name=name,
+                observation_log=katib_api_pb2.ObservationLog(
+                    metric_logs=[
+                        katib_api_pb2.MetricLog(
+                            time_stamp=timestamp,
+                            metric=katib_api_pb2.Metric(name=name,value=str(value))   
+                        )
+                        for name, value in metrics.items()
+                    ]
+                )
+            ),
+            timeout=timeout,
+        )
+    except Exception as e:
+        raise RuntimeError(
+            f"Unable to push metrics to Katib DB for Trial {namespace}/{name}. Exception: {e}"
+        )
