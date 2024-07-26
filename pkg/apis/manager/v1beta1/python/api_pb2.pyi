@@ -14,6 +14,13 @@ class ParameterType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     DISCRETE: _ClassVar[ParameterType]
     CATEGORICAL: _ClassVar[ParameterType]
 
+class Distribution(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    UNIFORM: _ClassVar[Distribution]
+    LOG_UNIFORM: _ClassVar[Distribution]
+    NORMAL: _ClassVar[Distribution]
+    LOG_NORMAL: _ClassVar[Distribution]
+
 class ObjectiveType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     UNKNOWN: _ClassVar[ObjectiveType]
@@ -31,6 +38,10 @@ DOUBLE: ParameterType
 INT: ParameterType
 DISCRETE: ParameterType
 CATEGORICAL: ParameterType
+UNIFORM: Distribution
+LOG_UNIFORM: Distribution
+NORMAL: Distribution
+LOG_NORMAL: Distribution
 UNKNOWN: ObjectiveType
 MINIMIZE: ObjectiveType
 MAXIMIZE: ObjectiveType
@@ -81,16 +92,18 @@ class ParameterSpec(_message.Message):
     def __init__(self, name: _Optional[str] = ..., parameter_type: _Optional[_Union[ParameterType, str]] = ..., feasible_space: _Optional[_Union[FeasibleSpace, _Mapping]] = ...) -> None: ...
 
 class FeasibleSpace(_message.Message):
-    __slots__ = ("max", "min", "list", "step")
+    __slots__ = ("max", "min", "list", "step", "distribution")
     MAX_FIELD_NUMBER: _ClassVar[int]
     MIN_FIELD_NUMBER: _ClassVar[int]
     LIST_FIELD_NUMBER: _ClassVar[int]
     STEP_FIELD_NUMBER: _ClassVar[int]
+    DISTRIBUTION_FIELD_NUMBER: _ClassVar[int]
     max: str
     min: str
     list: _containers.RepeatedScalarFieldContainer[str]
     step: str
-    def __init__(self, max: _Optional[str] = ..., min: _Optional[str] = ..., list: _Optional[_Iterable[str]] = ..., step: _Optional[str] = ...) -> None: ...
+    distribution: Distribution
+    def __init__(self, max: _Optional[str] = ..., min: _Optional[str] = ..., list: _Optional[_Iterable[str]] = ..., step: _Optional[str] = ..., distribution: _Optional[_Union[Distribution, str]] = ...) -> None: ...
 
 class ObjectiveSpec(_message.Message):
     __slots__ = ("type", "goal", "objective_metric_name", "additional_metric_names")
