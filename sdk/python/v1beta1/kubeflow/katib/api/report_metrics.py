@@ -40,9 +40,9 @@ def report_metrics(
         timeout: Optional, gRPC API Server timeout in seconds to report metrics.
     
     Raises:
-        ValueError: The Trial name is not passed to environment variables.
-        RuntimeError: Unable to push Trial metrics to Katib DB or
+        ValueError: The Trial name is not passed to environment variables or
             metrics value has incorrect format (cannot be converted to type `float`).
+        RuntimeError: Unable to push Trial metrics to Katib DB.
     """
 
     # Get Trial's namespace and name
