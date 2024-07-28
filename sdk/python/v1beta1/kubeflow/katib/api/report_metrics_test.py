@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
-from kubeflow.katib.constants import constants
 from kubeflow.katib import report_metrics
+from kubeflow.katib.constants import constants
 import pytest
 
 TEST_RESULT_SUCCESS = "success"
