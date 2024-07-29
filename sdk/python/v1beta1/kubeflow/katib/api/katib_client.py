@@ -490,6 +490,7 @@ class KatibClient(object):
                 )
 
             # Create PVC for the Storage Initializer.
+            # TODO (helenxie-bit): PVC Creation should be part of Katib Controller.
             try:
                 self.core_api.create_namespaced_persistent_volume_claim(
                     namespace=namespace,
