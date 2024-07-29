@@ -21,7 +21,6 @@ test_report_metrics_data = [
             "metrics": {
                 "result": 0.99
             },
-            "db_manager_address": constants.DEFAULT_DB_MANAGER_ADDRESS,
             "timeout": constants.DEFAULT_TIMEOUT
 
         },
@@ -34,7 +33,6 @@ test_report_metrics_data = [
             "metrics": {
                 "result": "0.99"
             },
-            "db_manager_address": constants.DEFAULT_DB_MANAGER_ADDRESS,
             "timeout": constants.DEFAULT_TIMEOUT
         },
         TEST_RESULT_SUCCESS,
@@ -46,7 +44,6 @@ test_report_metrics_data = [
             "metrics": {
                 "result": 1
             },
-            "db_manager_address": constants.DEFAULT_DB_MANAGER_ADDRESS,
             "timeout": constants.DEFAULT_TIMEOUT
         },
         TEST_RESULT_SUCCESS,
@@ -58,7 +55,6 @@ test_report_metrics_data = [
             "metrics": {
                 "result": 0.99
             },
-            "db_manager_address": constants.DEFAULT_DB_MANAGER_ADDRESS,
             "timeout": 0
         },
         RuntimeError,
@@ -70,7 +66,6 @@ test_report_metrics_data = [
             "metrics": {
                 "result": "abc"
             },
-            "db_manager_address": constants.DEFAULT_DB_MANAGER_ADDRESS,
             "timeout": constants.DEFAULT_TIMEOUT
         },
         ValueError,
@@ -82,7 +77,6 @@ test_report_metrics_data = [
             "metrics": {
                 "result": 0.99
             },
-            "db_manager_address": constants.DEFAULT_DB_MANAGER_ADDRESS,
             "timeout": constants.DEFAULT_TIMEOUT
         },
         ValueError,
@@ -117,7 +111,7 @@ def mock_report_observation_log():
 
 
 @pytest.mark.parametrize(
-    "test_name, kwargs, expected_output, mock_getenv",
+    "test_name,kwargs,expected_output,mock_getenv",
     test_report_metrics_data,
     indirect=["mock_getenv"]
 )
