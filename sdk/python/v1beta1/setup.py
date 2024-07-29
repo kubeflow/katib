@@ -70,6 +70,6 @@ setuptools.setup(
     ],
     install_requires=REQUIRES,
     extras_require={
-		"huggingface": ["kubeflow-training[huggingface]"],
-	},
+        "huggingface": ["kubeflow-training[huggingface]"],
+    },
 )

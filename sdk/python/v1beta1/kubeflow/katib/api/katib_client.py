@@ -18,7 +18,7 @@ import logging
 import multiprocessing
 import textwrap
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
@@ -168,16 +168,16 @@ class KatibClient(object):
         self,
         # TODO (andreyvelich): How to be consistent with other APIs (name) ?
         name: str,
-        model_provider_parameters: Optional[Any] = None,
-		dataset_provider_parameters: Optional[Any] = None,
-		storage_config: Optional[Dict[str, Optional[Union[str, List[str]]]]] = {
+        model_provider_parameters: Optional['HuggingFaceModelParams'] = None,
+        dataset_provider_parameters: Optional[Union['HuggingFaceDatasetParams', 'S3DatasetParams']] = None,
+        storage_config: Optional[Dict[str, Optional[Union[str, List[str]]]]] = {
             "size": constants.PVC_DEFAULT_SIZE,
             "storage_class": None,
             "access_modes": constants.PVC_DEFAULT_ACCESS_MODES,
         },
         objective: Optional[Callable] = None,
         base_image: Optional[str] = constants.BASE_IMAGE_TENSORFLOW,
-        trainer_parameters = None,
+        trainer_parameters: Union['HuggingFaceTrainerParams', Dict[str, Any]]=None,
         namespace: Optional[str] = None,
         env_per_trial: Optional[
             Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]
@@ -200,7 +200,7 @@ class KatibClient(object):
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
         """Create HyperParameter Tuning Katib Experiment using one of the following options:
-        - External models and datasets: Specify both `model_provider_parameters` and `dataset_provider_parameters` to download models and datasets from external platforms (currently supports HuggingFace and Amazon S3) using the Storage Initializer. The `trainer_parameters` should be of type `HuggingFaceTrainerParams` to set the hyperparameters search space. This API will automatically define the "Trainer" class in HuggingFace with the provided parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics for optimizing hyperparameters. 
+        - External models and datasets: Specify both `model_provider_parameters` and `dataset_provider_parameters` to download models and datasets from external platforms (currently supports HuggingFace and Amazon S3) using the Storage Initializer. The `trainer_parameters` should be of type `HuggingFaceTrainerParams` to set the hyperparameters search space. This API will automatically define the "Trainer" class in HuggingFace with the provided parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics for optimizing hyperparameters.
         - Custom objective function: Specify the `objective` parameter to define your own objective function. The `base_image` parameter will be used to execute the objective function. `trainer_parameters` should be a dictionary to define the search space for these parameters.
 
         Args:
@@ -276,7 +276,7 @@ class KatibClient(object):
                 to the base image packages. These packages are installed before
                 executing the objective function.
             pip_index_url: The PyPI url from which to install Python packages.
-            metrics_collector_config: Specify the config of metrics collector, 
+            metrics_collector_config: Specify the config of metrics collector,
                 for example, `metrics_collector_config = {"kind": "Push"}`.
                 Currently, we only support `StdOut` and `Push` metrics collector.
 
@@ -289,19 +289,17 @@ class KatibClient(object):
         print(
             "Thank you for using `tune` API for LLMs hyperparameters optimization. This feature is in alpha stage Kubeflow community is looking for your feedback. Please share your experience via #kubeflow-katib Slack channel or Kubeflow Katib GitHub."
         )
-        
+
         if (
-            ((model_provider_parameters is not None) and (dataset_provider_parameters is not None)) == (objective is not None)
-        ):
+            (model_provider_parameters is not None)
+            and (dataset_provider_parameters is not None)
+        ) == (objective is not None):
             raise ValueError(
                 "Invalid configuration for creating a Katib Experiment for hyperparameter optimization. "
                 "You should only specify one of the following options: 1) `model_provider_parameters` and `dataset_provider_parameters`; 2) `objective`."
             )
-        
-        if (
-            not name
-            or not trainer_parameters
-        ):
+
+        if not name or not trainer_parameters:
             raise ValueError("One of the required parameters is None")
 
         namespace = namespace or self.namespace
@@ -342,7 +340,7 @@ class KatibClient(object):
             experiment.spec.parallel_trial_count = parallel_trial_count
         if max_failed_trial_count is not None:
             experiment.spec.max_failed_trial_count = max_failed_trial_count
-        
+
         # Add resources to the Katib Experiment.
         if isinstance(resources_per_trial, dict):
             if "gpu" in resources_per_trial:
@@ -371,18 +369,20 @@ class KatibClient(object):
                     raise ValueError(
                         f"Incorrect value for env_per_trial: {env_per_trial}"
                     )
-        
+
         # Add metrics collector to the Katib Experiment.
-        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector. 
+        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector.
         experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
-            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"]),
+            collector=models.V1beta1CollectorSpec(
+                kind=metrics_collector_config["kind"]
+            ),
             source=models.V1beta1SourceSpec(
                 filter=models.V1beta1FilterSpec(
                     metrics_format=["\\'(\\w+)\\':\\s((-?\\d+)(\\.\\d+)?)"]
                 )
-            )
+            ),
         )
-        
+
         # Create Container and Pod specifications.
         # If users choose to use a custom objective function.
         if objective is not None:
@@ -441,21 +441,23 @@ class KatibClient(object):
             # Install Python packages if that is required.
             if packages_to_install is not None:
                 exec_script = (
-                    utils.get_script_for_python_packages(packages_to_install, pip_index_url)
+                    utils.get_script_for_python_packages(
+                        packages_to_install, pip_index_url
+                    )
                     + exec_script
                 )
-            
+
             # create app container spec
             container_spec = client.V1Container(
-                                name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                                image=base_image,
-                                command=["bash", "-c"],
-                                args=[exec_script],
-                                env=env if env else None,
-                                env_from=env_from if env_from else None,
-                                resources=resources_per_trial,
-                            )
-            
+                name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+                image=base_image,
+                command=["bash", "-c"],
+                args=[exec_script],
+                env=env if env else None,
+                env_from=env_from if env_from else None,
+                resources=resources_per_trial,
+            )
+
             pod_spec = client.V1PodTemplateSpec(
                 metadata=models.V1ObjectMeta(
                     annotations={"sidecar.istio.io/inject": "false"}
@@ -469,12 +471,15 @@ class KatibClient(object):
         # If users choose to use external models and datasets.
         else:
             try:
-                from kubeflow.storage_initializer.hugging_face import \
-                    HuggingFaceDatasetParams
-                from kubeflow.storage_initializer.hugging_face import \
-                    HuggingFaceModelParams
-                from kubeflow.storage_initializer.hugging_face import \
-                    HuggingFaceTrainerParams
+                from kubeflow.storage_initializer.hugging_face import (
+                    HuggingFaceDatasetParams,
+                )
+                from kubeflow.storage_initializer.hugging_face import (
+                    HuggingFaceModelParams,
+                )
+                from kubeflow.storage_initializer.hugging_face import (
+                    HuggingFaceTrainerParams,
+                )
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
                 import peft
                 import transformers
@@ -483,7 +488,7 @@ class KatibClient(object):
                     "Tune API dependencies not installed. "
                     + "Run: pip install -U 'kubeflow-training[huggingface]' "
                 )
-            
+
             # Create PVC for the Storage Initializer.
             try:
                 self.core_api.create_namespaced_persistent_volume_claim(
@@ -495,7 +500,9 @@ class KatibClient(object):
                     ),
                 )
             except Exception as e:
-                pvc_list = self.core_api.list_namespaced_persistent_volume_claim(namespace)
+                pvc_list = self.core_api.list_namespaced_persistent_volume_claim(
+                    namespace
+                )
                 # Check if the PVC with the specified name exists.
                 for pvc in pvc_list.items:
                     if pvc.metadata.name == constants.STORAGE_INITIALIZER:
@@ -506,27 +513,36 @@ class KatibClient(object):
                         break
                 else:
                     raise RuntimeError(f"failed to create PVC. Error: {e}")
-            
+
             if isinstance(model_provider_parameters, HuggingFaceModelParams):
                 mp = "hf"
             else:
-                raise ValueError("Model provider parameters must be an instance of HuggingFaceModelParams.")
-            
+                raise ValueError(
+                    "Model provider parameters must be an instance of HuggingFaceModelParams."
+                )
+
             if isinstance(dataset_provider_parameters, S3DatasetParams):
                 dp = "s3"
             elif isinstance(dataset_provider_parameters, HuggingFaceDatasetParams):
                 dp = "hf"
             else:
-                raise ValueError("Dataset provider parameters must be an instance of S3DatasetParams or HuggingFaceDatasetParams.")
-            
+                raise ValueError(
+                    "Dataset provider parameters must be an instance of S3DatasetParams or HuggingFaceDatasetParams."
+                )
+
             # Iterate over input parameters.
             experiment_params = []
             trial_params = []
 
             training_args = trainer_parameters.training_parameters
-            for p_name, p_value in trainer_parameters.training_parameters.to_dict().items():
+            for (
+                p_name,
+                p_value,
+            ) in trainer_parameters.training_parameters.to_dict().items():
                 if not hasattr(training_args, p_name):
-                    logger.warning(f"Training parameter {p_name} is not supported by the current transformer.")
+                    logger.warning(
+                        f"Training parameter {p_name} is not supported by the current transformer."
+                    )
                     continue
                 if isinstance(p_value, models.V1beta1ParameterSpec):
                     old_attr = getattr(training_args, p_name, None)
@@ -535,7 +551,9 @@ class KatibClient(object):
                     setattr(training_args, p_name, value)
                     p_value.name = p_name
                     experiment_params.append(p_value)
-                    trial_params.append(models.V1beta1TrialParameterSpec(name=p_name, reference=p_name))
+                    trial_params.append(
+                        models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
+                    )
                 elif p_value is not None:
                     old_attr = getattr(training_args, p_name, None)
                     if old_attr is not None:
@@ -545,7 +563,9 @@ class KatibClient(object):
             lora_config = trainer_parameters.lora_config
             for p_name, p_value in trainer_parameters.lora_config.__dict__.items():
                 if not hasattr(lora_config, p_name):
-                    logger.warning(f"Training parameter {p_name} is not supported by the current peft.")
+                    logger.warning(
+                        f"Training parameter {p_name} is not supported by the current peft."
+                    )
                     continue
                 if isinstance(p_value, models.V1beta1ParameterSpec):
                     old_attr = getattr(lora_config, p_name, None)
@@ -554,7 +574,9 @@ class KatibClient(object):
                     setattr(lora_config, p_name, value)
                     p_value.name = p_name
                     experiment_params.append(p_value)
-                    trial_params.append(models.V1beta1TrialParameterSpec(name=p_name, reference=p_name))
+                    trial_params.append(
+                        models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
+                    )
                 elif p_value is not None:
                     old_attr = getattr(lora_config, p_name, None)
                     if old_attr is not None:
@@ -569,7 +591,9 @@ class KatibClient(object):
                     "--model_provider",
                     mp,
                     "--model_provider_parameters",
-                    json.dumps(model_provider_parameters.__dict__, cls=utils.SetEncoder), 
+                    json.dumps(
+                        model_provider_parameters.__dict__, cls=utils.SetEncoder
+                    ),
                     "--dataset_provider",
                     dp,
                     "--dataset_provider_parameters",
@@ -972,7 +996,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Raise exception if Experiment is Failed.
@@ -992,7 +1018,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Running condition.
@@ -1003,7 +1031,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
@@ -1014,7 +1044,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
@@ -1025,7 +1057,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.
