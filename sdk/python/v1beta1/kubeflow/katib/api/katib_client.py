@@ -486,7 +486,7 @@ class KatibClient(object):
             except ImportError:
                 raise ImportError(
                     "Tune API dependencies not installed. "
-                    + "Run: pip install -U 'kubeflow-training[huggingface]' "
+                    + "Run: pip install -U 'kubeflow-katib[huggingface]' "
                 )
 
             # Create PVC for the Storage Initializer.
