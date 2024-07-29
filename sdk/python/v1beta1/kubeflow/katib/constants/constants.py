@@ -63,29 +63,7 @@ BASE_IMAGE_MXNET = "docker.io/mxnet/python:1.9.1_native_py3"
 
 DEFAULT_DB_MANAGER_ADDRESS = "katib-db-manager.kubeflow:6789"
 
-# Constants for Tune API.
-STORAGE_INITIALIZER = "storage-initializer"
 # The default value for dataset and model storage PVC.
 PVC_DEFAULT_SIZE = "10Gi"
 # The default value for PVC access modes.
 PVC_DEFAULT_ACCESS_MODES = ["ReadWriteOnce", "ReadOnlyMany"]
-
-INIT_CONTAINER_MOUNT_PATH = "/workspace"
-VOLUME_PATH_DATASET = INIT_CONTAINER_MOUNT_PATH + "/dataset"
-VOLUME_PATH_MODEL = INIT_CONTAINER_MOUNT_PATH + "/model"
-
-STORAGE_INITIALIZER_VOLUME_MOUNT = client.V1VolumeMount(
-    name=STORAGE_INITIALIZER,
-    mount_path=INIT_CONTAINER_MOUNT_PATH,
-)
-
-STORAGE_INITIALIZER_VOLUME = client.V1Volume(
-    name=STORAGE_INITIALIZER,
-    persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(
-        claim_name=STORAGE_INITIALIZER
-    ),
-)
-
-STORAGE_INITIALIZER_IMAGE = "docker.io/kubeflow/storage-initializer"
-
-TRAINER_TRANSFORMER_IMAGE = "docker.io/kubeflow/trainer-huggingface"

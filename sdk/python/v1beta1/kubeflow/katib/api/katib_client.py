@@ -471,6 +471,17 @@ class KatibClient(object):
         # If users choose to use external models and datasets.
         else:
             try:
+                from kubeflow.training.constants.constants import(
+                    STORAGE_INITIALIZER,
+                    STORAGE_INITIALIZER_VOLUME_MOUNT,
+                    STORAGE_INITIALIZER_VOLUME,
+                    STORAGE_INITIALIZER_IMAGE,
+                    TRAINER_TRANSFORMER_IMAGE,
+                )
+                from kubeflow.storage_initializer.constants import (
+                    VOLUME_PATH_DATASET,
+                    VOLUME_PATH_MODEL,
+                )
                 from kubeflow.storage_initializer.hugging_face import (
                     HuggingFaceDatasetParams,
                 )
@@ -586,8 +597,8 @@ class KatibClient(object):
 
             # create init container spec.
             init_container_spec = client.V1Container(
-                name=constants.STORAGE_INITIALIZER,
-                image=constants.STORAGE_INITIALIZER_IMAGE,
+                name=STORAGE_INITIALIZER,
+                image=STORAGE_INITIALIZER_IMAGE,
                 args=[
                     "--model_provider",
                     mp,
@@ -600,7 +611,7 @@ class KatibClient(object):
                     "--dataset_provider_parameters",
                     json.dumps(dataset_provider_parameters.__dict__),
                 ],
-                volume_mounts=[constants.STORAGE_INITIALIZER_VOLUME_MOUNT],
+                volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
             )
 
             lora_config = json.dumps(lora_config.__dict__, cls=utils.SetEncoder)
@@ -608,22 +619,22 @@ class KatibClient(object):
             # create app container spec.
             container_spec = client.V1Container(
                 name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                image=constants.TRAINER_TRANSFORMER_IMAGE,
+                image=TRAINER_TRANSFORMER_IMAGE,
                 args=[
                     "--model_uri",
                     model_provider_parameters.model_uri,
                     "--transformer_type",
                     model_provider_parameters.transformer_type.__name__,
                     "--model_dir",
-                    constants.VOLUME_PATH_MODEL,
+                    VOLUME_PATH_MODEL,
                     "--dataset_dir",
-                    constants.VOLUME_PATH_DATASET,
+                    VOLUME_PATH_DATASET,
                     "--lora_config",
                     f"'{lora_config}'",
                     "--training_parameters",
                     f"'{training_args}'",
                 ],
-                volume_mounts=[constants.STORAGE_INITIALIZER_VOLUME_MOUNT],
+                volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
                 env=env if env else None,
                 env_from=env_from if env_from else None,
                 resources=resources_per_trial,
@@ -637,7 +648,7 @@ class KatibClient(object):
                     restart_policy="Never",
                     containers=[container_spec],
                     init_containers=[init_container_spec],
-                    volumes=[constants.STORAGE_INITIALIZER_VOLUME],
+                    volumes=[STORAGE_INITIALIZER_VOLUME],
                 ),
             )
 
@@ -957,7 +968,7 @@ class KatibClient(object):
         name: str,
         namespace: Optional[str] = None,
         expected_condition: str = constants.EXPERIMENT_CONDITION_SUCCEEDED,
-        timeout: int = 600,
+        timeout: int = 6000,
         polling_interval: int = 15,
         apiserver_timeout: int = constants.DEFAULT_TIMEOUT,
     ):
