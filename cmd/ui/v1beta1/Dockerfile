@@ -5,29 +5,41 @@ RUN apt-get update && apt-get install git -y
 
 WORKDIR /kf
 COPY ./pkg/ui/v1beta1/frontend/COMMIT ./
-RUN git clone https://github.com/kubeflow/kubeflow.git && \
+RUN git clone https://github.com/tariq-hasan/kubeflow.git && \
     COMMIT=$(cat ./COMMIT) && \
     cd kubeflow && \
     git checkout $COMMIT
 
 # --- Build the frontend kubeflow library ---
-FROM node:12 AS frontend-kubeflow-lib
+FROM node:16 AS frontend-kubeflow-lib
 
 WORKDIR /src
 
 ARG LIB=/kf/kubeflow/components/crud-web-apps/common/frontend/kubeflow-common-lib
 COPY --from=fetch-kubeflow-kubeflow $LIB/package*.json ./
-RUN npm ci
+RUN npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config get registry && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config get https-proxy && \
+    npm config rm https-proxy && \
+    npm ci
 
 COPY --from=fetch-kubeflow-kubeflow $LIB/ ./
 RUN npm run build
 
 # --- Build the frontend ---
-FROM node:12 AS frontend
+FROM node:16 AS frontend
 
 WORKDIR /src
 COPY ./pkg/ui/v1beta1/frontend/package*.json ./
-RUN npm ci
+RUN npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config get registry && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config get https-proxy && \
+    npm config rm https-proxy && \
+    npm ci
 
 COPY ./pkg/ui/v1beta1/frontend/ .
 COPY --from=frontend-kubeflow-lib /src/dist/kubeflow/ ./node_modules/kubeflow/
