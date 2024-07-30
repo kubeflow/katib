@@ -48,4 +48,7 @@ for exp_name in "${EXPERIMENT_FILE_ARRAY[@]}"; do
   --verbose || (kubectl get pods -n kubeflow && exit 1)
 done
 
+python run-e2e-tune-api.py --namespace default \
+--verbose || (kubectl get pods -n kubeflow && exit 1)
+
 exit 0
