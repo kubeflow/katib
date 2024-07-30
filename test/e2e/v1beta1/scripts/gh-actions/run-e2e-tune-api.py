@@ -4,7 +4,6 @@ import logging
 from kubeflow.katib import KatibClient
 from kubeflow.katib import search
 from verify import verify_experiment_results
-import yaml
 
 # Experiment timeout is 40 min.
 EXPERIMENT_TIMEOUT = 60 * 40
@@ -61,9 +60,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--namespace", type=str, required=True, help="Namespace for the Katib E2E test",
-    )
-    parser.add_argument(
-        "--trial-pod-annotations", type=str, help="Annotation for the pod created by trial",
     )
     parser.add_argument(
         "--verbose", action="store_true", help="Verbose output for the Katib E2E test",
