@@ -18,7 +18,7 @@ import logging
 import multiprocessing
 import textwrap
 import time
-from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
 
 logger = logging.getLogger(__name__)
 
@@ -168,8 +168,11 @@ class KatibClient(object):
         self,
         # TODO (andreyvelich): How to be consistent with other APIs (name) ?
         name: str,
-        model_provider_parameters: Optional['HuggingFaceModelParams'] = None,
-        dataset_provider_parameters: Optional[Union['HuggingFaceDatasetParams', 'S3DatasetParams']] = None,
+        model_provider_parameters: Optional["HuggingFaceModelParams"] = None,
+        dataset_provider_parameters: Optional[
+            Union["HuggingFaceDatasetParams", "S3DatasetParams"]
+        ] = None,
+        trainer_parameters: Optional["HuggingFaceTrainerParams"] = None,
         storage_config: Optional[Dict[str, Optional[Union[str, List[str]]]]] = {
             "size": constants.PVC_DEFAULT_SIZE,
             "storage_class": None,
@@ -177,7 +180,7 @@ class KatibClient(object):
         },
         objective: Optional[Callable] = None,
         base_image: Optional[str] = constants.BASE_IMAGE_TENSORFLOW,
-        trainer_parameters: Union['HuggingFaceTrainerParams', Dict[str, Any]]=None,
+        parameters: Optional[Dict[str, Any]] = None,
         namespace: Optional[str] = None,
         env_per_trial: Optional[
             Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]
@@ -200,8 +203,12 @@ class KatibClient(object):
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
         """Create HyperParameter Tuning Katib Experiment using one of the following options:
-        - External models and datasets: Specify both `model_provider_parameters` and `dataset_provider_parameters` to download models and datasets from external platforms (currently supports HuggingFace and Amazon S3) using the Storage Initializer. The `trainer_parameters` should be of type `HuggingFaceTrainerParams` to set the hyperparameters search space. This API will automatically define the "Trainer" class in HuggingFace with the provided parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics for optimizing hyperparameters.
-        - Custom objective function: Specify the `objective` parameter to define your own objective function. The `base_image` parameter will be used to execute the objective function. `trainer_parameters` should be a dictionary to define the search space for these parameters.
+        1. External models and datasets
+        Parameters: `model_provider_parameters` + `dataset_provider_parameters` + `trainer_parameters`.
+        Usage: Specify both `model_provider_parameters` and `dataset_provider_parameters` to download models and datasets from external platforms (currently supports HuggingFace and Amazon S3) using the Storage Initializer. The `trainer_parameters` should be of type `HuggingFaceTrainerParams` to set the hyperparameters search space. This API will automatically define the "Trainer" class in HuggingFace with the provided parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics for optimizing hyperparameters.
+        2. Custom objective function
+        Parameters: `objective` + `base_image` + `parameters`.
+        Usage: Specify the `objective` parameter to define your own objective function. The `base_image` parameter will be used to execute the objective function. The `parameters` should be a dictionary to define the search space for these parameters.
 
         Args:
             name: Name for the Experiment.
@@ -209,6 +216,15 @@ class KatibClient(object):
                 For example, HuggingFace model name and Transformer type for that model, like: AutoModelForSequenceClassification. This argument must be the type of `kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams`.
             dataset_provider_parameters: Parameters for the dataset provider in the Storage Initializer.
                 For example, name of the HuggingFace dataset or AWS S3 configuration. This argument must be the type of `kubeflow.storage_initializer.hugging_face.HuggingFaceDatasetParams` or `kubeflow.storage_initializer.s3.S3DatasetParams`
+            trainer_parameters: Parameters for configuring the training process, including settings for the hyperparameters search space. It should be of type `HuggingFaceTrainerParams`. You should use the Katib SDK to define the search space for these parameters.For example:
+                ```
+                trainer_parameters = HuggingFaceTrainerParams(
+                    training_parameters = transformers.TrainingArguments(
+                        learning_rate = katib.search.double(min=0.1, max=0.2),
+                    ),
+                ),
+                ```
+                Also, you can use these parameters to define input for training the models.
             storage_config: Configuration for Storage Initializer PVC to download pre-trained model and dataset.
                 You can configure PVC size and storage class name in this argument.
             objective: Objective function that Katib uses to train the model.
@@ -217,21 +233,11 @@ class KatibClient(object):
                 The function should not use any code declared outside of the function
                 definition. Import statements must be added inside the function.
             base_image: Image to use when executing the objective function.
-            trainer_parameters: Parameters for configuring the training process, including settings for the hyperparameters search space.
-                You should use the Katib SDK to define the search space for these parameters.
-                If you choose to use external models and datasets, it should be of type `HuggingFaceTrainerParams`. For example:
+            parameters: Dict of hyperparameters to optimize if you choose a custom objective function. You should use the Katib SDK to define the search space for these parameters. For example: 
                 ```
-                trainer_parameters = HuggingFaceTrainerParams(
-                    training_parameters = transformers.TrainingArguments(
-                        learning_rate = katib.search.double(min=0.1, max=0.2),
-                    ),
-                ),
+                parameters = {"lr": katib.search.double(min=0.1, max=0.2)}`
                 ```
-                If you choose a custom objective function, it should be a dictionary. For example:
-                ```
-                trainer_parameters = {"lr": katib.search.double(min=0.1, max=0.2)}
-                ```
-                Also, you can use these parameters to define input for training the external models or your custom objective function.
+                Also, you can use these parameters to define input for your objective function.
             namespace: Namespace for the Experiment.
             env_per_trial: Environment variable(s) to be attached to each trial container.
                 You can specify a dictionary as a mapping object representing the environment
@@ -287,20 +293,29 @@ class KatibClient(object):
         """
 
         print(
-            "Thank you for using `tune` API for LLMs hyperparameters optimization. This feature is in alpha stage Kubeflow community is looking for your feedback. Please share your experience via #kubeflow-katib Slack channel or Kubeflow Katib GitHub."
+            "Thank you for using the `tune` API for LLM hyperparameter optimization. "
+            "You can create a HyperParameter Optimization Katib Experiment using one of the following options:\n"
+            "1. Use external models and datasets: specify `model_provider_parameters`, `dataset_provider_parameters` and `trainer_parameters`.\n"
+            "2. Use custom objective function: specify `objective`, `base_image` and `parameters`.\n"
+            "This feature is in the alpha stage. The Kubeflow community is looking for your feedback. Please share your experience via the #kubeflow-katib Slack channel or the Kubeflow Katib GitHub."
         )
 
         if (
-            (model_provider_parameters is not None)
-            and (dataset_provider_parameters is not None)
-        ) == (objective is not None):
+            model_provider_parameters is not None
+            or dataset_provider_parameters is not None
+            or trainer_parameters is not None
+        ) and (
+            objective is not None or base_image is not None or parameters is not None
+        ):
             raise ValueError(
                 "Invalid configuration for creating a Katib Experiment for hyperparameter optimization. "
-                "You should only specify one of the following options: 1) `model_provider_parameters` and `dataset_provider_parameters`; 2) `objective`."
+                "You should only specify one of the following options:\n"
+                "1. Use external models and datasets: specify `model_provider_parameters`, `dataset_provider_parameters` and `trainer_parameters`;\n"
+                "2. Use custom objective function: specify `objective`, `base_image` and `parameters`."
             )
 
-        if not name or not trainer_parameters:
-            raise ValueError("One of the required parameters is None")
+        if not name:
+            raise ValueError("Please specify name for the Experiment.")
 
         namespace = namespace or self.namespace
 
@@ -378,7 +393,12 @@ class KatibClient(object):
             ),
             source=models.V1beta1SourceSpec(
                 filter=models.V1beta1FilterSpec(
-                    metrics_format=["\\'(\\w+)\\':\\s((-?\\d+)(\\.\\d+)?)"]
+                    metrics_format=[
+                        # For example: train_loss=0.846
+                        r"([\w|-]+)\s*=\s*([+-]?\d*(\.\d+)?([Ee][+-]?\d+)?)",
+                        # For example: 'train_loss':0.846
+                        r"'([\w|-]+)'\s*:\s*([+-]?\d*(\.\d+)?([Ee][+-]?\d+)?)",
+                    ]
                 )
             ),
         )
@@ -386,6 +406,9 @@ class KatibClient(object):
         # Create Container and Pod specifications.
         # If users choose to use a custom objective function.
         if objective is not None:
+            if not base_image or not parameters:
+                raise ValueError("One of the required parameters is None.")
+
             # Validate objective function.
             utils.validate_objective_function(objective)
 
@@ -400,7 +423,7 @@ class KatibClient(object):
             input_params = {}
             experiment_params = []
             trial_params = []
-            for p_name, p_value in trainer_parameters.items():
+            for p_name, p_value in parameters.items():
                 # If input parameter value is Katib Experiment parameter sample.
                 if isinstance(p_value, models.V1beta1ParameterSpec):
                     # Wrap value for the function input.
@@ -447,7 +470,7 @@ class KatibClient(object):
                     + exec_script
                 )
 
-            # create app container spec
+            # Create app container spec
             container_spec = client.V1Container(
                 name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
                 image=base_image,
@@ -470,8 +493,15 @@ class KatibClient(object):
 
         # If users choose to use external models and datasets.
         else:
+            if (
+                not model_provider_parameters
+                or not dataset_provider_parameters
+                or not trainer_parameters
+            ):
+                raise ValueError("One of the required parameters is None")
+
             try:
-                from kubeflow.training.constants.constants import(
+                from kubeflow.training.constants.constants import (
                     STORAGE_INITIALIZER,
                     STORAGE_INITIALIZER_VOLUME_MOUNT,
                     STORAGE_INITIALIZER_VOLUME,
@@ -519,8 +549,7 @@ class KatibClient(object):
                 for pvc in pvc_list.items:
                     if pvc.metadata.name == name:
                         print(
-                            f"PVC '{name}' already exists in namespace "
-                            f"{namespace}."
+                            f"PVC '{name}' already exists in namespace " f"{namespace}."
                         )
                         break
                 else:
@@ -595,7 +624,7 @@ class KatibClient(object):
                         value = type(old_attr)(p_value)
                     setattr(lora_config, p_name, value)
 
-            # create init container spec.
+            # Create init container spec.
             init_container_spec = client.V1Container(
                 name=STORAGE_INITIALIZER,
                 image=STORAGE_INITIALIZER_IMAGE,
@@ -616,7 +645,7 @@ class KatibClient(object):
 
             lora_config = json.dumps(lora_config.__dict__, cls=utils.SetEncoder)
             training_args = json.dumps(training_args.to_dict())
-            # create app container spec.
+            # Create app container spec.
             container_spec = client.V1Container(
                 name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
                 image=TRAINER_TRANSFORMER_IMAGE,
@@ -968,7 +997,7 @@ class KatibClient(object):
         name: str,
         namespace: Optional[str] = None,
         expected_condition: str = constants.EXPERIMENT_CONDITION_SUCCEEDED,
-        timeout: int = 6000,
+        timeout: int = 600,
         polling_interval: int = 15,
         apiserver_timeout: int = constants.DEFAULT_TIMEOUT,
     ):
