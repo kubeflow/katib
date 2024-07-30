@@ -238,6 +238,7 @@ def run_e2e_experiment_create_by_tune(
         name=exp_name,
         namespace=exp_namespace,
         objective=objective,
+        parameters=parameters,
         objective_metric_name="result",
         max_trial_count=4,
         resources_per_trial={"cpu": "2"},
