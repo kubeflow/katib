@@ -1090,6 +1090,12 @@ func schema_apis_controller_experiments_v1beta1_FeasibleSpace(ref common.Referen
 							Format: "",
 						},
 					},
+					"distribution": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 				},
 			},
 		},
