@@ -66,6 +66,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+
     katib_client = KatibClient()
 
     # Test with run_e2e_experiment_create_by_tune
