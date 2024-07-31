@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 import grpc
 from kubeflow.katib import models
+from kubeflow.katib import types
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
@@ -196,7 +197,7 @@ class KatibClient(object):
         max_trial_count: int = None,
         parallel_trial_count: int = None,
         max_failed_trial_count: int = None,
-        resources_per_trial: Union[dict, client.V1ResourceRequirements, None] = None,
+        resources_per_trial: Union[dict, client.V1ResourceRequirements, types.TrainerResources, None] = None,
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
@@ -357,14 +358,14 @@ class KatibClient(object):
             experiment.spec.max_failed_trial_count = max_failed_trial_count
 
         # Add resources to the Katib Experiment.
-        if isinstance(resources_per_trial, dict):
-            if "gpu" in resources_per_trial:
-                resources_per_trial["nvidia.com/gpu"] = resources_per_trial.pop("gpu")
+        #if isinstance(resources_per_trial, dict):
+        #    if "gpu" in resources_per_trial:
+        #        resources_per_trial["nvidia.com/gpu"] = resources_per_trial.pop("gpu")
 
-            resources_per_trial = client.V1ResourceRequirements(
-                requests=resources_per_trial,
-                limits=resources_per_trial,
-            )
+        #    resources_per_trial = client.V1ResourceRequirements(
+        #        requests=resources_per_trial,
+        #        limits=resources_per_trial,
+        #    )
 
         # Add environment variables to the Katib Experiment.
         env = []
@@ -413,11 +414,11 @@ class KatibClient(object):
             utils.validate_objective_function(objective)
 
             # Extract objective function implementation.
-            objective_code = inspect.getsource(objective)
+            #objective_code = inspect.getsource(objective)
 
             # Objective function might be defined in some indented scope
             # (e.g. in another function). We need to dedent the function code.
-            objective_code = textwrap.dedent(objective_code)
+            #objective_code = textwrap.dedent(objective_code)
 
             # Iterate over input parameters.
             input_params = {}
@@ -445,51 +446,94 @@ class KatibClient(object):
             # def objective(parameters):
             #     print(f'Parameters are {parameters}')
             # objective({'lr': '${trialParameters.lr}', 'epochs': '${trialParameters.epochs}', 'is_dist': False})
-            objective_code = f"{objective_code}\n{objective.__name__}({input_params})\n"
+            #objective_code = f"{objective_code}\n{objective.__name__}({input_params})\n"
 
             # Prepare execute script template.
-            exec_script = textwrap.dedent(
-                """
-                program_path=$(mktemp -d)
-                read -r -d '' SCRIPT << EOM\n
-                {objective_code}
-                EOM
-                printf "%s" "$SCRIPT" > $program_path/ephemeral_objective.py
-                python3 -u $program_path/ephemeral_objective.py"""
-            )
+            #exec_script = textwrap.dedent(
+            #    """
+            #    program_path=$(mktemp -d)
+            #    read -r -d '' SCRIPT << EOM\n
+            #    {objective_code}
+            #    EOM
+            #    printf "%s" "$SCRIPT" > $program_path/ephemeral_objective.py
+            #    python3 -u $program_path/ephemeral_objective.py"""
+            #)
 
             # Add objective code to the execute script.
-            exec_script = exec_script.format(objective_code=objective_code)
+            #exec_script = exec_script.format(objective_code=objective_code)
 
             # Install Python packages if that is required.
-            if packages_to_install is not None:
-                exec_script = (
-                    utils.get_script_for_python_packages(
-                        packages_to_install, pip_index_url
-                    )
-                    + exec_script
-                )
+            #if packages_to_install is not None:
+            #    exec_script = (
+            #        utils.get_script_for_python_packages(
+            #            packages_to_install, pip_index_url
+            #        )
+            #        + exec_script
+            #    )
 
+            from kubeflow.training.utils import get_container_spec, get_pod_template_spec, get_pytorchjob_template
             # Create app container spec
-            container_spec = client.V1Container(
+            container_spec = get_container_spec(
                 name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
                 image=base_image,
-                command=["bash", "-c"],
-                args=[exec_script],
-                env=env if env else None,
-                env_from=env_from if env_from else None,
-                resources=resources_per_trial,
+                train_func=objective,
+                train_func_parameters=input_params,
+                packages_to_install=packages_to_install,
+                pip_index_url=pip_index_url,
+                resources=resources_per_trial.resources_per_worker if isinstance(resources_per_trial, types.TrainerResources) else resources_per_trial,
+                env=env,
+                env_from=env_from,
             )
+            #container_spec = client.V1Container(
+            #    name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+            #    image=base_image,
+            #    command=["bash", "-c"],
+            #    args=[exec_script],
+            #    env=env if env else None,
+            #    env_from=env_from if env_from else None,
+            #    resources=resources_per_trial,
+            #)
 
-            pod_spec = client.V1PodTemplateSpec(
-                metadata=models.V1ObjectMeta(
-                    annotations={"sidecar.istio.io/inject": "false"}
-                ),
-                spec=client.V1PodSpec(
+            if isinstance(resources_per_trial, dict) or isinstance(resources_per_trial, client.V1ResourceRequirements):
+                pod_spec = get_pod_template_spec(
+                    containers = [container_spec],
                     restart_policy="Never",
-                    containers=[container_spec],
-                ),
-            )
+                )
+            #pod_spec = client.V1PodTemplateSpec(
+            #    metadata=models.V1ObjectMeta(
+            #        annotations={"sidecar.istio.io/inject": "false"}
+            #    ),
+            #    spec=client.V1PodSpec(
+            #        restart_policy="Never",
+            #        containers=[container_spec],
+            #    ),
+            #)
+                # Create Trial specification.
+                trial_spec = client.V1Job(
+                    api_version="batch/v1",
+                    kind="Job",
+                    spec=client.V1JobSpec(
+                        template=pod_spec,
+                    ),
+                )
+            else:
+                worker_pod_spec = get_pod_template_spec(
+                    containers = [container_spec],
+                    restart_policy="Never",
+                )
+
+                master_pod_spec = get_pod_template_spec(
+                    containers = [container_spec],
+                    restart_policy="Never",
+                )
+                trial_spec = get_pytorchjob_template(
+                    name=name,
+                    namespace=namespace,
+                    master_pod_template_spec=master_pod_spec,
+                    worker_pod_template_spec=worker_pod_spec,
+                    num_workers=resources_per_trial.num_workers,
+                    num_procs_per_worker=resources_per_trial.num_procs_per_worker,
+                )
 
         # If users choose to use external models and datasets.
         else:
@@ -504,7 +548,7 @@ class KatibClient(object):
                 from kubeflow.training.constants.constants import (
                     STORAGE_INITIALIZER,
                     STORAGE_INITIALIZER_VOLUME_MOUNT,
-                    STORAGE_INITIALIZER_VOLUME,
+                    #STORAGE_INITIALIZER_VOLUME,
                     STORAGE_INITIALIZER_IMAGE,
                     TRAINER_TRANSFORMER_IMAGE,
                 )
@@ -625,16 +669,14 @@ class KatibClient(object):
                     setattr(lora_config, p_name, value)
 
             # Create init container spec.
-            init_container_spec = client.V1Container(
+            init_container_spec = get_container_spec(
                 name=STORAGE_INITIALIZER,
-                image=STORAGE_INITIALIZER_IMAGE,
+                base_image=STORAGE_INITIALIZER_IMAGE,
                 args=[
                     "--model_provider",
                     mp,
                     "--model_provider_parameters",
-                    json.dumps(
-                        model_provider_parameters.__dict__, cls=utils.SetEncoder
-                    ),
+                    json.dumps(model_provider_parameters.__dict__, cls=utils.SetEncoder),
                     "--dataset_provider",
                     dp,
                     "--dataset_provider_parameters",
@@ -642,13 +684,30 @@ class KatibClient(object):
                 ],
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
             )
+            #init_container_spec = client.V1Container(
+            #    name=STORAGE_INITIALIZER,
+            #    image=STORAGE_INITIALIZER_IMAGE,
+            #    args=[
+            #        "--model_provider",
+            #        mp,
+            #        "--model_provider_parameters",
+            #        json.dumps(
+            #            model_provider_parameters.__dict__, cls=utils.SetEncoder
+            #        ),
+            #        "--dataset_provider",
+            #        dp,
+            #        "--dataset_provider_parameters",
+            #        json.dumps(dataset_provider_parameters.__dict__),
+            #    ],
+            #    volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
+            #)
 
             lora_config = json.dumps(lora_config.__dict__, cls=utils.SetEncoder)
             training_args = json.dumps(training_args.to_dict())
-            # Create app container spec.
-            container_spec = client.V1Container(
+
+            container_spec = get_container_spec(
                 name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                image=TRAINER_TRANSFORMER_IMAGE,
+                base_image=TRAINER_TRANSFORMER_IMAGE,
                 args=[
                     "--model_uri",
                     model_provider_parameters.model_uri,
@@ -664,31 +723,88 @@ class KatibClient(object):
                     f"'{training_args}'",
                 ],
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
-                env=env if env else None,
-                env_from=env_from if env_from else None,
-                resources=resources_per_trial,
+                resources=resources_per_trial.resources_per_worker if isinstance(resources_per_trial, types.TrainerResources) else resources_per_trial,
+                env=env,
+                env_from=env_from,
+            )
+            # Create app container spec.
+            #container_spec = client.V1Container(
+            #    name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+            #    image=TRAINER_TRANSFORMER_IMAGE,
+            #    args=[
+            #        "--model_uri",
+            #        model_provider_parameters.model_uri,
+            #        "--transformer_type",
+            #        model_provider_parameters.transformer_type.__name__,
+            #        "--model_dir",
+            #        VOLUME_PATH_MODEL,
+            #        "--dataset_dir",
+            #        VOLUME_PATH_DATASET,
+            #        "--lora_config",
+            #        f"'{lora_config}'",
+            #        "--training_parameters",
+            #        f"'{training_args}'",
+            #    ],
+            #    volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
+            #    env=env if env else None,
+            #    env_from=env_from if env_from else None,
+            #    resources=resources_per_trial,
+            #)
+
+            storage_initializer_volume = models.V1Volume(
+                name=STORAGE_INITIALIZER,
+                persistent_volume_claim=models.V1PersistentVolumeClaimVolumeSource(
+                    claim_name=name
+                ),
             )
 
-            pod_spec = client.V1PodTemplateSpec(
-                metadata=models.V1ObjectMeta(
-                    annotations={"sidecar.istio.io/inject": "false"}
-                ),
-                spec=client.V1PodSpec(
-                    restart_policy="Never",
+            if isinstance(resources_per_trial, dict) or isinstance(resources_per_trial, client.V1ResourceRequirements):
+                pod_spec = get_pod_template_spec(
                     containers=[container_spec],
                     init_containers=[init_container_spec],
-                    volumes=[STORAGE_INITIALIZER_VOLUME],
-                ),
-            )
+                    volumes=[storage_initializer_volume],
+                    restart_policy="Never",
+                )
+            #pod_spec = client.V1PodTemplateSpec(
+            #    metadata=models.V1ObjectMeta(
+            #        annotations={"sidecar.istio.io/inject": "false"}
+            #    ),
+            #    spec=client.V1PodSpec(
+            #        restart_policy="Never",
+            #        containers=[container_spec],
+            #        init_containers=[init_container_spec],
+            #        volumes=[STORAGE_INITIALIZER_VOLUME],
+            #    ),
+            #)
+                # Create Trial specification.
+                trial_spec = client.V1Job(
+                    api_version="batch/v1",
+                    kind="Job",
+                    spec=client.V1JobSpec(
+                        template=pod_spec,
+                    ),
+                )
+            else:
+                # create worker pod spec
+                worker_pod_spec = get_pod_template_spec(
+                    containers=[container_spec],
+                    volumes=[storage_initializer_volume],
+                )
 
-        # Create Trial specification.
-        trial_spec = client.V1Job(
-            api_version="batch/v1",
-            kind="Job",
-            spec=client.V1JobSpec(
-                template=pod_spec,
-            ),
-        )
+                # create master pod spec
+                master_pod_spec = get_pod_template_spec(
+                    containers=[container_spec],
+                    init_containers=[init_container_spec],
+                    volumes=[storage_initializer_volume],
+                )
+                trial_spec = get_pytorchjob_template(
+                    name=name,
+                    namespace=namespace,
+                    master_pod_template_spec=master_pod_spec,
+                    worker_pod_template_spec=worker_pod_spec,
+                    num_workers=resources_per_trial.num_workers,
+                    num_procs_per_worker=resources_per_trial.num_procs_per_worker,
+                )
 
         # Create Trial template.
         trial_template = models.V1beta1TrialTemplate(
