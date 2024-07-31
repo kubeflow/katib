@@ -3,6 +3,7 @@ import logging
 
 from kubeflow.katib import KatibClient
 from kubeflow.katib import search
+from kubernetes import client
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
@@ -70,6 +71,11 @@ if __name__ == "__main__":
         logging.getLogger().setLevel(logging.DEBUG)
 
     katib_client = KatibClient()
+
+    namespace_labels = client.CoreV1Api().read_namespace(args.namespace).metadata.labels
+    if 'katib.kubeflow.org/metrics-collector-injection' not in namespace_labels:
+        namespace_labels['katib.kubeflow.org/metrics-collector-injection'] = 'enabled'
+        client.CoreV1Api().patch_namespace(args.namespace, {'metadata': {'labels': namespace_labels}})
 
     # Test with run_e2e_experiment_create_by_tune
     exp_name = "tune-example"
