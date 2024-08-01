@@ -822,21 +822,6 @@ class KatibClient(object):
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.
             utils.print_experiment_status(experiment)
-            import subprocess
-            result = subprocess.run(['kubectl', 'get', 'pod'],capture_output=True, text=True)
-            logger.debug(
-                f"Pods in default namespace\n{result.stdout}"
-            )
-            for line in result.stdout.splitlines():
-                if "Error" in line:
-                    pod_name = line.split()[0]
-                    pod_info = subprocess.run(
-                        ['kubectl', 'describe', 'pod', pod_name],
-                        capture_output=True, text=True
-                    )
-                    logger.debug(
-                        f"pod {pod_name} in error state:\n{pod_info.stdout}"
-                    )
             logger.debug(
                 f"Waiting for Experiment: {namespace}/{name} to reach {expected_condition} condition\n\n\n"
             )
