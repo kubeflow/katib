@@ -36,5 +36,3 @@ kubectl get crd
 
 python run-e2e-tune-api.py --namespace default \
 --verbose || (kubectl get pods -n kubeflow && exit 1)
-
-exit 0

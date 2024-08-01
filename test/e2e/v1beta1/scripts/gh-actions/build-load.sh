@@ -34,7 +34,7 @@ TAG="e2e-test"
 VERSION="v1beta1"
 CMD_PREFIX="cmd"
 SPECIFIED_DEVICE_TYPE_IMAGES=("enas-cnn-cifar10-cpu" "darts-cnn-cifar10-cpu" "pytorch-mnist-cpu")
-DEFAULT_IMAGE_FOR_TUNE="docker.io/tensorflow/tensorflow:2.13.0"
+# DEFAULT_IMAGE_FOR_TUNE="docker.io/tensorflow/tensorflow:2.13.0"
 
 IFS="," read -r -a TRIAL_IMAGE_ARRAY <<< "$TRIAL_IMAGES"
 IFS="," read -r -a EXPERIMENT_ARRAY <<< "$EXPERIMENTS"
@@ -64,7 +64,7 @@ _install_tools() {
 }
 
 setup_for_tune() {
-  docker pull $DEFAULT_IMAGE_FOR_TUNE
+  # docker pull $DEFAULT_IMAGE_FOR_TUNE
   _build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
 }
 
