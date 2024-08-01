@@ -77,12 +77,12 @@ func TestWrapWorkerContainer(t *testing.T) {
 	metricsFile := "metric.log"
 
 	testCases := map[string]struct {
-		trial           *trialsv1beta1.Trial
-		pod             *v1.Pod
-		metricsFile     string
-		pathKind        common.FileSystemKind
-		expectedPod     *v1.Pod
-		err             bool
+		trial       *trialsv1beta1.Trial
+		pod         *v1.Pod
+		metricsFile string
+		pathKind    common.FileSystemKind
+		expectedPod *v1.Pod
+		err         bool
 	}{
 		"Tensorflow container without sh -c": {
 			trial: trial,
@@ -115,7 +115,7 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			err:             false,
+			err: false,
 		},
 		"Tensorflow container with sh -c": {
 			trial: trial,
@@ -149,7 +149,7 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			err:             false,
+			err: false,
 		},
 		"Training pod doesn't have primary container": {
 			trial: trial,
@@ -162,8 +162,8 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			pathKind:        common.FileKind,
-			err:             true,
+			pathKind: common.FileKind,
+			err:      true,
 		},
 		"Container with early stopping command": {
 			trial: func() *trialsv1beta1.Trial {
@@ -210,10 +210,10 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			err:             false,
+			err: false,
 		},
 	}
-	
+
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			err := wrapWorkerContainer(tc.trial, tc.pod, tc.trial.Namespace, tc.metricsFile, tc.pathKind)
@@ -703,7 +703,7 @@ func TestGetKatibJob(t *testing.T) {
 	podName := "pod-name"
 	deployName := "deploy-name"
 	jobName := "job-name"
-	
+
 	testCases := map[string]struct {
 		pod             *v1.Pod
 		job             *batchv1.Job
@@ -868,7 +868,7 @@ func TestGetKatibJob(t *testing.T) {
 					},
 				},
 			},
-			err:             true,
+			err: true,
 		},
 		"Run when Pod owns Job that doesn't exists": {
 			pod: &v1.Pod{
@@ -884,7 +884,7 @@ func TestGetKatibJob(t *testing.T) {
 					},
 				},
 			},
-			err:             true,
+			err: true,
 		},
 		"Run when Pod owns Job with invalid API version": {
 			pod: &v1.Pod{
@@ -900,7 +900,7 @@ func TestGetKatibJob(t *testing.T) {
 					},
 				},
 			},
-			err:             true,
+			err: true,
 		},
 	}
 
@@ -918,25 +918,25 @@ func TestGetKatibJob(t *testing.T) {
 				if err != nil {
 					t.Errorf("ConvertObjectToUnstructured error %v", err)
 				}
-	
+
 				g.Expect(c.Create(context.TODO(), jobUnstr)).NotTo(gomega.HaveOccurred())
-	
+
 				// Wait that Job is created
 				g.Eventually(func() error {
 					return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.job.Name}, jobUnstr)
 				}, timeout).ShouldNot(gomega.HaveOccurred())
 			}
-	
+
 			// Create Deployment if it is needed
 			if tc.deployment != nil {
 				g.Expect(c.Create(context.TODO(), tc.deployment)).NotTo(gomega.HaveOccurred())
-	
+
 				// Wait that Deployment is created
 				g.Eventually(func() error {
 					return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.deployment.Name}, tc.deployment)
 				}, timeout).ShouldNot(gomega.HaveOccurred())
 			}
-	
+
 			object, _ := util.ConvertObjectToUnstructured(tc.pod)
 			jobKind, jobName, err := si.getKatibJob(object, namespace)
 			if !tc.err && err != nil {
@@ -967,7 +967,7 @@ func TestIsPrimaryPod(t *testing.T) {
 				"test-key-1": "test-value-1",
 				"test-key-2": "test-value-2",
 			},
-			isPrimary:       true,
+			isPrimary: true,
 		},
 		"Pod doesn't contain primary label": {
 			podLabels: map[string]string{
@@ -977,7 +977,7 @@ func TestIsPrimaryPod(t *testing.T) {
 				"test-key-1": "test-value-1",
 				"test-key-2": "test-value-2",
 			},
-			isPrimary:       false,
+			isPrimary: false,
 		},
 		"Pod contains label with incorrect value": {
 			podLabels: map[string]string{
@@ -986,7 +986,7 @@ func TestIsPrimaryPod(t *testing.T) {
 			primaryPodLabels: map[string]string{
 				"test-key-1": "test-value-1",
 			},
-			isPrimary:       false,
+			isPrimary: false,
 		},
 	}
 
@@ -1007,9 +1007,9 @@ func TestMutatePodMetadata(t *testing.T) {
 		consts.LabelTrialName: "test-trial",
 	}
 	testCases := map[string]struct {
-		pod             *v1.Pod
-		trial           *trialsv1beta1.Trial
-		mutatedPod      *v1.Pod
+		pod        *v1.Pod
+		trial      *trialsv1beta1.Trial
+		mutatedPod *v1.Pod
 	}{
 		"Mutated Pod should contain label from the origin Pod and Trial": {
 			pod: &v1.Pod{
