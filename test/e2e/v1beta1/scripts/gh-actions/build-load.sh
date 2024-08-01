@@ -34,7 +34,6 @@ TAG="e2e-test"
 VERSION="v1beta1"
 CMD_PREFIX="cmd"
 SPECIFIED_DEVICE_TYPE_IMAGES=("enas-cnn-cifar10-cpu" "darts-cnn-cifar10-cpu" "pytorch-mnist-cpu")
-# DEFAULT_IMAGE_FOR_TUNE="docker.io/tensorflow/tensorflow:2.13.0"
 
 IFS="," read -r -a TRIAL_IMAGE_ARRAY <<< "$TRIAL_IMAGES"
 IFS="," read -r -a EXPERIMENT_ARRAY <<< "$EXPERIMENTS"
@@ -61,11 +60,6 @@ _install_tools() {
     wget -O /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.25.2/yq_$(uname -s)_$(uname -m)"
     chmod +x /usr/local/bin/yq
   fi
-}
-
-setup_for_tune() {
-  # docker pull $DEFAULT_IMAGE_FOR_TUNE
-  _build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
 }
 
 run() {
@@ -170,7 +164,7 @@ done
 
 # Testing image for tune function
 echo -e "\nPulling and building testing image for tune function..."
-setup_for_tune
+_build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
 
 echo -e "\nCleanup Build Cache...\n"
 docker buildx prune -f
