@@ -662,25 +662,27 @@ func TestMutateMetricsCollectorVolume(t *testing.T) {
 }
 
 func TestGetSidecarContainerName(t *testing.T) {
-	testCases := []struct {
+	testCases := map[string]struct {
 		collectorKind         common.CollectorKind
 		expectedCollectorKind string
 	}{
-		{
+		"Expected kind is metrics-logger-and-collector": {
 			collectorKind:         common.StdOutCollector,
 			expectedCollectorKind: mccommon.MetricLoggerCollectorContainerName,
 		},
-		{
+		"Expected kind is metrics-collector": {
 			collectorKind:         common.TfEventCollector,
 			expectedCollectorKind: mccommon.MetricCollectorContainerName,
 		},
 	}
 
-	for _, tc := range testCases {
-		collectorKind := getSidecarContainerName(tc.collectorKind)
-		if collectorKind != tc.expectedCollectorKind {
-			t.Errorf("Expected Collector Kind: %v, got %v", tc.expectedCollectorKind, collectorKind)
-		}
+	for name, testcase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			collectorKind := getSidecarContainerName(testcase.collectorKind)
+			if collectorKind != testcase.expectedCollectorKind {
+				t.Errorf("Expected Collector Kind: %v, got %v", testcase.expectedCollectorKind, collectorKind)
+			}
+		})
 	}
 }
 
@@ -721,17 +723,16 @@ func TestGetKatibJob(t *testing.T) {
 	podName := "pod-name"
 	deployName := "deploy-name"
 	jobName := "job-name"
-
-	testCases := []struct {
+	
+	testCases := map[string]struct {
 		pod             *v1.Pod
 		job             *batchv1.Job
 		deployment      *appsv1.Deployment
 		expectedJobKind string
 		expectedJobName string
 		err             bool
-		testDescription string
 	}{
-		{
+		"Valid run with ownership sequence: Trial -> Job -> Pod": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -775,9 +776,8 @@ func TestGetKatibJob(t *testing.T) {
 			expectedJobKind: "Job",
 			expectedJobName: jobName + "-1",
 			err:             false,
-			testDescription: "Valid run with ownership sequence: Trial -> Job -> Pod",
 		},
-		{
+		"Valid run with ownership sequence: Trial -> Deployment -> Pod, Job -> Pod": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -854,9 +854,8 @@ func TestGetKatibJob(t *testing.T) {
 			expectedJobKind: "Deployment",
 			expectedJobName: deployName + "-2",
 			err:             false,
-			testDescription: "Valid run with ownership sequence: Trial -> Deployment -> Pod, Job -> Pod",
 		},
-		{
+		"Run for not Trial's pod with ownership sequence: Job -> Pod": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -890,9 +889,8 @@ func TestGetKatibJob(t *testing.T) {
 				},
 			},
 			err:             true,
-			testDescription: "Run for not Trial's pod with ownership sequence: Job -> Pod",
 		},
-		{
+		"Run when Pod owns Job that doesn't exists": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -907,9 +905,8 @@ func TestGetKatibJob(t *testing.T) {
 				},
 			},
 			err:             true,
-			testDescription: "Run when Pod owns Job that doesn't exists",
 		},
-		{
+		"Run when Pod owns Job with invalid API version": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -924,63 +921,63 @@ func TestGetKatibJob(t *testing.T) {
 				},
 			},
 			err:             true,
-			testDescription: "Run when Pod owns Job with invalid API version",
 		},
 	}
 
-	for _, tc := range testCases {
+	for name, testcase := range testCases {
 		// Create Job if it is needed
-		if tc.job != nil {
-			jobUnstr, err := util.ConvertObjectToUnstructured(tc.job)
-			gvk := schema.GroupVersionKind{
-				Group:   "batch",
-				Version: "v1",
-				Kind:    "Job",
+		t.Run(name, func(t *testing.T) {
+			if testcase.job != nil {
+				jobUnstr, err := util.ConvertObjectToUnstructured(testcase.job)
+				gvk := schema.GroupVersionKind{
+					Group:   "batch",
+					Version: "v1",
+					Kind:    "Job",
+				}
+				jobUnstr.SetGroupVersionKind(gvk)
+				if err != nil {
+					t.Errorf("ConvertObjectToUnstructured error %v", err)
+				}
+	
+				g.Expect(c.Create(context.TODO(), jobUnstr)).NotTo(gomega.HaveOccurred())
+	
+				// Wait that Job is created
+				g.Eventually(func() error {
+					return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: testcase.job.Name}, jobUnstr)
+				}, timeout).ShouldNot(gomega.HaveOccurred())
 			}
-			jobUnstr.SetGroupVersionKind(gvk)
-			if err != nil {
-				t.Errorf("ConvertObjectToUnstructured error %v", err)
+	
+			// Create Deployment if it is needed
+			if testcase.deployment != nil {
+				g.Expect(c.Create(context.TODO(), testcase.deployment)).NotTo(gomega.HaveOccurred())
+	
+				// Wait that Deployment is created
+				g.Eventually(func() error {
+					return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: testcase.deployment.Name}, testcase.deployment)
+				}, timeout).ShouldNot(gomega.HaveOccurred())
 			}
-
-			g.Expect(c.Create(context.TODO(), jobUnstr)).NotTo(gomega.HaveOccurred())
-
-			// Wait that Job is created
-			g.Eventually(func() error {
-				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.job.Name}, jobUnstr)
-			}, timeout).ShouldNot(gomega.HaveOccurred())
-		}
-
-		// Create Deployment if it is needed
-		if tc.deployment != nil {
-			g.Expect(c.Create(context.TODO(), tc.deployment)).NotTo(gomega.HaveOccurred())
-
-			// Wait that Deployment is created
-			g.Eventually(func() error {
-				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.deployment.Name}, tc.deployment)
-			}, timeout).ShouldNot(gomega.HaveOccurred())
-		}
-
-		object, _ := util.ConvertObjectToUnstructured(tc.pod)
-		jobKind, jobName, err := si.getKatibJob(object, namespace)
-		if !tc.err && err != nil {
-			t.Errorf("Case %v failed. Error %v", tc.testDescription, err)
-		} else if !tc.err && (tc.expectedJobKind != jobKind || tc.expectedJobName != jobName) {
-			t.Errorf("Case %v failed. Expected jobKind %v, got %v, Expected jobName %v, got %v",
-				tc.testDescription, tc.expectedJobKind, jobKind, tc.expectedJobName, jobName)
-		} else if tc.err && err == nil {
-			t.Errorf("Expected error got nil")
-		}
+	
+			object, _ := util.ConvertObjectToUnstructured(testcase.pod)
+			jobKind, jobName, err := si.getKatibJob(object, namespace)
+			if !testcase.err && err != nil {
+				t.Errorf("Error %v", err)
+			} else if !testcase.err && (testcase.expectedJobKind != jobKind || testcase.expectedJobName != jobName) {
+				t.Errorf("Expected jobKind %v, got %v, Expected jobName %v, got %v",
+					testcase.expectedJobKind, jobKind, testcase.expectedJobName, jobName)
+			} else if testcase.err && err == nil {
+				t.Errorf("Expected error got nil")
+			}
+		})
 	}
 }
 
 func TestIsPrimaryPod(t *testing.T) {
-	testCases := []struct {
+	testCases := map[string]struct {
 		podLabels        map[string]string
 		primaryPodLabels map[string]string
 		isPrimary        bool
-		testDescription  string
 	}{
-		{
+		"Pod contains all labels from primary pod labels": {
 			podLabels: map[string]string{
 				"test-key-1": "test-value-1",
 				"test-key-2": "test-value-2",
@@ -991,9 +988,8 @@ func TestIsPrimaryPod(t *testing.T) {
 				"test-key-2": "test-value-2",
 			},
 			isPrimary:       true,
-			testDescription: "Pod contains all labels from primary pod labels",
 		},
-		{
+		"Pod doesn't contain primary label": {
 			podLabels: map[string]string{
 				"test-key-1": "test-value-1",
 			},
@@ -1002,9 +998,8 @@ func TestIsPrimaryPod(t *testing.T) {
 				"test-key-2": "test-value-2",
 			},
 			isPrimary:       false,
-			testDescription: "Pod doesn't contain primary label",
 		},
-		{
+		"Pod contains label with incorrect value": {
 			podLabels: map[string]string{
 				"test-key-1": "invalid",
 			},
@@ -1012,15 +1007,16 @@ func TestIsPrimaryPod(t *testing.T) {
 				"test-key-1": "test-value-1",
 			},
 			isPrimary:       false,
-			testDescription: "Pod contains label with incorrect value",
 		},
 	}
 
-	for _, tc := range testCases {
-		isPrimary := isPrimaryPod(tc.podLabels, tc.primaryPodLabels)
-		if isPrimary != tc.isPrimary {
-			t.Errorf("Case %v. Expected isPrimary %v, got %v", tc.testDescription, tc.isPrimary, isPrimary)
-		}
+	for name, testcase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			isPrimary := isPrimaryPod(testcase.podLabels, testcase.primaryPodLabels)
+			if diff := cmp.Diff(testcase.isPrimary, isPrimary); len(diff) != 0 {
+				t.Errorf("Unexpected result (-want,got):\n%s", diff)
+			}
+		})
 	}
 }
 
@@ -1030,14 +1026,12 @@ func TestMutatePodMetadata(t *testing.T) {
 		"katib-experiment":    "katib-value",
 		consts.LabelTrialName: "test-trial",
 	}
-
-	testCases := []struct {
+	testCases := map[string]struct {
 		pod             *v1.Pod
 		trial           *trialsv1beta1.Trial
 		mutatedPod      *v1.Pod
-		testDescription string
 	}{
-		{
+		"Mutated Pod should contain label from the origin Pod and Trial": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -1058,15 +1052,16 @@ func TestMutatePodMetadata(t *testing.T) {
 					Labels: mutatedPodLabels,
 				},
 			},
-			testDescription: "Mutated Pod should contain label from the origin Pod and Trial",
 		},
 	}
 
-	for _, tc := range testCases {
-		mutatePodMetadata(tc.pod, tc.trial)
-		if !reflect.DeepEqual(tc.mutatedPod, tc.pod) {
-			t.Errorf("Case %v. Expected Pod %v, got %v", tc.testDescription, tc.mutatedPod, tc.pod)
-		}
+	for name, testcase := range testCases {
+		t.Run(name, func(t *testing.T) {
+			mutatePodMetadata(testcase.pod, testcase.trial)
+			if diff := cmp.Diff(testcase.mutatedPod, testcase.pod); len(diff) != 0 {
+				t.Errorf("Unexpected mutated result (-want,+got):\n%s", diff)
+			}
+		})
 	}
 }
 
