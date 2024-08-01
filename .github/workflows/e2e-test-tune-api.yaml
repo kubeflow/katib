@@ -1,4 +1,4 @@
-name: E2E Test with tune api
+name: E2E Test with tune API
 
 on:
   pull_request:
