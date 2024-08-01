@@ -25,6 +25,8 @@ def run_e2e_experiment_create_by_tune(
     # https://www.kubeflow.org/docs/components/katib/getting-started/#getting-started-with-katib-python-sdk
     # [1] Create an objective function.
     def objective(parameters):
+        import time
+        time.sleep(5)
         result = 4 * int(parameters["a"]) - float(parameters["b"]) ** 2
         print(f"result={result}")
     
