@@ -63,6 +63,11 @@ _install_tools() {
   fi
 }
 
+setup_for_tune() {
+  docker pull $DEFAULT_IMAGE_FOR_TUNE
+  _build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
+}
+
 run() {
   CONTAINER_NAME=${1:-"katib-controller"}
   DOCKERFILE=${2:-"$CMD_PREFIX/katib-controller/$VERSION/Dockerfile"}
@@ -164,8 +169,8 @@ for name in "${TRIAL_IMAGE_ARRAY[@]}"; do
 done
 
 # Testing image for tune function
-echo -e "\nPulling testing image for tune function..."
-docker pull $DEFAULT_IMAGE_FOR_TUNE
+echo -e "\nPulling and building testing image for tune function..."
+setup_for_tune
 
 echo -e "\nCleanup Build Cache...\n"
 docker buildx prune -f
