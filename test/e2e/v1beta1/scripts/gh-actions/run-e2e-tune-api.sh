@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2022 The Kubeflow Authors.
+# Copyright 2024 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ set -o nounset
 set -o pipefail
 
 cd "$(dirname "$0")"
-EXPERIMENT_FILES=${1:-""}
-IFS="," read -r -a EXPERIMENT_FILE_ARRAY <<< "$EXPERIMENT_FILES"
 
 echo "Katib deployments"
 kubectl -n kubeflow get deploy
@@ -36,16 +34,7 @@ kubectl get pvc -n kubeflow
 echo "Available CRDs"
 kubectl get crd
 
-if [ -z "$EXPERIMENT_FILES" ]; then
-  echo "Skip Test for Experiment"
-  exit 0
-fi
-
-for exp_name in "${EXPERIMENT_FILE_ARRAY[@]}"; do
-  echo "Running Experiment from $exp_name file"
-  exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
-  python run-e2e-experiment.py --experiment-path "${exp_path}" --namespace default \
-  --verbose || (kubectl get pods -n kubeflow && exit 1)
-done
+python run-e2e-tune-api.py --namespace default \
+--verbose || (kubectl get pods -n kubeflow && exit 1)
 
 exit 0
