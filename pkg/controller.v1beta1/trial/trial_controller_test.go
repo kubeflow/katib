@@ -429,6 +429,11 @@ func newFakeTrialBatchJob() *trialsv1beta1.Trial {
 		},
 		Spec: trialsv1beta1.TrialSpec{
 			PrimaryContainerName: primaryContainer,
+			MetricsCollector: 	  commonv1beta1.MetricsCollectorSpec{
+				Collector: &commonv1beta1.CollectorSpec{
+					Kind: commonv1beta1.StdOutCollector,
+				},
+			},
 			SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
 			FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
 			Objective: &commonv1beta1.ObjectiveSpec{
