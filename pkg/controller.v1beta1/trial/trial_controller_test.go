@@ -183,10 +183,10 @@ func TestReconcileBatchJob(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil)
 
-		trial := newFakeTrialBatchJob()
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector)
 		batchJob := &batchv1.Job{}
 
-		// Create the Trial
+		// Create the Trial with StdOut MC
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that BatchJob with appropriate name is created
@@ -262,8 +262,8 @@ func TestReconcileBatchJob(t *testing.T) {
 		}
 		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
 
-		// Create the Trial
-		trial := newFakeTrialBatchJob()
+		// Create the Trial with StdOut MC
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector)
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded and metrics are properly populated
@@ -290,14 +290,47 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics.`, func(t *testing.T) {
+	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(1),
 			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
 		)
-		// Create the Trial
-		trial := newFakeTrialBatchJob()
+		// Create the Trial with StdOut MC
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector)
+		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
+
+		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
+		// Metrics unavailable because GetTrialObservationLog returns "unavailable".
+		g.Eventually(func() bool {
+			if err = c.Get(ctx, trialKey, trial); err != nil {
+				return false
+			}
+			return trial.IsMetricsUnavailable() &&
+				len(trial.Status.Observation.Metrics) > 0 &&
+				trial.Status.Observation.Metrics[0].Min == consts.UnavailableMetricValue &&
+				trial.Status.Observation.Metrics[0].Max == consts.UnavailableMetricValue &&
+				trial.Status.Observation.Metrics[0].Latest == consts.UnavailableMetricValue
+		}, timeout).Should(gomega.BeTrue())
+
+		// Delete the Trial
+		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
+
+		// Expect that Trial is deleted
+		g.Eventually(func() bool {
+			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
+		}, timeout).Should(gomega.BeTrue())
+	})
+
+	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC).`, func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		gomock.InOrder(
+			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(1),
+			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil).MinTimes(1),
+			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
+		)
+		// Create the Trial with Push MC
+		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector)
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
@@ -386,7 +419,7 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 	g.Expect(err).To(gomega.HaveOccurred())
 }
 
-func newFakeTrialBatchJob() *trialsv1beta1.Trial {
+func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind) *trialsv1beta1.Trial {
 	primaryContainer := "training-container"
 
 	job := &batchv1.Job{
@@ -431,7 +464,7 @@ func newFakeTrialBatchJob() *trialsv1beta1.Trial {
 			PrimaryContainerName: primaryContainer,
 			MetricsCollector: commonv1beta1.MetricsCollectorSpec{
 				Collector: &commonv1beta1.CollectorSpec{
-					Kind: commonv1beta1.StdOutCollector,
+					Kind: mcType,
 				},
 			},
 			SuccessCondition: experimentsv1beta1.DefaultJobSuccessCondition,
