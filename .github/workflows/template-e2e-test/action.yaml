@@ -21,6 +21,10 @@ inputs:
     required: false
     description: mysql or postgres
     default: mysql
+  tune-api:
+    required: true
+    description: whether to execute tune-api test or not
+    default: false
 
 runs:
   using: composite
@@ -35,4 +39,9 @@ runs:
 
     - name: Run E2E Experiment
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}
+      run: |
+        if [ "${{ inputs.tune-api }}" = "true" ]; then
+          ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-tune-api.sh
+        else
+          ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}
+        fi

@@ -22,17 +22,13 @@ jobs:
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
       
-      - name: Setup Minikube Cluster
-        shell: bash
-        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh
-
-      - name: Setup Katib
-        shell: bash
-        run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh
-
-      - name: Run E2E Experiment
-        shell: bash
-        run: ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-tune-api.sh
+      - name: Run e2e test with tune API
+        uses: ./.github/workflows/template-e2e-test
+        with:
+          experiments: ""
+          # Comma Delimited
+          trial-images: ""
+          tune-api: true
 
     strategy:
       fail-fast: false

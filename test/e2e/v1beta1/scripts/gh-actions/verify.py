@@ -112,8 +112,6 @@ def verify_experiment_results(
                     break
                 else:
                     raise e
-            # Deployment deletion might take some time.
-            time.sleep(1)
         if i == 10:
             raise Exception(
                 "Suggestion Deployment is still alive for Resume Policy: {}".format(
