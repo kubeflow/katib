@@ -221,6 +221,7 @@ const (
 	DistributionLogUniform Distribution = "logUniform"
 	DistributionNormal     Distribution = "normal"
 	DistributionLogNormal  Distribution = "logNormal"
+	DistributionUnknown    Distribution = "unknown"
 )
 
 // TrialTemplate describes structure of trial template

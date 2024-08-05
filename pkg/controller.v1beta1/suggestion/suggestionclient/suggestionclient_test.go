@@ -539,6 +539,138 @@ func TestConvertParameterType(t *testing.T) {
 	}
 }
 
+func TestConvertFeasibleSpace(t *testing.T) {
+
+	tcs := []struct {
+		inFeasibleSpace       experimentsv1beta1.FeasibleSpace
+		expectedFeasibleSpace *suggestionapi.FeasibleSpace
+		testDescription       string
+	}{
+		{
+			inFeasibleSpace: experimentsv1beta1.FeasibleSpace{
+				Max:          "10",
+				Min:          "1",
+				List:         []string{"1", "2", "3"},
+				Step:         "1",
+				Distribution: experimentsv1beta1.DistributionUniform,
+			},
+			expectedFeasibleSpace: &suggestionapi.FeasibleSpace{
+				Max:          "10",
+				Min:          "1",
+				List:         []string{"1", "2", "3"},
+				Step:         "1",
+				Distribution: suggestionapi.Distribution_UNIFORM,
+			},
+			testDescription: "Convert feasible space with uniform distribution",
+		},
+		{
+			inFeasibleSpace: experimentsv1beta1.FeasibleSpace{
+				Max:          "100",
+				Min:          "10",
+				List:         nil,
+				Step:         "10",
+				Distribution: experimentsv1beta1.DistributionLogUniform,
+			},
+			expectedFeasibleSpace: &suggestionapi.FeasibleSpace{
+				Max:          "100",
+				Min:          "10",
+				List:         nil,
+				Step:         "10",
+				Distribution: suggestionapi.Distribution_LOG_UNIFORM,
+			},
+			testDescription: "Convert feasible space with log-uniform distribution",
+		},
+		{
+			inFeasibleSpace: experimentsv1beta1.FeasibleSpace{
+				Max:          "1.0",
+				Min:          "0.0",
+				List:         nil,
+				Step:         "0.1",
+				Distribution: experimentsv1beta1.DistributionNormal,
+			},
+			expectedFeasibleSpace: &suggestionapi.FeasibleSpace{
+				Max:          "1.0",
+				Min:          "0.0",
+				List:         nil,
+				Step:         "0.1",
+				Distribution: suggestionapi.Distribution_NORMAL,
+			},
+			testDescription: "Convert feasible space with normal distribution",
+		},
+	}
+
+	for _, tc := range tcs {
+		actualFeasibleSpace := convertFeasibleSpace(tc.inFeasibleSpace)
+		if !compareFeasibleSpaces(actualFeasibleSpace, tc.expectedFeasibleSpace) {
+			t.Errorf("Case: %v failed. Expected feasible space %+v, got %+v", tc.testDescription, tc.expectedFeasibleSpace, actualFeasibleSpace)
+		}
+	}
+}
+
+// Helper function to compare two FeasibleSpace structs.
+func compareFeasibleSpaces(a, b *suggestionapi.FeasibleSpace) bool {
+	return a.Max == b.Max &&
+		a.Min == b.Min &&
+		equalSlices(a.List, b.List) &&
+		a.Step == b.Step &&
+		a.Distribution == b.Distribution
+}
+
+// Helper function to compare two slices of strings.
+func equalSlices(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func TestConvertDistribution(t *testing.T) {
+
+	tcs := []struct {
+		inDistribution       experimentsv1beta1.Distribution
+		expectedDistribution suggestionapi.Distribution
+		testDescription      string
+	}{
+		{
+			inDistribution:       experimentsv1beta1.DistributionUniform,
+			expectedDistribution: suggestionapi.Distribution_UNIFORM,
+			testDescription:      "Convert uniform distribution",
+		},
+		{
+			inDistribution:       experimentsv1beta1.DistributionLogUniform,
+			expectedDistribution: suggestionapi.Distribution_LOG_UNIFORM,
+			testDescription:      "Convert log-uniform distribution",
+		},
+		{
+			inDistribution:       experimentsv1beta1.DistributionNormal,
+			expectedDistribution: suggestionapi.Distribution_NORMAL,
+			testDescription:      "Convert normal distribution",
+		},
+		{
+			inDistribution:       experimentsv1beta1.DistributionLogNormal,
+			expectedDistribution: suggestionapi.Distribution_LOG_NORMAL,
+			testDescription:      "Convert log-normal distribution",
+		},
+		{
+			inDistribution:       experimentsv1beta1.DistributionUnknown,
+			expectedDistribution: suggestionapi.Distribution_DISTRIBUTION_UNKNOWN,
+			testDescription:      "Convert unknown distribution",
+		},
+	}
+
+	for _, tc := range tcs {
+		actualDistribution := convertDistribution(tc.inDistribution)
+		if actualDistribution != tc.expectedDistribution {
+			t.Errorf("Case: %v failed. Expected distribution %v, got %v", tc.testDescription, tc.expectedDistribution, actualDistribution)
+		}
+	}
+}
+
 func TestConvertTrialObservation(t *testing.T) {
 
 	tcs := []struct {
