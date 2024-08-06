@@ -25,9 +25,6 @@ jobs:
       - name: Run e2e test with tune API
         uses: ./.github/workflows/template-e2e-test
         with:
-          experiments: ""
-          # Comma Delimited
-          trial-images: ""
           tune-api: true
 
     strategy:

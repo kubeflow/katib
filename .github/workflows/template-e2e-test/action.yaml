@@ -4,15 +4,17 @@ description: Run e2e test using the minikube cluster
 
 inputs:
   experiments:
-    required: true
+    required: false
     description: comma delimited experiment name
+    default: ""
   training-operator:
     required: false
     description: whether to deploy training-operator or not
     default: false
   trial-images:
-    required: true
+    required: false
     description: comma delimited trial image name
+    default: ""
   katib-ui:
     required: true
     description: whether to deploy katib-ui or not
