@@ -24,6 +24,7 @@ cd "$(dirname "$0")"
 DEPLOY_KATIB_UI=${1:-false}
 TRIAL_IMAGES=${2:-""}
 EXPERIMENTS=${3:-""}
+TUNE_API=${4:-false}
 
 echo "Start to setup Minikube Kubernetes Cluster"
 kubectl version
@@ -31,4 +32,4 @@ kubectl cluster-info
 kubectl get nodes
 
 echo "Build and Load container images"
-./build-load.sh "$TRIAL_IMAGES" "$EXPERIMENTS" "$DEPLOY_KATIB_UI"
+./build-load.sh "$TRIAL_IMAGES" "$EXPERIMENTS" "$DEPLOY_KATIB_UI" "$TUNE_API"

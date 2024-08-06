@@ -33,7 +33,7 @@ runs:
   steps:
     - name: Setup Minikube Cluster
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.trial-images }} ${{ inputs.experiments }}
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.trial-images }} ${{ inputs.experiments }} $${{ inputs.tune-api }}
 
     - name: Setup Katib
       shell: bash
@@ -42,7 +42,7 @@ runs:
     - name: Run E2E Experiment
       shell: bash
       run: |
-        if [ "${{ inputs.tune-api }}" = "true" ]; then
+        if "${{ inputs.tune-api }}"; then
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-tune-api.sh
         else
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}

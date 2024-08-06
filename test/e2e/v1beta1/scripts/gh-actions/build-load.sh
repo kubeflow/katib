@@ -28,6 +28,7 @@ trap popd EXIT
 TRIAL_IMAGES=${1:-""}
 EXPERIMENTS=${2:-""}
 DEPLOY_KATIB_UI=${3:-false}
+TUNE_API=${4:-false}
 
 REGISTRY="docker.io/kubeflowkatib"
 TAG="e2e-test"
@@ -163,8 +164,10 @@ for name in "${TRIAL_IMAGE_ARRAY[@]}"; do
 done
 
 # Testing image for tune function
-echo -e "\nPulling and building testing image for tune function..."
-_build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
+if "$TUNE_API"; then
+  echo -e "\nPulling and building testing image for tune function..."
+  _build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
+fi
 
 echo -e "\nCleanup Build Cache...\n"
 docker buildx prune -f
