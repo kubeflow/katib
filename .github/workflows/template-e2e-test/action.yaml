@@ -4,15 +4,17 @@ description: Run e2e test using the minikube cluster
 
 inputs:
   experiments:
-    required: true
+    required: false
     description: comma delimited experiment name
+    default: ""
   training-operator:
     required: false
     description: whether to deploy training-operator or not
     default: false
   trial-images:
-    required: true
+    required: false
     description: comma delimited trial image name
+    default: ""
   katib-ui:
     required: true
     description: whether to deploy katib-ui or not
@@ -21,13 +23,17 @@ inputs:
     required: false
     description: mysql or postgres
     default: mysql
+  tune-api:
+    required: true
+    description: whether to execute tune-api test or not
+    default: false
 
 runs:
   using: composite
   steps:
     - name: Setup Minikube Cluster
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.trial-images }} ${{ inputs.experiments }}
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.tune-api }} ${{ inputs.trial-images }} ${{ inputs.experiments }}
 
     - name: Setup Katib
       shell: bash
@@ -35,4 +41,9 @@ runs:
 
     - name: Run E2E Experiment
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}
+      run: |
+        if "${{ inputs.tune-api }}"; then
+          ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-tune-api.sh
+        else
+          ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}
+        fi
