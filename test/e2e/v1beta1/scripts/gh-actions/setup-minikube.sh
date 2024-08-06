@@ -22,9 +22,9 @@ set -o nounset
 cd "$(dirname "$0")"
 
 DEPLOY_KATIB_UI=${1:-false}
-TRIAL_IMAGES=${2:-""}
-EXPERIMENTS=${3:-""}
-TUNE_API=${4:-false}
+TUNE_API=${2:-false}
+TRIAL_IMAGES=${3:-""}
+EXPERIMENTS=${4:-""}
 
 echo "Start to setup Minikube Kubernetes Cluster"
 kubectl version
@@ -32,5 +32,4 @@ kubectl cluster-info
 kubectl get nodes
 
 echo "Build and Load container images"
-echo "$TUNE_API"
-./build-load.sh "$TRIAL_IMAGES" "$EXPERIMENTS" "$DEPLOY_KATIB_UI" "$TUNE_API"
+./build-load.sh "$DEPLOY_KATIB_UI" "$TUNE_API" "$TRIAL_IMAGES" "$EXPERIMENTS" 

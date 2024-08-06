@@ -33,7 +33,7 @@ runs:
   steps:
     - name: Setup Minikube Cluster
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.trial-images }} ${{ inputs.experiments }} ${{ inputs.tune-api }}
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.tune-api }} ${{ inputs.trial-images }} ${{ inputs.experiments }}
 
     - name: Setup Katib
       shell: bash
