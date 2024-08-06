@@ -164,6 +164,7 @@ for name in "${TRIAL_IMAGE_ARRAY[@]}"; do
 done
 
 # Testing image for tune function
+echo $TUNE_API
 if "$TUNE_API"; then
   echo -e "\nPulling and building testing image for tune function..."
   _build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"

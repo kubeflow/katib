@@ -32,4 +32,5 @@ kubectl cluster-info
 kubectl get nodes
 
 echo "Build and Load container images"
+echo "$TUNE_API"
 ./build-load.sh "$TRIAL_IMAGES" "$EXPERIMENTS" "$DEPLOY_KATIB_UI" "$TUNE_API"
