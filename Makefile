@@ -171,8 +171,10 @@ pytest: prepare-pytest prepare-pytest-testdata
 	pytest ./test/unit/v1beta1/earlystopping
 	pytest ./test/unit/v1beta1/metricscollector
 	cp ./pkg/apis/manager/v1beta1/python/api_pb2.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py
+	cp ./pkg/apis/manager/v1beta1/python/api_pb2_grpc.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
+	sed -i "s/api_pb2/kubeflow\.katib\.katib_api_pb2/g" ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
 	pytest ./sdk/python/v1beta1/kubeflow/katib
-	rm ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py
+	rm ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
 
 # The skopt service doesn't work appropriately with Python 3.11.
 # So, we need to run the test with Python 3.9.
