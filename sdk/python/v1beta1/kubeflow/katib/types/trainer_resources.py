@@ -1,9 +1,8 @@
 import pprint
 import re
 
-import six
-
 from kubeflow.katib.configuration import Configuration
+import six
 
 
 class TrainerResources(object):

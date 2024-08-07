@@ -496,26 +496,25 @@ class KatibClient(object):
                 raise ValueError("One of the required parameters is None")
 
             try:
-                from kubeflow.training.constants.constants import (
-                    STORAGE_INITIALIZER,
-                    STORAGE_INITIALIZER_VOLUME_MOUNT,
-                    STORAGE_INITIALIZER_IMAGE,
-                    TRAINER_TRANSFORMER_IMAGE,
-                )
-                from kubeflow.storage_initializer.constants import (
-                    VOLUME_PATH_DATASET,
-                    VOLUME_PATH_MODEL,
-                )
-                from kubeflow.storage_initializer.hugging_face import (
-                    HuggingFaceDatasetParams,
-                )
-                from kubeflow.storage_initializer.hugging_face import (
-                    HuggingFaceModelParams,
-                )
-                from kubeflow.storage_initializer.hugging_face import (
-                    HuggingFaceTrainerParams,
-                )
+                from kubeflow.storage_initializer.constants import \
+                    VOLUME_PATH_DATASET
+                from kubeflow.storage_initializer.constants import \
+                    VOLUME_PATH_MODEL
+                from kubeflow.storage_initializer.hugging_face import \
+                    HuggingFaceDatasetParams
+                from kubeflow.storage_initializer.hugging_face import \
+                    HuggingFaceModelParams
+                from kubeflow.storage_initializer.hugging_face import \
+                    HuggingFaceTrainerParams
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
+                from kubeflow.training.constants.constants import \
+                    STORAGE_INITIALIZER
+                from kubeflow.training.constants.constants import \
+                    STORAGE_INITIALIZER_IMAGE
+                from kubeflow.training.constants.constants import \
+                    STORAGE_INITIALIZER_VOLUME_MOUNT
+                from kubeflow.training.constants.constants import \
+                    TRAINER_TRANSFORMER_IMAGE
                 import peft
                 import transformers
             except ImportError:
@@ -619,10 +618,8 @@ class KatibClient(object):
                     setattr(lora_config, p_name, value)
 
             # Create init container spec.
-            from kubeflow.training.utils.utils import (
-                get_container_spec,
-                get_pod_template_spec,
-            )
+            from kubeflow.training.utils.utils import get_container_spec
+            from kubeflow.training.utils.utils import get_pod_template_spec
 
             init_container_spec = get_container_spec(
                 name=STORAGE_INITIALIZER,
