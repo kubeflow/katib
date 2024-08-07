@@ -3,6 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**distribution** | **str** |  | [optional] 
 **list** | **list[str]** |  | [optional] 
 **max** | **str** |  | [optional] 
 **min** | **str** |  | [optional] 

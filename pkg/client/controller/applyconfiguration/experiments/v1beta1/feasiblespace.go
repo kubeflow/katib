@@ -18,13 +18,18 @@ limitations under the License.
 
 package v1beta1
 
+import (
+	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+)
+
 // FeasibleSpaceApplyConfiguration represents an declarative configuration of the FeasibleSpace type for use
 // with apply.
 type FeasibleSpaceApplyConfiguration struct {
-	Max  *string  `json:"max,omitempty"`
-	Min  *string  `json:"min,omitempty"`
-	List []string `json:"list,omitempty"`
-	Step *string  `json:"step,omitempty"`
+	Max          *string               `json:"max,omitempty"`
+	Min          *string               `json:"min,omitempty"`
+	List         []string              `json:"list,omitempty"`
+	Step         *string               `json:"step,omitempty"`
+	Distribution *v1beta1.Distribution `json:"distribution,omitempty"`
 }
 
 // FeasibleSpaceApplyConfiguration constructs an declarative configuration of the FeasibleSpace type for use with
@@ -64,5 +69,13 @@ func (b *FeasibleSpaceApplyConfiguration) WithList(values ...string) *FeasibleSp
 // If called multiple times, the Step field is set to the value of the last call.
 func (b *FeasibleSpaceApplyConfiguration) WithStep(value string) *FeasibleSpaceApplyConfiguration {
 	b.Step = &value
+	return b
+}
+
+// WithDistribution sets the Distribution field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Distribution field is set to the value of the last call.
+func (b *FeasibleSpaceApplyConfiguration) WithDistribution(value v1beta1.Distribution) *FeasibleSpaceApplyConfiguration {
+	b.Distribution = &value
 	return b
 }

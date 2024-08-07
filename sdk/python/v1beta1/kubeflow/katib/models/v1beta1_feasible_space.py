@@ -33,6 +33,7 @@ class V1beta1FeasibleSpace(object):
                             and the value is json key in definition.
     """
     openapi_types = {
+        'distribution': 'str',
         'list': 'list[str]',
         'max': 'str',
         'min': 'str',
@@ -40,24 +41,28 @@ class V1beta1FeasibleSpace(object):
     }
 
     attribute_map = {
+        'distribution': 'distribution',
         'list': 'list',
         'max': 'max',
         'min': 'min',
         'step': 'step'
     }
 
-    def __init__(self, list=None, max=None, min=None, step=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, distribution=None, list=None, max=None, min=None, step=None, local_vars_configuration=None):  # noqa: E501
         """V1beta1FeasibleSpace - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
+        self._distribution = None
         self._list = None
         self._max = None
         self._min = None
         self._step = None
         self.discriminator = None
 
+        if distribution is not None:
+            self.distribution = distribution
         if list is not None:
             self.list = list
         if max is not None:
@@ -66,6 +71,27 @@ class V1beta1FeasibleSpace(object):
             self.min = min
         if step is not None:
             self.step = step
+
+    @property
+    def distribution(self):
+        """Gets the distribution of this V1beta1FeasibleSpace.  # noqa: E501
+
+
+        :return: The distribution of this V1beta1FeasibleSpace.  # noqa: E501
+        :rtype: str
+        """
+        return self._distribution
+
+    @distribution.setter
+    def distribution(self, distribution):
+        """Sets the distribution of this V1beta1FeasibleSpace.
+
+
+        :param distribution: The distribution of this V1beta1FeasibleSpace.  # noqa: E501
+        :type: str
+        """
+
+        self._distribution = distribution
 
     @property
     def list(self):

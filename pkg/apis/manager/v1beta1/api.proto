@@ -98,6 +98,16 @@ enum ParameterType {
 }
 
 /**
+ * Distribution types for HyperParameter.
+ */
+enum Distribution {
+    UNIFORM = 0;
+    LOG_UNIFORM = 1;
+    NORMAL = 2;
+    LOG_NORMAL = 3;
+}
+
+/**
  * Feasible space for optimization.
  * Int and Double type use Max/Min.
  * Discrete and Categorical type use List.
@@ -107,6 +117,7 @@ message FeasibleSpace {
     string min = 2; /// Minimum Value
     repeated string list = 3; /// List of Values.
     string step = 4; /// Step for double or int parameter
+    Distribution distribution = 5; // Distribution of the parameter.
 }
 
 /**
