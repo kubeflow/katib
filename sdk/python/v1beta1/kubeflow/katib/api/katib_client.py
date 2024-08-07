@@ -200,7 +200,7 @@ class KatibClient(object):
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
-        metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
+        metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"}, 
     ):
         """Create HyperParameter Tuning Katib Experiment using one of the following options:
         1. External models and datasets
