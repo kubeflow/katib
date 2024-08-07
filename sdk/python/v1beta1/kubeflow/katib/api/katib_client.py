@@ -995,7 +995,7 @@ class KatibClient(object):
         name: str,
         namespace: Optional[str] = None,
         expected_condition: str = constants.EXPERIMENT_CONDITION_SUCCEEDED,
-        timeout: int = 6000,
+        timeout: int = 600,
         polling_interval: int = 15,
         apiserver_timeout: int = constants.DEFAULT_TIMEOUT,
     ):
@@ -1035,9 +1035,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(
-                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
-                )
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Raise exception if Experiment is Failed.
@@ -1057,9 +1055,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(
-                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
-                )
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Running condition.
@@ -1070,9 +1066,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(
-                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
-                )
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
@@ -1083,9 +1077,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(
-                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
-                )
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
@@ -1096,9 +1088,7 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(
-                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
-                )
+                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
                 return experiment
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.
