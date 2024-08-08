@@ -214,8 +214,8 @@ class KatibClient(object):
             platforms (currently supports HuggingFace and Amazon S3) using the Storage
             Initializer. The `trainer_parameters` should be of type
             `HuggingFaceTrainerParams` to set the hyperparameters search space. This API
-            will automatically define the "Trainer" class in HuggingFace with the provided
-            parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics
+            will automatically define the "Trainer" in HuggingFace with the provided 
+            parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics 
             for optimizing hyperparameters.
 
         2. Custom objective function
