@@ -382,7 +382,8 @@ class KatibClient(object):
                     )
 
         # Add metrics collector to the Katib Experiment.
-        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector.
+        # Up to now, We only support parameter `kind`, of which default value is
+        # `StdOut`, to specify the kind of metrics collector.
         experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
             collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"]),
             source=models.V1beta1SourceSpec(
