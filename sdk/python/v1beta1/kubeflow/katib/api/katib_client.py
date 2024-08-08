@@ -659,8 +659,7 @@ class KatibClient(object):
                 ],
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
                 resources=resources_per_trial,
-                env=env,
-                env_from=env_from,
+                # TODO (helenxie-bit): Add `env` and `env_from` in the future
             )
 
             storage_initializer_volume = models.V1Volume(
