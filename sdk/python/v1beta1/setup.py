@@ -69,4 +69,7 @@ setuptools.setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     install_requires=REQUIRES,
+    extras_require={
+        "huggingface": ["kubeflow-training[huggingface]"],
+    },
 )
