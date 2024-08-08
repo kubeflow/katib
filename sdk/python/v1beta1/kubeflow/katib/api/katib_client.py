@@ -202,21 +202,45 @@ class KatibClient(object):
         pip_index_url: str = "https://pypi.org/simple",
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
-        """Create HyperParameter Tuning Katib Experiment using one of the following options:
+        """
+        Create HyperParameter Tuning Katib Experiment using one of the following
+        options:
+
         1. External models and datasets
-        Parameters: `model_provider_parameters` + `dataset_provider_parameters` + `trainer_parameters`.
-        Usage: Specify both `model_provider_parameters` and `dataset_provider_parameters` to download models and datasets from external platforms (currently supports HuggingFace and Amazon S3) using the Storage Initializer. The `trainer_parameters` should be of type `HuggingFaceTrainerParams` to set the hyperparameters search space. This API will automatically define the "Trainer" class in HuggingFace with the provided parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics for optimizing hyperparameters.
+        Parameters: `model_provider_parameters` + `dataset_provider_parameters` +
+            `trainer_parameters`.
+        Usage: Specify both `model_provider_parameters` and
+            `dataset_provider_parameters` to download models and datasets from external
+            platforms (currently supports HuggingFace and Amazon S3) using the Storage
+            Initializer. The `trainer_parameters` should be of type
+            `HuggingFaceTrainerParams` to set the hyperparameters search space. This API
+            will automatically define the "Trainer" class in HuggingFace with the provided
+            parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics
+            for optimizing hyperparameters.
+
         2. Custom objective function
         Parameters: `objective` + `base_image` + `parameters`.
-        Usage: Specify the `objective` parameter to define your own objective function. The `base_image` parameter will be used to execute the objective function. The `parameters` should be a dictionary to define the search space for these parameters.
+        Usage: Specify the `objective` parameter to define your own objective function.
+            The `base_image` parameter will be used to execute the objective function. The
+            `parameters` should be a dictionary to define the search space for these
+            parameters.
 
         Args:
             name: Name for the Experiment.
-            model_provider_parameters: Parameters for the model provider in the Storage Initializer.
-                For example, HuggingFace model name and Transformer type for that model, like: AutoModelForSequenceClassification. This argument must be the type of `kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams`.
-            dataset_provider_parameters: Parameters for the dataset provider in the Storage Initializer.
-                For example, name of the HuggingFace dataset or AWS S3 configuration. This argument must be the type of `kubeflow.storage_initializer.hugging_face.HuggingFaceDatasetParams` or `kubeflow.storage_initializer.s3.S3DatasetParams`
-            trainer_parameters: Parameters for configuring the training process, including settings for the hyperparameters search space. It should be of type `HuggingFaceTrainerParams`. You should use the Katib SDK to define the search space for these parameters.For example:
+            model_provider_parameters: Parameters for the model provider in the Storage
+                Initializer.
+                For example, HuggingFace model name and Transformer type for that model,
+                like: AutoModelForSequenceClassification. This argument must be the type
+                of `kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams`.
+            dataset_provider_parameters: Parameters for the dataset provider in the
+                Storage Initializer.
+                For example, name of the HuggingFace dataset or AWS S3 configuration.
+                This argument must be the type of `kubeflow.storage_initializer.hugging_face.HuggingFaceDatasetParams`
+                or `kubeflow.storage_initializer.s3.S3DatasetParams`
+            trainer_parameters: Parameters for configuring the training process,
+                including settings for the hyperparameters search space. It should be of
+                type `HuggingFaceTrainerParams`. You should use the Katib SDK to define
+                the search space for these parameters. For example:
                 ```
                 trainer_parameters = HuggingFaceTrainerParams(
                     training_parameters = transformers.TrainingArguments(
@@ -224,19 +248,22 @@ class KatibClient(object):
                     ),
                 ),
                 ```
-                Also, you can use these parameters to define input for training the models.
-            storage_config: Configuration for Storage Initializer PVC to download pre-trained model and dataset.
-                You can configure PVC size and storage class name in this argument.
-            objective: Objective function that Katib uses to train the model.
-                This function must be Callable and it must have only one dict argument.
-                Katib uses this argument to send HyperParameters to the function.
-                The function should not use any code declared outside of the function
-                definition. Import statements must be added inside the function.
+                Also, you can use these parameters to define input for training the
+                models.
+            storage_config: Configuration for Storage Initializer PVC to download
+                pre-trained model and dataset. You can configure PVC size and storage
+                class name in this argument.
+            objective: Objective function that Katib uses to train the model. This
+                function must be Callable and it must have only one dict argument. Katib
+                uses this argument to send HyperParameters to the function. The function
+                should not use any code declared outside of the function definition.
+                Import statements must be added inside the function.
             base_image: Image to use when executing the objective function.
-            parameters: Dict of hyperparameters to optimize if you choose a custom objective function. You should use the Katib SDK to define the search space for these parameters. For example:
-                ```
-                parameters = {"lr": katib.search.double(min=0.1, max=0.2)}`
-                ```
+            parameters: Dict of HyperParameters to tune your Experiment if you choose a custom 
+                objective function. You should use Katib SDK to define the search space for these 
+                parameters. For example: 
+                `parameters = {"lr": katib.search.double(min=0.1, max=0.2)}`
+
                 Also, you can use these parameters to define input for your objective function.
             namespace: Namespace for the Experiment.
             env_per_trial: Environment variable(s) to be attached to each trial container.
@@ -259,24 +286,24 @@ class KatibClient(object):
                 values check this doc: https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
             parallel_trial_count: Number of Trials that Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
-            resources_per_trial: A parameter that lets you specify how much
-            resources each trial container should have. You can either specify a
-            kubernetes.client.V1ResourceRequirements object (documented here:
-            https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1ResourceRequirements.md)
-            or a dictionary that includes one or more of the following keys:
-            `cpu`, `memory`, or `gpu` (other keys will be ignored). Appropriate
-            values for these keys are documented here:
-            https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/.
-            For example:
+            resources_per_trial: A parameter that lets you specify how much resources 
+                each trial container should have. You can either specify a
+                kubernetes.client.V1ResourceRequirements object (documented here:
+                https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1ResourceRequirements.md)
+                or a dictionary that includes one or more of the following keys: `cpu`, 
+                `memory`, or `gpu` (other keys will be ignored). Appropriate values 
+                for these keys are documented here:
+                https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/.
+                For example:
                 {
                     "cpu": "1",
                     "gpu": "1",
                     "memory": "2Gi",
                 }
-            Please note, `gpu` specifies a resource request with a key of
-            `nvidia.com/gpu`, i.e. an NVIDIA GPU. If you need a different type
-            of GPU, pass in a V1ResourceRequirement instance instead, since it's
-            more flexible. This parameter is optional and defaults to None.
+                Please note, `gpu` specifies a resource request with a key of
+                `nvidia.com/gpu`, i.e. an NVIDIA GPU. If you need a different type of 
+                GPU, pass in a V1ResourceRequirement instance instead, since it's more 
+                flexible. This parameter is optional and defaults to None.
             retain_trials: Whether Trials' resources (e.g. pods) are deleted after Succeeded state.
             packages_to_install: List of Python packages to install in addition
                 to the base image packages. These packages are installed before
@@ -293,9 +320,10 @@ class KatibClient(object):
         """
 
         print(
-            "Thank you for using `tune` API for LLM hyperparameter optimization. This feature is in the alpha stage. "
-            "Kubeflow community is looking for your feedback. Please share your experience via "
-            "#kubeflow-katib Slack channel or the Kubeflow Katib GitHub."
+            "Thank you for using `tune` API for LLM hyperparameter optimization. This feature "
+            "is in the alpha stage. Kubeflow community is looking for your feedback. Please "
+            "share your experience via #kubeflow-katib Slack channel or the Kubeflow Katib "
+            "GitHub."
         )
 
         if (
@@ -304,10 +332,12 @@ class KatibClient(object):
             or trainer_parameters is not None
         ) and (objective is not None or parameters is not None):
             raise ValueError(
-                "Invalid configuration for creating a Katib Experiment for hyperparameter optimization. "
-                "You should only specify one of the following options:\n"
-                "1. Use external models and datasets: specify `model_provider_parameters`, `dataset_provider_parameters` and `trainer_parameters`;\n"
-                "2. Use custom objective function: specify `objective`, `base_image` and `parameters`."
+                "Invalid configuration for creating a Katib Experiment for hyperparameter "
+                "optimization. You should only specify one of the following options:\n"
+                "1. Use external models and datasets: specify `model_provider_parameters`, "
+                "`dataset_provider_parameters` and `trainer_parameters`;\n"
+                "2. Use custom objective function: specify `objective`, `base_image` and "
+                "`parameters`."
             )
 
         if not name:
@@ -801,8 +831,8 @@ class KatibClient(object):
         experiment: models.V1beta1Experiment = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """Get the Experiment conditions. Experiment is in the condition when
-        `status` is True for the appropriate condition `type`.
+        """Get the Experiment conditions. Experiment is in the condition when `status`
+        is True for the appropriate condition `type`.
 
         Args:
             name: Name for the Experiment.
@@ -997,8 +1027,8 @@ class KatibClient(object):
         polling_interval: int = 15,
         apiserver_timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """Wait until Experiment reaches specific condition. By default it waits
-        for the Succeeded condition.
+        """Wait until Experiment reaches specific condition. By default it waits for the
+        Succeeded condition.
 
         Args:
             name: Name for the Experiment.
@@ -1109,9 +1139,9 @@ class KatibClient(object):
         max_failed_trial_count: int = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """Update Experiment budget for the running Trials. You can modify Trial
-        budget to resume Succeeded Experiments with `LongRunning` and `FromVolume`
-        resume policies.
+        """Update Experiment budget for the running Trials. You can modify Trial budget
+        to resume Succeeded Experiments with `LongRunning` and `FromVolume` resume
+        policies.
 
         Learn about resuming Experiments here: https://www.kubeflow.org/docs/components/katib/resume-experiment/
 
@@ -1350,8 +1380,8 @@ class KatibClient(object):
         namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """List of all Trials in namespace. If Experiment name is set,
-        it returns all Trials belong to the Experiment.
+        """List of all Trials in namespace. If Experiment name is set, it returns all
+        Trials belong to the Experiment.
 
         Args:
             experiment_name: Optional name for the Experiment.
@@ -1410,8 +1440,8 @@ class KatibClient(object):
         namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """Get the Succeeded Trial details. If Experiment name is set,
-        it returns Succeeded Trials details belong to the Experiment.
+        """Get the Succeeded Trial details. If Experiment name is set, it returns
+        Succeeded Trials details belong to the Experiment.
 
         Args:
             experiment_name: Optional name for the Experiment.
@@ -1519,8 +1549,8 @@ class KatibClient(object):
         db_manager_address: str = constants.DEFAULT_DB_MANAGER_ADDRESS,
         timeout: str = constants.DEFAULT_TIMEOUT,
     ):
-        """Get the Trial Metric Results from the Katib DB.
-        Katib DB Manager service should be accessible while calling this API.
+        """Get the Trial Metric Results from the Katib DB. Katib DB Manager service
+        should be accessible while calling this API.
 
         If you run this API in-cluster (e.g. from the Kubeflow Notebook) you can
         use the default Katib DB Manager address: `katib-db-manager.kubeflow:6789`.
