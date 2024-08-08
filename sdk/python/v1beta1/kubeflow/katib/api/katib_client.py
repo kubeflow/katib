@@ -214,8 +214,8 @@ class KatibClient(object):
             platforms (currently supports HuggingFace and Amazon S3) using the Storage
             Initializer. The `trainer_parameters` should be of type
             `HuggingFaceTrainerParams` to set the hyperparameters search space. This API
-            will automatically define the "Trainer" in HuggingFace with the provided 
-            parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics 
+            will automatically define the "Trainer" in HuggingFace with the provided
+            parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics
             for optimizing hyperparameters.
 
         2. Custom objective function
@@ -259,9 +259,9 @@ class KatibClient(object):
                 should not use any code declared outside of the function definition.
                 Import statements must be added inside the function.
             base_image: Image to use when executing the objective function.
-            parameters: Dict of HyperParameters to tune your Experiment if you choose a custom 
-                objective function. You should use Katib SDK to define the search space for these 
-                parameters. For example: 
+            parameters: Dict of HyperParameters to tune your Experiment if you choose a custom
+                objective function. You should use Katib SDK to define the search space for these
+                parameters. For example:
                 `parameters = {"lr": katib.search.double(min=0.1, max=0.2)}`
 
                 Also, you can use these parameters to define input for your objective function.
@@ -286,12 +286,12 @@ class KatibClient(object):
                 values check this doc: https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
             parallel_trial_count: Number of Trials that Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
-            resources_per_trial: A parameter that lets you specify how much resources 
+            resources_per_trial: A parameter that lets you specify how much resources
                 each trial container should have. You can either specify a
                 kubernetes.client.V1ResourceRequirements object (documented here:
                 https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1ResourceRequirements.md)
-                or a dictionary that includes one or more of the following keys: `cpu`, 
-                `memory`, or `gpu` (other keys will be ignored). Appropriate values 
+                or a dictionary that includes one or more of the following keys: `cpu`,
+                `memory`, or `gpu` (other keys will be ignored). Appropriate values
                 for these keys are documented here:
                 https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/.
                 For example:
@@ -301,8 +301,8 @@ class KatibClient(object):
                     "memory": "2Gi",
                 }
                 Please note, `gpu` specifies a resource request with a key of
-                `nvidia.com/gpu`, i.e. an NVIDIA GPU. If you need a different type of 
-                GPU, pass in a V1ResourceRequirement instance instead, since it's more 
+                `nvidia.com/gpu`, i.e. an NVIDIA GPU. If you need a different type of
+                GPU, pass in a V1ResourceRequirement instance instead, since it's more
                 flexible. This parameter is optional and defaults to None.
             retain_trials: Whether Trials' resources (e.g. pods) are deleted after Succeeded state.
             packages_to_install: List of Python packages to install in addition
@@ -382,16 +382,6 @@ class KatibClient(object):
         if max_failed_trial_count is not None:
             experiment.spec.max_failed_trial_count = max_failed_trial_count
 
-        # Add resources to the Katib Experiment.
-        if isinstance(resources_per_trial, dict):
-            if "gpu" in resources_per_trial:
-                resources_per_trial["nvidia.com/gpu"] = resources_per_trial.pop("gpu")
-
-            resources_per_trial = client.V1ResourceRequirements(
-                requests=resources_per_trial,
-                limits=resources_per_trial,
-            )
-
         # Add environment variables to the Katib Experiment.
         env = []
         env_from = []
@@ -415,7 +405,9 @@ class KatibClient(object):
         # Up to now, We only support parameter `kind`, of which default value is
         # `StdOut`, to specify the kind of metrics collector.
         experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
-            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"]),
+            collector=models.V1beta1CollectorSpec(
+                kind=metrics_collector_config["kind"]
+            ),
             source=models.V1beta1SourceSpec(
                 filter=models.V1beta1FilterSpec(
                     metrics_format=[
@@ -436,13 +428,6 @@ class KatibClient(object):
 
             # Validate objective function.
             utils.validate_objective_function(objective)
-
-            # Extract objective function implementation.
-            objective_code = inspect.getsource(objective)
-
-            # Objective function might be defined in some indented scope
-            # (e.g. in another function). We need to dedent the function code.
-            objective_code = textwrap.dedent(objective_code)
 
             # Iterate over input parameters.
             input_params = {}
@@ -466,53 +451,21 @@ class KatibClient(object):
                     # Otherwise, add value to the function input.
                     input_params[p_name] = p_value
 
-            # Wrap objective function to execute it from the file. For example
-            # def objective(parameters):
-            #     print(f'Parameters are {parameters}')
-            # objective({'lr': '${trialParameters.lr}', 'epochs': '${trialParameters.epochs}', 'is_dist': False})
-            objective_code = f"{objective_code}\n{objective.__name__}({input_params})\n"
-
-            # Prepare execute script template.
-            exec_script = textwrap.dedent(
-                """
-                program_path=$(mktemp -d)
-                read -r -d '' SCRIPT << EOM\n
-                {objective_code}
-                EOM
-                printf "%s" "$SCRIPT" > $program_path/ephemeral_objective.py
-                python3 -u $program_path/ephemeral_objective.py"""
-            )
-
-            # Add objective code to the execute script.
-            exec_script = exec_script.format(objective_code=objective_code)
-
-            # Install Python packages if that is required.
-            if packages_to_install is not None:
-                exec_script = (
-                    utils.get_script_for_python_packages(
-                        packages_to_install, pip_index_url
-                    )
-                    + exec_script
-                )
-
-            container_spec = client.V1Container(
+            container_spec = utils.get_container_spec(
                 name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                image=base_image,
-                command=["bash", "-c"],
-                args=[exec_script],
-                env=env if env else None,
-                env_from=env_from if env_from else None,
+                base_image=base_image,
+                train_func=objective,
+                train_func_parameters=input_params,
+                packages_to_install=packages_to_install,
+                pip_index_url=pip_index_url,
                 resources=resources_per_trial,
+                env=env,
+                env_from=env_from,
             )
 
-            pod_spec = client.V1PodTemplateSpec(
-                metadata=models.V1ObjectMeta(
-                    annotations={"sidecar.istio.io/inject": "false"}
-                ),
-                spec=client.V1PodSpec(
-                    restart_policy="Never",
-                    containers=[container_spec],
-                ),
+            pod_spec = utils.get_pod_template_spec(
+                containers=[container_spec],
+                restart_policy="Never",
             )
 
         # If users choose to use external models and datasets.
@@ -646,11 +599,7 @@ class KatibClient(object):
                         value = type(old_attr)(p_value)
                     setattr(lora_config, p_name, value)
 
-            # Create init container spec.
-            from kubeflow.training.utils.utils import get_container_spec
-            from kubeflow.training.utils.utils import get_pod_template_spec
-
-            init_container_spec = get_container_spec(
+            init_container_spec = utils.get_container_spec(
                 name=STORAGE_INITIALIZER,
                 base_image=STORAGE_INITIALIZER_IMAGE,
                 args=[
@@ -671,7 +620,7 @@ class KatibClient(object):
             lora_config = json.dumps(lora_config.__dict__, cls=utils.SetEncoder)
             training_args = json.dumps(training_args.to_dict())
 
-            container_spec = get_container_spec(
+            container_spec = utils.get_container_spec(
                 name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
                 base_image=TRAINER_TRANSFORMER_IMAGE,
                 args=[
@@ -690,7 +639,6 @@ class KatibClient(object):
                 ],
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
                 resources=resources_per_trial,
-                # TODO (helenxie-bit): Add `env` and `env_from` in the future
             )
 
             storage_initializer_volume = models.V1Volume(
@@ -700,7 +648,7 @@ class KatibClient(object):
                 ),
             )
 
-            pod_spec = get_pod_template_spec(
+            pod_spec = utils.get_pod_template_spec(
                 containers=[container_spec],
                 init_containers=[init_container_spec],
                 volumes=[storage_initializer_volume],
