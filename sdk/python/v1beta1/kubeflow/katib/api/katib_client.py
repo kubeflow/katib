@@ -779,7 +779,7 @@ class KatibClient(object):
         experiment: models.V1beta1Experiment = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """Get the Experiment conditions. Experiment is in the condition when 
+        """Get the Experiment conditions. Experiment is in the condition when
         `status` is True for the appropriate condition `type`.
 
         Args:
@@ -975,7 +975,7 @@ class KatibClient(object):
         polling_interval: int = 15,
         apiserver_timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """Wait until Experiment reaches specific condition. By default it waits 
+        """Wait until Experiment reaches specific condition. By default it waits
         for the Succeeded condition.
 
         Args:
@@ -1087,8 +1087,8 @@ class KatibClient(object):
         max_failed_trial_count: int = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """Update Experiment budget for the running Trials. You can modify Trial 
-        budget to resume Succeeded Experiments with `LongRunning` and `FromVolume` 
+        """Update Experiment budget for the running Trials. You can modify Trial
+        budget to resume Succeeded Experiments with `LongRunning` and `FromVolume`
         resume policies.
 
         Learn about resuming Experiments here: https://www.kubeflow.org/docs/components/katib/resume-experiment/
@@ -1328,7 +1328,7 @@ class KatibClient(object):
         namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """List of all Trials in namespace. If Experiment name is set, 
+        """List of all Trials in namespace. If Experiment name is set,
         it returns all Trials belong to the Experiment.
 
         Args:
@@ -1388,7 +1388,7 @@ class KatibClient(object):
         namespace: Optional[str] = None,
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
-        """Get the Succeeded Trial details. If Experiment name is set, 
+        """Get the Succeeded Trial details. If Experiment name is set,
         it returns Succeeded Trials details belong to the Experiment.
 
         Args:
@@ -1497,7 +1497,7 @@ class KatibClient(object):
         db_manager_address: str = constants.DEFAULT_DB_MANAGER_ADDRESS,
         timeout: str = constants.DEFAULT_TIMEOUT,
     ):
-        """Get the Trial Metric Results from the Katib DB. 
+        """Get the Trial Metric Results from the Katib DB.
         Katib DB Manager service should be accessible while calling this API.
 
         If you run this API in-cluster (e.g. from the Kubeflow Notebook) you can
