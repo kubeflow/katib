@@ -251,8 +251,8 @@ class KatibClient(object):
             pip_index_url: The PyPI url from which to install Python packages.
             metrics_collector_config: Specify the config of metrics collector, 
                 for example, `metrics_collector_config = {"kind": "Push"}`.
-                Currently, we only support `StdOut` and `Push` metrics collector.
-
+                for using custom metric collectors use "custom_collector" key,
+                for example, `metrics_collector_config = {"custom_collector": "prometheus "}`.
         Raises:
             ValueError: Function arguments have incorrect type or value.
             TimeoutError: Timeout to create Katib Experiment.
@@ -387,7 +387,9 @@ class KatibClient(object):
         # Add metrics collector to the Katib Experiment.
         # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector. 
         experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
-            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
+            collector=models.V1beta1CollectorSpec(  
+                kind=metrics_collector_config["kind"],
+                custom_collector=metrics_collector_config["custom_collector"])
         )
 
         # Create Trial specification.
