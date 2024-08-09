@@ -18,12 +18,13 @@ package validator
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	experimentutil "github.com/kubeflow/katib/pkg/controller.v1beta1/experiment/util"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"testing"
 
 	"go.uber.org/mock/gomock"
 	batchv1 "k8s.io/api/batch/v1"
@@ -453,6 +454,22 @@ func TestValidateParameters(t *testing.T) {
 				field.Invalid(field.NewPath("spec").Child("parameters").Index(1).Child("feasibleSpace"), "", ""),
 			},
 			testDescription: "Not empty max for categorical parameter type",
+		},
+		{
+			parameters: func() []experimentsv1beta1.ParameterSpec {
+				ps := newFakeInstance().Spec.Parameters
+				ps[0].FeasibleSpace.Distribution = "invalid-distribution"
+				return ps
+			}(),
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("parameters").Index(0).Child("feasibleSpace").Child("distribution"), "", ""),
+			},
+			testDescription: "Invalid distribution type",
+		},
+		{
+			parameters:      newFakeInstance().Spec.Parameters,
+			wantErr:         nil,
+			testDescription: "Valid parameters case",
 		},
 	}
 
@@ -1374,8 +1391,9 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					Name:          "lr",
 					ParameterType: experimentsv1beta1.ParameterTypeInt,
 					FeasibleSpace: experimentsv1beta1.FeasibleSpace{
-						Max: "5",
-						Min: "1",
+						Max:          "5",
+						Min:          "1",
+						Distribution: experimentsv1beta1.DistributionUniform,
 					},
 				},
 				{

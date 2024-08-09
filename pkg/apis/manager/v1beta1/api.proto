@@ -105,6 +105,7 @@ enum Distribution {
     LOG_UNIFORM = 1;
     NORMAL = 2;
     LOG_NORMAL = 3;
+    DISTRIBUTION_UNKNOWN = 4;
 }
 
 /**
