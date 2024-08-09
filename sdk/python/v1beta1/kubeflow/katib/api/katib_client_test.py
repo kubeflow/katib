@@ -38,6 +38,24 @@ def create_namespaced_custom_object_response(*args, **kwargs):
         return {"metadata": {"name": "12345-experiment-mnist-ci-test"}}
 
 
+def get_observation_log_response(*args, **kwargs):
+    if kwargs.get("timeout") == 0:
+        raise TimeoutError
+    elif args[0].trial_name == "invalid":
+        raise RuntimeError
+    else:
+        return katib_api_pb2.GetObservationLogReply(
+            observation_log=katib_api_pb2.ObservationLog(
+                metric_logs=[
+                    katib_api_pb2.MetricLog(
+                        time_stamp="2024-07-29T15:09:08Z",
+                        metric=katib_api_pb2.Metric(name="result",value="0.99")
+                    )
+                ]
+            )
+        )
+
+
 def generate_trial_template() -> V1beta1TrialTemplate:
     trial_spec={
         "apiVersion": "batch/v1",
@@ -238,54 +256,6 @@ test_create_experiment_data = [
 ]
 
 
-@pytest.fixture
-def katib_client_create_experiment():
-    with patch(
-        "kubernetes.client.CustomObjectsApi",
-        return_value=Mock(
-            create_namespaced_custom_object=Mock(
-                side_effect=create_namespaced_custom_object_response
-            )
-        ),
-    ), patch(
-        "kubernetes.config.load_kube_config",
-        return_value=Mock()
-    ):
-        client = KatibClient()
-        yield client
-
-
-@pytest.mark.parametrize("test_name,kwargs,expected_output", test_create_experiment_data)
-def test_create_experiment(katib_client_create_experiment, test_name, kwargs, expected_output):
-    """
-    test create_experiment function of katib client
-    """
-    print("\n\nExecuting test:", test_name)
-    try:
-        katib_client_create_experiment.create_experiment(**kwargs)
-        assert expected_output == TEST_RESULT_SUCCESS
-    except Exception as e:
-        assert type(e) is expected_output
-    print("test execution complete")
-
-
-def get_observation_log_response(*args, **kwargs):
-    if kwargs.get("timeout") == 0:
-        raise TimeoutError
-    elif args[0].trial_name == "invalid":
-        raise RuntimeError
-    else:
-        return katib_api_pb2.GetObservationLogReply(
-            observation_log=katib_api_pb2.ObservationLog(
-                metric_logs=[
-                    katib_api_pb2.MetricLog(
-                        time_stamp="2024-07-29T15:09:08Z",
-                        metric=katib_api_pb2.Metric(name="result",value="0.99")
-                    )
-                ]
-            )
-        )
-
 test_get_trial_metrics_data = [
     (
         "valid trial name",
@@ -323,34 +293,51 @@ test_get_trial_metrics_data = [
 
 
 @pytest.fixture
-def katib_client_get_trial_metrics():
+def katib_client():
     with patch(
         "kubernetes.client.CustomObjectsApi",
-        return_value=Mock(),
+        return_value=Mock(
+            create_namespaced_custom_object=Mock(
+                side_effect=create_namespaced_custom_object_response
+            )
+        ),
     ), patch(
         "kubernetes.config.load_kube_config",
         return_value=Mock()
+    ), patch(
+        "kubeflow.katib.katib_api_pb2_grpc.DBManagerStub", 
+        return_value=Mock(
+            GetObservationLog=Mock(
+                side_effect=get_observation_log_response
+            )
+        )
     ):
         client = KatibClient()
         yield client
 
 
-@pytest.fixture
-def mock_get_observation_log():
-    with patch("kubeflow.katib.katib_api_pb2_grpc.DBManagerStub") as mock:
-        mock_instance = mock.return_value
-        mock_instance.GetObservationLog.side_effect = get_observation_log_response
-        yield mock_instance
+@pytest.mark.parametrize("test_name,kwargs,expected_output", test_create_experiment_data)
+def test_create_experiment(katib_client, test_name, kwargs, expected_output):
+    """
+    test create_experiment function of katib client
+    """
+    print("\n\nExecuting test:", test_name)
+    try:
+        katib_client.create_experiment(**kwargs)
+        assert expected_output == TEST_RESULT_SUCCESS
+    except Exception as e:
+        assert type(e) is expected_output
+    print("test execution complete")
 
 
 @pytest.mark.parametrize("test_name,kwargs,expected_output", test_get_trial_metrics_data)
-def test_get_trial_metrics(test_name, kwargs, expected_output, katib_client_get_trial_metrics, mock_get_observation_log):
+def test_get_trial_metrics(katib_client, test_name, kwargs, expected_output):
     """
     test get_trial_metrics function of katib client
     """
     print("\n\nExecuting test:", test_name)
     try:
-        metrics = katib_client_get_trial_metrics.get_trial_metrics(**kwargs)
+        metrics = katib_client.get_trial_metrics(**kwargs)
         for i in range(len(metrics)):
             assert metrics[i] == expected_output[i]
     except Exception as e:
