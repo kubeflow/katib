@@ -211,7 +211,7 @@ class KatibClient(object):
             `trainer_parameters`.
         Usage: Specify both `model_provider_parameters` and
             `dataset_provider_parameters` to download models and datasets from external
-            platforms (currently supports HuggingFace and Amazon S3) using the Storage
+            platforms (currently support HuggingFace and Amazon S3) using the Storage
             Initializer. The `trainer_parameters` should be of type
             `HuggingFaceTrainerParams` to set the hyperparameters search space. This API
             will automatically define the "Trainer" in HuggingFace with the provided
