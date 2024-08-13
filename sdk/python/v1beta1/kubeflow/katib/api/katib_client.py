@@ -186,7 +186,7 @@ class KatibClient(object):
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
-        metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
+        metrics_collector_config: Dict[str, Any] = {"kind": "StdOut", "custom_collector": None},
     ):
         """Create HyperParameter Tuning Katib Experiment from the objective function.
 
@@ -252,7 +252,7 @@ class KatibClient(object):
             metrics_collector_config: Specify the config of metrics collector, 
                 for example, `metrics_collector_config = {"kind": "Push"}`.
                 for using custom metric collectors use "custom_collector" key,
-                for example, `metrics_collector_config = {"custom_collector": "prometheus "}`.
+                for example, `metrics_collector_config = {"custom_collector": "prometheus"}`.
         Raises:
             ValueError: Function arguments have incorrect type or value.
             TimeoutError: Timeout to create Katib Experiment.
