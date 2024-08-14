@@ -249,7 +249,7 @@ class KatibClient(object):
                 to the base image packages. These packages are installed before
                 executing the objective function.
             pip_index_url: The PyPI url from which to install Python packages.
-            metrics_collector_config: Specify the config of metrics collector, 
+            metrics_collector_config: Specify the config of metrics collector,
                 for example, `metrics_collector_config = {"kind": "Push"}`.
                 Currently, we only support `StdOut` and `Push` metrics collector.
 
@@ -385,7 +385,7 @@ class KatibClient(object):
                     )
 
         # Add metrics collector to the Katib Experiment.
-        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector. 
+        # Up to now, We only support parameter `kind`, of which default value is `StdOut`, to specify the kind of metrics collector.
         experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
             collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
         )
@@ -764,7 +764,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Raise exception if Experiment is Failed.
@@ -784,7 +786,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Running condition.
@@ -795,7 +799,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
@@ -806,7 +812,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
@@ -817,7 +825,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.

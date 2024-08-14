@@ -16,18 +16,30 @@ import torch
 import torch.nn as nn
 
 OPS = {
-    'none': lambda channels, stride: Zero(stride),
-    'avg_pooling_3x3': lambda channels, stride: PoolBN('avg', channels, kernel_size=3, stride=stride, padding=1),
-    'max_pooling_3x3': lambda channels, stride: PoolBN('max', channels, kernel_size=3, stride=stride, padding=1),
-    'skip_connection': lambda channels, stride: Identity() if stride == 1 else FactorizedReduce(channels, channels),
-    'separable_convolution_3x3': lambda channels, stride: SepConv(channels, kernel_size=3, stride=stride, padding=1),
-    'separable_convolution_5x5': lambda channels, stride: SepConv(channels, kernel_size=5, stride=stride, padding=2),
+    "none": lambda channels, stride: Zero(stride),
+    "avg_pooling_3x3": lambda channels, stride: PoolBN(
+        "avg", channels, kernel_size=3, stride=stride, padding=1
+    ),
+    "max_pooling_3x3": lambda channels, stride: PoolBN(
+        "max", channels, kernel_size=3, stride=stride, padding=1
+    ),
+    "skip_connection": lambda channels, stride: (
+        Identity() if stride == 1 else FactorizedReduce(channels, channels)
+    ),
+    "separable_convolution_3x3": lambda channels, stride: SepConv(
+        channels, kernel_size=3, stride=stride, padding=1
+    ),
+    "separable_convolution_5x5": lambda channels, stride: SepConv(
+        channels, kernel_size=5, stride=stride, padding=2
+    ),
     # 3x3 -> 5x5
-    'dilated_convolution_3x3': lambda channels, stride: DilConv(channels,
-                                                                kernel_size=3, stride=stride, padding=2, dilation=2),
+    "dilated_convolution_3x3": lambda channels, stride: DilConv(
+        channels, kernel_size=3, stride=stride, padding=2, dilation=2
+    ),
     # 5x5 -> 9x9
-    'dilated_convolution_5x5': lambda channels, stride: DilConv(channels,
-                                                                kernel_size=5, stride=stride, padding=4, dilation=2),
+    "dilated_convolution_5x5": lambda channels, stride: DilConv(
+        channels, kernel_size=5, stride=stride, padding=4, dilation=2
+    ),
 }
 
 
@@ -42,9 +54,9 @@ class Zero(nn.Module):
 
     def forward(self, x):
         if self.stride == 1:
-            return x * 0.
+            return x * 0.0
         # Resize by stride
-        return x[:, :, ::self.stride, ::self.stride] * 0.
+        return x[:, :, :: self.stride, :: self.stride] * 0.0
 
 
 class PoolBN(nn.Module):
@@ -55,15 +67,14 @@ class PoolBN(nn.Module):
     def __init__(self, pool_type, channels, kernel_size, stride, padding):
         super(PoolBN, self).__init__()
         if pool_type == "avg":
-            self.pool = nn.AvgPool2d(kernel_size, stride, padding, count_include_pad=False)
+            self.pool = nn.AvgPool2d(
+                kernel_size, stride, padding, count_include_pad=False
+            )
         elif pool_type == "max":
             self.pool = nn.MaxPool2d(kernel_size, stride, padding)
 
         self.bn = nn.BatchNorm2d(channels, affine=False)
-        self.net = nn.Sequential(
-            self.pool,
-            self.bn
-        )
+        self.net = nn.Sequential(self.pool, self.bn)
 
     def forward(self, x):
         # out = self.pool(x),
@@ -91,8 +102,12 @@ class FactorizedReduce(nn.Module):
     def __init__(self, c_in, c_out):
         super(FactorizedReduce, self).__init__()
         self.relu = nn.ReLU()
-        self.conv1 = nn.Conv2d(c_in, c_out // 2, kernel_size=1, stride=2, padding=0, bias=False)
-        self.conv2 = nn.Conv2d(c_in, c_out // 2, kernel_size=1, stride=2, padding=0, bias=False)
+        self.conv1 = nn.Conv2d(
+            c_in, c_out // 2, kernel_size=1, stride=2, padding=0, bias=False
+        )
+        self.conv2 = nn.Conv2d(
+            c_in, c_out // 2, kernel_size=1, stride=2, padding=0, bias=False
+        )
         self.bn = nn.BatchNorm2d(c_out, affine=False)
 
     def forward(self, x):
@@ -105,7 +120,7 @@ class FactorizedReduce(nn.Module):
 
 
 class StdConv(nn.Module):
-    """ Standard convolition
+    """Standard convolition
     ReLU - Conv - BN
     """
 
@@ -113,8 +128,15 @@ class StdConv(nn.Module):
         super(StdConv, self).__init__()
         self.net = nn.Sequential(
             nn.ReLU(),
-            nn.Conv2d(c_in, c_out, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
-            nn.BatchNorm2d(c_out, affine=False)
+            nn.Conv2d(
+                c_in,
+                c_out,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+                bias=False,
+            ),
+            nn.BatchNorm2d(c_out, affine=False),
         )
 
     def forward(self, x):
@@ -122,7 +144,7 @@ class StdConv(nn.Module):
 
 
 class DilConv(nn.Module):
-    """ (Dilated) depthwise separable conv
+    """(Dilated) depthwise separable conv
     ReLU - (Dilated) depthwise separable - Pointwise - BN
 
     If dilation == 2, 3x3 conv => 5x5 receptive field
@@ -134,9 +156,20 @@ class DilConv(nn.Module):
 
         self.net = nn.Sequential(
             nn.ReLU(),
-            nn.Conv2d(channels, channels, kernel_size, stride, padding, dilation=dilation, groups=channels, bias=False),
-            nn.Conv2d(channels, channels, kernel_size=1, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(channels, affine=False)
+            nn.Conv2d(
+                channels,
+                channels,
+                kernel_size,
+                stride,
+                padding,
+                dilation=dilation,
+                groups=channels,
+                bias=False,
+            ),
+            nn.Conv2d(
+                channels, channels, kernel_size=1, stride=1, padding=0, bias=False
+            ),
+            nn.BatchNorm2d(channels, affine=False),
         )
 
     def forward(self, x):
@@ -144,7 +177,7 @@ class DilConv(nn.Module):
 
 
 class SepConv(nn.Module):
-    """ Depthwise separable conv
+    """Depthwise separable conv
     DilConv (dilation=1) * 2
     """
 
@@ -152,7 +185,7 @@ class SepConv(nn.Module):
         super(SepConv, self).__init__()
         self.net = nn.Sequential(
             DilConv(channels, kernel_size, stride=stride, padding=padding, dilation=1),
-            DilConv(channels, kernel_size, stride=1, padding=padding, dilation=1)
+            DilConv(channels, kernel_size, stride=1, padding=padding, dilation=1),
         )
 
     def forward(self, x):
@@ -160,8 +193,7 @@ class SepConv(nn.Module):
 
 
 class MixedOp(nn.Module):
-    """ Mixed operation
-    """
+    """Mixed operation"""
 
     def __init__(self, channels, stride, search_space):
         super(MixedOp, self).__init__()

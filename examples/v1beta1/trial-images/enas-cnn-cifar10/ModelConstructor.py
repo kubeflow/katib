@@ -39,10 +39,10 @@ class ModelConstructor(object):
     def __init__(self, arc_json, nn_json):
         self.arch = json.loads(arc_json)
         nn_config = json.loads(nn_json)
-        self.num_layers = nn_config['num_layers']
-        self.input_sizes = nn_config['input_sizes']
-        self.output_size = nn_config['output_sizes'][-1]
-        self.embedding = nn_config['embedding']
+        self.num_layers = nn_config["num_layers"]
+        self.input_sizes = nn_config["input_sizes"]
+        self.output_size = nn_config["output_sizes"][-1]
+        self.embedding = nn_config["embedding"]
 
     def build_model(self):
         # a list of the data all layers
@@ -60,7 +60,7 @@ class ModelConstructor(object):
             input_layers = list()
             opt = self.arch[l - 1][0]
             opt_config = self.embedding[str(opt)]
-            skip = self.arch[l - 1][1:l+1]
+            skip = self.arch[l - 1][1 : l + 1]
 
             # set up the connection to the previous layer first
             input_layers.append(all_layers[l - 1])
@@ -71,13 +71,13 @@ class ModelConstructor(object):
                     input_layers.append(all_layers[i])
 
             layer_input = concat(input_layers)
-            if opt_config['opt_type'] == 'convolution':
+            if opt_config["opt_type"] == "convolution":
                 layer_output = conv(layer_input, opt_config)
-            if opt_config['opt_type'] == 'separable_convolution':
+            if opt_config["opt_type"] == "separable_convolution":
                 layer_output = sp_conv(layer_input, opt_config)
-            if opt_config['opt_type'] == 'depthwise_convolution':
+            if opt_config["opt_type"] == "depthwise_convolution":
                 layer_output = dw_conv(layer_input, opt_config)
-            elif opt_config['opt_type'] == 'reduction':
+            elif opt_config["opt_type"] == "reduction":
                 layer_output = reduction(layer_input, opt_config)
 
             all_layers[l] = layer_output
@@ -86,8 +86,7 @@ class ModelConstructor(object):
         # Global Average Pooling, then Fully connected with softmax.
         avgpooled = GlobalAveragePooling2D()(all_layers[self.num_layers])
         dropped = Dropout(0.4)(avgpooled)
-        logits = Dense(units=self.output_size,
-                       activation='softmax')(dropped)
+        logits = Dense(units=self.output_size, activation="softmax")(dropped)
 
         # Encapsulate the model
         self.model = Model(inputs=input_layer, outputs=logits)
