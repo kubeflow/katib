@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import inspect
 import json
 import logging
@@ -573,7 +574,11 @@ class KatibClient(object):
                 elif p_value is not None:
                     old_attr = getattr(training_args, p_name, None)
                     if old_attr is not None:
-                        value = type(old_attr)(p_value)
+                        if isinstance(p_value, dict):
+                            # Update the existing dictionary without nesting
+                            value = copy.deepcopy(p_value)
+                        else:
+                            value = type(old_attr)(p_value)
                     setattr(training_args, p_name, value)
 
             lora_config = trainer_parameters.lora_config
