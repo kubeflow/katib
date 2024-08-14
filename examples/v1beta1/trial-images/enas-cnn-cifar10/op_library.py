@@ -18,10 +18,7 @@ from keras.layers import AveragePooling2D
 from keras.layers import BatchNormalization
 from keras.layers import concatenate
 from keras.layers import Conv2D
-from keras.layers import Dense
 from keras.layers import DepthwiseConv2D
-from keras.layers import GlobalAveragePooling2D
-from keras.layers import Input
 from keras.layers import MaxPooling2D
 from keras.layers import SeparableConv2D
 from keras.layers import ZeroPadding2D
@@ -142,7 +139,8 @@ def reduction(x, config):
     dim = K.int_shape(x)
     if dim[1] == 1 or dim[2] == 1:
         print(
-            "WARNING: One or more dimensions of the input of the reduction layer is 1. It cannot be further reduced. A identity layer will be used instead."
+            "WARNING: One or more dimensions of the input of the reduction layer is 1. "
+            "It cannot be further reduced. A identity layer will be used instead."
         )
         return x
 

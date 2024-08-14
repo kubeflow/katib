@@ -21,10 +21,12 @@
 
 # This Experiment is similar to this:
 # https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/mpijob-horovod.yaml
-# Check the training container source code here: https://github.com/kubeflow/mpi-operator/tree/master/examples/horovod.
+# Check the training container source code here:
+# https://github.com/kubeflow/mpi-operator/tree/master/examples/horovod.
 
 # Note: To run this example, your Kubernetes cluster should run MPIJob operator.
-# Follow this guide to install MPIJob on your cluster: https://www.kubeflow.org/docs/components/training/mpi/
+# Follow this guide to install MPIJob on your cluster:
+# https://www.kubeflow.org/docs/components/training/mpi/
 
 import kfp
 from kfp import components
@@ -48,7 +50,6 @@ def horovod_mnist_hpo(
     experiment_name: str = "mpi-horovod-mnist",
     experiment_namespace: str = "kubeflow-user-example-com",
 ):
-
     # Trial count specification.
     max_trial_count = 6
     max_failed_trial_count = 3
@@ -193,7 +194,8 @@ def horovod_mnist_hpo(
     # Get the Katib launcher.
     # Load component from the URL or from the file.
     katib_experiment_launcher_op = components.load_component_from_url(
-        "https://raw.githubusercontent.com/kubeflow/pipelines/master/components/kubeflow/katib-launcher/component.yaml"
+        "https://raw.githubusercontent.com/kubeflow/pipelines/master/"
+        "components/kubeflow/katib-launcher/component.yaml"
     )
     # katib_experiment_launcher_op = components.load_component_from_file(
     #     "../../../components/kubeflow/katib-launcher/component.yaml"

@@ -14,20 +14,11 @@
 
 import json
 
-from keras import backend as K
-from keras.layers import Activation
-from keras.layers import AveragePooling2D
-from keras.layers import BatchNormalization
-from keras.layers import concatenate
-from keras.layers import Conv2D
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import GlobalAveragePooling2D
 from keras.layers import Input
-from keras.layers import MaxPooling2D
-from keras.layers import ZeroPadding2D
 from keras.models import Model
-import numpy as np
 from op_library import concat
 from op_library import conv
 from op_library import dw_conv
@@ -47,8 +38,6 @@ class ModelConstructor(object):
     def build_model(self):
         # a list of the data all layers
         all_layers = [0 for _ in range(self.num_layers + 1)]
-        # a list of all the dimensions of all layers
-        all_dims = [0 for _ in range(self.num_layers + 1)]
 
         # ================= Stacking layers =================
         # Input Layer. Layer 0
@@ -56,18 +45,18 @@ class ModelConstructor(object):
         all_layers[0] = input_layer
 
         # Intermediate Layers. Starting from layer 1.
-        for l in range(1, self.num_layers + 1):
+        for l_index in range(1, self.num_layers + 1):
             input_layers = list()
-            opt = self.arch[l - 1][0]
+            opt = self.arch[l_index - 1][0]
             opt_config = self.embedding[str(opt)]
-            skip = self.arch[l - 1][1 : l + 1]
+            skip = self.arch[l_index - 1][1 : l_index + 1]
 
             # set up the connection to the previous layer first
-            input_layers.append(all_layers[l - 1])
+            input_layers.append(all_layers[l_index - 1])
 
             # then add skip connections
-            for i in range(l - 1):
-                if l > 1 and skip[i] == 1:
+            for i in range(l_index - 1):
+                if l_index > 1 and skip[i] == 1:
                     input_layers.append(all_layers[i])
 
             layer_input = concat(input_layers)
@@ -80,7 +69,7 @@ class ModelConstructor(object):
             elif opt_config["opt_type"] == "reduction":
                 layer_output = reduction(layer_input, opt_config)
 
-            all_layers[l] = layer_output
+            all_layers[l_index] = layer_output
 
         # Final Layer
         # Global Average Pooling, then Fully connected with softmax.

@@ -67,7 +67,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
                 loss.item(),
             )
             logging.info(msg)
-            niter = epoch * len(train_loader) + batch_idx
+            niter = epoch * len(train_loader) + batch_idx  # noqa: F841
 
 
 def test(args, model, device, test_loader, epoch, hpt):
@@ -88,10 +88,10 @@ def test(args, model, device, test_loader, epoch, hpt):
 
     test_loss /= len(test_loader.dataset)
     test_accuracy = float(correct) / len(test_loader.dataset)
+
     logging.info(
-        "{{metricName: accuracy, metricValue: {:.4f}}};{{metricName: loss, metricValue: {:.4f}}}\n".format(
-            test_accuracy, test_loss
-        )
+        "{{metricName: accuracy, metricValue: {:.4f}}};"
+        "{{metricName: loss, metricValue: {:.4f}}}\n".format(test_accuracy, test_loss)
     )
 
     if args.logger == "hypertune":
@@ -239,7 +239,7 @@ def main():
         ),
         batch_size=args.batch_size,
         shuffle=True,
-        **kwargs
+        **kwargs,
     )
 
     test_loader = torch.utils.data.DataLoader(
@@ -248,7 +248,7 @@ def main():
         ),
         batch_size=args.test_batch_size,
         shuffle=False,
-        **kwargs
+        **kwargs,
     )
 
     model = Net().to(device)

@@ -34,7 +34,7 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
             for rule in rules:
                 line = rule(line)
             # Remove ignored lines.
-            if not any(l in line for l in IGNORE_LINES):
+            if not any(li in line for li in IGNORE_LINES):
                 lines.append(line)
 
     # Add Katib APIs to the init file.
@@ -73,34 +73,34 @@ def update_python_sdk(src, dest, versions=("v1beta1")):
     # tiny transformers to refine generated codes
     rewrite_rules = [
         # Models rules.
-        lambda l: l.replace("import katib", "import kubeflow.katib"),
-        lambda l: l.replace("from katib", "from kubeflow.katib"),
+        lambda line: line.replace("import katib", "import kubeflow.katib"),
+        lambda line: line.replace("from katib", "from kubeflow.katib"),
         # For the api_client.py.
-        lambda l: l.replace(
+        lambda line: line.replace(
             "klass = getattr(katib.models, klass)",
             "klass = getattr(kubeflow.katib.models, klass)",
         ),
         # Doc rules.
-        lambda l: l.replace("[**datetime**](V1Time.md)", "**datetime**"),
-        lambda l: l.replace(
+        lambda line: line.replace("[**datetime**](V1Time.md)", "**datetime**"),
+        lambda line: line.replace(
             "[**object**](V1UnstructuredUnstructured.md)", "**object**"
         ),
-        lambda l: l.replace(
+        lambda line: line.replace(
             "[**V1Container**](V1Container.md)",
             "[**V1Container**](https://github.com/kubernetes-client/"
             "python/blob/master/kubernetes/docs/V1Container.md)",
         ),
-        lambda l: l.replace(
+        lambda line: line.replace(
             "[**V1ObjectMeta**](V1ObjectMeta.md)",
             "[**V1ObjectMeta**](https://github.com/kubernetes-client/"
             "python/blob/master/kubernetes/docs/V1ObjectMeta.md)",
         ),
-        lambda l: l.replace(
+        lambda line: line.replace(
             "[**V1ListMeta**](V1ListMeta.md)",
             "[**V1ListMeta**](https://github.com/kubernetes-client/"
             "python/blob/master/kubernetes/docs/V1ListMeta.md)",
         ),
-        lambda l: l.replace(
+        lambda line: line.replace(
             "[**V1HTTPGetAction**](V1HTTPGetAction.md)",
             "[**V1HTTPGetAction**](https://github.com/kubernetes-client/"
             "python/blob/master/kubernetes/docs/V1HTTPGetAction.md)",
