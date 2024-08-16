@@ -497,6 +497,21 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-s-earlystop", katibEarlyStopAddress,
 			},
 		},
+		"Trial with invalid Experiment label name. Suggestion is not created": {
+			trial: func() *trialsv1beta1.Trial {
+				trial := testTrial.DeepCopy()
+				trial.ObjectMeta.Labels[consts.LabelExperimentName] = "invalid-name"
+				return trial
+			}(),
+			mCSpec: common.MetricsCollectorSpec{
+				Collector: &common.CollectorSpec{
+					Kind: common.StdOutCollector,
+				},
+			},
+			earlyStoppingRules: earlyStoppingRules,
+			katibConfig:        configv1beta1.MetricsCollectorConfig{},
+			err:                true,
+		},
 	}
 
 	g.Expect(c.Create(context.TODO(), testSuggestion)).NotTo(gomega.HaveOccurred())
