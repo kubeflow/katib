@@ -27,15 +27,27 @@ import utils
 
 def main():
 
-    parser = argparse.ArgumentParser(description='TrainingContainer')
-    parser.add_argument('--algorithm-settings', type=str, default="", help="algorithm settings")
-    parser.add_argument('--search-space', type=str, default="", help="search space for the neural architecture search")
-    parser.add_argument('--num-layers', type=str, default="", help="number of layers of the neural network")
+    parser = argparse.ArgumentParser(description="TrainingContainer")
+    parser.add_argument(
+        "--algorithm-settings", type=str, default="", help="algorithm settings"
+    )
+    parser.add_argument(
+        "--search-space",
+        type=str,
+        default="",
+        help="search space for the neural architecture search",
+    )
+    parser.add_argument(
+        "--num-layers",
+        type=str,
+        default="",
+        help="number of layers of the neural network",
+    )
 
     args = parser.parse_args()
 
     # Get Algorithm Settings
-    algorithm_settings = args.algorithm_settings.replace("\'", "\"")
+    algorithm_settings = args.algorithm_settings.replace("'", '"')
     algorithm_settings = json.loads(algorithm_settings)
     print(">>> Algorithm settings")
     for key, value in algorithm_settings.items():
@@ -69,7 +81,7 @@ def main():
     stem_multiplier = int(algorithm_settings["stem_multiplier"])
 
     # Get Search Space
-    search_space = args.search_space.replace("\'", "\"")
+    search_space = args.search_space.replace("'", '"')
     search_space = json.loads(search_space)
     search_space = SearchSpace(search_space)
 
@@ -103,16 +115,28 @@ def main():
 
     criterion = nn.CrossEntropyLoss().to(device)
 
-    model = NetworkCNN(init_channels, input_channels,  num_classes, num_layers,
-                       criterion, search_space, num_nodes, stem_multiplier)
+    model = NetworkCNN(
+        init_channels,
+        input_channels,
+        num_classes,
+        num_layers,
+        criterion,
+        search_space,
+        num_nodes,
+        stem_multiplier,
+    )
 
     model = model.to(device)
 
     # Weights optimizer
-    w_optim = torch.optim.SGD(model.getWeights(), w_lr,  momentum=w_momentum, weight_decay=w_weight_decay)
+    w_optim = torch.optim.SGD(
+        model.getWeights(), w_lr, momentum=w_momentum, weight_decay=w_weight_decay
+    )
 
     # Alphas optimizer
-    alpha_optim = torch.optim.Adam(model.getAlphas(), alpha_lr, betas=(0.5, 0.999), weight_decay=alpha_weight_decay)
+    alpha_optim = torch.optim.Adam(
+        model.getAlphas(), alpha_lr, betas=(0.5, 0.999), weight_decay=alpha_weight_decay
+    )
 
     # Split data to train/validation
     num_train = len(train_data)
@@ -122,27 +146,30 @@ def main():
     train_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[:split])
     valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[split:])
 
-    train_loader = torch.utils.data.DataLoader(train_data,
-                                               batch_size=batch_size,
-                                               sampler=train_sampler,
-                                               num_workers=num_workers,
-                                               pin_memory=True)
+    train_loader = torch.utils.data.DataLoader(
+        train_data,
+        batch_size=batch_size,
+        sampler=train_sampler,
+        num_workers=num_workers,
+        pin_memory=True,
+    )
 
-    valid_loader = torch.utils.data.DataLoader(train_data,
-                                               batch_size=batch_size,
-                                               sampler=valid_sampler,
-                                               num_workers=num_workers,
-                                               pin_memory=True)
+    valid_loader = torch.utils.data.DataLoader(
+        train_data,
+        batch_size=batch_size,
+        sampler=valid_sampler,
+        num_workers=num_workers,
+        pin_memory=True,
+    )
 
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        w_optim,
-        num_epochs,
-        eta_min=w_lr_min)
+        w_optim, num_epochs, eta_min=w_lr_min
+    )
 
     architect = Architect(model, w_momentum, w_weight_decay, device)
 
     # Start training
-    best_top1 = 0.
+    best_top1 = 0.0
 
     for epoch in range(num_epochs):
         lr = lr_scheduler.get_last_lr()
@@ -151,14 +178,28 @@ def main():
 
         # Training
         print(">>> Training")
-        train(train_loader, valid_loader, model, architect, w_optim, alpha_optim,
-              lr, epoch, num_epochs, device, w_grad_clip, print_step)
+        train(
+            train_loader,
+            valid_loader,
+            model,
+            architect,
+            w_optim,
+            alpha_optim,
+            lr,
+            epoch,
+            num_epochs,
+            device,
+            w_grad_clip,
+            print_step,
+        )
         lr_scheduler.step()
 
         # Validation
         print("\n>>> Validation")
         cur_step = (epoch + 1) * len(train_loader)
-        top1 = validate(valid_loader, model, epoch, cur_step, num_epochs, device, print_step)
+        top1 = validate(
+            valid_loader, model, epoch, cur_step, num_epochs, device, print_step
+        )
 
         # Print genotype
         genotype = model.genotype(search_space)
@@ -173,18 +214,36 @@ def main():
     print("\nBest-Genotype={}".format(str(best_genotype).replace(" ", "")))
 
 
-def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim,
-          lr, epoch, num_epochs, device, w_grad_clip, print_step):
+def train(
+    train_loader,
+    valid_loader,
+    model,
+    architect,
+    w_optim,
+    alpha_optim,
+    lr,
+    epoch,
+    num_epochs,
+    device,
+    w_grad_clip,
+    print_step,
+):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
     losses = utils.AverageMeter()
     cur_step = epoch * len(train_loader)
 
     model.train()
-    for step, ((train_x, train_y), (valid_x, valid_y)) in enumerate(zip(train_loader, valid_loader)):
+    for step, ((train_x, train_y), (valid_x, valid_y)) in enumerate(
+        zip(train_loader, valid_loader)
+    ):
 
-        train_x, train_y = train_x.to(device, non_blocking=True), train_y.to(device, non_blocking=True)
-        valid_x, valid_y = valid_x.to(device, non_blocking=True), valid_y.to(device, non_blocking=True)
+        train_x, train_y = train_x.to(device, non_blocking=True), train_y.to(
+            device, non_blocking=True
+        )
+        valid_x, valid_y = valid_x.to(device, non_blocking=True), valid_y.to(
+            device, non_blocking=True
+        )
 
         train_size = train_x.size(0)
 
@@ -213,12 +272,21 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim,
             print(
                 "Train: [{:2d}/{}] Step {:03d}/{:03d} Loss {losses.avg:.3f} "
                 "Prec@(1,5) ({top1.avg:.1%}, {top5.avg:.1%})".format(
-                    epoch+1, num_epochs, step, len(train_loader)-1, losses=losses,
-                    top1=top1, top5=top5))
+                    epoch + 1,
+                    num_epochs,
+                    step,
+                    len(train_loader) - 1,
+                    losses=losses,
+                    top1=top1,
+                    top5=top5,
+                )
+            )
 
         cur_step += 1
 
-    print("Train: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch+1, num_epochs, top1.avg))
+    print(
+        "Train: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch + 1, num_epochs, top1.avg)
+    )
 
 
 def validate(valid_loader, model, epoch, cur_step, num_epochs, device, print_step):
@@ -230,7 +298,9 @@ def validate(valid_loader, model, epoch, cur_step, num_epochs, device, print_ste
 
     with torch.no_grad():
         for step, (valid_x, valid_y) in enumerate(valid_loader):
-            valid_x, valid_y = valid_x.to(device, non_blocking=True), valid_y.to(device, non_blocking=True)
+            valid_x, valid_y = valid_x.to(device, non_blocking=True), valid_y.to(
+                device, non_blocking=True
+            )
 
             valid_size = valid_x.size(0)
 
@@ -246,10 +316,19 @@ def validate(valid_loader, model, epoch, cur_step, num_epochs, device, print_ste
                 print(
                     "Validation: [{:2d}/{}] Step {:03d}/{:03d} Loss {losses.avg:.3f} "
                     "Prec@(1,5) ({top1.avg:.1%}, {top5.avg:.1%})".format(
-                        epoch+1, num_epochs, step, len(valid_loader)-1, losses=losses,
-                        top1=top1, top5=top5))
+                        epoch + 1,
+                        num_epochs,
+                        step,
+                        len(valid_loader) - 1,
+                        losses=losses,
+                        top1=top1,
+                        top5=top5,
+                    )
+                )
 
-    print("Valid: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch+1, num_epochs, top1.avg))
+    print(
+        "Valid: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch + 1, num_epochs, top1.avg)
+    )
 
     return top1.avg
 

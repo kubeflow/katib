@@ -25,9 +25,9 @@ from tensorflow.keras.layers import Flatten
 class MyModel(Model):
     def __init__(self):
         super(MyModel, self).__init__()
-        self.conv1 = Conv2D(32, 3, activation='relu')
+        self.conv1 = Conv2D(32, 3, activation="relu")
         self.flatten = Flatten()
-        self.d1 = Dense(128, activation='relu')
+        self.d1 = Dense(128, activation="relu")
         self.d2 = Dense(10)
 
     def call(self, x):
@@ -37,7 +37,17 @@ class MyModel(Model):
         return self.d2(x)
 
 
-def train_step(args, model, optimizer, train_ds, epoch, loss_object, train_summary_writer, train_loss, train_accuracy):
+def train_step(
+    args,
+    model,
+    optimizer,
+    train_ds,
+    epoch,
+    loss_object,
+    train_summary_writer,
+    train_loss,
+    train_accuracy,
+):
     for step, (images, labels) in enumerate(train_ds):
         with tf.GradientTape() as tape:
             # training=True is only needed if there are layers with different
@@ -51,18 +61,25 @@ def train_step(args, model, optimizer, train_ds, epoch, loss_object, train_summa
             train_accuracy(labels, predictions)
 
         if step % args.log_interval == 0:
-            print("Train Epoch: {} [{}/60000 ({:.0f}%)]\tloss={:.4f}, accuracy={:.4f}".format(
-                epoch + 1, step * args.batch_size, 100. * step * args.batch_size / 60000,
-                train_loss.result(), train_accuracy.result() * 100)
+            print(
+                "Train Epoch: {} [{}/60000 ({:.0f}%)]\tloss={:.4f}, accuracy={:.4f}".format(
+                    epoch + 1,
+                    step * args.batch_size,
+                    100.0 * step * args.batch_size / 60000,
+                    train_loss.result(),
+                    train_accuracy.result() * 100,
+                )
             )
 
     with train_summary_writer.as_default():
-        tf.summary.scalar('loss', train_loss.result(), step=epoch)
-        tf.summary.scalar('accuracy', train_accuracy.result(), step=epoch)
+        tf.summary.scalar("loss", train_loss.result(), step=epoch)
+        tf.summary.scalar("accuracy", train_accuracy.result(), step=epoch)
 
 
-def test_step(model, test_ds, epoch, loss_object, test_summary_writer, test_loss, test_accuracy):
-    for (images, labels) in test_ds:
+def test_step(
+    model, test_ds, epoch, loss_object, test_summary_writer, test_loss, test_accuracy
+):
+    for images, labels in test_ds:
         # training=False is only needed if there are layers with different
         # behavior during training versus inference (e.g. Dropout).
         predictions = model(images, training=False)
@@ -72,30 +89,53 @@ def test_step(model, test_ds, epoch, loss_object, test_summary_writer, test_loss
         test_accuracy(labels, predictions)
 
     with test_summary_writer.as_default():
-        tf.summary.scalar('loss', test_loss.result(), step=epoch)
-        tf.summary.scalar('accuracy', test_accuracy.result(), step=epoch)
+        tf.summary.scalar("loss", test_loss.result(), step=epoch)
+        tf.summary.scalar("accuracy", test_accuracy.result(), step=epoch)
 
-    print("Test Loss: {:.4f}, Test Accuracy: {:.4f}\n".format(
-        test_loss.result(), test_accuracy.result() * 100)
+    print(
+        "Test Loss: {:.4f}, Test Accuracy: {:.4f}\n".format(
+            test_loss.result(), test_accuracy.result() * 100
+        )
     )
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch-size', type=int, default=64,
-                        help='input batch size for training (default: 64)')
-    parser.add_argument('--learning-rate', type=float, default=0.001,
-                        help='learning rate (default: 0.001)')
-    parser.add_argument("--epochs", type=int, default=10, metavar="N",
-                        help="number of epochs to train (default: 10)")
-    parser.add_argument("--log-interval", type=int, default=100, metavar="N",
-                        help="how many batches to wait before logging training status (default: 100)")
     parser.add_argument(
-        '--log-path',
+        "--batch-size",
+        type=int,
+        default=64,
+        help="input batch size for training (default: 64)",
+    )
+    parser.add_argument(
+        "--learning-rate",
+        type=float,
+        default=0.001,
+        help="learning rate (default: 0.001)",
+    )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=10,
+        metavar="N",
+        help="number of epochs to train (default: 10)",
+    )
+    parser.add_argument(
+        "--log-interval",
+        type=int,
+        default=100,
+        metavar="N",
+        help="how many batches to wait before logging training status (default: 100)",
+    )
+    parser.add_argument(
+        "--log-path",
         type=str,
-        default=os.path.join(os.getenv('TEST_TMPDIR', '/tmp'),
-                             'tensorflow/mnist/logs/mnist_with_summaries'),
-        help='Summaries log PATH')
+        default=os.path.join(
+            os.getenv("TEST_TMPDIR", "/tmp"),
+            "tensorflow/mnist/logs/mnist_with_summaries",
+        ),
+        help="Summaries log PATH",
+    )
     args = parser.parse_args()
 
     # Setup dataset
@@ -105,12 +145,18 @@ def main():
     # Add a channels dimension
     x_train = x_train[..., tf.newaxis].astype("float32")
     x_test = x_test[..., tf.newaxis].astype("float32")
-    train_ds = tf.data.Dataset.from_tensor_slices((x_train, y_train)).shuffle(10000).batch(args.batch_size)
-    test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(args.batch_size)
+    train_ds = (
+        tf.data.Dataset.from_tensor_slices((x_train, y_train))
+        .shuffle(10000)
+        .batch(args.batch_size)
+    )
+    test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(
+        args.batch_size
+    )
 
     # Setup tensorflow summaries
-    train_log_dir = os.path.join(args.log_path, 'train')
-    test_log_dir = os.path.join(args.log_path, 'test')
+    train_log_dir = os.path.join(args.log_path, "train")
+    test_log_dir = os.path.join(args.log_path, "test")
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
     test_summary_writer = tf.summary.create_file_writer(test_log_dir)
 
@@ -119,20 +165,37 @@ def main():
     loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     optimizer = tf.keras.optimizers.Adam(learning_rate=args.learning_rate)
 
-    train_loss = tf.keras.metrics.Mean(name='train_loss')
-    train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
+    train_loss = tf.keras.metrics.Mean(name="train_loss")
+    train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name="train_accuracy")
 
-    test_loss = tf.keras.metrics.Mean(name='test_loss')
-    test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+    test_loss = tf.keras.metrics.Mean(name="test_loss")
+    test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name="test_accuracy")
 
     for epoch in range(args.epochs):
         # Reset the metrics at the start of the next epoch
         train_summary_writer.flush()
         test_summary_writer.flush()
 
-        train_step(args, model, optimizer, train_ds, epoch, loss_object, train_summary_writer,
-                   train_loss, train_accuracy)
-        test_step(model, test_ds, epoch, loss_object, test_summary_writer, test_loss, test_accuracy)
+        train_step(
+            args,
+            model,
+            optimizer,
+            train_ds,
+            epoch,
+            loss_object,
+            train_summary_writer,
+            train_loss,
+            train_accuracy,
+        )
+        test_step(
+            model,
+            test_ds,
+            epoch,
+            loss_object,
+            test_summary_writer,
+            test_loss,
+            test_accuracy,
+        )
 
 
 if __name__ == "__main__":

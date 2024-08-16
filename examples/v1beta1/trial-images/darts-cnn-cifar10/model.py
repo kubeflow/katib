@@ -21,11 +21,20 @@ import torch.nn.functional as F
 
 
 class Cell(nn.Module):
-    """ Cell for search
+    """Cell for search
     Each edge is mixed and continuous relaxed.
     """
 
-    def __init__(self, num_nodes, c_prev_prev, c_prev, c_cur, reduction_prev, reduction_cur, search_space):
+    def __init__(
+        self,
+        num_nodes,
+        c_prev_prev,
+        c_prev,
+        c_cur,
+        reduction_prev,
+        reduction_cur,
+        search_space,
+    ):
         """
         Args:
             num_nodes: Number of intermediate cell nodes
@@ -45,7 +54,9 @@ class Cell(nn.Module):
         if reduction_prev:
             self.preprocess0 = FactorizedReduce(c_prev_prev, c_cur)
         else:
-            self.preprocess0 = StdConv(c_prev_prev, c_cur, kernel_size=1, stride=1, padding=0)
+            self.preprocess0 = StdConv(
+                c_prev_prev, c_cur, kernel_size=1, stride=1, padding=0
+            )
         self.preprocess1 = StdConv(c_prev, c_cur, kernel_size=1, stride=1, padding=0)
 
         # Generate dag from mixed operations
@@ -54,7 +65,7 @@ class Cell(nn.Module):
         for i in range(self.num_nodes):
             self.dag_ops.append(nn.ModuleList())
             # Include 2 input nodes
-            for j in range(2+i):
+            for j in range(2 + i):
                 # Reduction with stride = 2 must be only for the input node
                 stride = 2 if reduction_cur and j < 2 else 1
                 op = MixedOp(c_cur, stride, search_space)
@@ -66,7 +77,9 @@ class Cell(nn.Module):
 
         states = [s0, s1]
         for edges, w_list in zip(self.dag_ops, w_dag):
-            state_cur = sum(edges[i](s, w) for i, (s, w) in enumerate((zip(states, w_list))))
+            state_cur = sum(
+                edges[i](s, w) for i, (s, w) in enumerate((zip(states, w_list)))
+            )
             states.append(state_cur)
 
         state_out = torch.cat(states[2:], dim=1)
@@ -75,8 +88,17 @@ class Cell(nn.Module):
 
 class NetworkCNN(nn.Module):
 
-    def __init__(self, init_channels, input_channels, num_classes,
-                 num_layers, criterion, search_space, num_nodes, stem_multiplier):
+    def __init__(
+        self,
+        init_channels,
+        input_channels,
+        num_classes,
+        num_layers,
+        criterion,
+        search_space,
+        num_nodes,
+        stem_multiplier,
+    ):
         super(NetworkCNN, self).__init__()
 
         self.init_channels = init_channels
@@ -87,11 +109,11 @@ class NetworkCNN(nn.Module):
         self.num_nodes = num_nodes
         self.stem_multiplier = stem_multiplier
 
-        c_cur = self.stem_multiplier*self.init_channels
+        c_cur = self.stem_multiplier * self.init_channels
 
         self.stem = nn.Sequential(
             nn.Conv2d(input_channels, c_cur, 3, padding=1, bias=False),
-            nn.BatchNorm2d(c_cur)
+            nn.BatchNorm2d(c_cur),
         )
 
         # In first Cell stem is used for s0 and s1
@@ -110,14 +132,24 @@ class NetworkCNN(nn.Module):
                 # For Network with two layers: First layer - Normal, Second - Reduction
                 # For Other Networks: [1/3, 2/3] Layers - Reduction cell with double channels
                 # Others - Normal cell
-                if ((self.num_layers == 2 and i == 1) or
-                        (self.num_layers > 2 and i in [self.num_layers//3, 2*self.num_layers//3])):
+                if (self.num_layers == 2 and i == 1) or (
+                    self.num_layers > 2
+                    and i in [self.num_layers // 3, 2 * self.num_layers // 3]
+                ):
                     c_cur *= 2
                     reduction_cur = True
                 else:
                     reduction_cur = False
 
-            cell = Cell(self.num_nodes, c_prev_prev, c_prev, c_cur, reduction_prev, reduction_cur, search_space)
+            cell = Cell(
+                self.num_nodes,
+                c_prev_prev,
+                c_prev,
+                c_cur,
+                reduction_prev,
+                reduction_cur,
+                search_space,
+            )
             reduction_prev = reduction_cur
             self.cells.append(cell)
 
@@ -134,9 +166,11 @@ class NetworkCNN(nn.Module):
         self.alpha_reduce = nn.ParameterList()
 
         for i in range(self.num_nodes):
-            self.alpha_normal.append(nn.Parameter(1e-3*torch.randn(i+2, num_ops)))
+            self.alpha_normal.append(nn.Parameter(1e-3 * torch.randn(i + 2, num_ops)))
             if self.num_layers > 1:
-                self.alpha_reduce.append(nn.Parameter(1e-3*torch.randn(i+2, num_ops)))
+                self.alpha_reduce.append(
+                    nn.Parameter(1e-3 * torch.randn(i + 2, num_ops))
+                )
 
         # Setup alphas list
         self.alphas = []
@@ -192,5 +226,9 @@ class NetworkCNN(nn.Module):
         # concat all intermediate nodes
         concat = range(2, 2 + self.num_nodes)
 
-        return search_space.genotype(normal=gene_normal, normal_concat=concat,
-                                     reduce=gene_reduce, reduce_concat=concat)
+        return search_space.genotype(
+            normal=gene_normal,
+            normal_concat=concat,
+            reduce=gene_reduce,
+            reduce_concat=concat,
+        )
