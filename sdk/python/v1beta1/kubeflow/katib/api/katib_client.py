@@ -186,7 +186,10 @@ class KatibClient(object):
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
-        metrics_collector_config: Dict[str, Any] = {"kind": "StdOut", "custom_collector": None},
+        metrics_collector_config: Dict[str, Any] = {
+            "kind": "StdOut", 
+            "custom_collector": None
+        },
     ):
         """Create HyperParameter Tuning Katib Experiment from the objective function.
 
@@ -389,7 +392,8 @@ class KatibClient(object):
         experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
             collector=models.V1beta1CollectorSpec(  
                 kind=metrics_collector_config["kind"],
-                custom_collector=metrics_collector_config["custom_collector"])
+                custom_collector=metrics_collector_config["custom_collector"],
+            )
         )
 
         # Create Trial specification.
