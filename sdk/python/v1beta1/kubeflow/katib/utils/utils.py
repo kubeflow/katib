@@ -271,6 +271,7 @@ def get_pod_template_spec(
 
     return pod_template_spec
 
+
 def get_pvc_spec(
     pvc_name: str,
     namespace: str,
@@ -288,7 +289,7 @@ def get_pvc_spec(
     pvc_spec = models.V1PersistentVolumeClaim(
         api_version="v1",
         kind="PersistentVolumeClaim",
-        metadata={"name": pvc_name, "namepsace": namespace},
+        metadata={"name": pvc_name, "namespace": namespace},
         spec=models.V1PersistentVolumeClaimSpec(
             access_modes=storage_config["access_modes"],
             resources=models.V1ResourceRequirements(
