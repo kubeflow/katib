@@ -4,6 +4,7 @@ import logging
 from kubeflow.katib import KatibClient
 from kubeflow.katib import search
 from kubernetes import client
+from kubernetes.client import V1Container
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
@@ -36,7 +37,19 @@ def run_e2e_experiment_create_by_tune(
         "b": search.double(min=0.1, max=0.2)
     }
 
-    # [3] Create Katib Experiment with 4 Trials and 2 CPUs per Trial.
+    # [3] Create a dummy metric collector (DOES NOT HAVE A IMAGE)
+    metric_collector = V1Container(
+        name="dummy-collector",
+        image="dummy-collector:latest",
+        command=["python", "/app/dummy-collector.py"],
+        args=["--metric-name=result"],
+        env=[
+            client.V1EnvVar(name="EXPERIMENT_NAME", value=exp_name),
+            client.V1EnvVar(name="EXPERIMENT_NAMESPACE", value=exp_namespace)
+        ]
+    )
+
+    # [4] Create Katib Experiment with 4 Trials and 2 CPUs per Trial.
     # And Wait until Experiment reaches Succeeded condition.
     katib_client.tune(
         name=exp_name,
@@ -46,6 +59,16 @@ def run_e2e_experiment_create_by_tune(
         objective_metric_name="result",
         max_trial_count=4,
         resources_per_trial={"cpu": "2"},
+        metrics_collector_config={
+            "collector": {
+                "kind": "Custom",
+                "customCollector": {
+                    "image": "dummy-collector:latest",
+                    "command": ["python", "/app/dummy-collector.py"],
+                    "args": ["--metric-name=result"]
+                }
+            }
+        },
     )
     experiment = katib_client.wait_for_experiment_condition(
         exp_name, exp_namespace, timeout=EXPERIMENT_TIMEOUT

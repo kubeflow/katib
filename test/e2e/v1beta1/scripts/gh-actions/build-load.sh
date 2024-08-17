@@ -167,6 +167,9 @@ done
 if "$TUNE_API"; then
   echo -e "\nPulling and building testing image for tune function..."
   _build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
+  
+  echo -e "\nBuilding dummy collector image..."
+  docker build -t dummy-collector:latest -f Dockerfile.dummy-collector .
 fi
 
 echo -e "\nCleanup Build Cache...\n"
