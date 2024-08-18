@@ -14,7 +14,6 @@
 
 import os
 
-
 # How long to wait in seconds for requests to the Kubernetes or gRPC API Server.
 DEFAULT_TIMEOUT = 120
 
