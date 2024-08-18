@@ -333,10 +333,20 @@ class KatibClient(object):
         )
 
         if (
-            model_provider_parameters is not None
-            or dataset_provider_parameters is not None
-            or trainer_parameters is not None
-        ) and (objective is not None or parameters is not None):
+            (
+                model_provider_parameters is not None
+                or dataset_provider_parameters is not None
+                or trainer_parameters is not None
+            )
+            and (objective is not None or parameters is not None)
+        ) or (
+            (
+                model_provider_parameters is None
+                and dataset_provider_parameters is None
+                and trainer_parameters is None
+            )
+            and (objective is None and parameters is None)
+        ):
             raise ValueError(
                 "Invalid configuration for creating a Katib Experiment for hyperparameter "
                 "optimization. You should only specify one of the following options:\n"
@@ -1467,9 +1477,9 @@ class KatibClient(object):
                     ):
                         output = {}
                         output["name"] = trial.metadata.name
-                        output["parameter_assignments"] = (
-                            trial.spec.parameter_assignments
-                        )
+                        output[
+                            "parameter_assignments"
+                        ] = trial.spec.parameter_assignments
                         output["metrics"] = trial.status.observation.metrics
                         result.append(output)
         except multiprocessing.TimeoutError:
