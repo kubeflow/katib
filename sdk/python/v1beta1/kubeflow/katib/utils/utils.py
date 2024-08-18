@@ -85,7 +85,6 @@ def validate_metrics_value(value: Any):
 
 
 def validate_objective_function(objective: Callable):
-
     # Check if objective function is callable.
     if not callable(objective):
         raise ValueError(
@@ -179,8 +178,7 @@ def get_command_using_train_func(
     # Install Python packages if that is required.
     if packages_to_install is not None:
         exec_script = (
-            get_script_for_python_packages(packages_to_install, pip_index_url)
-            + exec_script
+            get_script_for_python_packages(packages_to_install, pip_index_url) + exec_script
         )
 
     # Return container command and args to execute training function.
@@ -289,9 +287,7 @@ def get_pvc_spec(
         metadata={"name": pvc_name, "namespace": namespace},
         spec=models.V1PersistentVolumeClaimSpec(
             access_modes=storage_config["access_modes"],
-            resources=models.V1ResourceRequirements(
-                requests={"storage": storage_config["size"]}
-            ),
+            resources=models.V1ResourceRequirements(requests={"storage": storage_config["size"]}),
         ),
     )
 
