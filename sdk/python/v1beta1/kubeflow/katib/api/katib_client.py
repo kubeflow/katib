@@ -17,20 +17,25 @@ import json
 import logging
 import multiprocessing
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
 
-logger = logging.getLogger(__name__)
-
-import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
+import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib.utils import utils
-from kubernetes import client, config
+from kubernetes import client
+from kubernetes import config
 
 import grpc
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from kubeflow.storage_initializer.hugging_face import HuggingFaceDatasetParams
+    from kubeflow.storage_initializer.hugging_face import HuggingFaceModelParams
+    from kubeflow.storage_initializer.hugging_face import HuggingFaceTrainerParams
+    from kubeflow.storage_initializer.s3 import S3DatasetParams
 
 
 class KatibClient(object):
@@ -134,14 +139,18 @@ class KatibClient(object):
                 "name"
             ]  # if "generate_name" is used, "name" gets a prefix from server
         except multiprocessing.TimeoutError:
-            raise TimeoutError(f"Timeout to create Katib Experiment: {namespace}/{experiment_name}")
+            raise TimeoutError(
+                f"Timeout to create Katib Experiment: {namespace}/{experiment_name}"
+            )
         except Exception as e:
             if hasattr(e, "status") and e.status == 409:
                 raise Exception(
                     f"A Katib Experiment with the name "
                     f"{namespace}/{experiment_name} already exists."
                 )
-            raise RuntimeError(f"Failed to create Katib Experiment: {namespace}/{experiment_name}")
+            raise RuntimeError(
+                f"Failed to create Katib Experiment: {namespace}/{experiment_name}"
+            )
 
         logger.debug(f"Experiment {namespace}/{experiment_name} has been created")
 
@@ -183,7 +192,9 @@ class KatibClient(object):
             Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]
         ] = None,
         algorithm_name: str = "random",
-        algorithm_settings: Union[dict, List[models.V1beta1AlgorithmSetting], None] = None,
+        algorithm_settings: Union[
+            dict, List[models.V1beta1AlgorithmSetting], None
+        ] = None,
         objective_metric_name: str = None,
         additional_metric_names: List[str] = [],
         objective_type: str = "maximize",
@@ -230,8 +241,8 @@ class KatibClient(object):
             dataset_provider_parameters: Parameters for the dataset provider in the
                 Storage Initializer.
                 For example, name of the HuggingFace dataset or AWS S3 configuration.
-                This argument must be the type of `kubeflow.storage_initializer.hugging_face.HuggingFaceDatasetParams`
-                or `kubeflow.storage_initializer.s3.S3DatasetParams`
+                This argument must be the type of `kubeflow.storage_initializer.hugging_face.
+                HuggingFaceDatasetParams` or `kubeflow.storage_initializer.s3.S3DatasetParams`.
             trainer_parameters: Parameters for configuring the training process,
                 including settings for the hyperparameters search space. It should be of
                 type `HuggingFaceTrainerParams`. You should use the Katib SDK to define
@@ -394,7 +405,10 @@ class KatibClient(object):
         env = []
         env_from = []
         if isinstance(env_per_trial, dict):
-            env = [client.V1EnvVar(name=str(k), value=str(v)) for k, v in env_per_trial.items()]
+            env = [
+                client.V1EnvVar(name=str(k), value=str(v))
+                for k, v in env_per_trial.items()
+            ]
         elif env_per_trial:
             for x in env_per_trial:
                 if isinstance(x, client.V1EnvVar):
@@ -402,13 +416,17 @@ class KatibClient(object):
                 elif isinstance(x, client.V1EnvFromSource):
                     env_from.append(x)
                 else:
-                    raise ValueError(f"Incorrect value for env_per_trial: {env_per_trial}")
+                    raise ValueError(
+                        f"Incorrect value for env_per_trial: {env_per_trial}"
+                    )
 
         # Add metrics collector to the Katib Experiment.
         # Up to now, We only support parameter `kind`, of which default value is
         # `StdOut`, to specify the kind of metrics collector.
         experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
-            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"]),
+            collector=models.V1beta1CollectorSpec(
+                kind=metrics_collector_config["kind"]
+            ),
             source=models.V1beta1SourceSpec(
                 filter=models.V1beta1FilterSpec(
                     metrics_format=[
@@ -479,19 +497,23 @@ class KatibClient(object):
                 raise ValueError("One of the required parameters is None")
 
             try:
-                from kubeflow.storage_initializer.constants import (
-                    VOLUME_PATH_DATASET,
-                    VOLUME_PATH_MODEL,
-                )
+                from kubeflow.storage_initializer.constants import VOLUME_PATH_DATASET
+                from kubeflow.storage_initializer.constants import VOLUME_PATH_MODEL
                 from kubeflow.storage_initializer.hugging_face import (
                     HuggingFaceDatasetParams,
+                )
+                from kubeflow.storage_initializer.hugging_face import (
                     HuggingFaceModelParams,
                 )
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
+                from kubeflow.training.constants.constants import STORAGE_INITIALIZER
                 from kubeflow.training.constants.constants import (
-                    STORAGE_INITIALIZER,
                     STORAGE_INITIALIZER_IMAGE,
+                )
+                from kubeflow.training.constants.constants import (
                     STORAGE_INITIALIZER_VOLUME_MOUNT,
+                )
+                from kubeflow.training.constants.constants import (
                     TRAINER_TRANSFORMER_IMAGE,
                 )
             except ImportError:
@@ -512,11 +534,15 @@ class KatibClient(object):
                     ),
                 )
             except Exception as e:
-                pvc_list = self.core_api.list_namespaced_persistent_volume_claim(namespace)
+                pvc_list = self.core_api.list_namespaced_persistent_volume_claim(
+                    namespace
+                )
                 # Check if the PVC with the specified name exists.
                 for pvc in pvc_list.items:
                     if pvc.metadata.name == name:
-                        print(f"PVC '{name}' already exists in namespace " f"{namespace}.")
+                        print(
+                            f"PVC '{name}' already exists in namespace " f"{namespace}."
+                        )
                         break
                 else:
                     raise RuntimeError(f"failed to create PVC. Error: {e}")
@@ -534,7 +560,8 @@ class KatibClient(object):
                 dp = "hf"
             else:
                 raise ValueError(
-                    "Dataset provider parameters must be an instance of S3DatasetParams or HuggingFaceDatasetParams."
+                    "Dataset provider parameters must be an instance of S3DatasetParams "
+                    "or HuggingFaceDatasetParams."
                 )
 
             # Iterate over input parameters.
@@ -596,12 +623,14 @@ class KatibClient(object):
 
             init_container_spec = utils.get_container_spec(
                 name=STORAGE_INITIALIZER,
-                base_image="docker.io/helenxiehz428/test", #STORAGE_INITIALIZER_IMAGE,
+                base_image=STORAGE_INITIALIZER_IMAGE,
                 args=[
                     "--model_provider",
                     mp,
                     "--model_provider_parameters",
-                    json.dumps(model_provider_parameters.__dict__, cls=utils.SetEncoder),
+                    json.dumps(
+                        model_provider_parameters.__dict__, cls=utils.SetEncoder
+                    ),
                     "--dataset_provider",
                     dp,
                     "--dataset_provider_parameters",
@@ -615,7 +644,7 @@ class KatibClient(object):
 
             container_spec = utils.get_container_spec(
                 name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                base_image="docker.io/helenxiehz428/test_llm4", #TRAINER_TRANSFORMER_IMAGE,
+                base_image=TRAINER_TRANSFORMER_IMAGE,
                 args=[
                     "--model_uri",
                     model_provider_parameters.model_uri,
@@ -636,7 +665,9 @@ class KatibClient(object):
 
             storage_initializer_volume = models.V1Volume(
                 name=STORAGE_INITIALIZER,
-                persistent_volume_claim=models.V1PersistentVolumeClaimVolumeSource(claim_name=name),
+                persistent_volume_claim=models.V1PersistentVolumeClaimVolumeSource(
+                    claim_name=name
+                ),
             )
 
             pod_spec = utils.get_pod_template_spec(
@@ -748,13 +779,19 @@ class KatibClient(object):
             )
             response = thread.get(timeout)
             result = [
-                self.api_client.deserialize(utils.FakeResponse(item), models.V1beta1Experiment)
+                self.api_client.deserialize(
+                    utils.FakeResponse(item), models.V1beta1Experiment
+                )
                 for item in response.get("items")
             ]
         except multiprocessing.TimeoutError:
-            raise TimeoutError(f"Timeout to list Katib Experiments in namespace: {namespace}")
+            raise TimeoutError(
+                f"Timeout to list Katib Experiments in namespace: {namespace}"
+            )
         except Exception:
-            raise RuntimeError(f"Failed to list Katib Experiments in namespace: {namespace}")
+            raise RuntimeError(
+                f"Failed to list Katib Experiments in namespace: {namespace}"
+            )
         return result
 
     def get_experiment_conditions(
@@ -991,14 +1028,20 @@ class KatibClient(object):
             # Wait for Failed condition.
             if (
                 expected_condition == constants.EXPERIMENT_CONDITION_FAILED
-                and self.is_experiment_failed(name, namespace, experiment, apiserver_timeout)
+                and self.is_experiment_failed(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Raise exception if Experiment is Failed.
-            elif self.is_experiment_failed(name, namespace, experiment, apiserver_timeout):
+            elif self.is_experiment_failed(
+                name, namespace, experiment, apiserver_timeout
+            ):
                 raise RuntimeError(
                     f"Experiment: {namespace}/{name} is Failed. "
                     f"Experiment conditions: {experiment.status.conditions}"
@@ -1007,34 +1050,48 @@ class KatibClient(object):
             # Check if Experiment reaches Created condition.
             elif (
                 expected_condition == constants.EXPERIMENT_CONDITION_CREATED
-                and self.is_experiment_created(name, namespace, experiment, apiserver_timeout)
+                and self.is_experiment_created(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Running condition.
             elif (
                 expected_condition == constants.EXPERIMENT_CONDITION_RUNNING
-                and self.is_experiment_running(name, namespace, experiment, apiserver_timeout)
+                and self.is_experiment_running(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
             elif (
                 expected_condition == constants.EXPERIMENT_CONDITION_RESTARTING
-                and self.is_experiment_restarting(name, namespace, experiment, apiserver_timeout)
+                and self.is_experiment_restarting(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
             elif (
                 expected_condition == constants.EXPERIMENT_CONDITION_SUCCEEDED
-                and self.is_experiment_succeeded(name, namespace, experiment, apiserver_timeout)
+                and self.is_experiment_succeeded(
+                    name, namespace, experiment, apiserver_timeout
+                )
             ):
                 utils.print_experiment_status(experiment)
 
@@ -1161,7 +1218,9 @@ class KatibClient(object):
                 body=delete_options,
             )
         except multiprocessing.TimeoutError:
-            raise TimeoutError(f"Timeout to delete Katib Experiment: {namespace}/{name}")
+            raise TimeoutError(
+                f"Timeout to delete Katib Experiment: {namespace}/{name}"
+            )
         except Exception:
             raise RuntimeError(f"Failed to delete Katib Experiment: {namespace}/{name}")
 
@@ -1243,13 +1302,19 @@ class KatibClient(object):
             )
             response = thread.get(timeout)
             result = [
-                self.api_client.deserialize(utils.FakeResponse(item), models.V1beta1Suggestion)
+                self.api_client.deserialize(
+                    utils.FakeResponse(item), models.V1beta1Suggestion
+                )
                 for item in response.get("items")
             ]
         except multiprocessing.TimeoutError:
-            raise TimeoutError(f"Timeout to list Katib Suggestions in namespace: {namespace}")
+            raise TimeoutError(
+                f"Timeout to list Katib Suggestions in namespace: {namespace}"
+            )
         except Exception:
-            raise RuntimeError(f"Failed to list Katib Suggestions in namespace: {namespace}")
+            raise RuntimeError(
+                f"Failed to list Katib Suggestions in namespace: {namespace}"
+            )
         return result
 
     def get_trial(
@@ -1341,11 +1406,15 @@ class KatibClient(object):
                 )
             response = thread.get(timeout)
             result = [
-                self.api_client.deserialize(utils.FakeResponse(item), models.V1beta1Trial)
+                self.api_client.deserialize(
+                    utils.FakeResponse(item), models.V1beta1Trial
+                )
                 for item in response.get("items")
             ]
         except multiprocessing.TimeoutError:
-            raise TimeoutError(f"Timeout to list Katib Trials in namespace: {namespace}")
+            raise TimeoutError(
+                f"Timeout to list Katib Trials in namespace: {namespace}"
+            )
         except Exception:
             raise RuntimeError(f"Failed to list Katib Trials in namespace: {namespace}")
         return result
@@ -1397,18 +1466,28 @@ class KatibClient(object):
                 )
             response = thread.get(timeout)
             for item in response.get("items"):
-                trial = self.api_client.deserialize(utils.FakeResponse(item), models.V1beta1Trial)
-                if trial.status and trial.status.conditions and len(trial.status.conditions) > 0:
+                trial = self.api_client.deserialize(
+                    utils.FakeResponse(item), models.V1beta1Trial
+                )
+                if (
+                    trial.status
+                    and trial.status.conditions
+                    and len(trial.status.conditions) > 0
+                ):
                     if utils.has_condition(
                         trial.status.conditions, constants.TRIAL_CONDITION_SUCCEEDED
                     ):
                         output = {}
                         output["name"] = trial.metadata.name
-                        output["parameter_assignments"] = trial.spec.parameter_assignments
+                        output["parameter_assignments"] = (
+                            trial.spec.parameter_assignments
+                        )
                         output["metrics"] = trial.status.observation.metrics
                         result.append(output)
         except multiprocessing.TimeoutError:
-            raise TimeoutError(f"Timeout to list Katib Trials in namespace: {namespace}")
+            raise TimeoutError(
+                f"Timeout to list Katib Trials in namespace: {namespace}"
+            )
         except Exception:
             raise RuntimeError(f"Failed to list Katib Trials in namespace: {namespace}")
         return result
