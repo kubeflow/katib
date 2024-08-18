@@ -349,7 +349,7 @@ class KatibClient(object):
         ):
             raise ValueError(
                 "Invalid configuration for creating a Katib Experiment for hyperparameter "
-                "optimization. You should only specify one of the following options:\n"
+                "optimization. You should specify one of the following options:\n"
                 "1. Use external models and datasets: specify `model_provider_parameters`, "
                 "`dataset_provider_parameters` and `trainer_parameters`;\n"
                 "2. Use custom objective function: specify `objective`, `base_image` and "
@@ -494,25 +494,22 @@ class KatibClient(object):
                 raise ValueError("One of the required parameters is None")
 
             try:
-                from kubeflow.storage_initializer.constants import \
-                    VOLUME_PATH_DATASET
-                from kubeflow.storage_initializer.constants import \
-                    VOLUME_PATH_MODEL
-                from kubeflow.storage_initializer.hugging_face import \
-                    HuggingFaceDatasetParams
-                from kubeflow.storage_initializer.hugging_face import \
-                    HuggingFaceModelParams
-                from kubeflow.storage_initializer.hugging_face import \
-                    HuggingFaceTrainerParams
+                from kubeflow.storage_initializer.constants import VOLUME_PATH_DATASET
+                from kubeflow.storage_initializer.constants import VOLUME_PATH_MODEL
+                from kubeflow.storage_initializer.hugging_face import (
+                    HuggingFaceDatasetParams,
+                )
+                from kubeflow.storage_initializer.hugging_face import (
+                    HuggingFaceModelParams,
+                )
+                from kubeflow.storage_initializer.hugging_face import (
+                    HuggingFaceTrainerParams,
+                )
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
-                from kubeflow.training.constants.constants import \
-                    STORAGE_INITIALIZER
-                from kubeflow.training.constants.constants import \
-                    STORAGE_INITIALIZER_IMAGE
-                from kubeflow.training.constants.constants import \
-                    STORAGE_INITIALIZER_VOLUME_MOUNT
-                from kubeflow.training.constants.constants import \
-                    TRAINER_TRANSFORMER_IMAGE
+                from kubeflow.training.constants.constants import STORAGE_INITIALIZER
+                from kubeflow.training.constants.constants import STORAGE_INITIALIZER_IMAGE
+                from kubeflow.training.constants.constants import STORAGE_INITIALIZER_VOLUME_MOUNT
+                from kubeflow.training.constants.constants import TRAINER_TRANSFORMER_IMAGE
                 import peft
                 import transformers
             except ImportError:
