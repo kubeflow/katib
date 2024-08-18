@@ -242,7 +242,6 @@ def get_container_spec(
     if env_from:
         container_spec.env_from = env_from
 
-
     return container_spec
 
 
