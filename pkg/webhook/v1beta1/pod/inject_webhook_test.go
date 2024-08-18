@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -32,7 +31,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -78,16 +76,15 @@ func TestWrapWorkerContainer(t *testing.T) {
 
 	metricsFile := "metric.log"
 
-	testCases := []struct {
-		trial           *trialsv1beta1.Trial
-		pod             *v1.Pod
-		metricsFile     string
-		pathKind        common.FileSystemKind
-		expectedPod     *v1.Pod
-		err             bool
-		testDescription string
+	testCases := map[string]struct {
+		trial       *trialsv1beta1.Trial
+		pod         *v1.Pod
+		metricsFile string
+		pathKind    common.FileSystemKind
+		expectedPod *v1.Pod
+		err         bool
 	}{
-		{
+		"Tensorflow container without sh -c": {
 			trial: trial,
 			pod: &v1.Pod{
 				Spec: v1.PodSpec{
@@ -118,10 +115,9 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			err:             false,
-			testDescription: "Tensorflow container without sh -c",
+			err: false,
 		},
-		{
+		"Tensorflow container with sh -c": {
 			trial: trial,
 			pod: &v1.Pod{
 				Spec: v1.PodSpec{
@@ -153,10 +149,9 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			err:             false,
-			testDescription: "Tensorflow container with sh -c",
+			err: false,
 		},
-		{
+		"Training pod doesn't have primary container": {
 			trial: trial,
 			pod: &v1.Pod{
 				Spec: v1.PodSpec{
@@ -167,11 +162,10 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			pathKind:        common.FileKind,
-			err:             true,
-			testDescription: "Training pod doesn't have primary container",
+			pathKind: common.FileKind,
+			err:      true,
 		},
-		{
+		"Container with early stopping command": {
 			trial: func() *trialsv1beta1.Trial {
 				t := trial.DeepCopy()
 				t.Spec.EarlyStoppingRules = []common.EarlyStoppingRule{
@@ -216,23 +210,23 @@ func TestWrapWorkerContainer(t *testing.T) {
 					},
 				},
 			},
-			err:             false,
-			testDescription: "Container with early stopping command",
+			err: false,
 		},
 	}
 
-	for _, c := range testCases {
-		err := wrapWorkerContainer(c.trial, c.pod, c.trial.Namespace, c.metricsFile, c.pathKind)
-		if c.err && err == nil {
-			t.Errorf("Case %s failed. Expected error, got nil", c.testDescription)
-		} else if !c.err {
-			if err != nil {
-				t.Errorf("Case %s failed. Expected nil, got error: %v", c.testDescription, err)
-			} else if !equality.Semantic.DeepEqual(c.pod.Spec.Containers, c.expectedPod.Spec.Containers) {
-				t.Errorf("Case %s failed. Expected pod: %v, got: %v",
-					c.testDescription, c.expectedPod.Spec.Containers, c.pod.Spec.Containers)
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			err := wrapWorkerContainer(tc.trial, tc.pod, tc.trial.Namespace, tc.metricsFile, tc.pathKind)
+			if tc.err && err == nil {
+				t.Errorf("Expected error, got nil")
+			} else if !tc.err {
+				if err != nil {
+					t.Errorf("Expected nil, got error: %v", err)
+				} else if diff := cmp.Diff(tc.expectedPod.Spec.Containers, tc.pod.Spec.Containers); len(diff) != 0 {
+					t.Errorf("Unexpected pod (-want,got):\n%s", diff)
+				}
 			}
-		}
+		})
 	}
 }
 
@@ -320,17 +314,16 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 		},
 	}
 
-	testCases := []struct {
+	testCases := map[string]struct {
 		trial              *trialsv1beta1.Trial
 		metricNames        string
 		mCSpec             common.MetricsCollectorSpec
 		earlyStoppingRules []string
 		katibConfig        configv1beta1.MetricsCollectorConfig
 		expectedArgs       []string
-		name               string
 		err                bool
 	}{
-		{
+		"StdOut MC": {
 			trial:       testTrial,
 			metricNames: testMetricName,
 			mCSpec: common.MetricsCollectorSpec{
@@ -350,9 +343,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-format", string(common.TextFormat),
 				"-w", "false",
 			},
-			name: "StdOut MC",
 		},
-		{
+		"File MC with Filter": {
 			trial:       testTrial,
 			metricNames: testMetricName,
 			mCSpec: common.MetricsCollectorSpec{
@@ -382,9 +374,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-f", "{mn1: ([a-b]), mv1: [0-9]};{mn2: ([a-b]), mv2: ([0-9])}",
 				"-format", string(common.TextFormat),
 			},
-			name: "File MC with Filter",
 		},
-		{
+		"File MC with Json Format": {
 			trial:       testTrial,
 			metricNames: testMetricName,
 			mCSpec: common.MetricsCollectorSpec{
@@ -407,9 +398,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-path", testPath,
 				"-format", string(common.JsonFormat),
 			},
-			name: "File MC with Json Format",
 		},
-		{
+		"Tf Event MC": {
 			trial:       testTrial,
 			metricNames: testMetricName,
 			mCSpec: common.MetricsCollectorSpec{
@@ -430,9 +420,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-s-db", katibDBAddress,
 				"-path", testPath,
 			},
-			name: "Tf Event MC",
 		},
-		{
+		"Custom MC without Path": {
 			trial:       testTrial,
 			metricNames: testMetricName,
 			mCSpec: common.MetricsCollectorSpec{
@@ -447,9 +436,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 			},
-			name: "Custom MC without Path",
 		},
-		{
+		"Custom MC with Path": {
 			trial:       testTrial,
 			metricNames: testMetricName,
 			mCSpec: common.MetricsCollectorSpec{
@@ -470,9 +458,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-s-db", katibDBAddress,
 				"-path", testPath,
 			},
-			name: "Custom MC with Path",
 		},
-		{
+		"Prometheus MC without Path": {
 			trial:       testTrial,
 			metricNames: testMetricName,
 			mCSpec: common.MetricsCollectorSpec{
@@ -487,9 +474,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-o-type", string(testObjective),
 				"-s-db", katibDBAddress,
 			},
-			name: "Prometheus MC without Path",
 		},
-		{
+		"Trial with EarlyStopping rules": {
 			trial:       testTrial,
 			metricNames: testMetricName,
 			mCSpec: common.MetricsCollectorSpec{
@@ -510,9 +496,8 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 				"-stop-rule", earlyStoppingRules[1],
 				"-s-earlystop", katibEarlyStopAddress,
 			},
-			name: "Trial with EarlyStopping rules",
 		},
-		{
+		"Trial with invalid Experiment label name. Suggestion is not created": {
 			trial: func() *trialsv1beta1.Trial {
 				trial := testTrial.DeepCopy()
 				trial.ObjectMeta.Labels[consts.LabelExperimentName] = "invalid-name"
@@ -525,7 +510,6 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 			},
 			earlyStoppingRules: earlyStoppingRules,
 			katibConfig:        configv1beta1.MetricsCollectorConfig{},
-			name:               "Trial with invalid Experiment label name. Suggestion is not created",
 			err:                true,
 		},
 	}
@@ -537,25 +521,28 @@ func TestGetMetricsCollectorArgs(t *testing.T) {
 		return c.Get(context.TODO(), types.NamespacedName{Namespace: testNamespace, Name: testSuggestionName}, testSuggestion)
 	}, timeout).ShouldNot(gomega.HaveOccurred())
 
-	for _, tc := range testCases {
-		args, err := si.getMetricsCollectorArgs(tc.trial, tc.metricNames, tc.mCSpec, tc.katibConfig, tc.earlyStoppingRules)
-
-		if !tc.err && err != nil {
-			t.Errorf("Case: %v failed. Expected nil, got %v", tc.name, err)
-		} else if tc.err && err == nil {
-			t.Errorf("Case: %v failed. Expected err, got nil", tc.name)
-		} else if !tc.err && !reflect.DeepEqual(tc.expectedArgs, args) {
-			t.Errorf("Case %v failed. ExpectedArgs: %v, got %v", tc.name, tc.expectedArgs, args)
-		}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			args, err := si.getMetricsCollectorArgs(tc.trial, tc.metricNames, tc.mCSpec, tc.katibConfig, tc.earlyStoppingRules)
+			if !tc.err && err != nil {
+				t.Errorf("Expected nil, got %v", err)
+			} else if tc.err && err == nil {
+				t.Error("Expected err, got nil")
+			} else if !tc.err {
+				if diff := cmp.Diff(tc.expectedArgs, args); len(diff) != 0 {
+					t.Errorf("Unexpected Args (-want,got):\n%s", diff)
+				}
+			}
+		})
 	}
 }
 
 func TestNeedWrapWorkerContainer(t *testing.T) {
-	testCases := []struct {
+	testCases := map[string]struct {
 		mCSpec   common.MetricsCollectorSpec
 		needWrap bool
 	}{
-		{
+		"Valid case with needWrap true": {
 			mCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.StdOutCollector,
@@ -563,7 +550,7 @@ func TestNeedWrapWorkerContainer(t *testing.T) {
 			},
 			needWrap: true,
 		},
-		{
+		"Valid case with needWrap false": {
 			mCSpec: common.MetricsCollectorSpec{
 				Collector: &common.CollectorSpec{
 					Kind: common.CustomCollector,
@@ -573,16 +560,18 @@ func TestNeedWrapWorkerContainer(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		needWrap := needWrapWorkerContainer(tc.mCSpec)
-		if needWrap != tc.needWrap {
-			t.Errorf("Expected needWrap %v, got %v", tc.needWrap, needWrap)
-		}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			needWrap := needWrapWorkerContainer(tc.mCSpec)
+			if needWrap != tc.needWrap {
+				t.Errorf("Expected needWrap %v, got %v", tc.needWrap, needWrap)
+			}
+		})
 	}
 }
 
 func TestMutateMetricsCollectorVolume(t *testing.T) {
-	tc := struct {
+	testCases := map[string]struct {
 		pod                  v1.Pod
 		expectedPod          v1.Pod
 		JobKind              string
@@ -592,95 +581,103 @@ func TestMutateMetricsCollectorVolume(t *testing.T) {
 		pathKind             common.FileSystemKind
 		err                  bool
 	}{
-		pod: v1.Pod{
-			Spec: v1.PodSpec{
-				Containers: []v1.Container{
-					{
-						Name: "train-job",
-					},
-					{
-						Name: "init-container",
-					},
-					{
-						Name: "metrics-collector",
-					},
-				},
-			},
-		},
-		expectedPod: v1.Pod{
-			Spec: v1.PodSpec{
-				Containers: []v1.Container{
-					{
-						Name: "train-job",
-						VolumeMounts: []v1.VolumeMount{
-							{
-								Name:      common.MetricsVolume,
-								MountPath: filepath.Dir(common.DefaultFilePath),
-							},
+		"Valid case": {
+			pod: v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "train-job",
 						},
-					},
-					{
-						Name: "init-container",
-					},
-					{
-						Name: "metrics-collector",
-						VolumeMounts: []v1.VolumeMount{
-							{
-								Name:      common.MetricsVolume,
-								MountPath: filepath.Dir(common.DefaultFilePath),
-							},
+						{
+							Name: "init-container",
 						},
-					},
-				},
-				Volumes: []v1.Volume{
-					{
-						Name: common.MetricsVolume,
-						VolumeSource: v1.VolumeSource{
-							EmptyDir: &v1.EmptyDirVolumeSource{},
+						{
+							Name: "metrics-collector",
 						},
 					},
 				},
 			},
+			expectedPod: v1.Pod{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Name: "train-job",
+							VolumeMounts: []v1.VolumeMount{
+								{
+									Name:      common.MetricsVolume,
+									MountPath: filepath.Dir(common.DefaultFilePath),
+								},
+							},
+						},
+						{
+							Name: "init-container",
+						},
+						{
+							Name: "metrics-collector",
+							VolumeMounts: []v1.VolumeMount{
+								{
+									Name:      common.MetricsVolume,
+									MountPath: filepath.Dir(common.DefaultFilePath),
+								},
+							},
+						},
+					},
+					Volumes: []v1.Volume{
+						{
+							Name: common.MetricsVolume,
+							VolumeSource: v1.VolumeSource{
+								EmptyDir: &v1.EmptyDirVolumeSource{},
+							},
+						},
+					},
+				},
+			},
+			MountPath:            common.DefaultFilePath,
+			SidecarContainerName: "metrics-collector",
+			PrimaryContainerName: "train-job",
+			pathKind:             common.FileKind,
 		},
-		MountPath:            common.DefaultFilePath,
-		SidecarContainerName: "metrics-collector",
-		PrimaryContainerName: "train-job",
-		pathKind:             common.FileKind,
 	}
 
-	err := mutateMetricsCollectorVolume(
-		&tc.pod,
-		tc.MountPath,
-		tc.SidecarContainerName,
-		tc.PrimaryContainerName,
-		tc.pathKind)
-	if err != nil {
-		t.Errorf("mutateMetricsCollectorVolume failed: %v", err)
-	} else if !equality.Semantic.DeepEqual(tc.pod, tc.expectedPod) {
-		t.Errorf("Expected pod %v, got %v", tc.expectedPod, tc.pod)
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			err := mutateMetricsCollectorVolume(
+				&tc.pod,
+				tc.MountPath,
+				tc.SidecarContainerName,
+				tc.PrimaryContainerName,
+				tc.pathKind)
+			if err != nil {
+				t.Errorf("mutateMetricsCollectorVolume failed: %v", err)
+			} else if diff := cmp.Diff(tc.expectedPod, tc.pod); len(diff) != 0 {
+				t.Errorf("Unexpected mutated pod result (-want,got):\n%s", diff)
+			}
+		})
 	}
 }
 
 func TestGetSidecarContainerName(t *testing.T) {
-	testCases := []struct {
+	testCases := map[string]struct {
 		collectorKind         common.CollectorKind
 		expectedCollectorKind string
 	}{
-		{
+		"Expected kind is metrics-logger-and-collector": {
 			collectorKind:         common.StdOutCollector,
 			expectedCollectorKind: mccommon.MetricLoggerCollectorContainerName,
 		},
-		{
+		"Expected kind is metrics-collector": {
 			collectorKind:         common.TfEventCollector,
 			expectedCollectorKind: mccommon.MetricCollectorContainerName,
 		},
 	}
 
-	for _, tc := range testCases {
-		collectorKind := getSidecarContainerName(tc.collectorKind)
-		if collectorKind != tc.expectedCollectorKind {
-			t.Errorf("Expected Collector Kind: %v, got %v", tc.expectedCollectorKind, collectorKind)
-		}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			collectorKind := getSidecarContainerName(tc.collectorKind)
+			if collectorKind != tc.expectedCollectorKind {
+				t.Errorf("Expected Collector Kind: %v, got %v", tc.expectedCollectorKind, collectorKind)
+			}
+		})
 	}
 }
 
@@ -722,16 +719,15 @@ func TestGetKatibJob(t *testing.T) {
 	deployName := "deploy-name"
 	jobName := "job-name"
 
-	testCases := []struct {
+	testCases := map[string]struct {
 		pod             *v1.Pod
 		job             *batchv1.Job
 		deployment      *appsv1.Deployment
 		expectedJobKind string
 		expectedJobName string
 		err             bool
-		testDescription string
 	}{
-		{
+		"Valid run with ownership sequence: Trial -> Job -> Pod": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -775,9 +771,8 @@ func TestGetKatibJob(t *testing.T) {
 			expectedJobKind: "Job",
 			expectedJobName: jobName + "-1",
 			err:             false,
-			testDescription: "Valid run with ownership sequence: Trial -> Job -> Pod",
 		},
-		{
+		"Valid run with ownership sequence: Trial -> Deployment -> Pod, Job -> Pod": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -854,9 +849,8 @@ func TestGetKatibJob(t *testing.T) {
 			expectedJobKind: "Deployment",
 			expectedJobName: deployName + "-2",
 			err:             false,
-			testDescription: "Valid run with ownership sequence: Trial -> Deployment -> Pod, Job -> Pod",
 		},
-		{
+		"Run for not Trial's pod with ownership sequence: Job -> Pod": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -889,10 +883,9 @@ func TestGetKatibJob(t *testing.T) {
 					},
 				},
 			},
-			err:             true,
-			testDescription: "Run for not Trial's pod with ownership sequence: Job -> Pod",
+			err: true,
 		},
-		{
+		"Run when Pod owns Job that doesn't exists": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -906,10 +899,9 @@ func TestGetKatibJob(t *testing.T) {
 					},
 				},
 			},
-			err:             true,
-			testDescription: "Run when Pod owns Job that doesn't exists",
+			err: true,
 		},
-		{
+		"Run when Pod owns Job with invalid API version": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      podName,
@@ -923,64 +915,64 @@ func TestGetKatibJob(t *testing.T) {
 					},
 				},
 			},
-			err:             true,
-			testDescription: "Run when Pod owns Job with invalid API version",
+			err: true,
 		},
 	}
 
-	for _, tc := range testCases {
+	for name, tc := range testCases {
 		// Create Job if it is needed
-		if tc.job != nil {
-			jobUnstr, err := util.ConvertObjectToUnstructured(tc.job)
-			gvk := schema.GroupVersionKind{
-				Group:   "batch",
-				Version: "v1",
-				Kind:    "Job",
+		t.Run(name, func(t *testing.T) {
+			if tc.job != nil {
+				jobUnstr, err := util.ConvertObjectToUnstructured(tc.job)
+				gvk := schema.GroupVersionKind{
+					Group:   "batch",
+					Version: "v1",
+					Kind:    "Job",
+				}
+				jobUnstr.SetGroupVersionKind(gvk)
+				if err != nil {
+					t.Errorf("ConvertObjectToUnstructured error %v", err)
+				}
+
+				g.Expect(c.Create(context.TODO(), jobUnstr)).NotTo(gomega.HaveOccurred())
+
+				// Wait that Job is created
+				g.Eventually(func() error {
+					return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.job.Name}, jobUnstr)
+				}, timeout).ShouldNot(gomega.HaveOccurred())
 			}
-			jobUnstr.SetGroupVersionKind(gvk)
-			if err != nil {
-				t.Errorf("ConvertObjectToUnstructured error %v", err)
+
+			// Create Deployment if it is needed
+			if tc.deployment != nil {
+				g.Expect(c.Create(context.TODO(), tc.deployment)).NotTo(gomega.HaveOccurred())
+
+				// Wait that Deployment is created
+				g.Eventually(func() error {
+					return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.deployment.Name}, tc.deployment)
+				}, timeout).ShouldNot(gomega.HaveOccurred())
 			}
 
-			g.Expect(c.Create(context.TODO(), jobUnstr)).NotTo(gomega.HaveOccurred())
-
-			// Wait that Job is created
-			g.Eventually(func() error {
-				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.job.Name}, jobUnstr)
-			}, timeout).ShouldNot(gomega.HaveOccurred())
-		}
-
-		// Create Deployment if it is needed
-		if tc.deployment != nil {
-			g.Expect(c.Create(context.TODO(), tc.deployment)).NotTo(gomega.HaveOccurred())
-
-			// Wait that Deployment is created
-			g.Eventually(func() error {
-				return c.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: tc.deployment.Name}, tc.deployment)
-			}, timeout).ShouldNot(gomega.HaveOccurred())
-		}
-
-		object, _ := util.ConvertObjectToUnstructured(tc.pod)
-		jobKind, jobName, err := si.getKatibJob(object, namespace)
-		if !tc.err && err != nil {
-			t.Errorf("Case %v failed. Error %v", tc.testDescription, err)
-		} else if !tc.err && (tc.expectedJobKind != jobKind || tc.expectedJobName != jobName) {
-			t.Errorf("Case %v failed. Expected jobKind %v, got %v, Expected jobName %v, got %v",
-				tc.testDescription, tc.expectedJobKind, jobKind, tc.expectedJobName, jobName)
-		} else if tc.err && err == nil {
-			t.Errorf("Expected error got nil")
-		}
+			object, _ := util.ConvertObjectToUnstructured(tc.pod)
+			jobKind, jobName, err := si.getKatibJob(object, namespace)
+			if !tc.err && err != nil {
+				t.Errorf("Error %v", err)
+			} else if !tc.err && (tc.expectedJobKind != jobKind || tc.expectedJobName != jobName) {
+				t.Errorf("Expected jobKind %v, got %v, Expected jobName %v, got %v",
+					tc.expectedJobKind, jobKind, tc.expectedJobName, jobName)
+			} else if tc.err && err == nil {
+				t.Errorf("Expected error got nil")
+			}
+		})
 	}
 }
 
 func TestIsPrimaryPod(t *testing.T) {
-	testCases := []struct {
+	testCases := map[string]struct {
 		podLabels        map[string]string
 		primaryPodLabels map[string]string
 		isPrimary        bool
-		testDescription  string
 	}{
-		{
+		"Pod contains all labels from primary pod labels": {
 			podLabels: map[string]string{
 				"test-key-1": "test-value-1",
 				"test-key-2": "test-value-2",
@@ -990,10 +982,9 @@ func TestIsPrimaryPod(t *testing.T) {
 				"test-key-1": "test-value-1",
 				"test-key-2": "test-value-2",
 			},
-			isPrimary:       true,
-			testDescription: "Pod contains all labels from primary pod labels",
+			isPrimary: true,
 		},
-		{
+		"Pod doesn't contain primary label": {
 			podLabels: map[string]string{
 				"test-key-1": "test-value-1",
 			},
@@ -1001,26 +992,26 @@ func TestIsPrimaryPod(t *testing.T) {
 				"test-key-1": "test-value-1",
 				"test-key-2": "test-value-2",
 			},
-			isPrimary:       false,
-			testDescription: "Pod doesn't contain primary label",
+			isPrimary: false,
 		},
-		{
+		"Pod contains label with incorrect value": {
 			podLabels: map[string]string{
 				"test-key-1": "invalid",
 			},
 			primaryPodLabels: map[string]string{
 				"test-key-1": "test-value-1",
 			},
-			isPrimary:       false,
-			testDescription: "Pod contains label with incorrect value",
+			isPrimary: false,
 		},
 	}
 
-	for _, tc := range testCases {
-		isPrimary := isPrimaryPod(tc.podLabels, tc.primaryPodLabels)
-		if isPrimary != tc.isPrimary {
-			t.Errorf("Case %v. Expected isPrimary %v, got %v", tc.testDescription, tc.isPrimary, isPrimary)
-		}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			isPrimary := isPrimaryPod(tc.podLabels, tc.primaryPodLabels)
+			if diff := cmp.Diff(tc.isPrimary, isPrimary); len(diff) != 0 {
+				t.Errorf("Unexpected result (-want,got):\n%s", diff)
+			}
+		})
 	}
 }
 
@@ -1030,14 +1021,12 @@ func TestMutatePodMetadata(t *testing.T) {
 		"katib-experiment":    "katib-value",
 		consts.LabelTrialName: "test-trial",
 	}
-
-	testCases := []struct {
-		pod             *v1.Pod
-		trial           *trialsv1beta1.Trial
-		mutatedPod      *v1.Pod
-		testDescription string
+	testCases := map[string]struct {
+		pod        *v1.Pod
+		trial      *trialsv1beta1.Trial
+		mutatedPod *v1.Pod
 	}{
-		{
+		"Mutated Pod should contain label from the origin Pod and Trial": {
 			pod: &v1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
@@ -1058,20 +1047,21 @@ func TestMutatePodMetadata(t *testing.T) {
 					Labels: mutatedPodLabels,
 				},
 			},
-			testDescription: "Mutated Pod should contain label from the origin Pod and Trial",
 		},
 	}
 
-	for _, tc := range testCases {
-		mutatePodMetadata(tc.pod, tc.trial)
-		if !reflect.DeepEqual(tc.mutatedPod, tc.pod) {
-			t.Errorf("Case %v. Expected Pod %v, got %v", tc.testDescription, tc.mutatedPod, tc.pod)
-		}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			mutatePodMetadata(tc.pod, tc.trial)
+			if diff := cmp.Diff(tc.mutatedPod, tc.pod); len(diff) != 0 {
+				t.Errorf("Unexpected mutated result (-want,+got):\n%s", diff)
+			}
+		})
 	}
 }
 
 func TestMutatePodEnv(t *testing.T) {
-	testcases := map[string]struct {
+	testCases := map[string]struct {
 		pod        *v1.Pod
 		trial      *trialsv1beta1.Trial
 		mutatedPod *v1.Pod
@@ -1148,22 +1138,22 @@ func TestMutatePodEnv(t *testing.T) {
 		},
 	}
 
-	for name, testcase := range testcases {
+	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			err := mutatePodEnv(testcase.pod, testcase.trial)
+			err := mutatePodEnv(tc.pod, tc.trial)
 			// Compare error with expected error
-			if testcase.wantError != nil && err != nil {
-				if diff := cmp.Diff(testcase.wantError.Error(), err.Error()); len(diff) != 0 {
+			if tc.wantError != nil && err != nil {
+				if diff := cmp.Diff(tc.wantError.Error(), err.Error()); len(diff) != 0 {
 					t.Errorf("Unexpected error (-want,+got):\n%s", diff)
 				}
-			} else if testcase.wantError != nil || err != nil {
+			} else if tc.wantError != nil || err != nil {
 				t.Errorf(
 					"Unexpected error (-want,+got):\n%s",
-					cmp.Diff(testcase.wantError, err, cmpopts.EquateErrors()),
+					cmp.Diff(tc.wantError, err, cmpopts.EquateErrors()),
 				)
 			}
 			// Compare Pod with expected pod after mutation
-			if diff := cmp.Diff(testcase.mutatedPod, testcase.pod); len(diff) != 0 {
+			if diff := cmp.Diff(tc.mutatedPod, tc.pod); len(diff) != 0 {
 				t.Errorf("Unexpected mutated result (-want,+got):\n%s", diff)
 			}
 		})

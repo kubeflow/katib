@@ -111,7 +111,7 @@ class KatibClient(object):
         namespace = namespace or self.namespace
 
         experiment_name = None
-        if type(experiment) == models.V1beta1Experiment:
+        if type(experiment) is models.V1beta1Experiment:
             if experiment.metadata.name is not None:
                 experiment_name = experiment.metadata.name
             elif experiment.metadata.generate_name is not None:
@@ -142,7 +142,8 @@ class KatibClient(object):
         except Exception as e:
             if hasattr(e, "status") and e.status == 409:
                 raise Exception(
-                    f"A Katib Experiment with the name {namespace}/{experiment_name} already exists."
+                    f"A Katib Experiment with the name "
+                    f"{namespace}/{experiment_name} already exists."
                 )
             raise RuntimeError(
                 f"Failed to create Katib Experiment: {namespace}/{experiment_name}"
@@ -157,7 +158,8 @@ class KatibClient(object):
                 IPython.display.display(
                     IPython.display.HTML(
                         "Katib Experiment {} "
-                        'link <a href="/_/katib/#/katib/hp_monitor/{}/{}" target="_blank">here</a>'.format(
+                        'link <a href="/_/katib/#/katib/hp_monitor/{}/{}" '
+                        'target="_blank">here</a>'.format(
                             experiment_name,
                             namespace,
                             experiment_name,
@@ -276,7 +278,8 @@ class KatibClient(object):
                 https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvFromSource.md)
             algorithm_name: Search algorithm for the HyperParameter tuning.
             algorithm_settings: Settings for the search algorithm given.
-                For available fields, check this doc: https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail.
+                For available fields, check this doc:
+                https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail.
             objective_metric_name: Objective metric that Katib optimizes.
             additional_metric_names: List of metrics that Katib collects from the
                 objective function in addition to objective metric.
@@ -284,7 +287,8 @@ class KatibClient(object):
                 Must be one of `minimize` or `maximize`.
             objective_goal: Objective goal that Experiment should reach to be Succeeded.
             max_trial_count: Maximum number of Trials to run. For the default
-                values check this doc: https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
+                values check this doc:
+                https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
             parallel_trial_count: Number of Trials that Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
             resources_per_trial: A parameter that lets you specify how much resources
@@ -310,6 +314,7 @@ class KatibClient(object):
                 to the base image packages. These packages are installed before
                 executing the objective function.
             pip_index_url: The PyPI url from which to install Python packages.
+            metrics_collector_config: Specify the config of metrics collector,
             metrics_collector_config: Specify the config of metrics collector,
                 for example, `metrics_collector_config = {"kind": "Push"}`.
                 Currently, we only support `StdOut` and `Push` metrics collector.
@@ -1016,7 +1021,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Raise exception if Experiment is Failed.
@@ -1036,7 +1043,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Running condition.
@@ -1047,7 +1056,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Restarting condition.
@@ -1058,7 +1069,9 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+                logger.debug(
+                    f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n"
+                )
                 return experiment
 
             # Check if Experiment reaches Succeeded condition.
@@ -1069,18 +1082,24 @@ class KatibClient(object):
                 )
             ):
                 utils.print_experiment_status(experiment)
-                logger.debug(f"Experiment: {namespace}/{name} is {expected_condition}\n\n\n")
+
+                logger.debug(
+                    f"waiting for experiment: {namespace}/{name} "
+                    f"to reach {expected_condition} condition\n\n\n"
+                )
                 return experiment
 
             # Otherwise, print the current Experiment results and sleep for the pooling interval.
             utils.print_experiment_status(experiment)
             logger.debug(
-                f"Waiting for Experiment: {namespace}/{name} to reach {expected_condition} condition\n\n\n"
+                f"waiting for experiment: {namespace}/{name} "
+                f"to reach {expected_condition} condition\n\n\n"
             )
             time.sleep(polling_interval)
 
         raise TimeoutError(
-            f"Timeout waiting for Experiment: {namespace}/{name} to reach {expected_condition} state"
+            f"Timeout waiting for Experiment: {namespace}/{name} "
+            f"to reach {expected_condition} state"
         )
 
     def edit_experiment_budget(
@@ -1096,7 +1115,8 @@ class KatibClient(object):
         budget to resume Succeeded Experiments with `LongRunning` and `FromVolume`
         resume policies.
 
-        Learn about resuming Experiments here: https://www.kubeflow.org/docs/components/katib/resume-experiment/
+        Learn about resuming Experiments here:
+        https://www.kubeflow.org/docs/components/katib/resume-experiment/
 
         Args:
             name: Name for the Experiment.
@@ -1509,10 +1529,12 @@ class KatibClient(object):
         use the default Katib DB Manager address: `katib-db-manager.kubeflow:6789`.
 
         If you run this API outside the cluster, you have to port-forward the
-        Katib DB Manager before getting the Trial metrics: `kubectl port-forward svc/katib-db-manager -n kubeflow 6789`.
+        Katib DB Manager before getting the Trial metrics:
+        `kubectl port-forward svc/katib-db-manager -n kubeflow 6789`.
         In that case, you can use this Katib DB Manager address: `localhost:6789`.
 
-        You can use `curl` to verify that Katib DB Manager is reachable: `curl <db-manager-address>`.
+        You can use `curl` to verify that Katib DB Manager is reachable:
+        `curl <db-manager-address>`.
 
         Args:
             name: Name for the Trial.
