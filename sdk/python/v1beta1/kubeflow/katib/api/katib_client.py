@@ -507,9 +507,15 @@ class KatibClient(object):
                 )
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
                 from kubeflow.training.constants.constants import STORAGE_INITIALIZER
-                from kubeflow.training.constants.constants import STORAGE_INITIALIZER_IMAGE
-                from kubeflow.training.constants.constants import STORAGE_INITIALIZER_VOLUME_MOUNT
-                from kubeflow.training.constants.constants import TRAINER_TRANSFORMER_IMAGE
+                from kubeflow.training.constants.constants import (
+                    STORAGE_INITIALIZER_IMAGE,
+                )
+                from kubeflow.training.constants.constants import (
+                    STORAGE_INITIALIZER_VOLUME_MOUNT,
+                )
+                from kubeflow.training.constants.constants import (
+                    TRAINER_TRANSFORMER_IMAGE,
+                )
                 import peft
                 import transformers
             except ImportError:
@@ -1474,9 +1480,9 @@ class KatibClient(object):
                     ):
                         output = {}
                         output["name"] = trial.metadata.name
-                        output[
-                            "parameter_assignments"
-                        ] = trial.spec.parameter_assignments
+                        output["parameter_assignments"] = (
+                            trial.spec.parameter_assignments
+                        )
                         output["metrics"] = trial.status.observation.metrics
                         result.append(output)
         except multiprocessing.TimeoutError:
