@@ -19,7 +19,7 @@ import multiprocessing
 import time
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
 
-from kubeflow.katib import models
+from kubeflow.katib import models, types
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
@@ -202,7 +202,9 @@ class KatibClient(object):
         max_trial_count: int = None,
         parallel_trial_count: int = None,
         max_failed_trial_count: int = None,
-        resources_per_trial: Union[dict, client.V1ResourceRequirements, None] = None,
+        resources_per_trial: Union[
+            dict, client.V1ResourceRequirements, types.TrainerResources, None
+        ] = None,
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
@@ -294,24 +296,50 @@ class KatibClient(object):
                 https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
             parallel_trial_count: Number of Trials that Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
-            resources_per_trial: A parameter that lets you specify how much resources
-                each trial container should have. You can either specify a
+            resources_per_trial: A parameter that lets you specify how much resources each
+                trial container should have. You can choose between non-distributed training
+                and distributed training.
+                1) Non-distributed training: You can either specify a
                 kubernetes.client.V1ResourceRequirements object (documented here:
                 https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1ResourceRequirements.md)
-                or a dictionary that includes one or more of the following keys: `cpu`,
-                `memory`, or `gpu` (other keys will be ignored). Appropriate values
-                for these keys are documented here:
+                or a dictionary that includes one or more of the following keys:
+                `cpu`, `memory`, or `gpu` (other keys will be ignored). Appropriate
+                values for these keys are documented here:
                 https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/.
                 For example:
+                ```
                 {
                     "cpu": "1",
                     "gpu": "1",
                     "memory": "2Gi",
                 }
-                Please note, `gpu` specifies a resource request with a key of
-                `nvidia.com/gpu`, i.e. an NVIDIA GPU. If you need a different type of
-                GPU, pass in a V1ResourceRequirement instance instead, since it's more
-                flexible. This parameter is optional and defaults to None.
+                ```
+                Please note, `gpu` specifies a resource request with a key of `nvidia.com/gpu`,
+                i.e. an NVIDIA GPU. If you need a different type of GPU, pass in a
+                V1ResourceRequirement instance instead, since it's more flexible. This
+                parameter is optional and defaults to None.
+                2) Distributed training: You can specify a types.TrainerResources object, which
+                includes `num_workers`, `num_procs_per_worker`, and `resources_per_worker`.
+                For example:
+                ```
+                resources_per_trial = types.TrainerResources(
+                    num_workers=4,
+                    num_procs_per_worker=2,
+                    resources_per_worker={
+                        "gpu": "2",
+                        "cpu": "5",
+                        "memory": "10Gi"
+                    }
+                )
+                ```
+                - num_workers: Number of PyTorchJob workers.
+                - num_procs_per_worker: Number of processes per PyTorchJob worker for
+                  `torchrun` CLI. You can use this parameter if you want to use more than 1 GPU
+                  per PyTorchJob worker.
+                - resources_per_worker: A parameter that lets you specify how much resources
+                  each PyTorchJob worker container should have. You can either specify
+                  a kubernetes.client.V1ResourceRequirements object or a dictionary, same as
+                  resources specified in non-distributed training.
             retain_trials: Whether Trials' resources (e.g. pods) are deleted after Succeeded state.
             packages_to_install: List of Python packages to install in addition
                 to the base image packages. These packages are installed before
@@ -470,22 +498,109 @@ class KatibClient(object):
                     # Otherwise, add value to the function input.
                     input_params[p_name] = p_value
 
-            container_spec = utils.get_container_spec(
-                name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                base_image=base_image,
-                train_func=objective,
-                train_func_parameters=input_params,
-                packages_to_install=packages_to_install,
-                pip_index_url=pip_index_url,
-                resources=resources_per_trial,
-                env=env,
-                env_from=env_from,
-            )
+            if isinstance(resources_per_trial, types.TrainerResources):
+                from kubeflow.training import models as training_models
 
-            pod_spec = utils.get_pod_template_spec(
-                containers=[container_spec],
-                restart_policy="Never",
-            )
+                if (
+                    resources_per_trial.num_workers is None
+                    or resources_per_trial.num_workers < 1
+                ):
+                    raise ValueError("At least one Worker for PyTorchJob must be set")
+
+                # Create container spec.
+                container_spec = utils.get_container_spec(
+                    name=constants.PYTORCHJOB_PRIMARY_CONTAINER_NAME,
+                    base_image=base_image,
+                    train_func=objective,
+                    train_func_parameters=input_params,
+                    packages_to_install=packages_to_install,
+                    pip_index_url=pip_index_url,
+                    resources=resources_per_trial.resources_per_worker,
+                    env=env,
+                    env_from=env_from,
+                )
+
+                # Create worker pod spec.
+                worker_pod_spec = utils.get_pod_template_spec(
+                    containers=[container_spec],
+                )
+
+                # Create pytorchjob.
+                pytorchjob = training_models.KubeflowOrgV1PyTorchJob(
+                    api_version="kubeflow.org/v1",
+                    kind="PyTorchJob",
+                    spec=training_models.KubeflowOrgV1PyTorchJobSpec(
+                        run_policy=training_models.KubeflowOrgV1RunPolicy(
+                            clean_pod_policy=None
+                        ),
+                        pytorch_replica_specs={},
+                    ),
+                )
+
+                if resources_per_trial.num_procs_per_worker:
+                    pytorchjob.spec.nproc_per_node = str(
+                        resources_per_trial.num_procs_per_worker
+                    )
+
+                pytorchjob.spec.pytorch_replica_specs[
+                    "Master"
+                ] = training_models.KubeflowOrgV1ReplicaSpec(
+                    replicas=1,
+                    template=worker_pod_spec,
+                )
+
+                if resources_per_trial.num_workers > 1:
+                    pytorchjob.spec.pytorch_replica_specs[
+                        "Worker"
+                    ] = training_models.KubeflowOrgV1ReplicaSpec(
+                        replicas=resources_per_trial.num_workers - 1,
+                        template=worker_pod_spec,
+                    )
+
+                # Create Trial template.
+                trial_template = models.V1beta1TrialTemplate(
+                    primary_container_name=constants.PYTORCHJOB_PRIMARY_CONTAINER_NAME,
+                    retain=retain_trials,
+                    trial_parameters=trial_params,
+                    trial_spec=pytorchjob,
+                )
+
+            else:
+                # Create container spec.
+                container_spec = utils.get_container_spec(
+                    name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+                    base_image=base_image,
+                    train_func=objective,
+                    train_func_parameters=input_params,
+                    packages_to_install=packages_to_install,
+                    pip_index_url=pip_index_url,
+                    resources=resources_per_trial,
+                    env=env,
+                    env_from=env_from,
+                )
+
+                # Create pod spec.
+                pod_spec = utils.get_pod_template_spec(
+                    containers=[container_spec],
+                    restart_policy="Never",
+                )
+
+                # Create Trial specification.
+                trial_spec = client.V1Job(
+                    api_version="batch/v1",
+                    kind="Job",
+                    spec=client.V1JobSpec(
+                        template=pod_spec,
+                    ),
+                )
+
+                # Create Trial template.
+                trial_template = models.V1beta1TrialTemplate(
+                    primary_container_name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+                    retain=retain_trials,
+                    trial_parameters=trial_params,
+                    trial_spec=trial_spec,
+                )
 
         # If users choose to use external models and datasets.
         else:
@@ -639,30 +754,6 @@ class KatibClient(object):
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
             )
 
-            lora_config = json.dumps(lora_config.__dict__, cls=utils.SetEncoder)
-            training_args = json.dumps(training_args.to_dict())
-
-            container_spec = utils.get_container_spec(
-                name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                base_image=TRAINER_TRANSFORMER_IMAGE,
-                args=[
-                    "--model_uri",
-                    model_provider_parameters.model_uri,
-                    "--transformer_type",
-                    model_provider_parameters.transformer_type.__name__,
-                    "--model_dir",
-                    VOLUME_PATH_MODEL,
-                    "--dataset_dir",
-                    VOLUME_PATH_DATASET,
-                    "--lora_config",
-                    f"'{lora_config}'",
-                    "--training_parameters",
-                    f"'{training_args}'",
-                ],
-                volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
-                resources=resources_per_trial,
-            )
-
             storage_initializer_volume = models.V1Volume(
                 name=STORAGE_INITIALIZER,
                 persistent_volume_claim=models.V1PersistentVolumeClaimVolumeSource(
@@ -670,29 +761,136 @@ class KatibClient(object):
                 ),
             )
 
-            pod_spec = utils.get_pod_template_spec(
-                containers=[container_spec],
-                init_containers=[init_container_spec],
-                volumes=[storage_initializer_volume],
-                restart_policy="Never",
-            )
+            if isinstance(resources_per_trial, types.TrainerResources):
+                from kubeflow.training import models as training_models
 
-        # Create Trial specification.
-        trial_spec = client.V1Job(
-            api_version="batch/v1",
-            kind="Job",
-            spec=client.V1JobSpec(
-                template=pod_spec,
-            ),
-        )
+                if (
+                    resources_per_trial.num_workers is None
+                    or resources_per_trial.num_workers < 1
+                ):
+                    raise ValueError("At least one Worker for PyTorchJob must be set")
 
-        # Create Trial template.
-        trial_template = models.V1beta1TrialTemplate(
-            primary_container_name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-            retain=retain_trials,
-            trial_parameters=trial_params,
-            trial_spec=trial_spec,
-        )
+                # Create container spec.
+                container_spec = utils.get_container_spec(
+                    name=constants.PYTORCHJOB_PRIMARY_CONTAINER_NAME,
+                    base_image=TRAINER_TRANSFORMER_IMAGE,
+                    args=[
+                        "--model_uri",
+                        model_provider_parameters.model_uri,
+                        "--transformer_type",
+                        model_provider_parameters.transformer_type.__name__,
+                        "--model_dir",
+                        VOLUME_PATH_MODEL,
+                        "--dataset_dir",
+                        VOLUME_PATH_DATASET,
+                        "--lora_config",
+                        f"'{json.dumps(lora_config.__dict__, cls=utils.SetEncoder)}'",
+                        "--training_parameters",
+                        f"'{json.dumps(training_args.to_dict())}'",
+                    ],
+                    volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
+                    resources=resources_per_trial.resources_per_worker,
+                )
+
+                # Create pod spec.
+                worker_pod_spec = utils.get_pod_template_spec(
+                    containers=[container_spec],
+                    volumes=[storage_initializer_volume],
+                )
+
+                master_pod_spec = utils.get_pod_template_spec(
+                    containers=[container_spec],
+                    init_containers=[init_container_spec],
+                    volumes=[storage_initializer_volume],
+                )
+
+                # Create pytorchjob.
+                pytorchjob = training_models.KubeflowOrgV1PyTorchJob(
+                    api_version="kubeflow.org/v1",
+                    kind="PyTorchJob",
+                    spec=training_models.KubeflowOrgV1PyTorchJobSpec(
+                        run_policy=training_models.KubeflowOrgV1RunPolicy(
+                            clean_pod_policy=None
+                        ),
+                        pytorch_replica_specs={},
+                    ),
+                )
+
+                if resources_per_trial.num_procs_per_worker:
+                    pytorchjob.spec.nproc_per_node = str(
+                        resources_per_trial.num_procs_per_worker
+                    )
+
+                pytorchjob.spec.pytorch_replica_specs[
+                    "Master"
+                ] = training_models.KubeflowOrgV1ReplicaSpec(
+                    replicas=1,
+                    template=master_pod_spec,
+                )
+
+                if resources_per_trial.num_workers > 1:
+                    pytorchjob.spec.pytorch_replica_specs[
+                        "Worker"
+                    ] = training_models.KubeflowOrgV1ReplicaSpec(
+                        replicas=resources_per_trial.num_workers - 1,
+                        template=worker_pod_spec,
+                    )
+
+                # Create Trial template.
+                trial_template = models.V1beta1TrialTemplate(
+                    primary_container_name=constants.PYTORCHJOB_PRIMARY_CONTAINER_NAME,
+                    retain=retain_trials,
+                    trial_parameters=trial_params,
+                    trial_spec=pytorchjob,
+                )
+
+            else:
+                # Create container spec.
+                container_spec = utils.get_container_spec(
+                    name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+                    base_image=TRAINER_TRANSFORMER_IMAGE,
+                    args=[
+                        "--model_uri",
+                        model_provider_parameters.model_uri,
+                        "--transformer_type",
+                        model_provider_parameters.transformer_type.__name__,
+                        "--model_dir",
+                        VOLUME_PATH_MODEL,
+                        "--dataset_dir",
+                        VOLUME_PATH_DATASET,
+                        "--lora_config",
+                        f"'{json.dumps(lora_config.__dict__, cls=utils.SetEncoder)}'",
+                        "--training_parameters",
+                        f"'{json.dumps(training_args.to_dict())}'",
+                    ],
+                    volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
+                    resources=resources_per_trial,
+                )
+
+                # Create pod spec.
+                pod_spec = utils.get_pod_template_spec(
+                    containers=[container_spec],
+                    init_containers=[init_container_spec],
+                    volumes=[storage_initializer_volume],
+                    restart_policy="Never",
+                )
+
+                # Create Trial specification.
+                trial_spec = client.V1Job(
+                    api_version="batch/v1",
+                    kind="Job",
+                    spec=client.V1JobSpec(
+                        template=pod_spec,
+                    ),
+                )
+
+                # Create Trial template.
+                trial_template = models.V1beta1TrialTemplate(
+                    primary_container_name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+                    retain=retain_trials,
+                    trial_parameters=trial_params,
+                    trial_spec=trial_spec,
+                )
 
         # Add parameters to the Katib Experiment.
         experiment.spec.parameters = experiment_params
@@ -1479,9 +1677,9 @@ class KatibClient(object):
                     ):
                         output = {}
                         output["name"] = trial.metadata.name
-                        output["parameter_assignments"] = (
-                            trial.spec.parameter_assignments
-                        )
+                        output[
+                            "parameter_assignments"
+                        ] = trial.spec.parameter_assignments
                         output["metrics"] = trial.status.observation.metrics
                         result.append(output)
         except multiprocessing.TimeoutError:

@@ -33,6 +33,7 @@ TRIAL_PLURAL = "trials"
 
 
 DEFAULT_PRIMARY_CONTAINER_NAME = "training-container"
+PYTORCHJOB_PRIMARY_CONTAINER_NAME = "pytorch"
 
 # Label to identify Experiment's resources.
 EXPERIMENT_LABEL = "katib.kubeflow.org/experiment"
