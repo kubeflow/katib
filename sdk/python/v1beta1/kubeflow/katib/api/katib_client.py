@@ -19,7 +19,8 @@ import multiprocessing
 import time
 from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
 
-from kubeflow.katib import models, types
+from kubeflow.katib import models
+from kubeflow.katib import types
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
@@ -542,19 +543,19 @@ class KatibClient(object):
                         resources_per_trial.num_procs_per_worker
                     )
 
-                pytorchjob.spec.pytorch_replica_specs[
-                    "Master"
-                ] = training_models.KubeflowOrgV1ReplicaSpec(
-                    replicas=1,
-                    template=worker_pod_spec,
+                pytorchjob.spec.pytorch_replica_specs["Master"] = (
+                    training_models.KubeflowOrgV1ReplicaSpec(
+                        replicas=1,
+                        template=worker_pod_spec,
+                    )
                 )
 
                 if resources_per_trial.num_workers > 1:
-                    pytorchjob.spec.pytorch_replica_specs[
-                        "Worker"
-                    ] = training_models.KubeflowOrgV1ReplicaSpec(
-                        replicas=resources_per_trial.num_workers - 1,
-                        template=worker_pod_spec,
+                    pytorchjob.spec.pytorch_replica_specs["Worker"] = (
+                        training_models.KubeflowOrgV1ReplicaSpec(
+                            replicas=resources_per_trial.num_workers - 1,
+                            template=worker_pod_spec,
+                        )
                     )
 
                 # Create Trial template.
@@ -821,19 +822,19 @@ class KatibClient(object):
                         resources_per_trial.num_procs_per_worker
                     )
 
-                pytorchjob.spec.pytorch_replica_specs[
-                    "Master"
-                ] = training_models.KubeflowOrgV1ReplicaSpec(
-                    replicas=1,
-                    template=master_pod_spec,
+                pytorchjob.spec.pytorch_replica_specs["Master"] = (
+                    training_models.KubeflowOrgV1ReplicaSpec(
+                        replicas=1,
+                        template=master_pod_spec,
+                    )
                 )
 
                 if resources_per_trial.num_workers > 1:
-                    pytorchjob.spec.pytorch_replica_specs[
-                        "Worker"
-                    ] = training_models.KubeflowOrgV1ReplicaSpec(
-                        replicas=resources_per_trial.num_workers - 1,
-                        template=worker_pod_spec,
+                    pytorchjob.spec.pytorch_replica_specs["Worker"] = (
+                        training_models.KubeflowOrgV1ReplicaSpec(
+                            replicas=resources_per_trial.num_workers - 1,
+                            template=worker_pod_spec,
+                        )
                     )
 
                 # Create Trial template.
@@ -1677,9 +1678,9 @@ class KatibClient(object):
                     ):
                         output = {}
                         output["name"] = trial.metadata.name
-                        output[
-                            "parameter_assignments"
-                        ] = trial.spec.parameter_assignments
+                        output["parameter_assignments"] = (
+                            trial.spec.parameter_assignments
+                        )
                         output["metrics"] = trial.status.observation.metrics
                         result.append(output)
         except multiprocessing.TimeoutError:
