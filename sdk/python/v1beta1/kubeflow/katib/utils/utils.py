@@ -12,14 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import inspect
 import json
+import logging
 import os
 import textwrap
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Union
 
 from kubeflow.katib import models
 from kubeflow.katib.constants import constants
+
+logger = logging.getLogger(__name__)
 
 
 def is_running_in_k8s():
@@ -130,176 +134,6 @@ class FakeResponse:
         self.data = json.dumps(obj)
 
 
-def get_command_using_train_func(
-    train_func: Optional[Callable],
-    train_func_parameters: Optional[Dict[str, Any]] = None,
-    packages_to_install: Optional[List[str]] = None,
-    pip_index_url: str = "https://pypi.org/simple",
-) -> Tuple[List[str], List[str]]:
-    """
-    Get container args and command from the given training function and parameters.
-    """
-    # Check if function is callable.
-    if not callable(train_func):
-        raise ValueError(
-            f"Training function must be callable, got function type: {type(train_func)}"
-        )
-
-    # Extract function implementation.
-    func_code = inspect.getsource(train_func)
-
-    # Function might be defined in some indented scope (e.g. in another function).
-    # We need to dedent the function code.
-    func_code = textwrap.dedent(func_code)
-
-    # Wrap function code to execute it from the file. For example:
-    # def train(parameters):
-    #     print('Start Training...')
-    # train({'lr': 0.01})
-    if train_func_parameters is None:
-        func_code = f"{func_code}\n{train_func.__name__}()\n"
-    else:
-        func_code = f"{func_code}\n{train_func.__name__}({train_func_parameters})\n"
-
-    # Prepare execute script template.
-    exec_script = textwrap.dedent(
-        """
-                program_path=$(mktemp -d)
-                read -r -d '' SCRIPT << EOM\n
-                {func_code}
-                EOM
-                printf "%s" \"$SCRIPT\" > \"$program_path/ephemeral_script.py\"
-                python3 -u \"$program_path/ephemeral_script.py\""""
-    )
-
-    # Add function code to the execute script.
-    exec_script = exec_script.format(func_code=func_code)
-
-    # Install Python packages if that is required.
-    if packages_to_install is not None:
-        exec_script = (
-            get_script_for_python_packages(packages_to_install, pip_index_url)
-            + exec_script
-        )
-
-    # Return container command and args to execute training function.
-    return ["bash", "-c"], [exec_script]
-
-
-def get_container_spec(
-    name: str,
-    base_image: str,
-    train_func: Optional[Callable] = None,
-    train_func_parameters: Optional[Dict[str, Any]] = None,
-    packages_to_install: Optional[List[str]] = None,
-    pip_index_url: str = "https://pypi.org/simple",
-    args: Optional[List[str]] = None,
-    resources: Union[dict, models.V1ResourceRequirements, None] = None,
-    volume_mounts: Optional[List[models.V1VolumeMount]] = None,
-    env: Optional[List[models.V1EnvVar]] = None,
-    env_from: Optional[List[models.V1EnvFromSource]] = None,
-) -> models.V1Container:
-    """
-    Get container spec for the given parameters.
-    """
-
-    if name is None or base_image is None:
-        raise ValueError("Container name or base image cannot be none")
-
-    # Create initial container spec.
-    container_spec = models.V1Container(
-        name=name, image=base_image, args=args, volume_mounts=volume_mounts
-    )
-
-    # If training function is set, override container command and args to execute the function.
-    if train_func is not None:
-        container_spec.command, container_spec.args = get_command_using_train_func(
-            train_func=train_func,
-            train_func_parameters=train_func_parameters,
-            packages_to_install=packages_to_install,
-            pip_index_url=pip_index_url,
-        )
-
-    # Convert dict to the Kubernetes container resources if that is required.
-    if isinstance(resources, dict):
-        # Convert all keys in resources to lowercase.
-        resources = {k.lower(): v for k, v in resources.items()}
-        if "gpu" in resources:
-            resources["nvidia.com/gpu"] = resources.pop("gpu")
-
-        resources = models.V1ResourceRequirements(
-            requests=resources,
-            limits=resources,
-        )
-
-    # Add resources to the container spec.
-    container_spec.resources = resources
-
-    # Add environment variables to the container spec.
-    if env:
-        container_spec.env = env
-    if env_from:
-        container_spec.env_from = env_from
-
-    return container_spec
-
-
-def get_pod_template_spec(
-    containers: List[models.V1Container],
-    init_containers: Optional[List[models.V1Container]] = None,
-    volumes: Optional[List[models.V1Volume]] = None,
-    restart_policy: Optional[str] = None,
-) -> models.V1PodTemplateSpec:
-    """
-    Get Pod template spec for the given parameters.
-    """
-
-    # Create Pod template spec. If the value is None, Pod doesn't have that parameter
-    pod_template_spec = models.V1PodTemplateSpec(
-        metadata=models.V1ObjectMeta(annotations={"sidecar.istio.io/inject": "false"}),
-        spec=models.V1PodSpec(
-            init_containers=init_containers,
-            containers=containers,
-            volumes=volumes,
-            restart_policy=restart_policy,
-        ),
-    )
-
-    return pod_template_spec
-
-
-def get_pvc_spec(
-    pvc_name: str,
-    namespace: str,
-    storage_config: Dict[str, Optional[Union[str, List[str]]]],
-):
-    if pvc_name is None or namespace is None:
-        raise ValueError("One of the required storage config argument is None")
-
-    if "size" not in storage_config:
-        storage_config["size"] = constants.PVC_DEFAULT_SIZE
-
-    if "access_modes" not in storage_config:
-        storage_config["access_modes"] = constants.PVC_DEFAULT_ACCESS_MODES
-
-    pvc_spec = models.V1PersistentVolumeClaim(
-        api_version="v1",
-        kind="PersistentVolumeClaim",
-        metadata={"name": pvc_name, "namespace": namespace},
-        spec=models.V1PersistentVolumeClaimSpec(
-            access_modes=storage_config["access_modes"],
-            resources=models.V1ResourceRequirements(
-                requests={"storage": storage_config["size"]}
-            ),
-        ),
-    )
-
-    if "storage_class" in storage_config:
-        pvc_spec.spec.storage_class_name = storage_config["storage_class"]
-
-    return pvc_spec
-
-
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
@@ -307,3 +141,49 @@ class SetEncoder(json.JSONEncoder):
         if isinstance(obj, type):
             return obj.__name__
         return json.JSONEncoder.default(self, obj)
+
+
+def parameter_substitution(
+    parameters: Union["TrainingArguments", "LoraConfig"],  # noqa: F821
+    experiment_params: List[models.V1beta1ParameterSpec],
+    trial_params: List[models.V1beta1TrialParameterSpec],
+):
+    from peft import LoraConfig  # noqa: F401
+    from transformers import TrainingArguments  # noqa: F401
+
+    if isinstance(parameters, TrainingArguments):
+        parameters_dict = parameters.to_dict()
+    else:
+        parameters_dict = parameters.__dict__
+
+    for p_name, p_value in parameters_dict.items():
+        if not hasattr(parameters, p_name):
+            logger.warning(f"Training parameter {p_name} is not supported.")
+            continue
+
+        if isinstance(p_value, models.V1beta1ParameterSpec):
+            old_attr = getattr(parameters, p_name, None)
+            if old_attr is not None:
+                value = f"${{trialParameters.{p_name}}}"
+            setattr(parameters, p_name, value)
+            p_value.name = p_name
+            experiment_params.append(p_value)
+            trial_params.append(
+                models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
+            )
+        elif p_value is not None:
+            old_attr = getattr(parameters, p_name, None)
+            if old_attr is not None:
+                if isinstance(p_value, dict):
+                    # Update the existing dictionary without nesting
+                    value = copy.deepcopy(p_value)
+                else:
+                    value = type(old_attr)(p_value)
+            setattr(parameters, p_name, value)
+
+    if isinstance(parameters, TrainingArguments):
+        parameters = json.dumps(parameters.to_dict())
+    else:
+        parameters = json.dumps(parameters.__dict__, cls=SetEncoder)
+
+    return parameters
