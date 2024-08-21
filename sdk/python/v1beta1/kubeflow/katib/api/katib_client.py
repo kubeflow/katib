@@ -17,23 +17,25 @@ import json
 import logging
 import multiprocessing
 import time
-from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
-import grpc
+import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
-import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubeflow.katib.utils import utils
-from kubernetes import client
-from kubernetes import config
+from kubernetes import client, config
+
+import grpc
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from kubeflow.storage_initializer.hugging_face import HuggingFaceDatasetParams
-    from kubeflow.storage_initializer.hugging_face import HuggingFaceModelParams
-    from kubeflow.storage_initializer.hugging_face import HuggingFaceTrainerParams
+    from kubeflow.storage_initializer.hugging_face import (
+        HuggingFaceDatasetParams,
+        HuggingFaceModelParams,
+        HuggingFaceTrainerParams,
+    )
     from kubeflow.storage_initializer.s3 import S3DatasetParams
 
 
@@ -420,7 +422,7 @@ class KatibClient(object):
                     )
 
         # Add metrics collector to the Katib Experiment.
-        # Up to now, We only support parameter `kind`, of which default value is
+        # Up to now, we only support parameter `kind`, of which default value is
         # `StdOut`, to specify the kind of metrics collector.
         experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
             collector=models.V1beta1CollectorSpec(
@@ -496,23 +498,19 @@ class KatibClient(object):
                 raise ValueError("One of the required parameters is None")
 
             try:
-                from kubeflow.storage_initializer.constants import VOLUME_PATH_DATASET
-                from kubeflow.storage_initializer.constants import VOLUME_PATH_MODEL
-                from kubeflow.storage_initializer.hugging_face import (
-                    HuggingFaceDatasetParams,
+                from kubeflow.storage_initializer.constants import (
+                    VOLUME_PATH_DATASET,
+                    VOLUME_PATH_MODEL,
                 )
                 from kubeflow.storage_initializer.hugging_face import (
+                    HuggingFaceDatasetParams,
                     HuggingFaceModelParams,
                 )
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
-                from kubeflow.training.constants.constants import STORAGE_INITIALIZER
                 from kubeflow.training.constants.constants import (
+                    STORAGE_INITIALIZER,
                     STORAGE_INITIALIZER_IMAGE,
-                )
-                from kubeflow.training.constants.constants import (
                     STORAGE_INITIALIZER_VOLUME_MOUNT,
-                )
-                from kubeflow.training.constants.constants import (
                     TRAINER_TRANSFORMER_IMAGE,
                 )
             except ImportError:
