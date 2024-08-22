@@ -17,71 +17,40 @@ def report_observation_log_response(*args, **kwargs):
 test_report_metrics_data = [
     (
         "valid metrics with float type",
-        {
-            "metrics": {
-                "result": 0.99
-            },
-            "timeout": constants.DEFAULT_TIMEOUT
-
-        },
+        {"metrics": {"result": 0.99}, "timeout": constants.DEFAULT_TIMEOUT},
         TEST_RESULT_SUCCESS,
-        ENV_VARIABLE_NOT_EMPTY
+        ENV_VARIABLE_NOT_EMPTY,
     ),
     (
         "valid metrics with string type",
-        {
-            "metrics": {
-                "result": "0.99"
-            },
-            "timeout": constants.DEFAULT_TIMEOUT
-        },
+        {"metrics": {"result": "0.99"}, "timeout": constants.DEFAULT_TIMEOUT},
         TEST_RESULT_SUCCESS,
-        ENV_VARIABLE_NOT_EMPTY
+        ENV_VARIABLE_NOT_EMPTY,
     ),
     (
         "valid metrics with int type",
-        {
-            "metrics": {
-                "result": 1
-            },
-            "timeout": constants.DEFAULT_TIMEOUT
-        },
+        {"metrics": {"result": 1}, "timeout": constants.DEFAULT_TIMEOUT},
         TEST_RESULT_SUCCESS,
-        ENV_VARIABLE_NOT_EMPTY
+        ENV_VARIABLE_NOT_EMPTY,
     ),
     (
         "ReportObservationLog timeout error",
-        {
-            "metrics": {
-                "result": 0.99
-            },
-            "timeout": 0
-        },
+        {"metrics": {"result": 0.99}, "timeout": 0},
         RuntimeError,
-        ENV_VARIABLE_NOT_EMPTY
+        ENV_VARIABLE_NOT_EMPTY,
     ),
     (
         "invalid metrics with type string",
-        {
-            "metrics": {
-                "result": "abc"
-            },
-            "timeout": constants.DEFAULT_TIMEOUT
-        },
+        {"metrics": {"result": "abc"}, "timeout": constants.DEFAULT_TIMEOUT},
         ValueError,
-        ENV_VARIABLE_NOT_EMPTY
+        ENV_VARIABLE_NOT_EMPTY,
     ),
     (
         "Trial name is not passed to env variables",
-        {
-            "metrics": {
-                "result": 0.99
-            },
-            "timeout": constants.DEFAULT_TIMEOUT
-        },
+        {"metrics": {"result": 0.99}, "timeout": constants.DEFAULT_TIMEOUT},
         ValueError,
-        ENV_VARIABLE_EMPTY
-    )
+        ENV_VARIABLE_EMPTY,
+    ),
 ]
 
 
@@ -113,9 +82,16 @@ def mock_report_observation_log():
 @pytest.mark.parametrize(
     "test_name,kwargs,expected_output,mock_getenv",
     test_report_metrics_data,
-    indirect=["mock_getenv"]
+    indirect=["mock_getenv"],
 )
-def test_report_metrics(test_name, kwargs, expected_output, mock_getenv, mock_get_current_k8s_namespace, mock_report_observation_log):
+def test_report_metrics(
+    test_name,
+    kwargs,
+    expected_output,
+    mock_getenv,
+    mock_get_current_k8s_namespace,
+    mock_report_observation_log,
+):
     """
     test report_metrics function
     """

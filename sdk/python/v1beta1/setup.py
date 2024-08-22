@@ -46,7 +46,7 @@ if os.path.exists(katib_grpc_svc_file):
         "kubeflow/katib/katib_api_pb2_grpc.py",
     )
 
-    with open("kubeflow/katib/katib_api_pb2_grpc.py", 'r+') as file:
+    with open("kubeflow/katib/katib_api_pb2_grpc.py", "r+") as file:
         content = file.read()
         new_content = content.replace("api_pb2", "kubeflow.katib.katib_api_pb2")
         file.seek(0)

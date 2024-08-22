@@ -68,11 +68,11 @@ def report_metrics(
                     metric_logs=[
                         katib_api_pb2.MetricLog(
                             time_stamp=timestamp,
-                            metric=katib_api_pb2.Metric(name=name,value=str(value))   
+                            metric=katib_api_pb2.Metric(name=name, value=str(value)),
                         )
                         for name, value in metrics.items()
                     ]
-                )
+                ),
             ),
             timeout=timeout,
         )

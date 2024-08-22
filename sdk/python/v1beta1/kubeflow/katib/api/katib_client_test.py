@@ -50,7 +50,7 @@ def get_observation_log_response(*args, **kwargs):
                 metric_logs=[
                     katib_api_pb2.MetricLog(
                         time_stamp="2024-07-29T15:09:08Z",
-                        metric=katib_api_pb2.Metric(name="result",value="0.99")
+                        metric=katib_api_pb2.Metric(name="result", value="0.99"),
                     )
                 ]
             )
@@ -245,36 +245,28 @@ test_create_experiment_data = [
 test_get_trial_metrics_data = [
     (
         "valid trial name",
-        {
-            "name": "example",
-            "namespace": "valid",
-            "timeout": constants.DEFAULT_TIMEOUT
-        },
+        {"name": "example", "namespace": "valid", "timeout": constants.DEFAULT_TIMEOUT},
         [
             katib_api_pb2.MetricLog(
                 time_stamp="2024-07-29T15:09:08Z",
-                metric=katib_api_pb2.Metric(name="result",value="0.99")
+                metric=katib_api_pb2.Metric(name="result", value="0.99"),
             )
-        ]
+        ],
     ),
     (
         "invalid trial name",
         {
             "name": "invalid",
             "namespace": "invalid",
-            "timeout": constants.DEFAULT_TIMEOUT
+            "timeout": constants.DEFAULT_TIMEOUT,
         },
-        RuntimeError
+        RuntimeError,
     ),
     (
         "GetObservationLog timeout error",
-        {
-            "name": "example",
-            "namespace": "valid",
-            "timeout": 0
-        },
-        RuntimeError
-    )
+        {"name": "example", "namespace": "valid", "timeout": 0},
+        RuntimeError,
+    ),
 ]
 
 
@@ -287,16 +279,11 @@ def katib_client():
                 side_effect=create_namespaced_custom_object_response
             )
         ),
-    ), patch(
-        "kubernetes.config.load_kube_config",
-        return_value=Mock()
-    ), patch(
-        "kubeflow.katib.katib_api_pb2_grpc.DBManagerStub", 
+    ), patch("kubernetes.config.load_kube_config", return_value=Mock()), patch(
+        "kubeflow.katib.katib_api_pb2_grpc.DBManagerStub",
         return_value=Mock(
-            GetObservationLog=Mock(
-                side_effect=get_observation_log_response
-            )
-        )
+            GetObservationLog=Mock(side_effect=get_observation_log_response)
+        ),
     ):
         client = KatibClient()
         yield client
@@ -318,7 +305,9 @@ def test_create_experiment(katib_client, test_name, kwargs, expected_output):
     print("test execution complete")
 
 
-@pytest.mark.parametrize("test_name,kwargs,expected_output", test_get_trial_metrics_data)
+@pytest.mark.parametrize(
+    "test_name,kwargs,expected_output", test_get_trial_metrics_data
+)
 def test_get_trial_metrics(katib_client, test_name, kwargs, expected_output):
     """
     test get_trial_metrics function of katib client
