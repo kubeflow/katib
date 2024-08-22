@@ -10,17 +10,17 @@ repos:
     hooks:
       - id: isort
         name: isort
-        entry: isort --profile google
+        entry: isort --profile black
   - repo: https://github.com/psf/black
     rev: 24.2.0
     hooks:
       - id: black
-        files: (sdk|examples)/.*
+        files: (sdk|examples|pkg)/.*
   - repo: https://github.com/pycqa/flake8
     rev: 7.1.1
     hooks:
       - id: flake8
-        files: (sdk|examples)/.*
+        files: (sdk|examples|pkg)/.*
 exclude: |
   (?x)^(
     .*zz_generated.deepcopy.*|
