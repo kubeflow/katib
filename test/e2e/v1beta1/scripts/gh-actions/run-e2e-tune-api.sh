@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2022 The Kubeflow Authors.
+# Copyright 2024 The Kubeflow Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This shell script is used to setup Katib deployment.
+# This shell script is used to run Katib Experiment.
+# Input parameter - path to Experiment yaml.
 
 set -o errexit
-set -o pipefail
 set -o nounset
+set -o pipefail
+
 cd "$(dirname "$0")"
 
-DEPLOY_KATIB_UI=${1:-false}
-TUNE_API=${2:-false}
-TRIAL_IMAGES=${3:-""}
-EXPERIMENTS=${4:-""}
+echo "Katib deployments"
+kubectl -n kubeflow get deploy
+echo "Katib services"
+kubectl -n kubeflow get svc
+echo "Katib pods"
+kubectl -n kubeflow get pod
+echo "Katib persistent volume claims"
+kubectl get pvc -n kubeflow
+echo "Available CRDs"
+kubectl get crd
 
-echo "Start to setup Minikube Kubernetes Cluster"
-kubectl version
-kubectl cluster-info
-kubectl get nodes
-
-echo "Build and Load container images"
-./build-load.sh "$DEPLOY_KATIB_UI" "$TUNE_API" "$TRIAL_IMAGES" "$EXPERIMENTS" 
+python run-e2e-tune-api.py --namespace default \
+--verbose || (kubectl get pods -n kubeflow && exit 1)

@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 100
+# E203 is ignored to avoid conflicts with Black's formatting, as it's not PEP 8 compliant
+extend-ignore = W503, E203

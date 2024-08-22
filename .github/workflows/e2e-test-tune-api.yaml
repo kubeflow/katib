@@ -1,0 +1,34 @@
+name: E2E Test with tune API
+
+on:
+  pull_request:
+    paths-ignore:
+      - "pkg/ui/v1beta1/frontend/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Test Env
+        uses: ./.github/workflows/template-setup-e2e-test
+        with:
+          kubernetes-version: ${{ matrix.kubernetes-version }}
+      
+      - name: Run e2e test with tune API
+        uses: ./.github/workflows/template-e2e-test
+        with:
+          tune-api: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Detail: https://hub.docker.com/r/kindest/node
+        kubernetes-version: ["v1.27.11", "v1.28.7", "v1.29.2"]

@@ -72,6 +72,7 @@ def print_experiment_status(experiment: models.V1beta1Experiment):
         print(f"Current Optimal Trial:\n {experiment.status.current_optimal_trial}")
         print(f"Experiment conditions:\n {experiment.status.conditions}")
 
+
 def validate_metrics_value(value: Any):
     """Validate if the metrics value can be converted to type `float`."""
     try:

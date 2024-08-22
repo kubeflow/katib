@@ -41,8 +41,11 @@ class Trial(object):
     def convert(trials):
         res = []
         for trial in trials:
-            if trial.status.condition == api.TrialStatus.TrialConditionType.SUCCEEDED or \
-              trial.status.condition == api.TrialStatus.TrialConditionType.EARLYSTOPPED:
+            if (
+                trial.status.condition == api.TrialStatus.TrialConditionType.SUCCEEDED
+                or trial.status.condition
+                == api.TrialStatus.TrialConditionType.EARLYSTOPPED
+            ):
                 new_trial = Trial.convertTrial(trial)
                 if new_trial is not None:
                     res.append(Trial.convertTrial(trial))
@@ -77,11 +80,14 @@ class Trial(object):
                 ", ".join([str(e) for e in self.assignments])
             )
         else:
-            return "Trial(assignment: {}, metric_name: {}, metric: {}, additional_metrics: {})".format(
-                ", ".join([str(e) for e in self.assignments]),
-                self.metric_name,
-                self.target_metric,
-                ", ".join(str(e) for e in self.additional_metrics),
+            return (
+                "Trial(assignment: {}, metric_name: {}, metric: {}, "
+                "additional_metrics: {})".format(
+                    ", ".join(str(e) for e in self.assignments),
+                    self.metric_name,
+                    self.target_metric,
+                    ", ".join(str(e) for e in self.additional_metrics),
+                )
             )
 
 

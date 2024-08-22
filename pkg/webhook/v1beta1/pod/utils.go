@@ -18,6 +18,7 @@ package pod
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -34,6 +35,8 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	mccommon "github.com/kubeflow/katib/pkg/metricscollector/v1beta1/common"
 )
+
+var errPrimaryContainerNotFound = errors.New("unable to find primary container in mutated pod containers")
 
 func isPrimaryPod(podLabels, primaryLabels map[string]string) bool {
 
@@ -190,8 +193,7 @@ func wrapWorkerContainer(trial *trialsv1beta1.Trial, pod *v1.Pod, namespace,
 		c.Command = command
 		c.Args = []string{argsStr}
 	} else {
-		return fmt.Errorf("Unable to find primary container %v in mutated pod containers %v",
-			trial.Spec.PrimaryContainerName, pod.Spec.Containers)
+		return fmt.Errorf("%w: primary container: %v, mutated pod containers: %v", errPrimaryContainerNotFound, trial.Spec.PrimaryContainerName, pod.Spec.Containers)
 	}
 	return nil
 }

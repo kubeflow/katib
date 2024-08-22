@@ -532,13 +532,38 @@ func convertParameterType(typ experimentsv1beta1.ParameterType) suggestionapi.Pa
 }
 
 func convertFeasibleSpace(fs experimentsv1beta1.FeasibleSpace) *suggestionapi.FeasibleSpace {
-	res := &suggestionapi.FeasibleSpace{
-		Max:  fs.Max,
-		Min:  fs.Min,
-		List: fs.List,
-		Step: fs.Step,
+	distribution := convertDistribution(fs.Distribution)
+	if distribution == suggestionapi.Distribution_DISTRIBUTION_UNKNOWN {
+		return &suggestionapi.FeasibleSpace{
+			Max:  fs.Max,
+			Min:  fs.Min,
+			List: fs.List,
+			Step: fs.Step,
+		}
 	}
-	return res
+
+	return &suggestionapi.FeasibleSpace{
+		Max:          fs.Max,
+		Min:          fs.Min,
+		List:         fs.List,
+		Step:         fs.Step,
+		Distribution: distribution,
+	}
+}
+
+func convertDistribution(typ experimentsv1beta1.Distribution) suggestionapi.Distribution {
+	switch typ {
+	case experimentsv1beta1.DistributionUniform:
+		return suggestionapi.Distribution_UNIFORM
+	case experimentsv1beta1.DistributionLogUniform:
+		return suggestionapi.Distribution_LOG_UNIFORM
+	case experimentsv1beta1.DistributionNormal:
+		return suggestionapi.Distribution_NORMAL
+	case experimentsv1beta1.DistributionLogNormal:
+		return suggestionapi.Distribution_LOG_NORMAL
+	default:
+		return suggestionapi.Distribution_DISTRIBUTION_UNKNOWN
+	}
 }
 
 func convertComparison(comparison suggestionapi.ComparisonType) commonapiv1beta1.ComparisonType {

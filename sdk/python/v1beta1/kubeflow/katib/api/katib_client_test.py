@@ -1,21 +1,22 @@
 import multiprocessing
 from typing import List, Optional
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-from kubeflow.katib import KatibClient
-from kubeflow.katib import V1beta1AlgorithmSpec
-from kubeflow.katib import V1beta1Experiment
-from kubeflow.katib import V1beta1ExperimentSpec
-from kubeflow.katib import V1beta1FeasibleSpace
-from kubeflow.katib import V1beta1ObjectiveSpec
-from kubeflow.katib import V1beta1ParameterSpec
-from kubeflow.katib import V1beta1TrialParameterSpec
-from kubeflow.katib import V1beta1TrialTemplate
+import pytest
+from kubeflow.katib import (
+    KatibClient,
+    V1beta1AlgorithmSpec,
+    V1beta1Experiment,
+    V1beta1ExperimentSpec,
+    V1beta1FeasibleSpace,
+    V1beta1ObjectiveSpec,
+    V1beta1ParameterSpec,
+    V1beta1TrialParameterSpec,
+    V1beta1TrialTemplate,
+)
 from kubeflow.katib.constants import constants
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 from kubernetes.client import V1ObjectMeta
-import pytest
 
 TEST_RESULT_SUCCESS = "success"
 
@@ -57,16 +58,12 @@ def get_observation_log_response(*args, **kwargs):
 
 
 def generate_trial_template() -> V1beta1TrialTemplate:
-    trial_spec={
+    trial_spec = {
         "apiVersion": "batch/v1",
         "kind": "Job",
         "spec": {
             "template": {
-                "metadata": {
-                    "annotations": {
-                        "sidecar.istio.io/inject": "false"
-                    }
-                },
+                "metadata": {"annotations": {"sidecar.istio.io/inject": "false"}},
                 "spec": {
                     "containers": [
                         {
@@ -79,13 +76,13 @@ def generate_trial_template() -> V1beta1TrialTemplate:
                                 "--batch-size=64",
                                 "--lr=${trialParameters.learningRate}",
                                 "--momentum=${trialParameters.momentum}",
-                            ]
+                            ],
                         }
                     ],
-                    "restartPolicy": "Never"
-                }
+                    "restartPolicy": "Never",
+                },
             }
-        }
+        },
     }
 
     return V1beta1TrialTemplate(
@@ -94,15 +91,15 @@ def generate_trial_template() -> V1beta1TrialTemplate:
             V1beta1TrialParameterSpec(
                 name="learningRate",
                 description="Learning rate for the training model",
-                reference="lr"
+                reference="lr",
             ),
             V1beta1TrialParameterSpec(
                 name="momentum",
                 description="Momentum for the training model",
-                reference="momentum"
+                reference="momentum",
             ),
         ],
-        trial_spec=trial_spec
+        trial_spec=trial_spec,
     )
 
 
@@ -125,60 +122,49 @@ def generate_experiment(
             objective=objective_spec,
             parameters=parameters,
             trial_template=trial_template,
-        )
+        ),
     )
 
 
 def create_experiment(
-    name: Optional[str] = None,
-    generate_name: Optional[str] = None
+    name: Optional[str] = None, generate_name: Optional[str] = None
 ) -> V1beta1Experiment:
     experiment_namespace = "test"
 
     if name is not None:
         metadata = V1ObjectMeta(name=name, namespace=experiment_namespace)
     elif generate_name is not None:
-        metadata = V1ObjectMeta(generate_name=generate_name, namespace=experiment_namespace)
+        metadata = V1ObjectMeta(
+            generate_name=generate_name, namespace=experiment_namespace
+        )
     else:
         metadata = V1ObjectMeta(namespace=experiment_namespace)
 
-    algorithm_spec=V1beta1AlgorithmSpec(
-        algorithm_name="random"
-    )
+    algorithm_spec = V1beta1AlgorithmSpec(algorithm_name="random")
 
-    objective_spec=V1beta1ObjectiveSpec(
+    objective_spec = V1beta1ObjectiveSpec(
         type="minimize",
-        goal= 0.001,
+        goal=0.001,
         objective_metric_name="loss",
     )
 
-    parameters=[
+    parameters = [
         V1beta1ParameterSpec(
             name="lr",
             parameter_type="double",
-            feasible_space=V1beta1FeasibleSpace(
-                min="0.01",
-                max="0.06"
-            ),
+            feasible_space=V1beta1FeasibleSpace(min="0.01", max="0.06"),
         ),
         V1beta1ParameterSpec(
             name="momentum",
             parameter_type="double",
-            feasible_space=V1beta1FeasibleSpace(
-                min="0.5",
-                max="0.9"
-            ),
+            feasible_space=V1beta1FeasibleSpace(min="0.5", max="0.9"),
         ),
     ]
 
     trial_template = generate_trial_template()
 
     experiment = generate_experiment(
-        metadata,
-        algorithm_spec,
-        objective_spec,
-        parameters,
-        trial_template
+        metadata, algorithm_spec, objective_spec, parameters, trial_template
     )
     return experiment
 
@@ -316,7 +302,9 @@ def katib_client():
         yield client
 
 
-@pytest.mark.parametrize("test_name,kwargs,expected_output", test_create_experiment_data)
+@pytest.mark.parametrize(
+    "test_name,kwargs,expected_output", test_create_experiment_data
+)
 def test_create_experiment(katib_client, test_name, kwargs, expected_output):
     """
     test create_experiment function of katib client

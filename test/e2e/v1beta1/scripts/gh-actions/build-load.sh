@@ -25,9 +25,10 @@ pushd .
 cd "$(dirname "$0")/../../../../.."
 trap popd EXIT
 
-TRIAL_IMAGES=${1:-""}
-EXPERIMENTS=${2:-""}
-DEPLOY_KATIB_UI=${3:-false}
+DEPLOY_KATIB_UI=${1:-false}
+TUNE_API=${2:-false}
+TRIAL_IMAGES=${3:-""}
+EXPERIMENTS=${4:-""}
 
 REGISTRY="docker.io/kubeflowkatib"
 TAG="e2e-test"
@@ -161,6 +162,12 @@ echo -e "\nBuilding training container images..."
 for name in "${TRIAL_IMAGE_ARRAY[@]}"; do
   run "$name" "examples/$VERSION/trial-images/$name/Dockerfile"
 done
+
+# Testing image for tune function
+if "$TUNE_API"; then
+  echo -e "\nPulling and building testing image for tune function..."
+  _build_containers "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
+fi
 
 echo -e "\nCleanup Build Cache...\n"
 docker buildx prune -f

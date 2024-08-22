@@ -14,24 +14,20 @@
 
 import json
 import logging
-from logging import getLogger
-from logging import INFO
-from logging import StreamHandler
 import os
+from logging import INFO, StreamHandler, getLogger
 
 import grpc
 import tensorflow as tf
 
-from pkg.apis.manager.v1beta1.python import api_pb2
-from pkg.apis.manager.v1beta1.python import api_pb2_grpc
+from pkg.apis.manager.v1beta1.python import api_pb2, api_pb2_grpc
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 from pkg.suggestion.v1beta1.nas.common.validation import validate_operations
-from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import \
-    algorithmSettingsValidator
-from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import \
-    enableNoneSettingsList
-from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import \
-    parseAlgorithmSettings
+from pkg.suggestion.v1beta1.nas.enas.AlgorithmSettings import (
+    algorithmSettingsValidator,
+    enableNoneSettingsList,
+    parseAlgorithmSettings,
+)
 from pkg.suggestion.v1beta1.nas.enas.Controller import Controller
 from pkg.suggestion.v1beta1.nas.enas.Operation import SearchSpace
 
@@ -43,8 +39,7 @@ class EnasExperiment:
         self.experiment = request.experiment
         self.num_trials = 1
         self.tf_graph = tf.Graph()
-        self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(
-            self.experiment_name)
+        self.ctrl_cache_file = "ctrl_cache/{}.ckpt".format(self.experiment_name)
         self.suggestion_step = 0
         self.algorithm_settings = None
         self.controller = None
@@ -55,12 +50,18 @@ class EnasExperiment:
         self.search_space = None
         self.opt_direction = None
         self.objective_name = None
-        self.logger.info("-" * 100 + "\nSetting Up Suggestion for Experiment {}\n".format(
-            self.experiment_name) + "-" * 100)
+        self.logger.info(
+            "-" * 100
+            + "\nSetting Up Suggestion for Experiment {}\n".format(self.experiment_name)
+            + "-" * 100
+        )
         self._get_experiment_param()
         self._setup_controller()
-        self.logger.info(">>> Suggestion for Experiment {} has been initialized.\n".format(
-            self.experiment_name))
+        self.logger.info(
+            ">>> Suggestion for Experiment {} has been initialized.\n".format(
+                self.experiment_name
+            )
+        )
 
     def _get_experiment_param(self):
         # this function need to
@@ -96,53 +97,69 @@ class EnasExperiment:
         self.print_algorithm_settings()
 
     def _setup_controller(self):
-
         with self.tf_graph.as_default():
-
             self.controller = Controller(
                 num_layers=self.num_layers,
                 num_operations=self.num_operations,
-                controller_hidden_size=self.algorithm_settings['controller_hidden_size'],
-                controller_temperature=self.algorithm_settings['controller_temperature'],
-                controller_tanh_const=self.algorithm_settings['controller_tanh_const'],
-                controller_entropy_weight=self.algorithm_settings['controller_entropy_weight'],
-                controller_baseline_decay=self.algorithm_settings['controller_baseline_decay'],
-                controller_learning_rate=self.algorithm_settings["controller_learning_rate"],
-                controller_skip_target=self.algorithm_settings['controller_skip_target'],
-                controller_skip_weight=self.algorithm_settings['controller_skip_weight'],
+                controller_hidden_size=self.algorithm_settings[
+                    "controller_hidden_size"
+                ],
+                controller_temperature=self.algorithm_settings[
+                    "controller_temperature"
+                ],
+                controller_tanh_const=self.algorithm_settings["controller_tanh_const"],
+                controller_entropy_weight=self.algorithm_settings[
+                    "controller_entropy_weight"
+                ],
+                controller_baseline_decay=self.algorithm_settings[
+                    "controller_baseline_decay"
+                ],
+                controller_learning_rate=self.algorithm_settings[
+                    "controller_learning_rate"
+                ],
+                controller_skip_target=self.algorithm_settings[
+                    "controller_skip_target"
+                ],
+                controller_skip_weight=self.algorithm_settings[
+                    "controller_skip_weight"
+                ],
                 controller_name="Ctrl_" + self.experiment_name,
-                logger=self.logger)
+                logger=self.logger,
+            )
 
             self.controller.build_trainer()
 
     def print_search_space(self):
         if self.search_space is None:
-            self.logger.warning(
-                "Error! The Suggestion has not yet been initialized!")
+            self.logger.warning("Error! The Suggestion has not yet been initialized!")
             return
 
         self.logger.info(
-            ">>> Search Space for Experiment {}".format(self.experiment_name))
+            ">>> Search Space for Experiment {}".format(self.experiment_name)
+        )
         for opt in self.search_space:
             opt.print_op(self.logger)
         self.logger.info(
-            "There are {} operations in total.\n".format(self.num_operations))
+            "There are {} operations in total.\n".format(self.num_operations)
+        )
 
     def print_algorithm_settings(self):
         if self.algorithm_settings is None:
-            self.logger.warning(
-                "Error! The Suggestion has not yet been initialized!")
+            self.logger.warning("Error! The Suggestion has not yet been initialized!")
             return
 
-        self.logger.info(">>> Parameters of LSTM Controller for Experiment {}\n".format(
-            self.experiment_name))
+        self.logger.info(
+            ">>> Parameters of LSTM Controller for Experiment {}\n".format(
+                self.experiment_name
+            )
+        )
         for spec in self.algorithm_settings:
             if len(spec) > 22:
-                self.logger.info("{}:\t{}".format(
-                    spec, self.algorithm_settings[spec]))
+                self.logger.info("{}:\t{}".format(spec, self.algorithm_settings[spec]))
             else:
-                self.logger.info("{}:\t\t{}".format(
-                    spec, self.algorithm_settings[spec]))
+                self.logger.info(
+                    "{}:\t\t{}".format(spec, self.algorithm_settings[spec])
+                )
 
         self.logger.info("")
 
@@ -154,7 +171,7 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         self.experiment = None
         if logger is None:
             self.logger = getLogger(__name__)
-            FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
+            FORMAT = "%(asctime)-15s Experiment %(experiment_name)s %(message)s"
             logging.basicConfig(format=FORMAT)
             handler = StreamHandler()
             handler.setLevel(INFO)
@@ -175,18 +192,21 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         # Validate GraphConfig
         # Check InputSize
         if not graph_config.input_sizes:
-            return self.set_validate_context_error(context,
-                                                   "Missing InputSizes in GraphConfig:\n{}".format(graph_config))
+            return self.set_validate_context_error(
+                context, "Missing InputSizes in GraphConfig:\n{}".format(graph_config)
+            )
 
         # Check OutputSize
         if not graph_config.output_sizes:
-            return self.set_validate_context_error(context,
-                                                   "Missing OutputSizes in GraphConfig:\n{}".format(graph_config))
+            return self.set_validate_context_error(
+                context, "Missing OutputSizes in GraphConfig:\n{}".format(graph_config)
+            )
 
         # Check NumLayers
         if not graph_config.num_layers:
-            return self.set_validate_context_error(context,
-                                                   "Missing NumLayers in GraphConfig:\n{}".format(graph_config))
+            return self.set_validate_context_error(
+                context, "Missing NumLayers in GraphConfig:\n{}".format(graph_config)
+            )
 
         # Validate Operations
         is_valid, message = validate_operations(nas_config.operations.operation)
@@ -204,34 +224,46 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 try:
                     converted_value = setting_type(setting.value)
                 except Exception as e:
-                    return self.set_validate_context_error(context,
-                                                           "Algorithm Setting {} must be {} type: exception {}".format(
-                                                               setting.name, setting_type.__name__, e))
+                    return self.set_validate_context_error(
+                        context,
+                        "Algorithm Setting {} must be {} type: exception {}".format(
+                            setting.name, setting_type.__name__, e
+                        ),
+                    )
 
                 if setting_type == float:
-                    if (converted_value <= setting_range[0] or
-                            (setting_range[1] != 'inf' and converted_value > setting_range[1])):
+                    if converted_value <= setting_range[0] or (
+                        setting_range[1] != "inf" and converted_value > setting_range[1]
+                    ):
                         return self.set_validate_context_error(
-                            context, "Algorithm Setting {}: {} with {} type must be in range ({}, {}]".format(
+                            context,
+                            (
+                                "Algorithm Setting {}: {} with {} type must be in range "
+                                "({}, {})"
+                            ).format(
                                 setting.name,
                                 converted_value,
                                 setting_type.__name__,
                                 setting_range[0],
-                                setting_range[1])
+                                setting_range[1],
+                            ),
                         )
 
                 elif converted_value < setting_range[0]:
                     return self.set_validate_context_error(
-                        context, "Algorithm Setting {}: {} with {} type must be in range [{}, {})".format(
+                        context,
+                        "Algorithm Setting {}: {} with {} type must be in range [{}, {})".format(
                             setting.name,
                             converted_value,
                             setting_type.__name__,
                             setting_range[0],
-                            setting_range[1])
+                            setting_range[1],
+                        ),
                     )
             else:
-                return self.set_validate_context_error(context,
-                                                       "Unknown Algorithm Setting name: {}".format(setting.name))
+                return self.set_validate_context_error(
+                    context, "Unknown Algorithm Setting name: {}".format(setting.name)
+                )
 
         self.logger.info("All Experiment Settings are Valid")
         return api_pb2.ValidateAlgorithmSettingsReply()
@@ -248,11 +280,18 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         experiment = self.experiment
         if request.current_request_number > 0:
             experiment.num_trials = request.current_request_number
-        self.logger.info("-" * 100 + "\nSuggestion Step {} for Experiment {}\n".format(
-            experiment.suggestion_step, experiment.experiment_name) + "-" * 100)
+        self.logger.info(
+            "-" * 100
+            + "\nSuggestion Step {} for Experiment {}\n".format(
+                experiment.suggestion_step, experiment.experiment_name
+            )
+            + "-" * 100
+        )
 
         self.logger.info("")
-        self.logger.info(">>> Current Request Number:\t\t{}".format(experiment.num_trials))
+        self.logger.info(
+            ">>> Current Request Number:\t\t{}".format(experiment.num_trials)
+        )
         self.logger.info("")
 
         with experiment.tf_graph.as_default():
@@ -272,16 +311,20 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             }
 
             if self.is_first_run:
-                self.logger.info(">>> First time running suggestion for {}. Random architecture will be given.".format(
-                    experiment.experiment_name))
+                self.logger.info(
+                    ">>> First time running suggestion for {}. "
+                    "Random architecture will be given.".format(
+                        experiment.experiment_name
+                    )
+                )
                 with tf.compat.v1.Session() as sess:
                     sess.run(tf.compat.v1.global_variables_initializer())
                     candidates = list()
                     for _ in range(experiment.num_trials):
-                        candidates.append(
-                            sess.run(controller_ops["sample_arc"]))
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
 
-                    # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
+                    # TODO: will use PVC to store the checkpoint to protect
+                    # against unexpected suggestion pod restart
                     saver.save(sess, experiment.ctrl_cache_file)
 
                 self.is_first_run = False
@@ -293,46 +336,66 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     result = self.GetEvaluationResult(request.trials)
 
                     # TODO: (andreyvelich) I deleted this part, should it be handle by controller?
-                    # Sometimes training container may fail and GetEvaluationResult() will return None
+                    # Sometimes training container may fail and GetEvaluationResult()
+                    # will return None
                     # In this case, the Suggestion will:
-                    # 1. Firstly try to respawn the previous trials after waiting for RESPAWN_SLEEP seconds
-                    # 2. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
-                    #    then fail the task because it may indicate that the training container has errors.
+                    # 1. Firstly try to respawn the previous trials after waiting for
+                    # RESPAWN_SLEEP seconds
+                    # 2. If respawning the trials for RESPAWN_LIMIT times still cannot
+                    # collect valid results,
+                    #    then fail the task because it may indicate that the training
+                    #    container has errors.
                     if result is None:
                         self.logger.warning(
-                            ">>> Suggestion has spawned trials, but they all failed.")
+                            ">>> Suggestion has spawned trials, but they all failed."
+                        )
                         self.logger.warning(
-                            ">>> Please check whether the training container is correctly implemented")
-                        self.logger.info(">>> Experiment {} failed".format(
-                            experiment.experiment_name))
+                            ">>> Please check whether the training container "
+                            "is correctly implemented"
+                        )
+                        self.logger.info(
+                            ">>> Experiment {} failed".format(
+                                experiment.experiment_name
+                            )
+                        )
                         return []
 
                     # This LSTM network is designed to maximize the metrics
-                    # However, if the user wants to minimize the metrics, we can take the negative of the result
+                    # However, if the user wants to minimize the metrics,
+                    # we can take the negative of the result
 
                     if experiment.opt_direction == api_pb2.MINIMIZE:
                         result = -result
 
-                    self.logger.info(">>> Suggestion updated. LSTM Controller Training\n")
-                    log_every = experiment.algorithm_settings["controller_log_every_steps"]
-                    for ctrl_step in range(1, experiment.algorithm_settings["controller_train_steps"]+1):
+                    self.logger.info(
+                        ">>> Suggestion updated. LSTM Controller Training\n"
+                    )
+                    log_every = experiment.algorithm_settings[
+                        "controller_log_every_steps"
+                    ]
+                    for ctrl_step in range(
+                        1, experiment.algorithm_settings["controller_train_steps"] + 1
+                    ):
                         run_ops = [
                             controller_ops["loss"],
                             controller_ops["entropy"],
                             controller_ops["grad_norm"],
                             controller_ops["baseline"],
                             controller_ops["skip_rate"],
-                            controller_ops["train_op"]
+                            controller_ops["train_op"],
                         ]
 
                         loss, entropy, grad_norm, baseline, skip_rate, _ = sess.run(
                             fetches=run_ops,
-                            feed_dict={controller_ops["child_val_accuracy"]: result})
+                            feed_dict={controller_ops["child_val_accuracy"]: result},
+                        )
 
                         controller_step = sess.run(controller_ops["train_step"])
                         if ctrl_step % log_every == 0:
                             log_string = ""
-                            log_string += "Controller Step: {} - ".format(controller_step)
+                            log_string += "Controller Step: {} - ".format(
+                                controller_step
+                            )
                             log_string += "Loss: {:.4f} - ".format(loss)
                             log_string += "Entropy: {:.9} - ".format(entropy)
                             log_string += "Gradient Norm: {:.7f} - ".format(grad_norm)
@@ -342,8 +405,7 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
                     candidates = list()
                     for _ in range(experiment.num_trials):
-                        candidates.append(
-                            sess.run(controller_ops["sample_arc"]))
+                        candidates.append(sess.run(controller_ops["sample_arc"]))
 
                     saver.save(sess, experiment.ctrl_cache_file)
 
@@ -355,27 +417,29 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             organized_arc = [0 for _ in range(experiment.num_layers)]
             record = 0
             for layer in range(experiment.num_layers):
-                organized_arc[layer] = arc[record: record + layer + 1]
+                organized_arc[layer] = arc[record : record + layer + 1]
                 record += layer + 1
             organized_candidates.append(organized_arc)
 
             nn_config = dict()
-            nn_config['num_layers'] = experiment.num_layers
-            nn_config['input_sizes'] = experiment.input_sizes
-            nn_config['output_sizes'] = experiment.output_sizes
-            nn_config['embedding'] = dict()
+            nn_config["num_layers"] = experiment.num_layers
+            nn_config["input_sizes"] = experiment.input_sizes
+            nn_config["output_sizes"] = experiment.output_sizes
+            nn_config["embedding"] = dict()
             for layer in range(experiment.num_layers):
                 opt = organized_arc[layer][0]
-                nn_config['embedding'][opt] = experiment.search_space[opt].get_dict()
+                nn_config["embedding"][opt] = experiment.search_space[opt].get_dict()
 
             organized_arc_json = json.dumps(organized_arc)
             nn_config_json = json.dumps(nn_config)
 
-            organized_arc_str = str(organized_arc_json).replace('\"', '\'')
-            nn_config_str = str(nn_config_json).replace('\"', '\'')
+            organized_arc_str = str(organized_arc_json).replace('"', "'")
+            nn_config_str = str(nn_config_json).replace('"', "'")
 
             self.logger.info(
-                "\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(i))
+                "\n>>> New Neural Network Architecture Candidate #{} "
+                "(internal representation):".format(i)
+            )
             self.logger.info(organized_arc_json)
             self.logger.info("\n>>> Corresponding Seach Space Description:")
             self.logger.info(nn_config_str)
@@ -384,20 +448,21 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 api_pb2.GetSuggestionsReply.ParameterAssignments(
                     assignments=[
                         api_pb2.ParameterAssignment(
-                            name="architecture",
-                            value=organized_arc_str
+                            name="architecture", value=organized_arc_str
                         ),
                         api_pb2.ParameterAssignment(
-                            name="nn_config",
-                            value=nn_config_str
-                        )
+                            name="nn_config", value=nn_config_str
+                        ),
                     ]
                 )
             )
 
         self.logger.info("")
-        self.logger.info(">>> {} Trials were created for Experiment {}".format(
-            experiment.num_trials, experiment.experiment_name))
+        self.logger.info(
+            ">>> {} Trials were created for Experiment {}".format(
+                experiment.num_trials, experiment.experiment_name
+            )
+        )
         self.logger.info("")
 
         experiment.suggestion_step += 1
@@ -423,11 +488,15 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 failed_trials.append(t.name)
 
         n_completed = len(completed_trials)
-        self.logger.info(">>> By now: {} Trials succeeded, {} Trials failed".format(
-            n_completed, len(failed_trials)))
+        self.logger.info(
+            ">>> By now: {} Trials succeeded, {} Trials failed".format(
+                n_completed, len(failed_trials)
+            )
+        )
         for tname in completed_trials:
-            self.logger.info("Trial: {}, Value: {}".format(
-                tname, completed_trials[tname]))
+            self.logger.info(
+                "Trial: {}, Value: {}".format(tname, completed_trials[tname])
+            )
         for tname in failed_trials:
             self.logger.info("Trial: {} was failed".format(tname))
 

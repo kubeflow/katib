@@ -17,11 +17,13 @@ import logging
 
 import skopt
 
-from pkg.suggestion.v1beta1.internal.constant import CATEGORICAL
-from pkg.suggestion.v1beta1.internal.constant import DISCRETE
-from pkg.suggestion.v1beta1.internal.constant import DOUBLE
-from pkg.suggestion.v1beta1.internal.constant import INTEGER
-from pkg.suggestion.v1beta1.internal.constant import MAX_GOAL
+from pkg.suggestion.v1beta1.internal.constant import (
+    CATEGORICAL,
+    DISCRETE,
+    DOUBLE,
+    INTEGER,
+    MAX_GOAL,
+)
 from pkg.suggestion.v1beta1.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)
@@ -32,13 +34,15 @@ class BaseSkoptService(object):
     Refer to https://github.com/scikit-optimize/scikit-optimize .
     """
 
-    def __init__(self,
-                 base_estimator="GP",
-                 n_initial_points=10,
-                 acq_func="gp_hedge",
-                 acq_optimizer="auto",
-                 random_state=None,
-                 search_space=None):
+    def __init__(
+        self,
+        base_estimator="GP",
+        n_initial_points=10,
+        acq_func="gp_hedge",
+        acq_optimizer="auto",
+        random_state=None,
+        search_space=None,
+    ):
         self.base_estimator = base_estimator
         self.n_initial_points = n_initial_points
         self.acq_func = acq_func
@@ -56,14 +60,22 @@ class BaseSkoptService(object):
 
         for param in self.search_space.params:
             if param.type == INTEGER:
-                skopt_search_space.append(skopt.space.Integer(
-                    int(param.min), int(param.max), name=param.name))
+                skopt_search_space.append(
+                    skopt.space.Integer(int(param.min), int(param.max), name=param.name)
+                )
             elif param.type == DOUBLE:
-                skopt_search_space.append(skopt.space.Real(
-                    float(param.min), float(param.max), "log-uniform", name=param.name))
+                skopt_search_space.append(
+                    skopt.space.Real(
+                        float(param.min),
+                        float(param.max),
+                        "log-uniform",
+                        name=param.name,
+                    )
+                )
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 skopt_search_space.append(
-                    skopt.space.Categorical(param.list, name=param.name))
+                    skopt.space.Categorical(param.list, name=param.name)
+                )
 
         self.skopt_optimizer = skopt.Optimizer(
             skopt_search_space,
@@ -71,20 +83,27 @@ class BaseSkoptService(object):
             n_initial_points=self.n_initial_points,
             acq_func=self.acq_func,
             acq_optimizer=self.acq_optimizer,
-            random_state=self.random_state)
+            random_state=self.random_state,
+        )
 
     def getSuggestions(self, trials, current_request_number):
         """
         Get the new suggested trials with skopt algorithm.
         """
         logger.info("-" * 100 + "\n")
-        logger.info("New GetSuggestions call with current request number: {}\n".format(current_request_number))
+        logger.info(
+            "New GetSuggestions call with current request number: {}\n".format(
+                current_request_number
+            )
+        )
         skopt_suggested = []
         loss_for_skopt = []
         if len(trials) > self.succeeded_trials or self.succeeded_trials == 0:
             self.succeeded_trials = len(trials)
             if self.succeeded_trials != 0:
-                logger.info("Succeeded Trials changed: {}\n".format(self.succeeded_trials))
+                logger.info(
+                    "Succeeded Trials changed: {}\n".format(self.succeeded_trials)
+                )
             for trial in trials:
                 if trial.name not in self.recorded_trials_names:
                     self.recorded_trials_names.append(trial.name)
@@ -113,11 +132,21 @@ class BaseSkoptService(object):
                 logger.info("Objective values: {}\n".format(loss_for_skopt))
                 t1 = datetime.datetime.now()
                 self.skopt_optimizer.tell(skopt_suggested, loss_for_skopt)
-                logger.info("Optimizer tell method takes {} seconds".format((datetime.datetime.now()-t1).seconds))
-                logger.info("List of recorded Trials names: {}\n".format(self.recorded_trials_names))
+                logger.info(
+                    "Optimizer tell method takes {} seconds".format(
+                        (datetime.datetime.now() - t1).seconds
+                    )
+                )
+                logger.info(
+                    "List of recorded Trials names: {}\n".format(
+                        self.recorded_trials_names
+                    )
+                )
 
         else:
-            logger.error("Succeeded Trials didn't change: {}\n".format(self.succeeded_trials))
+            logger.error(
+                "Succeeded Trials didn't change: {}\n".format(self.succeeded_trials)
+            )
 
         logger.info("Running Optimizer ask to query new parameters for Trials\n")
 
@@ -127,9 +156,12 @@ class BaseSkoptService(object):
         for suggestion in skopt_suggested:
             logger.info("New suggested parameters for Trial: {}".format(suggestion))
             return_trial_list.append(
-                BaseSkoptService.convert(self.search_space, suggestion))
+                BaseSkoptService.convert(self.search_space, suggestion)
+            )
 
-        logger.info("GetSuggestions returns {} new Trials\n\n".format(len(return_trial_list)))
+        logger.info(
+            "GetSuggestions returns {} new Trials\n\n".format(len(return_trial_list))
+        )
         return return_trial_list
 
     @staticmethod
