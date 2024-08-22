@@ -17,11 +17,13 @@ import logging
 import hyperopt
 import numpy as np
 
-from pkg.suggestion.v1beta1.internal.constant import CATEGORICAL
-from pkg.suggestion.v1beta1.internal.constant import DISCRETE
-from pkg.suggestion.v1beta1.internal.constant import DOUBLE
-from pkg.suggestion.v1beta1.internal.constant import INTEGER
-from pkg.suggestion.v1beta1.internal.constant import MAX_GOAL
+from pkg.suggestion.v1beta1.internal.constant import (
+    CATEGORICAL,
+    DISCRETE,
+    DOUBLE,
+    INTEGER,
+    MAX_GOAL,
+)
 from pkg.suggestion.v1beta1.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)
@@ -31,14 +33,13 @@ RANDOM_ALGORITHM_NAME = "random"
 
 
 class BaseHyperoptService(object):
-    def __init__(self,
-                 algorithm_name=TPE_ALGORITHM_NAME,
-                 algorithm_conf=None,
-                 search_space=None):
+    def __init__(
+        self, algorithm_name=TPE_ALGORITHM_NAME, algorithm_conf=None, search_space=None
+    ):
         self.algorithm_name = algorithm_name
         self.algorithm_conf = algorithm_conf or {}
         # pop common configurations
-        random_state = self.algorithm_conf.pop('random_state', None)
+        random_state = self.algorithm_conf.pop("random_state", None)
 
         if self.algorithm_name == TPE_ALGORITHM_NAME:
             self.hyperopt_algorithm = hyperopt.tpe.suggest
@@ -62,21 +63,20 @@ class BaseHyperoptService(object):
         for param in self.search_space.params:
             if param.type == INTEGER:
                 hyperopt_search_space[param.name] = hyperopt.hp.quniform(
-                    param.name,
-                    float(param.min),
-                    float(param.max),
-                    float(param.step))
+                    param.name, float(param.min), float(param.max), float(param.step)
+                )
             elif param.type == DOUBLE:
                 hyperopt_search_space[param.name] = hyperopt.hp.uniform(
-                    param.name,
-                    float(param.min),
-                    float(param.max))
+                    param.name, float(param.min), float(param.max)
+                )
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 hyperopt_search_space[param.name] = hyperopt.hp.choice(
-                    param.name, param.list)
+                    param.name, param.list
+                )
 
         self.hyperopt_domain = hyperopt.Domain(
-            None, hyperopt_search_space, pass_expr_memo_ctrl=None)
+            None, hyperopt_search_space, pass_expr_memo_ctrl=None
+        )
 
     def create_fmin(self):
         self.fmin = hyperopt.FMinIter(
@@ -85,7 +85,8 @@ class BaseHyperoptService(object):
             trials=hyperopt.Trials(),
             max_evals=-1,
             rstate=self.hyperopt_rstate,
-            verbose=False)
+            verbose=False,
+        )
 
         self.fmin.catch_eval_exceptions = False
 
@@ -112,7 +113,10 @@ class BaseHyperoptService(object):
 
                 # Insert Trial assignment to the misc
                 hyperopt_trial_misc = dict(
-                    tid=new_id[0], cmd=self.hyperopt_domain.cmd, workdir=self.hyperopt_domain.workdir)
+                    tid=new_id[0],
+                    cmd=self.hyperopt_domain.cmd,
+                    workdir=self.hyperopt_domain.workdir,
+                )
                 for param in self.search_space.params:
                     parameter_value = None
                     for assignment in trial.assignments:
@@ -135,9 +139,7 @@ class BaseHyperoptService(object):
                 hyperopt_trial_miscs.append(hyperopt_trial_misc)
 
                 # Insert Trial name to the spec
-                hyperopt_trial_spec = {
-                    "trial-name": trial.name
-                }
+                hyperopt_trial_spec = {"trial-name": trial.name}
                 hyperopt_trial_specs.append(hyperopt_trial_spec)
 
                 # Insert Trial result to the result
@@ -149,7 +151,7 @@ class BaseHyperoptService(object):
                     objective_for_hyperopt = -1 * objective_for_hyperopt
                 hyperopt_trial_result = {
                     "loss": objective_for_hyperopt,
-                    "status": hyperopt.STATUS_OK
+                    "status": hyperopt.STATUS_OK,
                 }
                 hyperopt_trial_results.append(hyperopt_trial_result)
 
@@ -160,7 +162,8 @@ class BaseHyperoptService(object):
                 tids=hyperopt_trial_new_ids,
                 specs=hyperopt_trial_specs,
                 results=hyperopt_trial_results,
-                miscs=hyperopt_trial_miscs)
+                miscs=hyperopt_trial_miscs,
+            )
 
             for i, _ in enumerate(hyperopt_trials):
                 hyperopt_trials[i]["state"] = hyperopt.JOB_STATE_DONE
@@ -208,7 +211,8 @@ class BaseHyperoptService(object):
                 new_ids=hyperopt_trial_new_ids,
                 domain=self.fmin.domain,
                 trials=self.fmin.trials,
-                seed=random_state)
+                seed=random_state,
+            )
         elif self.algorithm_name == TPE_ALGORITHM_NAME:
             # n_startup_jobs indicates for how many Trials we run random suggestion
             # This must be current_request_number value
@@ -222,24 +226,30 @@ class BaseHyperoptService(object):
                     trials=self.fmin.trials,
                     seed=random_state,
                     n_startup_jobs=current_request_number,
-                    **self.algorithm_conf)
+                    **self.algorithm_conf
+                )
                 self.is_first_run = False
             else:
                 for i in range(current_request_number):
                     # hyperopt_algorithm always returns one new Trial
-                    new_trials.append(self.hyperopt_algorithm(
-                        new_ids=[hyperopt_trial_new_ids[i]],
-                        domain=self.fmin.domain,
-                        trials=self.fmin.trials,
-                        seed=random_state,
-                        n_startup_jobs=current_request_number,
-                        **self.algorithm_conf)[0])
+                    new_trials.append(
+                        self.hyperopt_algorithm(
+                            new_ids=[hyperopt_trial_new_ids[i]],
+                            domain=self.fmin.domain,
+                            trials=self.fmin.trials,
+                            seed=random_state,
+                            n_startup_jobs=current_request_number,
+                            **self.algorithm_conf
+                        )[0]
+                    )
 
         # Construct return advisor Trials from new hyperopt Trials
         list_of_assignments = []
         for trial in new_trials:
-            vals = trial['misc']['vals']
-            list_of_assignments.append(BaseHyperoptService.convert(self.search_space, vals))
+            vals = trial["misc"]["vals"]
+            list_of_assignments.append(
+                BaseHyperoptService.convert(self.search_space, vals)
+            )
 
         if len(list_of_assignments) > 0:
             logger.info("GetSuggestions returns {} new Trial\n".format(len(new_trials)))
@@ -256,5 +266,6 @@ class BaseHyperoptService(object):
                 assignments.append(Assignment(param.name, vals[param.name][0]))
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 assignments.append(
-                    Assignment(param.name, param.list[vals[param.name][0]]))
+                    Assignment(param.name, param.list[vals[param.name][0]])
+                )
         return assignments

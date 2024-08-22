@@ -13,21 +13,18 @@
 # limitations under the License.
 
 import logging
-from logging import DEBUG
-from logging import getLogger
-from logging import StreamHandler
 import math
 import traceback
+from logging import DEBUG, StreamHandler, getLogger
 
 import grpc
 
-from pkg.apis.manager.v1beta1.python import api_pb2
-from pkg.apis.manager.v1beta1.python import api_pb2_grpc
+from pkg.apis.manager.v1beta1.python import api_pb2, api_pb2_grpc
 from pkg.suggestion.v1beta1.hyperband import parsing_util
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 
 logger = getLogger(__name__)
-FORMAT = '%(asctime)-15s Experiment %(experiment_name)s %(message)s'
+FORMAT = "%(asctime)-15s Experiment %(experiment_name)s %(message)s"
 logging.basicConfig(format=FORMAT)
 handler = StreamHandler()
 handler.setLevel(DEBUG)
@@ -55,12 +52,17 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
             trials = self._make_bracket(experiment, param)
             for trial in trials:
-                reply.parameter_assignments.add(assignments=trial.parameter_assignments.assignments)
+                reply.parameter_assignments.add(
+                    assignments=trial.parameter_assignments.assignments
+                )
             reply.algorithm.CopyFrom(HyperBandParam.generate(param))
             return reply
         except Exception as e:
-            logger.error("Fail to generate trials: \n%s",
-                         traceback.format_exc(), extra={"experiment_name": experiment.name})
+            logger.error(
+                "Fail to generate trials: \n%s",
+                traceback.format_exc(),
+                extra={"experiment_name": experiment.name},
+            )
             raise e
 
     def _update_hbParameters(self, param):
@@ -73,10 +75,13 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         param.current_i = 0
         if param.current_s >= 0:
             # when param.current_s < 0, hyperband algorithm reaches the end
-            param.n = int(math.ceil(float(param.s_max + 1) * (
-                float(param.eta**param.current_s) / float(param.current_s+1))))
-            param.r = param.r_l * \
-                param.eta**(-param.current_s)
+            param.n = int(
+                math.ceil(
+                    float(param.s_max + 1)
+                    * (float(param.eta**param.current_s) / float(param.current_s + 1))
+                )
+            )
+            param.r = param.r_l * param.eta ** (-param.current_s)
 
     def _make_bracket(self, experiment, param):
         if param.evaluating_trials == 0:
@@ -88,48 +93,76 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         else:
             param.evaluating_trials = 0
 
-        logger.info("HyperBand Param eta %d.",
-                    param.eta, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand Param R %d.",
-                    param.r_l, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand Param sMax %d.",
-                    param.s_max, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand Param B %d.",
-                    param.b_l, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand Param n %d.",
-                    param.n, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand Param r %d.",
-                    param.r, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand Param s %d.",
-                    param.current_s, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand Param i %d.",
-                    param.current_i, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand evaluating trials count %d.",
-                    param.evaluating_trials, extra={"experiment_name": experiment.name})
-        logger.info("HyperBand budget resource name %s.",
-                    param.resource_name, extra={"experiment_name": experiment.name})
+        logger.info(
+            "HyperBand Param eta %d.",
+            param.eta,
+            extra={"experiment_name": experiment.name},
+        )
+        logger.info(
+            "HyperBand Param R %d.",
+            param.r_l,
+            extra={"experiment_name": experiment.name},
+        )
+        logger.info(
+            "HyperBand Param sMax %d.",
+            param.s_max,
+            extra={"experiment_name": experiment.name},
+        )
+        logger.info(
+            "HyperBand Param B %d.",
+            param.b_l,
+            extra={"experiment_name": experiment.name},
+        )
+        logger.info(
+            "HyperBand Param n %d.", param.n, extra={"experiment_name": experiment.name}
+        )
+        logger.info(
+            "HyperBand Param r %d.", param.r, extra={"experiment_name": experiment.name}
+        )
+        logger.info(
+            "HyperBand Param s %d.",
+            param.current_s,
+            extra={"experiment_name": experiment.name},
+        )
+        logger.info(
+            "HyperBand Param i %d.",
+            param.current_i,
+            extra={"experiment_name": experiment.name},
+        )
+        logger.info(
+            "HyperBand evaluating trials count %d.",
+            param.evaluating_trials,
+            extra={"experiment_name": experiment.name},
+        )
+        logger.info(
+            "HyperBand budget resource name %s.",
+            param.resource_name,
+            extra={"experiment_name": experiment.name},
+        )
         if param.evaluating_trials == 0:
             self._new_hbParameters(param)
 
         return trialSpecs
 
     def _make_child_bracket(self, experiment, param):
-        n_i = math.ceil(param.n * param.eta**(-param.current_i))
+        n_i = math.ceil(param.n * param.eta ** (-param.current_i))
         top_trials_num = int(math.ceil(n_i / param.eta))
         self._update_hbParameters(param)
         r_i = int(param.r * param.eta**param.current_i)
         last_trials = self._get_top_trial(
-            param.evaluating_trials, top_trials_num, experiment)
-        trialSpecs = self._copy_trials(
-            last_trials, r_i, param.resource_name)
+            param.evaluating_trials, top_trials_num, experiment
+        )
+        trialSpecs = self._copy_trials(last_trials, r_i, param.resource_name)
 
-        logger.info("Generate %d trials by child bracket.",
-                    top_trials_num, extra={"experiment_name": experiment.name})
+        logger.info(
+            "Generate %d trials by child bracket.",
+            top_trials_num,
+            extra={"experiment_name": experiment.name},
+        )
         return trialSpecs
 
     def _get_last_trials(self, all_trials, latest_trials_num):
-        sorted_trials = sorted(
-            all_trials, key=lambda trial: trial.status.start_time)
+        sorted_trials = sorted(all_trials, key=lambda trial: trial.status.start_time)
         if len(sorted_trials) > latest_trials_num:
             return sorted_trials[-latest_trials_num:]
         else:
@@ -151,11 +184,14 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         for t in latest_trials:
             if t.status.condition != api_pb2.TrialStatus.TrialConditionType.SUCCEEDED:
                 raise Exception(
-                    "There are some trials which are not completed yet for experiment %s." % experiment.name)
+                    "There are some trials which are not completed yet for experiment %s."
+                    % experiment.name
+                )
 
         if objective_type == api_pb2.MAXIMIZE:
             top_trials.extend(
-                sorted(latest_trials, key=get_objective_value, reverse=True))
+                sorted(latest_trials, key=get_objective_value, reverse=True)
+            )
         else:
             top_trials.extend(sorted(latest_trials, key=get_objective_value))
         return top_trials[:top_trials_num]
@@ -169,8 +205,9 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     value = str(r_i)
                 else:
                     value = assignment.value
-                trial_spec.parameter_assignments.assignments.add(name=assignment.name,
-                                                                 value=value)
+                trial_spec.parameter_assignments.assignments.add(
+                    name=assignment.name, value=value
+                )
             trialSpecs.append(trial_spec)
         return trialSpecs
 
@@ -178,7 +215,8 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         n = param.n
         r = int(param.r)
         parameter_config = parsing_util.parse_parameter_configs(
-            experiment.spec.parameter_specs.parameters)
+            experiment.spec.parameter_specs.parameters
+        )
         trial_specs = []
         for _ in range(n):
             sample = parameter_config.random_sample()
@@ -187,16 +225,21 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 parameter_config.parameter_types,
                 parameter_config.names,
                 parameter_config.discrete_info,
-                parameter_config.categorical_info)
+                parameter_config.categorical_info,
+            )
             trial_spec = api_pb2.TrialSpec()
             for hp in suggestion:
-                if hp['name'] == param.resource_name:
-                    hp['value'] = str(r)
-                trial_spec.parameter_assignments.assignments.add(name=hp['name'],
-                                                                 value=str(hp['value']))
+                if hp["name"] == param.resource_name:
+                    hp["value"] = str(r)
+                trial_spec.parameter_assignments.assignments.add(
+                    name=hp["name"], value=str(hp["value"])
+                )
             trial_specs.append(trial_spec)
-        logger.info("Generate %d trials by master bracket.",
-                    n, extra={"experiment_name": experiment.name})
+        logger.info(
+            "Generate %d trials by master bracket.",
+            n,
+            extra={"experiment_name": experiment.name},
+        )
         return trial_specs
 
     def _set_validate_context_error(self, context, error_message):
@@ -212,14 +255,20 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         for setting in settings:
             setting_dict[setting.name] = setting.value
         if "r_l" not in setting_dict or "resource_name" not in setting_dict:
-            return self._set_validate_context_error(context, "r_l and resource_name must be set.")
+            return self._set_validate_context_error(
+                context, "r_l and resource_name must be set."
+            )
         try:
             rl = float(setting_dict["r_l"])
         except Exception:
-            return self._set_validate_context_error(context, "r_l must be a positive float number.")
+            return self._set_validate_context_error(
+                context, "r_l must be a positive float number."
+            )
         else:
             if rl < 0:
-                return self._set_validate_context_error(context, "r_l must be a positive float number.")
+                return self._set_validate_context_error(
+                    context, "r_l must be a positive float number."
+                )
 
         if "eta" in setting_dict:
             eta = int(float(setting_dict["eta"]))
@@ -228,11 +277,12 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         else:
             eta = 3
 
-        smax = int(math.log(rl)/math.log(eta))
+        smax = int(math.log(rl) / math.log(eta))
         max_parallel = int(math.ceil(eta**smax))
         if request.experiment.spec.parallel_trial_count < max_parallel:
-            return self._set_validate_context_error(context,
-                                                    "parallelTrialCount must be not less than %d." % max_parallel)
+            return self._set_validate_context_error(
+                context, "parallelTrialCount must be not less than %d." % max_parallel
+            )
 
         valid_resourceName = False
         for param in params:
@@ -240,17 +290,27 @@ class HyperbandService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 valid_resourceName = True
                 break
         if not valid_resourceName:
-            return self._set_validate_context_error(context,
-                                                    "value of resource_name setting must be in parameters.")
+            return self._set_validate_context_error(
+                context, "value of resource_name setting must be in parameters."
+            )
 
         return api_pb2.ValidateAlgorithmSettingsReply()
 
 
 class HyperBandParam(object):
-    def __init__(self, eta=3, s_max=-1, r_l=-1,
-                 b_l=-1, r=-1, n=-1, current_s=-2,
-                 current_i=-1, resource_name="",
-                 evaluating_trials=0):
+    def __init__(
+        self,
+        eta=3,
+        s_max=-1,
+        r_l=-1,
+        b_l=-1,
+        r=-1,
+        n=-1,
+        current_s=-2,
+        current_i=-1,
+        resource_name="",
+        evaluating_trials=0,
+    ):
         self.eta = eta
         self.s_max = s_max
         self.r_l = r_l
@@ -265,45 +325,24 @@ class HyperBandParam(object):
     @staticmethod
     def generate(param):
         algorithm_settings = [
+            api_pb2.AlgorithmSetting(name="eta", value=str(param.eta)),
+            api_pb2.AlgorithmSetting(name="s_max", value=str(param.s_max)),
+            api_pb2.AlgorithmSetting(name="r_l", value=str(param.r_l)),
+            api_pb2.AlgorithmSetting(name="b_l", value=str(param.b_l)),
+            api_pb2.AlgorithmSetting(name="r", value=str(param.r)),
+            api_pb2.AlgorithmSetting(name="n", value=str(param.n)),
+            api_pb2.AlgorithmSetting(name="current_s", value=str(param.current_s)),
+            api_pb2.AlgorithmSetting(name="current_i", value=str(param.current_i)),
+            api_pb2.AlgorithmSetting(name="resource_name", value=param.resource_name),
             api_pb2.AlgorithmSetting(
-                name="eta",
-                value=str(param.eta)
-            ), api_pb2.AlgorithmSetting(
-                name="s_max",
-                value=str(param.s_max)
-            ), api_pb2.AlgorithmSetting(
-                name="r_l",
-                value=str(param.r_l)
-            ), api_pb2.AlgorithmSetting(
-                name="b_l",
-                value=str(param.b_l)
-            ), api_pb2.AlgorithmSetting(
-                name="r",
-                value=str(param.r)
-            ), api_pb2.AlgorithmSetting(
-                name="n",
-                value=str(param.n)
-            ), api_pb2.AlgorithmSetting(
-                name="current_s",
-                value=str(param.current_s)
-            ), api_pb2.AlgorithmSetting(
-                name="current_i",
-                value=str(param.current_i)
-            ), api_pb2.AlgorithmSetting(
-                name="resource_name",
-                value=param.resource_name
-            ), api_pb2.AlgorithmSetting(
-                name="evaluating_trials",
-                value=str(param.evaluating_trials)
-            )]
-        return api_pb2.AlgorithmSpec(
-            algorithm_settings=algorithm_settings
-        )
+                name="evaluating_trials", value=str(param.evaluating_trials)
+            ),
+        ]
+        return api_pb2.AlgorithmSpec(algorithm_settings=algorithm_settings)
 
     @staticmethod
     def convert(alg_settings):
-        """Convert the algorithm settings to HyperBandParam.
-        """
+        """Convert the algorithm settings to HyperBandParam."""
         param = HyperBandParam()
         # Set the param from the algorithm settings.
         for setting in alg_settings:
@@ -328,8 +367,7 @@ class HyperBandParam(object):
             elif setting.name == "resource_name":
                 param.resource_name = setting.value
             else:
-                logger.info(
-                    "Unknown HyperBand Param %s, ignore it", setting.name)
+                logger.info("Unknown HyperBand Param %s, ignore it", setting.name)
         if param.current_s == -1:
             # Hyperband outlerloop has finished
             logger.info("HyperBand outlerloop has finished.")
@@ -339,8 +377,7 @@ class HyperBandParam(object):
         if param.eta <= 0:
             param.eta = 3
         if param.s_max < 0:
-            param.s_max = int(
-                math.log(param.r_l) / math.log(param.eta))
+            param.s_max = int(math.log(param.r_l) / math.log(param.eta))
         if param.b_l < 0:
             param.b_l = (param.s_max + 1) * param.r_l
         if param.current_s < 0:
@@ -348,10 +385,13 @@ class HyperBandParam(object):
         if param.current_i < 0:
             param.current_i = 0
         if param.n < 0:
-            param.n = int(math.ceil(float(param.s_max + 1) * (
-                float(param.eta**param.current_s) / float(param.current_s+1))))
+            param.n = int(
+                math.ceil(
+                    float(param.s_max + 1)
+                    * (float(param.eta**param.current_s) / float(param.current_s + 1))
+                )
+            )
         if param.r < 0:
-            param.r = param.r_l * \
-                param.eta**(-param.current_s)
+            param.r = param.r_l * param.eta ** (-param.current_s)
 
         return param

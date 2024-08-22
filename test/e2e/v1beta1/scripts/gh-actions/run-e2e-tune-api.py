@@ -1,8 +1,7 @@
 import argparse
 import logging
 
-from kubeflow.katib import KatibClient
-from kubeflow.katib import search
+from kubeflow.katib import KatibClient, search
 from kubernetes import client
 from verify import verify_experiment_results
 

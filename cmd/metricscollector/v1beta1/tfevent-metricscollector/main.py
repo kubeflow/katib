@@ -13,9 +13,7 @@
 # limitations under the License.
 
 import argparse
-from logging import getLogger
-from logging import INFO
-from logging import StreamHandler
+from logging import INFO, StreamHandler, getLogger
 
 import api_pb2
 import api_pb2_grpc

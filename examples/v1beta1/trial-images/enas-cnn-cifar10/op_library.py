@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from keras import backend as K
-from keras.layers import Activation
-from keras.layers import AveragePooling2D
-from keras.layers import BatchNormalization
-from keras.layers import concatenate
-from keras.layers import Conv2D
-from keras.layers import DepthwiseConv2D
-from keras.layers import MaxPooling2D
-from keras.layers import SeparableConv2D
-from keras.layers import ZeroPadding2D
 import numpy as np
+from keras import backend as K
+from keras.layers import (
+    Activation,
+    AveragePooling2D,
+    BatchNormalization,
+    Conv2D,
+    DepthwiseConv2D,
+    MaxPooling2D,
+    SeparableConv2D,
+    ZeroPadding2D,
+    concatenate,
+)
 
 
 def concat(inputs):
