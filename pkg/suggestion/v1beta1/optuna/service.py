@@ -18,13 +18,10 @@ import threading
 
 import grpc
 
-from pkg.apis.manager.v1beta1.python import api_pb2
-from pkg.apis.manager.v1beta1.python import api_pb2_grpc
+from pkg.apis.manager.v1beta1.python import api_pb2, api_pb2_grpc
 from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
-from pkg.suggestion.v1beta1.internal.search_space import \
-    HyperParameterSearchSpace
-from pkg.suggestion.v1beta1.internal.trial import Assignment
-from pkg.suggestion.v1beta1.internal.trial import Trial
+from pkg.suggestion.v1beta1.internal.search_space import HyperParameterSearchSpace
+from pkg.suggestion.v1beta1.internal.trial import Assignment, Trial
 from pkg.suggestion.v1beta1.optuna.base_service import BaseOptunaService
 
 logger = logging.getLogger(__name__)
@@ -247,7 +244,8 @@ class OptimizerConfiguration(object):
             if max_trial_count > num_combinations:
                 return (
                     False,
-                    "Max Trial Count: {max_trial} > all possible search combinations: {combinations}".format(
+                    "Max Trial Count: {max_trial} > all possible search combinations: "
+                    "{combinations}".format(
                         max_trial=max_trial_count, combinations=num_combinations
                     ),
                 )

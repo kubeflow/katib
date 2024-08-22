@@ -16,13 +16,13 @@
 import argparse
 import json
 
-from architect import Architect
-from model import NetworkCNN
 import numpy as np
-from search_space import SearchSpace
 import torch
 import torch.nn as nn
 import utils
+from architect import Architect
+from model import NetworkCNN
+from search_space import SearchSpace
 
 
 def main():
