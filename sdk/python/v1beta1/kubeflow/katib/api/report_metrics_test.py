@@ -1,8 +1,8 @@
 from unittest.mock import patch
 
+import pytest
 from kubeflow.katib import report_metrics
 from kubeflow.katib.constants import constants
-import pytest
 
 TEST_RESULT_SUCCESS = "success"
 ENV_VARIABLE_EMPTY = True

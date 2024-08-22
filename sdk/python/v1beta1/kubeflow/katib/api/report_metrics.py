@@ -17,9 +17,9 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 import grpc
-from kubeflow.katib.constants import constants
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import kubeflow.katib.katib_api_pb2_grpc as katib_api_pb2_grpc
+from kubeflow.katib.constants import constants
 from kubeflow.katib.utils import utils
 
 
