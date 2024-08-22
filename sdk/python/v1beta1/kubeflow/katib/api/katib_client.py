@@ -743,7 +743,7 @@ class KatibClient(object):
                 )
 
             # Add metrics collector to the Katib Experiment.
-            # Specify metrics format for the collector.
+            # Specify metrics format for the collector, for example: 'train_loss':0.846
             experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
                 collector=models.V1beta1CollectorSpec(
                     kind=metrics_collector_config["kind"]
@@ -751,7 +751,6 @@ class KatibClient(object):
                 source=models.V1beta1SourceSpec(
                     filter=models.V1beta1FilterSpec(
                         metrics_format=[
-                            # For example: 'train_loss':0.846
                             r"'([\w|-]+)'\s*:\s*([+-]?\d*(\.\d+)?([Ee][+-]?\d+)?)",
                         ]
                     )
