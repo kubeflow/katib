@@ -166,6 +166,8 @@ ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
 	python examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py --epochs 5 --batch-size 200 --log-path $(TEST_TENSORFLOW_EVENT_FILE_PATH)
 endif
 
+# TODO(Electronic-Waste): Remove the import rewrite when protobuf supports `python_package` option.
+# REF: https://github.com/protocolbuffers/protobuf/issues/7061
 pytest: prepare-pytest prepare-pytest-testdata
 	pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
 	pytest ./test/unit/v1beta1/earlystopping

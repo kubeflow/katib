@@ -38,6 +38,8 @@ if os.path.exists(katib_grpc_api_file):
         "kubeflow/katib/katib_api_pb2.py",
     )
 
+# TODO(Electronic-Waste): Remove the import rewrite when protobuf supports `python_package` option.
+# REF: https://github.com/protocolbuffers/protobuf/issues/7061
 if os.path.exists(katib_grpc_svc_file):
     shutil.copy(
         katib_grpc_svc_file,
