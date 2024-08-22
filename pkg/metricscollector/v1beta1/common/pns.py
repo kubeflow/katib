@@ -109,7 +109,8 @@ def WaitPIDs(pids, main_pid, pool_interval, timout, wait_all, completed_marked_d
                             contents = file_obj.read()
                             if contents.strip() != const.TRAINING_COMPLETED:
                                 raise Exception(
-                                    "Unable to find marker: {} in file: {} with contents: {} for pid: {}".format(
+                                    "Unable to find marker: {} in file: {} with contents: {} "
+                                    "for pid: {}".format(
                                         const.TRAINING_COMPLETED,
                                         mark_file,
                                         contents,

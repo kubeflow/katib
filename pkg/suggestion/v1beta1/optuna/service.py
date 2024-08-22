@@ -244,7 +244,8 @@ class OptimizerConfiguration(object):
             if max_trial_count > num_combinations:
                 return (
                     False,
-                    "Max Trial Count: {max_trial} > all possible search combinations: {combinations}".format(
+                    "Max Trial Count: {max_trial} > all possible search combinations: "
+                    "{combinations}".format(
                         max_trial=max_trial_count, combinations=num_combinations
                     ),
                 )

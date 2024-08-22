@@ -57,9 +57,8 @@ class HyperParameterSearchSpace(object):
             elif parameter.type == DOUBLE:
                 if parameter.step == "" or parameter.step is None:
                     raise Exception(
-                        "Param {} step is nil; For discrete search space, all parameters must include step".format(
-                            parameter.name
-                        )
+                        "Param {} step is nil; For discrete search space, all parameters "
+                        "must include step".format(parameter.name)
                     )
                 double_list = np.arange(
                     float(parameter.min),

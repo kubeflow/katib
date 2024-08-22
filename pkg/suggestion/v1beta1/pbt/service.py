@@ -27,7 +27,7 @@ from pkg.suggestion.v1beta1.internal.search_space import (
     HyperParameter,
     HyperParameterSearchSpace,
 )
-from pkg.suggestion.v1beta1.internal.trial import Assignment, Trial
+from pkg.suggestion.v1beta1.internal.trial import Assignment
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,8 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         ):
             return self._set_validate_context_error(
                 context,
-                "Param(resample_probability) should be null to perturb at 0.8 or 1.2, or be between 0 and 1, inclusive, to resample",
+                "Param(resample_probability) should be null to perturb at 0.8 or 1.2, "
+                "or be between 0 and 1, inclusive, to resample",
             )
 
         return api_pb2.ValidateAlgorithmSettingsReply()
@@ -98,7 +99,7 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 float(settings["truncation_threshold"]),
                 (
                     None
-                    if not "resample_probability" in settings
+                    if "resample_probability" not in settings
                     else float(settings["resample_probability"])
                 ),
                 search_space,
@@ -184,7 +185,7 @@ class PbtJob(object):
         labels = {
             "pbt.suggestion.katib.kubeflow.org/generation": self.generation,
         }
-        if not self.parent is None:
+        if self.parent is not None:
             labels["pbt.suggestion.katib.kubeflow.org/parent"] = self.parent
         return assignments, labels, self.uid
 
@@ -284,9 +285,7 @@ class PbtJobQueue(object):
         return obj.get()
 
     def update(self, trial):
-        trial_labels = trial.spec.labels
         uid = trial.name
-        generation = trial_labels["pbt.suggestion.katib.kubeflow.org/generation"]
 
         # Do not update active/pending trials
         if trial.status.condition in (

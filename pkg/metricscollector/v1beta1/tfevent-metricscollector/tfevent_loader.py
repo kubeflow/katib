@@ -13,7 +13,8 @@
 # limitations under the License.
 
 # TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
-# When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
+# When the event file is under a directory(e.g. test dir), please specify
+# "{{dirname}}/{{metrics name}}"
 # For example, in the Tensorflow MNIST Classification With Summaries:
 # https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py.
 # The "accuracy" and "loss" metric is saved under "train" and "test" directories.
@@ -28,10 +29,7 @@ from logging import INFO, StreamHandler, getLogger
 import api_pb2
 import rfc3339
 import tensorflow as tf
-from tensorboard.backend.event_processing.event_accumulator import (
-    EventAccumulator,
-    TensorEvent,
-)
+from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from tensorboard.backend.event_processing.tag_types import TENSORS
 
 from pkg.metricscollector.v1beta1.common import const
@@ -53,7 +51,6 @@ class TFEventFileParser:
         event_accumulator.Reload()
         for tag in event_accumulator.Tags()[TENSORS]:
             for m in self.metric_names:
-
                 tfefile_parent_dir = (
                     os.path.dirname(m)
                     if len(m.split("/")) >= 2

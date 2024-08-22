@@ -58,7 +58,8 @@ class BaseHyperoptService(object):
         self.is_first_run = True
 
     def create_hyperopt_domain(self):
-        # Construct search space, example: {"x": hyperopt.hp.uniform('x', -10, 10), "x2": hyperopt.hp.uniform('x2', -10, 10)}
+        # Construct search space, example: {"x": hyperopt.hp.uniform('x', -10, 10), "x2":
+        # hyperopt.hp.uniform('x2', -10, 10)}
         hyperopt_search_space = {}
         for param in self.search_space.params:
             if param.type == INTEGER:
@@ -108,7 +109,8 @@ class BaseHyperoptService(object):
                 new_id = self.fmin.trials.new_trial_ids(1)
                 hyperopt_trial_new_ids.append(new_id[0])
                 hyperopt_trial_miscs_idxs = {}
-                # Example: {'l1_normalization': [0.1], 'learning_rate': [0.1], 'hidden2': [1], 'optimizer': [1]}
+                # Example: {'l1_normalization': [0.1], 'learning_rate': [0.1],
+                # 'hidden2': [1], 'optimizer': [1]}
                 hyperopt_trial_miscs_vals = {}
 
                 # Insert Trial assignment to the misc
@@ -147,7 +149,8 @@ class BaseHyperoptService(object):
                 # TODO: Do we need to analyse additional_metrics?
                 objective_for_hyperopt = float(trial.target_metric.value)
                 if self.search_space.goal == MAX_GOAL:
-                    # Now hyperopt only supports fmin and we need to reverse objective value for maximization
+                    # Now hyperopt only supports fmin and we need to reverse
+                    # objective value for maximization
                     objective_for_hyperopt = -1 * objective_for_hyperopt
                 hyperopt_trial_result = {
                     "loss": objective_for_hyperopt,
@@ -156,7 +159,6 @@ class BaseHyperoptService(object):
                 hyperopt_trial_results.append(hyperopt_trial_result)
 
         if len(trials) > 0:
-
             # Create new Trial doc
             hyperopt_trials = hyperopt.Trials().new_trial_docs(
                 tids=hyperopt_trial_new_ids,
@@ -226,7 +228,7 @@ class BaseHyperoptService(object):
                     trials=self.fmin.trials,
                     seed=random_state,
                     n_startup_jobs=current_request_number,
-                    **self.algorithm_conf
+                    **self.algorithm_conf,
                 )
                 self.is_first_run = False
             else:
@@ -239,7 +241,7 @@ class BaseHyperoptService(object):
                             trials=self.fmin.trials,
                             seed=random_state,
                             n_startup_jobs=current_request_number,
-                            **self.algorithm_conf
+                            **self.algorithm_conf,
                         )[0]
                     )
 

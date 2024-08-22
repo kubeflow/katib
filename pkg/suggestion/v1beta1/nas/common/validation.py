@@ -16,10 +16,8 @@ from pkg.apis.manager.v1beta1.python import api_pb2
 
 
 def validate_operations(operations: list[api_pb2.Operation]) -> (bool, str):
-
     # Validate each operation
     for operation in operations:
-
         # Check OperationType
         if not operation.operation_type:
             return False, "Missing operationType in Operation:\n{}".format(operation)
@@ -31,7 +29,6 @@ def validate_operations(operations: list[api_pb2.Operation]) -> (bool, str):
         # Validate each ParameterConfig in Operation
         parameters_list = list(operation.parameter_specs.parameters)
         for parameter in parameters_list:
-
             # Check Name
             if not parameter.name:
                 return False, "Missing Name in ParameterConfig:\n{}".format(parameter)
@@ -78,16 +75,16 @@ def validate_operations(operations: list[api_pb2.Operation]) -> (bool, str):
                     ):
                         return (
                             False,
-                            "Step parameter should be > 0 in ParameterConfig.feasibleSpace:\n{}".format(
-                                parameter
-                            ),
+                            "Step parameter should be > 0 in ParameterConfig.feasibleSpace:\n"
+                            "{}".format(parameter),
                         )
                 except Exception as e:
                     return (
                         False,
-                        "failed to validate ParameterConfig.feasibleSpace \n{parameter}):\n{exception}".format(
-                            parameter=parameter, exception=e
-                        ),
+                        (
+                            "failed to validate ParameterConfig.feasibleSpace \n"
+                            "{parameter}):\n{exception}"
+                        ).format(parameter=parameter, exception=e),
                     )
 
     return True, ""

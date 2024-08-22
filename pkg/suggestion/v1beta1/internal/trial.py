@@ -80,11 +80,14 @@ class Trial(object):
                 ", ".join([str(e) for e in self.assignments])
             )
         else:
-            return "Trial(assignment: {}, metric_name: {}, metric: {}, additional_metrics: {})".format(
-                ", ".join([str(e) for e in self.assignments]),
-                self.metric_name,
-                self.target_metric,
-                ", ".join(str(e) for e in self.additional_metrics),
+            return (
+                "Trial(assignment: {}, metric_name: {}, metric: {}, "
+                "additional_metrics: {})".format(
+                    ", ".join(str(e) for e in self.assignments),
+                    self.metric_name,
+                    self.target_metric,
+                    ", ".join(str(e) for e in self.additional_metrics),
+                )
             )
 
 

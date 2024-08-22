@@ -237,7 +237,10 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     ):
                         return self.set_validate_context_error(
                             context,
-                            "Algorithm Setting {}: {} with {} type must be in range ({}, {}]".format(
+                            (
+                                "Algorithm Setting {}: {} with {} type must be in range "
+                                "({}, {})"
+                            ).format(
                                 setting.name,
                                 converted_value,
                                 setting_type.__name__,
@@ -309,7 +312,8 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
             if self.is_first_run:
                 self.logger.info(
-                    ">>> First time running suggestion for {}. Random architecture will be given.".format(
+                    ">>> First time running suggestion for {}. "
+                    "Random architecture will be given.".format(
                         experiment.experiment_name
                     )
                 )
@@ -319,7 +323,8 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     for _ in range(experiment.num_trials):
                         candidates.append(sess.run(controller_ops["sample_arc"]))
 
-                    # TODO: will use PVC to store the checkpoint to protect against unexpected suggestion pod restart
+                    # TODO: will use PVC to store the checkpoint to protect
+                    # against unexpected suggestion pod restart
                     saver.save(sess, experiment.ctrl_cache_file)
 
                 self.is_first_run = False
@@ -331,17 +336,22 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                     result = self.GetEvaluationResult(request.trials)
 
                     # TODO: (andreyvelich) I deleted this part, should it be handle by controller?
-                    # Sometimes training container may fail and GetEvaluationResult() will return None
+                    # Sometimes training container may fail and GetEvaluationResult()
+                    # will return None
                     # In this case, the Suggestion will:
-                    # 1. Firstly try to respawn the previous trials after waiting for RESPAWN_SLEEP seconds
-                    # 2. If respawning the trials for RESPAWN_LIMIT times still cannot collect valid results,
-                    #    then fail the task because it may indicate that the training container has errors.
+                    # 1. Firstly try to respawn the previous trials after waiting for
+                    # RESPAWN_SLEEP seconds
+                    # 2. If respawning the trials for RESPAWN_LIMIT times still cannot
+                    # collect valid results,
+                    #    then fail the task because it may indicate that the training
+                    #    container has errors.
                     if result is None:
                         self.logger.warning(
                             ">>> Suggestion has spawned trials, but they all failed."
                         )
                         self.logger.warning(
-                            ">>> Please check whether the training container is correctly implemented"
+                            ">>> Please check whether the training container "
+                            "is correctly implemented"
                         )
                         self.logger.info(
                             ">>> Experiment {} failed".format(
@@ -351,7 +361,8 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                         return []
 
                     # This LSTM network is designed to maximize the metrics
-                    # However, if the user wants to minimize the metrics, we can take the negative of the result
+                    # However, if the user wants to minimize the metrics,
+                    # we can take the negative of the result
 
                     if experiment.opt_direction == api_pb2.MINIMIZE:
                         result = -result
@@ -426,9 +437,8 @@ class EnasService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             nn_config_str = str(nn_config_json).replace('"', "'")
 
             self.logger.info(
-                "\n>>> New Neural Network Architecture Candidate #{} (internal representation):".format(
-                    i
-                )
+                "\n>>> New Neural Network Architecture Candidate #{} "
+                "(internal representation):".format(i)
             )
             self.logger.info(organized_arc_json)
             self.logger.info("\n>>> Corresponding Seach Space Description:")
