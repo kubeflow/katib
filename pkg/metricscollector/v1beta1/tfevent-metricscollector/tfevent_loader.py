@@ -13,7 +13,8 @@
 # limitations under the License.
 
 # TFEventFileParser parses tfevent files and returns an ObservationLog of the metrics specified.
-# When the event file is under a directory(e.g. test dir), please specify "{{dirname}}/{{metrics name}}"
+# When the event file is under a directory(e.g. test dir), please specify
+# "{{dirname}}/{{metrics name}}"
 # For example, in the Tensorflow MNIST Classification With Summaries:
 # https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py.
 # The "accuracy" and "loss" metric is saved under "train" and "test" directories.
@@ -21,19 +22,15 @@
 # Check TFJob example for more information:
 # https://github.com/kubeflow/katib/blob/master/examples/v1beta1/kubeflow-training-operator/tfjob-mnist-with-summaries.yaml#L16-L22
 
-from datetime import datetime
-from logging import getLogger
-from logging import INFO
-from logging import StreamHandler
 import os
+from datetime import datetime
+from logging import INFO, StreamHandler, getLogger
 
 import api_pb2
 import rfc3339
-from tensorboard.backend.event_processing.event_accumulator import \
-    EventAccumulator
-from tensorboard.backend.event_processing.event_accumulator import TensorEvent
-from tensorboard.backend.event_processing.tag_types import TENSORS
 import tensorflow as tf
+from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+from tensorboard.backend.event_processing.tag_types import TENSORS
 
 from pkg.metricscollector.v1beta1.common import const
 
@@ -54,19 +51,25 @@ class TFEventFileParser:
         event_accumulator.Reload()
         for tag in event_accumulator.Tags()[TENSORS]:
             for m in self.metric_names:
-
-                tfefile_parent_dir = os.path.dirname(m) if len(m.split("/")) >= 2 else os.path.dirname(tfefile)
+                tfefile_parent_dir = (
+                    os.path.dirname(m)
+                    if len(m.split("/")) >= 2
+                    else os.path.dirname(tfefile)
+                )
                 basedir_name = os.path.dirname(tfefile)
-                if not tag.startswith(m.split("/")[-1]) or not basedir_name.endswith(tfefile_parent_dir):
+                if not tag.startswith(m.split("/")[-1]) or not basedir_name.endswith(
+                    tfefile_parent_dir
+                ):
                     continue
 
                 for tensor in event_accumulator.Tensors(tag):
                     ml = api_pb2.MetricLog(
-                        time_stamp=rfc3339.rfc3339(datetime.fromtimestamp(tensor.wall_time)),
+                        time_stamp=rfc3339.rfc3339(
+                            datetime.fromtimestamp(tensor.wall_time)
+                        ),
                         metric=api_pb2.Metric(
-                            name=m,
-                            value=str(tf.make_ndarray(tensor.tensor_proto))
-                        )
+                            name=m, value=str(tf.make_ndarray(tensor.tensor_proto))
+                        ),
                     )
                     metric_logs.append(ml)
 
@@ -109,12 +112,14 @@ class MetricsCollector:
                 api_pb2.MetricLog(
                     time_stamp=rfc3339.rfc3339(datetime.now()),
                     metric=api_pb2.Metric(
-                        name=self.metrics[0],
-                        value=const.UNAVAILABLE_METRIC_VALUE
-                    )
+                        name=self.metrics[0], value=const.UNAVAILABLE_METRIC_VALUE
+                    ),
                 )
             ]
-            self.logger.info("Objective metric {} is not found in training logs, {} value is reported".format(
-                self.metrics[0], const.UNAVAILABLE_METRIC_VALUE))
+            self.logger.info(
+                "Objective metric {} is not found in training logs, {} value is reported".format(
+                    self.metrics[0], const.UNAVAILABLE_METRIC_VALUE
+                )
+            )
 
         return api_pb2.ObservationLog(metric_logs=mls)

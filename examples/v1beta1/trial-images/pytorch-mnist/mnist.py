@@ -24,8 +24,7 @@ import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision import datasets
-from torchvision import transforms
+from torchvision import datasets, transforms
 
 WORLD_SIZE = int(os.environ.get("WORLD_SIZE", 1))
 

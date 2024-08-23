@@ -29,17 +29,19 @@
 # https://www.kubeflow.org/docs/components/training/mpi/
 
 import kfp
-from kfp import components
 import kfp.dsl as dsl
-from kubeflow.katib import ApiClient
-from kubeflow.katib import V1beta1AlgorithmSetting
-from kubeflow.katib import V1beta1AlgorithmSpec
-from kubeflow.katib import V1beta1ExperimentSpec
-from kubeflow.katib import V1beta1FeasibleSpace
-from kubeflow.katib import V1beta1ObjectiveSpec
-from kubeflow.katib import V1beta1ParameterSpec
-from kubeflow.katib import V1beta1TrialParameterSpec
-from kubeflow.katib import V1beta1TrialTemplate
+from kfp import components
+from kubeflow.katib import (
+    ApiClient,
+    V1beta1AlgorithmSetting,
+    V1beta1AlgorithmSpec,
+    V1beta1ExperimentSpec,
+    V1beta1FeasibleSpace,
+    V1beta1ObjectiveSpec,
+    V1beta1ParameterSpec,
+    V1beta1TrialParameterSpec,
+    V1beta1TrialTemplate,
+)
 
 
 @dsl.pipeline(

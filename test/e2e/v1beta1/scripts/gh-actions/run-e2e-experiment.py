@@ -1,14 +1,12 @@
 import argparse
 import logging
 
-from kubeflow.katib import ApiClient
-from kubeflow.katib import KatibClient
-from kubeflow.katib import models
+import yaml
+from kubeflow.katib import ApiClient, KatibClient, models
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils.utils import FakeResponse
 from kubernetes import client
 from verify import verify_experiment_results
-import yaml
 
 # Experiment timeout is 40 min.
 EXPERIMENT_TIMEOUT = 60 * 40

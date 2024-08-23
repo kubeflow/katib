@@ -14,13 +14,11 @@
 
 import argparse
 
+import tensorflow as tf
 from keras.datasets import cifar10
 from ModelConstructor import ModelConstructor
 from tensorflow import keras
-import tensorflow as tf
-from tensorflow.keras.layers import RandomFlip
-from tensorflow.keras.layers import RandomTranslation
-from tensorflow.keras.layers import Rescaling
+from tensorflow.keras.layers import RandomFlip, RandomTranslation, Rescaling
 from tensorflow.keras.utils import to_categorical
 
 if __name__ == "__main__":

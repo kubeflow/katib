@@ -1,20 +1,21 @@
 import multiprocessing
 from typing import List, Optional
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-from kubeflow.katib import KatibClient
-from kubeflow.katib import V1beta1AlgorithmSpec
-from kubeflow.katib import V1beta1Experiment
-from kubeflow.katib import V1beta1ExperimentSpec
-from kubeflow.katib import V1beta1FeasibleSpace
-from kubeflow.katib import V1beta1ObjectiveSpec
-from kubeflow.katib import V1beta1ParameterSpec
-from kubeflow.katib import V1beta1TrialParameterSpec
-from kubeflow.katib import V1beta1TrialTemplate
+import pytest
+from kubeflow.katib import (
+    KatibClient,
+    V1beta1AlgorithmSpec,
+    V1beta1Experiment,
+    V1beta1ExperimentSpec,
+    V1beta1FeasibleSpace,
+    V1beta1ObjectiveSpec,
+    V1beta1ParameterSpec,
+    V1beta1TrialParameterSpec,
+    V1beta1TrialTemplate,
+)
 from kubeflow.katib.constants import constants
 from kubernetes.client import V1ObjectMeta
-import pytest
 
 TEST_RESULT_SUCCESS = "success"
 

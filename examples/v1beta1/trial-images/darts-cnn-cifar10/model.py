@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from operations import FactorizedReduce
-from operations import MixedOp
-from operations import StdConv
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from operations import FactorizedReduce, MixedOp, StdConv
 
 
 class Cell(nn.Module):
