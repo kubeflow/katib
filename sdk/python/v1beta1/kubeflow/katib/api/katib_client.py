@@ -743,7 +743,7 @@ class KatibClient(object):
                 )
 
             # Add metrics collector to the Katib Experiment.
-            # Specify metrics format for the collector, for example: 'train_loss':0.846
+            # Specify metrics format for the collector. For example: 'train_loss':0.846
             experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
                 collector=models.V1beta1CollectorSpec(
                     kind=metrics_collector_config["kind"]
