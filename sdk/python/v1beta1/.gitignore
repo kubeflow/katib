@@ -3,3 +3,4 @@ dist/
 
 # Katib gRPC APIs
 kubeflow/katib/katib_api_pb2.py
+kubeflow/katib/katib_api_pb2_grpc.py

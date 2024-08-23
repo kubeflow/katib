@@ -28,6 +28,7 @@ REQUIRES = [
 ]
 
 katib_grpc_api_file = "../../../pkg/apis/manager/v1beta1/python/api_pb2.py"
+katib_grpc_svc_file = "../../../pkg/apis/manager/v1beta1/python/api_pb2_grpc.py"
 
 # Copy Katib gRPC Python APIs to use it in the Katib SDK Client.
 # We need to always copy this file only on the SDK building stage, not on SDK installation stage.
@@ -36,6 +37,21 @@ if os.path.exists(katib_grpc_api_file):
         katib_grpc_api_file,
         "kubeflow/katib/katib_api_pb2.py",
     )
+
+# TODO(Electronic-Waste): Remove the import rewrite when protobuf supports `python_package` option.
+# REF: https://github.com/protocolbuffers/protobuf/issues/7061
+if os.path.exists(katib_grpc_svc_file):
+    shutil.copy(
+        katib_grpc_svc_file,
+        "kubeflow/katib/katib_api_pb2_grpc.py",
+    )
+
+    with open("kubeflow/katib/katib_api_pb2_grpc.py", "r+") as file:
+        content = file.read()
+        new_content = content.replace("api_pb2", "kubeflow.katib.katib_api_pb2")
+        file.seek(0)
+        file.write(new_content)
+        file.truncate()
 
 setuptools.setup(
     name="kubeflow-katib",
