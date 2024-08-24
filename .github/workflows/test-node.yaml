@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 12.18.1
+          node-version: 16.20.2
 
       - name: Format katib code
         run: |
@@ -44,7 +44,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 12.18.1
+          node-version: 16.20.2
 
       - name: Fetch Kubeflow and install common code dependencies
         run: |
@@ -74,10 +74,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup node version to 12
+      - name: Setup node version to 16
         uses: actions/setup-node@v4
         with:
-          node-version: 12
+          node-version: 16
 
       - name: Fetch Kubeflow and install common code dependencies
         run: |
