@@ -69,7 +69,6 @@ class BaseHyperoptService(object):
                     param.name,
                     float(param.min),
                     float(param.max))
-                hyperopt.hp.uniform
             elif param.type == DOUBLE:
                 if param.distribution == UNIFORM:
                     if param.step:
