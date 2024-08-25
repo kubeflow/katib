@@ -71,7 +71,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			reason := TrialMetricsUnavailableReason
 
 			// If the type of metrics collector is Push, We should insert an unavailable value to Katib DB.
-			// We would retry reconcilation if some error occurs while we report unavailable metrics.
+			// We would retry reconciliation if some error occurs while we report unavailable metrics.
 			if instance.Spec.MetricsCollector.Collector.Kind == commonv1beta1.PushCollector {
 				if err := r.reportUnavailableMetrics(instance); err != nil {
 					logger.Error(err, "Failed to insert unavailable value to Katib DB")
