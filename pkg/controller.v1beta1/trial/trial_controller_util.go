@@ -39,7 +39,7 @@ const (
 )
 
 // UpdateTrialStatusCondition updates Trial status from current deployed Job status
-func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Trial, deployedJobName string, jobStatus *trialutil.TrialJobStatus) {
+func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Trial, deployedJobName string, jobStatus *trialutil.TrialJobStatus) error {
 	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
 	timeNow := metav1.Now()
@@ -70,10 +70,12 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			msg := "Metrics are not available"
 			reason := TrialMetricsUnavailableReason
 
-			// If the type of metrics collector is Push, We should insert an unavailable value to Katib DB
+			// If the type of metrics collector is Push, We should insert an unavailable value to Katib DB.
+			// We would retry reconcilation if some error occurs while we report unavailable metrics.
 			if instance.Spec.MetricsCollector.Collector.Kind == commonv1beta1.PushCollector {
 				if err := r.reportUnavailableMetrics(instance); err != nil {
 					logger.Error(err, "Failed to insert unavailable value to Katib DB")
+					return errMetricsNotReported
 				}
 			}
 
@@ -126,6 +128,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 		// TODO(gaocegege): Should we maintain a TrialsRunningCount?
 	}
 	// else nothing to do
+	return nil
 }
 
 func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1beta1.Trial) error {

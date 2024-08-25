@@ -259,7 +259,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 		//    if job has succeeded and if observation field is available.
 		//    if job has failed
 		// This will ensure that trial is set to be complete only if metric is collected at least once
-		r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
+		return r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
 	}
 	return nil
 }

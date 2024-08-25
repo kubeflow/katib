@@ -355,6 +355,40 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
+	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC, failed once).`, func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		gomock.InOrder(
+			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(2),
+			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, errMetricsNotReported).MinTimes(1),
+			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil).MinTimes(1),
+			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
+		)
+		// Create the Trial with Push MC
+		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector)
+		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
+
+		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
+		// Metrics unavailable because GetTrialObservationLog returns "unavailable".
+		g.Eventually(func() bool {
+			if err = c.Get(ctx, trialKey, trial); err != nil {
+				return false
+			}
+			return trial.IsMetricsUnavailable() &&
+				len(trial.Status.Observation.Metrics) > 0 &&
+				trial.Status.Observation.Metrics[0].Min == consts.UnavailableMetricValue &&
+				trial.Status.Observation.Metrics[0].Max == consts.UnavailableMetricValue &&
+				trial.Status.Observation.Metrics[0].Latest == consts.UnavailableMetricValue
+		}, timeout).Should(gomega.BeTrue())
+
+		// Delete the Trial
+		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
+
+		// Expect that Trial is deleted
+		g.Eventually(func() bool {
+			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
+		}, timeout).Should(gomega.BeTrue())
+	})
+
 	t.Run("Update status for empty Trial", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		g.Expect(r.updateStatus(&trialsv1beta1.Trial{})).To(gomega.HaveOccurred())
