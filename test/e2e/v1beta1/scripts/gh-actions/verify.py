@@ -1,7 +1,6 @@
 import time
 
-from kubeflow.katib import KatibClient
-from kubeflow.katib import models
+from kubeflow.katib import KatibClient, models
 from kubeflow.katib.constants import constants
 from kubernetes import client
 

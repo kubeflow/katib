@@ -17,48 +17,44 @@ limitations under the License.
 package suggestion_goptuna_v1beta1
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/c-bata/goptuna"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 )
 
 func Test_toGoptunaDirection(t *testing.T) {
-	for _, tt := range []struct {
-		name          string
+	for name, tc := range map[string]struct {
 		objectiveType api_v1_beta1.ObjectiveType
-		expected      goptuna.StudyDirection
+		wantDirection goptuna.StudyDirection
 	}{
-		{
-			name:          "minimize",
+		"minimize": {
 			objectiveType: api_v1_beta1.ObjectiveType_MINIMIZE,
-			expected:      goptuna.StudyDirectionMinimize,
+			wantDirection: goptuna.StudyDirectionMinimize,
 		},
-		{
-			name:          "maximize",
+		"maximize": {
 			objectiveType: api_v1_beta1.ObjectiveType_MAXIMIZE,
-			expected:      goptuna.StudyDirectionMaximize,
+			wantDirection: goptuna.StudyDirectionMaximize,
 		},
 	} {
-		t.Run(tt.name, func(t *testing.T) {
-			got := toGoptunaDirection(tt.objectiveType)
-			if got != tt.expected {
-				t.Errorf("toGoptunaDirection() got = %v, want %v", got, tt.expected)
+		t.Run(name, func(t *testing.T) {
+			got := toGoptunaDirection(tc.objectiveType)
+			if diff := cmp.Diff(tc.wantDirection, got); len(diff) != 0 {
+				t.Errorf("Unexpected direction from toGoptunaDirection (-want,+got):\n%s", diff)
 			}
 		})
 	}
 }
 
 func Test_toGoptunaSearchSpace(t *testing.T) {
-	tests := []struct {
-		name       string
-		parameters []*api_v1_beta1.ParameterSpec
-		want       map[string]interface{}
-		wantErr    bool
+	cases := map[string]struct {
+		parameters      []*api_v1_beta1.ParameterSpec
+		wantSearchSpace map[string]interface{}
+		wantError       error
 	}{
-		{
-			name: "Double parameter type",
+		"Double parameter type": {
 			parameters: []*api_v1_beta1.ParameterSpec{
 				{
 					Name:          "param-double",
@@ -69,16 +65,14 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			wantSearchSpace: map[string]interface{}{
 				"param-double": goptuna.UniformDistribution{
 					High: 5.5,
 					Low:  1.5,
 				},
 			},
-			wantErr: false,
 		},
-		{
-			name: "Double parameter type with step",
+		"Double parameter type with step": {
 			parameters: []*api_v1_beta1.ParameterSpec{
 				{
 					Name:          "param-double",
@@ -90,17 +84,15 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			wantSearchSpace: map[string]interface{}{
 				"param-double": goptuna.DiscreteUniformDistribution{
 					High: 5.5,
 					Low:  1.5,
 					Q:    0.5,
 				},
 			},
-			wantErr: false,
 		},
-		{
-			name: "Int parameter type",
+		"Int parameter type": {
 			parameters: []*api_v1_beta1.ParameterSpec{
 				{
 					Name:          "param-int",
@@ -111,16 +103,14 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			wantSearchSpace: map[string]interface{}{
 				"param-int": goptuna.IntUniformDistribution{
 					High: 5,
 					Low:  1,
 				},
 			},
-			wantErr: false,
 		},
-		{
-			name: "Int parameter type with step",
+		"Int parameter type with step": {
 			parameters: []*api_v1_beta1.ParameterSpec{
 				{
 					Name:          "param-int",
@@ -132,17 +122,15 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			wantSearchSpace: map[string]interface{}{
 				"param-int": goptuna.StepIntUniformDistribution{
 					High: 5,
 					Low:  1,
 					Step: 2,
 				},
 			},
-			wantErr: false,
 		},
-		{
-			name: "Discrete parameter type",
+		"Discrete parameter type": {
 			parameters: []*api_v1_beta1.ParameterSpec{
 				{
 					Name:          "param-discrete",
@@ -152,15 +140,13 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			wantSearchSpace: map[string]interface{}{
 				"param-discrete": goptuna.CategoricalDistribution{
 					Choices: []string{"3", "2", "6"},
 				},
 			},
-			wantErr: false,
 		},
-		{
-			name: "Categorical parameter type",
+		"Categorical parameter type": {
 			parameters: []*api_v1_beta1.ParameterSpec{
 				{
 					Name:          "param-categorical",
@@ -170,23 +156,21 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 					},
 				},
 			},
-			want: map[string]interface{}{
+			wantSearchSpace: map[string]interface{}{
 				"param-categorical": goptuna.CategoricalDistribution{
 					Choices: []string{"cat1", "cat2", "cat3"},
 				},
 			},
-			wantErr: false,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := toGoptunaSearchSpace(tt.parameters)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("toGoptunaSearchSpace() error = %v, wantErr %v", err, tt.wantErr)
-				return
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			got, err := toGoptunaSearchSpace(tc.parameters)
+			if diff := cmp.Diff(tc.wantError, err, cmpopts.EquateErrors()); len(diff) != 0 {
+				t.Errorf("Unexpected error from toGoptunaSearchSpace (-want,+got):\n%s", diff)
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("toGoptunaSearchSpace() got = %v, want %v", got, tt.want)
+			if diff := cmp.Diff(tc.wantSearchSpace, got); len(diff) != 0 {
+				t.Errorf("Unexpected search space from toGoptunaSearchSpace (-want,+got):\n%s", diff)
 			}
 		})
 	}

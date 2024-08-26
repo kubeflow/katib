@@ -166,13 +166,17 @@ ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
 	python examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py --epochs 5 --batch-size 200 --log-path $(TEST_TENSORFLOW_EVENT_FILE_PATH)
 endif
 
+# TODO(Electronic-Waste): Remove the import rewrite when protobuf supports `python_package` option.
+# REF: https://github.com/protocolbuffers/protobuf/issues/7061
 pytest: prepare-pytest prepare-pytest-testdata
 	pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
 	pytest ./test/unit/v1beta1/earlystopping
 	pytest ./test/unit/v1beta1/metricscollector
 	cp ./pkg/apis/manager/v1beta1/python/api_pb2.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py
+	cp ./pkg/apis/manager/v1beta1/python/api_pb2_grpc.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
+	sed -i "s/api_pb2/kubeflow\.katib\.katib_api_pb2/g" ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
 	pytest ./sdk/python/v1beta1/kubeflow/katib
-	rm ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py
+	rm ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
 
 # The skopt service doesn't work appropriately with Python 3.11.
 # So, we need to run the test with Python 3.9.

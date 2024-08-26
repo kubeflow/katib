@@ -19,9 +19,10 @@ import grpc
 import grpc_testing
 
 from pkg.apis.manager.v1beta1.python import api_pb2
-from pkg.suggestion.v1beta1.nas.darts.service import DartsService
-from pkg.suggestion.v1beta1.nas.darts.service import \
-    validate_algorithm_settings
+from pkg.suggestion.v1beta1.nas.darts.service import (
+    DartsService,
+    validate_algorithm_settings,
+)
 
 
 class TestDarts(unittest.TestCase):

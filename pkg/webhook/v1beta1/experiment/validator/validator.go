@@ -19,7 +19,6 @@ package validator
 import (
 	"encoding/json"
 	"fmt"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -30,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
@@ -262,6 +262,17 @@ func (g *DefaultValidator) validateParameters(parameters []experimentsv1beta1.Pa
 			param.ParameterType != experimentsv1beta1.ParameterTypeUnknown {
 			allErrs = append(allErrs, field.Invalid(parametersPath.Index(i).Child("parameterType"),
 				param.ParameterType, fmt.Sprintf("parameterType: %v is not supported", param.ParameterType)))
+		}
+
+		if param.FeasibleSpace.Distribution != "" {
+			if param.FeasibleSpace.Distribution != experimentsv1beta1.DistributionUniform &&
+				param.FeasibleSpace.Distribution != experimentsv1beta1.DistributionLogUniform &&
+				param.FeasibleSpace.Distribution != experimentsv1beta1.DistributionNormal &&
+				param.FeasibleSpace.Distribution != experimentsv1beta1.DistributionLogNormal &&
+				param.FeasibleSpace.Distribution != experimentsv1beta1.DistributionUnknown {
+				allErrs = append(allErrs, field.Invalid(parametersPath.Index(i).Child("feasibleSpace").Child("distribution"),
+					param.FeasibleSpace.Distribution, fmt.Sprintf("distribution: %v is not supported", param.FeasibleSpace.Distribution)))
+			}
 		}
 
 		if equality.Semantic.DeepEqual(param.FeasibleSpace, experimentsv1beta1.FeasibleSpace{}) {

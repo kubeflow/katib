@@ -42,8 +42,17 @@ class ParameterConfig:
             {"name": "cat_param", "values": ["true", "false"], "number": 2}.
     """
 
-    def __init__(self, name_ids, dim, lower_bounds, upper_bounds,
-                 parameter_types, names, discrete_info, categorical_info):
+    def __init__(
+        self,
+        name_ids,
+        dim,
+        lower_bounds,
+        upper_bounds,
+        parameter_types,
+        names,
+        discrete_info,
+        categorical_info,
+    ):
         self.name_ids = name_ids
         self.dim = dim
         self.lower_bounds = np.array(lower_bounds).reshape((1, dim))
@@ -62,6 +71,7 @@ class ParameterConfig:
         return scaler
 
     def random_sample(self):
-        new_sample = np.random.uniform(self.lower_bounds, self.upper_bounds,
-                                       size=(1, self.dim))
+        new_sample = np.random.uniform(
+            self.lower_bounds, self.upper_bounds, size=(1, self.dim)
+        )
         return new_sample
