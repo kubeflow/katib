@@ -20,6 +20,7 @@ import utils
 
 from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.suggestion.v1beta1.hyperopt.service import HyperoptService
+from pkg.suggestion.v1beta1.internal.constant import LOG_UNIFORM
 
 
 class TestHyperopt(unittest.TestCase):
@@ -176,6 +177,12 @@ class TestHyperopt(unittest.TestCase):
                             parameter_type=api_pb2.DOUBLE,
                             feasible_space=api_pb2.FeasibleSpace(
                                 max="5", min="1", list=[])
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-5",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="5", min="1", list=[], step="0.5", distribution=api_pb2.LOG_UNIFORM)
                         )
                     ]
                 )

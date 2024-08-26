@@ -533,14 +533,6 @@ func convertParameterType(typ experimentsv1beta1.ParameterType) suggestionapi.Pa
 
 func convertFeasibleSpace(fs experimentsv1beta1.FeasibleSpace) *suggestionapi.FeasibleSpace {
 	distribution := convertDistribution(fs.Distribution)
-	if distribution == suggestionapi.Distribution_DISTRIBUTION_UNKNOWN {
-		return &suggestionapi.FeasibleSpace{
-			Max:  fs.Max,
-			Min:  fs.Min,
-			List: fs.List,
-			Step: fs.Step,
-		}
-	}
 
 	return &suggestionapi.FeasibleSpace{
 		Max:          fs.Max,

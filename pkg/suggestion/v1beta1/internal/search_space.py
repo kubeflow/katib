@@ -82,18 +82,36 @@ class HyperParameterSearchSpace(object):
 
     @staticmethod
     def convert_parameter(p):
+        distribution = (
+            p.feasible_space.distribution
+            if p.feasible_space.distribution != ""
+            and p.feasible_space.distribution is not None
+            and p.feasible_space.distribution != api.DISTRIBUTION_UNKNOWN
+            else None
+        )
+
         if p.parameter_type == api.INT:
             # Default value for INT parameter step is 1
-            step = 1
-            if p.feasible_space.step is not None and p.feasible_space.step != "":
-                step = p.feasible_space.step
-            return HyperParameter.int(p.name, p.feasible_space.min, p.feasible_space.max, step, p.feasible_space.distribution)
+            step = p.feasible_space.step if p.feasible_space.step else 1
+            return HyperParameter.int(
+                p.name, p.feasible_space.min, p.feasible_space.max, step, distribution
+            )
+
         elif p.parameter_type == api.DOUBLE:
-            return HyperParameter.double(p.name, p.feasible_space.min, p.feasible_space.max, p.feasible_space.step, p.feasible_space.distribution)
+            return HyperParameter.double(
+                p.name,
+                p.feasible_space.min,
+                p.feasible_space.max,
+                p.feasible_space.step,
+                distribution,
+            )
+
         elif p.parameter_type == api.CATEGORICAL:
             return HyperParameter.categorical(p.name, p.feasible_space.list)
+
         elif p.parameter_type == api.DISCRETE:
             return HyperParameter.discrete(p.name, p.feasible_space.list)
+
         else:
             logger.error(
                 "Cannot get the type for the parameter: %s (%s)",
@@ -114,8 +132,9 @@ class HyperParameter(object):
 
     def __str__(self):
         if self.type in [constant.INTEGER, constant.DOUBLE]:
-            return "HyperParameter(name: {}, type: {}, min: {}, max: {}, step: {}, distribution: {})".format(
-                self.name, self.type, self.min, self.max, self.step, self.distribution
+            return (
+                f"HyperParameter(name: {self.name}, type: {self.type}, min: {self.min}, "
+                f"max: {self.max}, step: {self.step}, distribution: {self.distribution})"
             )
         else:
             return "HyperParameter(name: {}, type: {}, list: {})".format(
@@ -130,9 +149,7 @@ class HyperParameter(object):
 
     @staticmethod
     def double(name, min_, max_, step, distribution=None):
-        return HyperParameter(
-            name, constant.DOUBLE, min_, max_, [], step, distribution
-        )
+        return HyperParameter(name, constant.DOUBLE, min_, max_, [], step, distribution)
 
     @staticmethod
     def categorical(name, lst):
