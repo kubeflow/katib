@@ -252,10 +252,19 @@ class KatibClient(object):
                 to the base image packages. These packages are installed before
                 executing the objective function.
             pip_index_url: The PyPI url from which to install Python packages.
-            metrics_collector_config: Specify the config of metrics collector, 
-                for example, `metrics_collector_config = {"kind": "Push"}`.
-                for using custom metric collectors use "custom_collector" key and provide instance of custom V1Container as value,
-                for example, `metrics_collector_config = {"kind" : "Custom", "custom_collector": <Instance of V1Container>}`.
+        
+            `metrics_collector_config`: Specify the configuration for the metrics collector with following keys:
+            - **kind**: Specify the kind of Metrics Collector. Currently supported values are:
+                - `StdOut`: Collects metrics from standard output.
+                - `None`: No metrics collection.
+                - `File`: Writes metrics to a file.
+                - `TensorFlowEvent`: Collects metrics in TensorFlow Event format.
+                - `PrometheusMetric`: Exposes metrics in a Prometheus-compatible format.
+                - `Custom`: For custom metrics collection. Use the "custom_collector" key to specify the collector instance.
+                
+            - **custom_collector**: If the `kind` is set to `Custom`, you must provide an instance of a custom `V1Container` as the value. For example:
+                `metrics_collector_config = {"kind" : "Custom", "custom_collector": <Instance of V1Container>}`.
+
         Raises:
             ValueError: Function arguments have incorrect type or value.
             TimeoutError: Timeout to create Katib Experiment.
