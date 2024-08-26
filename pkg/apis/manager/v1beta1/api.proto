@@ -101,11 +101,11 @@ enum ParameterType {
  * Distribution types for HyperParameter.
  */
 enum Distribution {
-    UNIFORM = 0;
-    LOG_UNIFORM = 1;
-    NORMAL = 2;
-    LOG_NORMAL = 3;
-    DISTRIBUTION_UNKNOWN = 4;
+    DISTRIBUTION_UNKNOWN = 0;
+    UNIFORM = 1;
+    LOG_UNIFORM = 2;
+    NORMAL = 3;
+    LOG_NORMAL = 4;
 }
 
 /**

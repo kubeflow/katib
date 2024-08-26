@@ -16,11 +16,11 @@ class ParameterType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
 
 class Distribution(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
+    DISTRIBUTION_UNKNOWN: _ClassVar[Distribution]
     UNIFORM: _ClassVar[Distribution]
     LOG_UNIFORM: _ClassVar[Distribution]
     NORMAL: _ClassVar[Distribution]
     LOG_NORMAL: _ClassVar[Distribution]
-    DISTRIBUTION_UNKNOWN: _ClassVar[Distribution]
 
 class ObjectiveType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -39,11 +39,11 @@ DOUBLE: ParameterType
 INT: ParameterType
 DISCRETE: ParameterType
 CATEGORICAL: ParameterType
+DISTRIBUTION_UNKNOWN: Distribution
 UNIFORM: Distribution
 LOG_UNIFORM: Distribution
 NORMAL: Distribution
 LOG_NORMAL: Distribution
-DISTRIBUTION_UNKNOWN: Distribution
 UNKNOWN: ObjectiveType
 MINIMIZE: ObjectiveType
 MAXIMIZE: ObjectiveType
