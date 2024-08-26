@@ -58,6 +58,8 @@ var (
 	log = logf.Log.WithName(ControllerName)
 	// errMetricsNotReported is the error when Trial job is succeeded but metrics are not reported yet
 	errMetricsNotReported = fmt.Errorf("metrics are not reported yet")
+	// errReportMetricsFailed is the error when metrics are reported but not successful yet
+	errReportMetricsFailed = fmt.Errorf("failed to report metrics")
 )
 
 // Add creates a new Trial Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -180,7 +182,7 @@ func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Reques
 	} else {
 		err := r.reconcileTrial(instance)
 		if err != nil {
-			if err == errMetricsNotReported {
+			if err == errMetricsNotReported || err == errReportMetricsFailed {
 				return reconcile.Result{
 					RequeueAfter: time.Second * 1,
 				}, nil
