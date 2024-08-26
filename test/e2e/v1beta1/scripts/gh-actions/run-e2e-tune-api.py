@@ -60,14 +60,8 @@ def run_e2e_experiment_create_by_tune(
         max_trial_count=4,
         resources_per_trial={"cpu": "2"},
         metrics_collector_config={
-            "collector": {
-                "kind": "Custom",
-                "customCollector": {
-                    "image": "dummy-collector:latest",
-                    "command": ["python", "/app/dummy-collector.py"],
-                    "args": ["--metric-name=result"]
-                }
-            }
+            "kind": "Custom",
+            "customCollector": metric_collector,
         },
     )
     experiment = katib_client.wait_for_experiment_condition(
