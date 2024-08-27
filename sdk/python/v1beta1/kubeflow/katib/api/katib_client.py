@@ -39,22 +39,25 @@ class KatibClient(object):
         client_configuration: Optional[client.Configuration] = None,
         namespace: str = utils.get_default_target_namespace(),
     ):
-        """KatibClient constructor. Configure logging in your application
-            as follows to see detailed information from the KatibClient APIs:
-            .. code-block:: python
-                import logging
-                logging.basicConfig()
-                log = logging.getLogger("kubeflow.katib.api.katib_client")
-                log.setLevel(logging.DEBUG)
+        """KatibClient constructor.
+
+        Configure logging in your application as follows to see detailed
+        information from the KatibClient APIs:
+
+        .. code-block:: python
+
+            import logging
+            logging.basicConfig()
+            log = logging.getLogger("kubeflow.katib.api.katib_client")
+            log.setLevel(logging.DEBUG)
 
         Args:
-            config_file: Path to the kube-config file. Defaults to ~/.kube/config.
-            context: Set the active context. Defaults to current_context from the kube-config.
-            client_configuration: Client configuration for cluster authentication.
+            config_file (str, optional): Path to the kube-config file. Defaults to ~/.kube/config.
+            context (str, optional): Set the active context. Defaults to current_context from the kube-config.
+            client_configuration (client.Configuration, optional): Client configuration for cluster authentication.
                 You have to provide valid configuration with Bearer token or
-                with username and password. You can find an example here:
-                https://github.com/kubernetes-client/python/blob/67f9c7a97081b4526470cad53576bc3b71fa6fcc/examples/remote_cluster.py#L31
-            namespace: Target Kubernetes namespace. By default it takes namespace
+                with username and password.
+            namespace (str): Target Kubernetes namespace. By default it takes namespace
                 from `/var/run/secrets/kubernetes.io/serviceaccount/namespace` location
                 or set as `default`. Namespace can be overridden during method invocations.
         """
@@ -190,7 +193,8 @@ class KatibClient(object):
         pip_index_url: str = "https://pypi.org/simple",
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
-        """Create HyperParameter Tuning Katib Experiment from the objective function.
+        """
+        Create HyperParameter Tuning Katib Experiment from the objective function.
 
         Args:
             name: Name for the Experiment.
@@ -201,9 +205,7 @@ class KatibClient(object):
                 definition. Import statements must be added inside the function.
             parameters: Dict of HyperParameters to tune your Experiment. You
                 should use Katib SDK to define the search space for these parameters.
-
-                For example: `parameters = {"lr": katib.search.double(min=0.1, max=0.2)}`
-
+                For example: ``parameters = {"lr": katib.search.double(min=0.1, max=0.2)``.
                 Also, you can use these parameters to define input for your
                 objective function.
             base_image: Image to use when executing the objective function.
@@ -211,19 +213,16 @@ class KatibClient(object):
             env_per_trial: Environment variable(s) to be attached to each trial container.
                 You can specify a dictionary as a mapping object representing the environment
                 variables. Otherwise, you can specify a list, in which the element can either
-                be a kubernetes.client.models.V1EnvVar (documented here:
-                https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvVar.md)
-                or a kubernetes.client.models.V1EnvFromSource (documented here:
-                https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvFromSource.md)
+                be a ``kubernetes.client.models.V1EnvVar`` or a ``kubernetes.client.models.V1EnvFromSource``.
             algorithm_name: Search algorithm for the HyperParameter tuning.
             algorithm_settings: Settings for the search algorithm given.
                 For available fields, check this doc:
                 https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail.
             objective_metric_name: Objective metric that Katib optimizes.
             additional_metric_names: List of metrics that Katib collects from the
-                objective function in addition to objective metric.
+                objective function in addition to the objective metric.
             objective_type: Type for the Experiment optimization for the objective metric.
-                Must be one of `minimize` or `maximize`.
+                Must be one of ``minimize`` or ``maximize``.
             objective_goal: Objective goal that Experiment should reach to be Succeeded.
             max_trial_count: Maximum number of Trials to run. For the default
                 values check this doc:
@@ -231,31 +230,28 @@ class KatibClient(object):
             parallel_trial_count: Number of Trials that Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
             resources_per_trial: A parameter that lets you specify how much
-            resources each trial container should have. You can either specify a
-            kubernetes.client.V1ResourceRequirements object (documented here:
-            https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1ResourceRequirements.md)
-            or a dictionary that includes one or more of the following keys:
-            `cpu`, `memory`, or `gpu` (other keys will be ignored). Appropriate
-            values for these keys are documented here:
-            https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/.
-            For example:
-                {
-                    "cpu": "1",
-                    "gpu": "1",
-                    "memory": "2Gi",
-                }
-            Please note, `gpu` specifies a resource request with a key of
-            `nvidia.com/gpu`, i.e. an NVIDIA GPU. If you need a different type
-            of GPU, pass in a V1ResourceRequirement instance instead, since it's
-            more flexible. This parameter is optional and defaults to None.
-            retain_trials: Whether Trials' resources (e.g. pods) are deleted after Succeeded state.
+                resources each trial container should have. You can either specify a
+                ``kubernetes.client.V1ResourceRequirements`` object or a dictionary that
+                includes one or more of the following keys: ``cpu``, ``memory``, or ``gpu``
+                (other keys will be ignored). For example:
+
+                .. code-block:: yaml
+
+                    {
+                        "cpu": "1",
+                        "gpu": "1",
+                        "memory": "2Gi",
+                    }
+
+                Please note, ``gpu`` specifies a resource request with a key of
+                ``nvidia.com/gpu``, i.e., an NVIDIA GPU. If you need a different type
+                of GPU, pass in a ``V1ResourceRequirement`` instance instead, since it's
+                more flexible. This parameter is optional and defaults to None.
+            retain_trials: Whether Trials' resources (e.g., pods) are deleted after Succeeded state.
             packages_to_install: List of Python packages to install in addition
                 to the base image packages. These packages are installed before
                 executing the objective function.
-            pip_index_url: The PyPI url from which to install Python packages.
-            metrics_collector_config: Specify the config of metrics collector,
-                for example, `metrics_collector_config = {"kind": "Push"}`.
-                Currently, we only support `StdOut` and `Push` metrics collector.
+            pip_index_url: The PyPI URL from which to install Python packages.
 
         Raises:
             ValueError: Function arguments have incorrect type or value.
@@ -646,6 +642,7 @@ class KatibClient(object):
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Check if Experiment is Restarting.
+
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
@@ -654,13 +651,12 @@ class KatibClient(object):
                 to execute the request.
 
         Returns:
-            bool: True is Experiment is Resting, else False.
+            bool: True if Experiment is Restarting, else False.
 
         Raises:
             TimeoutError: Timeout to get Katib Experiment.
             RuntimeError: Failed to get Katib Experiment.
         """
-
         namespace = namespace or self.namespace
 
         return utils.has_condition(
@@ -676,6 +672,7 @@ class KatibClient(object):
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Check if Experiment is Succeeded.
+
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
@@ -684,7 +681,7 @@ class KatibClient(object):
                 to execute the request.
 
         Returns:
-            bool: True is Experiment is Succeeded, else False.
+            bool: True if Experiment is Succeeded, else False.
 
         Raises:
             TimeoutError: Timeout to get Katib Experiment.
@@ -706,6 +703,7 @@ class KatibClient(object):
         timeout: int = constants.DEFAULT_TIMEOUT,
     ):
         """Check if Experiment is Failed.
+
         Args:
             name: Name for the Experiment.
             namespace: Namespace for the Experiment.
@@ -714,7 +712,7 @@ class KatibClient(object):
                 to execute the request.
 
         Returns:
-            bool: True is Experiment is Failed, else False.
+            bool: True if Experiment is Failed, else False.
 
         Raises:
             TimeoutError: Timeout to get Katib Experiment.
@@ -1277,7 +1275,7 @@ class KatibClient(object):
         """Get the Trial Metric Results from the Katib DB.
         Katib DB Manager service should be accessible while calling this API.
 
-        If you run this API in-cluster (e.g. from the Kubeflow Notebook) you can
+        If you run this API in-cluster (e.g. from the Kubeflow Notebook), you can
         use the default Katib DB Manager address: `katib-db-manager.kubeflow:6789`.
 
         If you run this API outside the cluster, you have to port-forward the
@@ -1291,14 +1289,14 @@ class KatibClient(object):
         Args:
             name: Name for the Trial.
             namespace: Namespace for the Trial.
-            db-manager-address: Address for the Katib DB Manager in this format: `ip-address:port`.
+            db_manager_address: Address for the Katib DB Manager in this format: `ip-address:port`.
             timeout: Optional, gRPC API Server timeout in seconds to get metrics.
 
         Returns:
             List of MetricLog objects
             (https://github.com/kubeflow/katib/blob/4a2db414d85f29f17bc8ec6ff3462beef29585da/pkg/apis/manager/v1beta1/gen-doc/api.md#api-v1-beta1-MetricLog).
-            For example, to get the first metric value run the following:
-            `get_trial_metrics(...)[0].metric.value
+            For example, to get the first metric value, run the following:
+            `get_trial_metrics(...)[0].metric.value`.
 
         Raises:
             RuntimeError: Unable to get Trial metrics.
