@@ -58,8 +58,8 @@ var (
 	log = logf.Log.WithName(ControllerName)
 	// errMetricsNotReported is the error when Trial job is succeeded but metrics are not reported yet
 	errMetricsNotReported = fmt.Errorf("metrics are not reported yet")
-	// errReportMetricsFailed is the error when metrics are reported but not successful yet
-	errReportMetricsFailed = fmt.Errorf("failed to report metrics")
+	// errReportMetricsFailed is the error when `unavailable` metrics value can't be inserted to the Katib DB.
+	errReportMetricsFailed = fmt.Errorf("failed to report unavailable metrics")
 )
 
 // Add creates a new Trial Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
