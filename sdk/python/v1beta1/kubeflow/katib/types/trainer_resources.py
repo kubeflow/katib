@@ -1,6 +1,3 @@
-import pprint
-
-import six
 from kubeflow.katib.configuration import Configuration
 
 
