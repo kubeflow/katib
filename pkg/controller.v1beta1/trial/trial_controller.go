@@ -182,7 +182,7 @@ func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Reques
 	} else {
 		err := r.reconcileTrial(instance)
 		if err != nil {
-			if err == errMetricsNotReported || err == errReportMetricsFailed {
+			if errors.Is(err, errMetricsNotReported) || errors.Is(err, errReportMetricsFailed) {
 				return reconcile.Result{
 					RequeueAfter: time.Second * 1,
 				}, nil
