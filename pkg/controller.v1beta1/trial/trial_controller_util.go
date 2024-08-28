@@ -75,7 +75,7 @@ func (r *ReconcileTrial) UpdateTrialStatusCondition(instance *trialsv1beta1.Tria
 			if instance.Spec.MetricsCollector.Collector.Kind == commonv1beta1.PushCollector {
 				if err := r.reportUnavailableMetrics(instance); err != nil {
 					logger.Error(err, "Failed to insert unavailable value to Katib DB")
-					return errReportMetricsFailed
+					return fmt.Errorf("%w: %w", errReportMetricsFailed, err)
 				}
 			}
 
