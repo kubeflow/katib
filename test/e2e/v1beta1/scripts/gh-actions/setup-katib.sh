@@ -65,9 +65,7 @@ echo "Deploying Katib"
 cd ../../../../../ && WITH_DATABASE_TYPE=$WITH_DATABASE_TYPE make deploy && cd -
 
 echo "Get PVC"
-kubectl get pvc
-echo "Describe PVC"
-kubectl describe pvc katib-mysql
+kubectl get pvc -n kubeflow
 echo "Get PV"
 kubectl get pv
 echo "Get StorageClass"
