@@ -64,6 +64,15 @@ fi
 echo "Deploying Katib"
 cd ../../../../../ && WITH_DATABASE_TYPE=$WITH_DATABASE_TYPE make deploy && cd -
 
+echo "Get PVC"
+kubectl get pvc
+echo "Describe PVC"
+kubectl describe pvc katib-mysql
+echo "Get PV"
+kubectl get pv
+echo "Get StorageClass"
+kubectl get storageclass
+
 # Wait until all Katib pods is running.
 TIMEOUT=120s
 
