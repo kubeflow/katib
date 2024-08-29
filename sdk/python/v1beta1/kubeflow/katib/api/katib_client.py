@@ -23,10 +23,10 @@ from typing import Any, Callable, Dict, List, Optional, Union
 import grpc
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import kubeflow.katib.katib_api_pb2_grpc as katib_api_pb2_grpc
-from kubeflow.katib import models, types
+from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
-# from kubeflow.katib.types.trainer_resources import TrainerResources
+from kubeflow.katib.types.trainer_resources import TrainerResources
 from kubeflow.katib.utils import utils
 from kubernetes import client, config
 
@@ -198,7 +198,7 @@ class KatibClient(object):
         parallel_trial_count: int = None,
         max_failed_trial_count: int = None,
         resources_per_trial: Union[
-            dict, client.V1ResourceRequirements, types.TrainerResources, None
+            dict, client.V1ResourceRequirements, TrainerResources, None
         ] = None,
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
