@@ -20,6 +20,7 @@ import textwrap
 import time
 from typing import Any, Callable, Dict, List, Optional, Union
 
+import grpc
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import kubeflow.katib.katib_api_pb2_grpc as katib_api_pb2_grpc
 from kubeflow.katib import models
@@ -28,8 +29,6 @@ from kubeflow.katib.constants import constants
 from kubeflow.katib.types.trainer_resources import TrainerResources
 from kubeflow.katib.utils import utils
 from kubernetes import client, config
-
-import grpc
 
 logger = logging.getLogger(__name__)
 
