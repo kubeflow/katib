@@ -41,6 +41,8 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
     if output_file == "sdk/python/v1beta1/kubeflow/katib/__init__.py":
         lines.append("# Import Katib API client.\n")
         lines.append("from kubeflow.katib.api.katib_client import KatibClient\n")
+        lines.append("# Import Katib TrainerResources class.\n")
+        lines.append("from kubeflow.katib.types.trainer_resources import TrainerResources\n")
         lines.append("# Import Katib report metrics functions\n")
         lines.append("from kubeflow.katib.api.report_metrics import report_metrics\n")
         lines.append("# Import Katib helper functions.\n")
