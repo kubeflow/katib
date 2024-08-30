@@ -165,14 +165,16 @@ class KatibClient(object):
                     )
                 )
 
-    # fmt: off
     def tune(
         self,
         # TODO (andreyvelich): How to be consistent with other APIs (name) ?
         name: str,
-        model_provider_parameters: Optional["HuggingFaceModelParams"] = None,  # noqa: F821
-        dataset_provider_parameters: Optional[Union[
-            "HuggingFaceDatasetParams", "S3DatasetParams"]] = None,  # noqa: F821
+        model_provider_parameters: Optional[
+            "HuggingFaceModelParams"  # noqa: F821
+        ] = None,
+        dataset_provider_parameters: Optional[
+            Union["HuggingFaceDatasetParams", "S3DatasetParams"]  # noqa: F821
+        ] = None,
         trainer_parameters: Optional["HuggingFaceTrainerParams"] = None,  # noqa: F821
         storage_config: Optional[Dict[str, Optional[Union[str, List[str]]]]] = {
             "size": constants.PVC_DEFAULT_SIZE,
@@ -205,8 +207,6 @@ class KatibClient(object):
         pip_index_url: str = "https://pypi.org/simple",
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
-        # fmt: on
-
         """
         Create HyperParameter Tuning Katib Experiment using one of the following
         options:
