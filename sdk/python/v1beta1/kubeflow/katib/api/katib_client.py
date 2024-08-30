@@ -415,19 +415,21 @@ class KatibClient(object):
         if max_failed_trial_count is not None:
             experiment.spec.max_failed_trial_count = max_failed_trial_count
 
-        # Add metrics collector to the Katib Experiment.
-        # Up to now, we only support parameter `kind`, of which default value
-        # is `StdOut`, to specify the kind of metrics collector.
-        experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
-            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
-        )
-
         # If users choose to use a custom objective function.
         if objective is not None:
+            # Add metrics collector to the Katib Experiment.
+            # Up to now, we only support parameter `kind`, of which default value
+            # is `StdOut`, to specify the kind of metrics collector.
+            experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
+                collector=models.V1beta1CollectorSpec(
+                    kind=metrics_collector_config["kind"]
+                )
+            )
+
             # Iterate over input parameters and do substitutions.
             experiment_params = []
             trial_params = []
-            input_params = utils.parameter_substitution(
+            input_params = utils.get_trial_substitutions_from_dict(
                 parameters, experiment_params, trial_params
             )
 
@@ -587,10 +589,10 @@ class KatibClient(object):
             # Iterate over input parameters and do substitutions.
             experiment_params = []
             trial_params = []
-            training_args = utils.parameter_substitution(
+            training_args = utils.get_trial_substitutions_from_trainer(
                 trainer_parameters.training_parameters, experiment_params, trial_params
             )
-            lora_config = utils.parameter_substitution(
+            lora_config = utils.get_trial_substitutions_from_trainer(
                 trainer_parameters.lora_config, experiment_params, trial_params
             )
 

@@ -143,68 +143,74 @@ class SetEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def parameter_substitution(
-    parameters: Union[Dict[str, Any], "TrainingArguments", "LoraConfig"],  # noqa: F821
+def get_trial_substitutions_from_dict(
+    parameters: Dict[str, Any],
     experiment_params: List[models.V1beta1ParameterSpec],
     trial_params: List[models.V1beta1TrialParameterSpec],
-):
-    if isinstance(parameters, dict):
-        for p_name, p_value in parameters.items():
-            # If input parameter value is Katib Experiment parameter sample.
-            if isinstance(p_value, models.V1beta1ParameterSpec):
-                # Wrap value for the function input.
-                parameters[p_name] = f"${{trialParameters.{p_name}}}"
+) -> Dict[str, str]:
+    for p_name, p_value in parameters.items():
+        # If input parameter value is Katib Experiment parameter sample.
+        if isinstance(p_value, models.V1beta1ParameterSpec):
+            # Wrap value for the function input.
+            parameters[p_name] = f"${{trialParameters.{p_name}}}"
 
-                # Add value to the Katib Experiment parameters.
-                p_value.name = p_name
-                experiment_params.append(p_value)
+            # Add value to the Katib Experiment parameters.
+            p_value.name = p_name
+            experiment_params.append(p_value)
 
-                # Add value to the Katib Experiment's Trial parameters.
-                trial_params.append(
-                    models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
-                )
-            else:
-                # Otherwise, add value to the function input.
-                parameters[p_name] = p_value
+            # Add value to the Katib Experiment's Trial parameters.
+            trial_params.append(
+                models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
+            )
+        else:
+            # Otherwise, add value to the function input.
+            parameters[p_name] = p_value
 
+    return parameters
+
+
+def get_trial_substitutions_from_trainer(
+    parameters: Union["TrainingArguments", "LoraConfig"],  # noqa: F821
+    experiment_params: List[models.V1beta1ParameterSpec],
+    trial_params: List[models.V1beta1TrialParameterSpec],
+) -> Dict[str, str]:
+    from peft import LoraConfig  # noqa: F401
+    from transformers import TrainingArguments  # noqa: F401
+
+    if isinstance(parameters, TrainingArguments):
+        parameters_dict = parameters.to_dict()
     else:
-        from peft import LoraConfig  # noqa: F401
-        from transformers import TrainingArguments  # noqa: F401
+        parameters_dict = parameters.__dict__
 
-        if isinstance(parameters, TrainingArguments):
-            parameters_dict = parameters.to_dict()
-        else:
-            parameters_dict = parameters.__dict__
+    for p_name, p_value in parameters_dict.items():
+        if not hasattr(parameters, p_name):
+            logger.warning(f"Training parameter {p_name} is not supported.")
+            continue
 
-        for p_name, p_value in parameters_dict.items():
-            if not hasattr(parameters, p_name):
-                logger.warning(f"Training parameter {p_name} is not supported.")
-                continue
+        if isinstance(p_value, models.V1beta1ParameterSpec):
+            old_attr = getattr(parameters, p_name, None)
+            if old_attr is not None:
+                value = f"${{trialParameters.{p_name}}}"
+            setattr(parameters, p_name, value)
+            p_value.name = p_name
+            experiment_params.append(p_value)
+            trial_params.append(
+                models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
+            )
+        elif p_value is not None:
+            old_attr = getattr(parameters, p_name, None)
+            if old_attr is not None:
+                if isinstance(p_value, dict):
+                    # Update the existing dictionary without nesting
+                    value = copy.deepcopy(p_value)
+                else:
+                    value = type(old_attr)(p_value)
+            setattr(parameters, p_name, value)
 
-            if isinstance(p_value, models.V1beta1ParameterSpec):
-                old_attr = getattr(parameters, p_name, None)
-                if old_attr is not None:
-                    value = f"${{trialParameters.{p_name}}}"
-                setattr(parameters, p_name, value)
-                p_value.name = p_name
-                experiment_params.append(p_value)
-                trial_params.append(
-                    models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
-                )
-            elif p_value is not None:
-                old_attr = getattr(parameters, p_name, None)
-                if old_attr is not None:
-                    if isinstance(p_value, dict):
-                        # Update the existing dictionary without nesting
-                        value = copy.deepcopy(p_value)
-                    else:
-                        value = type(old_attr)(p_value)
-                setattr(parameters, p_name, value)
-
-        if isinstance(parameters, TrainingArguments):
-            parameters = json.dumps(parameters.to_dict())
-        else:
-            parameters = json.dumps(parameters.__dict__, cls=SetEncoder)
+    if isinstance(parameters, TrainingArguments):
+        parameters = json.dumps(parameters.to_dict())
+    else:
+        parameters = json.dumps(parameters.__dict__, cls=SetEncoder)
 
     return parameters
 
@@ -214,7 +220,7 @@ def get_exec_script_from_objective(
     input_params: Dict[str, Any] = None,
     packages_to_install: Optional[List[str]] = None,
     pip_index_url: str = "https://pypi.org/simple",
-):
+) -> str:
     """
     Get executable script for container args from the given objective function and parameters.
     """
