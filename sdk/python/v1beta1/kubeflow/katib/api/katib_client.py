@@ -199,8 +199,8 @@ class KatibClient(object):
         max_trial_count: int = None,
         parallel_trial_count: int = None,
         max_failed_trial_count: int = None,
-        resources_per_trial: Union[
-            dict, client.V1ResourceRequirements, TrainerResources, None
+        resources_per_trial: Optional[
+            Union[dict, client.V1ResourceRequirements, TrainerResources]
         ] = None,
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
@@ -350,13 +350,6 @@ class KatibClient(object):
             TimeoutError: Timeout to create Katib Experiment.
             RuntimeError: Failed to create Katib Experiment.
         """
-
-        print(
-            "Thank you for using `tune` API for LLM hyperparameter optimization. This feature "
-            "is in the alpha stage. Kubeflow community is looking for your feedback. Please "
-            "share your experience via #kubeflow-katib Slack channel or the Kubeflow Katib "
-            "GitHub."
-        )
 
         if (
             (
@@ -599,6 +592,13 @@ class KatibClient(object):
                     + "Run: pip install -U 'kubeflow-katib[huggingface]' "
                 )
 
+            print(
+                "Thank you for using `tune` API for LLM hyperparameter optimization. This feature "
+                "is in the alpha stage. Kubeflow community is looking for your feedback. Please "
+                "share your experience via #kubeflow-katib Slack channel or the Kubeflow Katib "
+                "GitHub."
+            )
+
             # Create PVC for the Storage Initializer.
             # TODO (helenxie-bit): PVC Creation should be part of Katib Controller.
             try:
@@ -746,9 +746,6 @@ class KatibClient(object):
             # Add metrics collector to the Katib Experiment.
             # Specify metrics format for the collector, for example: 'train_loss':0.846
             experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
-                collector=models.V1beta1CollectorSpec(
-                    kind=metrics_collector_config["kind"]
-                ),
                 source=models.V1beta1SourceSpec(
                     filter=models.V1beta1FilterSpec(
                         metrics_format=[
