@@ -311,11 +311,11 @@ class KatibClient(object):
                 GPU, pass in a V1ResourceRequirement instance instead, since it's more
                 flexible. This parameter is optional and defaults to None.
 
-                For external models and datasets, you can specify a types.TrainerResources object,
+                For external models and datasets, you can specify a TrainerResources object,
                 which includes `num_workers`, `num_procs_per_worker`, and `resources_per_worker`.
                 For example:
                 ```
-                resources_per_trial = types.TrainerResources(
+                resources_per_trial = TrainerResources(
                     num_workers=4,
                     num_procs_per_worker=2,
                     resources_per_worker={
@@ -338,7 +338,6 @@ class KatibClient(object):
                 to the base image packages. These packages are installed before
                 executing the objective function.
             pip_index_url: The PyPI url from which to install Python packages.
-            metrics_collector_config: Specify the config of metrics collector,
             metrics_collector_config: Specify the config of metrics collector,
                 for example, `metrics_collector_config = {"kind": "Push"}`.
                 Currently, we only support `StdOut` and `Push` metrics collector.
@@ -544,6 +543,17 @@ class KatibClient(object):
                 "GitHub."
             )
 
+            # Specify metrics format for the collector, for example: 'train_loss':0.846
+            experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
+                source=models.V1beta1SourceSpec(
+                    filter=models.V1beta1FilterSpec(
+                        metrics_format=[
+                            r"'([\w|-]+)'\s*:\s*([+-]?\d*(\.\d+)?([Ee][+-]?\d+)?)",
+                        ]
+                    )
+                ),
+            )
+
             # Create PVC for the Storage Initializer.
             # TODO (helenxie-bit): PVC Creation should be part of Katib Controller.
             try:
@@ -693,17 +703,6 @@ class KatibClient(object):
                 retain=retain_trials,
                 trial_parameters=trial_params,
                 trial_spec=pytorchjob,
-            )
-
-            # Specify metrics format for the collector, for example: 'train_loss':0.846
-            experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
-                source=models.V1beta1SourceSpec(
-                    filter=models.V1beta1FilterSpec(
-                        metrics_format=[
-                            r"'([\w|-]+)'\s*:\s*([+-]?\d*(\.\d+)?([Ee][+-]?\d+)?)",
-                        ]
-                    )
-                ),
             )
 
         # Add parameters to the Katib Experiment.
