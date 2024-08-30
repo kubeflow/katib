@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import inspect
 import json
 import logging
 import multiprocessing
-import textwrap
 import time
 from typing import Any, Callable, Dict, List, Optional, Union
 
-import grpc
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import kubeflow.katib.katib_api_pb2_grpc as katib_api_pb2_grpc
 from kubeflow.katib import models
@@ -29,6 +26,8 @@ from kubeflow.katib.constants import constants
 from kubeflow.katib.types.trainer_resources import TrainerResources
 from kubeflow.katib.utils import utils
 from kubernetes import client, config
+
+import grpc
 
 logger = logging.getLogger(__name__)
 
@@ -417,72 +416,26 @@ class KatibClient(object):
         if max_failed_trial_count is not None:
             experiment.spec.max_failed_trial_count = max_failed_trial_count
 
+        # Add metrics collector to the Katib Experiment.
+        # Up to now, we only support parameter `kind`, of which default value
+        # is `StdOut`, to specify the kind of metrics collector.
+        experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
+            collector=models.V1beta1CollectorSpec(kind=metrics_collector_config["kind"])
+        )
+
         # If users choose to use a custom objective function.
         if objective is not None:
-            # Validate objective function.
-            utils.validate_objective_function(objective)
-
-            # Extract objective function implementation.
-            objective_code = inspect.getsource(objective)
-
-            # Objective function might be defined in some indented scope
-            # (e.g. in another function). We need to dedent the function code.
-            objective_code = textwrap.dedent(objective_code)
-
-            # Iterate over input parameters.
-            input_params = {}
+            # Iterate over input parameters and do substitutions.
             experiment_params = []
             trial_params = []
-            for p_name, p_value in parameters.items():
-                # If input parameter value is Katib Experiment parameter sample.
-                if isinstance(p_value, models.V1beta1ParameterSpec):
-                    # Wrap value for the function input.
-                    input_params[p_name] = f"${{trialParameters.{p_name}}}"
-
-                    # Add value to the Katib Experiment parameters.
-                    p_value.name = p_name
-                    experiment_params.append(p_value)
-
-                    # Add value to the Katib Experiment's Trial parameters.
-                    trial_params.append(
-                        models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
-                    )
-                else:
-                    # Otherwise, add value to the function input.
-                    input_params[p_name] = p_value
-
-            # Wrap objective function to execute it from the file. For example:
-            # def objective(parameters):
-            #     print(f'Parameters are {parameters}')
-            # objective({
-            #     'lr': '${trialParameters.lr}',
-            #     'epochs': '${trialParameters.epochs}',
-            #     'is_dist': False
-            # })
-            objective_code = f"{objective_code}\n{objective.__name__}({input_params})\n"
-
-            # Prepare execute script template.
-            exec_script = textwrap.dedent(
-                """
-                program_path=$(mktemp -d)
-                read -r -d '' SCRIPT << EOM\n
-                {objective_code}
-                EOM
-                printf "%s" "$SCRIPT" > $program_path/ephemeral_objective.py
-                python3 -u $program_path/ephemeral_objective.py"""
+            input_params = utils.parameter_substitution(
+                parameters, experiment_params, trial_params
             )
 
-            # Add objective code to the execute script.
-            exec_script = exec_script.format(objective_code=objective_code)
-
-            # Install Python packages if that is required.
-            if packages_to_install is not None:
-                exec_script = (
-                    utils.get_script_for_python_packages(
-                        packages_to_install, pip_index_url
-                    )
-                    + exec_script
-                )
+            # Get the execution script from the objective function.
+            exec_script = utils.get_exec_script_from_objective(
+                objective, input_params, packages_to_install, pip_index_url
+            )
 
             if isinstance(resources_per_trial, dict):
                 if "gpu" in resources_per_trial:
@@ -512,15 +465,6 @@ class KatibClient(object):
                         raise ValueError(
                             f"Incorrect value for env_per_trial: {env_per_trial}"
                         )
-
-            # Add metrics collector to the Katib Experiment.
-            # Up to now, we only support parameter `kind`, of which default value
-            # is `StdOut`, to specify the kind of metrics collector.
-            experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
-                collector=models.V1beta1CollectorSpec(
-                    kind=metrics_collector_config["kind"]
-                )
-            )
 
             # Create Trial specification.
             trial_spec = client.V1Job(
@@ -644,7 +588,6 @@ class KatibClient(object):
             # Iterate over input parameters and do substitutions.
             experiment_params = []
             trial_params = []
-
             training_args = utils.parameter_substitution(
                 trainer_parameters.training_parameters, experiment_params, trial_params
             )
@@ -652,6 +595,7 @@ class KatibClient(object):
                 trainer_parameters.lora_config, experiment_params, trial_params
             )
 
+            # Create the init and the primary container.
             init_container_spec = training_utils.get_container_spec(
                 name=STORAGE_INITIALIZER,
                 base_image=STORAGE_INITIALIZER_IMAGE,
@@ -691,6 +635,7 @@ class KatibClient(object):
                 resources=resources_per_trial.resources_per_worker,
             )
 
+            # Create the worker and the master pod.
             storage_initializer_volume = models.V1Volume(
                 name=STORAGE_INITIALIZER,
                 persistent_volume_claim=models.V1PersistentVolumeClaimVolumeSource(
@@ -698,20 +643,18 @@ class KatibClient(object):
                 ),
             )
 
-            # create worker pod spec
             worker_pod_template_spec = training_utils.get_pod_template_spec(
                 containers=[container_spec],
                 volumes=[storage_initializer_volume],
             )
 
-            # create master pod spec
             master_pod_template_spec = training_utils.get_pod_template_spec(
                 containers=[container_spec],
                 init_containers=[init_container_spec],
                 volumes=[storage_initializer_volume],
             )
 
-            # Create pytorchjob.
+            # Create PyTorchJob.
             pytorchjob = training_models.KubeflowOrgV1PyTorchJob(
                 api_version="kubeflow.org/v1",
                 kind="PyTorchJob",
@@ -743,7 +686,14 @@ class KatibClient(object):
                     )
                 )
 
-            # Add metrics collector to the Katib Experiment.
+            # Create Trial template.
+            trial_template = models.V1beta1TrialTemplate(
+                primary_container_name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
+                retain=retain_trials,
+                trial_parameters=trial_params,
+                trial_spec=pytorchjob,
+            )
+
             # Specify metrics format for the collector, for example: 'train_loss':0.846
             experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
                 source=models.V1beta1SourceSpec(
@@ -753,14 +703,6 @@ class KatibClient(object):
                         ]
                     )
                 ),
-            )
-
-            # Create Trial template.
-            trial_template = models.V1beta1TrialTemplate(
-                primary_container_name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
-                retain=retain_trials,
-                trial_parameters=trial_params,
-                trial_spec=pytorchjob,
             )
 
         # Add parameters to the Katib Experiment.
