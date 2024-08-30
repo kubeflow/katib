@@ -695,7 +695,7 @@ class KatibClient(object):
                 trial_spec=pytorchjob,
             )
 
-            # Specify metrics format for the collector. For example: 'train_loss':0.846
+            # Specify metrics format for the collector, for example: 'train_loss':0.846
             experiment.spec.metrics_collector_spec = models.V1beta1MetricsCollectorSpec(
                 source=models.V1beta1SourceSpec(
                     filter=models.V1beta1FilterSpec(
