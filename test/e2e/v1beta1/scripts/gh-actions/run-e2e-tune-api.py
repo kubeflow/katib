@@ -96,7 +96,7 @@ def run_e2e_experiment_create_by_tune_default_metrics_collector(
         "b": search.double(min=0.1, max=0.2)
     }
 
-    # [4] Create Katib Experiment with 4 Trials and 2 CPUs per Trial.
+    # [3] Create Katib Experiment with 4 Trials and 2 CPUs per Trial.
     # And Wait until Experiment reaches Succeeded condition.
     katib_client.tune(
         name=exp_name,
@@ -140,7 +140,6 @@ if __name__ == "__main__":
         client.CoreV1Api().patch_namespace(args.namespace, {'metadata': {'labels': namespace_labels}})
 
     # Test with run_e2e_experiment_create_by_tune_default_metrics_collector 
-    # and run_e2e_experiment_create_by_tune_custom_metrics_collector
     exp_namespace = args.namespace
     try:
         exp_name = "tune-example-default-metrics-collector"
@@ -148,7 +147,19 @@ if __name__ == "__main__":
         run_e2e_experiment_create_by_tune_default_metrics_collector(katib_client, exp_name, exp_namespace)
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}")
+    except Exception as e:
+        logging.info("---------------------------------------------------------------")
+        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}")
+        raise e
+    finally:
+        # Delete the Experiment.
+        logging.info("---------------------------------------------------------------")
+        logging.info("---------------------------------------------------------------")
+        katib_client.delete_experiment(exp_name, exp_namespace)
+    
 
+    # Test with run_e2e_experiment_create_by_tune_custom_metrics_collector
+    try:
         exp_name = "tune-example-custom-metrics-collector"
         logging.info(f"Runnning E2E for Experiment created by tune: {exp_namespace}/{exp_name}")
         run_e2e_experiment_create_by_tune_custom_metrics_collector(katib_client, exp_name, exp_namespace)
