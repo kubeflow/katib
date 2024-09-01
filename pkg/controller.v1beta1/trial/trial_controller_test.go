@@ -290,14 +290,15 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
+	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC).`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(1),
+			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil).MinTimes(1),
 			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
 		)
-		// Create the Trial with StdOut MC
-		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector)
+		// Create the Trial with Push MC
+		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector)
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
@@ -322,15 +323,14 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC).`, func(t *testing.T) {
+	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(1),
-			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil).MinTimes(1),
 			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
 		)
-		// Create the Trial with Push MC
-		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector)
+		// Create the Trial with StdOut MC
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector)
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
