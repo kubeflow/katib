@@ -2,8 +2,7 @@ import argparse
 import logging
 import time
 
-from kubernetes import client
-from kubernetes import config
+from kubernetes import client, config
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)

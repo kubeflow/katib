@@ -2,7 +2,7 @@ FROM python:3.8-slim
 
 WORKDIR /app
 
-COPY dummy-collector.py .
+COPY test/e2e/v1beta1/scripts/gh-actions/dummy-collector.py .
 
 RUN pip install kubernetes
 

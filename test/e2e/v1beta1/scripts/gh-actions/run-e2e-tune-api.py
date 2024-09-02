@@ -59,7 +59,7 @@ def run_e2e_experiment_create_by_tune_custom_metrics_collector(
         resources_per_trial={"cpu": "2"},
         metrics_collector_config={
             "kind": "Custom",
-            "customCollector": metric_collector,
+            "custom_collector": metric_collector,
         },
     )
     experiment = katib_client.wait_for_experiment_condition(
@@ -117,7 +117,6 @@ def run_e2e_experiment_create_by_tune_default_metrics_collector(
     # Print the Experiment and Suggestion.
     logging.debug(katib_client.get_experiment(exp_name, exp_namespace))
     logging.debug(katib_client.get_suggestion(exp_name, exp_namespace))
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
