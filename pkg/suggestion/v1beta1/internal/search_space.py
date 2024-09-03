@@ -86,7 +86,7 @@ class HyperParameterSearchSpace(object):
             p.feasible_space.distribution
             if p.feasible_space.distribution != ""
             and p.feasible_space.distribution is not None
-            and p.feasible_space.distribution != api.DISTRIBUTION_UNKNOWN
+            and p.feasible_space.distribution != api.DISTRIBUTION_UNSPECIFIED
             else None
         )
 
