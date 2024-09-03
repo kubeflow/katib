@@ -1,8 +1,15 @@
 import argparse
 import logging
 
-from kubeflow.katib import KatibClient, search
+import transformers
+from kubeflow.katib import KatibClient, search, types
+from kubeflow.storage_initializer.hugging_face import (
+    HuggingFaceDatasetParams,
+    HuggingFaceModelParams,
+    HuggingFaceTrainerParams,
+)
 from kubernetes import client
+from peft import LoraConfig
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
@@ -12,7 +19,8 @@ EXPERIMENT_TIMEOUT = 60 * 40
 logging.basicConfig(level=logging.INFO)
 
 
-def run_e2e_experiment_create_by_tune(
+# Test for Experiment created with custom objective.
+def run_e2e_experiment_create_by_tune_with_custom_objective(
     katib_client: KatibClient,
     exp_name: str,
     exp_namespace: str,
@@ -57,6 +65,70 @@ def run_e2e_experiment_create_by_tune(
     logging.debug(katib_client.get_experiment(exp_name, exp_namespace))
     logging.debug(katib_client.get_suggestion(exp_name, exp_namespace))
 
+# Test for Experiment created with external models and datasets.
+def run_e2e_experiment_create_by_tune_with_external_model(
+    katib_client: KatibClient,
+    exp_name: str,
+    exp_namespace: str,
+):
+    # Create Katib Experiment and wait until it is finished.
+    logging.debug("Creating Experiment: {}/{}".format(exp_namespace, exp_name))
+    
+    # Use the test case from fine-tuning API tutorial.
+    # https://www.kubeflow.org/docs/components/training/user-guides/fine-tuning/
+    # Create Katib Experiment.
+    # And Wait until Experiment reaches Succeeded condition.
+    katib_client.tune(
+        name=exp_name,
+        namespace=exp_namespace,
+        # BERT model URI and type of Transformer to train it.
+        model_provider_parameters=HuggingFaceModelParams(
+            model_uri="hf://google-bert/bert-base-cased",
+            transformer_type=transformers.AutoModelForSequenceClassification,
+            num_labels=5,
+        ),
+        # In order to save test time, use 8 samples from Yelp dataset.
+        dataset_provider_parameters=HuggingFaceDatasetParams(
+            repo_id="yelp_review_full",
+            split="train[:8]",
+        ),
+        # Specify HuggingFace Trainer parameters.
+        trainer_parameters=HuggingFaceTrainerParams(
+            training_parameters=transformers.TrainingArguments(
+                output_dir="test_tune_api",
+                save_strategy="no",
+                learning_rate = search.double(min=1e-05, max=5e-05),
+                num_train_epochs=1,
+            ),
+            # Set LoRA config to reduce number of trainable model parameters.
+            lora_config=LoraConfig(
+                r = search.int(min=8, max=32),
+                lora_alpha=8,
+                lora_dropout=0.1,
+                bias="none",
+            ),
+        ),
+        objective_metric_name = "train_loss", 
+        objective_type = "minimize", 
+        algorithm_name = "random",
+        max_trial_count = 1,
+        parallel_trial_count = 1,
+        resources_per_trial=types.TrainerResources(
+            num_workers=1,
+            num_procs_per_worker=1,
+            resources_per_worker={"cpu": "2", "memory": "10G",},
+        ),
+    )
+    experiment = katib_client.wait_for_experiment_condition(
+        exp_name, exp_namespace, timeout=EXPERIMENT_TIMEOUT
+    )
+
+    # Verify the Experiment results.
+    verify_experiment_results(katib_client, experiment, exp_name, exp_namespace)
+
+    # Print the Experiment and Suggestion.
+    logging.debug(katib_client.get_experiment(exp_name, exp_namespace))
+    logging.debug(katib_client.get_suggestion(exp_name, exp_namespace))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -82,7 +154,21 @@ if __name__ == "__main__":
     exp_name = "tune-example"
     exp_namespace = args.namespace
     try:
-        run_e2e_experiment_create_by_tune(katib_client, exp_name, exp_namespace)
+        run_e2e_experiment_create_by_tune_with_custom_objective(katib_client, exp_name, exp_namespace)
+        logging.info("---------------------------------------------------------------")
+        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}")
+    except Exception as e:
+        logging.info("---------------------------------------------------------------")
+        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}")
+        raise e
+    finally:
+        # Delete the Experiment.
+        logging.info("---------------------------------------------------------------")
+        logging.info("---------------------------------------------------------------")
+        katib_client.delete_experiment(exp_name, exp_namespace)
+    
+    try:
+        run_e2e_experiment_create_by_tune_with_external_model(katib_client, exp_name, exp_namespace)
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}")
     except Exception as e:
