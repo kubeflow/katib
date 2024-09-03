@@ -10,6 +10,7 @@ from kubeflow.storage_initializer.hugging_face import (
 )
 from kubernetes import client
 from peft import LoraConfig
+from typing import get_type_hints
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
@@ -71,6 +72,10 @@ def run_e2e_experiment_create_by_tune_with_external_model(
     exp_name: str,
     exp_namespace: str,
 ):
+    # Debugging: Print the module and annotations of HuggingFaceModelParams
+    print("HuggingFaceModelParams is defined in module:", HuggingFaceModelParams.__module__)
+    print("HuggingFaceModelParams annotations:", get_type_hints(HuggingFaceModelParams))
+
     # Create Katib Experiment and wait until it is finished.
     logging.debug("Creating Experiment: {}/{}".format(exp_namespace, exp_name))
     
