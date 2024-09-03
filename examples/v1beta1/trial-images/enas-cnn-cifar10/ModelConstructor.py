@@ -14,16 +14,9 @@
 
 import json
 
-from keras.layers import Dense
-from keras.layers import Dropout
-from keras.layers import GlobalAveragePooling2D
-from keras.layers import Input
+from keras.layers import Dense, Dropout, GlobalAveragePooling2D, Input
 from keras.models import Model
-from op_library import concat
-from op_library import conv
-from op_library import dw_conv
-from op_library import reduction
-from op_library import sp_conv
+from op_library import concat, conv, dw_conv, reduction, sp_conv
 
 
 class ModelConstructor(object):

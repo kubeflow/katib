@@ -20,15 +20,14 @@ import uuid
 import grpc
 import numpy as np
 
-from pkg.apis.manager.v1beta1.python import api_pb2
-from pkg.apis.manager.v1beta1.python import api_pb2_grpc
-from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
 import pkg.suggestion.v1beta1.internal.constant as constant
-from pkg.suggestion.v1beta1.internal.search_space import HyperParameter
-from pkg.suggestion.v1beta1.internal.search_space import \
-    HyperParameterSearchSpace
+from pkg.apis.manager.v1beta1.python import api_pb2, api_pb2_grpc
+from pkg.suggestion.v1beta1.internal.base_health_service import HealthServicer
+from pkg.suggestion.v1beta1.internal.search_space import (
+    HyperParameter,
+    HyperParameterSearchSpace,
+)
 from pkg.suggestion.v1beta1.internal.trial import Assignment
-from pkg.suggestion.v1beta1.internal.trial import Trial
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +70,8 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         ):
             return self._set_validate_context_error(
                 context,
-                "Param(resample_probability) should be null to perturb at 0.8 or 1.2, or be between 0 and 1, inclusive, to resample",
+                "Param(resample_probability) should be null to perturb at 0.8 or 1.2, "
+                "or be between 0 and 1, inclusive, to resample",
             )
 
         return api_pb2.ValidateAlgorithmSettingsReply()
@@ -97,9 +97,11 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
                 request.experiment.name,
                 int(settings["n_population"]),
                 float(settings["truncation_threshold"]),
-                None
-                if not "resample_probability" in settings
-                else float(settings["resample_probability"]),
+                (
+                    None
+                    if "resample_probability" not in settings
+                    else float(settings["resample_probability"])
+                ),
                 search_space,
                 objective_metric,
                 objective_scale,
@@ -183,7 +185,7 @@ class PbtJob(object):
         labels = {
             "pbt.suggestion.katib.kubeflow.org/generation": self.generation,
         }
-        if not self.parent is None:
+        if self.parent is not None:
             labels["pbt.suggestion.katib.kubeflow.org/parent"] = self.parent
         return assignments, labels, self.uid
 
@@ -283,9 +285,7 @@ class PbtJobQueue(object):
         return obj.get()
 
     def update(self, trial):
-        trial_labels = trial.spec.labels
         uid = trial.name
-        generation = trial_labels["pbt.suggestion.katib.kubeflow.org/generation"]
 
         # Do not update active/pending trials
         if trial.status.condition in (

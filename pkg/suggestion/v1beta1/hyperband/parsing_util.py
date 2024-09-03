@@ -26,14 +26,14 @@ from pkg.suggestion.v1beta1.hyperband.parameter import ParameterConfig
 
 
 def _deal_with_discrete(feasible_values, current_value):
-    """ function to embed the current values to the feasible discrete space"""
+    """function to embed the current values to the feasible discrete space"""
     diff = np.subtract(feasible_values, current_value)
     diff = np.absolute(diff)
     return feasible_values[np.argmin(diff)]
 
 
 def _deal_with_categorical(feasible_values, one_hot_values):
-    """ function to do the one hot encoding of the categorical values """
+    """function to do the one hot encoding of the categorical values"""
     index = np.argmax(one_hot_values)
     return feasible_values[int(index)]
 
@@ -61,17 +61,18 @@ def parse_parameter_configs(parameter_configs):
             discrete_values = [int(x) for x in param.feasible_space.list]
             new_lower = min(discrete_values)
             new_upper = max(discrete_values)
-            discrete_info.append(
-                {"name": param.name, "values": discrete_values})
+            discrete_info.append({"name": param.name, "values": discrete_values})
         elif param.parameter_type == api_pb2.CATEGORICAL:
             num_feasible = len(param.feasible_space.list)
             new_lower = [0 for _ in range(num_feasible)]
             new_upper = [1 for _ in range(num_feasible)]
-            categorical_info.append({
-                "name": param.name,
-                "values": param.feasible_space.list,
-                "number": num_feasible,
-            })
+            categorical_info.append(
+                {
+                    "name": param.name,
+                    "values": param.feasible_space.list,
+                    "number": num_feasible,
+                }
+            )
         if isinstance(new_lower, Iterable):  # handles categorical parameters
             lower_bounds.extend(new_lower)
             upper_bounds.extend(new_upper)
@@ -80,14 +81,16 @@ def parse_parameter_configs(parameter_configs):
             lower_bounds.append(new_lower)
             upper_bounds.append(new_upper)
             dim += 1
-    parsed_config = ParameterConfig(name_ids,
-                                    dim,
-                                    lower_bounds,
-                                    upper_bounds,
-                                    parameter_types,
-                                    names,
-                                    discrete_info,
-                                    categorical_info)
+    parsed_config = ParameterConfig(
+        name_ids,
+        dim,
+        lower_bounds,
+        upper_bounds,
+        parameter_types,
+        names,
+        discrete_info,
+        categorical_info,
+    )
     return parsed_config
 
 
@@ -97,8 +100,7 @@ def parse_previous_observations(parameters_list, dim, name_id, types, categorica
         offset = 0
         for p in parameters:
             map_id = name_id[p.name]
-            if types[map_id] in [api_pb2.DOUBLE, api_pb2.INT,
-                                 api_pb2.DISCRETE]:
+            if types[map_id] in [api_pb2.DOUBLE, api_pb2.INT, api_pb2.DISCRETE]:
                 parsed_X[row_idx, offset] = float(p.value)
                 offset += 1
             elif types[map_id] == api_pb2.CATEGORICAL:
@@ -120,8 +122,10 @@ def parse_metric(y_train, goal):
     return y_array
 
 
-def parse_x_next_vector(x_next, param_types, param_names, discrete_info, categorical_info):
-    """ parse the next suggestion to the proper format """
+def parse_x_next_vector(
+    x_next, param_types, param_names, discrete_info, categorical_info
+):
+    """parse the next suggestion to the proper format"""
     counter = 0
     result = []
     if isinstance(x_next, np.ndarray):
@@ -136,8 +140,7 @@ def parse_x_next_vector(x_next, param_types, param_names, discrete_info, categor
         elif par_type == api_pb2.DISCRETE:
             for param in discrete_info:
                 if param["name"] == par_name:
-                    value = _deal_with_discrete(param["values"],
-                                                x_next[counter])
+                    value = _deal_with_discrete(param["values"], x_next[counter])
                     counter = counter + 1
                     break
         elif par_type == api_pb2.CATEGORICAL:
@@ -145,7 +148,7 @@ def parse_x_next_vector(x_next, param_types, param_names, discrete_info, categor
                 if param["name"] == par_name:
                     value = _deal_with_categorical(
                         feasible_values=param["values"],
-                        one_hot_values=x_next[counter:counter + param["number"]],
+                        one_hot_values=x_next[counter : counter + param["number"]],
                     )
                     counter = counter + param["number"]
                     break
