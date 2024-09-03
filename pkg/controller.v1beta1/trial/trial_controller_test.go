@@ -48,13 +48,11 @@ import (
 
 const (
 	namespace       = "default"
-	trialName       = "test-trial"
 	batchJobName    = "test-job"
 	objectiveMetric = "accuracy"
 	timeout         = time.Second * 80
 )
 
-var trialKey = types.NamespacedName{Name: trialName, Namespace: namespace}
 var batchJobKey = types.NamespacedName{Name: batchJobName, Namespace: namespace}
 
 func init() {
@@ -112,6 +110,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		// Try to update status until it be succeeded
 		for err != nil {
 			updatedInstance := &trialsv1beta1.Trial{}
+			trialKey := types.NamespacedName{Name: instance.Name, Namespace: namespace}
 			if err = c.Get(ctx, trialKey, updatedInstance); err != nil {
 				continue
 			}
@@ -183,7 +182,8 @@ func TestReconcileBatchJob(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil)
 
-		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector)
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-failed-batch-job")
+		trialKey := types.NamespacedName{Name: "test-failed-batch-job", Namespace: namespace}
 		batchJob := &batchv1.Job{}
 
 		// Create the Trial with StdOut MC
@@ -263,7 +263,8 @@ func TestReconcileBatchJob(t *testing.T) {
 		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
 
 		// Create the Trial with StdOut MC
-		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector)
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-available-stdout")
+		trialKey := types.NamespacedName{Name: "test-available-stdout", Namespace: namespace}
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded and metrics are properly populated
@@ -290,15 +291,15 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC).`, func(t *testing.T) {
+	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(1),
-			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil).MinTimes(1),
 			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
 		)
-		// Create the Trial with Push MC
-		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector)
+		// Create the Trial with StdOut MC
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-unavailable-stdout")
+		trialKey := types.NamespacedName{Name: "test-unavailable-stdout", Namespace: namespace}
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
@@ -323,14 +324,16 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
+	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC).`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(1),
+			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil).MinTimes(1),
 			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
 		)
-		// Create the Trial with StdOut MC
-		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector)
+		// Create the Trial with Push MC
+		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector, "test-unavailable-push")
+		trialKey := types.NamespacedName{Name: "test-unavailable-push", Namespace: namespace}
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
@@ -365,7 +368,8 @@ func TestReconcileBatchJob(t *testing.T) {
 			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
 		)
 		// Create the Trial with Push MC
-		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector)
+		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector, "test-unavailable-push-failed-once")
+		trialKey := types.NamespacedName{Name: "test-unavailable-push-failed-once", Namespace: namespace}
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
@@ -454,7 +458,7 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 	g.Expect(err).To(gomega.HaveOccurred())
 }
 
-func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind) *trialsv1beta1.Trial {
+func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind, trialName string) *trialsv1beta1.Trial {
 	primaryContainer := "training-container"
 
 	job := &batchv1.Job{
