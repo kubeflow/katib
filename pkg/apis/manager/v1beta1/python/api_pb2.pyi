@@ -16,7 +16,7 @@ class ParameterType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
 
 class Distribution(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
-    DISTRIBUTION_UNKNOWN: _ClassVar[Distribution]
+    DISTRIBUTION_UNSPECIFIED: _ClassVar[Distribution]
     UNIFORM: _ClassVar[Distribution]
     LOG_UNIFORM: _ClassVar[Distribution]
     NORMAL: _ClassVar[Distribution]
@@ -39,7 +39,7 @@ DOUBLE: ParameterType
 INT: ParameterType
 DISCRETE: ParameterType
 CATEGORICAL: ParameterType
-DISTRIBUTION_UNKNOWN: Distribution
+DISTRIBUTION_UNSPECIFIED: Distribution
 UNIFORM: Distribution
 LOG_UNIFORM: Distribution
 NORMAL: Distribution

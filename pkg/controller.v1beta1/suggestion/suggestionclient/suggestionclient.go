@@ -552,7 +552,7 @@ func convertDistribution(typ experimentsv1beta1.Distribution) suggestionapi.Dist
 	case experimentsv1beta1.DistributionLogNormal:
 		return suggestionapi.Distribution_LOG_NORMAL
 	default:
-		return suggestionapi.Distribution_DISTRIBUTION_UNKNOWN
+		return suggestionapi.Distribution_DISTRIBUTION_UNSPECIFIED
 	}
 }
 

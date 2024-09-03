@@ -101,7 +101,7 @@ enum ParameterType {
  * Distribution types for HyperParameter.
  */
 enum Distribution {
-    DISTRIBUTION_UNKNOWN = 0;
+    DISTRIBUTION_UNSPECIFIED = 0;
     UNIFORM = 1;
     LOG_UNIFORM = 2;
     NORMAL = 3;
