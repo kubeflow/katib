@@ -10,6 +10,7 @@ from kubeflow.storage_initializer.hugging_face import (
 )
 from kubernetes import client
 from peft import LoraConfig
+import sys
 from typing import get_type_hints
 from verify import verify_experiment_results
 
@@ -75,6 +76,7 @@ def run_e2e_experiment_create_by_tune_with_external_model(
     # Debugging: Print the module and annotations of HuggingFaceModelParams
     print("HuggingFaceModelParams is defined in module:", HuggingFaceModelParams.__module__)
     print("HuggingFaceModelParams annotations:", get_type_hints(HuggingFaceModelParams))
+    print(sys.modules['kubeflow'].HuggingFaceModelParams.__file__)
 
     # Create Katib Experiment and wait until it is finished.
     logging.debug("Creating Experiment: {}/{}".format(exp_namespace, exp_name))
