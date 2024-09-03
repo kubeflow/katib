@@ -37,7 +37,7 @@ runs:
         version: ${{ inputs.kubernetes-version }}
 
     - name: Setup Minikube Cluster
-      uses: medyagh/setup-minikube@v0.0.16
+      uses: medyagh/setup-minikube@v0.0.18
       with:
         network-plugin: cni
         cni: flannel
