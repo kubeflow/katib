@@ -633,6 +633,8 @@ class KatibClient(object):
                     model_provider_parameters.model_uri,
                     "--transformer_type",
                     model_provider_parameters.transformer_type.__name__,
+                    "--num_labels",
+                    str(model_provider_parameters.num_labels),
                     "--model_dir",
                     VOLUME_PATH_MODEL,
                     "--dataset_dir",
