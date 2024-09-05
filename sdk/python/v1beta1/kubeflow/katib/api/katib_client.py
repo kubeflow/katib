@@ -625,45 +625,28 @@ class KatibClient(object):
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
             )
 
-            storage_initializer_volume = models.V1Volume(
-                name=STORAGE_INITIALIZER,
-                persistent_volume_claim=models.V1PersistentVolumeClaimVolumeSource(
-                    claim_name=name
-                ),
+            container_spec = training_utils.get_container_spec(
+                name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
+                base_image=TRAINER_TRANSFORMER_IMAGE,
+                args=[
+                    "--model_uri",
+                    model_provider_parameters.model_uri,
+                    "--transformer_type",
+                    model_provider_parameters.transformer_type.__name__,
+                    "--num_labels",
+                    str(model_provider_parameters.num_labels),
+                    "--model_dir",
+                    VOLUME_PATH_MODEL,
+                    "--dataset_dir",
+                    VOLUME_PATH_DATASET,
+                    "--lora_config",
+                    f"'{lora_config}'",
+                    "--training_parameters",
+                    f"'{training_args}'",
+                ],
+                volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
+                resources=resources_per_trial.resources_per_worker,
             )
-
-            if isinstance(resources_per_trial, types.TrainerResources):
-                from kubeflow.training import models as training_models
-
-                if (
-                    resources_per_trial.num_workers is None
-                    or resources_per_trial.num_workers < 1
-                ):
-                    raise ValueError("At least one Worker for PyTorchJob must be set")
-
-                # Create container spec.
-                container_spec = utils.get_container_spec(
-                    name=constants.PYTORCHJOB_PRIMARY_CONTAINER_NAME,
-                    base_image=TRAINER_TRANSFORMER_IMAGE,
-                    args=[
-                        "--model_uri",
-                        model_provider_parameters.model_uri,
-                        "--transformer_type",
-                        model_provider_parameters.transformer_type.__name__,
-                        "--num_labels",
-                        str(model_provider_parameters.num_labels),
-                        "--model_dir",
-                        VOLUME_PATH_MODEL,
-                        "--dataset_dir",
-                        VOLUME_PATH_DATASET,
-                        "--lora_config",
-                        f"'{json.dumps(lora_config.__dict__, cls=utils.SetEncoder)}'",
-                        "--training_parameters",
-                        f"'{json.dumps(training_args.to_dict())}'",
-                    ],
-                    volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
-                    resources=resources_per_trial.resources_per_worker,
-                )
 
             # Create the worker and the master pod.
             storage_initializer_volume = models.V1Volume(
