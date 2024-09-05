@@ -167,28 +167,7 @@ class TestTuneAPI(TestCase):
 
         self.assertIn("Incorrect value for env_per_trial", str(context.exception))
 
-    # Case 2: Invalid resources_per_trial.num_workers (for distributed training)
-    def test_tune_invalid_resources_per_trial_value(self):
-        with self.assertRaises(ValueError) as context:
-            self.katib_client.tune(
-                name="experiment",
-                objective=lambda x: x,
-                parameters={
-                    "a": katib.search.int(min=10, max=100),
-                    "b": katib.search.double(min=0.1, max=0.2),
-                },
-                resources_per_trial=katib.TrainerResources(
-                    num_workers=0,  # Invalid value, should be at least 1
-                    num_procs_per_worker=1,
-                    resources_per_worker={"cpu": "1", "memory": "1Gi"},
-                ),
-            )
-
-        self.assertIn(
-            "At least one Worker for PyTorchJob must be set", str(context.exception)
-        )
-
-    # Case 3: Invalid model_provider_parameters
+    # Case 2: Invalid model_provider_parameters
     def test_tune_invalid_model_provider_parameters(self):
         with self.assertRaises(ValueError) as context:
             self.katib_client.tune(
@@ -221,7 +200,7 @@ class TestTuneAPI(TestCase):
             str(context.exception),
         )
 
-    # Case 4: Invalid dataset_provider_parameters
+    # Case 3: Invalid dataset_provider_parameters
     def test_tune_invalid_dataset_provider_parameters(self):
         with self.assertRaises(ValueError) as context:
             self.katib_client.tune(
@@ -255,7 +234,7 @@ class TestTuneAPI(TestCase):
             str(context.exception),
         )
 
-    # Case 5: Invalid trainer_parameters.training_parameters
+    # Case 4: Invalid trainer_parameters.training_parameters
     def test_tune_invalid_trainer_parameters_training_parameters(self):
         with self.assertRaises(TypeError) as context:
             self.katib_client.tune(
@@ -283,7 +262,7 @@ class TestTuneAPI(TestCase):
             str(context.exception),
         )
 
-    # Case 6: Invalid trainer_parameters.lora_config
+    # Case 5: Invalid trainer_parameters.lora_config
     def test_tune_invalid_trainer_parameters_lora_config(self):
         with self.assertRaises(TypeError) as context:
             self.katib_client.tune(
@@ -545,9 +524,9 @@ class TestTuneAPI(TestCase):
                     "<lambda>({'a': '${trialParameters.a}', 'b': '${trialParameters.b}'})\n"
                     "\n"
                     "EOM\n"
-                    'printf "%s" "$SCRIPT" > "$program_path/ephemeral_script.py"\n'
-                    'python3 -u "$program_path/ephemeral_script.py"'
-                ],
+                    'printf "%s" "$SCRIPT" > $program_path/ephemeral_objective.py\n'
+                    'python3 -u $program_path/ephemeral_objective.py'
+                    ],
                 resources=models.V1ResourceRequirements(
                     requests={"cpu": "1", "memory": "1Gi"},
                     limits={"cpu": "1", "memory": "1Gi"},

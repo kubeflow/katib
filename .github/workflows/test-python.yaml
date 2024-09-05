@@ -22,6 +22,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
+      
+      - name: Install Katib SDK
+        shell: bash
+        run: pip install --prefer-binary -e sdk/python/v1beta1
+          
+      - name: Install Training Operator SDK
+        shell: bash
+        run: |
+          pip install git+https://github.com/kubeflow/training-operator.git@v1.8-branch#subdirectory=sdk/python
+          pip install peft==0.3.0 datasets==2.15.0 transformers==4.38.0
 
       - name: Run Python test
         run: make pytest
