@@ -14,7 +14,7 @@ from peft import LoraConfig
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
-EXPERIMENT_TIMEOUT = 60 * 40
+EXPERIMENT_TIMEOUT = 60 * 10
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
