@@ -33,6 +33,18 @@ jobs:
         with:
           tune-api: true
           training-operator: true
+      
+      - name: Check the status of Experiment and Trials
+        shell: bash
+        run: |
+          kubectl get pods -n default
+          
+          # describe pod
+          pod_name=$(kubectl get pods -n default -o jsonpath='{.items[?(@.metadata.labels.trial-name)].metadata.name}')
+          kubectl describe pod $pod_name -n default
+          
+          # check the logs of pod
+          kubectl logs $pod_name -n default
 
     strategy:
       fail-fast: false
