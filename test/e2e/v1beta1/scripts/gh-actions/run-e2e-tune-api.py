@@ -14,7 +14,7 @@ from peft import LoraConfig
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
-EXPERIMENT_TIMEOUT = 60 * 10
+EXPERIMENT_TIMEOUT = 60 * 40
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
@@ -152,33 +152,32 @@ if __name__ == "__main__":
         client.CoreV1Api().patch_namespace(args.namespace, {'metadata': {'labels': namespace_labels}})
 
     # Test with run_e2e_experiment_create_by_tune
-    exp_name = "tune-example-1"
+    exp_name = "tune-example"
     exp_namespace = args.namespace
     try:
-        run_e2e_experiment_create_by_tune_with_custom_objective(katib_client, exp_name, exp_namespace)
+        run_e2e_experiment_create_by_tune_with_custom_objective(katib_client, f"{exp_name}-1", exp_namespace)
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}")
+        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{f"{exp_name}-1"}")
     except Exception as e:
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}")
+        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{f"{exp_name}-1"}")
         raise e
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
-        katib_client.delete_experiment(exp_name, exp_namespace)
+        katib_client.delete_experiment(f"{exp_name}-1", exp_namespace)
     
-    exp_name_2 = "tune-example-2"
     try:
-        run_e2e_experiment_create_by_tune_with_external_model(katib_client, exp_name_2, exp_namespace)
+        run_e2e_experiment_create_by_tune_with_external_model(katib_client, f"{exp_name}-2", exp_namespace)
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name_2}")
+        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{f"{exp_name}-2"}")
     except Exception as e:
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name_2}")
+        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{f"{exp_name}-2"}")
         raise e
-    #finally:
+    finally:
         # Delete the Experiment.
-        #logging.info("---------------------------------------------------------------")
-        #logging.info("---------------------------------------------------------------")
-        #katib_client.delete_experiment(exp_name_2, exp_namespace)
+        logging.info("---------------------------------------------------------------")
+        logging.info("---------------------------------------------------------------")
+        katib_client.delete_experiment(f"{exp_name}-2", exp_namespace)
