@@ -157,24 +157,24 @@ if __name__ == "__main__":
     try:
         run_e2e_experiment_create_by_tune_with_custom_objective(katib_client, f"{exp_name}-1", exp_namespace)
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{f"{exp_name}-1"}")
+        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}-1")
     except Exception as e:
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{f"{exp_name}-1"}")
+        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-1")
         raise e
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
         katib_client.delete_experiment(f"{exp_name}-1", exp_namespace)
-    
+
     try:
         run_e2e_experiment_create_by_tune_with_external_model(katib_client, f"{exp_name}-2", exp_namespace)
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{f"{exp_name}-2"}")
+        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}-2")
     except Exception as e:
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{f"{exp_name}-2"}")
+        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-2")
         raise e
     finally:
         # Delete the Experiment.
