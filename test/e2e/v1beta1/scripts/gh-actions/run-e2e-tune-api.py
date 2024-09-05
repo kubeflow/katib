@@ -9,7 +9,7 @@ from kubeflow.storage_initializer.hugging_face import (
     HuggingFaceModelParams,
     HuggingFaceTrainerParams,
 )
-from kubernetes import client, config
+from kubernetes import client
 from peft import LoraConfig
 from verify import verify_experiment_results
 
@@ -18,25 +18,6 @@ EXPERIMENT_TIMEOUT = 60 * 10
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
-
-# Function to get logs of the pod related to the experiment.
-def get_experiment_pod_logs(namespace: str, exp_name: str):
-    v1 = client.CoreV1Api()
-    pods = v1.list_namespaced_pod(namespace)
-    
-    for pod in pods.items:
-        # Identify the pod associated with the experiment
-        if exp_name in pod.metadata.name:
-            logging.info(f"Describing pod: {pod.metadata.name}")
-            pod_description = v1.read_namespaced_pod(name=pod.metadata.name, namespace=namespace)
-            logging.info(pod_description)
-            
-            logging.info(f"Fetching logs for pod: {pod.metadata.name}")
-            pod_logs = v1.read_namespaced_pod_log(name=pod.metadata.name, namespace=namespace)
-            logging.info(pod_logs)
-            break
-    else:
-        logging.warning(f"No pod found for experiment: {exp_name}")
 
 
 # Test for Experiment created with custom objective.
@@ -163,8 +144,6 @@ if __name__ == "__main__":
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    config.load_kube_config()  # Load Kubernetes config from the environment
-
     katib_client = KatibClient()
 
     namespace_labels = client.CoreV1Api().read_namespace(args.namespace).metadata.labels
@@ -184,9 +163,6 @@ if __name__ == "__main__":
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}")
         raise e
     finally:
-        # Describe and get logs of the experiment pod
-        get_experiment_pod_logs(exp_namespace, exp_name)
-
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
@@ -201,11 +177,8 @@ if __name__ == "__main__":
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name_2}")
         raise e
-    finally:
-        # Describe and get logs of the experiment pod
-        get_experiment_pod_logs(exp_namespace, exp_name_2)
-
+    #finally:
         # Delete the Experiment.
-        logging.info("---------------------------------------------------------------")
-        logging.info("---------------------------------------------------------------")
+        #logging.info("---------------------------------------------------------------")
+        #logging.info("---------------------------------------------------------------")
         #katib_client.delete_experiment(exp_name_2, exp_namespace)

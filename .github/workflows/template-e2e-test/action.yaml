@@ -47,3 +47,20 @@ runs:
         else
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}
         fi
+    
+    - name: Check disk space
+      shell: bash
+      run: |
+        df -hT
+    
+    - name: Check the status of Experiment and Trials
+      shell: bash
+      run: |
+        kubectl get pods -n default
+        
+        # describe pod
+        pod_name=$(kubectl get pods -n default -o jsonpath='{.items[?(@.metadata.labels.trial-name)].metadata.name}')
+        kubectl describe pod $pod_name -n default
+        
+        # check the logs of pod
+        kubectl logs $pod_name -n default -c metrics-logger-and-collector
