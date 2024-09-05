@@ -416,12 +416,9 @@ class KatibClient(object):
 
         # If users choose to use a custom objective function.
         if objective is not None:
-            if (
-                not base_image
-                or not parameters
-            ):
+            if not base_image or not parameters:
                 raise ValueError("One of the required parameters is None")
-            
+
             # Add metrics collector to the Katib Experiment.
             # Up to now, we only support parameter `kind`, of which default value
             # is `StdOut`, to specify the kind of metrics collector.
@@ -651,7 +648,11 @@ class KatibClient(object):
                     f"'{training_args}'",
                 ],
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
-                resources=resources_per_trial.resources_per_worker if resources_per_trial else None,
+                resources=(
+                    resources_per_trial.resources_per_worker
+                    if resources_per_trial
+                    else None
+                ),
             )
 
             # Create the worker and the master pod.
@@ -685,7 +686,10 @@ class KatibClient(object):
                 ),
             )
 
-            if resources_per_trial is not None and resources_per_trial.num_procs_per_worker:
+            if (
+                resources_per_trial is not None
+                and resources_per_trial.num_procs_per_worker
+            ):
                 pytorchjob.spec.nproc_per_node = str(
                     resources_per_trial.num_procs_per_worker
                 )
