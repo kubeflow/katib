@@ -17,14 +17,13 @@ import logging
 import hyperopt
 import numpy as np
 
+from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.suggestion.v1beta1.internal.constant import (
     CATEGORICAL,
     DISCRETE,
     DOUBLE,
     INTEGER,
-    LOG_UNIFORM,
     MAX_GOAL,
-    UNIFORM,
 )
 from pkg.suggestion.v1beta1.internal.trial import Assignment
 
@@ -69,7 +68,7 @@ class BaseHyperoptService(object):
                     param.name, float(param.min), float(param.max)
                 )
             elif param.type == DOUBLE:
-                if param.distribution == UNIFORM:
+                if param.distribution == api_pb2.UNIFORM or param.distribution is None:
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.quniform(
                             param.name,
@@ -81,7 +80,7 @@ class BaseHyperoptService(object):
                         hyperopt_search_space[param.name] = hyperopt.hp.uniform(
                             param.name, float(param.min), float(param.max)
                         )
-                elif param.distribution == LOG_UNIFORM:
+                elif param.distribution == api_pb2.LOG_UNIFORM:
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qloguniform(
                             param.name,
@@ -93,10 +92,10 @@ class BaseHyperoptService(object):
                         hyperopt_search_space[param.name] = hyperopt.hp.loguniform(
                             param.name, float(param.min), float(param.max)
                         )
-                else:
-                    hyperopt_search_space[param.name] = hyperopt.hp.uniform(
-                        param.name, float(param.min), float(param.max)
-                    )
+                # else:
+                #     hyperopt_search_space[param.name] = hyperopt.hp.uniform(
+                #         param.name, float(param.min), float(param.max)
+                #     )
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 hyperopt_search_space[param.name] = hyperopt.hp.choice(
                     param.name, param.list

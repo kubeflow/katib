@@ -43,6 +43,7 @@ class HyperParameterSearchSpace(object):
             search_space.goal = constant.MIN_GOAL
         for p in experiment.spec.parameter_specs.parameters:
             search_space.params.append(HyperParameterSearchSpace.convert_parameter(p))
+        print(search_space)
         return search_space
 
     @staticmethod

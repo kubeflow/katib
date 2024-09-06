@@ -183,6 +183,24 @@ class TestHyperopt(unittest.TestCase):
                             parameter_type=api_pb2.DOUBLE,
                             feasible_space=api_pb2.FeasibleSpace(
                                 max="5", min="1", list=[], step="0.5", distribution=api_pb2.LOG_UNIFORM)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-6",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="5", min="1", list=[], distribution=api_pb2.LOG_UNIFORM)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-7",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="10", min="5", list=[], step="0.8", distribution=api_pb2.UNIFORM)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-8",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="10", min="5", list=[], distribution=api_pb2.UNIFORM)
                         )
                     ]
                 )
