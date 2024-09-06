@@ -15,7 +15,6 @@
 import os
 import shutil
 import sys
-import subprocess
 
 IGNORE_LINES = [
     "from kubeflow.katib.models.v1_unstructured_unstructured import V1UnstructuredUnstructured",
@@ -184,29 +183,6 @@ def update_python_sdk(src, dest, versions=("v1beta1")):
     # Clear working dictionary
     shutil.rmtree(src)
 
-def upgate_python_sdk_docs():
-    
-    # Set the path to the Sphinx project
-    sdkdocs_path = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), '..', '..', 'docs', 'sdkdocs'
-    ))
-    
-    os.chdir(sdkdocs_path)
-    subprocess.run(['make', 'clean'], check=True)
-    print("Removing exist sdk documentation")
-    
-    #Executing make html 
-    try:
-        subprocess.run(['make', 'html'], check=True)
-        print("Sphinx documentation built successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error building Sphinx documentation: {e}")
-    except FileNotFoundError:
-        print("Error: 'make' command not found. Please ensure you have Sphinx installed.")
-
 
 if __name__ == "__main__":
     update_python_sdk(src=sys.argv[1], dest=sys.argv[2])
-    
-    # SDK docs update
-    upgate_python_sdk_docs()

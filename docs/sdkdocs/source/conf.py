@@ -126,7 +126,7 @@ html_theme_options = {
 
 # Version dropdown JSON file
 html_context = {
-    "version_json": "https://raw.githubusercontent.com/kubeflow/katib/master/docs/versions.json",
+    "version_json": "https://raw.githubusercontent.com/kubeflow/katib/master/docs/sdkdocs/source/versions.json",
 }
 # Exclude patterns
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

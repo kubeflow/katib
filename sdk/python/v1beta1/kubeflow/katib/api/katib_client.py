@@ -52,14 +52,16 @@ class KatibClient(object):
             log.setLevel(logging.DEBUG)
 
         Args:
-            config_file (str, optional): Path to the kube-config file. Defaults to ~/.kube/config.
-            context (str, optional): Set the active context. Defaults to current_context from the kube-config.
-            client_configuration (client.Configuration, optional): Client configuration for cluster authentication.
-                You have to provide valid configuration with Bearer token or
-                with username and password.
-            namespace (str): Target Kubernetes namespace. By default it takes namespace
-                from `/var/run/secrets/kubernetes.io/serviceaccount/namespace` location
-                or set as `default`. Namespace can be overridden during method invocations.
+            config_file (str, optional): Path to the kube-config file.
+                Defaults to ~/.kube/config.
+            context (str, optional): Set the active context.
+                Defaults to current_context from the kube-config.
+            client_configuration (client.Configuration, optional): Client configuration
+                for cluster authentication. You have to provide valid configuration with
+                a Bearer token or with a username and password.
+            namespace (str): Target Kubernetes namespace. By default, it takes the namespace
+                from `/var/run/secrets/kubernetes.io/serviceaccount/namespace` or is set to
+                `default`. Namespace can be overridden during method invocations.
         """
 
         self.in_cluster = False
@@ -194,46 +196,45 @@ class KatibClient(object):
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
         """
-        Create HyperParameter Tuning Katib Experiment from the objective function.
+        Create a HyperParameter Tuning Katib Experiment from the objective function.
 
         Args:
             name: Name for the Experiment.
-            objective: Objective function that Katib uses to train the model.
-                This function must be Callable and it must have only one dict argument.
-                Katib uses this argument to send HyperParameters to the function.
-                The function should not use any code declared outside of the function
-                definition. Import statements must be added inside the function.
-            parameters: Dict of HyperParameters to tune your Experiment. You
-                should use Katib SDK to define the search space for these parameters.
-                For example: ``parameters = {"lr": katib.search.double(min=0.1, max=0.2)``.
-                Also, you can use these parameters to define input for your
-                objective function.
+            objective: Objective function that Katib uses to train the model. This function
+                must be Callable and it must have only one dict argument. Katib uses this
+                argument to send HyperParameters to the function. The function should not
+                use any code declared outside of the function definition. Import statements
+                must be added inside the function.
+            parameters: Dict of HyperParameters to tune your Experiment. Use Katib SDK to
+                define the search space for these parameters. For example:
+                ``parameters = {"lr": katib.search.double(min=0.1, max=0.2)}``. You can
+                also use these parameters to define input for your objective function.
             base_image: Image to use when executing the objective function.
             namespace: Namespace for the Experiment.
             env_per_trial: Environment variable(s) to be attached to each trial container.
                 You can specify a dictionary as a mapping object representing the environment
-                variables. Otherwise, you can specify a list, in which the element can either
-                be a ``kubernetes.client.models.V1EnvVar`` or a ``kubernetes.client.models.V1EnvFromSource``.
+                variables. Alternatively, you can specify a list where each element can be
+                either a ``kubernetes.client.models.V1EnvVar`` or a
+                ``kubernetes.client.models.V1EnvFromSource``.
             algorithm_name: Search algorithm for the HyperParameter tuning.
-            algorithm_settings: Settings for the search algorithm given.
-                For available fields, check this doc:
+            algorithm_settings: Settings for the search algorithm. For available fields, refer
+                to the documentation:
                 https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail.
             objective_metric_name: Objective metric that Katib optimizes.
-            additional_metric_names: List of metrics that Katib collects from the
-                objective function in addition to the objective metric.
-            objective_type: Type for the Experiment optimization for the objective metric.
-                Must be one of ``minimize`` or ``maximize``.
-            objective_goal: Objective goal that Experiment should reach to be Succeeded.
-            max_trial_count: Maximum number of Trials to run. For the default
-                values check this doc:
+            additional_metric_names: List of metrics that Katib collects from the objective
+                function in addition to the objective metric.
+            objective_type: Type of optimization for the objective metric. Must be one of
+                ``minimize`` or ``maximize``.
+            objective_goal: Objective goal that the Experiment should reach to be marked as
+                Succeeded.
+            max_trial_count: Maximum number of Trials to run. For default values, refer to:
                 https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
-            parallel_trial_count: Number of Trials that Experiment runs in parallel.
+            parallel_trial_count: Number of Trials that the Experiment runs in parallel.
             max_failed_trial_count: Maximum number of Trials allowed to fail.
-            resources_per_trial: A parameter that lets you specify how much
-                resources each trial container should have. You can either specify a
-                ``kubernetes.client.V1ResourceRequirements`` object or a dictionary that
-                includes one or more of the following keys: ``cpu``, ``memory``, or ``gpu``
-                (other keys will be ignored). For example:
+            resources_per_trial: Specifies the resources each trial container should have.
+                You can either provide a ``kubernetes.client.V1ResourceRequirements`` object
+                or a dictionary including one or more of the following keys: ``cpu``,
+                ``memory``, or ``gpu`` (other keys will be ignored). Example:
 
                 .. code-block:: yaml
 
@@ -243,20 +244,20 @@ class KatibClient(object):
                         "memory": "2Gi",
                     }
 
-                Please note, ``gpu`` specifies a resource request with a key of
-                ``nvidia.com/gpu``, i.e., an NVIDIA GPU. If you need a different type
-                of GPU, pass in a ``V1ResourceRequirement`` instance instead, since it's
-                more flexible. This parameter is optional and defaults to None.
-            retain_trials: Whether Trials' resources (e.g., pods) are deleted after Succeeded state.
-            packages_to_install: List of Python packages to install in addition
-                to the base image packages. These packages are installed before
-                executing the objective function.
+                Note that ``gpu`` specifies a resource request with a key of ``nvidia.com/gpu``,
+                i.e., an NVIDIA GPU. For different types of GPU, use a ``V1ResourceRequirement``
+                instance as it is more flexible. This parameter is optional and defaults to None.
+            retain_trials: Whether to delete Trials' resources (e.g., pods) after reaching
+                the Succeeded state.
+            packages_to_install: List of Python packages to install in addition to the base
+                image packages. These packages are installed before executing the objective
+                function.
             pip_index_url: The PyPI URL from which to install Python packages.
 
         Raises:
-            ValueError: Function arguments have incorrect type or value.
-            TimeoutError: Timeout to create Katib Experiment.
-            RuntimeError: Failed to create Katib Experiment.
+            ValueError: If function arguments have incorrect type or value.
+            TimeoutError: If there is a timeout in creating the Katib Experiment.
+            RuntimeError: If there is a failure in creating the Katib Experiment.
         """
 
         namespace = namespace or self.namespace

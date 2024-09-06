@@ -39,15 +39,21 @@ sudo python setup.py install
 
 The Katib Python SDK is released as part of Katib's patch releases. For each patch release, a new version of the SDK is uploaded to PyPi. The SDK version corresponds directly to the Katib version.
 
-You can find the Katib Python SDK in the [`kubeflow-katib` package on PyPi](https://pypi.org/project/kubeflow-katib/).
-
-For detailed information on the release process, please refer to the [release script](https://github.com/shivas1516/katib/blob/master/scripts/v1beta1/release.sh) in the Katib repository.
+Our SDK is located in [`kubeflow-katib` PyPi package](https://pypi.org/project/kubeflow-katib/).
+Katib Python SDK is published as part of the Katib patch releases.
+You can check the release process [here](https://github.com/kubeflow/katib/blob/master/scripts/v1beta1/release.sh).
+For each Katib patch release, we upload a new SDK version to the PyPi.
+The SDK version is equal to the Katib version.
 
 
 ## Getting Started
 
-Please follow the [examples](https://github.com/shivas1516/katib/tree/master/sdk) to learn more about Katib SDK.
+Please follow the [examples](https://github.com/kubeflow/katib/tree/master/examples/v1beta1/sdk) to learn more about Katib SDK.
 
 ## Authorization Details
 
 All endpoints do not require authorization.
+
+## Author
+
+prem0912
