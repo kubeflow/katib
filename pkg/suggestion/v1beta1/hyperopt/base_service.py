@@ -93,34 +93,36 @@ class BaseHyperoptService(object):
                             param.name, float(param.min), float(param.max)
                         )
                 elif param.distribution == api_pb2.NORMAL:
-                    sigma = 1
+                    mu = (float(param.min) + float(param.max)) / 2
+                    sigma = (float(param.max) - float(param.min)) / 6
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qnormal(
                             param.name,
-                            float((float(param.min) + float(param.max)) / 2),
-                            float(sigma),
+                            mu,
+                            sigma,
                             float(param.step),
                         )
                     else:
                         hyperopt_search_space[param.name] = hyperopt.hp.normal(
                             param.name,
-                            float((float(param.min) + float(param.max)) / 2),
-                            float(sigma),
+                            mu,
+                            sigma,
                         )
                 elif param.distribution == api_pb2.LOG_NORMAL:
-                    sigma = 1
+                    mu = (float(param.min) + float(param.max)) / 2
+                    sigma = (float(param.max) - float(param.min)) / 6
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qlognormal(
                             param.name,
-                            float((float(param.min) + float(param.max)) / 2),
-                            float(sigma),
+                            mu,
+                            sigma,
                             float(param.step),
                         )
                     else:
                         hyperopt_search_space[param.name] = hyperopt.hp.lognormal(
                             param.name,
-                            float((float(param.min) + float(param.max)) / 2),
-                            float(sigma),
+                            mu,
+                            sigma,
                         )
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 hyperopt_search_space[param.name] = hyperopt.hp.choice(
