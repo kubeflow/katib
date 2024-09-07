@@ -92,10 +92,36 @@ class BaseHyperoptService(object):
                         hyperopt_search_space[param.name] = hyperopt.hp.loguniform(
                             param.name, float(param.min), float(param.max)
                         )
-                # else:
-                #     hyperopt_search_space[param.name] = hyperopt.hp.uniform(
-                #         param.name, float(param.min), float(param.max)
-                #     )
+                elif param.distribution == api_pb2.NORMAL:
+                    sigma = 1
+                    if param.step:
+                        hyperopt_search_space[param.name] = hyperopt.hp.qnormal(
+                            param.name,
+                            float((float(param.min) + float(param.max)) / 2),
+                            float(sigma),
+                            float(param.step),
+                        )
+                    else:
+                        hyperopt_search_space[param.name] = hyperopt.hp.normal(
+                            param.name,
+                            float((float(param.min) + float(param.max)) / 2),
+                            float(sigma),
+                        )
+                elif param.distribution == api_pb2.LOG_NORMAL:
+                    sigma = 1
+                    if param.step:
+                        hyperopt_search_space[param.name] = hyperopt.hp.qlognormal(
+                            param.name,
+                            float((float(param.min) + float(param.max)) / 2),
+                            float(sigma),
+                            float(param.step),
+                        )
+                    else:
+                        hyperopt_search_space[param.name] = hyperopt.hp.lognormal(
+                            param.name,
+                            float((float(param.min) + float(param.max)) / 2),
+                            float(sigma),
+                        )
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 hyperopt_search_space[param.name] = hyperopt.hp.choice(
                     param.name, param.list
