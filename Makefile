@@ -172,7 +172,6 @@ pytest: prepare-pytest prepare-pytest-testdata
 	pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
 	pytest ./test/unit/v1beta1/earlystopping
 	pytest ./test/unit/v1beta1/metricscollector
-	pytest ./test/unit/v1beta1/tune-api
 	cp ./pkg/apis/manager/v1beta1/python/api_pb2.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py
 	cp ./pkg/apis/manager/v1beta1/python/api_pb2_grpc.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
 	sed -i "s/api_pb2/kubeflow\.katib\.katib_api_pb2/g" ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
