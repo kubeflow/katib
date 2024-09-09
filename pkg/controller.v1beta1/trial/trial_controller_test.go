@@ -320,183 +320,6 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run("Update status for empty Trial", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		g.Expect(r.updateStatus(&trialsv1beta1.Trial{})).To(gomega.HaveOccurred())
-	})
-
-	// Stop the test manager
-	cancel()
-}
-
-func TestUnavailablePushMC(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
-
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockManagerClient := managerclientmock.NewMockManagerClient(mockCtrl)
-
-	// Setup the Manager and Controller. Wrap the Controller Reconcile function so it writes each request to a
-	// channel when it is finished.
-	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	c := mgr.GetClient()
-
-	r := &ReconcileTrial{
-		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
-		ManagerClient: mockManagerClient,
-		recorder:      mgr.GetEventRecorderFor(ControllerName),
-		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), prometheus.NewRegistry()),
-	}
-
-	r.updateStatusHandler = func(instance *trialsv1beta1.Trial) error {
-		var err error = errors.NewBadRequest("fake-error")
-		// Try to update status until it be succeeded
-		for err != nil {
-			updatedInstance := &trialsv1beta1.Trial{}
-			trialKey := types.NamespacedName{Name: instance.Name, Namespace: namespace}
-			if err = c.Get(ctx, trialKey, updatedInstance); err != nil {
-				continue
-			}
-			updatedInstance.Status = instance.Status
-			err = r.updateStatus(updatedInstance)
-		}
-		return err
-	}
-
-	recFn := SetupTestReconcile(r)
-	// Set Job resource
-	trialResources := []schema.GroupVersionKind{
-		{
-			Group:   "batch",
-			Version: "v1",
-			Kind:    "Job",
-		},
-	}
-
-	viper.Set(consts.ConfigTrialResources, trialResources)
-	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
-
-	// Start test manager.
-	mgrCtx, cancel := context.WithCancel(context.TODO())
-	go func() {
-		g.Expect(mgr.Start(mgrCtx)).NotTo(gomega.HaveOccurred())
-	}()
-
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC).`, func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		gomock.InOrder(
-			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil),
-			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil),
-			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
-		)
-		mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).AnyTimes()
-		mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
-
-		// Create the Trial with Push MC
-		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector, "test-unavailable-push")
-		trialKey := types.NamespacedName{Name: "test-unavailable-push", Namespace: namespace}
-		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
-
-		// Update BatchJob status to Complete.
-		batchJob := &batchv1.Job{}
-		batchJobCompleteMessage := "BatchJob completed test message"
-		batchJobCompleteReason := "BatchJob completed test reason"
-		g.Expect(c.Get(ctx, batchJobKey, batchJob)).NotTo(gomega.HaveOccurred())
-		batchJob.Status = batchv1.JobStatus{
-			Conditions: []batchv1.JobCondition{
-				{
-					Type:    batchv1.JobComplete,
-					Status:  corev1.ConditionTrue,
-					Message: batchJobCompleteMessage,
-					Reason:  batchJobCompleteReason,
-				},
-			},
-		}
-		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
-
-		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
-		// Metrics unavailable because GetTrialObservationLog returns "unavailable".
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				return false
-			}
-			return trial.IsMetricsUnavailable() &&
-				len(trial.Status.Observation.Metrics) > 0 &&
-				trial.Status.Observation.Metrics[0].Min == consts.UnavailableMetricValue &&
-				trial.Status.Observation.Metrics[0].Max == consts.UnavailableMetricValue &&
-				trial.Status.Observation.Metrics[0].Latest == consts.UnavailableMetricValue
-		}, timeout).Should(gomega.BeTrue())
-
-		// Delete the Trial
-		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
-
-		// Expect that Trial is deleted
-		g.Eventually(func() bool {
-			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
-		}, timeout).Should(gomega.BeTrue())
-	})
-
-	// Stop the test manager
-	cancel()
-}
-
-func TestUnavailablePushMCFailedOnce(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
-
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockManagerClient := managerclientmock.NewMockManagerClient(mockCtrl)
-
-	// Setup the Manager and Controller. Wrap the Controller Reconcile function so it writes each request to a
-	// channel when it is finished.
-	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	c := mgr.GetClient()
-
-	r := &ReconcileTrial{
-		Client:        mgr.GetClient(),
-		scheme:        mgr.GetScheme(),
-		ManagerClient: mockManagerClient,
-		recorder:      mgr.GetEventRecorderFor(ControllerName),
-		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), prometheus.NewRegistry()),
-	}
-
-	r.updateStatusHandler = func(instance *trialsv1beta1.Trial) error {
-		var err error = errors.NewBadRequest("fake-error")
-		// Try to update status until it be succeeded
-		for err != nil {
-			updatedInstance := &trialsv1beta1.Trial{}
-			trialKey := types.NamespacedName{Name: instance.Name, Namespace: namespace}
-			if err = c.Get(ctx, trialKey, updatedInstance); err != nil {
-				continue
-			}
-			updatedInstance.Status = instance.Status
-			err = r.updateStatus(updatedInstance)
-		}
-		return err
-	}
-
-	recFn := SetupTestReconcile(r)
-	// Set Job resource
-	trialResources := []schema.GroupVersionKind{
-		{
-			Group:   "batch",
-			Version: "v1",
-			Kind:    "Job",
-		},
-	}
-
-	viper.Set(consts.ConfigTrialResources, trialResources)
-	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
-
-	// Start test manager.
-	mgrCtx, cancel := context.WithCancel(context.TODO())
-	go func() {
-		g.Expect(mgr.Start(mgrCtx)).NotTo(gomega.HaveOccurred())
-	}()
-
 	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC, failed once).`, func(t *testing.T) {
 		mockCtrl.Finish()
 		g := gomega.NewGomegaWithT(t)
@@ -515,23 +338,6 @@ func TestUnavailablePushMCFailedOnce(t *testing.T) {
 		trialKey := types.NamespacedName{Name: "test-unavailable-push-failed-once", Namespace: namespace}
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
-		// Update BatchJob status to Complete.
-		batchJob := &batchv1.Job{}
-		batchJobCompleteMessage := "BatchJob completed test message"
-		batchJobCompleteReason := "BatchJob completed test reason"
-		g.Expect(c.Get(ctx, batchJobKey, batchJob)).NotTo(gomega.HaveOccurred())
-		batchJob.Status = batchv1.JobStatus{
-			Conditions: []batchv1.JobCondition{
-				{
-					Type:    batchv1.JobComplete,
-					Status:  corev1.ConditionTrue,
-					Message: batchJobCompleteMessage,
-					Reason:  batchJobCompleteReason,
-				},
-			},
-		}
-		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
-
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
 		// Metrics unavailable because GetTrialObservationLog returns "unavailable".
 		g.Eventually(func() bool {
@@ -552,6 +358,11 @@ func TestUnavailablePushMCFailedOnce(t *testing.T) {
 		g.Eventually(func() bool {
 			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
 		}, timeout).Should(gomega.BeTrue())
+	})
+
+	t.Run("Update status for empty Trial", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		g.Expect(r.updateStatus(&trialsv1beta1.Trial{})).To(gomega.HaveOccurred())
 	})
 
 	// Stop the test manager
