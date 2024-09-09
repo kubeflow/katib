@@ -615,4 +615,4 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
             assert expected_output == TEST_RESULT_SUCCESS
         except Exception as e:
             assert type(e) is expected_output
-        print("Test execution complete for:", test_name)
+        print("test execution complete")
