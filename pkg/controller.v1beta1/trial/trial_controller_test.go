@@ -50,13 +50,11 @@ const (
 	namespace       = "default"
 	batchJobName    = "test-job"
 	objectiveMetric = "accuracy"
-	startSignal     = "start"
-	closeSignal		= "close"
 	timeout         = time.Second * 10
 )
 
 var (
-	batchJobKey = types.NamespacedName{Name: batchJobName, Namespace: namespace}
+	batchJobKey             = types.NamespacedName{Name: batchJobName, Namespace: namespace}
 	observationLogAvailable = &api_pb.GetObservationLogReply{
 		ObservationLog: &api_pb.ObservationLog{
 			MetricLogs: []*api_pb.MetricLog{
