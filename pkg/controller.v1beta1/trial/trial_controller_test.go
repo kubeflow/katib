@@ -235,7 +235,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Available metrics.`, func(t *testing.T) {
+	t.Run(`Trial with "Complete" BatchJob and Available metrics.`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogAvailable, nil).MinTimes(1),
@@ -287,7 +287,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
+	t.Run(`Trial with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(1),
@@ -320,7 +320,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		}, timeout).Should(gomega.BeTrue())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics(Push MC, failed once).`, func(t *testing.T) {
+	t.Run(`Trial with "Complete" BatchJob and Unavailable metrics(Push MC, failed once).`, func(t *testing.T) {
 		mockCtrl.Finish()
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
