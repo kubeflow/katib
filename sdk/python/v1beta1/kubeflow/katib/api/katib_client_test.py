@@ -583,7 +583,7 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
 
     with patch.dict(
         "sys.modules",
-        {   
+        {
             "kubeflow.storage_initializer": Mock(),
             "kubeflow.storage_initializer.hugging_face": Mock(),
             "kubeflow.storage_initializer.s3": Mock(),
@@ -593,8 +593,8 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
             "kubeflow.training.utils": Mock(),
             "kubeflow.training.constants": Mock(),
             "kubeflow.training.constants.constants": Mock(),
-        }), \
-        patch(
+        },
+    ), patch(
         "kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams",
         HuggingFaceModelParams,
     ), patch(
@@ -614,8 +614,7 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
     ), patch(
         "kubeflow.katib.utils.utils.get_trial_substitutions_from_trainer",
         return_value={"param": "value"},
-    ), \
-    patch.object(
+    ), patch.object(
         katib_client, "create_experiment", return_value=Mock()
     ) as mock_create_experiment:
         try:
