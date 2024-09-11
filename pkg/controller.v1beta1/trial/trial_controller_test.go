@@ -168,7 +168,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	viper.Set(consts.ConfigTrialResources, trialResources)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
-	// Start test manager.
+	// Start test manager
 	mgrCtx, cancel := context.WithCancel(context.TODO())
 	go func() {
 		g.Expect(mgr.Start(mgrCtx)).NotTo(gomega.HaveOccurred())
