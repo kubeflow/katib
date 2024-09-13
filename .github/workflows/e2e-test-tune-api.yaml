@@ -33,6 +33,13 @@ jobs:
           tune-api: true
           training-operator: true
 
+      # Step to get logs of the relevant Experiment pod
+      - name: Fetch Experiment Pod Logs
+        run: |
+          POD_NAME=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2)
+          echo "Fetching logs for pod: $POD_NAME"
+          kubectl logs $POD_NAME -n default
+
     strategy:
       fail-fast: false
       matrix:

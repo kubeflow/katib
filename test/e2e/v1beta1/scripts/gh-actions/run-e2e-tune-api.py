@@ -14,10 +14,28 @@ from peft import LoraConfig
 from verify import verify_experiment_results
 
 # Experiment timeout is 60 min.
-EXPERIMENT_TIMEOUT = 60 * 60
+EXPERIMENT_TIMEOUT = 60 * 15
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
+
+
+def get_experiment_pods_logs(katib_client: KatibClient, exp_name: str, exp_namespace: str):
+    # List all the pods in the namespace
+    v1 = client.CoreV1Api()
+    pods = v1.list_namespaced_pod(namespace=exp_namespace)
+    
+    # Filter pods related to the specific Katib Experiment
+    for pod in pods.items:
+        if exp_name in pod.metadata.name:
+            logging.info(f"Fetching logs for pod: {pod.metadata.name}")
+            try:
+                pod_logs = v1.read_namespaced_pod_log(
+                    name=pod.metadata.name, namespace=exp_namespace
+                )
+                logging.info(f"Logs for pod {pod.metadata.name}:\n{pod_logs}")
+            except Exception as e:
+                logging.error(f"Failed to get logs for pod {pod.metadata.name}: {str(e)}")
 
 
 # Test for Experiment created with custom objective.
@@ -117,7 +135,7 @@ def run_e2e_experiment_create_by_tune_with_external_model(
         resources_per_trial=katib.TrainerResources(
             num_workers=1,
             num_procs_per_worker=1,
-            resources_per_worker={"cpu": "2", "memory": "10G",},
+            resources_per_worker={"cpu": "1", "memory": "10G",},
         ),
     )
     experiment = katib_client.wait_for_experiment_condition(
@@ -166,7 +184,7 @@ if __name__ == "__main__":
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
-        katib_client.delete_experiment(f"{exp_name}-1", exp_namespace)
+        #katib_client.delete_experiment(f"{exp_name}-1", exp_namespace)
 
     try:
         run_e2e_experiment_create_by_tune_with_external_model(katib_client, f"{exp_name}-2", exp_namespace)
@@ -175,9 +193,10 @@ if __name__ == "__main__":
     except Exception as e:
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-2")
+        get_experiment_pods_logs(katib_client, f"{exp_name}-2", exp_namespace)
         raise e
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
-        katib_client.delete_experiment(f"{exp_name}-2", exp_namespace)
+        #katib_client.delete_experiment(f"{exp_name}-2", exp_namespace)
