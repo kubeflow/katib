@@ -25,8 +25,7 @@ jobs:
       - name: Install Training Operator SDK
         shell: bash
         run: |
-          pip install git+https://github.com/kubeflow/training-operator.git@v1.8-branch#subdirectory=sdk/python
-          pip install peft==0.3.0 datasets==2.15.0 transformers==4.38.0
+          pip install "kubeflow-training[huggingface]==1.8.1"
       
       - name: Run e2e test with tune API
         uses: ./.github/workflows/template-e2e-test
