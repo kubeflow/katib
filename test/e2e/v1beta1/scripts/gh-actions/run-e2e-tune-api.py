@@ -13,8 +13,8 @@ from kubernetes import client
 from peft import LoraConfig
 from verify import verify_experiment_results
 
-# Experiment timeout is 40 min.
-EXPERIMENT_TIMEOUT = 60 * 40
+# Experiment timeout is 60 min.
+EXPERIMENT_TIMEOUT = 60 * 60
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
