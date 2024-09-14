@@ -27,11 +27,24 @@ jobs:
         run: |
           pip install "kubeflow-training[huggingface]==1.8.1"
       
+      # Step to check disk space
+      - name: Check Disk Space
+        run: |
+          echo "Checking disk space usage before e2e test..."
+          df -h  # Run 'df' to check free disk space
+      
       - name: Run e2e test with tune API
         uses: ./.github/workflows/template-e2e-test
         with:
           tune-api: true
           training-operator: true
+      
+      # Step to check disk space
+      - name: Check Disk Space
+        if: always()  # Run this step even if previous steps fail
+        run: |
+          echo "Checking disk space usage after e2e test..."
+          df -h  # Run 'df' to check free disk space
 
       # Step to get logs of the relevant Experiment pod
       - name: Fetch Experiment Pod Logs
