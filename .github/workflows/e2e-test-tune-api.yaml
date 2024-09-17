@@ -13,6 +13,8 @@ jobs:
   e2e:
     runs-on: ubuntu-22.04
     timeout-minutes: 120
+    env:
+      GITHUB_WORKSPACE: /mnt/docker
     steps:
       - name: Checkout
         uses: actions/checkout@v4
