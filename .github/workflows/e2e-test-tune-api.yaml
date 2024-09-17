@@ -13,11 +13,27 @@ jobs:
   e2e:
     runs-on: ubuntu-22.04
     timeout-minutes: 120
-    env:
-      GITHUB_WORKSPACE: /mnt/docker
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Move docker data directory
+        shell: bash
+        run: |
+          echo "Stopping docker service ..."
+          sudo systemctl stop docker
+          DOCKER_DEFAULT_ROOT_DIR=/var/lib/docker
+          DOCKER_ROOT_DIR=/mnt/docker
+          echo "Moving ${DOCKER_DEFAULT_ROOT_DIR} -> ${DOCKER_ROOT_DIR}"
+          sudo mv ${DOCKER_DEFAULT_ROOT_DIR} ${DOCKER_ROOT_DIR}
+          echo "Creating symlink ${DOCKER_DEFAULT_ROOT_DIR} -> ${DOCKER_ROOT_DIR}"
+          sudo ln -s ${DOCKER_ROOT_DIR} ${DOCKER_DEFAULT_ROOT_DIR}
+          echo "$(sudo ls -l ${DOCKER_DEFAULT_ROOT_DIR})"
+          echo "Starting docker service ..."
+          sudo systemctl daemon-reload
+          sudo systemctl start docker
+          echo "Docker service status:"
+          sudo systemctl --no-pager -l -o short status docker
 
       - name: Setup Test Env
         uses: ./.github/workflows/template-setup-e2e-test
