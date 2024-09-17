@@ -14,7 +14,7 @@ from peft import LoraConfig
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
-EXPERIMENT_TIMEOUT = 60 * 40
+EXPERIMENT_TIMEOUT = 60 * 15
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
@@ -197,6 +197,7 @@ if __name__ == "__main__":
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-2")
         get_experiment_pods_logs(katib_client, f"{exp_name}-2", exp_namespace)
+        get_experiment_pods_logs(katib_client, "katib-controller", "kubeflow")
         raise e
     finally:
         # Delete the Experiment.
