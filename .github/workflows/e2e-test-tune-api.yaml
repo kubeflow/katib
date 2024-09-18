@@ -56,6 +56,14 @@ jobs:
           kubectl describe pod $POD_NAME -n default
           kubectl logs $POD_NAME -n default
           kubectl get events -n default | grep "tune-example-2"
+        
+      # Step to fetch kubelet logs from Minikube
+      - name: Fetch Kubelet Logs
+        if: always()  # Run this step even if previous steps fail
+        shell: bash
+        run: |
+          echo "Fetching kubelet logs from Minikube..."
+          minikube ssh "sudo journalctl -u kubelet"
 
     strategy:
       fail-fast: false
