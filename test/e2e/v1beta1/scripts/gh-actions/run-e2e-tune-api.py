@@ -36,6 +36,25 @@ def get_experiment_pods_logs(katib_client: KatibClient, exp_name: str, exp_names
                     namespace=exp_namespace,
                     container="metrics-logger-and-collector"  # Specify the desired container
                 )
+                logging.info(f"Logs for pod {pod.metadata.name}:\n{pod_logs}")
+            except Exception as e:
+                logging.error(f"Failed to get logs for pod {pod.metadata.name}: {str(e)}")
+
+def get_experiment_pods_logs_2(katib_client: KatibClient, exp_name: str, exp_namespace: str):
+    # List all the pods in the namespace
+    v1 = client.CoreV1Api()
+    pods = v1.list_namespaced_pod(namespace=exp_namespace)
+    
+    # Filter pods related to the specific Katib Experiment
+    for pod in pods.items:
+        if exp_name in pod.metadata.name:
+            logging.info(f"Fetching logs for pod: {pod.metadata.name}")
+            try:
+                # Specify the container name when retrieving logs
+                pod_logs = v1.read_namespaced_pod_log(
+                    name=pod.metadata.name,
+                    namespace=exp_namespace,
+                )
                 logging.info(f"Logs for pod {pod.metadata.name} (container: metrics-logger-and-collector):\n{pod_logs}")
             except Exception as e:
                 logging.error(f"Failed to get logs for pod {pod.metadata.name}: {str(e)}")
@@ -197,7 +216,7 @@ if __name__ == "__main__":
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-2")
         get_experiment_pods_logs(katib_client, f"{exp_name}-2", exp_namespace)
-        get_experiment_pods_logs(katib_client, "katib-controller", "kubeflow")
+        get_experiment_pods_logs_2(katib_client, "katib-controller", "kubeflow")
         raise e
     finally:
         # Delete the Experiment.
