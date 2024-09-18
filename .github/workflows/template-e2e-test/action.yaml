@@ -47,4 +47,3 @@ runs:
         else
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}
         fi
-      working-directory: /mnt
