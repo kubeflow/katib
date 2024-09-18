@@ -62,8 +62,8 @@ jobs:
         if: always()  # Run this step even if previous steps fail
         shell: bash
         run: |
-          echo "Fetching kubelet logs from Minikube..."
-          minikube ssh "sudo journalctl -u kubelet"
+          echo "Fetching kubelet logs..."
+          sudo journalctl -u kubelet
 
     strategy:
       fail-fast: false
