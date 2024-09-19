@@ -28,6 +28,9 @@ type ManagerClient interface {
 		instance *trialsv1beta1.Trial) (*api_pb.GetObservationLogReply, error)
 	DeleteTrialObservationLog(
 		instance *trialsv1beta1.Trial) (*api_pb.DeleteObservationLogReply, error)
+	ReportTrialObservationLog(
+		instance *trialsv1beta1.Trial,
+		observationLogs *api_pb.ObservationLog) (*api_pb.ReportObservationLogReply, error)
 }
 
 // DefaultClient implements the Client interface.
@@ -83,6 +86,20 @@ func (d *DefaultClient) DeleteTrialObservationLog(
 		TrialName: instance.Name,
 	}
 	reply, err := common.DeleteObservationLog(request)
+	if err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
+func (d *DefaultClient) ReportTrialObservationLog(
+	instance *trialsv1beta1.Trial,
+	observationLog *api_pb.ObservationLog) (*api_pb.ReportObservationLogReply, error) {
+	request := &api_pb.ReportObservationLogRequest{
+		TrialName:      instance.Name,
+		ObservationLog: observationLog,
+	}
+	reply, err := common.ReportObservationLog(request)
 	if err != nil {
 		return nil, err
 	}

@@ -18,13 +18,14 @@ package trial
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -42,6 +43,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
@@ -57,6 +59,8 @@ var (
 	log = logf.Log.WithName(ControllerName)
 	// errMetricsNotReported is the error when Trial job is succeeded but metrics are not reported yet
 	errMetricsNotReported = fmt.Errorf("metrics are not reported yet")
+	// errReportMetricsFailed is the error when `unavailable` metrics value can't be inserted to the Katib DB.
+	errReportMetricsFailed = fmt.Errorf("failed to report unavailable metrics")
 )
 
 // Add creates a new Trial Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -150,7 +154,7 @@ func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Reques
 	original := &trialsv1beta1.Trial{}
 	err := r.Get(ctx, request.NamespacedName, original)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers.
 			return reconcile.Result{}, nil
@@ -179,7 +183,7 @@ func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Reques
 	} else {
 		err := r.reconcileTrial(instance)
 		if err != nil {
-			if err == errMetricsNotReported {
+			if errors.Is(err, errMetricsNotReported) || errors.Is(err, errReportMetricsFailed) {
 				return reconcile.Result{
 					RequeueAfter: time.Second * 1,
 				}, nil
@@ -244,9 +248,12 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 			}
 		}
 
-		// If observation is empty metrics collector doesn't finish.
-		// For early stopping metrics collector are reported logs before Trial status is changed to EarlyStopped.
-		if jobStatus.Condition == trialutil.JobSucceeded && instance.Status.Observation == nil {
+		// If observation is empty, metrics collector doesn't finish.
+		// For early stopping scenario, metrics collector will report logs before Trial status is changed to EarlyStopped.
+		// We need to requeue reconcile when the Trial is succeeded, metrics collector's type is not `Push`, and metrics are not reported.
+		if jobStatus.Condition == trialutil.JobSucceeded &&
+			instance.Status.Observation == nil &&
+			instance.Spec.MetricsCollector.Collector.Kind != commonapiv1beta1.PushCollector {
 			logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
 			return errMetricsNotReported
 		}
@@ -255,7 +262,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 		//    if job has succeeded and if observation field is available.
 		//    if job has failed
 		// This will ensure that trial is set to be complete only if metric is collected at least once
-		r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
+		return r.UpdateTrialStatusCondition(instance, deployedJob.GetName(), jobStatus)
 	}
 	return nil
 }
@@ -271,7 +278,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 	deployedJob.SetGroupVersionKind(gvk)
 	err = r.Get(context.TODO(), types.NamespacedName{Name: desiredJob.GetName(), Namespace: desiredJob.GetNamespace()}, deployedJob)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			if instance.IsCompleted() {
 				return nil, nil
 			}
