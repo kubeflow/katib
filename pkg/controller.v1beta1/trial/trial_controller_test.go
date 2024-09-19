@@ -306,10 +306,10 @@ func TestReconcileBatchJob(t *testing.T) {
 			g.Expect(trial.IsMetricsUnavailable()).Should(gomega.BeTrue())
 			g.Expect(trial.Status.Observation.Metrics).ShouldNot(gomega.HaveLen(0))
 			g.Expect(trial.Status.Observation.Metrics[0]).Should(gomega.BeComparableTo(commonv1beta1.Metric{
-			  Name: objectiveMetric,
-			  Min: consts.UnavailableMetricValue,
-			  Max: consts.UnavailableMetricValue,
-			  Latest: consts.UnavailableMetricValue,
+				Name:   objectiveMetric,
+				Min:    consts.UnavailableMetricValue,
+				Max:    consts.UnavailableMetricValue,
+				Latest: consts.UnavailableMetricValue,
 			}))
 		}, timeout).Should(gomega.Succeed())
 
@@ -347,10 +347,10 @@ func TestReconcileBatchJob(t *testing.T) {
 			g.Expect(trial.IsMetricsUnavailable()).Should(gomega.BeTrue())
 			g.Expect(trial.Status.Observation.Metrics).ShouldNot(gomega.HaveLen(0))
 			g.Expect(trial.Status.Observation.Metrics[0]).Should(gomega.BeComparableTo(commonv1beta1.Metric{
-			  Name: objectiveMetric,
-			  Min: consts.UnavailableMetricValue,
-			  Max: consts.UnavailableMetricValue,
-			  Latest: consts.UnavailableMetricValue,
+				Name:   objectiveMetric,
+				Min:    consts.UnavailableMetricValue,
+				Max:    consts.UnavailableMetricValue,
+				Latest: consts.UnavailableMetricValue,
 			}))
 		}, timeout).Should(gomega.Succeed())
 
