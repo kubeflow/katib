@@ -21,6 +21,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/spf13/viper"
@@ -133,23 +135,35 @@ func main() {
 
 	ctx := signals.SetupSignalHandler()
 	certsReady := make(chan struct{})
-	defer close(certsReady)
 
 	// The setupControllers will register controllers to the manager
 	// after generated certs for the admission webhooks.
 	go setupControllers(mgr, certsReady, hookServer)
 
 	if initConfig.CertGeneratorConfig.Enable {
+		err := mgr.AddReadyzCheck("cert", func(_ *http.Request) error {
+			select {
+			case <-certsReady:
+				return nil
+			default:
+				return fmt.Errorf("certificates are not ready")
+			}
+		})
+		if err != nil {
+			log.Error(err, "Unable to add readyz check cert")
+			os.Exit(1)
+		}
 		if err = cert.AddToManager(mgr, initConfig.CertGeneratorConfig, certsReady); err != nil {
 			log.Error(err, "Failed to set up cert-generator")
+			os.Exit(1)
 		}
 	} else {
-		certsReady <- struct{}{}
+		close(certsReady)
 	}
 
 	log.Info("Setting up health checker.")
-	if err := mgr.AddReadyzCheck("readyz", hookServer.StartedChecker()); err != nil {
-		log.Error(err, "Unable to add readyz endpoint to the manager")
+	if err := mgr.AddReadyzCheck("webhook", hookServer.StartedChecker()); err != nil {
+		log.Error(err, "Unable to add readyz check webhook")
 		os.Exit(1)
 	}
 	if err = mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
