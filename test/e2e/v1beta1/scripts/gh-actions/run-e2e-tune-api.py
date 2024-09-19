@@ -217,6 +217,7 @@ if __name__ == "__main__":
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-2")
         get_experiment_pods_logs(katib_client, f"{exp_name}-2", exp_namespace)
         get_experiment_pods_logs_2(katib_client, "katib-controller", "kubeflow")
+        get_experiment_pods_logs_2(katib_client, "training-operator", "kubeflow")
         raise e
     finally:
         # Delete the Experiment.

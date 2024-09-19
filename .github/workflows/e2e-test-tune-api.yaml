@@ -51,7 +51,7 @@ jobs:
         if: always()  # Run this step even if previous steps fail
         run: |
           kubectl get pods -n default
-          POD_NAME=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2)
+          POD_NAME=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2 | grep master)
           echo "Fetching logs for pod: $POD_NAME"
           kubectl describe pod $POD_NAME -n default
           kubectl logs $POD_NAME -n default
