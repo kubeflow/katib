@@ -157,7 +157,7 @@ def run_e2e_experiment_create_by_tune_with_external_model(
         resources_per_trial=katib.TrainerResources(
             num_workers=1,
             num_procs_per_worker=1,
-            resources_per_worker={"cpu": "1", "memory": "10G",},
+            resources_per_worker={"cpu": "2", "memory": "10G",},
         ),
     )
     experiment = katib_client.wait_for_experiment_condition(

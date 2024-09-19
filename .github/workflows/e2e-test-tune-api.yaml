@@ -55,6 +55,7 @@ jobs:
           echo "Fetching logs for pod: $POD_NAME"
           kubectl describe pod $POD_NAME -n default
           kubectl logs $POD_NAME -n default
+          kubectl top pods $POD_NAME
           kubectl get events -n default | grep "tune-example-2"
         
       # Step to fetch kubelet logs from Minikube
