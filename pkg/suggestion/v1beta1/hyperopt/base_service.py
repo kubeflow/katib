@@ -116,8 +116,11 @@ class BaseHyperoptService(object):
                             sigma,
                         )
                 elif param.distribution == api_pb2.LOG_NORMAL:
-                    mu = (float(param.min) + float(param.max)) / 2
-                    sigma = (float(param.max) - float(param.min)) / 6
+                    log_min = math.log(float(param.min))
+                    log_max = math.log(float(param.max))
+
+                    mu = (log_min + log_max) / 2
+                    sigma = (log_max - log_min) / 6
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qlognormal(
                             param.name,
