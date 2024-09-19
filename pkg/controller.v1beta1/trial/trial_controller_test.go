@@ -301,16 +301,17 @@ func TestReconcileBatchJob(t *testing.T) {
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
 		// Metrics unavailable because GetTrialObservationLog returns "unavailable".
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				return false
-			}
-			return trial.IsMetricsUnavailable() &&
-				len(trial.Status.Observation.Metrics) > 0 &&
-				trial.Status.Observation.Metrics[0].Min == consts.UnavailableMetricValue &&
-				trial.Status.Observation.Metrics[0].Max == consts.UnavailableMetricValue &&
-				trial.Status.Observation.Metrics[0].Latest == consts.UnavailableMetricValue
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsMetricsUnavailable()).Should(gomega.BeTrue())
+			g.Expect(trial.Status.Observation.Metrics).ShouldNot(gomega.HaveLen(0))
+			g.Expect(trial.Status.Observation.Metrics[0]).Should(gomega.BeComparableTo(commonv1beta1.Metric{
+			  Name: objectiveMetric,
+			  Min: consts.UnavailableMetricValue,
+			  Max: consts.UnavailableMetricValue,
+			  Latest: consts.UnavailableMetricValue,
+			}))
+		}, timeout).Should(gomega.Succeed())
 
 		// Delete the Trial
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
@@ -341,16 +342,17 @@ func TestReconcileBatchJob(t *testing.T) {
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
 		// Metrics unavailable because GetTrialObservationLog returns "unavailable".
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				return false
-			}
-			return trial.IsMetricsUnavailable() &&
-				len(trial.Status.Observation.Metrics) > 0 &&
-				trial.Status.Observation.Metrics[0].Min == consts.UnavailableMetricValue &&
-				trial.Status.Observation.Metrics[0].Max == consts.UnavailableMetricValue &&
-				trial.Status.Observation.Metrics[0].Latest == consts.UnavailableMetricValue
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsMetricsUnavailable()).Should(gomega.BeTrue())
+			g.Expect(trial.Status.Observation.Metrics).ShouldNot(gomega.HaveLen(0))
+			g.Expect(trial.Status.Observation.Metrics[0]).Should(gomega.BeComparableTo(commonv1beta1.Metric{
+			  Name: objectiveMetric,
+			  Min: consts.UnavailableMetricValue,
+			  Max: consts.UnavailableMetricValue,
+			  Latest: consts.UnavailableMetricValue,
+			}))
+		}, timeout).Should(gomega.Succeed())
 
 		// Delete the Trial
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
