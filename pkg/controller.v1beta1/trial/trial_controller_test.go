@@ -170,6 +170,7 @@ func TestReconcileBatchJob(t *testing.T) {
 
 	// Start test manager
 	mgrCtx, cancel := context.WithCancel(context.TODO())
+	t.Cleanup(cancel)
 	go func() {
 		g.Expect(mgr.Start(mgrCtx)).NotTo(gomega.HaveOccurred())
 	}()
@@ -364,9 +365,6 @@ func TestReconcileBatchJob(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		g.Expect(r.updateStatus(&trialsv1beta1.Trial{})).To(gomega.HaveOccurred())
 	})
-
-	// Stop the test manager
-	cancel()
 }
 
 func TestGetObjectiveMetricValue(t *testing.T) {
