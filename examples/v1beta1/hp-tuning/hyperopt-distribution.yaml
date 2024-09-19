@@ -7,7 +7,7 @@ metadata:
 spec:
   objective:
     type: minimize
-    goal: 0.001
+    goal: 0.2
     objectiveMetricName: loss
   algorithm:
     algorithmName: random
@@ -39,7 +39,7 @@ spec:
       feasibleSpace:
         min: "0.1"
         max: "0.5"
-        step: "0.001"
+        step: "0.01"
         distribution: "logNormal"
   trialTemplate:
     primaryContainerName: training-container
