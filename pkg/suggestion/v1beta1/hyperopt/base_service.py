@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import math
 
 import hyperopt
 import numpy as np
@@ -84,17 +85,23 @@ class BaseHyperoptService(object):
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qloguniform(
                             param.name,
-                            float(param.min),
-                            float(param.max),
+                            math.log(float(param.min)),
+                            math.log(float(param.max)),
                             float(param.step),
                         )
                     else:
                         hyperopt_search_space[param.name] = hyperopt.hp.loguniform(
-                            param.name, float(param.min), float(param.max)
+                            param.name,
+                            math.log(float(param.min)),
+                            math.log(float(param.max)),
                         )
                 elif param.distribution == api_pb2.NORMAL:
-                    mu = (float(param.min) + float(param.max)) / 2
-                    sigma = (float(param.max) - float(param.min)) / 6
+                    log_min = math.log(float(param.min))
+                    log_max = math.log(float(param.max))
+
+                    mu = (log_min + log_max) / 2
+                    sigma = (log_max - log_min) / 6
+
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qnormal(
                             param.name,
