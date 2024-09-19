@@ -54,7 +54,6 @@ jobs:
           POD_NAME=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2 | grep master)
           echo "Fetching logs for pod: $POD_NAME"
           kubectl describe pod $POD_NAME -n default
-          kubectl logs $POD_NAME -n default
           kubectl top pods $POD_NAME
           kubectl get events -n default | grep "tune-example-2"
         
