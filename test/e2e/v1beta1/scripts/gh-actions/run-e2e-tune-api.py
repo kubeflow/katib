@@ -31,12 +31,24 @@ def get_experiment_pods_logs(katib_client: KatibClient, exp_name: str, exp_names
             logging.info(f"Fetching logs for pod: {pod.metadata.name}")
             try:
                 # Specify the container name when retrieving logs
-                pod_logs = v1.read_namespaced_pod_log(
+                pod_logs1 = v1.read_namespaced_pod_log(
                     name=pod.metadata.name,
                     namespace=exp_namespace,
                     container="metrics-logger-and-collector"  # Specify the desired container
                 )
-                logging.info(f"Logs for pod {pod.metadata.name}:\n{pod_logs}")
+                logging.info(f"Logs for pod {pod.metadata.name}:\n{pod_logs1}")
+                pod_logs2 = v1.read_namespaced_pod_log(
+                    name=pod.metadata.name,
+                    namespace=exp_namespace,
+                    container="pytorch"
+                )
+                logging.info(f"Logs for pod {pod.metadata.name}:\n{pod_logs2}")
+                pod_logs3 = v1.read_namespaced_pod_log(
+                    name=pod.metadata.name,
+                    namespace=exp_namespace,
+                    container="storage-initializer"
+                )
+                logging.info(f"Logs for pod {pod.metadata.name}:\n{pod_logs3}")
             except Exception as e:
                 logging.error(f"Failed to get logs for pod {pod.metadata.name}: {str(e)}")
 
