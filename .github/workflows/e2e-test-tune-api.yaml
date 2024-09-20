@@ -53,8 +53,11 @@ jobs:
           kubectl get pods -n default
           POD_NAME=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2 | grep master)
           kubectl describe pod $POD_NAME -n default
-          kubectl top pods $POD_NAME
           kubectl get events -n default | grep "tune-example-2"
+          kubectl get apiservices | grep metrics
+          minikube addons enable metrics-server
+          kubectl get pods -n kube-system
+          kubectl top pods $POD_NAME
         
       # Step to fetch kubelet logs from Minikube
       - name: Fetch Kubelet Logs
