@@ -27,48 +27,82 @@ jobs:
         run: |
           pip install "kubeflow-training[huggingface]==1.8.1"
       
-      # Step to check disk space
-      - name: Check Disk Space
+      # Step 2: Check Disk Space Before Test
+      - name: Check Disk Space Before Test
         run: |
           echo "Checking disk space usage before e2e test..."
           df -h  # Run 'df' to check free disk space
       
+      # Step 3: Run e2e test with tune API
       - name: Run e2e test with tune API
         uses: ./.github/workflows/template-e2e-test
         with:
           tune-api: true
           training-operator: true
       
-      # Step to check disk space
-      - name: Check Disk Space
+      # Step 4: Check Disk Space After Test
+      - name: Check Disk Space After Test
         if: always()  # Run this step even if previous steps fail
         run: |
           echo "Checking disk space usage after e2e test..."
           df -h  # Run 'df' to check free disk space
 
-      # Step to get logs of the relevant Experiment pod
+      # Step 5: Fetch Pod Logs for Relevant Experiment Pod
       - name: Fetch Experiment Pod Logs
         if: always()  # Run this step even if previous steps fail
         run: |
+          echo "Fetching logs for experiment pod..."
           kubectl get pods -n default
           POD_NAME=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2 | grep master)
           kubectl describe pod $POD_NAME -n default
           kubectl get events -n default | grep "tune-example-2"
-          kubectl get apiservices | grep metrics
-          minikube addons enable metrics-server
-          kubectl get pods -n kube-system
-          kubectl top pods $POD_NAME
-        
-      # Step to fetch kubelet logs from Minikube
+      
+      # Step 6: Fetch kubelet logs (requires sudo for accessing kubelet logs)
       - name: Fetch Kubelet Logs
         if: always()  # Run this step even if previous steps fail
-        shell: bash
         run: |
           echo "Fetching kubelet logs..."
           sudo journalctl -u kubelet
+      
+      # Step 7: Check Node Resource Usage
+      - name: Check Node Resource Usage
+        if: always()
+        run: |
+          echo "Checking node resource usage..."
+          NODE_NAME=$(kubectl get pods -n default -o jsonpath="{.items[0].spec.nodeName}")
+          kubectl top node $NODE_NAME
+
+      # Step 8: Check Pod Resource Usage
+      - name: Check Pod Resource Usage
+        if: always()
+        run: |
+          echo "Checking pod resource usage..."
+          kubectl top pod -n default $POD_NAME
+      
+      # Step 9: Fetch Network Information for Pod
+      - name: Fetch Network Info
+        if: always()
+        run: |
+          echo "Fetching network info for pod $POD_NAME"
+          kubectl exec $POD_NAME -n default -- ip a
+
+      # Step 10: Check Docker Logs for Container
+      - name: Check Docker Logs for Container
+        if: always()
+        run: |
+          echo "Fetching Docker logs..."
+          CONTAINER_ID=$(docker ps | grep $POD_NAME | awk '{print $1}')
+          docker logs $CONTAINER_ID
+
+      # Step 11: Check Kernel Logs for OOM/Resource Issues
+      - name: Check Kernel Logs for Resource Issues
+        if: always()
+        run: |
+          echo "Checking kernel logs for resource issues..."
+          dmesg | grep -i "oom\|kill"
 
     strategy:
       fail-fast: false
       matrix:
-        # Detail: https://hub.docker.com/r/kindest/node
+        # Kubernetes versions to test with
         kubernetes-version: ["v1.27.11", "v1.28.7", "v1.29.2"]
