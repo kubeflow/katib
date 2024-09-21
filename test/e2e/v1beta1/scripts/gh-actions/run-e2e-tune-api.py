@@ -176,6 +176,10 @@ def run_e2e_experiment_create_by_tune_with_external_model(
             num_procs_per_worker=1,
             resources_per_worker={"cpu": "2", "memory": "10G",},
         ),
+        storage_config={
+            "size": "10Gi",
+            "access_modes": ["ReadWriteOnce"],
+        },
     )
     experiment = katib_client.wait_for_experiment_condition(
         exp_name, exp_namespace, timeout=EXPERIMENT_TIMEOUT
