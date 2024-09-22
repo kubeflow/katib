@@ -64,6 +64,12 @@ jobs:
           echo "Fetching kubelet logs..."
           sudo journalctl -u kubelet
 
+      - name: Check container runtime logs
+        if: always()  # Run this step even if previous steps fail
+        run: |
+          echo "Checking container runtime logs..."
+          sudo journalctl -u docker
+
     strategy:
       fail-fast: false
       matrix:
