@@ -80,9 +80,14 @@ class BaseHyperoptService(object):
                             param.name, float(param.min), float(param.max)
                         )
                     else:
-                        hyperopt_search_space[param.name] = hyperopt.hp.uniform(
-                            param.name, float(param.min), float(param.max)
-                        )
+                        if param.type == INTEGER:
+                            hyperopt_search_space[param.name] = hyperopt.hp.uniformint(
+                                param.name, float(param.min), float(param.max)
+                            )
+                        else:
+                            hyperopt_search_space[param.name] = hyperopt.hp.uniform(
+                                param.name, float(param.min), float(param.max)
+                            )
                 elif param.distribution == api_pb2.LOG_UNIFORM:
                     # Log-uniform distribution: used for parameters that vary exponentially.
                     # We convert min and max to their logarithmic scale using math.log, because
