@@ -111,6 +111,7 @@ class BaseHyperoptService(object):
                     # min and max, and sigma as (max - min) / 6. This is based on the assumption
                     # that 99.7% of the values in a normal distribution fall within ±3 sigma.
                     mu = (float(param.min) + float(param.max)) / 2
+                    // We consider the normal distribution based on the range of ±3 sigma.
                     sigma = (float(param.max) - float(param.min)) / 6
 
                     if param.step:
