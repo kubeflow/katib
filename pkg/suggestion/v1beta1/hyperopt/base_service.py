@@ -117,7 +117,6 @@ class BaseHyperoptService(object):
                 elif param.distribution == api_pb2.LOG_NORMAL:
                     log_min = math.log(float(param.min))
                     log_max = math.log(float(param.max))
-
                     mu = (log_min + log_max) / 2
                     sigma = (log_max - log_min) / 6
 

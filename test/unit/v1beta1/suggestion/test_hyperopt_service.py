@@ -212,37 +212,79 @@ class TestHyperopt(unittest.TestCase):
                             name="param-10",
                             parameter_type=api_pb2.DOUBLE,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="10", min="5", list=[], step="0.8", distribution=api_pb2.LOG_NORMAL)
+                                max="10", min="5", list=[], distribution=api_pb2.NORMAL)
                         ),
                         api_pb2.ParameterSpec(
                             name="param-11",
-                            parameter_type=api_pb2.INT,
+                            parameter_type=api_pb2.DOUBLE,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="64", min="32", distribution=api_pb2.LOG_NORMAL)
+                                max="10", min="5", list=[], step="0.8", distribution=api_pb2.LOG_NORMAL)
                         ),
                         api_pb2.ParameterSpec(
                             name="param-12",
-                            parameter_type=api_pb2.INT,
+                            parameter_type=api_pb2.DOUBLE,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="5", min="1", list=[], distribution=api_pb2.UNIFORM)
+                                max="10", min="5", list=[], distribution=api_pb2.LOG_NORMAL)
                         ),
                         api_pb2.ParameterSpec(
                             name="param-13",
                             parameter_type=api_pb2.INT,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="10", min="5", list=[], step="0.8", distribution=api_pb2.UNIFORM)
+                                max="5", min="1", list=[], distribution=api_pb2.UNIFORM)
                         ),
                         api_pb2.ParameterSpec(
                             name="param-14",
                             parameter_type=api_pb2.INT,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="10", min="5", list=[], distribution=api_pb2.LOG_UNIFORM)
+                                max="5", min="1", list=[], step="0.8", distribution=api_pb2.UNIFORM)
                         ),
                         api_pb2.ParameterSpec(
                             name="param-15",
                             parameter_type=api_pb2.INT,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="100", min="5", list=[], step="0.8", distribution=api_pb2.NORMAL)
+                                max="10", min="5", list=[], distribution=api_pb2.LOG_UNIFORM)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-16",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="10", min="5", list=[], step="0.01", distribution=api_pb2.LOG_UNIFORM)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-17",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="100", min="5", list=[], distribution=api_pb2.NORMAL)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-18",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="100", min="5", list=[], step="0.01", distribution=api_pb2.NORMAL)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-19",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="64", min="32", distribution=api_pb2.LOG_NORMAL)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-20",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="64", min="32", step="0.01", distribution=api_pb2.LOG_NORMAL)
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-21",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="64", min="32", step="0.01")
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-22",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="64", min="32", step="0.01")
                         )
                     ]
                 )
