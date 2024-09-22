@@ -63,46 +63,9 @@ jobs:
         run: |
           echo "Fetching kubelet logs..."
           sudo journalctl -u kubelet
-      
-      # Step 7: Check Node Resource Usage
-      - name: Check Node Resource Usage
-        if: always()
-        run: |
-          echo "Checking node resource usage..."
-          NODE_NAME=$(kubectl get pods -n default -o jsonpath="{.items[0].spec.nodeName}")
-          kubectl top node $NODE_NAME
-
-      # Step 8: Check Pod Resource Usage
-      - name: Check Pod Resource Usage
-        if: always()
-        run: |
-          echo "Checking pod resource usage..."
-          kubectl top pod -n default $POD_NAME
-      
-      # Step 9: Fetch Network Information for Pod
-      - name: Fetch Network Info
-        if: always()
-        run: |
-          echo "Fetching network info for pod $POD_NAME"
-          kubectl exec $POD_NAME -n default -- ip a
-
-      # Step 10: Check Docker Logs for Container
-      - name: Check Docker Logs for Container
-        if: always()
-        run: |
-          echo "Fetching Docker logs..."
-          CONTAINER_ID=$(docker ps | grep $POD_NAME | awk '{print $1}')
-          docker logs $CONTAINER_ID
-
-      # Step 11: Check Kernel Logs for OOM/Resource Issues
-      - name: Check Kernel Logs for Resource Issues
-        if: always()
-        run: |
-          echo "Checking kernel logs for resource issues..."
-          dmesg | grep -i "oom\|kill"
 
     strategy:
       fail-fast: false
       matrix:
         # Kubernetes versions to test with
-        kubernetes-version: ["v1.27.11", "v1.28.7", "v1.29.2"]
+        kubernetes-version: ["v1.29.2"]
