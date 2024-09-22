@@ -59,7 +59,7 @@ runs:
       with:
         network-plugin: cni
         cni: flannel
-        driver: docker
+        driver: none
         kubernetes-version: ${{ inputs.kubernetes-version }}
         minikube-version: 1.31.1
         start-args: --wait-timeout=120s
