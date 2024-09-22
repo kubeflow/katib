@@ -151,20 +151,6 @@ def main():
         help="SGD momentum (default: 0.5)",
     )
     parser.add_argument(
-        "--weight-decay",
-        type=float,
-        default=0.01,
-        metavar="WD",
-        help="Weight decay for regularization (default: 0.01)",
-    )
-    parser.add_argument(
-        "--dropout-rate",
-        type=float,
-        default=0.5,
-        metavar="DR",
-        help="Dropout rate for the model (default: 0.5)",
-    )
-    parser.add_argument(
         "--no-cuda", action="store_true", default=False, help="disables CUDA training"
     )
     parser.add_argument(
