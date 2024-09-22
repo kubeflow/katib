@@ -31,13 +31,6 @@ runs:
         echo "Disk usage after cleanup:"
         df -h
     
-    - name: Prune docker images
-      shell: bash
-      run: |
-        docker image prune -a -f
-        docker system df
-        df -hT
-  
     - name: Move docker data directory
       shell: bash
       run: |
@@ -66,7 +59,7 @@ runs:
       with:
         network-plugin: cni
         cni: flannel
-        driver: none
+        driver: docker
         kubernetes-version: ${{ inputs.kubernetes-version }}
         minikube-version: 1.31.1
         start-args: --wait-timeout=120s
