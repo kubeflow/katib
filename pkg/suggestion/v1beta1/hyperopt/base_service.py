@@ -98,6 +98,7 @@ class BaseHyperoptService(object):
                         )
                 elif param.distribution == api_pb2.NORMAL:
                     mu = (float(param.min) + float(param.max)) / 2
+                    // We consider the normal distribution based on the range of ±3 sigma.
                     sigma = (float(param.max) - float(param.min)) / 6
 
                     if param.step:
