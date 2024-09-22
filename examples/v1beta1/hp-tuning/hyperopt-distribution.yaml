@@ -7,7 +7,7 @@ metadata:
 spec:
   objective:
     type: minimize
-    goal: 0.2
+    goal: 0.05
     objectiveMetricName: loss
   algorithm:
     algorithmName: random
@@ -25,9 +25,15 @@ spec:
     - name: momentum
       parameterType: double
       feasibleSpace:
-        min: "0.5"
-        max: "0.9"
-        distribution: "logUniform"
+        min: "0.001"
+        max: "1"
+        distribution: "uniform"
+    - name: batch_size
+      parameterType: int
+      feasibleSpace:
+        min: "32"
+        max: "64"
+        distribution: "logNormal"
   trialTemplate:
     primaryContainerName: training-container
     trialParameters:
@@ -37,6 +43,9 @@ spec:
       - name: momentum
         description: Momentum for the training model
         reference: momentum
+      - name: batchSize
+        description: Batch Size
+        reference: batch_size
     trialSpec:
       apiVersion: batch/v1
       kind: Job
@@ -50,7 +59,7 @@ spec:
                   - "python3"
                   - "/opt/pytorch-mnist/mnist.py"
                   - "--epochs=1"
-                  - "--batch-size=16"
+                  - "--batch-size=${trialParameters.batchSize}"
                   - "--lr=${trialParameters.learningRate}"
                   - "--momentum=${trialParameters.momentum}"
                 resources:
