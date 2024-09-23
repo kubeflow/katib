@@ -97,9 +97,13 @@ class BaseHyperoptService(object):
                             math.log(float(param.max)),
                         )
                 elif param.distribution == api_pb2.NORMAL:
-                    mu = (float(param.min) + float(param.max)) / 2
-                    # We consider the normal distribution based on the range of ±3 sigma.
-                    sigma = (float(param.max) - float(param.min)) / 6
+                    if param.min == "" or param.max == "":
+                        mu = 0
+                        sigma = 1
+                    else:
+                        mu = (float(param.min) + float(param.max)) / 2
+                        # We consider the normal distribution based on the range of ±3 sigma.
+                        sigma = (float(param.max) - float(param.min)) / 6
 
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qnormal(
@@ -115,10 +119,15 @@ class BaseHyperoptService(object):
                             sigma,
                         )
                 elif param.distribution == api_pb2.LOG_NORMAL:
-                    log_min = math.log(float(param.min))
-                    log_max = math.log(float(param.max))
-                    mu = (log_min + log_max) / 2
-                    sigma = (log_max - log_min) / 6
+                    if param.min == "" or param.max == "":
+                        mu = 0
+                        sigma = 1
+                    else:
+                        log_min = math.log(float(param.min))
+                        log_max = math.log(float(param.max))
+                        mu = (log_min + log_max) / 2
+                        # We consider the normal distribution based on the range of ±3 sigma.
+                        sigma = (log_max - log_min) / 6
 
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qlognormal(
