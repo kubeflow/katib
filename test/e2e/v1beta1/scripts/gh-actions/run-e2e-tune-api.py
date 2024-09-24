@@ -19,64 +19,6 @@ EXPERIMENT_TIMEOUT = 60 * 10
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
 
-
-def get_experiment_pods_logs(katib_client: KatibClient, exp_name: str, exp_namespace: str):
-    # List all the pods in the namespace
-    v1 = client.CoreV1Api()
-    pods = v1.list_namespaced_pod(namespace=exp_namespace)
-    
-    # Filter pods related to the specific Katib Experiment
-    for pod in pods.items:
-        if exp_name in pod.metadata.name:
-            logging.info(f"Fetching logs for pod: {pod.metadata.name}")
-            try:
-                # Specify the container name when retrieving logs
-                pod_logs1 = v1.read_namespaced_pod_log(
-                    name=pod.metadata.name,
-                    namespace=exp_namespace,
-                    container="metrics-logger-and-collector"
-                )
-                logging.info(f"Logs of metrics-logger-and-collector for pod {pod.metadata.name}:\n{pod_logs1}")
-                pod_logs2 = v1.read_namespaced_pod_log(
-                    name=pod.metadata.name,
-                    namespace=exp_namespace,
-                    container="pytorch"
-                )
-                logging.info(f"Logs of pytorch for pod {pod.metadata.name}:\n{pod_logs2}")
-                pod_logs3 = v1.read_namespaced_pod_log(
-                    name=pod.metadata.name,
-                    namespace=exp_namespace,
-                    container="storage-initializer"
-                )
-                logging.info(f"Logs of storage-initializer for pod {pod.metadata.name}:\n{pod_logs3}")
-                pod_logs4 = v1.read_namespaced_pod_log(
-                    name=pod.metadata.name,
-                    namespace=exp_namespace,
-                )
-                logging.info(f"Logs for pod {pod.metadata.name}:\n{pod_logs4}")
-            except Exception as e:
-                logging.error(f"Failed to get logs for pod {pod.metadata.name}: {str(e)}")
-
-def get_experiment_pods_logs_2(katib_client: KatibClient, exp_name: str, exp_namespace: str):
-    # List all the pods in the namespace
-    v1 = client.CoreV1Api()
-    pods = v1.list_namespaced_pod(namespace=exp_namespace)
-    
-    # Filter pods related to the specific Katib Experiment
-    for pod in pods.items:
-        if exp_name in pod.metadata.name:
-            logging.info(f"Fetching logs for pod: {pod.metadata.name}")
-            try:
-                # Specify the container name when retrieving logs
-                pod_logs = v1.read_namespaced_pod_log(
-                    name=pod.metadata.name,
-                    namespace=exp_namespace,
-                )
-                logging.info(f"Logs for pod {pod.metadata.name} (container: metrics-logger-and-collector):\n{pod_logs}")
-            except Exception as e:
-                logging.error(f"Failed to get logs for pod {pod.metadata.name}: {str(e)}")
-
-
 # Test for Experiment created with custom objective.
 def run_e2e_experiment_create_by_tune_with_custom_objective(
     katib_client: KatibClient,
@@ -180,6 +122,7 @@ def run_e2e_experiment_create_by_tune_with_external_model(
             "size": "10Gi",
             "access_modes": ["ReadWriteOnce"],
         },
+        retain_trials=True,
     )
     experiment = katib_client.wait_for_experiment_condition(
         exp_name, exp_namespace, timeout=EXPERIMENT_TIMEOUT
@@ -236,9 +179,6 @@ if __name__ == "__main__":
     except Exception as e:
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-2")
-        get_experiment_pods_logs(katib_client, f"{exp_name}-2", exp_namespace)
-        get_experiment_pods_logs_2(katib_client, "katib-controller", "kubeflow")
-        get_experiment_pods_logs_2(katib_client, "training-operator", "kubeflow")
         raise e
     finally:
         # Delete the Experiment.

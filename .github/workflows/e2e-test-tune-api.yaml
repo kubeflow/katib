@@ -51,10 +51,14 @@ jobs:
       - name: Fetch Experiment Pod Logs
         if: always()  # Run this step even if previous steps fail
         run: |
-          echo "Fetching logs for experiment pod..."
+          echo "Fetching all the pods in the default namespace..."
           kubectl get pods -n default
           POD_NAME=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2 | grep master)
+          echo "Fetching pod description for experiment pod..."
           kubectl describe pod $POD_NAME -n default
+          echo "Fetching logs for experiment pod..."
+          kubectl logs $POD_NAME -n default --all-containers
+          echo "Fetching events for experiment pod..."
           kubectl get events -n default | grep "tune-example-2"
       
       # Step 6: Fetch kubelet logs (requires sudo for accessing kubelet logs)
