@@ -33,13 +33,32 @@ jobs:
           echo "Checking disk space usage before e2e test..."
           df -h  # Run 'df' to check free disk space
       
+      - name: Monitor Memory Usage Before Run
+        if: always()
+        run: free -h
+      
+      - name: Monitor Docker Container Memory Usage
+        if: always()  
+        run: |
+          docker stats --no-stream
+      
       # Step 3: Run e2e test with tune API
       - name: Run e2e test with tune API
+        if: always()
         uses: ./.github/workflows/template-e2e-test
         with:
           tune-api: true
           training-operator: true
       
+      - name: Monitor Memory Usage After Run
+        if: always()
+        run: free -h
+      
+      - name: Monitor Docker Container Memory Usage
+        if: always()  
+        run: |
+          docker stats --no-stream
+        
       # Step 4: Check Disk Space After Test
       - name: Check Disk Space After Test
         if: always()  # Run this step even if previous steps fail
