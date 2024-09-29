@@ -30,6 +30,8 @@ jobs:
       # Step 2: Check Disk Space Before Test
       - name: Check Disk Space Before Test
         run: |
+          docker system prune -a
+          docker volume prune
           echo "Checking disk space usage before e2e test..."
           df -h  # Run 'df' to check free disk space
       
