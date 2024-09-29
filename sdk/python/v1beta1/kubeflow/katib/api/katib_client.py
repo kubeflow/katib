@@ -658,7 +658,7 @@ class KatibClient(object):
 
             worker_pod_template_spec = models.V1PodTemplateSpec(
                 metadata=models.V1ObjectMeta(
-                    annotations={constants.ISTIO_SIDECAR_INJECTION: "false"}
+                    annotations={"sidecar.istio.io/inject": "false"}
                 ),
                 spec=models.V1PodSpec(
                     containers=[container_spec],
@@ -669,7 +669,7 @@ class KatibClient(object):
 
             master_pod_template_spec = models.V1PodTemplateSpec(
                 metadata=models.V1ObjectMeta(
-                    annotations={constants.ISTIO_SIDECAR_INJECTION: "false"}
+                    annotations={"sidecar.istio.io/inject": "false"}
                 ),
                 spec=models.V1PodSpec(
                     init_containers=[init_container_spec],
