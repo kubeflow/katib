@@ -27,7 +27,6 @@ jobs:
         run: |
           pip install "kubeflow-training[huggingface]==1.8.1"
       
-      # Step 2: Check Disk Space Before Test
       - name: Check Disk Space Before Test
         run: |
           docker system prune -a
@@ -43,16 +42,7 @@ jobs:
         if: always()  
         run: |
           docker stats --no-stream
-
-      - name: Restart Docker Service
-        run: |
-          echo "Restarting Docker service..."
-          sudo systemctl restart docker
-          echo "Docker service status:"
-          sudo systemctl --no-pager -l -o short status docker
-          kubectl get pods -n kubeflow
       
-      # Step 3: Run e2e test with tune API
       - name: Run e2e test with tune API
         if: always()
         uses: ./.github/workflows/template-e2e-test
@@ -69,14 +59,12 @@ jobs:
         run: |
           docker stats --no-stream
         
-      # Step 4: Check Disk Space After Test
       - name: Check Disk Space After Test
         if: always()  # Run this step even if previous steps fail
         run: |
           echo "Checking disk space usage after e2e test..."
           df -h  # Run 'df' to check free disk space
 
-      # Step 5: Fetch Pod Logs for Relevant Experiment Pod
       - name: Fetch Experiment Pod Logs
         if: always()  # Run this step even if previous steps fail
         run: |
@@ -90,7 +78,6 @@ jobs:
           echo "Fetching events for experiment pod..."
           kubectl get events -n default | grep "tune-example-2"
       
-      # Step 6: Fetch kubelet logs (requires sudo for accessing kubelet logs)
       - name: Fetch Kubelet Logs
         if: always()  # Run this step even if previous steps fail
         run: |
