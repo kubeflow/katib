@@ -633,6 +633,8 @@ class KatibClient(object):
                     model_provider_parameters.model_uri,
                     "--transformer_type",
                     model_provider_parameters.transformer_type.__name__,
+                    "--num_labels",
+                    str(model_provider_parameters.num_labels),
                     "--model_dir",
                     VOLUME_PATH_MODEL,
                     "--dataset_dir",
@@ -654,15 +656,27 @@ class KatibClient(object):
                 ),
             )
 
-            worker_pod_template_spec = training_utils.get_pod_template_spec(
-                containers=[container_spec],
-                volumes=[storage_initializer_volume],
+            worker_pod_template_spec = models.V1PodTemplateSpec(
+                metadata=models.V1ObjectMeta(
+                    annotations={"sidecar.istio.io/inject": "false"}
+                ),
+                spec=models.V1PodSpec(
+                    containers=[container_spec],
+                    volumes=[storage_initializer_volume],
+                    termination_grace_period_seconds=60,
+                ),
             )
 
-            master_pod_template_spec = training_utils.get_pod_template_spec(
-                containers=[container_spec],
-                init_containers=[init_container_spec],
-                volumes=[storage_initializer_volume],
+            master_pod_template_spec = models.V1PodTemplateSpec(
+                metadata=models.V1ObjectMeta(
+                    annotations={"sidecar.istio.io/inject": "false"}
+                ),
+                spec=models.V1PodSpec(
+                    init_containers=[init_container_spec],
+                    containers=[container_spec],
+                    volumes=[storage_initializer_volume],
+                    termination_grace_period_seconds=60,
+                ),
             )
 
             # Create PyTorchJob.
