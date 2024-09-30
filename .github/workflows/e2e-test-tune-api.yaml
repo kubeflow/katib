@@ -43,6 +43,14 @@ jobs:
         if: always()  
         run: |
           docker stats --no-stream
+
+      - name: Restart Docker Service
+        run: |
+          echo "Restarting Docker service..."
+          sudo systemctl restart docker
+          echo "Docker service status:"
+          sudo systemctl --no-pager -l -o short status docker
+          kubectl get pods -n kubeflow
       
       # Step 3: Run e2e test with tune API
       - name: Run e2e test with tune API
