@@ -284,7 +284,7 @@ func (g *DefaultValidator) validateParameters(parameters []experimentsv1beta1.Pa
 					allErrs = append(allErrs, field.Invalid(parametersPath.Index(i).Child("feasibleSpace").Child("list"),
 						param.FeasibleSpace.List, fmt.Sprintf("feasibleSpace.list is not supported for parameterType: %v", param.ParameterType)))
 				}
-				if param.FeasibleSpace.Max == "" && param.FeasibleSpace.Min == "" {
+				if param.FeasibleSpace.Max == "" || param.FeasibleSpace.Min == "" {
 					allErrs = append(allErrs, field.Required(parametersPath.Index(i).Child("feasibleSpace").Child("max"),
 						fmt.Sprintf("feasibleSpace.max or feasibleSpace.min must be specified for parameterType: %v", param.ParameterType)))
 				}
