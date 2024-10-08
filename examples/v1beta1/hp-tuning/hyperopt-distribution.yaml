@@ -71,8 +71,4 @@ spec:
                   - "--batch-size=${trialParameters.batchSize}"
                   - "--lr=${trialParameters.learningRate}"
                   - "--momentum=${trialParameters.momentum}"
-                resources:
-                  limits:
-                    memory: "1Gi"
-                    cpu: "0.5"
             restartPolicy: Never

@@ -67,21 +67,20 @@ class BaseHyperoptService(object):
             if param.type in [INTEGER, DOUBLE]:
                 if param.distribution == api_pb2.UNIFORM or param.distribution is None:
                     if param.step:
-                        hyperopt_search_space[param.name] = hyperopt.hp.quniform(
+                        hyperopt_search_space[param.name] = hyperopt.hp.quniformint(
                             param.name,
                             float(param.min),
                             float(param.max),
                             float(param.step),
                         )
+                    elif param.type == INTEGER:
+                        hyperopt_search_space[param.name] = hyperopt.hp.uniformint(
+                            param.name, float(param.min), float(param.max)
+                        )
                     else:
-                        if param.type == INTEGER:
-                            hyperopt_search_space[param.name] = hyperopt.hp.uniformint(
-                                param.name, float(param.min), float(param.max)
-                            )
-                        else:
-                            hyperopt_search_space[param.name] = hyperopt.hp.uniform(
-                                param.name, float(param.min), float(param.max)
-                            )
+                        hyperopt_search_space[param.name] = hyperopt.hp.uniform(
+                            param.name, float(param.min), float(param.max)
+                        )
                 elif param.distribution == api_pb2.LOG_UNIFORM:
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qloguniform(
