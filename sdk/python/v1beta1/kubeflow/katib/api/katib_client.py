@@ -599,7 +599,7 @@ class KatibClient(object):
                     "Dataset provider parameters must be an instance of S3DatasetParams "
                     "or HuggingFaceDatasetParams."
                 )
-            
+
             if not isinstance(trainer_parameters, HuggingFaceTrainerParams):
                 raise ValueError(
                     "Trainer parameters must be an instance of HuggingFaceTrainerParams."
