@@ -65,7 +65,7 @@ def create_namespaced_persistent_volume_claim_response(*args, **kwargs):
 
 
 def list_namespaced_persistent_volume_claim_response(*args, **kwargs):
-    if args[0] == "pvc creation failed":
+    if kwargs.get("namespace") == "pvc creation failed":
         mock_pvc = Mock()
         mock_pvc.metadata.name = "pvc_failed"
         mock_list = Mock()
