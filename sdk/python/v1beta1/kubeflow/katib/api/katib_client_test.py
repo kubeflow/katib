@@ -470,6 +470,16 @@ test_tune_data = [
         ValueError,
     ),
     (
+        "invalid trainer_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(),
+            "trainer_parameters": "invalid",
+        },
+        ValueError,
+    ),
+    (
         "pvc creation failed",
         {
             "name": "tune_test",

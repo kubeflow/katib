@@ -521,6 +521,7 @@ class KatibClient(object):
                 from kubeflow.storage_initializer.hugging_face import (
                     HuggingFaceDatasetParams,
                     HuggingFaceModelParams,
+                    HuggingFaceTrainerParams,
                 )
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
                 from kubeflow.training import models as training_models
@@ -597,6 +598,11 @@ class KatibClient(object):
                 raise ValueError(
                     "Dataset provider parameters must be an instance of S3DatasetParams "
                     "or HuggingFaceDatasetParams."
+                )
+            
+            if not isinstance(trainer_parameters, HuggingFaceTrainerParams):
+                raise ValueError(
+                    "Trainer parameters must be an instance of HuggingFaceTrainerParams."
                 )
 
             # Iterate over input parameters and do substitutions.
