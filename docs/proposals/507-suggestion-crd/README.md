@@ -1,28 +1,27 @@
-# Suggestion CRD Design Document
+# KEP-507: Suggestion CRD Design Document
 
-Table of Contents
-=================
+# Table of Contents
 
-   * [Suggestion CRD Design Document](#suggestion-crd-design-document)
-   * [Table of Contents](#table-of-contents)
-      * [Background](#background)
-      * [Goals](#goals)
-      * [Non-Goals](#non-goals)
-      * [Design](#design)
-         * [Kubernetes API](#kubernetes-api)
-         * [GRPC API](#grpc-api)
-         * [Workflow](#workflow)
-            * [Example](#example)
-      * [Algorithm Supports](#algorithm-supports)
-         * [Random](#random)
-         * [Grid](#grid)
-         * [Bayes Optimization](#bayes-optimization)
-         * [HyperBand](#hyperband)
-         * [BOHB](#bohb)
-         * [TPE](#tpe)
-         * [SMAC](#smac)
-         * [CMA-ES](#cma-es)
-         * [Sobol](#sobol)
+- [Suggestion CRD Design Document](#suggestion-crd-design-document)
+- [Table of Contents](#table-of-contents)
+  - [Background](#background)
+  - [Goals](#goals)
+  - [Non-Goals](#non-goals)
+  - [Design](#design)
+    - [Kubernetes API](#kubernetes-api)
+    - [GRPC API](#grpc-api)
+    - [Workflow](#workflow)
+      - [Example](#example)
+  - [Algorithm Supports](#algorithm-supports)
+    - [Random](#random)
+    - [Grid](#grid)
+    - [Bayes Optimization](#bayes-optimization)
+    - [HyperBand](#hyperband)
+    - [BOHB](#bohb)
+    - [TPE](#tpe)
+    - [SMAC](#smac)
+    - [CMA-ES](#cma-es)
+    - [Sobol](#sobol)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
@@ -118,7 +117,7 @@ message ExperimentSpec {
 }
 
 message ParameterSpecs {
-    repeated ParameterSpec parameters = 1; 
+    repeated ParameterSpec parameters = 1;
 }
 
 message AlgorithmSpec {
@@ -228,28 +227,28 @@ spec:
     algorithmName: random
   trialTemplate:
     goTemplate:
-        rawTemplate: |-
-          apiVersion: batch/v1
-          kind: Job
-          metadata:
-            name: {{.Trial}}
-            namespace: {{.NameSpace}}
-          spec:
-            template:
-              spec:
-                containers:
-                - name: {{.Trial}}
-                  image: katib/mxnet-mnist-example
-                  command:
-                  - "python"
-                  - "/mxnet/example/image-classification/train_mnist.py"
-                  - "--batch-size=64"
-                  {{- with .HyperParameters}}
-                  {{- range .}}
-                  - "{{.Name}}={{.Value}}"
-                  {{- end}}
-                  {{- end}}
-                restartPolicy: Never
+      rawTemplate: |-
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: {{.Trial}}
+          namespace: {{.NameSpace}}
+        spec:
+          template:
+            spec:
+              containers:
+              - name: {{.Trial}}
+                image: katib/mxnet-mnist-example
+                command:
+                - "python"
+                - "/mxnet/example/image-classification/train_mnist.py"
+                - "--batch-size=64"
+                {{- with .HyperParameters}}
+                {{- range .}}
+                - "{{.Name}}={{.Value}}"
+                {{- end}}
+                {{- end}}
+              restartPolicy: Never
   parameters:
     - name: --lr
       parameterType: double
@@ -265,9 +264,9 @@ spec:
       parameterType: categorical
       feasibleSpace:
         list:
-        - sgd
-        - adam
-        - ftrl
+          - sgd
+          - adam
+          - ftrl
 ```
 
 Then, Experiment controller needs 3 parallel trials to run. It creates the Suggestions:
