@@ -18,6 +18,8 @@ from kubeflow.katib import (
 from kubeflow.katib.constants import constants
 from kubernetes.client import V1ObjectMeta
 
+PVC_FAILED = "pvc creation failed"
+
 TEST_RESULT_SUCCESS = "success"
 
 
@@ -58,14 +60,14 @@ def get_observation_log_response(*args, **kwargs):
 
 
 def create_namespaced_persistent_volume_claim_response(*args, **kwargs):
-    if kwargs.get("namespace") == "pvc creation failed":
+    if kwargs.get("namespace") == PVC_FAILED:
         raise Exception("PVC creation failed")
     else:
         return {"metadata": {"name": "tune_test"}}
 
 
 def list_namespaced_persistent_volume_claim_response(*args, **kwargs):
-    if kwargs.get("namespace") == "pvc creation failed":
+    if kwargs.get("namespace") == PVC_FAILED:
         mock_pvc = Mock()
         mock_pvc.metadata.name = "pvc_failed"
         mock_list = Mock()
@@ -471,7 +473,7 @@ test_tune_data = [
         "pvc creation failed",
         {
             "name": "tune_test",
-            "namespace": "pvc creation failed",
+            "namespace": PVC_FAILED,
             "model_provider_parameters": HuggingFaceModelParams(),
             "dataset_provider_parameters": HuggingFaceDatasetParams(),
             "trainer_parameters": HuggingFaceTrainerParams(),
