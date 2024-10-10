@@ -66,8 +66,10 @@ class BaseHyperoptService(object):
         for param in self.search_space.params:
             if param.type in [INTEGER, DOUBLE]:
                 if param.distribution == api_pb2.UNIFORM or param.distribution is None:
+                    # Uniform distribution: values are sampled between min and max.
+                    # If step is defined, we use the quantized version quniform.
                     if param.step:
-                        hyperopt_search_space[param.name] = hyperopt.hp.quniformint(
+                        hyperopt_search_space[param.name] = hyperopt.hp.uniformint(
                             param.name,
                             float(param.min),
                             float(param.max),
@@ -82,6 +84,9 @@ class BaseHyperoptService(object):
                             param.name, float(param.min), float(param.max)
                         )
                 elif param.distribution == api_pb2.LOG_UNIFORM:
+                    # Log-uniform distribution: used for parameters that vary exponentially.
+                    # We convert min and max to their logarithmic scale using math.log, because
+                    # the log-uniform distribution is applied over the logarithmic range.
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qloguniform(
                             param.name,
@@ -96,8 +101,11 @@ class BaseHyperoptService(object):
                             math.log(float(param.max)),
                         )
                 elif param.distribution == api_pb2.NORMAL:
+                    # Normal distribution: used when values are centered around the mean (mu)
+                    # and spread out by sigma. We calculate mu as the midpoint between
+                    # min and max, and sigma as (max - min) / 6. This is based on the assumption
+                    # that 99.7% of the values in a normal distribution fall within ±3 sigma.
                     mu = (float(param.min) + float(param.max)) / 2
-                    # We consider the normal distribution based on the range of ±3 sigma.
                     sigma = (float(param.max) - float(param.min)) / 6
 
                     if param.step:
@@ -114,10 +122,14 @@ class BaseHyperoptService(object):
                             sigma,
                         )
                 elif param.distribution == api_pb2.LOG_NORMAL:
+                    # Log-normal distribution: applies when the logarithm
+                    # of the parameter follows a normal distribution.
+                    # We convert min and max to logarithmic scale and calculate
+                    # mu and sigma similarly to the normal distribution,
+                    # but on the log-transformed values to ensure the distribution is correct.
                     log_min = math.log(float(param.min))
                     log_max = math.log(float(param.max))
                     mu = (log_min + log_max) / 2
-                    # We consider the normal distribution based on the range of ±3 sigma.
                     sigma = (log_max - log_min) / 6
 
                     if param.step:
