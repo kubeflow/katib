@@ -618,7 +618,7 @@ func TestConvertDistribution(t *testing.T) {
 		},
 		{
 			inDistribution:       experimentsv1beta1.DistributionUnknown,
-			expectedDistribution: suggestionapi.Distribution_DISTRIBUTION_UNKNOWN,
+			expectedDistribution: suggestionapi.Distribution_DISTRIBUTION_UNSPECIFIED,
 			testDescription:      "Convert unknown distribution",
 		},
 	}
