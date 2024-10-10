@@ -1,13 +1,13 @@
-# HyperParameter Optimization API for LLM Fine-Tuning
+# KEP-2339: HyperParameter Optimization API for LLM Fine-Tuning
 
 - [HyperParameter Optimization API for LLM Fine-Tuning](#hyperparameter-optimization-api-for-llm-fine-tuning)
-  * [Links](#links)
-  * [Motivation](#motivation)
-  * [Goals](#goals)
-  * [Non-Goals](#non-goals)
-  * [Design for API](#design-for-api)
-    + [Example](#example)
-  * [Implementation](#implementation)
+  - [Links](#links)
+  - [Motivation](#motivation)
+  - [Goals](#goals)
+  - [Non-Goals](#non-goals)
+  - [Design for API](#design-for-api)
+    - [Example](#example)
+  - [Implementation](#implementation)
 
 ## Links
 
@@ -37,10 +37,10 @@ import kubeflow.katib as katib
 from kubeflow.katib import KatibClient
 
 class KatibClient(object):
-	
+
 	def tune(
 		self,
-		name: str, 
+		name: str,
 		namespace: Optional[str] = None,
 		model_provider_parameters: Optional[HuggingFaceModelParams] = None,
 		dataset_provider_parameters: Optional[Union[HuggingFaceDatasetParams, S3DatasetParams]] = None,
@@ -152,9 +152,9 @@ cl.tune(
 			lora_dropout = 0.1,
 			bias = "none",
 		),
-	),	
-	objective_metric_name = "train_loss", 
-	objective_type = "minimize", 
+	),
+	objective_metric_name = "train_loss",
+	objective_type = "minimize",
 	algorithm_name = "random",
 	max_trial_count = 10,
 	parallel_trial_count = 2,
@@ -214,7 +214,7 @@ container_spec = client.V1Container(
 		"--transformer_type",
 		model_provider_parameters.transformer_type.__name__,
 		"--model_dir",
-		"REPLACE_WITH_ACTUAL_MODEL_PATH", 
+		"REPLACE_WITH_ACTUAL_MODEL_PATH",
 		"--dataset_dir",
 		"REPLACE_WITH_ACTUAL_DATASET_PATH",
 		"--lora_config",
@@ -228,7 +228,7 @@ container_spec = client.V1Container(
 
 **Hyperparameter Optimization**: This API will create an Experiment that defines the search space for identified tunable hyperparameters, the objective metric, optimization algorithm, etc. The Experiment will orchestrate the hyperparameter tuning process, generating Trials for each configuratin. Each Trial will be implemented as a Kubernete PyTorchJob, with the `trialTemplate` specifying the exact values for hyperparameters. The `trialTemplate` will also define master and worker containers, facilitating effective resource distribution and parallel execution of Trials. Trial results will then be fed back to the Experiment, which will evaluate the outcomes to identify the optimal set of hyperparameters.
 
- **Dependencies Update**: To reuse existing assets from the Training Python SDK and integrate packages from HuggingFace, dependencies will be added to the `setup.py` of the Katib Python SDK as follows:
+**Dependencies Update**: To reuse existing assets from the Training Python SDK and integrate packages from HuggingFace, dependencies will be added to the `setup.py` of the Katib Python SDK as follows:
 
 ```python
 setuptools.setup(

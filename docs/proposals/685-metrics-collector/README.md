@@ -1,4 +1,4 @@
-# Metrics Collector Proposal
+# KEP-685: Metrics Collector Proposal
 
 - [Metrics Collector Proposal](#metrics-collector-proposal)
   - [Links](#links)
@@ -33,7 +33,7 @@ In the new design, Katib use mutating webhook to inject metrics collector contai
 The sidecar collects metrics of the master and then store them on the persistent layer (e.x. katib-db-manager and metadata server).
 
 <center>
-<img src="../images/metrics-collector-design.png" width="80%">
+<img src="./metrics-collector-design.png" width="80%">
 
 Fig. 1 Architecture of the new design
 

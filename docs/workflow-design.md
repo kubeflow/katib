@@ -1,5 +1,7 @@
 # How Katib v1beta1 tunes hyperparameters automatically in a Kubernetes native way
 
+TODO (andreyvelich): This doc is out of date. We should update it and move to the Kubeflow website.
+
 Follow the Kubeflow documentation guides:
 
 - [Concepts](https://www.kubeflow.org/docs/components/katib/overview/)
