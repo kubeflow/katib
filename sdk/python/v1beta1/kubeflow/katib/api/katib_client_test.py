@@ -416,7 +416,8 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "missing parameters in external model tuning - lack dataset_provider_parameters and trainer_parameters",
+        "missing parameters in external model tuning - lack dataset_provider_parameters "
+        "and trainer_parameters",
         {
             "name": "tune_test",
             "model_provider_parameters": HuggingFaceModelParams(),
@@ -424,7 +425,8 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "missing parameters in external model tuning - lack model_provider_parameters and trainer_parameters",
+        "missing parameters in external model tuning - lack model_provider_parameters "
+        "and trainer_parameters",
         {
             "name": "tune_test",
             "dataset_provider_parameters": HuggingFaceDatasetParams(),
@@ -432,7 +434,8 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "missing parameters in external model tuning - lack model_provider_parameters and dataset_provider_parameters",
+        "missing parameters in external model tuning - lack model_provider_parameters "
+        "and dataset_provider_parameters",
         {
             "name": "tune_test",
             "trainer_parameters": HuggingFaceTrainerParams(),
