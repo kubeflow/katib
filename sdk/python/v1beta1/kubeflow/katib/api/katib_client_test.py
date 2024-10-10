@@ -375,7 +375,7 @@ class KubeflowOrgV1PyTorchJob:
 
 test_tune_data = [
     (
-        "not specify name",
+        "missing name",
         {
             "name": None,
             "objective": lambda x: x,
@@ -384,7 +384,7 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "set both options",
+        "invalid hybrid parameters - objective and model_provider_parameters",
         {
             "name": "tune_test",
             "objective": lambda x: x,
@@ -393,14 +393,14 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "set no option",
+        "missing parameters",
         {
             "name": "tune_test",
         },
         ValueError,
     ),
     (
-        "set one option but missing parameters - only objective",
+        "missing parameters in custom objective tuning - lack parameters",
         {
             "name": "tune_test",
             "objective": lambda x: x,
@@ -408,7 +408,7 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "set one option but missing parameters - only parameters",
+        "missing parameters in custom objective tuning - lack objective",
         {
             "name": "tune_test",
             "parameters": {"param": "value"},
@@ -416,7 +416,7 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "set one option but missing parameters - only model_provider_parameters",
+        "missing parameters in external model tuning - lack dataset_provider_parameters and trainer_parameters",
         {
             "name": "tune_test",
             "model_provider_parameters": HuggingFaceModelParams(),
@@ -424,7 +424,7 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "set one option but missing parameters - only dataset_provider_parameters",
+        "missing parameters in external model tuning - lack model_provider_parameters and trainer_parameters",
         {
             "name": "tune_test",
             "dataset_provider_parameters": HuggingFaceDatasetParams(),
@@ -432,7 +432,7 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "set one option but missing parameters - only trainer_parameters",
+        "missing parameters in external model tuning - lack model_provider_parameters and dataset_provider_parameters",
         {
             "name": "tune_test",
             "trainer_parameters": HuggingFaceTrainerParams(),
@@ -491,7 +491,7 @@ test_tune_data = [
         RuntimeError,
     ),
     (
-        "valid flow with custom objective",
+        "valid flow with custom objective tuning",
         {
             "name": "tune_test",
             "namespace": "tune",
@@ -501,7 +501,7 @@ test_tune_data = [
         TEST_RESULT_SUCCESS,
     ),
     (
-        "valid flow with external models and datasets",
+        "valid flow with external model tuning",
         {
             "name": "tune_test",
             "namespace": "tune",
