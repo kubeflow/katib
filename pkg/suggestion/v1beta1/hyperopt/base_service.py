@@ -69,7 +69,7 @@ class BaseHyperoptService(object):
                     # Uniform distribution: values are sampled between min and max.
                     # If step is defined, we use the quantized version quniform.
                     if param.step:
-                        hyperopt_search_space[param.name] = hyperopt.hp.uniformint(
+                        hyperopt_search_space[param.name] = hyperopt.hp.quniform(
                             param.name,
                             float(param.min),
                             float(param.max),
