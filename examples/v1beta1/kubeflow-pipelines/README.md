@@ -15,10 +15,9 @@ You have to install the following Python SDK to run these examples:
 
 ## Multi-User Pipelines Setup
 
-The Notebooks examples run Pipelines in multi-user mode and your Kubeflow Notebook
-must have the appropriate `PodDefault` with the `pipelines.kubeflow.org` audience.
+The Notebooks examples run Pipelines in multi-user mode and your Kubeflow Notebook must authenticate the Pipeline SDK.
 
-Please follow [this guide](https://www.kubeflow.org/docs/components/pipelines/operator-guides/multi-user/)
+Please follow [this guide](https://www.kubeflow.org/docs/components/pipelines/user-guides/core-functions/connect-api/)
 to give an access Kubeflow Notebook to run Kubeflow Pipelines.
 
 ## List of Examples
