@@ -19,7 +19,7 @@ To make changes to the UI you need to install:
 
 - Tools, defined [here](https://github.com/kubeflow/katib/blob/master/docs/developer-guide.md#requirements).
 
-- `node` (v12.18.1) and `npm` (v6.13). Recommended to install `node` and `npm` using [`nvm`](https://github.com/nvm-sh/nvm). After installing `nvm`, you can run `nvm install 12.18.1` to install `node` version 12.18.1 and run `nvm use 12.18.1` to use that version.
+- `node` (v16.20.2) and `npm` (v8.19.4). Recommended to install `node` and `npm` using [`nvm`](https://github.com/nvm-sh/nvm). After installing `nvm`, you can run `nvm install 16.20.2` to install `node` version 16.20.2 and run `nvm use 16.20.2` to use that version.
 
 ## Development
 
