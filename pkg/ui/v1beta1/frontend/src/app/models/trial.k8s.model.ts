@@ -37,7 +37,7 @@ export type CollectorKind =
   | 'TensorFlowEvent'
   | 'PrometheusMetric'
   | 'Custom'
-  | 'None';
+  | 'Push';
 
 export interface Objective {
   type: ObjectiveType;

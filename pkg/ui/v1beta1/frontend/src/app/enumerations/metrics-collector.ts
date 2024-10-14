@@ -4,5 +4,5 @@ export enum CollectorKind {
   TFEVENT = 'TensorFlowEvent',
   PROMETHEUS = 'PrometheusMetric',
   CUSTOM = 'Custom',
-  NONE = 'None',
+  PUSH = 'Push',
 }

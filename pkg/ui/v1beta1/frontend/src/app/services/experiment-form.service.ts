@@ -360,7 +360,7 @@ export class ExperimentFormService {
       collector: { kind },
     };
 
-    if (kind === 'StdOut' || kind === 'None') {
+    if (kind === 'StdOut' || kind === 'Push') {
       delete metrics.source;
       return metrics;
     }
