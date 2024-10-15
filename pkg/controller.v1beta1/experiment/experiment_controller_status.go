@@ -20,12 +20,13 @@ import (
 	"context"
 
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type updateStatusFunc func(instance *experimentsv1beta1.Experiment) error
 
 func (r *ReconcileExperiment) updateStatus(instance *experimentsv1beta1.Experiment) error {
-	err := r.Status().Update(context.TODO(), instance)
+	err := r.Status().Update(context.TODO(), instance, &client.SubResourceUpdateOptions{UpdateOptions: client.UpdateOptions{FieldManager: "experiment-controller"}})
 	if err != nil {
 		return err
 	}
