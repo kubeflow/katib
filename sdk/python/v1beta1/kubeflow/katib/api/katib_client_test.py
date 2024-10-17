@@ -1,6 +1,6 @@
 import multiprocessing
 from typing import List, Optional
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import pytest
@@ -17,6 +17,8 @@ from kubeflow.katib import (
 )
 from kubeflow.katib.constants import constants
 from kubernetes.client import V1ObjectMeta
+
+PVC_FAILED = "pvc creation failed"
 
 TEST_RESULT_SUCCESS = "success"
 
@@ -55,6 +57,27 @@ def get_observation_log_response(*args, **kwargs):
                 ]
             )
         )
+
+
+def create_namespaced_persistent_volume_claim_response(*args, **kwargs):
+    if kwargs.get("namespace") == PVC_FAILED:
+        raise Exception("PVC creation failed")
+    else:
+        return {"metadata": {"name": "tune_test"}}
+
+
+def list_namespaced_persistent_volume_claim_response(*args, **kwargs):
+    if kwargs.get("namespace") == PVC_FAILED:
+        mock_pvc = Mock()
+        mock_pvc.metadata.name = "pvc_failed"
+        mock_list = Mock()
+        mock_list.items = [mock_pvc]
+    else:
+        mock_pvc = Mock()
+        mock_pvc.metadata.name = "tune_test"
+        mock_list = Mock()
+        mock_list.items = [mock_pvc]
+    return mock_list
 
 
 def generate_trial_template() -> V1beta1TrialTemplate:
@@ -270,6 +293,230 @@ test_get_trial_metrics_data = [
 ]
 
 
+# Mock classes for testing
+class MockTransformerType:
+    __name__ = "MockTransformerType"
+
+
+class HuggingFaceModelParams:
+    def __init__(
+        self,
+        model_uri=None,
+        transformer_type=MockTransformerType,
+        access_token=None,
+        num_labels=None,
+    ):
+        self.model_uri = model_uri
+        self.transformer_type = transformer_type
+        self.access_token = access_token
+        self.num_labels = num_labels
+
+
+class HuggingFaceDatasetParams:
+    def __init__(self, repo_id=None, access_token=None, split=None):
+        self.repo_id = repo_id
+        self.access_token = access_token
+        self.split = split
+
+
+class HuggingFaceTrainerParams:
+    def __init__(self, training_parameters=None, lora_config=None):
+        self.training_parameters = training_parameters
+        self.lora_config = lora_config
+
+
+class S3DatasetParams:
+    def __init__(
+        self,
+        endpoint_url=None,
+        bucket_name=None,
+        file_key=None,
+        region_name=None,
+        access_key=None,
+        secret_key=None,
+    ):
+        self.endpoint_url = endpoint_url
+        self.bucket_name = bucket_name
+        self.file_key = file_key
+        self.region_name = region_name
+        self.access_key = access_key
+        self.secret_key = secret_key
+
+
+class KubeflowOrgV1PyTorchJobSpec:
+    def __init__(
+        self,
+        elastic_policy=None,
+        nproc_per_node=None,
+        pytorch_replica_specs={},
+        run_policy=None,
+    ):
+        self.elastic_policy = elastic_policy
+        self.nproc_per_node = nproc_per_node
+        self.pytorch_replica_specs = pytorch_replica_specs
+        self.run_policy = run_policy
+
+
+class KubeflowOrgV1PyTorchJob:
+    def __init__(
+        self,
+        api_version=None,
+        kind=None,
+        metadata=None,
+        spec=KubeflowOrgV1PyTorchJobSpec,
+        status=None,
+    ):
+        self.api_version = api_version
+        self.kind = kind
+        self.metadata = metadata
+        self.spec = spec
+        self.status = status
+
+
+test_tune_data = [
+    (
+        "missing name",
+        {
+            "name": None,
+            "objective": lambda x: x,
+            "parameters": {"param": "value"},
+        },
+        ValueError,
+    ),
+    (
+        "invalid hybrid parameters - objective and model_provider_parameters",
+        {
+            "name": "tune_test",
+            "objective": lambda x: x,
+            "model_provider_parameters": HuggingFaceModelParams(),
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters",
+        {
+            "name": "tune_test",
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in custom objective tuning - lack parameters",
+        {
+            "name": "tune_test",
+            "objective": lambda x: x,
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in custom objective tuning - lack objective",
+        {
+            "name": "tune_test",
+            "parameters": {"param": "value"},
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in external model tuning - lack dataset_provider_parameters "
+        "and trainer_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(),
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in external model tuning - lack model_provider_parameters "
+        "and trainer_parameters",
+        {
+            "name": "tune_test",
+            "dataset_provider_parameters": HuggingFaceDatasetParams(),
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in external model tuning - lack model_provider_parameters "
+        "and dataset_provider_parameters",
+        {
+            "name": "tune_test",
+            "trainer_parameters": HuggingFaceTrainerParams(),
+        },
+        ValueError,
+    ),
+    (
+        "invalid env_per_trial",
+        {
+            "name": "tune_test",
+            "objective": lambda x: x,
+            "parameters": {"param": "value"},
+            "env_per_trial": "invalid",
+        },
+        ValueError,
+    ),
+    (
+        "invalid model_provider_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": "invalid",
+            "dataset_provider_parameters": HuggingFaceDatasetParams(),
+            "trainer_parameters": HuggingFaceTrainerParams(),
+        },
+        ValueError,
+    ),
+    (
+        "invalid dataset_provider_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(),
+            "dataset_provider_parameters": "invalid",
+            "trainer_parameters": HuggingFaceTrainerParams(),
+        },
+        ValueError,
+    ),
+    (
+        "invalid trainer_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(),
+            "trainer_parameters": "invalid",
+        },
+        ValueError,
+    ),
+    (
+        "pvc creation failed",
+        {
+            "name": "tune_test",
+            "namespace": PVC_FAILED,
+            "model_provider_parameters": HuggingFaceModelParams(),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(),
+            "trainer_parameters": HuggingFaceTrainerParams(),
+        },
+        RuntimeError,
+    ),
+    (
+        "valid flow with custom objective tuning",
+        {
+            "name": "tune_test",
+            "namespace": "tune",
+            "objective": lambda x: x,
+            "parameters": {"param": "value"},
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+    (
+        "valid flow with external model tuning",
+        {
+            "name": "tune_test",
+            "namespace": "tune",
+            "model_provider_parameters": HuggingFaceModelParams(),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(),
+            "trainer_parameters": HuggingFaceTrainerParams(),
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+]
+
+
 @pytest.fixture
 def katib_client():
     with patch(
@@ -283,6 +530,16 @@ def katib_client():
         "kubeflow.katib.katib_api_pb2_grpc.DBManagerStub",
         return_value=Mock(
             GetObservationLog=Mock(side_effect=get_observation_log_response)
+        ),
+    ), patch(
+        "kubernetes.client.CoreV1Api",
+        return_value=Mock(
+            create_namespaced_persistent_volume_claim=Mock(
+                side_effect=create_namespaced_persistent_volume_claim_response
+            ),
+            list_namespaced_persistent_volume_claim=Mock(
+                side_effect=list_namespaced_persistent_volume_claim_response
+            ),
         ),
     ):
         client = KatibClient()
@@ -320,3 +577,65 @@ def test_get_trial_metrics(katib_client, test_name, kwargs, expected_output):
     except Exception as e:
         assert type(e) is expected_output
     print("test execution complete")
+
+
+@pytest.mark.parametrize("test_name,kwargs,expected_output", test_tune_data)
+def test_tune(katib_client, test_name, kwargs, expected_output):
+    """
+    test tune function of katib client
+    """
+    print("\n\nExecuting test:", test_name)
+
+    PYTORCHJOB_KIND = "PyTorchJob"
+    JOB_PARAMETERS = {
+        "PyTorchJob": {
+            "model": "KubeflowOrgV1PyTorchJob",
+            "plural": "pytorchjobs",
+            "container": "pytorch",
+            "base_image": "docker.io/pytorch/pytorch:2.1.2-cuda11.8-cudnn8-runtime",
+        }
+    }
+
+    with patch.dict(
+        "sys.modules",
+        {
+            "kubeflow.storage_initializer": Mock(),
+            "kubeflow.storage_initializer.hugging_face": Mock(),
+            "kubeflow.storage_initializer.s3": Mock(),
+            "kubeflow.storage_initializer.constants": Mock(),
+            "kubeflow.training": MagicMock(),
+            "kubeflow.training.models": Mock(),
+            "kubeflow.training.utils": Mock(),
+            "kubeflow.training.constants": Mock(),
+            "kubeflow.training.constants.constants": Mock(),
+        },
+    ), patch(
+        "kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams",
+        HuggingFaceModelParams,
+    ), patch(
+        "kubeflow.storage_initializer.hugging_face.HuggingFaceDatasetParams",
+        HuggingFaceDatasetParams,
+    ), patch(
+        "kubeflow.storage_initializer.hugging_face.HuggingFaceTrainerParams",
+        HuggingFaceTrainerParams,
+    ), patch(
+        "kubeflow.storage_initializer.s3.S3DatasetParams", S3DatasetParams
+    ), patch(
+        "kubeflow.training.models.KubeflowOrgV1PyTorchJob", KubeflowOrgV1PyTorchJob
+    ), patch(
+        "kubeflow.training.constants.constants.JOB_PARAMETERS", JOB_PARAMETERS
+    ), patch(
+        "kubeflow.training.constants.constants.PYTORCHJOB_KIND", PYTORCHJOB_KIND
+    ), patch(
+        "kubeflow.katib.utils.utils.get_trial_substitutions_from_trainer",
+        return_value={"param": "value"},
+    ), patch.object(
+        katib_client, "create_experiment", return_value=Mock()
+    ) as mock_create_experiment:
+        try:
+            katib_client.tune(**kwargs)
+            mock_create_experiment.assert_called_once()
+            assert expected_output == TEST_RESULT_SUCCESS
+        except Exception as e:
+            assert type(e) is expected_output
+        print("test execution complete")
