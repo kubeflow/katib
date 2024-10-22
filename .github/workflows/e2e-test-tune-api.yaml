@@ -50,6 +50,12 @@ jobs:
           tune-api: true
           training-operator: true
       
+      - name: Get YAML file of Experiment
+        if: always()
+        run: |
+          echo "Fetching the YAML file of the experiment..."
+          kubectl get experiment tune-example-2 -n default -o yaml
+      
       - name: Monitor Memory Usage After Run
         if: always()
         run: free -h
