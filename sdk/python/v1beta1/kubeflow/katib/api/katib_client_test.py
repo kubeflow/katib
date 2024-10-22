@@ -1,9 +1,11 @@
 import multiprocessing
 from typing import List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
+import kubeflow.katib as katib
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import pytest
+import transformers
 from kubeflow.katib import (
     KatibClient,
     V1beta1AlgorithmSpec,
@@ -16,6 +18,11 @@ from kubeflow.katib import (
     V1beta1TrialTemplate,
 )
 from kubeflow.katib.constants import constants
+from kubeflow.storage_initializer.hugging_face import (
+    HuggingFaceDatasetParams,
+    HuggingFaceModelParams,
+    HuggingFaceTrainerParams,
+)
 from kubernetes.client import V1ObjectMeta
 
 PVC_FAILED = "pvc creation failed"
@@ -293,93 +300,13 @@ test_get_trial_metrics_data = [
 ]
 
 
-# Mock classes for testing
-class MockTransformerType:
-    __name__ = "MockTransformerType"
-
-
-class HuggingFaceModelParams:
-    def __init__(
-        self,
-        model_uri=None,
-        transformer_type=MockTransformerType,
-        access_token=None,
-        num_labels=None,
-    ):
-        self.model_uri = model_uri
-        self.transformer_type = transformer_type
-        self.access_token = access_token
-        self.num_labels = num_labels
-
-
-class HuggingFaceDatasetParams:
-    def __init__(self, repo_id=None, access_token=None, split=None):
-        self.repo_id = repo_id
-        self.access_token = access_token
-        self.split = split
-
-
-class HuggingFaceTrainerParams:
-    def __init__(self, training_parameters=None, lora_config=None):
-        self.training_parameters = training_parameters
-        self.lora_config = lora_config
-
-
-class S3DatasetParams:
-    def __init__(
-        self,
-        endpoint_url=None,
-        bucket_name=None,
-        file_key=None,
-        region_name=None,
-        access_key=None,
-        secret_key=None,
-    ):
-        self.endpoint_url = endpoint_url
-        self.bucket_name = bucket_name
-        self.file_key = file_key
-        self.region_name = region_name
-        self.access_key = access_key
-        self.secret_key = secret_key
-
-
-class KubeflowOrgV1PyTorchJobSpec:
-    def __init__(
-        self,
-        elastic_policy=None,
-        nproc_per_node=None,
-        pytorch_replica_specs={},
-        run_policy=None,
-    ):
-        self.elastic_policy = elastic_policy
-        self.nproc_per_node = nproc_per_node
-        self.pytorch_replica_specs = pytorch_replica_specs
-        self.run_policy = run_policy
-
-
-class KubeflowOrgV1PyTorchJob:
-    def __init__(
-        self,
-        api_version=None,
-        kind=None,
-        metadata=None,
-        spec=KubeflowOrgV1PyTorchJobSpec,
-        status=None,
-    ):
-        self.api_version = api_version
-        self.kind = kind
-        self.metadata = metadata
-        self.spec = spec
-        self.status = status
-
-
 test_tune_data = [
     (
         "missing name",
         {
             "name": None,
             "objective": lambda x: x,
-            "parameters": {"param": "value"},
+            "parameters": {"a": katib.search.int(min=10, max=100)},
         },
         ValueError,
     ),
@@ -388,12 +315,16 @@ test_tune_data = [
         {
             "name": "tune_test",
             "objective": lambda x: x,
-            "model_provider_parameters": HuggingFaceModelParams(),
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
         },
         ValueError,
     ),
     (
-        "missing parameters",
+        "missing parameters - not setting custom objective tuning or external model tuning",
         {
             "name": "tune_test",
         },
@@ -411,7 +342,7 @@ test_tune_data = [
         "missing parameters in custom objective tuning - lack objective",
         {
             "name": "tune_test",
-            "parameters": {"param": "value"},
+            "parameters": {"a": katib.search.int(min=10, max=100)},
         },
         ValueError,
     ),
@@ -420,7 +351,11 @@ test_tune_data = [
         "and trainer_parameters",
         {
             "name": "tune_test",
-            "model_provider_parameters": HuggingFaceModelParams(),
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
         },
         ValueError,
     ),
@@ -429,7 +364,10 @@ test_tune_data = [
         "and trainer_parameters",
         {
             "name": "tune_test",
-            "dataset_provider_parameters": HuggingFaceDatasetParams(),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
         },
         ValueError,
     ),
@@ -438,7 +376,12 @@ test_tune_data = [
         "and dataset_provider_parameters",
         {
             "name": "tune_test",
-            "trainer_parameters": HuggingFaceTrainerParams(),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
         },
         ValueError,
     ),
@@ -447,7 +390,7 @@ test_tune_data = [
         {
             "name": "tune_test",
             "objective": lambda x: x,
-            "parameters": {"param": "value"},
+            "parameters": {"a": katib.search.int(min=10, max=100)},
             "env_per_trial": "invalid",
         },
         ValueError,
@@ -457,8 +400,16 @@ test_tune_data = [
         {
             "name": "tune_test",
             "model_provider_parameters": "invalid",
-            "dataset_provider_parameters": HuggingFaceDatasetParams(),
-            "trainer_parameters": HuggingFaceTrainerParams(),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
         },
         ValueError,
     ),
@@ -466,9 +417,18 @@ test_tune_data = [
         "invalid dataset_provider_parameters",
         {
             "name": "tune_test",
-            "model_provider_parameters": HuggingFaceModelParams(),
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
             "dataset_provider_parameters": "invalid",
-            "trainer_parameters": HuggingFaceTrainerParams(),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
         },
         ValueError,
     ),
@@ -476,8 +436,15 @@ test_tune_data = [
         "invalid trainer_parameters",
         {
             "name": "tune_test",
-            "model_provider_parameters": HuggingFaceModelParams(),
-            "dataset_provider_parameters": HuggingFaceDatasetParams(),
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
             "trainer_parameters": "invalid",
         },
         ValueError,
@@ -487,9 +454,21 @@ test_tune_data = [
         {
             "name": "tune_test",
             "namespace": PVC_FAILED,
-            "model_provider_parameters": HuggingFaceModelParams(),
-            "dataset_provider_parameters": HuggingFaceDatasetParams(),
-            "trainer_parameters": HuggingFaceTrainerParams(),
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
         },
         RuntimeError,
     ),
@@ -497,9 +476,8 @@ test_tune_data = [
         "valid flow with custom objective tuning",
         {
             "name": "tune_test",
-            "namespace": "tune",
             "objective": lambda x: x,
-            "parameters": {"param": "value"},
+            "parameters": {"a": katib.search.int(min=10, max=100)},
         },
         TEST_RESULT_SUCCESS,
     ),
@@ -507,10 +485,21 @@ test_tune_data = [
         "valid flow with external model tuning",
         {
             "name": "tune_test",
-            "namespace": "tune",
-            "model_provider_parameters": HuggingFaceModelParams(),
-            "dataset_provider_parameters": HuggingFaceDatasetParams(),
-            "trainer_parameters": HuggingFaceTrainerParams(),
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
         },
         TEST_RESULT_SUCCESS,
     ),
@@ -586,56 +575,69 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
     """
     print("\n\nExecuting test:", test_name)
 
-    PYTORCHJOB_KIND = "PyTorchJob"
-    JOB_PARAMETERS = {
-        "PyTorchJob": {
-            "model": "KubeflowOrgV1PyTorchJob",
-            "plural": "pytorchjobs",
-            "container": "pytorch",
-            "base_image": "docker.io/pytorch/pytorch:2.1.2-cuda11.8-cudnn8-runtime",
-        }
-    }
-
-    with patch.dict(
-        "sys.modules",
-        {
-            "kubeflow.storage_initializer": Mock(),
-            "kubeflow.storage_initializer.hugging_face": Mock(),
-            "kubeflow.storage_initializer.s3": Mock(),
-            "kubeflow.storage_initializer.constants": Mock(),
-            "kubeflow.training": MagicMock(),
-            "kubeflow.training.models": Mock(),
-            "kubeflow.training.utils": Mock(),
-            "kubeflow.training.constants": Mock(),
-            "kubeflow.training.constants.constants": Mock(),
-        },
-    ), patch(
-        "kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams",
-        HuggingFaceModelParams,
-    ), patch(
-        "kubeflow.storage_initializer.hugging_face.HuggingFaceDatasetParams",
-        HuggingFaceDatasetParams,
-    ), patch(
-        "kubeflow.storage_initializer.hugging_face.HuggingFaceTrainerParams",
-        HuggingFaceTrainerParams,
-    ), patch(
-        "kubeflow.storage_initializer.s3.S3DatasetParams", S3DatasetParams
-    ), patch(
-        "kubeflow.training.models.KubeflowOrgV1PyTorchJob", KubeflowOrgV1PyTorchJob
-    ), patch(
-        "kubeflow.training.constants.constants.JOB_PARAMETERS", JOB_PARAMETERS
-    ), patch(
-        "kubeflow.training.constants.constants.PYTORCHJOB_KIND", PYTORCHJOB_KIND
-    ), patch(
-        "kubeflow.katib.utils.utils.get_trial_substitutions_from_trainer",
-        return_value={"param": "value"},
-    ), patch.object(
+    with patch.object(
         katib_client, "create_experiment", return_value=Mock()
     ) as mock_create_experiment:
         try:
             katib_client.tune(**kwargs)
             mock_create_experiment.assert_called_once()
-            assert expected_output == TEST_RESULT_SUCCESS
+
+            if expected_output == TEST_RESULT_SUCCESS:
+                assert expected_output == TEST_RESULT_SUCCESS
+                call_args = mock_create_experiment.call_args
+                experiment = call_args[0][0]
+
+                if test_name == "valid flow with custom objective tuning":
+                    # Verify input_params
+                    args_content = "".join(
+                        experiment.spec.trial_template.trial_spec.spec.template.spec.containers[
+                            0
+                        ].args
+                    )
+                    assert "'a': '${trialParameters.a}'" in args_content
+                    # Verify trial_params
+                    assert experiment.spec.trial_template.trial_parameters == [
+                        V1beta1TrialParameterSpec(name="a", reference="a"),
+                    ]
+                    # Verify experiment_params
+                    assert experiment.spec.parameters == [
+                        V1beta1ParameterSpec(
+                            name="a",
+                            parameter_type="int",
+                            feasible_space=V1beta1FeasibleSpace(min="10", max="100"),
+                        ),
+                    ]
+
+                elif test_name == "valid flow with external model tuning":
+                    # Verify input_params
+                    args_content = "".join(
+                        experiment.spec.trial_template.trial_spec.spec.pytorch_replica_specs[
+                            "Master"
+                        ]
+                        .template.spec.containers[0]
+                        .args
+                    )
+                    assert (
+                        '"learning_rate": "${trialParameters.learning_rate}"'
+                        in args_content
+                    )
+                    # Verify trial_params
+                    assert experiment.spec.trial_template.trial_parameters == [
+                        V1beta1TrialParameterSpec(
+                            name="learning_rate", reference="learning_rate"
+                        ),
+                    ]
+                    # Verify experiment_params
+                    assert experiment.spec.parameters == [
+                        V1beta1ParameterSpec(
+                            name="learning_rate",
+                            parameter_type="double",
+                            feasible_space=V1beta1FeasibleSpace(
+                                min="1e-05", max="5e-05"
+                            ),
+                        ),
+                    ]
+
         except Exception as e:
             assert type(e) is expected_output
         print("test execution complete")
