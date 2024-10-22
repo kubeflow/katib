@@ -324,7 +324,7 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "missing parameters - not setting custom objective tuning or external model tuning",
+        "missing parameters - no custom objective or external model tuning",
         {
             "name": "tune_test",
         },
