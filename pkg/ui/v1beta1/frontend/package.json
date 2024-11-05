@@ -60,7 +60,7 @@
     "@angular/compiler-cli": "~12.2.7",
     "@angular/language-service": "~12.2.7",
     "@cypress/schematic": "^2.3.0",
-    "@kubernetes/client-node": "^0.12.2",
+    "@kubernetes/client-node": "^0.22.2",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "^12.11.1",
