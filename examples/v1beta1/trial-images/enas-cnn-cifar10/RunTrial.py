@@ -79,8 +79,11 @@ if __name__ == "__main__":
         num_physical_cpu = len(tf.config.experimental.list_physical_devices("CPU"))
         devices = ["/cpu:" + str(j) for j in range(num_physical_cpu)]
 
+    print(f">>> Using devices: {devices}")
+
     strategy = tf.distribute.MirroredStrategy(devices)
     with strategy.scope():
+        print("Setup TensorFlow distributed training")
         test_model = constructor.build_model()
         test_model.summary()
         test_model.compile(

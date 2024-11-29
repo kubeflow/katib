@@ -14,7 +14,7 @@
 
 import json
 
-from keras.layers import Dense, Dropout, GlobalAveragePooling2D, Input
+from keras.layers import Dense, GlobalAveragePooling2D, Input
 from keras.models import Model
 from op_library import concat, conv, dw_conv, reduction, sp_conv
 
@@ -67,8 +67,13 @@ class ModelConstructor(object):
         # Final Layer
         # Global Average Pooling, then Fully connected with softmax.
         avgpooled = GlobalAveragePooling2D()(all_layers[self.num_layers])
-        dropped = Dropout(0.4)(avgpooled)
-        logits = Dense(units=self.output_size, activation="softmax")(dropped)
+
+        # TODO (andreyvelich): Currently, Dropout layer fails in distributed training.
+        # Error: creating distributed tf.Variable with aggregation=MEAN
+        # and a non-floating dtype is not supported, please use a different aggregation or dtype
+        # dropped = Dropout(0.4)(avgpooled)
+
+        logits = Dense(units=self.output_size, activation="softmax")(avgpooled)
 
         # Encapsulate the model
         self.model = Model(inputs=input_layer, outputs=logits)
