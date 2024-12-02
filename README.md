@@ -18,8 +18,7 @@ Katib supports
 Katib is the project which is agnostic to machine learning (ML) frameworks.
 It can tune hyperparameters of applications written in any language of the
 users’ choice and natively supports many ML frameworks, such as
-[TensorFlow](https://www.tensorflow.org/), [Apache MXNet](https://mxnet.apache.org/),
-[PyTorch](https://pytorch.org/), [XGBoost](https://xgboost.readthedocs.io/en/latest/), and others.
+[TensorFlow](https://www.tensorflow.org/), [PyTorch](https://pytorch.org/), [XGBoost](https://xgboost.readthedocs.io/en/latest/), and others.
 
 Katib can perform training jobs using any Kubernetes
 [Custom Resources](https://www.kubeflow.org/docs/components/katib/trial-template/)

@@ -81,4 +81,3 @@ import kubeflow.katib.api.search as search
 from kubeflow.katib.constants.constants import BASE_IMAGE_TENSORFLOW
 from kubeflow.katib.constants.constants import BASE_IMAGE_TENSORFLOW_GPU
 from kubeflow.katib.constants.constants import BASE_IMAGE_PYTORCH
-from kubeflow.katib.constants.constants import BASE_IMAGE_MXNET

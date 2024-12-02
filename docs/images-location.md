@@ -273,17 +273,6 @@ The following table shows images for training containers which are used in the
     </tr>
     <tr align="center">
       <td>
-        <code>docker.io/bytepsimage/mxnet</code>
-      </td>
-      <td>
-        Distributed BytePS example for MXJob
-      </td>
-      <td>
-        <a href="https://github.com/bytedance/byteps/blob/v0.2.5/docker/Dockerfile">Dockerfile</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
         <code>docker.io/kubeflowkatib/xgboost-lightgbm</code>
       </td>
       <td>

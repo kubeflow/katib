@@ -59,9 +59,6 @@ def _rewrite_helper(input_file, output_file, rewrite_rules):
         lines.append(
             "from kubeflow.katib.constants.constants import BASE_IMAGE_PYTORCH\n"
         )
-        lines.append(
-            "from kubeflow.katib.constants.constants import BASE_IMAGE_MXNET\n"
-        )
 
     # Add Kubernetes models to proper deserialization of Katib models.
     if output_file == "sdk/python/v1beta1/kubeflow/katib/models/__init__.py":
