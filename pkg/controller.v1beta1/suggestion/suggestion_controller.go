@@ -75,18 +75,35 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	if err = c.Watch(source.Kind(mgr.GetCache(), &suggestionsv1beta1.Suggestion{}), &handler.EnqueueRequestForObject{}); err != nil {
+	if err = c.Watch(source.Kind[*suggestionsv1beta1.Suggestion](
+		mgr.GetCache(), &suggestionsv1beta1.Suggestion{},
+		&handler.TypedEnqueueRequestForObject[*suggestionsv1beta1.Suggestion]{},
+	)); err != nil {
 		return err
 	}
 
-	eventHandler := handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &suggestionsv1beta1.Suggestion{}, handler.OnlyControllerOwner())
-	if err = c.Watch(source.Kind(mgr.GetCache(), &appsv1.Deployment{}), eventHandler); err != nil {
+	if err = c.Watch(source.Kind[*appsv1.Deployment](
+		mgr.GetCache(), &appsv1.Deployment{},
+		handler.TypedEnqueueRequestForOwner[*appsv1.Deployment](
+			mgr.GetScheme(), mgr.GetRESTMapper(), &suggestionsv1beta1.Suggestion{}, handler.OnlyControllerOwner(),
+		),
+	)); err != nil {
 		return err
 	}
-	if err = c.Watch(source.Kind(mgr.GetCache(), &corev1.Service{}), eventHandler); err != nil {
+	if err = c.Watch(source.Kind[*corev1.Service](
+		mgr.GetCache(), &corev1.Service{},
+		handler.TypedEnqueueRequestForOwner[*corev1.Service](
+			mgr.GetScheme(), mgr.GetRESTMapper(), &suggestionsv1beta1.Suggestion{}, handler.OnlyControllerOwner(),
+		),
+	)); err != nil {
 		return err
 	}
-	if err = c.Watch(source.Kind(mgr.GetCache(), &corev1.PersistentVolumeClaim{}), eventHandler); err != nil {
+	if err = c.Watch(source.Kind[*corev1.PersistentVolumeClaim](
+		mgr.GetCache(), &corev1.PersistentVolumeClaim{},
+		handler.TypedEnqueueRequestForOwner[*corev1.PersistentVolumeClaim](
+			mgr.GetScheme(), mgr.GetRESTMapper(), &suggestionsv1beta1.Suggestion{}, handler.OnlyControllerOwner(),
+		),
+	)); err != nil {
 		return err
 	}
 
