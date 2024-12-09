@@ -28,6 +28,7 @@ CODEGEN_PKG=$(go list -m -mod=readonly -f "{{.Dir}}" k8s.io/code-generator)
 cd "$CURRENT_DIR/.."
 
 # shellcheck source=/dev/null
+echo "${CODEGEN_PKG}"
 source "${CODEGEN_PKG}/kube_codegen.sh"
 
 echo "Generating conversion and defaults functions for config.kubeflow.org ..."
