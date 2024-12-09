@@ -20,8 +20,6 @@ package fake
 
 import (
 	clientset "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned"
-	commonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/common/v1beta1"
-	fakecommonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/common/v1beta1/fake"
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/experiments/v1beta1"
 	fakeexperimentv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/experiments/v1beta1/fake"
 	suggestionv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/suggestions/v1beta1"
@@ -84,11 +82,6 @@ var (
 	_ clientset.Interface = &Clientset{}
 	_ testing.FakeClient  = &Clientset{}
 )
-
-// CommonV1beta1 retrieves the CommonV1beta1Client
-func (c *Clientset) CommonV1beta1() commonv1beta1.CommonV1beta1Interface {
-	return &fakecommonv1beta1.FakeCommonV1beta1{Fake: &c.Fake}
-}
 
 // ExperimentV1beta1 retrieves the ExperimentV1beta1Client
 func (c *Clientset) ExperimentV1beta1() experimentv1beta1.ExperimentV1beta1Interface {

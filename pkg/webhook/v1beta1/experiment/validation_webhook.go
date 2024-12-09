@@ -42,12 +42,12 @@ import (
 // ExperimentValidator validates Experiments.
 type ExperimentValidator struct {
 	client  client.Client
-	decoder *admission.Decoder
+	decoder admission.Decoder
 	validator.Validator
 }
 
 // NewExperimentValidator returns a new Experiment validator with the given client.
-func NewExperimentValidator(c client.Client, d *admission.Decoder) *ExperimentValidator {
+func NewExperimentValidator(c client.Client, d admission.Decoder) *ExperimentValidator {
 	p := manifest.New(c)
 	return &ExperimentValidator{
 		client:    c,

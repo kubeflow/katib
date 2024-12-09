@@ -19,16 +19,16 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/common/v1beta1"
+	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 )
 
 // TrialAssignmentApplyConfiguration represents an declarative configuration of the TrialAssignment type for use
 // with apply.
 type TrialAssignmentApplyConfiguration struct {
-	ParameterAssignments []v1beta1.ParameterAssignmentApplyConfiguration `json:"parameterAssignments,omitempty"`
-	Name                 *string                                         `json:"name,omitempty"`
-	EarlyStoppingRules   []v1beta1.EarlyStoppingRuleApplyConfiguration   `json:"earlyStoppingRules,omitempty"`
-	Labels               map[string]string                               `json:"labels,omitempty"`
+	ParameterAssignments []v1beta1.ParameterAssignment `json:"parameterAssignments,omitempty"`
+	Name                 *string                       `json:"name,omitempty"`
+	EarlyStoppingRules   []v1beta1.EarlyStoppingRule   `json:"earlyStoppingRules,omitempty"`
+	Labels               map[string]string             `json:"labels,omitempty"`
 }
 
 // TrialAssignmentApplyConfiguration constructs an declarative configuration of the TrialAssignment type for use with
@@ -40,12 +40,9 @@ func TrialAssignment() *TrialAssignmentApplyConfiguration {
 // WithParameterAssignments adds the given value to the ParameterAssignments field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the ParameterAssignments field.
-func (b *TrialAssignmentApplyConfiguration) WithParameterAssignments(values ...*v1beta1.ParameterAssignmentApplyConfiguration) *TrialAssignmentApplyConfiguration {
+func (b *TrialAssignmentApplyConfiguration) WithParameterAssignments(values ...v1beta1.ParameterAssignment) *TrialAssignmentApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithParameterAssignments")
-		}
-		b.ParameterAssignments = append(b.ParameterAssignments, *values[i])
+		b.ParameterAssignments = append(b.ParameterAssignments, values[i])
 	}
 	return b
 }
@@ -61,12 +58,9 @@ func (b *TrialAssignmentApplyConfiguration) WithName(value string) *TrialAssignm
 // WithEarlyStoppingRules adds the given value to the EarlyStoppingRules field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the EarlyStoppingRules field.
-func (b *TrialAssignmentApplyConfiguration) WithEarlyStoppingRules(values ...*v1beta1.EarlyStoppingRuleApplyConfiguration) *TrialAssignmentApplyConfiguration {
+func (b *TrialAssignmentApplyConfiguration) WithEarlyStoppingRules(values ...v1beta1.EarlyStoppingRule) *TrialAssignmentApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithEarlyStoppingRules")
-		}
-		b.EarlyStoppingRules = append(b.EarlyStoppingRules, *values[i])
+		b.EarlyStoppingRules = append(b.EarlyStoppingRules, values[i])
 	}
 	return b
 }

@@ -19,17 +19,17 @@ limitations under the License.
 package v1beta1
 
 import (
+	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	v1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/common/v1beta1"
 )
 
 // SuggestionSpecApplyConfiguration represents an declarative configuration of the SuggestionSpec type for use
 // with apply.
 type SuggestionSpecApplyConfiguration struct {
-	Algorithm     *v1beta1.AlgorithmSpecApplyConfiguration     `json:"algorithm,omitempty"`
-	EarlyStopping *v1beta1.EarlyStoppingSpecApplyConfiguration `json:"earlyStopping,omitempty"`
-	Requests      *int32                                       `json:"requests,omitempty"`
-	ResumePolicy  *experimentsv1beta1.ResumePolicyType         `json:"resumePolicy,omitempty"`
+	Algorithm     *v1beta1.AlgorithmSpec               `json:"algorithm,omitempty"`
+	EarlyStopping *v1beta1.EarlyStoppingSpec           `json:"earlyStopping,omitempty"`
+	Requests      *int32                               `json:"requests,omitempty"`
+	ResumePolicy  *experimentsv1beta1.ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 
 // SuggestionSpecApplyConfiguration constructs an declarative configuration of the SuggestionSpec type for use with
@@ -41,16 +41,16 @@ func SuggestionSpec() *SuggestionSpecApplyConfiguration {
 // WithAlgorithm sets the Algorithm field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Algorithm field is set to the value of the last call.
-func (b *SuggestionSpecApplyConfiguration) WithAlgorithm(value *v1beta1.AlgorithmSpecApplyConfiguration) *SuggestionSpecApplyConfiguration {
-	b.Algorithm = value
+func (b *SuggestionSpecApplyConfiguration) WithAlgorithm(value v1beta1.AlgorithmSpec) *SuggestionSpecApplyConfiguration {
+	b.Algorithm = &value
 	return b
 }
 
 // WithEarlyStopping sets the EarlyStopping field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the EarlyStopping field is set to the value of the last call.
-func (b *SuggestionSpecApplyConfiguration) WithEarlyStopping(value *v1beta1.EarlyStoppingSpecApplyConfiguration) *SuggestionSpecApplyConfiguration {
-	b.EarlyStopping = value
+func (b *SuggestionSpecApplyConfiguration) WithEarlyStopping(value v1beta1.EarlyStoppingSpec) *SuggestionSpecApplyConfiguration {
+	b.EarlyStopping = &value
 	return b
 }
 

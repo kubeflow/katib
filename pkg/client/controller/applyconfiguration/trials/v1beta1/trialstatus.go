@@ -19,18 +19,18 @@ limitations under the License.
 package v1beta1
 
 import (
-	commonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/common/v1beta1"
+	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // TrialStatusApplyConfiguration represents an declarative configuration of the TrialStatus type for use
 // with apply.
 type TrialStatusApplyConfiguration struct {
-	StartTime         *v1.Time                                     `json:"startTime,omitempty"`
-	CompletionTime    *v1.Time                                     `json:"completionTime,omitempty"`
-	LastReconcileTime *v1.Time                                     `json:"lastReconcileTime,omitempty"`
-	Conditions        []TrialConditionApplyConfiguration           `json:"conditions,omitempty"`
-	Observation       *commonv1beta1.ObservationApplyConfiguration `json:"observation,omitempty"`
+	StartTime         *v1.Time                           `json:"startTime,omitempty"`
+	CompletionTime    *v1.Time                           `json:"completionTime,omitempty"`
+	LastReconcileTime *v1.Time                           `json:"lastReconcileTime,omitempty"`
+	Conditions        []TrialConditionApplyConfiguration `json:"conditions,omitempty"`
+	Observation       *commonv1beta1.Observation         `json:"observation,omitempty"`
 }
 
 // TrialStatusApplyConfiguration constructs an declarative configuration of the TrialStatus type for use with
@@ -79,7 +79,7 @@ func (b *TrialStatusApplyConfiguration) WithConditions(values ...*TrialCondition
 // WithObservation sets the Observation field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Observation field is set to the value of the last call.
-func (b *TrialStatusApplyConfiguration) WithObservation(value *commonv1beta1.ObservationApplyConfiguration) *TrialStatusApplyConfiguration {
-	b.Observation = value
+func (b *TrialStatusApplyConfiguration) WithObservation(value commonv1beta1.Observation) *TrialStatusApplyConfiguration {
+	b.Observation = &value
 	return b
 }

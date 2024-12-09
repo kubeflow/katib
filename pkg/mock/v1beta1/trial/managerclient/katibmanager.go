@@ -79,8 +79,8 @@ func (m *MockManagerClient) ReportTrialObservationLog(arg0 *v1beta1.Trial, arg1 
 	return ret0, ret1
 }
 
-// ReportTrialObservationLog indicated an expected call of ReportTrialObservationLog.
-func (mr *MockManagerClientMockRecorder) ReportTrialObservationLog(arg0 any, arg1 any) *gomock.Call {
+// ReportTrialObservationLog indicates an expected call of ReportTrialObservationLog.
+func (mr *MockManagerClientMockRecorder) ReportTrialObservationLog(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReportTrialObservationLog", reflect.TypeOf((*MockManagerClient)(nil).ReportTrialObservationLog), arg0, arg1)
 }

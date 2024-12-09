@@ -23,7 +23,7 @@ import (
 	"github.com/kubeflow/katib/pkg/db/v1beta1/common"
 	"github.com/kubeflow/katib/pkg/db/v1beta1/mysql"
 	"github.com/kubeflow/katib/pkg/db/v1beta1/postgres"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 )
 
 func NewKatibDBInterface(dbName string, connectTimeout time.Duration) (common.KatibDBInterface, error) {

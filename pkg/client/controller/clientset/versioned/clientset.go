@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net/http"
 
-	commonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/common/v1beta1"
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/experiments/v1beta1"
 	suggestionv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/suggestions/v1beta1"
 	trialv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/trials/v1beta1"
@@ -33,7 +32,6 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	CommonV1beta1() commonv1beta1.CommonV1beta1Interface
 	ExperimentV1beta1() experimentv1beta1.ExperimentV1beta1Interface
 	SuggestionV1beta1() suggestionv1beta1.SuggestionV1beta1Interface
 	TrialV1beta1() trialv1beta1.TrialV1beta1Interface
@@ -42,15 +40,9 @@ type Interface interface {
 // Clientset contains the clients for groups.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	commonV1beta1     *commonv1beta1.CommonV1beta1Client
 	experimentV1beta1 *experimentv1beta1.ExperimentV1beta1Client
 	suggestionV1beta1 *suggestionv1beta1.SuggestionV1beta1Client
 	trialV1beta1      *trialv1beta1.TrialV1beta1Client
-}
-
-// CommonV1beta1 retrieves the CommonV1beta1Client
-func (c *Clientset) CommonV1beta1() commonv1beta1.CommonV1beta1Interface {
-	return c.commonV1beta1
 }
 
 // ExperimentV1beta1 retrieves the ExperimentV1beta1Client
@@ -112,10 +104,6 @@ func NewForConfigAndClient(c *rest.Config, httpClient *http.Client) (*Clientset,
 
 	var cs Clientset
 	var err error
-	cs.commonV1beta1, err = commonv1beta1.NewForConfigAndClient(&configShallowCopy, httpClient)
-	if err != nil {
-		return nil, err
-	}
 	cs.experimentV1beta1, err = experimentv1beta1.NewForConfigAndClient(&configShallowCopy, httpClient)
 	if err != nil {
 		return nil, err
@@ -149,7 +137,6 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.commonV1beta1 = commonv1beta1.New(c)
 	cs.experimentV1beta1 = experimentv1beta1.New(c)
 	cs.suggestionV1beta1 = suggestionv1beta1.New(c)
 	cs.trialV1beta1 = trialv1beta1.New(c)
