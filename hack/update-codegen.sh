@@ -38,7 +38,7 @@ kube::codegen::gen_helpers \
 echo "Generating clients for config.kubeflow.org ..."
 kube::codegen::gen_client \
     --boilerplate "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
-    --output-dir "${TRAINING_OPERATOR_ROOT}/pkg/client/controller" \
+    --output-dir "${KATIB_ROOT}/pkg/client/controller" \
     --output-pkg "${KATIB_PKG}/pkg/client/controller" \
     --with-watch \
     --with-applyconfig \

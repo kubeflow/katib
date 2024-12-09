@@ -19,7 +19,6 @@ limitations under the License.
 package scheme
 
 import (
-	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -34,7 +33,6 @@ var Scheme = runtime.NewScheme()
 var Codecs = serializer.NewCodecFactory(Scheme)
 var ParameterCodec = runtime.NewParameterCodec(Scheme)
 var localSchemeBuilder = runtime.SchemeBuilder{
-	commonv1beta1.AddToScheme,
 	experimentv1beta1.AddToScheme,
 	suggestionv1beta1.AddToScheme,
 	trialv1beta1.AddToScheme,
