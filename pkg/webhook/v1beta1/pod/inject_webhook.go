@@ -58,7 +58,7 @@ var (
 // SidecarInjector injects metrics collect sidecar to the primary pod.
 type SidecarInjector struct {
 	client  client.Client
-	decoder *admission.Decoder
+	decoder admission.Decoder
 
 	// injectSecurityContext indicates if we should inject the security
 	// context into the metrics collector sidecar.
@@ -66,7 +66,7 @@ type SidecarInjector struct {
 }
 
 // NewSidecarInjector returns a new sidecar injector with the given client.
-func NewSidecarInjector(c client.Client, d *admission.Decoder) *SidecarInjector {
+func NewSidecarInjector(c client.Client, d admission.Decoder) *SidecarInjector {
 	return &SidecarInjector{
 		injectSecurityContext: viper.GetBool(consts.ConfigInjectSecurityContext),
 		client:                c,

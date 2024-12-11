@@ -19,15 +19,15 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/common/v1beta1"
+	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 )
 
 // OptimalTrialApplyConfiguration represents an declarative configuration of the OptimalTrial type for use
 // with apply.
 type OptimalTrialApplyConfiguration struct {
-	BestTrialName        *string                                         `json:"bestTrialName,omitempty"`
-	ParameterAssignments []v1beta1.ParameterAssignmentApplyConfiguration `json:"parameterAssignments,omitempty"`
-	Observation          *v1beta1.ObservationApplyConfiguration          `json:"observation,omitempty"`
+	BestTrialName        *string                       `json:"bestTrialName,omitempty"`
+	ParameterAssignments []v1beta1.ParameterAssignment `json:"parameterAssignments,omitempty"`
+	Observation          *v1beta1.Observation          `json:"observation,omitempty"`
 }
 
 // OptimalTrialApplyConfiguration constructs an declarative configuration of the OptimalTrial type for use with
@@ -47,12 +47,9 @@ func (b *OptimalTrialApplyConfiguration) WithBestTrialName(value string) *Optima
 // WithParameterAssignments adds the given value to the ParameterAssignments field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the ParameterAssignments field.
-func (b *OptimalTrialApplyConfiguration) WithParameterAssignments(values ...*v1beta1.ParameterAssignmentApplyConfiguration) *OptimalTrialApplyConfiguration {
+func (b *OptimalTrialApplyConfiguration) WithParameterAssignments(values ...v1beta1.ParameterAssignment) *OptimalTrialApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithParameterAssignments")
-		}
-		b.ParameterAssignments = append(b.ParameterAssignments, *values[i])
+		b.ParameterAssignments = append(b.ParameterAssignments, values[i])
 	}
 	return b
 }
@@ -60,7 +57,7 @@ func (b *OptimalTrialApplyConfiguration) WithParameterAssignments(values ...*v1b
 // WithObservation sets the Observation field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Observation field is set to the value of the last call.
-func (b *OptimalTrialApplyConfiguration) WithObservation(value *v1beta1.ObservationApplyConfiguration) *OptimalTrialApplyConfiguration {
-	b.Observation = value
+func (b *OptimalTrialApplyConfiguration) WithObservation(value v1beta1.Observation) *OptimalTrialApplyConfiguration {
+	b.Observation = &value
 	return b
 }
