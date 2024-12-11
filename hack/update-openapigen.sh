@@ -23,23 +23,23 @@ echo "Generate open-api for the APIs"
 CURRENT_DIR=$(dirname "${BASH_SOURCE[0]}")
 KATIB_ROOT=$(realpath "${CURRENT_DIR}/..")
 KATIB_PKG="github.com/kubeflow/katib"
-CODEGEN_PKG=$(go list -m -mod=readonly -f "{{.Dir}}" k8s.io/code-generator)
 
 cd "$CURRENT_DIR/.."
 
-# shellcheck source=/dev/null
-source "${CODEGEN_PKG}/kube_codegen.sh"
+# Get the kube-openapi binary.
+OPENAPI_PKG=$(go list -m -mod=readonly -f "{{.Dir}}" k8s.io/kube-openapi)
+echo ">> Using ${OPENAPI_PKG}"
 
 VERSION_LIST=(v1beta1)
 
 for VERSION in "${VERSION_LIST[@]}"; do
   echo "Generating OpenAPI specification for ${VERSION} ..."
 
-  kube::codegen::gen_openapi \
-    --boilerplate "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
+  go run "${OPENAPI_PKG}/cmd/openapi-gen" \
+    --go-header-file "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
     --output-pkg "${KATIB_PKG}/pkg/apis/${VERSION}" \
     --output-dir "${KATIB_ROOT}/pkg/apis/${VERSION}" \
+    --output-file "zz_generated.openapi.go" \
     --report-filename "${KATIB_ROOT}/hack/violation_exception_${VERSION}.list" \
-    --update-report \
     "${KATIB_ROOT}/pkg/apis/controller"
 done
