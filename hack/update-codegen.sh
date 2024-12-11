@@ -27,16 +27,15 @@ CODEGEN_PKG=$(go list -m -mod=readonly -f "{{.Dir}}" k8s.io/code-generator)
 
 cd "$CURRENT_DIR/.."
 
-echo "${CODEGEN_PKG}"
 # shellcheck source=/dev/null
 source "${CODEGEN_PKG}/kube_codegen.sh"
 
-echo "Generating conversion and defaults functions for config.kubeflow.org ..."
+echo "Generating deepcopy and defaults for config.kubeflow.org ..."
 kube::codegen::gen_helpers \
     --boilerplate "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
     "${KATIB_ROOT}/pkg/apis/config"
 
-echo "Generating clients for config.kubeflow.org ..."
+echo "Generating clients for v1beta1"
 kube::codegen::gen_client \
     --boilerplate "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
     --output-dir "${KATIB_ROOT}/pkg/client/controller" \
