@@ -50,6 +50,5 @@ for VERSION in "${VERSION_LIST[@]}"; do
     "${KATIB_ROOT}/pkg/apis/controller/trials/${VERSION}"
   
   echo "Generating OpenAPI Swagger for ${VERSION} ..."
-
   go run "${KATIB_ROOT}/hack/swagger/main.go" "${VERSION}-${SWAGGER_VERSION}" "${VERSION}" >"${SWAGGER_CODEGEN_FILE}"
 done
