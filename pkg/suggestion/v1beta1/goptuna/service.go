@@ -24,7 +24,7 @@ import (
 	api_v1_beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"k8s.io/klog/v2"
+	"k8s.io/klog"
 )
 
 const (

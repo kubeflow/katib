@@ -25,7 +25,7 @@ import (
 	"time"
 
 	psutil "github.com/shirou/gopsutil/v3/process"
-	"k8s.io/klog/v2"
+	"k8s.io/klog"
 )
 
 // WaitPidsOpts is the input options for metrics collector

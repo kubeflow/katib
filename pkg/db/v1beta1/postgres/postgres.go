@@ -27,7 +27,7 @@ import (
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
 	"github.com/kubeflow/katib/pkg/db/v1beta1/common"
 	"github.com/kubeflow/katib/pkg/util/v1beta1/env"
-	"k8s.io/klog/v2"
+	"k8s.io/klog"
 )
 
 const dbDriver = "postgres"

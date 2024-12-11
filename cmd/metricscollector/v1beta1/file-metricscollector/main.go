@@ -53,7 +53,7 @@ import (
 	psutil "github.com/shirou/gopsutil/v3/process"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"k8s.io/klog/v2"
+	"k8s.io/klog"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	api "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
