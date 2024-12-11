@@ -2,8 +2,6 @@ module github.com/kubeflow/katib
 
 go 1.22.0
 
-toolchain go1.23.2
-
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/awalterschulze/gographviz v2.0.3+incompatible
