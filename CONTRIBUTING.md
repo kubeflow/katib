@@ -88,9 +88,10 @@ Below is a list of command-line flags accepted by Katib controller:
 
 Below is a list of command-line flags accepted by Katib DB Manager:
 
-| Name            | Type          | Default | Description                                             |
-| --------------- | ------------- | ------- | ------------------------------------------------------- |
-| connect-timeout | time.Duration | 60s     | Timeout before calling error during database connection |
+| Name            | Type          | Default      | Description                                                         |
+| --------------- | ------------- | -------------| ------------------------------------------------------------------- |
+| connect-timeout | time.Duration | 60s          | Timeout before calling error during database connection             |
+| listen-address  | string        | 0.0.0.0:6789 | The network interface or IP address to receive incoming connections |
 
 ## Katib admission webhooks
 
