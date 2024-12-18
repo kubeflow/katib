@@ -16,6 +16,7 @@ from collections import defaultdict
 
 import optuna
 
+from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.suggestion.v1beta1.internal.constant import (
     CATEGORICAL,
     DISCRETE,
@@ -110,13 +111,37 @@ class BaseOptunaService(object):
         search_space = {}
         for param in self.search_space.params:
             if param.type == INTEGER:
-                search_space[param.name] = optuna.distributions.IntDistribution(
-                    int(param.min), int(param.max)
-                )
+                if param.distribution == api_pb2.UNIFORM or param.distribution is None:
+                    if param.step:
+                        search_space[param.name] = optuna.distributions.IntDistribution(
+                            int(param.min), int(param.max), False, param.step
+                        )
+                    else:
+                        search_space[param.name] = optuna.distributions.IntDistribution(
+                            int(param.min), int(param.max)
+                        )
+                if param.distribution == api_pb2.LOG_UNIFORM:
+                    search_space[param.name] = optuna.distributions.IntDistribution(
+                        int(param.min), int(param.max), True, param.step
+                    )
             elif param.type == DOUBLE:
-                search_space[param.name] = optuna.distributions.FloatDistribution(
-                    float(param.min), float(param.max)
-                )
+                if param.distribution == api_pb2.UNIFORM or param.distribution is None:
+                    if param.step:
+                        search_space[param.name] = (
+                            optuna.distributions.FloatDistribution(
+                                int(param.min), int(param.max), False, param.step
+                            )
+                        )
+                    else:
+                        search_space[param.name] = (
+                            optuna.distributions.FloatDistribution(
+                                int(param.min), int(param.max)
+                            )
+                        )
+                if param.distribution == api_pb2.LOG_UNIFORM:
+                    search_space[param.name] = optuna.distributions.FloatDistribution(
+                        int(param.min), int(param.max), True, param.step
+                    )
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 search_space[param.name] = optuna.distributions.CategoricalDistribution(
                     param.list
