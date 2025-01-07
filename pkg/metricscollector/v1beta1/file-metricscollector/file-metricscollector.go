@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
