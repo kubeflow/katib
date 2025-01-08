@@ -30,7 +30,7 @@ Our goal is to develop a high-level API for tuning hyperparameters of LLMs that 
 
 ## Design for API
 
-![Design for API](images/design_api.jpg)
+![Design for API](hp-optimization-api-design.jpg)
 
 ```python
 import kubeflow.katib as katib
