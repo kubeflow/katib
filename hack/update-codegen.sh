@@ -35,7 +35,7 @@ kube::codegen::gen_helpers \
     --boilerplate "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
     "${KATIB_ROOT}/pkg/apis/config"
 
-echo "Generating clients for v1beta1"
+echo "Generating clients for v1beta1 ..."
 kube::codegen::gen_client \
     --boilerplate "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
     --output-dir "${KATIB_ROOT}/pkg/client/controller" \
