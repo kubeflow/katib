@@ -30,6 +30,7 @@ func (e *Experiment) SetDefault() {
 	e.setDefaultObjective()
 	e.setDefaultTrialTemplate()
 	e.setDefaultMetricsCollector()
+	e.setDefaultParameterDistribution()
 }
 
 func (e *Experiment) setDefaultParallelTrialCount() {
@@ -173,6 +174,14 @@ func (e *Experiment) setDefaultMetricsCollector() {
 		}
 		if e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path == "" {
 			e.Spec.MetricsCollectorSpec.Source.FileSystemPath.Path = common.DefaultTensorflowEventDirPath
+		}
+	}
+}
+
+func (e *Experiment) setDefaultParameterDistribution() {
+	for i := range e.Spec.Parameters {
+		if e.Spec.Parameters[i].FeasibleSpace.Distribution == "" {
+			e.Spec.Parameters[i].FeasibleSpace.Distribution = DistributionUniform
 		}
 	}
 }
