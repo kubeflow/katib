@@ -79,6 +79,10 @@ endif
 sync-go-mod:
 	go mod tidy -go $(GO_VERSION)
 
+.PHONY: go-mod-download
+go-mod-download:
+	go mod download
+
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 .PHONY: controller-gen
 controller-gen:
@@ -90,7 +94,7 @@ controller-gen:
 # 3. Generate Python SDK for Katib (hack/gen-python-sdk/gen-sdk.sh)
 # 4. Generate gRPC manager APIs (pkg/apis/manager/v1beta1/build.sh and pkg/apis/manager/health/build.sh)
 # 5. Generate Go mock codes
-generate: controller-gen
+generate: go-mod-download controller-gen
 ifndef HAS_MOCKGEN
 	go install go.uber.org/mock/mockgen@$(MOCKGEN_VERSION)
 	$(info "mockgen has been installed")
