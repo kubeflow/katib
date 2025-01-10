@@ -92,7 +92,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes in Trial
-	if err = c.Watch(source.Kind(mgr.GetCache(), &trialsv1beta1.Trial{}), &handler.EnqueueRequestForObject{}); err != nil {
+	if err = c.Watch(source.Kind[*trialsv1beta1.Trial](
+		mgr.GetCache(), &trialsv1beta1.Trial{},
+		&handler.TypedEnqueueRequestForObject[*trialsv1beta1.Trial]{},
+	)); err != nil {
 		log.Error(err, "Trial watch error")
 		return err
 	}
@@ -117,8 +120,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			// Watch for the CRD changes.
 			unstructuredJob := &unstructured.Unstructured{}
 			unstructuredJob.SetGroupVersionKind(gvk)
-			eventHandler := handler.EnqueueRequestForOwner(mgr.GetScheme(), mgr.GetRESTMapper(), &trialsv1beta1.Trial{}, handler.OnlyControllerOwner())
-			if err = c.Watch(source.Kind(mgr.GetCache(), unstructuredJob), eventHandler); err != nil {
+			if err = c.Watch(source.Kind[*unstructured.Unstructured](
+				mgr.GetCache(), unstructuredJob,
+				handler.TypedEnqueueRequestForOwner[*unstructured.Unstructured](
+					mgr.GetScheme(), mgr.GetRESTMapper(), &trialsv1beta1.Trial{}, handler.OnlyControllerOwner(),
+				),
+			)); err != nil {
 				return err
 			}
 			log.Info("Job watch added successfully",

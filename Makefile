@@ -7,7 +7,7 @@ HAS_MOCKGEN := $(shell command -v mockgen;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= linux/amd64,linux/arm64
-ENVTEST_K8S_VERSION ?= 1.29
+ENVTEST_K8S_VERSION ?= 1.30
 MOCKGEN_VERSION ?= $(shell grep 'go.uber.org/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
 GOPATH ?= $(shell go env GOPATH)
@@ -21,7 +21,7 @@ test: envtest
 
 envtest:
 ifndef HAS_SETUP_ENVTEST
-	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@bf15e44028f908c790721fc8fe67c7bf2d06a611 #v0.17.3
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.18
 	$(info "setup-envtest has been installed")
 endif
 	$(info "setup-envtest has already installed")
@@ -79,10 +79,14 @@ endif
 sync-go-mod:
 	go mod tidy -go $(GO_VERSION)
 
+.PHONY: go-mod-download
+go-mod-download:
+	go mod download
+
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 .PHONY: controller-gen
 controller-gen:
-	@GOBIN=$(shell pwd)/bin GO111MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0
+	@GOBIN=$(shell pwd)/bin GO111MODULE=on go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.16.5
 
 # Run this if you update any existing controller APIs.
 # 1. Generate deepcopy, clientset, listers, informers for the APIs (hack/update-codegen.sh)
@@ -90,7 +94,7 @@ controller-gen:
 # 3. Generate Python SDK for Katib (hack/gen-python-sdk/gen-sdk.sh)
 # 4. Generate gRPC manager APIs (pkg/apis/manager/v1beta1/build.sh and pkg/apis/manager/health/build.sh)
 # 5. Generate Go mock codes
-generate: controller-gen
+generate: go-mod-download controller-gen
 ifndef HAS_MOCKGEN
 	go install go.uber.org/mock/mockgen@$(MOCKGEN_VERSION)
 	$(info "mockgen has been installed")

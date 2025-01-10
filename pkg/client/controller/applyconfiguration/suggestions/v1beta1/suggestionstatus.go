@@ -19,20 +19,20 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/common/v1beta1"
+	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // SuggestionStatusApplyConfiguration represents an declarative configuration of the SuggestionStatus type for use
 // with apply.
 type SuggestionStatusApplyConfiguration struct {
-	AlgorithmSettings []v1beta1.AlgorithmSettingApplyConfiguration `json:"algorithmSettings,omitempty"`
-	SuggestionCount   *int32                                       `json:"suggestionCount,omitempty"`
-	Suggestions       []TrialAssignmentApplyConfiguration          `json:"suggestions,omitempty"`
-	StartTime         *v1.Time                                     `json:"startTime,omitempty"`
-	CompletionTime    *v1.Time                                     `json:"completionTime,omitempty"`
-	LastReconcileTime *v1.Time                                     `json:"lastReconcileTime,omitempty"`
-	Conditions        []SuggestionConditionApplyConfiguration      `json:"conditions,omitempty"`
+	AlgorithmSettings []v1beta1.AlgorithmSetting              `json:"algorithmSettings,omitempty"`
+	SuggestionCount   *int32                                  `json:"suggestionCount,omitempty"`
+	Suggestions       []TrialAssignmentApplyConfiguration     `json:"suggestions,omitempty"`
+	StartTime         *v1.Time                                `json:"startTime,omitempty"`
+	CompletionTime    *v1.Time                                `json:"completionTime,omitempty"`
+	LastReconcileTime *v1.Time                                `json:"lastReconcileTime,omitempty"`
+	Conditions        []SuggestionConditionApplyConfiguration `json:"conditions,omitempty"`
 }
 
 // SuggestionStatusApplyConfiguration constructs an declarative configuration of the SuggestionStatus type for use with
@@ -44,12 +44,9 @@ func SuggestionStatus() *SuggestionStatusApplyConfiguration {
 // WithAlgorithmSettings adds the given value to the AlgorithmSettings field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the AlgorithmSettings field.
-func (b *SuggestionStatusApplyConfiguration) WithAlgorithmSettings(values ...*v1beta1.AlgorithmSettingApplyConfiguration) *SuggestionStatusApplyConfiguration {
+func (b *SuggestionStatusApplyConfiguration) WithAlgorithmSettings(values ...v1beta1.AlgorithmSetting) *SuggestionStatusApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithAlgorithmSettings")
-		}
-		b.AlgorithmSettings = append(b.AlgorithmSettings, *values[i])
+		b.AlgorithmSettings = append(b.AlgorithmSettings, values[i])
 	}
 	return b
 }
