@@ -32,6 +32,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -66,7 +68,10 @@ func init() {
 
 func TestAdd(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
+	mgr, err := manager.New(cfg, manager.Options{
+		Metrics:    metricsserver.Options{BindAddress: "0"},
+		Controller: config.Controller{SkipNameValidation: ptr.To[bool](true)},
+	})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	// Test - Try to add suggestion controller to the manager
