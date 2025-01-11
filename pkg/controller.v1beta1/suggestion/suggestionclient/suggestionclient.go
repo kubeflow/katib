@@ -91,7 +91,7 @@ func (g *General) SyncAssignments(
 	}
 
 	endpoint := util.GetAlgorithmEndpoint(instance)
-	connSuggestion, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	connSuggestion, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (g *General) SyncAssignments(
 	// If early stopping is set, call GetEarlyStoppingRules after GetSuggestions.
 	if instance.Spec.EarlyStopping != nil {
 		endpoint = util.GetEarlyStoppingEndpoint(instance)
-		connEarlyStopping, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		connEarlyStopping, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			return err
 		}
@@ -202,7 +202,7 @@ func (g *General) ValidateAlgorithmSettings(instance *suggestionsv1beta1.Suggest
 	logger := log.WithValues("Suggestion", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := util.GetAlgorithmEndpoint(instance)
 
-	conn, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()),
+	conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callValidatorOpts...)),
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callValidatorOpts...)),
 	)
@@ -250,7 +250,7 @@ func (g *General) ValidateEarlyStoppingSettings(instance *suggestionsv1beta1.Sug
 	logger := log.WithValues("EarlyStopping", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	endpoint := util.GetEarlyStoppingEndpoint(instance)
 
-	conn, err := grpc.Dial(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()),
+	conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStreamInterceptor(grpc_retry.StreamClientInterceptor(callValidatorOpts...)),
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(callValidatorOpts...)),
 	)
