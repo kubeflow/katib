@@ -23,7 +23,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SuggestionStatusApplyConfiguration represents an declarative configuration of the SuggestionStatus type for use
+// SuggestionStatusApplyConfiguration represents a declarative configuration of the SuggestionStatus type for use
 // with apply.
 type SuggestionStatusApplyConfiguration struct {
 	AlgorithmSettings []v1beta1.AlgorithmSetting              `json:"algorithmSettings,omitempty"`
@@ -35,7 +35,7 @@ type SuggestionStatusApplyConfiguration struct {
 	Conditions        []SuggestionConditionApplyConfiguration `json:"conditions,omitempty"`
 }
 
-// SuggestionStatusApplyConfiguration constructs an declarative configuration of the SuggestionStatus type for use with
+// SuggestionStatusApplyConfiguration constructs a declarative configuration of the SuggestionStatus type for use with
 // apply.
 func SuggestionStatus() *SuggestionStatusApplyConfiguration {
 	return &SuggestionStatusApplyConfiguration{}

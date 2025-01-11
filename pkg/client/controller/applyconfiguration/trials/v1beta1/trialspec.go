@@ -23,7 +23,7 @@ import (
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// TrialSpecApplyConfiguration represents an declarative configuration of the TrialSpec type for use
+// TrialSpecApplyConfiguration represents a declarative configuration of the TrialSpec type for use
 // with apply.
 type TrialSpecApplyConfiguration struct {
 	Objective            *v1beta1.ObjectiveSpec        `json:"objective,omitempty"`
@@ -39,7 +39,7 @@ type TrialSpecApplyConfiguration struct {
 	Labels               map[string]string             `json:"labels,omitempty"`
 }
 
-// TrialSpecApplyConfiguration constructs an declarative configuration of the TrialSpec type for use with
+// TrialSpecApplyConfiguration constructs a declarative configuration of the TrialSpec type for use with
 // apply.
 func TrialSpec() *TrialSpecApplyConfiguration {
 	return &TrialSpecApplyConfiguration{}

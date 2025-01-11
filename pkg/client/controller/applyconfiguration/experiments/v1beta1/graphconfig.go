@@ -18,7 +18,7 @@ limitations under the License.
 
 package v1beta1
 
-// GraphConfigApplyConfiguration represents an declarative configuration of the GraphConfig type for use
+// GraphConfigApplyConfiguration represents a declarative configuration of the GraphConfig type for use
 // with apply.
 type GraphConfigApplyConfiguration struct {
 	NumLayers   *int32  `json:"numLayers,omitempty"`
@@ -26,7 +26,7 @@ type GraphConfigApplyConfiguration struct {
 	OutputSizes []int32 `json:"outputSizes,omitempty"`
 }
 
-// GraphConfigApplyConfiguration constructs an declarative configuration of the GraphConfig type for use with
+// GraphConfigApplyConfiguration constructs a declarative configuration of the GraphConfig type for use with
 // apply.
 func GraphConfig() *GraphConfigApplyConfiguration {
 	return &GraphConfigApplyConfiguration{}

@@ -24,7 +24,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// ExperimentApplyConfiguration represents an declarative configuration of the Experiment type for use
+// ExperimentApplyConfiguration represents a declarative configuration of the Experiment type for use
 // with apply.
 type ExperimentApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -33,7 +33,7 @@ type ExperimentApplyConfiguration struct {
 	Status                           *ExperimentStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// Experiment constructs an declarative configuration of the Experiment type for use with
+// Experiment constructs a declarative configuration of the Experiment type for use with
 // apply.
 func Experiment(name, namespace string) *ExperimentApplyConfiguration {
 	b := &ExperimentApplyConfiguration{}
@@ -216,4 +216,10 @@ func (b *ExperimentApplyConfiguration) WithSpec(value *ExperimentSpecApplyConfig
 func (b *ExperimentApplyConfiguration) WithStatus(value *ExperimentStatusApplyConfiguration) *ExperimentApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *ExperimentApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

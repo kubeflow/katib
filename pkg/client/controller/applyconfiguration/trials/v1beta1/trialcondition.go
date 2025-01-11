@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// TrialConditionApplyConfiguration represents an declarative configuration of the TrialCondition type for use
+// TrialConditionApplyConfiguration represents a declarative configuration of the TrialCondition type for use
 // with apply.
 type TrialConditionApplyConfiguration struct {
 	Type               *v1beta1.TrialConditionType `json:"type,omitempty"`
@@ -35,7 +35,7 @@ type TrialConditionApplyConfiguration struct {
 	LastTransitionTime *metav1.Time                `json:"lastTransitionTime,omitempty"`
 }
 
-// TrialConditionApplyConfiguration constructs an declarative configuration of the TrialCondition type for use with
+// TrialConditionApplyConfiguration constructs a declarative configuration of the TrialCondition type for use with
 // apply.
 func TrialCondition() *TrialConditionApplyConfiguration {
 	return &TrialConditionApplyConfiguration{}

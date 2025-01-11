@@ -22,7 +22,7 @@ import (
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-// FeasibleSpaceApplyConfiguration represents an declarative configuration of the FeasibleSpace type for use
+// FeasibleSpaceApplyConfiguration represents a declarative configuration of the FeasibleSpace type for use
 // with apply.
 type FeasibleSpaceApplyConfiguration struct {
 	Max          *string               `json:"max,omitempty"`
@@ -32,7 +32,7 @@ type FeasibleSpaceApplyConfiguration struct {
 	Distribution *v1beta1.Distribution `json:"distribution,omitempty"`
 }
 
-// FeasibleSpaceApplyConfiguration constructs an declarative configuration of the FeasibleSpace type for use with
+// FeasibleSpaceApplyConfiguration constructs a declarative configuration of the FeasibleSpace type for use with
 // apply.
 func FeasibleSpace() *FeasibleSpaceApplyConfiguration {
 	return &FeasibleSpaceApplyConfiguration{}
