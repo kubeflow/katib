@@ -114,6 +114,14 @@ func schema_apis_controller_common_v1beta1_AlgorithmSpec(ref common.ReferenceCal
 						},
 					},
 					"algorithmSettings": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Key-value pairs representing settings for suggestion algorithms.",
 							Type:        []string{"array"},
@@ -244,6 +252,14 @@ func schema_apis_controller_common_v1beta1_EarlyStoppingSpec(ref common.Referenc
 						},
 					},
 					"algorithmSettings": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Key-value pairs representing settings for early stopping algorithm.",
 							Type:        []string{"array"},
@@ -302,6 +318,11 @@ func schema_apis_controller_common_v1beta1_FilterSpec(ref common.ReferenceCallba
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"metricsFormat": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "When the metrics output follows format as this field specified, metricsCollector collects it and reports to metrics server, it can be \"<metric_name>: <float>\" or else",
 							Type:        []string{"array"},
@@ -435,6 +456,11 @@ func schema_apis_controller_common_v1beta1_ObjectiveSpec(ref common.ReferenceCal
 						},
 					},
 					"additionalMetricNames": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "AdditionalMetricNames represents metrics that should be collected from Trials. This can be empty if we only care about the objective metric. Note: If we adopt a push instead of pull mechanism, this can be omitted completely.",
 							Type:        []string{"array"},
@@ -450,6 +476,14 @@ func schema_apis_controller_common_v1beta1_ObjectiveSpec(ref common.ReferenceCal
 						},
 					},
 					"metricStrategies": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "MetricStrategies defines various rules (min, max or latest) to extract metrics values. This field is allowed to missing, experiment defaulter (webhook) will fill it.",
 							Type:        []string{"array"},
@@ -478,6 +512,14 @@ func schema_apis_controller_common_v1beta1_Observation(ref common.ReferenceCallb
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"metrics": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Key-value pairs for metric names and values",
 							Type:        []string{"array"},
@@ -751,6 +793,14 @@ func schema_apis_controller_experiments_v1beta1_ExperimentSpec(ref common.Refere
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"parameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of hyperparameter configurations.",
 							Type:        []string{"array"},
@@ -861,6 +911,14 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						},
 					},
 					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Type",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of observed runtime conditions for this Experiment.",
 							Type:        []string{"array"},
@@ -882,6 +940,11 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						},
 					},
 					"runningTrialList": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of trial names which are running.",
 							Type:        []string{"array"},
@@ -897,6 +960,11 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						},
 					},
 					"pendingTrialList": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of trial names which are pending.",
 							Type:        []string{"array"},
@@ -912,6 +980,11 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						},
 					},
 					"failedTrialList": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of trial names which have already failed.",
 							Type:        []string{"array"},
@@ -927,6 +1000,11 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						},
 					},
 					"succeededTrialList": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of trial names which have already succeeded.",
 							Type:        []string{"array"},
@@ -942,6 +1020,11 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						},
 					},
 					"killedTrialList": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of trial names which have been killed.",
 							Type:        []string{"array"},
@@ -957,6 +1040,11 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						},
 					},
 					"earlyStoppedTrialList": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of trial names which have been early stopped.",
 							Type:        []string{"array"},
@@ -972,6 +1060,11 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						},
 					},
 					"metricsUnavailableTrialList": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of trial names which have been metrics unavailable",
 							Type:        []string{"array"},
@@ -1069,6 +1162,11 @@ func schema_apis_controller_experiments_v1beta1_FeasibleSpace(ref common.Referen
 						},
 					},
 					"list": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -1114,6 +1212,11 @@ func schema_apis_controller_experiments_v1beta1_GraphConfig(ref common.Reference
 						},
 					},
 					"inputSizes": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -1128,6 +1231,11 @@ func schema_apis_controller_experiments_v1beta1_GraphConfig(ref common.Reference
 						},
 					},
 					"outputSizes": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -1161,6 +1269,14 @@ func schema_apis_controller_experiments_v1beta1_NasConfig(ref common.ReferenceCa
 						},
 					},
 					"operations": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"OperationType",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -1195,6 +1311,14 @@ func schema_apis_controller_experiments_v1beta1_Operation(ref common.ReferenceCa
 						},
 					},
 					"parameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -1230,6 +1354,14 @@ func schema_apis_controller_experiments_v1beta1_OptimalTrial(ref common.Referenc
 						},
 					},
 					"parameterAssignments": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Key-value pairs for hyperparameters and assignment values.",
 							Type:        []string{"array"},
@@ -1378,6 +1510,14 @@ func schema_apis_controller_experiments_v1beta1_TrialTemplate(ref common.Referen
 						},
 					},
 					"trialParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of parameters that are used in trial template",
 							Type:        []string{"array"},
@@ -1639,6 +1779,14 @@ func schema_apis_controller_suggestions_v1beta1_SuggestionStatus(ref common.Refe
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"algorithmSettings": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "AlgorithmSettings defines HP or NAS algorithm settings which suggestion gRPC service returns. These settings overwrites Experiment's settings before the gRPC request. It can be empty if settings haven't been changed.",
 							Type:        []string{"array"},
@@ -1660,6 +1808,14 @@ func schema_apis_controller_suggestions_v1beta1_SuggestionStatus(ref common.Refe
 						},
 					},
 					"suggestions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Suggestion results",
 							Type:        []string{"array"},
@@ -1692,6 +1848,14 @@ func schema_apis_controller_suggestions_v1beta1_SuggestionStatus(ref common.Refe
 						},
 					},
 					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Type",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of observed runtime conditions for this Suggestion.",
 							Type:        []string{"array"},
@@ -1721,6 +1885,14 @@ func schema_apis_controller_suggestions_v1beta1_TrialAssignment(ref common.Refer
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"parameterAssignments": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Suggestion results with Trial parameters",
 							Type:        []string{"array"},
@@ -1742,6 +1914,14 @@ func schema_apis_controller_suggestions_v1beta1_TrialAssignment(ref common.Refer
 						},
 					},
 					"earlyStoppingRules": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Rules for early stopping techniques Contains rule name, value and comparison type",
 							Type:        []string{"array"},
@@ -1947,6 +2127,14 @@ func schema_apis_controller_trials_v1beta1_TrialSpec(ref common.ReferenceCallbac
 						},
 					},
 					"parameterAssignments": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Key-value pairs for hyperparameters and assignment values.",
 							Type:        []string{"array"},
@@ -1961,6 +2149,14 @@ func schema_apis_controller_trials_v1beta1_TrialSpec(ref common.ReferenceCallbac
 						},
 					},
 					"earlyStoppingRules": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Name",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Rules for early stopping techniques. Each rule should be met to early stop Trial.",
 							Type:        []string{"array"},
@@ -2081,6 +2277,14 @@ func schema_apis_controller_trials_v1beta1_TrialStatus(ref common.ReferenceCallb
 						},
 					},
 					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"Type",
+								},
+								"x-kubernetes-list-type": "map",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Description: "List of observed runtime conditions for this Trial.",
 							Type:        []string{"array"},
