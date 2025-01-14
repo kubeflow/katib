@@ -1,4 +1,4 @@
-grpcio>=1.41.1
+grpcio>=1.64.1
 cloudpickle==0.5.6
 # This is a workaround to avoid the following error.
 # AttributeError: module 'numpy' has no attribute 'int'
