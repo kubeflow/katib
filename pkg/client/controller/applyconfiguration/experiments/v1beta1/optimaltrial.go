@@ -22,7 +22,7 @@ import (
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 )
 
-// OptimalTrialApplyConfiguration represents an declarative configuration of the OptimalTrial type for use
+// OptimalTrialApplyConfiguration represents a declarative configuration of the OptimalTrial type for use
 // with apply.
 type OptimalTrialApplyConfiguration struct {
 	BestTrialName        *string                       `json:"bestTrialName,omitempty"`
@@ -30,7 +30,7 @@ type OptimalTrialApplyConfiguration struct {
 	Observation          *v1beta1.Observation          `json:"observation,omitempty"`
 }
 
-// OptimalTrialApplyConfiguration constructs an declarative configuration of the OptimalTrial type for use with
+// OptimalTrialApplyConfiguration constructs a declarative configuration of the OptimalTrial type for use with
 // apply.
 func OptimalTrial() *OptimalTrialApplyConfiguration {
 	return &OptimalTrialApplyConfiguration{}

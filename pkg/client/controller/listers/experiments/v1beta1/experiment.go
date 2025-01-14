@@ -20,8 +20,8 @@ package v1beta1
 
 import (
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -38,25 +38,17 @@ type ExperimentLister interface {
 
 // experimentLister implements the ExperimentLister interface.
 type experimentLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1beta1.Experiment]
 }
 
 // NewExperimentLister returns a new ExperimentLister.
 func NewExperimentLister(indexer cache.Indexer) ExperimentLister {
-	return &experimentLister{indexer: indexer}
-}
-
-// List lists all Experiments in the indexer.
-func (s *experimentLister) List(selector labels.Selector) (ret []*v1beta1.Experiment, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1beta1.Experiment))
-	})
-	return ret, err
+	return &experimentLister{listers.New[*v1beta1.Experiment](indexer, v1beta1.Resource("experiment"))}
 }
 
 // Experiments returns an object that can list and get Experiments.
 func (s *experimentLister) Experiments(namespace string) ExperimentNamespaceLister {
-	return experimentNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return experimentNamespaceLister{listers.NewNamespaced[*v1beta1.Experiment](s.ResourceIndexer, namespace)}
 }
 
 // ExperimentNamespaceLister helps list and get Experiments.
@@ -74,26 +66,5 @@ type ExperimentNamespaceLister interface {
 // experimentNamespaceLister implements the ExperimentNamespaceLister
 // interface.
 type experimentNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all Experiments in the indexer for a given namespace.
-func (s experimentNamespaceLister) List(selector labels.Selector) (ret []*v1beta1.Experiment, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1beta1.Experiment))
-	})
-	return ret, err
-}
-
-// Get retrieves the Experiment from the indexer for a given namespace and name.
-func (s experimentNamespaceLister) Get(name string) (*v1beta1.Experiment, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1beta1.Resource("experiment"), name)
-	}
-	return obj.(*v1beta1.Experiment), nil
+	listers.ResourceIndexer[*v1beta1.Experiment]
 }

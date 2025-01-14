@@ -22,7 +22,7 @@ import (
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// TrialTemplateApplyConfiguration represents an declarative configuration of the TrialTemplate type for use
+// TrialTemplateApplyConfiguration represents a declarative configuration of the TrialTemplate type for use
 // with apply.
 type TrialTemplateApplyConfiguration struct {
 	Retain                        *bool `json:"retain,omitempty"`
@@ -34,7 +34,7 @@ type TrialTemplateApplyConfiguration struct {
 	FailureCondition              *string                                `json:"failureCondition,omitempty"`
 }
 
-// TrialTemplateApplyConfiguration constructs an declarative configuration of the TrialTemplate type for use with
+// TrialTemplateApplyConfiguration constructs a declarative configuration of the TrialTemplate type for use with
 // apply.
 func TrialTemplate() *TrialTemplateApplyConfiguration {
 	return &TrialTemplateApplyConfiguration{}

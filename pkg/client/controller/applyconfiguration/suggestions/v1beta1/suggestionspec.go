@@ -23,7 +23,7 @@ import (
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-// SuggestionSpecApplyConfiguration represents an declarative configuration of the SuggestionSpec type for use
+// SuggestionSpecApplyConfiguration represents a declarative configuration of the SuggestionSpec type for use
 // with apply.
 type SuggestionSpecApplyConfiguration struct {
 	Algorithm     *v1beta1.AlgorithmSpec               `json:"algorithm,omitempty"`
@@ -32,7 +32,7 @@ type SuggestionSpecApplyConfiguration struct {
 	ResumePolicy  *experimentsv1beta1.ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 
-// SuggestionSpecApplyConfiguration constructs an declarative configuration of the SuggestionSpec type for use with
+// SuggestionSpecApplyConfiguration constructs a declarative configuration of the SuggestionSpec type for use with
 // apply.
 func SuggestionSpec() *SuggestionSpecApplyConfiguration {
 	return &SuggestionSpecApplyConfiguration{}

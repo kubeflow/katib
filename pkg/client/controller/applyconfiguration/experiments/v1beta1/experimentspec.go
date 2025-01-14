@@ -23,7 +23,7 @@ import (
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-// ExperimentSpecApplyConfiguration represents an declarative configuration of the ExperimentSpec type for use
+// ExperimentSpecApplyConfiguration represents a declarative configuration of the ExperimentSpec type for use
 // with apply.
 type ExperimentSpecApplyConfiguration struct {
 	Parameters           []ParameterSpecApplyConfiguration    `json:"parameters,omitempty"`
@@ -39,7 +39,7 @@ type ExperimentSpecApplyConfiguration struct {
 	ResumePolicy         *experimentsv1beta1.ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 
-// ExperimentSpecApplyConfiguration constructs an declarative configuration of the ExperimentSpec type for use with
+// ExperimentSpecApplyConfiguration constructs a declarative configuration of the ExperimentSpec type for use with
 // apply.
 func ExperimentSpec() *ExperimentSpecApplyConfiguration {
 	return &ExperimentSpecApplyConfiguration{}
