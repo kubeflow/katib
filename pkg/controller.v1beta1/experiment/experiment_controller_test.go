@@ -93,7 +93,7 @@ func TestAdd(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	mgr, err := manager.New(cfg, manager.Options{
 		Metrics:    metricsserver.Options{BindAddress: "0"},
-		Controller: config.Controller{SkipNameValidation: ptr.To[bool](true)},
+		Controller: config.Controller{SkipNameValidation: ptr.To(true)},
 	})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
