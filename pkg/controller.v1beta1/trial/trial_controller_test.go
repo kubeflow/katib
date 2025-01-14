@@ -187,24 +187,20 @@ func TestReconcileBatchJob(t *testing.T) {
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that BatchJob with appropriate name is created
-		g.Eventually(func() error {
-			return c.Get(ctx, batchJobKey, batchJob)
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, batchJobKey, batchJob)).Should(gomega.Succeed())
 		}, timeout).Should(gomega.Succeed())
 
 		// Expect that Trial status is running
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				return false
-			}
-			return trial.IsRunning()
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsRunning()).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 
 		// Manually update BatchJob status to failed
 		// Expect that Trial status is failed
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, batchJobKey, batchJob); err != nil {
-				return false
-			}
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, batchJobKey, batchJob)).Should(gomega.Succeed())
 			batchJob.Status = batchv1.JobStatus{
 				Conditions: []batchv1.JobCondition{
 					{
@@ -215,15 +211,10 @@ func TestReconcileBatchJob(t *testing.T) {
 					},
 				},
 			}
-			if err = c.Status().Update(ctx, batchJob); err != nil {
-				return false
-			}
-
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				return false
-			}
-			return trial.IsFailed()
-		}, timeout).Should(gomega.BeTrue())
+			g.Expect(c.Status().Update(ctx, batchJob)).Should(gomega.Succeed())
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsFailed()).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 
 		// Delete the Trial
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
@@ -231,9 +222,9 @@ func TestReconcileBatchJob(t *testing.T) {
 		// Expect that Trial is deleted
 		// BatchJob can't be deleted because GC doesn't work in envtest and BatchJob stuck in termination phase.
 		// Ref: https://book.kubebuilder.io/reference/testing/envtest.html#testing-considerations.
-		g.Eventually(func() bool {
-			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 	})
 
 	t.Run(`Trial with "Complete" BatchJob and Available metrics.`, func(t *testing.T) {
@@ -266,26 +257,25 @@ func TestReconcileBatchJob(t *testing.T) {
 
 		// Expect that Trial status is succeeded and metrics are properly populated
 		// Metrics available because GetTrialObservationLog returns values
-		start := time.Now()
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				t.Log(time.Since(start), err)
-				return false
-			}
-			return trial.IsSucceeded() &&
-				len(trial.Status.Observation.Metrics) > 0 &&
-				trial.Status.Observation.Metrics[0].Min == "0.11" &&
-				trial.Status.Observation.Metrics[0].Max == "0.99" &&
-				trial.Status.Observation.Metrics[0].Latest == "0.11"
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsSucceeded()).Should(gomega.BeTrue())
+			g.Expect(trial.Status.Observation.Metrics).ShouldNot(gomega.HaveLen(0))
+			g.Expect(trial.Status.Observation.Metrics[0]).Should(gomega.BeComparableTo(commonv1beta1.Metric{
+				Name:   objectiveMetric,
+				Min:    "0.11",
+				Max:    "0.99",
+				Latest: "0.11",
+			}))
+		}, timeout).Should(gomega.Succeed())
 
 		// Delete the Trial
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial is deleted
-		g.Eventually(func() bool {
-			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 	})
 
 	t.Run(`Trial with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
@@ -317,9 +307,9 @@ func TestReconcileBatchJob(t *testing.T) {
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial is deleted
-		g.Eventually(func() bool {
-			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 	})
 
 	t.Run(`Trial with "Complete" BatchJob and Unavailable metrics(Push MC, failed once).`, func(t *testing.T) {
@@ -358,9 +348,9 @@ func TestReconcileBatchJob(t *testing.T) {
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial is deleted
-		g.Eventually(func() bool {
-			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 	})
 
 	t.Run("Update status for empty Trial", func(t *testing.T) {

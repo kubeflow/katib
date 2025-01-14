@@ -19,12 +19,10 @@ limitations under the License.
 package applyconfiguration
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
-	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
-	commonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/common/v1beta1"
-	applyconfigurationexperimentsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/experiments/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/experiments/v1beta1"
 	applyconfigurationsuggestionsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/suggestions/v1beta1"
 	applyconfigurationtrialsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/trials/v1beta1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -34,67 +32,35 @@ import (
 // apply configuration type exists for the given GroupVersionKind.
 func ForKind(kind schema.GroupVersionKind) interface{} {
 	switch kind {
-	// Group=common.kubeflow.org, Version=v1beta1
-	case v1beta1.SchemeGroupVersion.WithKind("AlgorithmSetting"):
-		return &commonv1beta1.AlgorithmSettingApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("AlgorithmSpec"):
-		return &commonv1beta1.AlgorithmSpecApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("CollectorSpec"):
-		return &commonv1beta1.CollectorSpecApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("EarlyStoppingRule"):
-		return &commonv1beta1.EarlyStoppingRuleApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("EarlyStoppingSetting"):
-		return &commonv1beta1.EarlyStoppingSettingApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("EarlyStoppingSpec"):
-		return &commonv1beta1.EarlyStoppingSpecApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("FileSystemPath"):
-		return &commonv1beta1.FileSystemPathApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("FilterSpec"):
-		return &commonv1beta1.FilterSpecApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("Metric"):
-		return &commonv1beta1.MetricApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("MetricsCollectorSpec"):
-		return &commonv1beta1.MetricsCollectorSpecApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("MetricStrategy"):
-		return &commonv1beta1.MetricStrategyApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("ObjectiveSpec"):
-		return &commonv1beta1.ObjectiveSpecApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("Observation"):
-		return &commonv1beta1.ObservationApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("ParameterAssignment"):
-		return &commonv1beta1.ParameterAssignmentApplyConfiguration{}
-	case v1beta1.SchemeGroupVersion.WithKind("SourceSpec"):
-		return &commonv1beta1.SourceSpecApplyConfiguration{}
-
-		// Group=experiment.kubeflow.org, Version=v1beta1
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("ConfigMapSource"):
-		return &applyconfigurationexperimentsv1beta1.ConfigMapSourceApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("Experiment"):
-		return &applyconfigurationexperimentsv1beta1.ExperimentApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("ExperimentCondition"):
-		return &applyconfigurationexperimentsv1beta1.ExperimentConditionApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("ExperimentSpec"):
-		return &applyconfigurationexperimentsv1beta1.ExperimentSpecApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("ExperimentStatus"):
-		return &applyconfigurationexperimentsv1beta1.ExperimentStatusApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("FeasibleSpace"):
-		return &applyconfigurationexperimentsv1beta1.FeasibleSpaceApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("GraphConfig"):
-		return &applyconfigurationexperimentsv1beta1.GraphConfigApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("NasConfig"):
-		return &applyconfigurationexperimentsv1beta1.NasConfigApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("Operation"):
-		return &applyconfigurationexperimentsv1beta1.OperationApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("OptimalTrial"):
-		return &applyconfigurationexperimentsv1beta1.OptimalTrialApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("ParameterSpec"):
-		return &applyconfigurationexperimentsv1beta1.ParameterSpecApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("TrialParameterSpec"):
-		return &applyconfigurationexperimentsv1beta1.TrialParameterSpecApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("TrialSource"):
-		return &applyconfigurationexperimentsv1beta1.TrialSourceApplyConfiguration{}
-	case experimentsv1beta1.SchemeGroupVersion.WithKind("TrialTemplate"):
-		return &applyconfigurationexperimentsv1beta1.TrialTemplateApplyConfiguration{}
+	// Group=experiment.kubeflow.org, Version=v1beta1
+	case v1beta1.SchemeGroupVersion.WithKind("ConfigMapSource"):
+		return &experimentsv1beta1.ConfigMapSourceApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("Experiment"):
+		return &experimentsv1beta1.ExperimentApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ExperimentCondition"):
+		return &experimentsv1beta1.ExperimentConditionApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ExperimentSpec"):
+		return &experimentsv1beta1.ExperimentSpecApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ExperimentStatus"):
+		return &experimentsv1beta1.ExperimentStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("FeasibleSpace"):
+		return &experimentsv1beta1.FeasibleSpaceApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("GraphConfig"):
+		return &experimentsv1beta1.GraphConfigApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("NasConfig"):
+		return &experimentsv1beta1.NasConfigApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("Operation"):
+		return &experimentsv1beta1.OperationApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("OptimalTrial"):
+		return &experimentsv1beta1.OptimalTrialApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ParameterSpec"):
+		return &experimentsv1beta1.ParameterSpecApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("TrialParameterSpec"):
+		return &experimentsv1beta1.TrialParameterSpecApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("TrialSource"):
+		return &experimentsv1beta1.TrialSourceApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("TrialTemplate"):
+		return &experimentsv1beta1.TrialTemplateApplyConfiguration{}
 
 		// Group=suggestion.kubeflow.org, Version=v1beta1
 	case suggestionsv1beta1.SchemeGroupVersion.WithKind("Suggestion"):

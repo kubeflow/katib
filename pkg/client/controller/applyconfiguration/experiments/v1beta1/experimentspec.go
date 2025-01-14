@@ -19,24 +19,24 @@ limitations under the License.
 package v1beta1
 
 import (
+	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	commonv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/common/v1beta1"
 )
 
 // ExperimentSpecApplyConfiguration represents an declarative configuration of the ExperimentSpec type for use
 // with apply.
 type ExperimentSpecApplyConfiguration struct {
-	Parameters           []ParameterSpecApplyConfiguration                     `json:"parameters,omitempty"`
-	Objective            *commonv1beta1.ObjectiveSpecApplyConfiguration        `json:"objective,omitempty"`
-	Algorithm            *commonv1beta1.AlgorithmSpecApplyConfiguration        `json:"algorithm,omitempty"`
-	EarlyStopping        *commonv1beta1.EarlyStoppingSpecApplyConfiguration    `json:"earlyStopping,omitempty"`
-	TrialTemplate        *TrialTemplateApplyConfiguration                      `json:"trialTemplate,omitempty"`
-	ParallelTrialCount   *int32                                                `json:"parallelTrialCount,omitempty"`
-	MaxTrialCount        *int32                                                `json:"maxTrialCount,omitempty"`
-	MaxFailedTrialCount  *int32                                                `json:"maxFailedTrialCount,omitempty"`
-	MetricsCollectorSpec *commonv1beta1.MetricsCollectorSpecApplyConfiguration `json:"metricsCollectorSpec,omitempty"`
-	NasConfig            *NasConfigApplyConfiguration                          `json:"nasConfig,omitempty"`
-	ResumePolicy         *experimentsv1beta1.ResumePolicyType                  `json:"resumePolicy,omitempty"`
+	Parameters           []ParameterSpecApplyConfiguration    `json:"parameters,omitempty"`
+	Objective            *commonv1beta1.ObjectiveSpec         `json:"objective,omitempty"`
+	Algorithm            *commonv1beta1.AlgorithmSpec         `json:"algorithm,omitempty"`
+	EarlyStopping        *commonv1beta1.EarlyStoppingSpec     `json:"earlyStopping,omitempty"`
+	TrialTemplate        *TrialTemplateApplyConfiguration     `json:"trialTemplate,omitempty"`
+	ParallelTrialCount   *int32                               `json:"parallelTrialCount,omitempty"`
+	MaxTrialCount        *int32                               `json:"maxTrialCount,omitempty"`
+	MaxFailedTrialCount  *int32                               `json:"maxFailedTrialCount,omitempty"`
+	MetricsCollectorSpec *commonv1beta1.MetricsCollectorSpec  `json:"metricsCollectorSpec,omitempty"`
+	NasConfig            *NasConfigApplyConfiguration         `json:"nasConfig,omitempty"`
+	ResumePolicy         *experimentsv1beta1.ResumePolicyType `json:"resumePolicy,omitempty"`
 }
 
 // ExperimentSpecApplyConfiguration constructs an declarative configuration of the ExperimentSpec type for use with
@@ -61,24 +61,24 @@ func (b *ExperimentSpecApplyConfiguration) WithParameters(values ...*ParameterSp
 // WithObjective sets the Objective field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Objective field is set to the value of the last call.
-func (b *ExperimentSpecApplyConfiguration) WithObjective(value *commonv1beta1.ObjectiveSpecApplyConfiguration) *ExperimentSpecApplyConfiguration {
-	b.Objective = value
+func (b *ExperimentSpecApplyConfiguration) WithObjective(value commonv1beta1.ObjectiveSpec) *ExperimentSpecApplyConfiguration {
+	b.Objective = &value
 	return b
 }
 
 // WithAlgorithm sets the Algorithm field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Algorithm field is set to the value of the last call.
-func (b *ExperimentSpecApplyConfiguration) WithAlgorithm(value *commonv1beta1.AlgorithmSpecApplyConfiguration) *ExperimentSpecApplyConfiguration {
-	b.Algorithm = value
+func (b *ExperimentSpecApplyConfiguration) WithAlgorithm(value commonv1beta1.AlgorithmSpec) *ExperimentSpecApplyConfiguration {
+	b.Algorithm = &value
 	return b
 }
 
 // WithEarlyStopping sets the EarlyStopping field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the EarlyStopping field is set to the value of the last call.
-func (b *ExperimentSpecApplyConfiguration) WithEarlyStopping(value *commonv1beta1.EarlyStoppingSpecApplyConfiguration) *ExperimentSpecApplyConfiguration {
-	b.EarlyStopping = value
+func (b *ExperimentSpecApplyConfiguration) WithEarlyStopping(value commonv1beta1.EarlyStoppingSpec) *ExperimentSpecApplyConfiguration {
+	b.EarlyStopping = &value
 	return b
 }
 
@@ -117,8 +117,8 @@ func (b *ExperimentSpecApplyConfiguration) WithMaxFailedTrialCount(value int32) 
 // WithMetricsCollectorSpec sets the MetricsCollectorSpec field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the MetricsCollectorSpec field is set to the value of the last call.
-func (b *ExperimentSpecApplyConfiguration) WithMetricsCollectorSpec(value *commonv1beta1.MetricsCollectorSpecApplyConfiguration) *ExperimentSpecApplyConfiguration {
-	b.MetricsCollectorSpec = value
+func (b *ExperimentSpecApplyConfiguration) WithMetricsCollectorSpec(value commonv1beta1.MetricsCollectorSpec) *ExperimentSpecApplyConfiguration {
+	b.MetricsCollectorSpec = &value
 	return b
 }
 

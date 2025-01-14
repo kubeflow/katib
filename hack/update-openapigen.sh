@@ -20,41 +20,35 @@ set -o pipefail
 
 echo "Generate open-api for the APIs"
 
-if [[ -z "${GOPATH:-}" ]]; then
-  GOPATH=$(go env GOPATH)
-  export GOPATH
-fi
+CURRENT_DIR=$(dirname "${BASH_SOURCE[0]}")
+KATIB_ROOT=$(realpath "${CURRENT_DIR}/..")
+KATIB_PKG="github.com/kubeflow/katib"
 
-# Grab code-generator version from go.mod
-CODEGEN_VERSION=$(cd ../.. && grep 'k8s.io/code-generator' go.mod | awk '{print $2}')
-CODEGEN_PKG="${GOPATH}/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}"
+cd "$CURRENT_DIR/.."
 
-if [[ ! -d ${CODEGEN_PKG} ]]; then
-  echo "${CODEGEN_PKG} is missing. Please run 'go mod download'."
-  exit 0
-fi
+# Get the kube-openapi binary.
+OPENAPI_PKG=$(go list -m -mod=readonly -f "{{.Dir}}" k8s.io/kube-openapi)
+echo ">> Using ${OPENAPI_PKG}"
 
-echo ">> Using ${CODEGEN_PKG} for the code generator"
-
-# Ensure we can execute.
-chmod +x "${CODEGEN_PKG}/generate-groups.sh"
-
-PROJECT_ROOT=${GOPATH}/src/github.com/kubeflow/katib
 VERSION_LIST=(v1beta1)
 SWAGGER_VERSION="0.1"
 
 for VERSION in "${VERSION_LIST[@]}"; do
-  SWAGGER_CODEGEN_FILE=${PROJECT_ROOT}/pkg/apis/${VERSION}/swagger.json
+  SWAGGER_CODEGEN_FILE=${KATIB_ROOT}/pkg/apis/${VERSION}/swagger.json
 
   echo "Generating OpenAPI specification for ${VERSION} ..."
-
-  # shellcheck disable=SC2140
-  go run "${CODEGEN_PKG}/cmd/openapi-gen/main.go" \
-    --go-header-file "${PROJECT_ROOT}/hack/boilerplate/boilerplate.go.txt" \
-    --input-dirs "github.com/kubeflow/katib/pkg/apis/controller/common/$VERSION","github.com/kubeflow/katib/pkg/apis/controller/experiments/$VERSION","github.com/kubeflow/katib/pkg/apis/controller/suggestions/${VERSION}","github.com/kubeflow/katib/pkg/apis/controller/trials/${VERSION}" \
-    --output-package "github.com/kubeflow/katib/pkg/apis/${VERSION}" \
-    "$@"
-
-  echo "Generating swagger file for ${VERSION} ..."
-  go run "${PROJECT_ROOT}/hack/swagger/main.go" "${VERSION}-${SWAGGER_VERSION}" "${VERSION}" >"${SWAGGER_CODEGEN_FILE}"
+  
+  go run "${OPENAPI_PKG}/cmd/openapi-gen" \
+    --go-header-file "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
+    --output-pkg "${KATIB_PKG}/pkg/apis/${VERSION}" \
+    --output-dir "${KATIB_ROOT}/pkg/apis/${VERSION}" \
+    --output-file "zz_generated.openapi.go" \
+    --report-filename "${KATIB_ROOT}/hack/violation_exception_${VERSION}.list" \
+    "${KATIB_ROOT}/pkg/apis/controller/common/${VERSION}" \
+    "${KATIB_ROOT}/pkg/apis/controller/experiments/${VERSION}" \
+    "${KATIB_ROOT}/pkg/apis/controller/suggestions/${VERSION}" \
+    "${KATIB_ROOT}/pkg/apis/controller/trials/${VERSION}"
+  
+  echo "Generating OpenAPI Swagger for ${VERSION} ..."
+  go run "${KATIB_ROOT}/hack/swagger/main.go" "${VERSION}-${SWAGGER_VERSION}" "${VERSION}" >"${SWAGGER_CODEGEN_FILE}"
 done
