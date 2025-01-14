@@ -22,14 +22,14 @@ import (
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// TrialSourceApplyConfiguration represents an declarative configuration of the TrialSource type for use
+// TrialSourceApplyConfiguration represents a declarative configuration of the TrialSource type for use
 // with apply.
 type TrialSourceApplyConfiguration struct {
 	TrialSpec *unstructured.Unstructured         `json:"trialSpec,omitempty"`
 	ConfigMap *ConfigMapSourceApplyConfiguration `json:"configMap,omitempty"`
 }
 
-// TrialSourceApplyConfiguration constructs an declarative configuration of the TrialSource type for use with
+// TrialSourceApplyConfiguration constructs a declarative configuration of the TrialSource type for use with
 // apply.
 func TrialSource() *TrialSourceApplyConfiguration {
 	return &TrialSourceApplyConfiguration{}

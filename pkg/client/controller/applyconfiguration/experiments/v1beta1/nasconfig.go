@@ -18,14 +18,14 @@ limitations under the License.
 
 package v1beta1
 
-// NasConfigApplyConfiguration represents an declarative configuration of the NasConfig type for use
+// NasConfigApplyConfiguration represents a declarative configuration of the NasConfig type for use
 // with apply.
 type NasConfigApplyConfiguration struct {
 	GraphConfig *GraphConfigApplyConfiguration `json:"graphConfig,omitempty"`
 	Operations  []OperationApplyConfiguration  `json:"operations,omitempty"`
 }
 
-// NasConfigApplyConfiguration constructs an declarative configuration of the NasConfig type for use with
+// NasConfigApplyConfiguration constructs a declarative configuration of the NasConfig type for use with
 // apply.
 func NasConfig() *NasConfigApplyConfiguration {
 	return &NasConfigApplyConfiguration{}

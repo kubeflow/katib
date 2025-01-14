@@ -22,7 +22,7 @@ import (
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 )
 
-// TrialAssignmentApplyConfiguration represents an declarative configuration of the TrialAssignment type for use
+// TrialAssignmentApplyConfiguration represents a declarative configuration of the TrialAssignment type for use
 // with apply.
 type TrialAssignmentApplyConfiguration struct {
 	ParameterAssignments []v1beta1.ParameterAssignment `json:"parameterAssignments,omitempty"`
@@ -31,7 +31,7 @@ type TrialAssignmentApplyConfiguration struct {
 	Labels               map[string]string             `json:"labels,omitempty"`
 }
 
-// TrialAssignmentApplyConfiguration constructs an declarative configuration of the TrialAssignment type for use with
+// TrialAssignmentApplyConfiguration constructs a declarative configuration of the TrialAssignment type for use with
 // apply.
 func TrialAssignment() *TrialAssignmentApplyConfiguration {
 	return &TrialAssignmentApplyConfiguration{}

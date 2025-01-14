@@ -20,9 +20,6 @@ package v1beta1
 
 import (
 	"context"
-	json "encoding/json"
-	"fmt"
-	"time"
 
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/trials/v1beta1"
@@ -30,7 +27,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // TrialsGetter has a method to return a TrialInterface.
@@ -43,6 +40,7 @@ type TrialsGetter interface {
 type TrialInterface interface {
 	Create(ctx context.Context, trial *v1beta1.Trial, opts v1.CreateOptions) (*v1beta1.Trial, error)
 	Update(ctx context.Context, trial *v1beta1.Trial, opts v1.UpdateOptions) (*v1beta1.Trial, error)
+	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 	UpdateStatus(ctx context.Context, trial *v1beta1.Trial, opts v1.UpdateOptions) (*v1beta1.Trial, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
@@ -51,206 +49,25 @@ type TrialInterface interface {
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
 	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Trial, err error)
 	Apply(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error)
+	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
 	ApplyStatus(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error)
 	TrialExpansion
 }
 
 // trials implements TrialInterface
 type trials struct {
-	client rest.Interface
-	ns     string
+	*gentype.ClientWithListAndApply[*v1beta1.Trial, *v1beta1.TrialList, *trialsv1beta1.TrialApplyConfiguration]
 }
 
 // newTrials returns a Trials
 func newTrials(c *TrialV1beta1Client, namespace string) *trials {
 	return &trials{
-		client: c.RESTClient(),
-		ns:     namespace,
+		gentype.NewClientWithListAndApply[*v1beta1.Trial, *v1beta1.TrialList, *trialsv1beta1.TrialApplyConfiguration](
+			"trials",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			namespace,
+			func() *v1beta1.Trial { return &v1beta1.Trial{} },
+			func() *v1beta1.TrialList { return &v1beta1.TrialList{} }),
 	}
-}
-
-// Get takes name of the trial, and returns the corresponding trial object, and an error if there is any.
-func (c *trials) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Trial, err error) {
-	result = &v1beta1.Trial{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("trials").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of Trials that match those selectors.
-func (c *trials) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.TrialList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1beta1.TrialList{}
-	err = c.client.Get().
-		Namespace(c.ns).
-		Resource("trials").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested trials.
-func (c *trials) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Namespace(c.ns).
-		Resource("trials").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
-}
-
-// Create takes the representation of a trial and creates it.  Returns the server's representation of the trial, and an error, if there is any.
-func (c *trials) Create(ctx context.Context, trial *v1beta1.Trial, opts v1.CreateOptions) (result *v1beta1.Trial, err error) {
-	result = &v1beta1.Trial{}
-	err = c.client.Post().
-		Namespace(c.ns).
-		Resource("trials").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(trial).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Update takes the representation of a trial and updates it. Returns the server's representation of the trial, and an error, if there is any.
-func (c *trials) Update(ctx context.Context, trial *v1beta1.Trial, opts v1.UpdateOptions) (result *v1beta1.Trial, err error) {
-	result = &v1beta1.Trial{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("trials").
-		Name(trial.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(trial).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *trials) UpdateStatus(ctx context.Context, trial *v1beta1.Trial, opts v1.UpdateOptions) (result *v1beta1.Trial, err error) {
-	result = &v1beta1.Trial{}
-	err = c.client.Put().
-		Namespace(c.ns).
-		Resource("trials").
-		Name(trial.Name).
-		SubResource("status").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(trial).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Delete takes name of the trial and deletes it. Returns an error if one occurs.
-func (c *trials) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("trials").
-		Name(name).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *trials) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
-	}
-	return c.client.Delete().
-		Namespace(c.ns).
-		Resource("trials").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// Patch applies the patch and returns the patched trial.
-func (c *trials) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Trial, err error) {
-	result = &v1beta1.Trial{}
-	err = c.client.Patch(pt).
-		Namespace(c.ns).
-		Resource("trials").
-		Name(name).
-		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied trial.
-func (c *trials) Apply(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error) {
-	if trial == nil {
-		return nil, fmt.Errorf("trial provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(trial)
-	if err != nil {
-		return nil, err
-	}
-	name := trial.Name
-	if name == nil {
-		return nil, fmt.Errorf("trial.Name must be provided to Apply")
-	}
-	result = &v1beta1.Trial{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("trials").
-		Name(*name).
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *trials) ApplyStatus(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error) {
-	if trial == nil {
-		return nil, fmt.Errorf("trial provided to Apply must not be nil")
-	}
-	patchOpts := opts.ToPatchOptions()
-	data, err := json.Marshal(trial)
-	if err != nil {
-		return nil, err
-	}
-
-	name := trial.Name
-	if name == nil {
-		return nil, fmt.Errorf("trial.Name must be provided to Apply")
-	}
-
-	result = &v1beta1.Trial{}
-	err = c.client.Patch(types.ApplyPatchType).
-		Namespace(c.ns).
-		Resource("trials").
-		Name(*name).
-		SubResource("status").
-		VersionedParams(&patchOpts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
 }
