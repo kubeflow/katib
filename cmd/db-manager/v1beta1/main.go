@@ -35,7 +35,7 @@ import (
 )
 
 const (
-	port                  = "0.0.0.0:6789"
+	defaultListenAddress  = "0.0.0.0:6789"
 	defaultConnectTimeout = time.Second * 60
 )
 
@@ -90,7 +90,9 @@ func (s *server) Check(ctx context.Context, in *health_pb.HealthCheckRequest) (*
 
 func main() {
 	var connectTimeout time.Duration
+	var listenAddress string
 	flag.DurationVar(&connectTimeout, "connect-timeout", defaultConnectTimeout, "Timeout before calling error during database connection. (e.g. 120s)")
+	flag.StringVar(&listenAddress, "listen-address", defaultListenAddress, "The network interface or IP address to receive incoming connections. (e.g. 0.0.0.0:6789)")
 	flag.Parse()
 
 	var err error
@@ -104,13 +106,13 @@ func main() {
 		klog.Fatalf("Failed to open db connection: %v", err)
 	}
 	dbIf.DBInit()
-	listener, err := net.Listen("tcp", port)
+	listener, err := net.Listen("tcp", listenAddress)
 	if err != nil {
 		klog.Fatalf("Failed to listen: %v", err)
 	}
 
 	size := 1<<31 - 1
-	klog.Infof("Start Katib manager: %s", port)
+	klog.Infof("Start Katib manager: %s", listenAddress)
 	s := grpc.NewServer(grpc.MaxRecvMsgSize(size), grpc.MaxSendMsgSize(size))
 	api_pb.RegisterDBManagerServer(s, &server{})
 	health_pb.RegisterHealthServer(s, &server{})
