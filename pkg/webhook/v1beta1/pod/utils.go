@@ -291,7 +291,7 @@ func mutatePodEnv(pod *v1.Pod, trial *trialsv1beta1.Trial) error {
 			pod.Spec.Containers[index].Env = []v1.EnvVar{}
 		}
 
-		// Pass env variable KATIB_TRIAL_NAME to the primary container using fieldPath
+		// Pass env variable KATIB_TRIAL_NAME and KATIB_EXPERIMENT_NAME to the primary container using fieldPath
 		pod.Spec.Containers[index].Env = append(
 			pod.Spec.Containers[index].Env,
 			v1.EnvVar{
@@ -302,10 +302,18 @@ func mutatePodEnv(pod *v1.Pod, trial *trialsv1beta1.Trial) error {
 					},
 				},
 			},
+			v1.EnvVar{
+				Name: consts.EnvExperimentName,
+				ValueFrom: &v1.EnvVarSource{
+					FieldRef: &v1.ObjectFieldSelector{
+						FieldPath: fmt.Sprintf("metadata.labels['%s']", consts.LabelExperimentName),
+					},
+				},
+			},
 		)
 		return nil
 	} else {
-		return fmt.Errorf("Unable to find primary container %v in mutated pod containers %v",
+		return fmt.Errorf("unable to find primary container %v in mutated pod containers %v",
 			trial.Spec.PrimaryContainerName, pod.Spec.Containers)
 	}
 }
