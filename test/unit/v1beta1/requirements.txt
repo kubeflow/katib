@@ -1,2 +1,2 @@
-grpcio-testing==1.41.1
+grpcio-testing==1.64.1
 pytest==7.2.0
