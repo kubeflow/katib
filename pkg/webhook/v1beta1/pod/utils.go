@@ -313,7 +313,7 @@ func mutatePodEnv(pod *v1.Pod, trial *trialsv1beta1.Trial) error {
 		)
 		return nil
 	} else {
-		return fmt.Errorf("unable to find primary container %v in mutated pod containers %v",
+		return fmt.Errorf("Unable to find primary container %v in mutated pod containers %v",
 			trial.Spec.PrimaryContainerName, pod.Spec.Containers)
 	}
 }
