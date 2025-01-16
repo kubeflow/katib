@@ -26,8 +26,6 @@ jobs:
             dockerfile: cmd/suggestion/hyperopt/v1beta1/Dockerfile
           - component-name: suggestion-hyperband
             dockerfile: cmd/suggestion/hyperband/v1beta1/Dockerfile
-          - component-name: suggestion-skopt
-            dockerfile: cmd/suggestion/skopt/v1beta1/Dockerfile
           - component-name: suggestion-goptuna
             dockerfile: cmd/suggestion/goptuna/v1beta1/Dockerfile
           - component-name: suggestion-optuna

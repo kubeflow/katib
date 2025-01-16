@@ -25,23 +25,3 @@ jobs:
 
       - name: Run Python test
         run: make pytest
-
-  # The skopt service doesn't work appropriately with Python 3.11.
-  # So, we need to run the test with Python 3.9.
-  # TODO (tenzen-y): Once we stop to support skopt, we can remove this test.
-  # REF: https://github.com/kubeflow/katib/issues/2280
-  test-skopt:
-    name: Test Skopt
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
-
-      - name: Run Python test
-        run: make pytest-skopt

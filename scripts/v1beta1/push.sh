@@ -59,9 +59,6 @@ docker push "${REGISTRY}/suggestion-hyperopt:${TAG}"
 echo -e "\nPushing hyperband suggestion...\n"
 docker push "${REGISTRY}/suggestion-hyperband:${TAG}"
 
-echo -e "\nPushing skopt suggestion...\n"
-docker push "${REGISTRY}/suggestion-skopt:${TAG}"
-
 echo -e "\nPushing goptuna suggestion...\n"
 docker push "${REGISTRY}/suggestion-goptuna:${TAG}"
 

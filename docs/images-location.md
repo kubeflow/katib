@@ -142,17 +142,6 @@ and the [Katib Early Stopping algorithms](https://www.kubeflow.org/docs/componen
     </tr>
     <tr align="center">
       <td>
-        <code>docker.io/kubeflowkatib/suggestion-skopt</code>
-      </td>
-      <td>
-        <a href="https://github.com/scikit-optimize/scikit-optimize">Skopt</a> Suggestion
-      </td>
-      <td>
-        <a href="https://github.com/kubeflow/katib/blob/master/cmd/suggestion/skopt/v1beta1/Dockerfile">Dockerfile</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
         <code>docker.io/kubeflowkatib/suggestion-optuna</code>
       </td>
       <td>

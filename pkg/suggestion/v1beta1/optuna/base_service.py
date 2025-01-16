@@ -58,6 +58,9 @@ class BaseOptunaService(object):
                 self.search_space
             )
             return optuna.samplers.GridSampler(combinations, **self.algorithm_config)
+        
+        elif self.algorithm_name == "bayesianoptimization":
+            return optuna.samplers.GPSampler(**self.algorithm_config)
 
     def get_suggestions(self, trials, current_request_number):
         if len(trials) != 0:

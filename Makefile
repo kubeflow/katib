@@ -173,7 +173,7 @@ endif
 # TODO(Electronic-Waste): Remove the import rewrite when protobuf supports `python_package` option.
 # REF: https://github.com/protocolbuffers/protobuf/issues/7061
 pytest: prepare-pytest prepare-pytest-testdata
-	pytest ./test/unit/v1beta1/suggestion --ignore=./test/unit/v1beta1/suggestion/test_skopt_service.py
+	pytest ./test/unit/v1beta1/suggestion
 	pytest ./test/unit/v1beta1/earlystopping
 	pytest ./test/unit/v1beta1/metricscollector
 	cp ./pkg/apis/manager/v1beta1/python/api_pb2.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py
@@ -182,12 +182,3 @@ pytest: prepare-pytest prepare-pytest-testdata
 	pytest ./sdk/python/v1beta1/kubeflow/katib
 	rm ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2.py ./sdk/python/v1beta1/kubeflow/katib/katib_api_pb2_grpc.py
 
-# The skopt service doesn't work appropriately with Python 3.11.
-# So, we need to run the test with Python 3.9.
-# TODO (tenzen-y): Once we stop to support skopt, we can remove this test.
-# REF: https://github.com/kubeflow/katib/issues/2280
-pytest-skopt:
-	pip install six
-	pip install --prefer-binary -r test/unit/v1beta1/requirements.txt
-	pip install --prefer-binary -r cmd/suggestion/skopt/v1beta1/requirements.txt
-	pytest ./test/unit/v1beta1/suggestion/test_skopt_service.py
