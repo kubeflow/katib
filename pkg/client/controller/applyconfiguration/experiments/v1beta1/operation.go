@@ -18,14 +18,14 @@ limitations under the License.
 
 package v1beta1
 
-// OperationApplyConfiguration represents an declarative configuration of the Operation type for use
+// OperationApplyConfiguration represents a declarative configuration of the Operation type for use
 // with apply.
 type OperationApplyConfiguration struct {
 	OperationType *string                           `json:"operationType,omitempty"`
 	Parameters    []ParameterSpecApplyConfiguration `json:"parameters,omitempty"`
 }
 
-// OperationApplyConfiguration constructs an declarative configuration of the Operation type for use with
+// OperationApplyConfiguration constructs a declarative configuration of the Operation type for use with
 // apply.
 func Operation() *OperationApplyConfiguration {
 	return &OperationApplyConfiguration{}

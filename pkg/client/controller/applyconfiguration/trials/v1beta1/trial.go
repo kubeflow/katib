@@ -24,7 +24,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// TrialApplyConfiguration represents an declarative configuration of the Trial type for use
+// TrialApplyConfiguration represents a declarative configuration of the Trial type for use
 // with apply.
 type TrialApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -33,7 +33,7 @@ type TrialApplyConfiguration struct {
 	Status                           *TrialStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// Trial constructs an declarative configuration of the Trial type for use with
+// Trial constructs a declarative configuration of the Trial type for use with
 // apply.
 func Trial(name, namespace string) *TrialApplyConfiguration {
 	b := &TrialApplyConfiguration{}
@@ -216,4 +216,10 @@ func (b *TrialApplyConfiguration) WithSpec(value *TrialSpecApplyConfiguration) *
 func (b *TrialApplyConfiguration) WithStatus(value *TrialStatusApplyConfiguration) *TrialApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *TrialApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

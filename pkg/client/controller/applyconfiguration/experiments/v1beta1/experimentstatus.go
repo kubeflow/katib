@@ -22,7 +22,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ExperimentStatusApplyConfiguration represents an declarative configuration of the ExperimentStatus type for use
+// ExperimentStatusApplyConfiguration represents a declarative configuration of the ExperimentStatus type for use
 // with apply.
 type ExperimentStatusApplyConfiguration struct {
 	StartTime                   *v1.Time                                `json:"startTime,omitempty"`
@@ -47,7 +47,7 @@ type ExperimentStatusApplyConfiguration struct {
 	TrialMetricsUnavailable     *int32                                  `json:"trialMetricsUnavailable,omitempty"`
 }
 
-// ExperimentStatusApplyConfiguration constructs an declarative configuration of the ExperimentStatus type for use with
+// ExperimentStatusApplyConfiguration constructs a declarative configuration of the ExperimentStatus type for use with
 // apply.
 func ExperimentStatus() *ExperimentStatusApplyConfiguration {
 	return &ExperimentStatusApplyConfiguration{}

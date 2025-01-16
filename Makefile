@@ -7,7 +7,7 @@ HAS_MOCKGEN := $(shell command -v mockgen;)
 COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := docker.io/kubeflowkatib
 CPU_ARCH ?= linux/amd64,linux/arm64
-ENVTEST_K8S_VERSION ?= 1.30
+ENVTEST_K8S_VERSION ?= 1.31
 MOCKGEN_VERSION ?= $(shell grep 'go.uber.org/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
 GOPATH ?= $(shell go env GOPATH)
@@ -21,7 +21,7 @@ test: envtest
 
 envtest:
 ifndef HAS_SETUP_ENVTEST
-	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.18
+	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.19
 	$(info "setup-envtest has been installed")
 endif
 	$(info "setup-envtest has already installed")

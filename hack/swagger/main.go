@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/kubeflow/katib/pkg/apis/v1beta1"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	"k8s.io/kube-openapi/pkg/common"
 	"k8s.io/kube-openapi/pkg/validation/spec"
 )

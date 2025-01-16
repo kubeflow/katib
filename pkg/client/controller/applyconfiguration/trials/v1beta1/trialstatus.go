@@ -23,7 +23,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// TrialStatusApplyConfiguration represents an declarative configuration of the TrialStatus type for use
+// TrialStatusApplyConfiguration represents a declarative configuration of the TrialStatus type for use
 // with apply.
 type TrialStatusApplyConfiguration struct {
 	StartTime         *v1.Time                           `json:"startTime,omitempty"`
@@ -33,7 +33,7 @@ type TrialStatusApplyConfiguration struct {
 	Observation       *commonv1beta1.Observation         `json:"observation,omitempty"`
 }
 
-// TrialStatusApplyConfiguration constructs an declarative configuration of the TrialStatus type for use with
+// TrialStatusApplyConfiguration constructs a declarative configuration of the TrialStatus type for use with
 // apply.
 func TrialStatus() *TrialStatusApplyConfiguration {
 	return &TrialStatusApplyConfiguration{}

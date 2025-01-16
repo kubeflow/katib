@@ -20,8 +20,8 @@ package v1beta1
 
 import (
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/client-go/listers"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -38,25 +38,17 @@ type SuggestionLister interface {
 
 // suggestionLister implements the SuggestionLister interface.
 type suggestionLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*v1beta1.Suggestion]
 }
 
 // NewSuggestionLister returns a new SuggestionLister.
 func NewSuggestionLister(indexer cache.Indexer) SuggestionLister {
-	return &suggestionLister{indexer: indexer}
-}
-
-// List lists all Suggestions in the indexer.
-func (s *suggestionLister) List(selector labels.Selector) (ret []*v1beta1.Suggestion, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1beta1.Suggestion))
-	})
-	return ret, err
+	return &suggestionLister{listers.New[*v1beta1.Suggestion](indexer, v1beta1.Resource("suggestion"))}
 }
 
 // Suggestions returns an object that can list and get Suggestions.
 func (s *suggestionLister) Suggestions(namespace string) SuggestionNamespaceLister {
-	return suggestionNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return suggestionNamespaceLister{listers.NewNamespaced[*v1beta1.Suggestion](s.ResourceIndexer, namespace)}
 }
 
 // SuggestionNamespaceLister helps list and get Suggestions.
@@ -74,26 +66,5 @@ type SuggestionNamespaceLister interface {
 // suggestionNamespaceLister implements the SuggestionNamespaceLister
 // interface.
 type suggestionNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all Suggestions in the indexer for a given namespace.
-func (s suggestionNamespaceLister) List(selector labels.Selector) (ret []*v1beta1.Suggestion, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1beta1.Suggestion))
-	})
-	return ret, err
-}
-
-// Get retrieves the Suggestion from the indexer for a given namespace and name.
-func (s suggestionNamespaceLister) Get(name string) (*v1beta1.Suggestion, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1beta1.Resource("suggestion"), name)
-	}
-	return obj.(*v1beta1.Suggestion), nil
+	listers.ResourceIndexer[*v1beta1.Suggestion]
 }
