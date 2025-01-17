@@ -564,8 +564,9 @@ class KatibClient(object):
                     raise ValueError(
                         f"""
                         Invalid PVC name '{name}'. It must comply with RFC 1123.
-                        
-                        A lowercase RFC 1123 subdomain must consist of lowercase alphanumeric characters, '-' or '.',
+
+                        A lowercase RFC 1123 subdomain must consist of lowercase
+                        alphanumeric characters, '-' or '.',
                         and must start and end with an alphanumeric character.
                         For example, 'example.com' is valid.
                         The regex used for validation is:
