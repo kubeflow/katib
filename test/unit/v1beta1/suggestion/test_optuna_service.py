@@ -120,7 +120,6 @@ class TestOptuna:
         )
 
         response, metadata, code, details = get_suggestion.termination()
-        print(response)
         assert code == grpc.StatusCode.OK
         assert 2 == len(response.parameter_assignments)
 
@@ -486,7 +485,7 @@ class TestOptuna:
                 grpc.StatusCode.INVALID_ARGUMENT,
             ],
             # [BAYESIANOPTIMIZATION] Invalid parameter name
-            # ["bayesianoptimization", {"invalid": "5"}, 100, [], grpc.StatusCode.INVALID_ARGUMENT],
+            ["bayesianoptimization", {"invalid": "5"}, 100, [], grpc.StatusCode.INVALID_ARGUMENT],
         ],
     )
     def test_validate_algorithm_settings(
