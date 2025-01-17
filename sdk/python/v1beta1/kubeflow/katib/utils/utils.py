@@ -272,4 +272,8 @@ def get_exec_script_from_objective(
 
 def is_valid_pvc_name(name: str) -> bool:
     # RFC 1123 regex for valid PVC names: lowercase alphanumeric, '-', or '.'.
-    return bool(re.match(r'^[a-z0-9]([a-z0-9\-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]*[a-z0-9])?)*$', name))
+    return bool(
+        re.match(
+            r"^[a-z0-9]([a-z0-9\-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]*[a-z0-9])?)*$", name
+        )
+    )
