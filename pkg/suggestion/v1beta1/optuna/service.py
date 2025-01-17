@@ -97,7 +97,7 @@ class OptimizerConfiguration(object):
         "bayesianoptimization": {
             "n_startup_trials": lambda x: int(x),
             "seed": lambda x: int(x),
-        }
+        },
     }
 
     @classmethod
@@ -265,7 +265,7 @@ class OptimizerConfiguration(object):
             )
 
         return True, ""
-    
+
     @classmethod
     def _validate_bayesianoptimization_setting(cls, algorithm_settings):
         for s in algorithm_settings:
@@ -276,12 +276,16 @@ class OptimizerConfiguration(object):
                             s.name
                         )
                 else:
-                    return False, "unknown setting {} for algorithm bayesianoptimization".format(s.name)
-                
+                    return (
+                        False,
+                        "unknown setting {} for algorithm bayesianoptimization".format(
+                            s.name
+                        ),
+                    )
+
             except Exception as e:
                 return False, "failed to validate {name}({value}): {exception}".format(
                     name=s.name, value=s.value, exception=e
                 )
-                
-        return True, ""
 
+        return True, ""
