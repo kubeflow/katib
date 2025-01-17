@@ -377,9 +377,13 @@ class KatibClient(object):
 
         namespace = namespace or self.namespace
         namespace_labels = client.CoreV1Api().read_namespace(namespace).metadata.labels
-        if 'katib.kubeflow.org/metrics-collector-injection' not in namespace_labels:
-            namespace_labels['katib.kubeflow.org/metrics-collector-injection'] = 'enabled'
-            client.CoreV1Api().patch_namespace(namespace, {'metadata': {'labels': namespace_labels}})
+        if "katib.kubeflow.org/metrics-collector-injection" not in namespace_labels:
+            namespace_labels["katib.kubeflow.org/metrics-collector-injection"] = (
+                "enabled"
+            )
+            client.CoreV1Api().patch_namespace(
+                namespace, {"metadata": {"labels": namespace_labels}}
+            )
 
         # Create Katib Experiment template.
         experiment = models.V1beta1Experiment(
