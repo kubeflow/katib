@@ -33,10 +33,16 @@ describe('Index page', () => {
 
     let i = 0;
     const experiments = this.experimentsRequest;
-    // Table is sorted by Name in ascending order by default
-    // and experiment objects are also sorted alphabetically by name
+
+    // Experiment objects are sorted alphabetically by name
+    // We sort them by startTime in descending
+    const sortedExperiments = [...experiments].sort((a, b) => {
+      return b.startTime.getTime() - a.startTime.getTime();
+    });
+    
+    // Table is sorted by startTime in descending order
     cy.get(`[data-cy-resource-table-row="Name"]`).each(element => {
-      expect(element).to.contain(experiments[i].name);
+      expect(element).to.contain(sortedExperiments[i].name);
       i++;
     });
   });
