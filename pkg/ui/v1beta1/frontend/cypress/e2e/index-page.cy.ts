@@ -37,7 +37,9 @@ describe('Index page', () => {
     // Experiment objects are sorted alphabetically by name
     // We sort them by startTime in descending
     const sortedExperiments = [...experiments].sort((a, b) => {
-      return b.startTime.getTime() - a.startTime.getTime();
+      const timeA = new Date(a.startTime).getTime();
+      const timeB = new Date(b.startTime).getTime();
+      return timeB - timeA;
     });
     
     // Table is sorted by startTime in descending order
