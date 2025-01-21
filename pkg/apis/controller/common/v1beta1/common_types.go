@@ -27,6 +27,8 @@ type AlgorithmSpec struct {
 	AlgorithmName string `json:"algorithmName,omitempty"`
 
 	// Key-value pairs representing settings for suggestion algorithms.
+	// +listType=map
+	// +listMapKey=name
 	AlgorithmSettings []AlgorithmSetting `json:"algorithmSettings,omitempty"`
 }
 
@@ -46,6 +48,8 @@ type EarlyStoppingSpec struct {
 	AlgorithmName string `json:"algorithmName,omitempty"`
 
 	// Key-value pairs representing settings for early stopping algorithm.
+	// +listType=map
+	// +listMapKey=name
 	AlgorithmSettings []EarlyStoppingSetting `json:"algorithmSettings,omitempty"`
 }
 
@@ -105,10 +109,13 @@ type ObjectiveSpec struct {
 	// AdditionalMetricNames represents metrics that should be collected from Trials.
 	// This can be empty if we only care about the objective metric.
 	// Note: If we adopt a push instead of pull mechanism, this can be omitted completely.
+	// +listType=set
 	AdditionalMetricNames []string `json:"additionalMetricNames,omitempty"`
 
 	// MetricStrategies defines various rules (min, max or latest) to extract metrics values.
 	// This field is allowed to missing, experiment defaulter (webhook) will fill it.
+	// +listType=map
+	// +listMapKey=name
 	MetricStrategies []MetricStrategy `json:"metricStrategies,omitempty"`
 }
 
@@ -150,6 +157,8 @@ type Metric struct {
 // +k8s:deepcopy-gen=true
 type Observation struct {
 	// Key-value pairs for metric names and values
+	// +listType=map
+	// +listMapKey=name
 	Metrics []Metric `json:"metrics,omitempty"`
 }
 
@@ -177,6 +186,7 @@ type SourceSpec struct {
 type FilterSpec struct {
 	// When the metrics output follows format as this field specified, metricsCollector
 	// collects it and reports to metrics server, it can be "<metric_name>: <float>" or else
+	// +listType=set
 	MetricsFormat []string `json:"metricsFormat,omitempty"`
 }
 
