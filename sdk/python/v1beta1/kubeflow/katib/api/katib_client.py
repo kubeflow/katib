@@ -415,7 +415,9 @@ class KatibClient(object):
             experiment.spec.max_failed_trial_count = max_failed_trial_count
 
         # If users choose to use a custom objective function.
-        if objective is not None:
+        if objective is not None or parameters is not None:
+            if not objective or not parameters:
+                raise ValueError("One of the required parameters is None")
             # Add metrics collector to the Katib Experiment.
             # Up to now, we only support parameter `kind`, of which default value
             # is `StdOut`, to specify the kind of metrics collector.
@@ -518,6 +520,7 @@ class KatibClient(object):
                 from kubeflow.storage_initializer.hugging_face import (
                     HuggingFaceDatasetParams,
                     HuggingFaceModelParams,
+                    HuggingFaceTrainerParams,
                 )
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
                 from kubeflow.training import models as training_models
@@ -596,6 +599,11 @@ class KatibClient(object):
                     "or HuggingFaceDatasetParams."
                 )
 
+            if not isinstance(trainer_parameters, HuggingFaceTrainerParams):
+                raise ValueError(
+                    "Trainer parameters must be an instance of HuggingFaceTrainerParams."
+                )
+
             # Iterate over input parameters and do substitutions.
             experiment_params = []
             trial_params = []
@@ -633,6 +641,8 @@ class KatibClient(object):
                     model_provider_parameters.model_uri,
                     "--transformer_type",
                     model_provider_parameters.transformer_type.__name__,
+                    "--num_labels",
+                    str(model_provider_parameters.num_labels),
                     "--model_dir",
                     VOLUME_PATH_MODEL,
                     "--dataset_dir",
@@ -643,7 +653,11 @@ class KatibClient(object):
                     f"'{training_args}'",
                 ],
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
-                resources=resources_per_trial.resources_per_worker,
+                resources=(
+                    resources_per_trial.resources_per_worker
+                    if resources_per_trial
+                    else None
+                ),
             )
 
             # Create the worker and the master pod.
@@ -677,7 +691,10 @@ class KatibClient(object):
                 ),
             )
 
-            if resources_per_trial.num_procs_per_worker:
+            if (
+                resources_per_trial is not None
+                and resources_per_trial.num_procs_per_worker
+            ):
                 pytorchjob.spec.nproc_per_node = str(
                     resources_per_trial.num_procs_per_worker
                 )
@@ -689,7 +706,7 @@ class KatibClient(object):
                 )
             )
 
-            if resources_per_trial.num_workers > 1:
+            if resources_per_trial is not None and resources_per_trial.num_workers > 1:
                 pytorchjob.spec.pytorch_replica_specs["Worker"] = (
                     training_models.KubeflowOrgV1ReplicaSpec(
                         replicas=resources_per_trial.num_workers - 1,
