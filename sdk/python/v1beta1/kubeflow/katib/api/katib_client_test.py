@@ -389,7 +389,7 @@ test_tune_data = [
         "invalid env_per_trial",
         {
             "name": "tune_test",
-            "objective": lambda x: x,
+            "objective": lambda x: print(f"a={x}"),
             "parameters": {"a": katib.search.int(min=10, max=100)},
             "env_per_trial": "invalid",
         },
