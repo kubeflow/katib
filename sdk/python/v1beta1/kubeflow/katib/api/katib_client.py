@@ -635,7 +635,7 @@ class KatibClient(object):
 
             container_spec = training_utils.get_container_spec(
                 name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
-                base_image=TRAINER_TRANSFORMER_IMAGE,
+                base_image="docker.io/helenxiehz428/trainer:test",
                 args=[
                     "--model_uri",
                     model_provider_parameters.model_uri,
