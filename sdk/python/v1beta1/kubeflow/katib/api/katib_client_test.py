@@ -305,7 +305,7 @@ test_tune_data = [
         "missing name",
         {
             "name": None,
-            "objective": lambda x: x,
+            "objective": lambda x: print(f"a={x}"),
             "parameters": {"a": katib.search.int(min=10, max=100)},
         },
         ValueError,
@@ -314,7 +314,7 @@ test_tune_data = [
         "invalid hybrid parameters - objective and model_provider_parameters",
         {
             "name": "tune_test",
-            "objective": lambda x: x,
+            "objective": lambda x: print(f"a={x}"),
             "model_provider_parameters": HuggingFaceModelParams(
                 model_uri="hf://google-bert/bert-base-cased",
                 transformer_type=transformers.AutoModelForSequenceClassification,
@@ -334,7 +334,7 @@ test_tune_data = [
         "missing parameters in custom objective tuning - lack parameters",
         {
             "name": "tune_test",
-            "objective": lambda x: x,
+            "objective": lambda x: print(f"a={x}"),
         },
         ValueError,
     ),
