@@ -506,9 +506,9 @@ class KatibClient(object):
         # If users choose to use external models and datasets.
         else:
             if (
-                model_provider_parameters is None
-                or dataset_provider_parameters is None
-                or trainer_parameters is None
+                not model_provider_parameters
+                or not dataset_provider_parameters
+                or not trainer_parameters
             ):
                 raise ValueError("One of the required parameters is None")
 
