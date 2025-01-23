@@ -23,7 +23,7 @@ REQUIRES = [
     "setuptools>=21.0.0",
     "urllib3>=1.15.1",
     "kubernetes>=27.2.0",
-    "grpcio>=1.41.1",
+    "grpcio>=1.64.1",
     "protobuf>=4.21.12,<5",
 ]
 

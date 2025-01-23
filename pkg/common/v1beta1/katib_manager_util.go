@@ -46,7 +46,7 @@ func GetDBManagerAddr() string {
 
 func getKatibDBManagerClientAndConn() (*katibDBManagerClientAndConn, error) {
 	addr := GetDBManagerAddr()
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
@@ -70,6 +70,17 @@ func GetObservationLog(request *api_pb.GetObservationLogRequest) (*api_pb.GetObs
 	defer closeKatibDBManagerConnection(kcc)
 	kc := kcc.KatibDBManagerClient
 	return kc.GetObservationLog(ctx, request)
+}
+
+func ReportObservationLog(request *api_pb.ReportObservationLogRequest) (*api_pb.ReportObservationLogReply, error) {
+	ctx := context.Background()
+	kcc, err := getKatibDBManagerClientAndConn()
+	if err != nil {
+		return nil, err
+	}
+	defer closeKatibDBManagerConnection(kcc)
+	kc := kcc.KatibDBManagerClient
+	return kc.ReportObservationLog(ctx, request)
 }
 
 func DeleteObservationLog(request *api_pb.DeleteObservationLogRequest) (*api_pb.DeleteObservationLogReply, error) {

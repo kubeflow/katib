@@ -97,7 +97,6 @@ rules:
       - pytorchjobs
       - mpijobs
       - xgboostjobs
-      - mxjobs
     verbs:
       - "get"
       - "list"

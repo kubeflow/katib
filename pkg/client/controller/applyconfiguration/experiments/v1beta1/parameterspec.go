@@ -22,7 +22,7 @@ import (
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-// ParameterSpecApplyConfiguration represents an declarative configuration of the ParameterSpec type for use
+// ParameterSpecApplyConfiguration represents a declarative configuration of the ParameterSpec type for use
 // with apply.
 type ParameterSpecApplyConfiguration struct {
 	Name          *string                          `json:"name,omitempty"`
@@ -30,7 +30,7 @@ type ParameterSpecApplyConfiguration struct {
 	FeasibleSpace *FeasibleSpaceApplyConfiguration `json:"feasibleSpace,omitempty"`
 }
 
-// ParameterSpecApplyConfiguration constructs an declarative configuration of the ParameterSpec type for use with
+// ParameterSpecApplyConfiguration constructs a declarative configuration of the ParameterSpec type for use with
 // apply.
 func ParameterSpec() *ParameterSpecApplyConfiguration {
 	return &ParameterSpecApplyConfiguration{}

@@ -5,7 +5,7 @@ Here you can find the location for images that are used in Katib.
 ## Katib Components Images
 
 The following table shows images for the
-[Katib components](https://www.kubeflow.org/docs/components/katib/hyperparameter/#katib-components).
+[Katib components](https://www.kubeflow.org/docs/components/katib/reference/architecture/#katib-control-plane-components).
 
 <table>
   <tbody>
@@ -70,7 +70,7 @@ The following table shows images for the
 ## Katib Metrics Collectors Images
 
 The following table shows images for the
-[Katib Metrics Collectors](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector).
+[Katib Metrics Collectors](https://www.kubeflow.org/docs/components/katib/user-guides/metrics-collector/).
 
 <table>
   <tbody>
@@ -113,8 +113,8 @@ The following table shows images for the
 ## Katib Suggestions and Early Stopping Images
 
 The following table shows images for the
-[Katib Suggestions](https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail)
-and the [Katib Early Stopping algorithms](https://www.kubeflow.org/docs/components/katib/early-stopping/).
+[Katib Suggestion services](https://www.kubeflow.org/docs/components/katib/reference/architecture/#suggestion)
+and the [Katib Early Stopping algorithms](https://www.kubeflow.org/docs/components/katib/user-guides/early-stopping/#early-stopping-algorithms).
 
 <table>
   <tbody>
@@ -223,7 +223,7 @@ and the [Katib Early Stopping algorithms](https://www.kubeflow.org/docs/componen
 ## Training Containers Images
 
 The following table shows images for training containers which are used in the
-[Katib Trials](https://www.kubeflow.org/docs/components/katib/experiment/#packaging-your-training-code-in-a-container-image).
+[Katib Trials](https://www.kubeflow.org/docs/components/katib/reference/architecture/#trial).
 
 <table>
   <tbody>
@@ -269,17 +269,6 @@ The following table shows images for training containers which are used in the
       </td>
       <td>
         <a href="https://github.com/kubeflow/katib/blob/master/examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile">Dockerfile</a>
-      </td>
-    </tr>
-    <tr align="center">
-      <td>
-        <code>docker.io/bytepsimage/mxnet</code>
-      </td>
-      <td>
-        Distributed BytePS example for MXJob
-      </td>
-      <td>
-        <a href="https://github.com/bytedance/byteps/blob/v0.2.5/docker/Dockerfile">Dockerfile</a>
       </td>
     </tr>
     <tr align="center">

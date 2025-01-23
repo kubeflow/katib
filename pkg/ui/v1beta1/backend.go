@@ -74,7 +74,7 @@ func (k *KatibUIHandler) ServeIndex(buildDir string) func(w http.ResponseWriter,
 }
 
 func (k *KatibUIHandler) connectManager() (*grpc.ClientConn, api_pb_v1beta1.DBManagerClient) {
-	conn, err := grpc.Dial(k.dbManagerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(k.dbManagerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Printf("Dial to GRPC failed: %v", err)
 		return nil, nil

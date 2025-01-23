@@ -110,7 +110,7 @@ export type CollectorKind =
   | 'TensorFlowEvent'
   | 'PrometheusMetric'
   | 'Custom'
-  | 'None';
+  | 'Push';
 
 export interface HttpGet {
   host?: string;

@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ExperimentConditionApplyConfiguration represents an declarative configuration of the ExperimentCondition type for use
+// ExperimentConditionApplyConfiguration represents a declarative configuration of the ExperimentCondition type for use
 // with apply.
 type ExperimentConditionApplyConfiguration struct {
 	Type               *v1beta1.ExperimentConditionType `json:"type,omitempty"`
@@ -35,7 +35,7 @@ type ExperimentConditionApplyConfiguration struct {
 	LastTransitionTime *metav1.Time                     `json:"lastTransitionTime,omitempty"`
 }
 
-// ExperimentConditionApplyConfiguration constructs an declarative configuration of the ExperimentCondition type for use with
+// ExperimentConditionApplyConfiguration constructs a declarative configuration of the ExperimentCondition type for use with
 // apply.
 func ExperimentCondition() *ExperimentConditionApplyConfiguration {
 	return &ExperimentConditionApplyConfiguration{}

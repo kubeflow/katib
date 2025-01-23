@@ -15,7 +15,6 @@ spec:
     metadata:
       labels:
         katib.kubeflow.org/component: controller
-        katib.kubeflow.org/metrics-collector-injection: disabled
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"

@@ -19,27 +19,27 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/common/v1beta1"
+	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// TrialSpecApplyConfiguration represents an declarative configuration of the TrialSpec type for use
+// TrialSpecApplyConfiguration represents a declarative configuration of the TrialSpec type for use
 // with apply.
 type TrialSpecApplyConfiguration struct {
-	Objective            *v1beta1.ObjectiveSpecApplyConfiguration        `json:"objective,omitempty"`
-	ParameterAssignments []v1beta1.ParameterAssignmentApplyConfiguration `json:"parameterAssignments,omitempty"`
-	EarlyStoppingRules   []v1beta1.EarlyStoppingRuleApplyConfiguration   `json:"earlyStoppingRules,omitempty"`
-	RunSpec              *unstructured.Unstructured                      `json:"runSpec,omitempty"`
-	RetainRun            *bool                                           `json:"retainRun,omitempty"`
-	MetricsCollector     *v1beta1.MetricsCollectorSpecApplyConfiguration `json:"metricsCollector,omitempty"`
-	PrimaryPodLabels     map[string]string                               `json:"primaryPodLabels,omitempty"`
-	PrimaryContainerName *string                                         `json:"primaryContainerName,omitempty"`
-	SuccessCondition     *string                                         `json:"successCondition,omitempty"`
-	FailureCondition     *string                                         `json:"failureCondition,omitempty"`
-	Labels               map[string]string                               `json:"labels,omitempty"`
+	Objective            *v1beta1.ObjectiveSpec        `json:"objective,omitempty"`
+	ParameterAssignments []v1beta1.ParameterAssignment `json:"parameterAssignments,omitempty"`
+	EarlyStoppingRules   []v1beta1.EarlyStoppingRule   `json:"earlyStoppingRules,omitempty"`
+	RunSpec              *unstructured.Unstructured    `json:"runSpec,omitempty"`
+	RetainRun            *bool                         `json:"retainRun,omitempty"`
+	MetricsCollector     *v1beta1.MetricsCollectorSpec `json:"metricsCollector,omitempty"`
+	PrimaryPodLabels     map[string]string             `json:"primaryPodLabels,omitempty"`
+	PrimaryContainerName *string                       `json:"primaryContainerName,omitempty"`
+	SuccessCondition     *string                       `json:"successCondition,omitempty"`
+	FailureCondition     *string                       `json:"failureCondition,omitempty"`
+	Labels               map[string]string             `json:"labels,omitempty"`
 }
 
-// TrialSpecApplyConfiguration constructs an declarative configuration of the TrialSpec type for use with
+// TrialSpecApplyConfiguration constructs a declarative configuration of the TrialSpec type for use with
 // apply.
 func TrialSpec() *TrialSpecApplyConfiguration {
 	return &TrialSpecApplyConfiguration{}
@@ -48,20 +48,17 @@ func TrialSpec() *TrialSpecApplyConfiguration {
 // WithObjective sets the Objective field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Objective field is set to the value of the last call.
-func (b *TrialSpecApplyConfiguration) WithObjective(value *v1beta1.ObjectiveSpecApplyConfiguration) *TrialSpecApplyConfiguration {
-	b.Objective = value
+func (b *TrialSpecApplyConfiguration) WithObjective(value v1beta1.ObjectiveSpec) *TrialSpecApplyConfiguration {
+	b.Objective = &value
 	return b
 }
 
 // WithParameterAssignments adds the given value to the ParameterAssignments field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the ParameterAssignments field.
-func (b *TrialSpecApplyConfiguration) WithParameterAssignments(values ...*v1beta1.ParameterAssignmentApplyConfiguration) *TrialSpecApplyConfiguration {
+func (b *TrialSpecApplyConfiguration) WithParameterAssignments(values ...v1beta1.ParameterAssignment) *TrialSpecApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithParameterAssignments")
-		}
-		b.ParameterAssignments = append(b.ParameterAssignments, *values[i])
+		b.ParameterAssignments = append(b.ParameterAssignments, values[i])
 	}
 	return b
 }
@@ -69,12 +66,9 @@ func (b *TrialSpecApplyConfiguration) WithParameterAssignments(values ...*v1beta
 // WithEarlyStoppingRules adds the given value to the EarlyStoppingRules field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the EarlyStoppingRules field.
-func (b *TrialSpecApplyConfiguration) WithEarlyStoppingRules(values ...*v1beta1.EarlyStoppingRuleApplyConfiguration) *TrialSpecApplyConfiguration {
+func (b *TrialSpecApplyConfiguration) WithEarlyStoppingRules(values ...v1beta1.EarlyStoppingRule) *TrialSpecApplyConfiguration {
 	for i := range values {
-		if values[i] == nil {
-			panic("nil value passed to WithEarlyStoppingRules")
-		}
-		b.EarlyStoppingRules = append(b.EarlyStoppingRules, *values[i])
+		b.EarlyStoppingRules = append(b.EarlyStoppingRules, values[i])
 	}
 	return b
 }
@@ -98,8 +92,8 @@ func (b *TrialSpecApplyConfiguration) WithRetainRun(value bool) *TrialSpecApplyC
 // WithMetricsCollector sets the MetricsCollector field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the MetricsCollector field is set to the value of the last call.
-func (b *TrialSpecApplyConfiguration) WithMetricsCollector(value *v1beta1.MetricsCollectorSpecApplyConfiguration) *TrialSpecApplyConfiguration {
-	b.MetricsCollector = value
+func (b *TrialSpecApplyConfiguration) WithMetricsCollector(value v1beta1.MetricsCollectorSpec) *TrialSpecApplyConfiguration {
+	b.MetricsCollector = &value
 	return b
 }
 

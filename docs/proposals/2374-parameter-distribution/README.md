@@ -1,4 +1,4 @@
-# Proposal for Supporting various parameter distributions in Katib
+# KEP-2374: Proposal for Supporting various parameter distributions in Katib
 
 ## Summary
 The goal of this project is to enhance the existing Katib Experiment APIs to support various parameter distributions such as uniform, log-uniform, and qlog-uniform. Then extend the suggestion services to be able to configure distributions for search space using libraries provided in each framework.

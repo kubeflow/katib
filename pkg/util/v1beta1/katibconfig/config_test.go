@@ -401,7 +401,6 @@ init:
     - PyTorchJob.v1.kubeflow.org
     - MPIJob.v1.kubeflow.org
     - XGBoostJob.v1.kubeflow.org
-    - MXJob.v1.kubeflow.org
     webhookPort: 18443
     enableLeaderElection: true
     leaderElectionID: xyz0123
@@ -456,7 +455,6 @@ runtime:
 						"PyTorchJob.v1.kubeflow.org",
 						"MPIJob.v1.kubeflow.org",
 						"XGBoostJob.v1.kubeflow.org",
-						"MXJob.v1.kubeflow.org",
 					},
 					WebhookPort:          &customizedWebhookPort,
 					EnableLeaderElection: true,

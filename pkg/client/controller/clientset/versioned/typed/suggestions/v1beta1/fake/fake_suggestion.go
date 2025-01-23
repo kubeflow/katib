@@ -44,22 +44,24 @@ var suggestionsKind = v1beta1.SchemeGroupVersion.WithKind("Suggestion")
 
 // Get takes name of the suggestion, and returns the corresponding suggestion object, and an error if there is any.
 func (c *FakeSuggestions) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Suggestion, err error) {
+	emptyResult := &v1beta1.Suggestion{}
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(suggestionsResource, c.ns, name), &v1beta1.Suggestion{})
+		Invokes(testing.NewGetActionWithOptions(suggestionsResource, c.ns, name, options), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1beta1.Suggestion), err
 }
 
 // List takes label and field selectors, and returns the list of Suggestions that match those selectors.
 func (c *FakeSuggestions) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.SuggestionList, err error) {
+	emptyResult := &v1beta1.SuggestionList{}
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(suggestionsResource, suggestionsKind, c.ns, opts), &v1beta1.SuggestionList{})
+		Invokes(testing.NewListActionWithOptions(suggestionsResource, suggestionsKind, c.ns, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 
 	label, _, _ := testing.ExtractFromListOptions(opts)
@@ -78,40 +80,43 @@ func (c *FakeSuggestions) List(ctx context.Context, opts v1.ListOptions) (result
 // Watch returns a watch.Interface that watches the requested suggestions.
 func (c *FakeSuggestions) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(suggestionsResource, c.ns, opts))
+		InvokesWatch(testing.NewWatchActionWithOptions(suggestionsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a suggestion and creates it.  Returns the server's representation of the suggestion, and an error, if there is any.
 func (c *FakeSuggestions) Create(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.CreateOptions) (result *v1beta1.Suggestion, err error) {
+	emptyResult := &v1beta1.Suggestion{}
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(suggestionsResource, c.ns, suggestion), &v1beta1.Suggestion{})
+		Invokes(testing.NewCreateActionWithOptions(suggestionsResource, c.ns, suggestion, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1beta1.Suggestion), err
 }
 
 // Update takes the representation of a suggestion and updates it. Returns the server's representation of the suggestion, and an error, if there is any.
 func (c *FakeSuggestions) Update(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (result *v1beta1.Suggestion, err error) {
+	emptyResult := &v1beta1.Suggestion{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(suggestionsResource, c.ns, suggestion), &v1beta1.Suggestion{})
+		Invokes(testing.NewUpdateActionWithOptions(suggestionsResource, c.ns, suggestion, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1beta1.Suggestion), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeSuggestions) UpdateStatus(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (*v1beta1.Suggestion, error) {
+func (c *FakeSuggestions) UpdateStatus(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (result *v1beta1.Suggestion, err error) {
+	emptyResult := &v1beta1.Suggestion{}
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(suggestionsResource, "status", c.ns, suggestion), &v1beta1.Suggestion{})
+		Invokes(testing.NewUpdateSubresourceActionWithOptions(suggestionsResource, "status", c.ns, suggestion, opts), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1beta1.Suggestion), err
 }
@@ -126,7 +131,7 @@ func (c *FakeSuggestions) Delete(ctx context.Context, name string, opts v1.Delet
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeSuggestions) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(suggestionsResource, c.ns, listOpts)
+	action := testing.NewDeleteCollectionActionWithOptions(suggestionsResource, c.ns, opts, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1beta1.SuggestionList{})
 	return err
@@ -134,11 +139,12 @@ func (c *FakeSuggestions) DeleteCollection(ctx context.Context, opts v1.DeleteOp
 
 // Patch applies the patch and returns the patched suggestion.
 func (c *FakeSuggestions) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Suggestion, err error) {
+	emptyResult := &v1beta1.Suggestion{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(suggestionsResource, c.ns, name, pt, data, subresources...), &v1beta1.Suggestion{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(suggestionsResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1beta1.Suggestion), err
 }
@@ -156,11 +162,12 @@ func (c *FakeSuggestions) Apply(ctx context.Context, suggestion *suggestionsv1be
 	if name == nil {
 		return nil, fmt.Errorf("suggestion.Name must be provided to Apply")
 	}
+	emptyResult := &v1beta1.Suggestion{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(suggestionsResource, c.ns, *name, types.ApplyPatchType, data), &v1beta1.Suggestion{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(suggestionsResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1beta1.Suggestion), err
 }
@@ -179,11 +186,12 @@ func (c *FakeSuggestions) ApplyStatus(ctx context.Context, suggestion *suggestio
 	if name == nil {
 		return nil, fmt.Errorf("suggestion.Name must be provided to Apply")
 	}
+	emptyResult := &v1beta1.Suggestion{}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(suggestionsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1beta1.Suggestion{})
+		Invokes(testing.NewPatchSubresourceActionWithOptions(suggestionsResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
 
 	if obj == nil {
-		return nil, err
+		return emptyResult, err
 	}
 	return obj.(*v1beta1.Suggestion), err
 }

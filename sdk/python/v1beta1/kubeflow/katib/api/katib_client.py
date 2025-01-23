@@ -418,7 +418,6 @@ class KatibClient(object):
         if objective is not None or parameters is not None:
             if not objective or not parameters:
                 raise ValueError("One of the required parameters is None")
-
             # Add metrics collector to the Katib Experiment.
             # Up to now, we only support parameter `kind`, of which default value
             # is `StdOut`, to specify the kind of metrics collector.
