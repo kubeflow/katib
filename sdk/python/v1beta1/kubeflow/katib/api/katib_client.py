@@ -416,7 +416,7 @@ class KatibClient(object):
 
         # If users choose to use a custom objective function.
         if objective is not None or parameters is not None:
-            if objective is None or base_image is None or parameters is None:
+            if not objective or not parameters:
                 raise ValueError("One of the required parameters is None")
 
             # Add metrics collector to the Katib Experiment.

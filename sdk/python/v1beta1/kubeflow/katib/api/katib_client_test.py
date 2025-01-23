@@ -476,8 +476,9 @@ test_tune_data = [
         "valid flow with custom objective tuning",
         {
             "name": "tune_test",
-            "objective": lambda x: x,
+            "objective": lambda x: print(f"a={x}"),
             "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
         },
         TEST_RESULT_SUCCESS,
     ),
@@ -500,6 +501,8 @@ test_tune_data = [
                     learning_rate=katib.search.double(min=1e-05, max=5e-05),
                 ),
             ),
+            "objective_metric_name": "train_loss",
+            "objective_type": "minimize",
         },
         TEST_RESULT_SUCCESS,
     ),
@@ -607,6 +610,12 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                             feasible_space=V1beta1FeasibleSpace(min="10", max="100"),
                         ),
                     ]
+                    # Verify objective_spec
+                    assert experiment.spec.objective == V1beta1ObjectiveSpec(
+                        type="maximize",
+                        objective_metric_name="a",
+                        additional_metric_names=[],
+                    )
 
                 elif test_name == "valid flow with external model tuning":
                     # Verify input_params
@@ -637,6 +646,12 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                             ),
                         ),
                     ]
+                    # Verify objective_spec
+                    assert experiment.spec.objective == V1beta1ObjectiveSpec(
+                        type="minimize",
+                        objective_metric_name="train_loss",
+                        additional_metric_names=[],
+                    )
 
         except Exception as e:
             assert type(e) is expected_output
