@@ -22,10 +22,10 @@ jobs:
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
       
-      - name: Install Training Operator SDK
+      - name: Install Katib SDK with extra requires
         shell: bash
         run: |
-          pip install "kubeflow-training[huggingface]==1.8.1"
+          pip install --prefer-binary -e 'sdk/python/v1beta1[huggingface]'
       
       - name: Check Disk Space Before Test
         run: |
@@ -99,5 +99,5 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Kubernetes versions to test with
-        kubernetes-version: ["v1.29.2"]
+        # Detail: https://hub.docker.com/r/kindest/node
+        kubernetes-version: ["v1.29.2", "v1.30.7", "v1.31.3"]
