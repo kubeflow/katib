@@ -14,12 +14,12 @@ from peft import LoraConfig
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
-EXPERIMENT_TIMEOUT = 60 * 15
+EXPERIMENT_TIMEOUT = 60 * 40
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
 
-# Test for Experiment created with custom objective.
+# Test for Experiment created with custom objective function.
 def run_e2e_experiment_create_by_tune_with_custom_objective(
     katib_client: KatibClient,
     exp_name: str,
@@ -166,11 +166,6 @@ if __name__ == "__main__":
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-1")
         raise e
-    finally:
-        # Delete the Experiment.
-        logging.info("---------------------------------------------------------------")
-        logging.info("---------------------------------------------------------------")
-        #katib_client.delete_experiment(f"{exp_name}-1", exp_namespace)
 
     try:
         run_e2e_experiment_create_by_tune_with_external_model(katib_client, f"{exp_name}-2", exp_namespace)
@@ -180,8 +175,3 @@ if __name__ == "__main__":
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-2")
         raise e
-    finally:
-        # Delete the Experiment.
-        logging.info("---------------------------------------------------------------")
-        logging.info("---------------------------------------------------------------")
-        #katib_client.delete_experiment(f"{exp_name}-2", exp_namespace)

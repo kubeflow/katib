@@ -27,50 +27,39 @@ jobs:
         run: |
           pip install --prefer-binary -e 'sdk/python/v1beta1[huggingface]'
       
-      - name: Check Disk Space Before Test
-        run: |
-          docker system prune -a
-          docker volume prune
-          echo "Checking disk space usage before e2e test..."
-          df -h  # Run 'df' to check free disk space
-      
       - name: Run e2e test with tune API
-        if: always()
         uses: ./.github/workflows/template-e2e-test
         with:
           tune-api: true
           training-operator: true
-        
-      - name: Check Disk Space After Test
-        if: always()  # Run this step even if previous steps fail
-        run: |
-          echo "Checking disk space usage after e2e test..."
-          df -h  # Run 'df' to check free disk space
 
-      - name: Fetch Experiment Pod Logs
-        if: always()  # Run this step even if previous steps fail
+      - name: Fetch Pod Description and Logs for Experiment # This step is added to debug the test failure
+        if: always()
         run: |
-          echo "Fetching all the pods in the default namespace..."
+          echo "Fetching all the pods..."
           kubectl get pods -n default
-          POD_NAME=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2 | grep master)
-          echo "Fetching pod description for experiment pod..."
-          kubectl describe pod $POD_NAME -n default
-          echo "Fetching logs for experiment pod..."
-          kubectl logs $POD_NAME -n default --all-containers
-          echo "Fetching events for experiment pod..."
-          kubectl get events -n default | grep "tune-example-2"
-      
-      - name: Fetch Kubelet Logs
-        if: always()  # Run this step even if previous steps fail
-        run: |
-          echo "Fetching kubelet logs..."
-          sudo journalctl -u kubelet
 
-      - name: Check container runtime logs
-        if: always()  # Run this step even if previous steps fail
+          POD_NAME_1=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-1 | grep master)
+
+          echo "Fetching pod description for tune-example-1..."
+          kubectl describe pod $POD_NAME_1 -n default
+
+          echo "Fetching pod logs for tune-example-1..."
+          kubectl logs $POD_NAME_1 -n default --all-containers
+
+          POD_NAME_2=$(kubectl get pods -n default --no-headers -o custom-columns=":metadata.name" | grep tune-example-2 | grep master)
+
+          echo "Fetching pod description for tune-example-2..."
+          kubectl describe pod $POD_NAME_2 -n default
+
+          echo "Fetching pod logs for tune-example-2..."
+          kubectl logs $POD_NAME_2 -n default --all-containers
+      
+      - name: Delete Experiment for e2e test
+        if: always()
         run: |
-          echo "Checking container runtime logs..."
-          sudo journalctl -u docker
+          kubectl delete experiment tune-example-1 -n default
+          kubectl delete experiment tune-example-2 -n default
 
     strategy:
       fail-fast: false
