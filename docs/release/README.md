@@ -4,7 +4,7 @@ This is the instruction on how to make a new release for the Katib project.
 
 ## Prerequisite
 
-- Tools, defined in the [Developer Guide](./../developer-guide.md#requirements).
+- Tools, defined in the [Contributing Guide](./../../CONTRIBUTING.md#requirements).
 
 - [Write](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-permission-levels-for-an-organization#permission-levels-for-repositories-owned-by-an-organization)
   permission for the Katib repository.

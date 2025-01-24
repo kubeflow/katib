@@ -122,8 +122,6 @@ Check the following examples for the various distributed operators:
 
 - [PyTorchJob MNIST](./kubeflow-training-operator/pytorchjob-mnist.yaml)
 
-- [MXJob BytePS](./kubeflow-training-operator/mxjob-byteps.yaml)
-
 - [XGBoostJob LightGBM](./kubeflow-training-operator/xgboostjob-lightgbm.yaml)
 
 - [MPIJob Horovod](./kubeflow-training-operator/mpijob-horovod.yaml)

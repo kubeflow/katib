@@ -24,7 +24,7 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// SuggestionApplyConfiguration represents an declarative configuration of the Suggestion type for use
+// SuggestionApplyConfiguration represents a declarative configuration of the Suggestion type for use
 // with apply.
 type SuggestionApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
@@ -33,7 +33,7 @@ type SuggestionApplyConfiguration struct {
 	Status                           *SuggestionStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// Suggestion constructs an declarative configuration of the Suggestion type for use with
+// Suggestion constructs a declarative configuration of the Suggestion type for use with
 // apply.
 func Suggestion(name, namespace string) *SuggestionApplyConfiguration {
 	b := &SuggestionApplyConfiguration{}
@@ -216,4 +216,10 @@ func (b *SuggestionApplyConfiguration) WithSpec(value *SuggestionSpecApplyConfig
 func (b *SuggestionApplyConfiguration) WithStatus(value *SuggestionStatusApplyConfiguration) *SuggestionApplyConfiguration {
 	b.Status = value
 	return b
+}
+
+// GetName retrieves the value of the Name field in the declarative configuration.
+func (b *SuggestionApplyConfiguration) GetName() *string {
+	b.ensureObjectMetaApplyConfigurationExists()
+	return b.Name
 }

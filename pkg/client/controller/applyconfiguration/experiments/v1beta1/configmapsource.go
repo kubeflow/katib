@@ -18,7 +18,7 @@ limitations under the License.
 
 package v1beta1
 
-// ConfigMapSourceApplyConfiguration represents an declarative configuration of the ConfigMapSource type for use
+// ConfigMapSourceApplyConfiguration represents a declarative configuration of the ConfigMapSource type for use
 // with apply.
 type ConfigMapSourceApplyConfiguration struct {
 	ConfigMapName      *string `json:"configMapName,omitempty"`
@@ -26,7 +26,7 @@ type ConfigMapSourceApplyConfiguration struct {
 	TemplatePath       *string `json:"templatePath,omitempty"`
 }
 
-// ConfigMapSourceApplyConfiguration constructs an declarative configuration of the ConfigMapSource type for use with
+// ConfigMapSourceApplyConfiguration constructs a declarative configuration of the ConfigMapSource type for use with
 // apply.
 func ConfigMapSource() *ConfigMapSourceApplyConfiguration {
 	return &ConfigMapSourceApplyConfiguration{}

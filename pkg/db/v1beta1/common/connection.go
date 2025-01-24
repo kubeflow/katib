@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 )
 
 func OpenSQLConn(driverName string, dataSourceName string, interval time.Duration,

@@ -2,13 +2,12 @@
 
 This developer guide is for people who want to contribute to the Katib project.
 If you're interesting in using Katib in your machine learning project,
-see the following user guides:
+see the following guides:
 
-- [Concepts](https://www.kubeflow.org/docs/components/katib/overview/)
-  in Katib, hyperparameter tuning, and neural architecture search.
 - [Getting started with Katib](https://kubeflow.org/docs/components/katib/hyperparameter/).
-- Detailed guide to [configuring and running a Katib
-  experiment](https://kubeflow.org/docs/components/katib/experiment/).
+- [How to configure Katib Experiment](https://kubeflow.org/docs/components/katib/experiment/).
+- [Katib architecture and concepts](https://www.kubeflow.org/docs/components/katib/reference/architecture/)
+  for hyperparameter tuning and neural architecture search.
 
 ## Requirements
 
@@ -89,13 +88,10 @@ Below is a list of command-line flags accepted by Katib controller:
 
 Below is a list of command-line flags accepted by Katib DB Manager:
 
-| Name            | Type          | Default | Description                                             |
-| --------------- | ------------- | ------- | ------------------------------------------------------- |
-| connect-timeout | time.Duration | 60s     | Timeout before calling error during database connection |
-
-## Workflow design
-
-Please see [workflow-design.md](./workflow-design.md).
+| Name            | Type          | Default      | Description                                                         |
+| --------------- | ------------- | -------------| ------------------------------------------------------------------- |
+| connect-timeout | time.Duration | 60s          | Timeout before calling error during database connection             |
+| listen-address  | string        | 0.0.0.0:6789 | The network interface or IP address to receive incoming connections |
 
 ## Katib admission webhooks
 
@@ -113,7 +109,7 @@ Katib uses three [Kubernetes admission webhooks](https://kubernetes.io/docs/refe
 1. `mutator.pod.katib.kubeflow.org` - Mutating admission webhook to inject the metrics
    collector sidecar container to the training pod. Learn more about the Katib's
    metrics collector in the
-   [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector).
+   [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/user-guides/metrics-collector/).
 
 You can find the YAMLs for the Katib webhooks
 [here](../manifests/v1beta1/components/webhook/webhooks.yaml).
@@ -168,4 +164,4 @@ they'll be executed against every file in the repository.
 
 Specific programmatically generated files listed in the `exclude` field in
 [.pre-commit-config.yaml](../.pre-commit-config.yaml) are deliberately excluded
-from the hooks. 
+from the hooks.

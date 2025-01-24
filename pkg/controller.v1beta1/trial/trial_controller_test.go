@@ -17,7 +17,7 @@ limitations under the License.
 package trial
 
 import (
-	"sync"
+	"context"
 	"testing"
 	"time"
 
@@ -31,6 +31,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -48,14 +50,47 @@ import (
 
 const (
 	namespace       = "default"
-	trialName       = "test-trial"
 	batchJobName    = "test-job"
 	objectiveMetric = "accuracy"
-	timeout         = time.Second * 80
+	timeout         = time.Second * 10
 )
 
-var trialKey = types.NamespacedName{Name: trialName, Namespace: namespace}
-var batchJobKey = types.NamespacedName{Name: batchJobName, Namespace: namespace}
+var (
+	batchJobKey             = types.NamespacedName{Name: batchJobName, Namespace: namespace}
+	observationLogAvailable = &api_pb.GetObservationLogReply{
+		ObservationLog: &api_pb.ObservationLog{
+			MetricLogs: []*api_pb.MetricLog{
+				{
+					TimeStamp: "2020-08-10T14:47:38+08:00",
+					Metric: &api_pb.Metric{
+						Name:  objectiveMetric,
+						Value: "0.99",
+					},
+				},
+				{
+					TimeStamp: "2020-08-10T14:50:38+08:00",
+					Metric: &api_pb.Metric{
+						Name:  objectiveMetric,
+						Value: "0.11",
+					},
+				},
+			},
+		},
+	}
+	observationLogUnavailable = &api_pb.GetObservationLogReply{
+		ObservationLog: &api_pb.ObservationLog{
+			MetricLogs: []*api_pb.MetricLog{
+				{
+					Metric: &api_pb.Metric{
+						Name:  objectiveMetric,
+						Value: consts.UnavailableMetricValue,
+					},
+					TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+				},
+			},
+		},
+	}
+)
 
 func init() {
 	logf.SetLogger(zap.New(zap.UseDevMode(true)))
@@ -63,7 +98,10 @@ func init() {
 
 func TestAdd(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
+	mgr, err := manager.New(cfg, manager.Options{
+		Metrics:    metricsserver.Options{BindAddress: "0"},
+		Controller: config.Controller{SkipNameValidation: ptr.To(true)},
+	})
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	// Set Trial resources.
@@ -112,6 +150,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		// Try to update status until it be succeeded
 		for err != nil {
 			updatedInstance := &trialsv1beta1.Trial{}
+			trialKey := types.NamespacedName{Name: instance.Name, Namespace: namespace}
 			if err = c.Get(ctx, trialKey, updatedInstance); err != nil {
 				continue
 			}
@@ -134,80 +173,39 @@ func TestReconcileBatchJob(t *testing.T) {
 	viper.Set(consts.ConfigTrialResources, trialResources)
 	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
 
-	// Start test manager.
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	// Start test manager
+	mgrCtx, cancel := context.WithCancel(context.TODO())
+	t.Cleanup(cancel)
 	go func() {
-		defer wg.Done()
-		g.Expect(mgr.Start(ctx)).NotTo(gomega.HaveOccurred())
+		g.Expect(mgr.Start(mgrCtx)).NotTo(gomega.HaveOccurred())
 	}()
-
-	// Result for GetTrialObservationLog with some metrics.
-	observationLogAvailable := &api_pb.GetObservationLogReply{
-		ObservationLog: &api_pb.ObservationLog{
-			MetricLogs: []*api_pb.MetricLog{
-				{
-					TimeStamp: "2020-08-10T14:47:38+08:00",
-					Metric: &api_pb.Metric{
-						Name:  objectiveMetric,
-						Value: "0.99",
-					},
-				},
-				{
-					TimeStamp: "2020-08-10T14:50:38+08:00",
-					Metric: &api_pb.Metric{
-						Name:  objectiveMetric,
-						Value: "0.11",
-					},
-				},
-			},
-		},
-	}
-	// Empty result for GetTrialObservationLog.
-	// If objective metrics are not parsed, metrics collector reports "unavailable" value to DB.
-	observationLogUnavailable := &api_pb.GetObservationLogReply{
-		ObservationLog: &api_pb.ObservationLog{
-			MetricLogs: []*api_pb.MetricLog{
-				{
-					Metric: &api_pb.Metric{
-						Name:  objectiveMetric,
-						Value: consts.UnavailableMetricValue,
-					},
-					TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
-				},
-			},
-		},
-	}
 
 	t.Run(`Trial run with "Failed" BatchJob.`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil)
 
-		trial := newFakeTrialBatchJob()
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-failed-batch-job")
+		trialKey := types.NamespacedName{Name: "test-failed-batch-job", Namespace: namespace}
 		batchJob := &batchv1.Job{}
 
-		// Create the Trial
+		// Create the Trial with StdOut MC
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that BatchJob with appropriate name is created
-		g.Eventually(func() error {
-			return c.Get(ctx, batchJobKey, batchJob)
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, batchJobKey, batchJob)).Should(gomega.Succeed())
 		}, timeout).Should(gomega.Succeed())
 
 		// Expect that Trial status is running
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				return false
-			}
-			return trial.IsRunning()
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsRunning()).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 
 		// Manually update BatchJob status to failed
 		// Expect that Trial status is failed
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, batchJobKey, batchJob); err != nil {
-				return false
-			}
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, batchJobKey, batchJob)).Should(gomega.Succeed())
 			batchJob.Status = batchv1.JobStatus{
 				Conditions: []batchv1.JobCondition{
 					{
@@ -218,15 +216,10 @@ func TestReconcileBatchJob(t *testing.T) {
 					},
 				},
 			}
-			if err = c.Status().Update(ctx, batchJob); err != nil {
-				return false
-			}
-
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				return false
-			}
-			return trial.IsFailed()
-		}, timeout).Should(gomega.BeTrue())
+			g.Expect(c.Status().Update(ctx, batchJob)).Should(gomega.Succeed())
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsFailed()).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 
 		// Delete the Trial
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
@@ -234,12 +227,12 @@ func TestReconcileBatchJob(t *testing.T) {
 		// Expect that Trial is deleted
 		// BatchJob can't be deleted because GC doesn't work in envtest and BatchJob stuck in termination phase.
 		// Ref: https://book.kubebuilder.io/reference/testing/envtest.html#testing-considerations.
-		g.Eventually(func() bool {
-			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Available metrics.`, func(t *testing.T) {
+	t.Run(`Trial with "Complete" BatchJob and Available metrics.`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogAvailable, nil).MinTimes(1),
@@ -262,64 +255,107 @@ func TestReconcileBatchJob(t *testing.T) {
 		}
 		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
 
-		// Create the Trial
-		trial := newFakeTrialBatchJob()
+		// Create the Trial with StdOut MC
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-available-stdout")
+		trialKey := types.NamespacedName{Name: "test-available-stdout", Namespace: namespace}
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded and metrics are properly populated
 		// Metrics available because GetTrialObservationLog returns values
-		start := time.Now()
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				t.Log(time.Since(start), err)
-				return false
-			}
-			return trial.IsSucceeded() &&
-				len(trial.Status.Observation.Metrics) > 0 &&
-				trial.Status.Observation.Metrics[0].Min == "0.11" &&
-				trial.Status.Observation.Metrics[0].Max == "0.99" &&
-				trial.Status.Observation.Metrics[0].Latest == "0.11"
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsSucceeded()).Should(gomega.BeTrue())
+			g.Expect(trial.Status.Observation.Metrics).ShouldNot(gomega.HaveLen(0))
+			g.Expect(trial.Status.Observation.Metrics[0]).Should(gomega.BeComparableTo(commonv1beta1.Metric{
+				Name:   objectiveMetric,
+				Min:    "0.11",
+				Max:    "0.99",
+				Latest: "0.11",
+			}))
+		}, timeout).Should(gomega.Succeed())
 
 		// Delete the Trial
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial is deleted
-		g.Eventually(func() bool {
-			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 	})
 
-	t.Run(`Trail with "Complete" BatchJob and Unavailable metrics.`, func(t *testing.T) {
+	t.Run(`Trial with "Complete" BatchJob and Unavailable metrics(StdOut MC).`, func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		gomock.InOrder(
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).MinTimes(1),
 			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
 		)
-		// Create the Trial
-		trial := newFakeTrialBatchJob()
+		// Create the Trial with StdOut MC
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-unavailable-stdout")
+		trialKey := types.NamespacedName{Name: "test-unavailable-stdout", Namespace: namespace}
 		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
 		// Metrics unavailable because GetTrialObservationLog returns "unavailable".
-		g.Eventually(func() bool {
-			if err = c.Get(ctx, trialKey, trial); err != nil {
-				return false
-			}
-			return trial.IsMetricsUnavailable() &&
-				len(trial.Status.Observation.Metrics) > 0 &&
-				trial.Status.Observation.Metrics[0].Min == consts.UnavailableMetricValue &&
-				trial.Status.Observation.Metrics[0].Max == consts.UnavailableMetricValue &&
-				trial.Status.Observation.Metrics[0].Latest == consts.UnavailableMetricValue
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsMetricsUnavailable()).Should(gomega.BeTrue())
+			g.Expect(trial.Status.Observation.Metrics).ShouldNot(gomega.HaveLen(0))
+			g.Expect(trial.Status.Observation.Metrics[0]).Should(gomega.BeComparableTo(commonv1beta1.Metric{
+				Name:   objectiveMetric,
+				Min:    consts.UnavailableMetricValue,
+				Max:    consts.UnavailableMetricValue,
+				Latest: consts.UnavailableMetricValue,
+			}))
+		}, timeout).Should(gomega.Succeed())
 
 		// Delete the Trial
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial is deleted
-		g.Eventually(func() bool {
-			return errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))
-		}, timeout).Should(gomega.BeTrue())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
+	})
+
+	t.Run(`Trial with "Complete" BatchJob and Unavailable metrics(Push MC, failed once).`, func(t *testing.T) {
+		mockCtrl.Finish()
+		g := gomega.NewGomegaWithT(t)
+		gomock.InOrder(
+			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil),
+			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, errReportMetricsFailed),
+			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil),
+			mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil),
+			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
+		)
+		mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogUnavailable, nil).AnyTimes()
+		mockManagerClient.EXPECT().ReportTrialObservationLog(gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
+
+		// Create the Trial with Push MC
+		trial := newFakeTrialBatchJob(commonv1beta1.PushCollector, "test-unavailable-push-failed-once")
+		trialKey := types.NamespacedName{Name: "test-unavailable-push-failed-once", Namespace: namespace}
+		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
+
+		// Expect that Trial status is succeeded with "false" status and "metrics unavailable" reason.
+		// Metrics unavailable because GetTrialObservationLog returns "unavailable".
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsMetricsUnavailable()).Should(gomega.BeTrue())
+			g.Expect(trial.Status.Observation.Metrics).ShouldNot(gomega.HaveLen(0))
+			g.Expect(trial.Status.Observation.Metrics[0]).Should(gomega.BeComparableTo(commonv1beta1.Metric{
+				Name:   objectiveMetric,
+				Min:    consts.UnavailableMetricValue,
+				Max:    consts.UnavailableMetricValue,
+				Latest: consts.UnavailableMetricValue,
+			}))
+		}, timeout).Should(gomega.Succeed())
+
+		// Delete the Trial
+		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
+
+		// Expect that Trial is deleted
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
 	})
 
 	t.Run("Update status for empty Trial", func(t *testing.T) {
@@ -386,7 +422,7 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 	g.Expect(err).To(gomega.HaveOccurred())
 }
 
-func newFakeTrialBatchJob() *trialsv1beta1.Trial {
+func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind, trialName string) *trialsv1beta1.Trial {
 	primaryContainer := "training-container"
 
 	job := &batchv1.Job{
@@ -429,8 +465,13 @@ func newFakeTrialBatchJob() *trialsv1beta1.Trial {
 		},
 		Spec: trialsv1beta1.TrialSpec{
 			PrimaryContainerName: primaryContainer,
-			SuccessCondition:     experimentsv1beta1.DefaultJobSuccessCondition,
-			FailureCondition:     experimentsv1beta1.DefaultJobFailureCondition,
+			MetricsCollector: commonv1beta1.MetricsCollectorSpec{
+				Collector: &commonv1beta1.CollectorSpec{
+					Kind: mcType,
+				},
+			},
+			SuccessCondition: experimentsv1beta1.DefaultJobSuccessCondition,
+			FailureCondition: experimentsv1beta1.DefaultJobFailureCondition,
 			Objective: &commonv1beta1.ObjectiveSpec{
 				ObjectiveMetricName: objectiveMetric,
 				MetricStrategies: []commonv1beta1.MetricStrategy{

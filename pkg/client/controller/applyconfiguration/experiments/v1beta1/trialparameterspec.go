@@ -18,7 +18,7 @@ limitations under the License.
 
 package v1beta1
 
-// TrialParameterSpecApplyConfiguration represents an declarative configuration of the TrialParameterSpec type for use
+// TrialParameterSpecApplyConfiguration represents a declarative configuration of the TrialParameterSpec type for use
 // with apply.
 type TrialParameterSpecApplyConfiguration struct {
 	Name        *string `json:"name,omitempty"`
@@ -26,7 +26,7 @@ type TrialParameterSpecApplyConfiguration struct {
 	Reference   *string `json:"reference,omitempty"`
 }
 
-// TrialParameterSpecApplyConfiguration constructs an declarative configuration of the TrialParameterSpec type for use with
+// TrialParameterSpecApplyConfiguration constructs a declarative configuration of the TrialParameterSpec type for use with
 // apply.
 func TrialParameterSpec() *TrialParameterSpecApplyConfiguration {
 	return &TrialParameterSpecApplyConfiguration{}

@@ -2,8 +2,10 @@ import multiprocessing
 from typing import List, Optional
 from unittest.mock import Mock, patch
 
+import kubeflow.katib as katib
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import pytest
+import transformers
 from kubeflow.katib import (
     KatibClient,
     V1beta1AlgorithmSpec,
@@ -16,7 +18,14 @@ from kubeflow.katib import (
     V1beta1TrialTemplate,
 )
 from kubeflow.katib.constants import constants
+from kubeflow.storage_initializer.hugging_face import (
+    HuggingFaceDatasetParams,
+    HuggingFaceModelParams,
+    HuggingFaceTrainerParams,
+)
 from kubernetes.client import V1ObjectMeta
+
+PVC_FAILED = "pvc creation failed"
 
 TEST_RESULT_SUCCESS = "success"
 
@@ -55,6 +64,27 @@ def get_observation_log_response(*args, **kwargs):
                 ]
             )
         )
+
+
+def create_namespaced_persistent_volume_claim_response(*args, **kwargs):
+    if kwargs.get("namespace") == PVC_FAILED:
+        raise Exception("PVC creation failed")
+    else:
+        return {"metadata": {"name": "tune_test"}}
+
+
+def list_namespaced_persistent_volume_claim_response(*args, **kwargs):
+    if kwargs.get("namespace") == PVC_FAILED:
+        mock_pvc = Mock()
+        mock_pvc.metadata.name = "pvc_failed"
+        mock_list = Mock()
+        mock_list.items = [mock_pvc]
+    else:
+        mock_pvc = Mock()
+        mock_pvc.metadata.name = "tune_test"
+        mock_list = Mock()
+        mock_list.items = [mock_pvc]
+    return mock_list
 
 
 def generate_trial_template() -> V1beta1TrialTemplate:
@@ -270,6 +300,215 @@ test_get_trial_metrics_data = [
 ]
 
 
+test_tune_data = [
+    (
+        "missing name",
+        {
+            "name": None,
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+        },
+        ValueError,
+    ),
+    (
+        "invalid hybrid parameters - objective and model_provider_parameters",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters - no custom objective or external model tuning",
+        {
+            "name": "tune_test",
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in custom objective tuning - lack parameters",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in custom objective tuning - lack objective",
+        {
+            "name": "tune_test",
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in external model tuning - lack dataset_provider_parameters "
+        "and trainer_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in external model tuning - lack model_provider_parameters "
+        "and trainer_parameters",
+        {
+            "name": "tune_test",
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+        },
+        ValueError,
+    ),
+    (
+        "missing parameters in external model tuning - lack model_provider_parameters "
+        "and dataset_provider_parameters",
+        {
+            "name": "tune_test",
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
+        },
+        ValueError,
+    ),
+    (
+        "invalid env_per_trial",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "env_per_trial": "invalid",
+        },
+        ValueError,
+    ),
+    (
+        "invalid model_provider_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": "invalid",
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
+        },
+        ValueError,
+    ),
+    (
+        "invalid dataset_provider_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            "dataset_provider_parameters": "invalid",
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
+        },
+        ValueError,
+    ),
+    (
+        "invalid trainer_parameters",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+            "trainer_parameters": "invalid",
+        },
+        ValueError,
+    ),
+    (
+        "pvc creation failed",
+        {
+            "name": "tune_test",
+            "namespace": PVC_FAILED,
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
+        },
+        RuntimeError,
+    ),
+    (
+        "valid flow with custom objective tuning",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+    (
+        "valid flow with external model tuning",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
+            "objective_metric_name": "train_loss",
+            "objective_type": "minimize",
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+]
+
+
 @pytest.fixture
 def katib_client():
     with patch(
@@ -283,6 +522,16 @@ def katib_client():
         "kubeflow.katib.katib_api_pb2_grpc.DBManagerStub",
         return_value=Mock(
             GetObservationLog=Mock(side_effect=get_observation_log_response)
+        ),
+    ), patch(
+        "kubernetes.client.CoreV1Api",
+        return_value=Mock(
+            create_namespaced_persistent_volume_claim=Mock(
+                side_effect=create_namespaced_persistent_volume_claim_response
+            ),
+            list_namespaced_persistent_volume_claim=Mock(
+                side_effect=list_namespaced_persistent_volume_claim_response
+            ),
         ),
     ):
         client = KatibClient()
@@ -320,3 +569,90 @@ def test_get_trial_metrics(katib_client, test_name, kwargs, expected_output):
     except Exception as e:
         assert type(e) is expected_output
     print("test execution complete")
+
+
+@pytest.mark.parametrize("test_name,kwargs,expected_output", test_tune_data)
+def test_tune(katib_client, test_name, kwargs, expected_output):
+    """
+    test tune function of katib client
+    """
+    print("\n\nExecuting test:", test_name)
+
+    with patch.object(
+        katib_client, "create_experiment", return_value=Mock()
+    ) as mock_create_experiment:
+        try:
+            katib_client.tune(**kwargs)
+            mock_create_experiment.assert_called_once()
+
+            if expected_output == TEST_RESULT_SUCCESS:
+                assert expected_output == TEST_RESULT_SUCCESS
+                call_args = mock_create_experiment.call_args
+                experiment = call_args[0][0]
+
+                if test_name == "valid flow with custom objective tuning":
+                    # Verify input_params
+                    args_content = "".join(
+                        experiment.spec.trial_template.trial_spec.spec.template.spec.containers[
+                            0
+                        ].args
+                    )
+                    assert "'a': '${trialParameters.a}'" in args_content
+                    # Verify trial_params
+                    assert experiment.spec.trial_template.trial_parameters == [
+                        V1beta1TrialParameterSpec(name="a", reference="a"),
+                    ]
+                    # Verify experiment_params
+                    assert experiment.spec.parameters == [
+                        V1beta1ParameterSpec(
+                            name="a",
+                            parameter_type="int",
+                            feasible_space=V1beta1FeasibleSpace(min="10", max="100"),
+                        ),
+                    ]
+                    # Verify objective_spec
+                    assert experiment.spec.objective == V1beta1ObjectiveSpec(
+                        type="maximize",
+                        objective_metric_name="a",
+                        additional_metric_names=[],
+                    )
+
+                elif test_name == "valid flow with external model tuning":
+                    # Verify input_params
+                    args_content = "".join(
+                        experiment.spec.trial_template.trial_spec.spec.pytorch_replica_specs[
+                            "Master"
+                        ]
+                        .template.spec.containers[0]
+                        .args
+                    )
+                    assert (
+                        '"learning_rate": "${trialParameters.learning_rate}"'
+                        in args_content
+                    )
+                    # Verify trial_params
+                    assert experiment.spec.trial_template.trial_parameters == [
+                        V1beta1TrialParameterSpec(
+                            name="learning_rate", reference="learning_rate"
+                        ),
+                    ]
+                    # Verify experiment_params
+                    assert experiment.spec.parameters == [
+                        V1beta1ParameterSpec(
+                            name="learning_rate",
+                            parameter_type="double",
+                            feasible_space=V1beta1FeasibleSpace(
+                                min="1e-05", max="5e-05"
+                            ),
+                        ),
+                    ]
+                    # Verify objective_spec
+                    assert experiment.spec.objective == V1beta1ObjectiveSpec(
+                        type="minimize",
+                        objective_metric_name="train_loss",
+                        additional_metric_names=[],
+                    )
+
+        except Exception as e:
+            assert type(e) is expected_output
+        print("test execution complete")

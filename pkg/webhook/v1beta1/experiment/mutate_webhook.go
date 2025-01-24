@@ -30,11 +30,11 @@ import (
 // ExperimentDefaulter sets the Experiment default values.
 type ExperimentDefaulter struct {
 	client  client.Client
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 // NewExperimentDefaulter returns a new Experiment defaulter with the given client.
-func NewExperimentDefaulter(c client.Client, d *admission.Decoder) *ExperimentDefaulter {
+func NewExperimentDefaulter(c client.Client, d admission.Decoder) *ExperimentDefaulter {
 	return &ExperimentDefaulter{
 		client:  c,
 		decoder: d,

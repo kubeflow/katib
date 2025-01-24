@@ -26,6 +26,8 @@ import (
 // ExperimentSpec is the specification of an Experiment.
 type ExperimentSpec struct {
 	// List of hyperparameter configurations.
+	// +listType=map
+	// +listMapKey=name
 	Parameters []ParameterSpec `json:"parameters,omitempty"`
 
 	// Describes the objective of the experiment.
@@ -78,30 +80,39 @@ type ExperimentStatus struct {
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
 	// List of observed runtime conditions for this Experiment.
+	// +listType=map
+	// +listMapKey=type
 	Conditions []ExperimentCondition `json:"conditions,omitempty"`
 
 	// Current optimal trial parameters and observations.
 	CurrentOptimalTrial OptimalTrial `json:"currentOptimalTrial,omitempty"`
 
 	// List of trial names which are running.
+	// +listType=set
 	RunningTrialList []string `json:"runningTrialList,omitempty"`
 
 	// List of trial names which are pending.
+	// +listType=set
 	PendingTrialList []string `json:"pendingTrialList,omitempty"`
 
 	// List of trial names which have already failed.
+	// +listType=set
 	FailedTrialList []string `json:"failedTrialList,omitempty"`
 
 	// List of trial names which have already succeeded.
+	// +listType=set
 	SucceededTrialList []string `json:"succeededTrialList,omitempty"`
 
 	// List of trial names which have been killed.
+	// +listType=set
 	KilledTrialList []string `json:"killedTrialList,omitempty"`
 
 	// List of trial names which have been early stopped.
+	// +listType=set
 	EarlyStoppedTrialList []string `json:"earlyStoppedTrialList,omitempty"`
 
 	// List of trial names which have been metrics unavailable
+	// +listType=set
 	MetricsUnavailableTrialList []string `json:"metricsUnavailableTrialList,omitempty"`
 
 	// Trials is the total number of trials owned by the experiment.
@@ -134,6 +145,8 @@ type OptimalTrial struct {
 	// BestTrialName is the name of the best trial.
 	BestTrialName string `json:"bestTrialName,omitempty"`
 	// Key-value pairs for hyperparameters and assignment values.
+	// +listType=map
+	// +listMapKey=name
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
 
 	// Observation for this trial
@@ -207,8 +220,10 @@ const (
 )
 
 type FeasibleSpace struct {
-	Max          string       `json:"max,omitempty"`
-	Min          string       `json:"min,omitempty"`
+	Max string `json:"max,omitempty"`
+	Min string `json:"min,omitempty"`
+
+	// +listType=set
 	List         []string     `json:"list,omitempty"`
 	Step         string       `json:"step,omitempty"`
 	Distribution Distribution `json:"distribution,omitempty"`
@@ -233,6 +248,8 @@ type TrialTemplate struct {
 	TrialSource `json:",inline"`
 
 	// List of parameters that are used in trial template
+	// +listType=map
+	// +listMapKey=name
 	TrialParameters []TrialParameterSpec `json:"trialParameters,omitempty"`
 
 	// Labels that determines if pod needs to be injected by Katib sidecar container.
@@ -314,20 +331,30 @@ type ExperimentList struct {
 // NasConfig contains config for NAS job
 type NasConfig struct {
 	GraphConfig GraphConfig `json:"graphConfig,omitempty"`
-	Operations  []Operation `json:"operations,omitempty"`
+
+	// +listType=map
+	// +listMapKey=operationType
+	Operations []Operation `json:"operations,omitempty"`
 }
 
 // GraphConfig contains a config of DAG
 type GraphConfig struct {
-	NumLayers   *int32  `json:"numLayers,omitempty"`
-	InputSizes  []int32 `json:"inputSizes,omitempty"`
+	NumLayers *int32 `json:"numLayers,omitempty"`
+
+	// +listType=set
+	InputSizes []int32 `json:"inputSizes,omitempty"`
+
+	// +listType=set
 	OutputSizes []int32 `json:"outputSizes,omitempty"`
 }
 
 // Operation contains type of operation in DAG
 type Operation struct {
-	OperationType string          `json:"operationType,omitempty"`
-	Parameters    []ParameterSpec `json:"parameters,omitempty"`
+	OperationType string `json:"operationType,omitempty"`
+
+	// +listType=map
+	// +listMapKey=name
+	Parameters []ParameterSpec `json:"parameters,omitempty"`
 }
 
 func init() {

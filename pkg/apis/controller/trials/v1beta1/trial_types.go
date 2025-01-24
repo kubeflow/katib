@@ -29,10 +29,14 @@ type TrialSpec struct {
 	Objective *common.ObjectiveSpec `json:"objective,omitempty"`
 
 	// Key-value pairs for hyperparameters and assignment values.
+	// +listType=map
+	// +listMapKey=name
 	ParameterAssignments []common.ParameterAssignment `json:"parameterAssignments,omitempty"`
 
 	// Rules for early stopping techniques.
 	// Each rule should be met to early stop Trial.
+	// +listType=map
+	// +listMapKey=name
 	EarlyStoppingRules []common.EarlyStoppingRule `json:"earlyStoppingRules,omitempty"`
 
 	// Raw text for the trial run spec. This can be any generic Kubernetes
@@ -84,6 +88,8 @@ type TrialStatus struct {
 	LastReconcileTime *metav1.Time `json:"lastReconcileTime,omitempty"`
 
 	// List of observed runtime conditions for this Trial.
+	// +listType=map
+	// +listMapKey=type
 	Conditions []TrialCondition `json:"conditions,omitempty"`
 
 	// Results of the Trial - objectives and other metrics values.

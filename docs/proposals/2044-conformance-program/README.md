@@ -1,4 +1,4 @@
-# Conformance Test for AutoML and Training Working Group
+# KEP-2044: Conformance Test for AutoML and Training Working Group
 
 Andrey Velichkevich ([@andreyvelich](https://github.com/andreyvelich))
 Johnu George ([@johnugeorge](https://github.com/johnugeorge))
@@ -61,7 +61,7 @@ the 3 category of tests:
 
 ## Design for the CRD-based tests
 
-![conformance-crd-test](../images/conformance-crd-test.png)
+![conformance-crd-test](conformance-crd-test.png)
 
 The design is similar to the KFP conformance program for the API-based tests.
 

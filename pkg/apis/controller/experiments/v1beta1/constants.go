@@ -45,7 +45,6 @@ var (
 		"TFJob":      true,
 		"PyTorchJob": true,
 		"XGBoostJob": true,
-		"MXJob":      true,
 		"MPIJob":     true,
 	}
 )

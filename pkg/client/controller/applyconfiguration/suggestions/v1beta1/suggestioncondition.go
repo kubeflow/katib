@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SuggestionConditionApplyConfiguration represents an declarative configuration of the SuggestionCondition type for use
+// SuggestionConditionApplyConfiguration represents a declarative configuration of the SuggestionCondition type for use
 // with apply.
 type SuggestionConditionApplyConfiguration struct {
 	Type               *v1beta1.SuggestionConditionType `json:"type,omitempty"`
@@ -35,7 +35,7 @@ type SuggestionConditionApplyConfiguration struct {
 	LastTransitionTime *metav1.Time                     `json:"lastTransitionTime,omitempty"`
 }
 
-// SuggestionConditionApplyConfiguration constructs an declarative configuration of the SuggestionCondition type for use with
+// SuggestionConditionApplyConfiguration constructs a declarative configuration of the SuggestionCondition type for use with
 // apply.
 func SuggestionCondition() *SuggestionConditionApplyConfiguration {
 	return &SuggestionConditionApplyConfiguration{}
