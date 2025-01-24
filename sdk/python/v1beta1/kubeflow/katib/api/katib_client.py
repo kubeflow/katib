@@ -570,7 +570,7 @@ class KatibClient(object):
                 )
             except Exception as e:
                 pvc_list = self.core_api.list_namespaced_persistent_volume_claim(
-                    namespace
+                    namespace=namespace
                 )
                 # Check if the PVC with the specified name exists.
                 for pvc in pvc_list.items:
