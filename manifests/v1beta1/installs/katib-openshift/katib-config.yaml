@@ -31,7 +31,7 @@ runtime:
     - algorithmName: hyperband
       image: docker.io/kubeflowkatib/suggestion-hyperband:latest
     - algorithmName: bayesianoptimization
-      image: docker.io/kubeflowkatib/suggestion-skopt:latest
+      image: docker.io/kubeflowkatib/suggestion-optuna:latest
     - algorithmName: cmaes
       image: docker.io/kubeflowkatib/suggestion-goptuna:latest
     - algorithmName: sobol

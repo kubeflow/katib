@@ -1,4 +1,7 @@
 grpcio>=1.64.1
 protobuf>=4.21.12,<5
 googleapis-common-protos==1.53.0
-optuna==3.3.0
+optuna==3.6.0
+torch==2.5.1
+scipy==1.15.1
+cmaes==0.11.1

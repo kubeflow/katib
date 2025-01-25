@@ -146,7 +146,6 @@ run "tfevent-metrics-collector" "$CMD_PREFIX/metricscollector/$VERSION/tfevent-m
 echo -e "\nBuilding suggestion images..."
 run "suggestion-hyperopt" "$CMD_PREFIX/suggestion/hyperopt/$VERSION/Dockerfile"
 run "suggestion-hyperband" "$CMD_PREFIX/suggestion/hyperband/$VERSION/Dockerfile"
-run "suggestion-skopt" "$CMD_PREFIX/suggestion/skopt/$VERSION/Dockerfile"
 run "suggestion-goptuna" "$CMD_PREFIX/suggestion/goptuna/$VERSION/Dockerfile"
 run "suggestion-optuna" "$CMD_PREFIX/suggestion/optuna/$VERSION/Dockerfile"
 run "suggestion-pbt" "$CMD_PREFIX/suggestion/pbt/$VERSION/Dockerfile"
