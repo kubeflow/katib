@@ -86,6 +86,17 @@ func TestValidateExperiment(t *testing.T) {
 			},
 			testDescription: "Name is invalid",
 		},
+		{
+			instance: func() *experimentsv1beta1.Experiment {
+				i := newFakeInstance()
+				i.Name = "test-manymanymanyextracharactersthatgobeyondlimit"
+				return i
+			}(),
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("metadata").Child("name"), "", ""),
+			},
+			testDescription: "Name is invalid",
+		},
 		// Objective
 		{
 			instance: func() *experimentsv1beta1.Experiment {
