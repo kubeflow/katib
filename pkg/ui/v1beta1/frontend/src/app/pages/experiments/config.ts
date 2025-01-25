@@ -95,4 +95,6 @@ export const experimentsTableConfig: TableConfig = {
       ]),
     },
   ],
+  sortByColumn: 'age',
+  sortDirection: 'desc',
 };
