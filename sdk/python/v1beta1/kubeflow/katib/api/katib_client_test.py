@@ -311,7 +311,7 @@ test_tune_data = [
         ValueError,
     ),
     (
-        "wrong name format",
+        "invalid name format",
         {
             "name": "Llama3.1-fine-tune",
         },
