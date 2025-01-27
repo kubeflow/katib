@@ -575,17 +575,8 @@ class KatibClient(object):
                         f"alphanumeric characters ('a-z', '0-9'), hyphens ('-'), or periods ('.'). "
                         f"It must also start and end with an alphanumeric character."
                     )
-
-                pvc_list = self.core_api.list_namespaced_persistent_volume_claim(
-                    namespace=namespace
-                )
-                # Check if the PVC with the specified name exists.
-                for pvc in pvc_list.items:
-                    if pvc.metadata.name == name:
-                        print(
-                            f"PVC '{name}' already exists in namespace " f"{namespace}."
-                        )
-                        break
+                elif hasattr(e, "status") and e.status == 409:
+                    print(f"PVC '{name}' already exists in namespace " f"{namespace}.")
                 else:
                     raise RuntimeError(f"failed to create PVC. Error: {e}")
 
