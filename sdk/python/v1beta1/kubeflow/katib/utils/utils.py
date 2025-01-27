@@ -17,7 +17,6 @@ import inspect
 import json
 import logging
 import os
-import re
 import textwrap
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -268,12 +267,3 @@ def get_exec_script_from_objective(
 
     # Return executable script to execute objective function.
     return exec_script
-
-
-def is_valid_pvc_name(name: str) -> bool:
-    # RFC 1123 regex for valid PVC names: lowercase alphanumeric, '-', or '.'.
-    return bool(
-        re.match(
-            r"^[a-z0-9]([a-z0-9\-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9\-]*[a-z0-9])?)*$", name
-        )
-    )
