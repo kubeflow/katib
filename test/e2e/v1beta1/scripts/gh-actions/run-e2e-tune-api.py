@@ -66,7 +66,7 @@ def run_e2e_experiment_create_by_tune_with_custom_objective(
     logging.debug(katib_client.get_suggestion(exp_name, exp_namespace))
 
 # Test for Experiment created with external models and datasets.
-def run_e2e_experiment_create_by_tune_with_external_model(
+def run_e2e_experiment_create_by_tune_with_llm_optimization(
     katib_client: KatibClient,
     exp_name: str,
     exp_namespace: str,
@@ -174,7 +174,7 @@ if __name__ == "__main__":
         katib_client.delete_experiment(exp_name_custom_objective, exp_namespace)
 
     try:
-        run_e2e_experiment_create_by_tune_with_external_model(katib_client, exp_name_llm_optimization, exp_namespace)
+        run_e2e_experiment_create_by_tune_with_llm_optimization(katib_client, exp_name_llm_optimization, exp_namespace)
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name_llm_optimization}")
     except Exception as e:
