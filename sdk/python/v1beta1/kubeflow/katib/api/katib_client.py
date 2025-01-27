@@ -560,20 +560,6 @@ class KatibClient(object):
             # Create PVC for the Storage Initializer.
             # TODO (helenxie-bit): PVC Creation should be part of Katib Controller.
             try:
-                if not utils.is_valid_pvc_name(name):
-                    raise ValueError(
-                        f"""
-                        Invalid PVC name '{name}'. It must comply with RFC 1123.
-
-                        A lowercase RFC 1123 subdomain must consist of lowercase
-                        alphanumeric characters, '-' or '.',
-                        and must start and end with an alphanumeric character.
-                        For example, 'example.com' is valid.
-                        The regex used for validation is:
-                            '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
-                    """
-                    )
-
                 self.core_api.create_namespaced_persistent_volume_claim(
                     namespace=namespace,
                     body=training_utils.get_pvc_spec(
@@ -583,6 +569,11 @@ class KatibClient(object):
                     ),
                 )
             except Exception as e:
+                if hasattr(e, "status") and e.status == 422:
+                    raise ValueError(
+                        f"An Experiment with the name {name} is not valid."
+                    )
+
                 pvc_list = self.core_api.list_namespaced_persistent_volume_claim(
                     namespace=namespace
                 )
