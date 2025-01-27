@@ -571,7 +571,9 @@ class KatibClient(object):
             except Exception as e:
                 if hasattr(e, "status") and e.status == 422:
                     raise ValueError(
-                        f"An Experiment with the name {name} is not valid."
+                        f"The Experiment name '{name}' is invalid. It must use only lowercase "
+                        f"alphanumeric characters ('a-z', '0-9'), hyphens ('-'), or periods ('.'). "
+                        f"It must also start and end with an alphanumeric character."
                     )
 
                 pvc_list = self.core_api.list_namespaced_persistent_volume_claim(
