@@ -156,32 +156,33 @@ if __name__ == "__main__":
         client.CoreV1Api().patch_namespace(args.namespace, {'metadata': {'labels': namespace_labels}})
 
     # Test with run_e2e_experiment_create_by_tune
-    exp_name = "tune-example"
+    exp_name_custom_objective = "tune-example-1"
+    exp_name_llm_optimization = "tune-example-2"
     exp_namespace = args.namespace
     try:
-        run_e2e_experiment_create_by_tune_with_custom_objective(katib_client, f"{exp_name}-1", exp_namespace)
+        run_e2e_experiment_create_by_tune_with_custom_objective(katib_client, exp_name_custom_objective, exp_namespace)
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}-1")
+        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name_custom_objective}")
     except Exception as e:
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-1")
+        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name_custom_objective}")
         raise e
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
-        katib_client.delete_experiment(f"{exp_name}-1", exp_namespace)
+        katib_client.delete_experiment(exp_name_custom_objective, exp_namespace)
 
     try:
-        run_e2e_experiment_create_by_tune_with_external_model(katib_client, f"{exp_name}-2", exp_namespace)
+        run_e2e_experiment_create_by_tune_with_external_model(katib_client, exp_name_llm_optimization, exp_namespace)
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}-2")
+        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name_llm_optimization}")
     except Exception as e:
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}-2")
+        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name_llm_optimization}")
         raise e
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
-        katib_client.delete_experiment(f"{exp_name}-2", exp_namespace)
+        katib_client.delete_experiment(exp_name_llm_optimization, exp_namespace)
