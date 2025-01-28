@@ -311,6 +311,13 @@ test_tune_data = [
         ValueError,
     ),
     (
+        "invalid name format",
+        {
+            "name": "Llama3.1-fine-tune",
+        },
+        ValueError,
+    ),
+    (
         "invalid hybrid parameters - objective and model_provider_parameters",
         {
             "name": "tune_test",
