@@ -163,7 +163,7 @@ prepare-pytest:
 	# The sqlalchemy on which optuna depends requires typing-extensions>=4.6.0.
 	# REF: https://github.com/kubeflow/katib/pull/2251
 	# TODO (tenzen-y): Once we upgrade libraries depended on typing-extensions==4.5.0, we can remove this line.
-	pip install typing-extensions==4.6.3
+	pip install typing-extensions==4.10.0
 
 prepare-pytest-testdata:
 ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
