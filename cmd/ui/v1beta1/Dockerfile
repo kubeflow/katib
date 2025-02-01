@@ -1,7 +1,7 @@
 # --- Clone the kubeflow/kubeflow code ---
-FROM ubuntu AS fetch-kubeflow-kubeflow
+FROM alpine:3.15 AS fetch-kubeflow-kubeflow
 
-RUN apt-get update && apt-get install git -y
+RUN apk add --no-cache git
 
 WORKDIR /kf
 COPY ./pkg/ui/v1beta1/frontend/COMMIT ./
