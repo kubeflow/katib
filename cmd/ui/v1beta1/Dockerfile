@@ -1,7 +1,5 @@
 # --- Clone the kubeflow/kubeflow code ---
-FROM ubuntu AS fetch-kubeflow-kubeflow
-
-RUN apt-get update && apt-get install git -y
+FROM alpine/git AS fetch-kubeflow-kubeflow
 
 WORKDIR /kf
 COPY ./pkg/ui/v1beta1/frontend/COMMIT ./
@@ -11,7 +9,7 @@ RUN git clone https://github.com/kubeflow/kubeflow.git && \
     git checkout $COMMIT
 
 # --- Build the frontend kubeflow library ---
-FROM node:16 AS frontend-kubeflow-lib
+FROM node:16-alpine AS frontend-kubeflow-lib
 
 WORKDIR /src
 
@@ -21,25 +19,27 @@ RUN npm config set fetch-retry-mintimeout 200000 && \
     npm config set fetch-retry-maxtimeout 1200000 && \
     npm config get registry && \
     npm config set registry https://registry.npmjs.org/ && \
-    npm config get https-proxy && \
-    npm config rm https-proxy && \
-    npm ci
+    npm config delete https-proxy && \
+    npm config set loglevel verbose && \
+    npm cache clean --force && \
+    npm ci --force --prefer-offline --no-audit
 
 COPY --from=fetch-kubeflow-kubeflow $LIB/ ./
 RUN npm run build
 
 # --- Build the frontend ---
-FROM node:16 AS frontend
+FROM node:16-alpine AS frontend
 
 WORKDIR /src
 COPY ./pkg/ui/v1beta1/frontend/package*.json ./
-RUN npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
+RUN npm config set fetch-retry-mintimeout 200000 && \
+    npm config set fetch-retry-maxtimeout 1200000 && \
     npm config get registry && \
     npm config set registry https://registry.npmjs.org/ && \
-    npm config get https-proxy && \
-    npm config rm https-proxy && \
-    npm ci
+    npm config delete https-proxy && \
+    npm config set loglevel verbose && \
+    npm cache clean --force && \
+    npm ci --force --prefer-offline --no-audit
 
 COPY ./pkg/ui/v1beta1/frontend/ .
 COPY --from=frontend-kubeflow-lib /src/dist/kubeflow/ ./node_modules/kubeflow/
