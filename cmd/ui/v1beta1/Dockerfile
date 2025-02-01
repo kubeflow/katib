@@ -1,7 +1,5 @@
 # --- Clone the kubeflow/kubeflow code ---
-FROM alpine:3.15 AS fetch-kubeflow-kubeflow
-
-RUN apk add --no-cache git
+FROM alpine/git AS fetch-kubeflow-kubeflow
 
 WORKDIR /kf
 COPY ./pkg/ui/v1beta1/frontend/COMMIT ./
