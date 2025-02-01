@@ -22,7 +22,7 @@ RUN npm config set fetch-retry-mintimeout 200000 && \
     npm config delete https-proxy && \
     npm config set loglevel verbose && \
     npm cache clean --force && \
-    npm ci --no-audit
+    npm ci --force --prefer-offline --no-audit
 
 COPY --from=fetch-kubeflow-kubeflow $LIB/ ./
 RUN npm run build
@@ -39,7 +39,7 @@ RUN npm config set fetch-retry-mintimeout 200000 && \
     npm config delete https-proxy && \
     npm config set loglevel verbose && \
     npm cache clean --force && \
-    npm ci --no-audit
+    npm ci --force --prefer-offline --no-audit
 
 COPY ./pkg/ui/v1beta1/frontend/ .
 COPY --from=frontend-kubeflow-lib /src/dist/kubeflow/ ./node_modules/kubeflow/
