@@ -33,12 +33,11 @@ FROM node:16 AS frontend
 
 WORKDIR /src
 COPY ./pkg/ui/v1beta1/frontend/package*.json ./
-RUN npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
+RUN npm config set fetch-retry-mintimeout 200000 && \
+    npm config set fetch-retry-maxtimeout 1200000 && \
     npm config get registry && \
     npm config set registry https://registry.npmjs.org/ && \
-    npm config get https-proxy && \
-    npm config rm https-proxy && \
+    npm config delete https-proxy && \
     npm ci
 
 COPY ./pkg/ui/v1beta1/frontend/ .
