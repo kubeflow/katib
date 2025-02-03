@@ -109,41 +109,74 @@ class BaseOptunaService(object):
 
     def _get_optuna_search_space(self):
         search_space = {}
+
         for param in self.search_space.params:
             if param.type == INTEGER:
+                step = int(param.step) if param.step else None
+
                 if param.distribution == api_pb2.UNIFORM or param.distribution is None:
-                    if param.step:
+                    # Uniform integer distribution: samples integers between min and max.
+                    # If step is defined, use a quantized version.
+                    if step:
                         search_space[param.name] = optuna.distributions.IntDistribution(
-                            int(param.min), int(param.max), False, param.step
+                            low=int(param.min),
+                            high=int(param.max),
+                            log=False,
+                            step=step,
                         )
                     else:
                         search_space[param.name] = optuna.distributions.IntDistribution(
-                            int(param.min), int(param.max)
+                            low=int(param.min),
+                            high=int(param.max),
+                            log=False,
+                            step=None,
                         )
-                if param.distribution == api_pb2.LOG_UNIFORM:
+                elif param.distribution == api_pb2.LOG_UNIFORM:
+                    # Log-uniform integer distribution: used for exponentially varying integers.
                     search_space[param.name] = optuna.distributions.IntDistribution(
-                        int(param.min), int(param.max), True, param.step
+                        low=max(1, int(param.min)),
+                        high=int(param.max),
+                        log=True,
+                        step=1,
                     )
+
             elif param.type == DOUBLE:
+                step = float(param.step) if param.step else None
+
                 if param.distribution == api_pb2.UNIFORM or param.distribution is None:
-                    if param.step:
+                    # Uniform float distribution: samples values between min and max.
+                    # If step is provided, use a quantized version.
+                    if step:
                         search_space[param.name] = (
                             optuna.distributions.FloatDistribution(
-                                int(param.min), int(param.max), False, param.step
+                                low=float(param.min),
+                                high=float(param.max),
+                                log=False,
+                                step=step,
                             )
                         )
                     else:
                         search_space[param.name] = (
                             optuna.distributions.FloatDistribution(
-                                int(param.min), int(param.max)
+                                low=float(param.min),
+                                high=float(param.max),
+                                log=False,
+                                step=None,
                             )
                         )
-                if param.distribution == api_pb2.LOG_UNIFORM:
+                elif param.distribution == api_pb2.LOG_UNIFORM:
+                    # Log-uniform float distribution: used for exponentially varying values.
                     search_space[param.name] = optuna.distributions.FloatDistribution(
-                        int(param.min), int(param.max), True, param.step
+                        low=max(1e-10, float(param.min)),
+                        high=float(param.max),
+                        log=True,
+                        step=None,
                     )
-            elif param.type == CATEGORICAL or param.type == DISCRETE:
+
+            elif param.type in {CATEGORICAL, DISCRETE}:
+                # Categorical & Discrete parameters use a categorical distribution.
                 search_space[param.name] = optuna.distributions.CategoricalDistribution(
                     param.list
                 )
+
         return search_space
