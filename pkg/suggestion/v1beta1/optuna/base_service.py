@@ -112,25 +112,15 @@ class BaseOptunaService(object):
 
         for param in self.search_space.params:
             if param.type == INTEGER:
-                step = int(param.step) if param.step else None
-
-                if param.distribution == api_pb2.UNIFORM or param.distribution is None:
+                if param.distribution in [api_pb2.UNIFORM, None]:
                     # Uniform integer distribution: samples integers between min and max.
                     # If step is defined, use a quantized version.
-                    if step:
-                        search_space[param.name] = optuna.distributions.IntDistribution(
-                            low=int(param.min),
-                            high=int(param.max),
-                            log=False,
-                            step=step,
-                        )
-                    else:
-                        search_space[param.name] = optuna.distributions.IntDistribution(
-                            low=int(param.min),
-                            high=int(param.max),
-                            log=False,
-                            step=None,
-                        )
+                    search_space[param.name] = optuna.distributions.IntDistribution(
+                        low=int(param.min),
+                        high=int(param.max),
+                        log=False,
+                        step=int(param.step) if param.step else None,
+                    )
                 elif param.distribution == api_pb2.LOG_UNIFORM:
                     # Log-uniform integer distribution: used for exponentially varying integers.
                     search_space[param.name] = optuna.distributions.IntDistribution(
@@ -141,29 +131,15 @@ class BaseOptunaService(object):
                     )
 
             elif param.type == DOUBLE:
-                step = float(param.step) if param.step else None
-
-                if param.distribution == api_pb2.UNIFORM or param.distribution is None:
+                if param.distribution in [api_pb2.UNIFORM, None]:
                     # Uniform float distribution: samples values between min and max.
                     # If step is provided, use a quantized version.
-                    if step:
-                        search_space[param.name] = (
-                            optuna.distributions.FloatDistribution(
-                                low=float(param.min),
-                                high=float(param.max),
-                                log=False,
-                                step=step,
-                            )
-                        )
-                    else:
-                        search_space[param.name] = (
-                            optuna.distributions.FloatDistribution(
-                                low=float(param.min),
-                                high=float(param.max),
-                                log=False,
-                                step=None,
-                            )
-                        )
+                    search_space[param.name] = optuna.distributions.FloatDistribution(
+                        low=float(param.min),
+                        high=float(param.max),
+                        log=False,
+                        step=float(param.step) if param.step else None,
+                    )
                 elif param.distribution == api_pb2.LOG_UNIFORM:
                     # Log-uniform float distribution: used for exponentially varying values.
                     search_space[param.name] = optuna.distributions.FloatDistribution(

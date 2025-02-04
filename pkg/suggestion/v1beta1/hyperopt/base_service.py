@@ -63,9 +63,10 @@ class BaseHyperoptService(object):
         # Construct search space, example: {"x": hyperopt.hp.uniform('x', -10, 10), "x2":
         # hyperopt.hp.uniform('x2', -10, 10)}
         hyperopt_search_space = {}
+
         for param in self.search_space.params:
             if param.type in [INTEGER, DOUBLE]:
-                if param.distribution == api_pb2.UNIFORM or param.distribution is None:
+                if param.distribution in [api_pb2.UNIFORM, None]:
                     # Uniform distribution: values are sampled between min and max.
                     # If step is defined, we use the quantized version quniform.
                     if param.step:
@@ -80,14 +81,10 @@ class BaseHyperoptService(object):
                             param.name, float(param.min), float(param.max)
                         )
                     else:
-                        if param.type == INTEGER:
-                            hyperopt_search_space[param.name] = hyperopt.hp.uniformint(
-                                param.name, float(param.min), float(param.max)
-                            )
-                        else:
-                            hyperopt_search_space[param.name] = hyperopt.hp.uniform(
-                                param.name, float(param.min), float(param.max)
-                            )
+                        hyperopt_search_space[param.name] = hyperopt.hp.uniform(
+                            param.name, float(param.min), float(param.max)
+                        )
+
                 elif param.distribution == api_pb2.LOG_UNIFORM:
                     # Log-uniform distribution: used for parameters that vary exponentially.
                     # We convert min and max to their logarithmic scale using math.log, because
@@ -105,28 +102,23 @@ class BaseHyperoptService(object):
                             math.log(float(param.min)),
                             math.log(float(param.max)),
                         )
+
                 elif param.distribution == api_pb2.NORMAL:
                     # Normal distribution: used when values are centered around the mean (mu)
                     # and spread out by sigma. We calculate mu as the midpoint between
                     # min and max, and sigma as (max - min) / 6. This is based on the assumption
                     # that 99.7% of the values in a normal distribution fall within ±3 sigma.
                     mu = (float(param.min) + float(param.max)) / 2
-                    # We consider the normal distribution based on the range of ±3 sigma.
                     sigma = (float(param.max) - float(param.min)) / 6
-
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qnormal(
-                            param.name,
-                            mu,
-                            sigma,
-                            float(param.step),
+                            param.name, mu, sigma, float(param.step)
                         )
                     else:
                         hyperopt_search_space[param.name] = hyperopt.hp.normal(
-                            param.name,
-                            mu,
-                            sigma,
+                            param.name, mu, sigma
                         )
+
                 elif param.distribution == api_pb2.LOG_NORMAL:
                     # Log-normal distribution: applies when the logarithm
                     # of the parameter follows a normal distribution.
@@ -137,21 +129,16 @@ class BaseHyperoptService(object):
                     log_max = math.log(float(param.max))
                     mu = (log_min + log_max) / 2
                     sigma = (log_max - log_min) / 6
-
                     if param.step:
                         hyperopt_search_space[param.name] = hyperopt.hp.qlognormal(
-                            param.name,
-                            mu,
-                            sigma,
-                            float(param.step),
+                            param.name, mu, sigma, float(param.step)
                         )
                     else:
                         hyperopt_search_space[param.name] = hyperopt.hp.lognormal(
-                            param.name,
-                            mu,
-                            sigma,
+                            param.name, mu, sigma
                         )
-            elif param.type == CATEGORICAL or param.type == DISCRETE:
+
+            elif param.type in [CATEGORICAL, DISCRETE]:
                 hyperopt_search_space[param.name] = hyperopt.hp.choice(
                     param.name, param.list
                 )
