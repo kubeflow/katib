@@ -16,7 +16,7 @@ import json
 import logging
 import multiprocessing
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
 
 import grpc
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
@@ -41,6 +41,14 @@ from kubeflow.training.utils import utils as training_utils
 from kubernetes import client, config
 
 logger = logging.getLogger(__name__)
+
+TuneStoragePerTrialType = TypedDict(
+    "TuneStoragePerTrial",
+    {
+        "volume": Union[client.V1Volume, Dict[str, Any]],
+        "mount_path": Union[str, client.V1VolumeMount],
+    },
+)
 
 
 class KatibClient(object):
@@ -198,6 +206,7 @@ class KatibClient(object):
         env_per_trial: Optional[
             Union[Dict[str, str], List[Union[client.V1EnvVar, client.V1EnvFromSource]]]
         ] = None,
+        storage_per_trial: Optional[List[TuneStoragePerTrialType]] = None,
         algorithm_name: str = "random",
         algorithm_settings: Union[
             dict, List[models.V1beta1AlgorithmSetting], None
@@ -288,6 +297,21 @@ class KatibClient(object):
                 https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvVar.md)
                 or a kubernetes.client.models.V1EnvFromSource (documented here:
                 https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvFromSource.md)
+            storage_per_trial: List of storage configurations for each trial container.
+                Each element in the list should be a dictionary with two keys:
+                - volume: Either a kubernetes.client.V1Volume object or a dictionary
+                  containing volume configuration with required fields:
+                  - name: Name of the volume
+                  - type: One of "pvc", "secret", "config_map", or "empty_dir"
+                  Additional fields based on volume type:
+                  - For pvc: claim_name, read_only (optional)
+                  - For secret: secret_name, items (optional), default_mode (optional),
+                    optional (optional)
+                  - For config_map: config_map_name, items (optional), default_mode
+                    (optional), optional (optional)
+                  - For empty_dir: medium (optional), size_limit (optional)
+                - mount_path: Either a kubernetes.client.V1VolumeMount object or a string
+                  specifying the path where the volume should be mounted in the container
             algorithm_name: Search algorithm for the HyperParameter tuning.
             algorithm_settings: Settings for the search algorithm given.
                 For available fields, check this doc:
@@ -503,6 +527,134 @@ class KatibClient(object):
             container_spec.env = env if env else None
             container_spec.env_from = env_from if env_from else None
 
+            volumes: List[client.V1Volume] = []
+            volume_mounts: List[client.V1VolumeMount] = []
+            if storage_per_trial:
+                if isinstance(storage_per_trial, dict):
+                    storage_per_trial = [storage_per_trial]
+                for storage in storage_per_trial:
+                    print(f"storage: {storage}")
+                    volume = None
+                    if isinstance(storage["volume"], client.V1Volume):
+                        volume = storage["volume"]
+                    elif isinstance(storage["volume"], dict):
+                        volume_name = storage["volume"].get("name")
+                        volume_type = storage["volume"].get("type")
+
+                        if not volume_name:
+                            raise ValueError(
+                                "storage_per_trial['volume'] does not have a 'name' key"
+                            )
+                        if not volume_type:
+                            raise ValueError(
+                                "storage_per_trial['volume'] does not have a 'type' key"
+                            )
+
+                        if volume_type == "pvc":
+                            volume_claim_name = storage["volume"].get("claim_name")
+                            if not volume_claim_name:
+                                raise ValueError(
+                                    "storage_per_trial['volume'] should have a "
+                                    "'claim_name' key for type pvc"
+                                )
+                            volume = client.V1Volume(
+                                name=volume_name,
+                                persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(
+                                    claim_name=volume_claim_name,
+                                    read_only=storage["volume"].get("read_only", False),
+                                ),
+                            )
+                        elif volume_type == "secret":
+                            volume = client.V1Volume(
+                                name=volume_name,
+                                secret=client.V1SecretVolumeSource(
+                                    secret_name=storage["volume"].get("secret_name"),
+                                    items=storage["volume"].get("items", None),
+                                    default_mode=storage["volume"].get(
+                                        "default_mode", None
+                                    ),
+                                    optional=storage["volume"].get("optional", False),
+                                ),
+                            )
+                        elif volume_type == "config_map":
+                            volume = client.V1Volume(
+                                name=volume_name,
+                                config_map=client.V1ConfigMapVolumeSource(
+                                    name=storage["volume"].get("config_map_name"),
+                                    items=storage["volume"].get("items", []),
+                                    default_mode=storage["volume"].get(
+                                        "default_mode", None
+                                    ),
+                                    optional=storage["volume"].get("optional", False),
+                                ),
+                            )
+                        elif volume_type == "empty_dir":
+                            volume = client.V1Volume(
+                                name=volume_name,
+                                empty_dir=client.V1EmptyDirVolumeSource(
+                                    medium=storage["volume"].get("medium", None),
+                                    size_limit=storage["volume"].get(
+                                        "size_limit", None
+                                    ),
+                                ),
+                            )
+                        else:
+                            raise ValueError(
+                                "storage_per_trial['volume'] must be a client.V1Volume or a dict"
+                            )
+
+                    else:
+                        raise ValueError(
+                            "storage_per_trial['volume'] must be a client.V1Volume or a dict"
+                        )
+
+                    volumes.append(volume)
+
+                    if isinstance(storage["mount_path"], client.V1VolumeMount):
+                        volume_mounts.append(storage["mount_path"])
+                    elif isinstance(storage["mount_path"], str):
+                        volume_mounts.append(
+                            client.V1VolumeMount(
+                                name=volume_name, mount_path=storage["mount_path"]
+                            )
+                        )
+                    else:
+                        raise ValueError(
+                            "storage_per_trial['mount_path'] must be a "
+                            "client.V1VolumeMount or a str"
+                        )
+
+            # Create Trial specification.
+            trial_spec = client.V1Job(
+                api_version="batch/v1",
+                kind="Job",
+                spec=client.V1JobSpec(
+                    template=client.V1PodTemplateSpec(
+                        metadata=models.V1ObjectMeta(
+                            annotations={"sidecar.istio.io/inject": "false"}
+                        ),
+                        spec=client.V1PodSpec(
+                            restart_policy="Never",
+                            containers=[
+                                client.V1Container(
+                                    name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+                                    image=base_image,
+                                    command=["bash", "-c"],
+                                    args=[exec_script],
+                                    env=env if env else None,
+                                    env_from=env_from if env_from else None,
+                                    resources=resources_per_trial,
+                                    volume_mounts=(
+                                        volume_mounts if volume_mounts else None
+                                    ),
+                                )
+                            ],
+                            volumes=volumes if volumes else None,
+                        ),
+                    )
+                ),
+            )
+
             # Trial uses PyTorchJob for distributed training if TrainerResources is set.
             if isinstance(resources_per_trial, TrainerResources):
                 trial_template = utils.get_trial_template_with_pytorchjob(
@@ -584,7 +736,7 @@ class KatibClient(object):
                         f"It must also start and end with an alphanumeric character."
                     )
                 elif hasattr(e, "status") and e.status == 409:
-                    print(f"PVC '{name}' already exists in namespace " f"{namespace}.")
+                    print(f"PVC '{name}' already exists in namespace {namespace}.")
                 else:
                     raise RuntimeError(f"failed to create PVC. Error: {e}")
 
