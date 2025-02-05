@@ -85,8 +85,8 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 	if !namingConvention.MatchString(instance.Name) || len(instance.Name) > 40 {
 		msg := "name must consist of lower case alphanumeric characters or '-'," +
 			" start with an alphabetic character, and end with an alphanumeric character" +
-			" (e.g. 'my-name', or 'abc-123', regex used for validation is '^[a-z]([-a-z0-9]*[a-z0-9])?)'" +
-			" and may not be larger than 40 characters. "
+			" (e.g. 'my-name', or 'abc-123', regex used for validation is '^[a-z]([-a-z0-9]*[a-z0-9])?)')" +
+			" and may not be longer than 40 characters. "
 
 		allErrs = append(allErrs, field.Invalid(field.NewPath("metadata").Child("name"), instance.Name, msg))
 	}
