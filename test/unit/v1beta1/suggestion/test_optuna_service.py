@@ -51,6 +51,7 @@ class TestOptuna:
             ["cmaes", {"restart_strategy": "ipop", "sigma": "2", "random_state": "71"}],
             ["random", {"random_state": "71"}],
             ["grid", {"random_state": "71"}],
+            ["bayesianoptimization",{"n_startup_trials": "20", "random_state": "71"}],
         ],
     )
     def test_get_suggestion(self, algorithm_name, algorithm_settings):
@@ -115,7 +116,7 @@ class TestOptuna:
             ),
             invocation_metadata={},
             request=request,
-            timeout=1,
+            timeout=2,
         )
 
         response, metadata, code, details = get_suggestion.termination()
@@ -467,6 +468,24 @@ class TestOptuna:
                 ],
                 grpc.StatusCode.INVALID_ARGUMENT,
             ],
+            # [BAYESIANOPTIMIZATION] Valid case
+            [
+                "bayesianoptimization",
+                {"n_startup_trials": "5", "random_state": "1"},
+                100,
+                [],
+                grpc.StatusCode.OK,
+            ],
+            # [BAYESIANOPTIMIZATION] Invalid n_startup_trials
+            [
+                "bayesianoptimization",
+                {"n_startup_trials": "-1"},
+                100,
+                [],
+                grpc.StatusCode.INVALID_ARGUMENT,
+            ],
+            # [BAYESIANOPTIMIZATION] Invalid parameter name
+            ["bayesianoptimization", {"invalid": "5"}, 100, [], grpc.StatusCode.INVALID_ARGUMENT],
         ],
     )
     def test_validate_algorithm_settings(

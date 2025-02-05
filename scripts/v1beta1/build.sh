@@ -88,9 +88,6 @@ docker buildx build --platform "${ARCH}" -t "${REGISTRY}/suggestion-hyperopt:${T
 echo -e "\nBuilding hyperband suggestion...\n"
 docker buildx build --platform "${ARCH}" -t "${REGISTRY}/suggestion-hyperband:${TAG}" -f ${CMD_PREFIX}/suggestion/hyperband/${VERSION}/Dockerfile .
 
-echo -e "\nBuilding skopt suggestion...\n"
-docker buildx build --platform "${ARCH}" -t "${REGISTRY}/suggestion-skopt:${TAG}" -f ${CMD_PREFIX}/suggestion/skopt/${VERSION}/Dockerfile .
-
 echo -e "\nBuilding goptuna suggestion...\n"
 docker buildx build --platform "${ARCH}" -t "${REGISTRY}/suggestion-goptuna:${TAG}" -f ${CMD_PREFIX}/suggestion/goptuna/${VERSION}/Dockerfile .
 

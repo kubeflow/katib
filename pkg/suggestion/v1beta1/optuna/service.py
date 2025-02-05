@@ -94,6 +94,10 @@ class OptimizerConfiguration(object):
         "grid": {
             "seed": lambda x: int(x),
         },
+        "bayesianoptimization": {
+            "n_startup_trials": lambda x: int(x),
+            "seed": lambda x: int(x),
+        },
     }
 
     @classmethod
@@ -132,6 +136,8 @@ class OptimizerConfiguration(object):
             return cls._validate_random_setting(algorithm_settings)
         elif algorithm_name == "grid":
             return cls._validate_grid_setting(experiment)
+        elif algorithm_name == "bayesianoptimization":
+            return cls._validate_bayesianoptimization_setting(algorithm_settings)
         else:
             return False, "unknown algorithm name {}".format(algorithm_name)
 
@@ -257,5 +263,29 @@ class OptimizerConfiguration(object):
                     parameters=search_space.params, exception=e
                 ),
             )
+
+        return True, ""
+
+    @classmethod
+    def _validate_bayesianoptimization_setting(cls, algorithm_settings):
+        for s in algorithm_settings:
+            try:
+                if s.name in ["n_startup_trials", "random_state"]:
+                    if not int(s.value) >= 0:
+                        return False, "{} should be greate or equal than zero".format(
+                            s.name
+                        )
+                else:
+                    return (
+                        False,
+                        "unknown setting {} for algorithm bayesianoptimization".format(
+                            s.name
+                        ),
+                    )
+
+            except Exception as e:
+                return False, "failed to validate {name}({value}): {exception}".format(
+                    name=s.name, value=s.value, exception=e
+                )
 
         return True, ""

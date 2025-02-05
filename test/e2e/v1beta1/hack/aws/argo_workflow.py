@@ -46,7 +46,6 @@ KATIB_IMAGES = {
     "file-metrics-collector":        "cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile",
     "tfevent-metrics-collector":     "cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile",
     "suggestion-hyperopt":           "cmd/suggestion/hyperopt/v1beta1/Dockerfile",
-    "suggestion-skopt":              "cmd/suggestion/skopt/v1beta1/Dockerfile",
     "suggestion-hyperband":          "cmd/suggestion/hyperband/v1beta1/Dockerfile",
     "suggestion-goptuna":            "cmd/suggestion/goptuna/v1beta1/Dockerfile",
     "suggestion-optuna":             "cmd/suggestion/optuna/v1beta1/Dockerfile",
