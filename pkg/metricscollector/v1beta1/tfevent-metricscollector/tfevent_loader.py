@@ -42,9 +42,8 @@ def _should_consider(tag: str, metric_name: str, tfefile: str) -> bool:
         else os.path.dirname(tfefile)
     )
     basedir_name = os.path.dirname(tfefile)
-    return tag.startswith(metric_name.split("/")[-1]) and basedir_name.endswith(
-        tfefile_parent_dir
-    )
+    return (tag.startswith(metric_name.split("/")[-1]) and
+            basedir_name.endswith(tfefile_parent_dir))
 
 
 class TFEventFileParser:
@@ -91,6 +90,7 @@ class TFEventFileParser:
                         metric=api_pb2.Metric(name=m, value=str(scalar.value)),
                     )
                     metric_logs.append(ml)
+
         return metric_logs
 
 
