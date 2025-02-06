@@ -1,0 +1,5 @@
+---
+- op: replace
+  path: /spec/selector
+  value:
+    app: mysql

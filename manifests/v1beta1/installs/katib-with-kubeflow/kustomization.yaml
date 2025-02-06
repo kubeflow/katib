@@ -42,6 +42,17 @@ patches:
       kind: Deployment
       name: katib-ui
     path: patches/istio-sidecar-injection.yaml
+  # Use mysql secrets, since katib-mysql is not used, only the already existing mysql
+  - target:
+      kind: Deployment
+      name: katib-db-manager
+    path: patches/katib-db-manager-env.yaml
+  # Fix select the app mysql
+  - target:
+      kind: Service
+      name: katib-mysql
+      namespace: kubeflow
+    path: patches/katib-mysql-service-select-app.yaml
 
 vars:
   - fieldref:

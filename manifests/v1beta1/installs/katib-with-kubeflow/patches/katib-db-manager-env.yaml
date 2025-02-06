@@ -1,0 +1,16 @@
+---
+- op: replace
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: DB_NAME
+      value: mysql
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          key: username
+          name: mysql-secret
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: password
+          name: mysql-secret
