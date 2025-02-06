@@ -5,10 +5,10 @@ metadata:
   name: katib-webhook-cert
 spec:
   isCA: true
-  commonName: $(KATIB_SERVICE_NAME).$(KATIB_NAMESPACE).svc
+  commonName: KATIB_SERVICE_NAME_PLACEHOLDER.KATIB_NAMESPACE_PLACEHOLDER.svc
   dnsNames:
-    - $(KATIB_SERVICE_NAME).$(KATIB_NAMESPACE).svc
-    - $(KATIB_SERVICE_NAME).$(KATIB_NAMESPACE).svc.cluster.local
+    - KATIB_SERVICE_NAME_PLACEHOLDER.KATIB_NAMESPACE_PLACEHOLDER.svc
+    - KATIB_SERVICE_NAME_PLACEHOLDER.KATIB_NAMESPACE_PLACEHOLDER.svc.cluster.local
   issuerRef:
     kind: Issuer
     name: katib-selfsigned-issuer
