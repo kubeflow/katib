@@ -65,31 +65,29 @@ class TFEventFileParser:
         tags = event_accumulator.Tags()
         for tag in tags[TENSORS]:
             for m in self.metric_names:
-                if not _should_consider(tag, m, tfefile):
-                    continue
-                for tensor in event_accumulator.Tensors(tag):
-                    ml = api_pb2.MetricLog(
-                        time_stamp=rfc3339.rfc3339(
-                            datetime.fromtimestamp(tensor.wall_time)
-                        ),
-                        metric=api_pb2.Metric(
-                            name=m, value=str(tf.make_ndarray(tensor.tensor_proto))
-                        ),
-                    )
-                    metric_logs.append(ml)
+                if _should_consider(tag, m, tfefile):
+                    for tensor in event_accumulator.Tensors(tag):
+                        ml = api_pb2.MetricLog(
+                            time_stamp=rfc3339.rfc3339(
+                                datetime.fromtimestamp(tensor.wall_time)
+                            ),
+                            metric=api_pb2.Metric(
+                                name=m, value=str(tf.make_ndarray(tensor.tensor_proto))
+                            ),
+                        )
+                        metric_logs.append(ml)
         # support old-style tensorboard metrics too
         for tag in tags[SCALARS]:
             for m in self.metric_names:
-                if not _should_consider(tag, m, tfefile):
-                    continue
-                for scalar in event_accumulator.Scalars(tag):
-                    ml = api_pb2.MetricLog(
-                        time_stamp=rfc3339.rfc3339(
-                            datetime.fromtimestamp(scalar.wall_time)
-                        ),
-                        metric=api_pb2.Metric(name=m, value=str(scalar.value)),
-                    )
-                    metric_logs.append(ml)
+                if _should_consider(tag, m, tfefile):
+                    for scalar in event_accumulator.Scalars(tag):
+                        ml = api_pb2.MetricLog(
+                            time_stamp=rfc3339.rfc3339(
+                                datetime.fromtimestamp(scalar.wall_time)
+                            ),
+                            metric=api_pb2.Metric(name=m, value=str(scalar.value)),
+                        )
+                        metric_logs.append(ml)
 
         return metric_logs
 
