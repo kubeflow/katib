@@ -149,7 +149,7 @@ class BaseOptunaService(object):
                         step=None,
                     )
 
-            elif param.type in {CATEGORICAL, DISCRETE}:
+            elif param.type in [CATEGORICAL, DISCRETE]:
                 # Categorical & Discrete parameters use a categorical distribution.
                 search_space[param.name] = optuna.distributions.CategoricalDistribution(
                     param.list
