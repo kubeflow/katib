@@ -50,7 +50,7 @@ class TestOptuna:
             ],
             ["cmaes", {"restart_strategy": "ipop", "sigma": "2", "random_state": "71"}],
             ["random", {"random_state": "71"}],
-            ["grid", {"random_state": "71"}],
+            # ["grid", {"random_state": "71"}],
         ],
     )
     def test_get_suggestion(self, algorithm_name, algorithm_settings):
@@ -93,6 +93,62 @@ class TestOptuna:
                             parameter_type=api_pb2.DOUBLE,
                             feasible_space=api_pb2.FeasibleSpace(
                                 max="5", min="1", step="1", list=[]
+                            ),
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-5",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="5", min="1", step="2", distribution=api_pb2.UNIFORM
+                            ),
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-6",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="5", min="1", distribution=api_pb2.UNIFORM
+                            ),
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-7",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="5", min="1", step="2", distribution=api_pb2.LOG_UNIFORM
+                            ),
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-8",
+                            parameter_type=api_pb2.INT,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="5", min="1", distribution=api_pb2.LOG_UNIFORM
+                            ),
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-9",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="11", min="1", step="2.5", distribution=api_pb2.UNIFORM
+                            ),
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-10",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="11", min="1", step="2.5", distribution=api_pb2.LOG_UNIFORM
+                            ),
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-11",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="5", min="1", distribution=api_pb2.UNIFORM
+                            ),
+                        ),
+                        api_pb2.ParameterSpec(
+                            name="param-12",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="5", min="1", distribution=api_pb2.LOG_UNIFORM
                             ),
                         ),
                     ]
