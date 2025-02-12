@@ -43,7 +43,7 @@ def run_e2e_experiment_create_by_tune(
         parameters=parameters,
         objective_metric_name="result",
         max_trial_count=4,
-        resources_per_trial={"cpu": "2"},
+        resources_per_trial={"cpu": "100m"},
     )
     experiment = katib_client.wait_for_experiment_condition(
         exp_name, exp_namespace, timeout=EXPERIMENT_TIMEOUT
@@ -103,7 +103,7 @@ def run_e2e_experiment_create_by_tune_pytorchjob(
         resources_per_trial=TrainerResources(
             num_workers=2,
             num_procs_per_worker=2,
-            resources_per_worker={"cpu": "2"},
+            resources_per_worker={"cpu": "100m"},
         ),
     )
 
