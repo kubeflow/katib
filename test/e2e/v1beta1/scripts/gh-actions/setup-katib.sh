@@ -58,7 +58,7 @@ cat ../../../../../manifests/v1beta1/installs/katib-standalone/katib-config.yaml
 # If the user wants to deploy training operator, then use the kustomization file for training operator.
 if "$DEPLOY_TRAINING_OPERATOR"; then
   echo "Deploying Training Operator $TRAINING_OPERATOR_VERSION"
-  kustomize build "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION" | kubectl apply -f -
+  kubectl apply --server-side -k "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION"
 fi
 
 echo "Deploying Katib"
