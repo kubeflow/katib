@@ -21,11 +21,10 @@ import textwrap
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from kubeflow.katib import models
-from kubeflow.katib.types import types
 from kubeflow.katib.constants import constants
+from kubeflow.katib.types import types
 from kubeflow.training import models as training_models
 from kubeflow.training.constants import constants as training_constants
-
 from kubernetes import client
 
 logger = logging.getLogger(__name__)
@@ -223,7 +222,7 @@ def get_trial_substitutions_from_trainer(
 def get_exec_script_from_objective(
     objective: Callable,
     entrypoint: str,
-    input_params: Dict[str, Any] = None,
+    input_params: Dict[str, Any],
     packages_to_install: Optional[List[str]] = None,
     pip_index_url: str = "https://pypi.org/simple",
 ) -> str:
@@ -255,7 +254,7 @@ def get_exec_script_from_objective(
         """
                 program_path=$(mktemp -d)
                 read -r -d '' SCRIPT << EOM\n
-                {func_code}
+                {objective_code}
                 EOM
                 printf "%s" \"$SCRIPT\" > \"$program_path/ephemeral_script.py\"
                 {entrypoint} \"$program_path/ephemeral_script.py\""""
@@ -286,33 +285,14 @@ def get_trial_template_with_job(
     Get Trial template with Job as a Trial's Worker
     """
 
-    # Use Batch/Job as a Trial spec.
+    # Restart policy must be set for the Job.
+    pod_template_spec.spec.restart_policy = "OnFailure"  # type: ignore
+
+    # Use PyTorchJob as a Trial spec.
     job = client.V1Job(
         api_version="batch/v1",
         kind="Job",
-        spec=client.V1JobSpec(
-            template=client.V1PodTemplateSpec(
-                metadata=models.V1ObjectMeta(
-                    annotations={"sidecar.istio.io/inject": "false"}
-                ),
-                spec=client.V1PodSpec(
-                    restart_policy="Never",
-                    containers=[
-                        client.V1Container(
-                            name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                            image=base_image,
-                            command=["bash", "-c"],
-                            args=[exec_script],
-                            env=env if env else None,
-                            env_from=env_from if env_from else None,
-                            resources=(
-                                resources_per_trial if resources_per_trial else None
-                            ),
-                        )
-                    ],
-                ),
-            )
-        ),
+        spec=client.V1JobSpec(template=pod_template_spec),
     )
 
     trial_template = models.V1beta1TrialTemplate(

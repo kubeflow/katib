@@ -26,21 +26,18 @@ from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
 from kubeflow.katib.types.types import TrainerResources
 from kubeflow.katib.utils import utils
-
-from kubeflow.training import models as training_models
 from kubeflow.training.constants.constants import (
+    DEFAULT_COMMAND,
+    ENTRYPOINT_PYTHON,
+    ENTRYPOINT_TORCH,
     JOB_PARAMETERS,
     PYTORCHJOB_KIND,
     STORAGE_INITIALIZER,
     STORAGE_INITIALIZER_IMAGE,
     STORAGE_INITIALIZER_VOLUME_MOUNT,
     TRAINER_TRANSFORMER_IMAGE,
-    ENTRYPOINT_TORCH,
-    ENTRYPOINT_PYTHON,
-    DEFAULT_COMMAND,
 )
 from kubeflow.training.utils import utils as training_utils
-
 from kubernetes import client, config
 
 logger = logging.getLogger(__name__)
@@ -502,8 +499,9 @@ class KatibClient(object):
                         raise ValueError(
                             f"Incorrect value for env_per_trial: {env_per_trial}"
                         )
-            container_spec.env = env
-            container_spec.env_from = env_from
+
+            container_spec.env = env if env else None
+            container_spec.env_from = env_from if env_from else None
 
             # Trial uses PyTorchJob for distributed training if TrainerResources is set.
             if isinstance(resources_per_trial, TrainerResources):
