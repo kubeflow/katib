@@ -17,9 +17,7 @@ import tempfile
 import unittest
 
 import tensorboardX
-
 import utils
-
 
 METRIC_DIR_NAMES = ("train", "test")
 METRIC_NAMES = ("accuracy", "loss")
