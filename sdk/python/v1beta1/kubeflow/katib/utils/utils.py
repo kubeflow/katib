@@ -24,7 +24,11 @@ from kubeflow.katib import models
 from kubeflow.katib.constants import constants
 from kubeflow.katib.types import types
 from kubeflow.training import models as training_models
-from kubeflow.training.constants import constants as training_constants
+from kubeflow.training.constants.constants import (
+    API_VERSION,
+    JOB_PARAMETERS,
+    PYTORCHJOB_KIND,
+)
 from kubernetes import client
 
 logger = logging.getLogger(__name__)
@@ -317,11 +321,11 @@ def get_trial_template_with_pytorchjob(
 
     # Use PyTorchJob as a Trial spec.
     pytorchjob = training_models.KubeflowOrgV1PyTorchJob(
-        api_version=training_constants.API_VERSION,
-        kind=training_constants.PYTORCHJOB_KIND,
+        api_version=API_VERSION,
+        kind=PYTORCHJOB_KIND,
         spec=training_models.KubeflowOrgV1PyTorchJobSpec(
             run_policy=training_models.KubeflowOrgV1RunPolicy(clean_pod_policy=None),
-            nproc_per_node=resources_per_trial.num_procs_per_worker,
+            nproc_per_node=str(resources_per_trial.num_procs_per_worker),
             pytorch_replica_specs={
                 "Master": training_models.KubeflowOrgV1ReplicaSpec(
                     replicas=1,
@@ -341,7 +345,7 @@ def get_trial_template_with_pytorchjob(
         )
 
     trial_template = models.V1beta1TrialTemplate(
-        primary_container_name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+        primary_container_name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
         retain=retain_trials,
         trial_parameters=trial_parameters,
         trial_spec=pytorchjob,
