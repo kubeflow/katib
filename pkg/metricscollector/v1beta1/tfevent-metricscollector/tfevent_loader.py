@@ -30,9 +30,21 @@ import api_pb2
 import rfc3339
 import tensorflow as tf
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
-from tensorboard.backend.event_processing.tag_types import TENSORS
+from tensorboard.backend.event_processing.tag_types import SCALARS, TENSORS
 
 from pkg.metricscollector.v1beta1.common import const
+
+
+def _should_consider(tag: str, metric_name: str, tfefile: str) -> bool:
+    tfefile_parent_dir = (
+        os.path.dirname(metric_name)
+        if len(metric_name.split("/")) >= 2
+        else os.path.dirname(tfefile)
+    )
+    basedir_name = os.path.dirname(tfefile)
+    return tag.startswith(metric_name.split("/")[-1]) and basedir_name.endswith(
+        tfefile_parent_dir
+    )
 
 
 class TFEventFileParser:
@@ -47,31 +59,36 @@ class TFEventFileParser:
 
     def parse_summary(self, tfefile):
         metric_logs = []
-        event_accumulator = EventAccumulator(tfefile, size_guidance={TENSORS: 0})
+        event_accumulator = EventAccumulator(
+            tfefile, size_guidance={SCALARS: 0, TENSORS: 0}
+        )
         event_accumulator.Reload()
-        for tag in event_accumulator.Tags()[TENSORS]:
+        tags = event_accumulator.Tags()
+        for tag in tags[TENSORS]:
             for m in self.metric_names:
-                tfefile_parent_dir = (
-                    os.path.dirname(m)
-                    if len(m.split("/")) >= 2
-                    else os.path.dirname(tfefile)
-                )
-                basedir_name = os.path.dirname(tfefile)
-                if not tag.startswith(m.split("/")[-1]) or not basedir_name.endswith(
-                    tfefile_parent_dir
-                ):
-                    continue
-
-                for tensor in event_accumulator.Tensors(tag):
-                    ml = api_pb2.MetricLog(
-                        time_stamp=rfc3339.rfc3339(
-                            datetime.fromtimestamp(tensor.wall_time)
-                        ),
-                        metric=api_pb2.Metric(
-                            name=m, value=str(tf.make_ndarray(tensor.tensor_proto))
-                        ),
-                    )
-                    metric_logs.append(ml)
+                if _should_consider(tag, m, tfefile):
+                    for tensor in event_accumulator.Tensors(tag):
+                        ml = api_pb2.MetricLog(
+                            time_stamp=rfc3339.rfc3339(
+                                datetime.fromtimestamp(tensor.wall_time)
+                            ),
+                            metric=api_pb2.Metric(
+                                name=m, value=str(tf.make_ndarray(tensor.tensor_proto))
+                            ),
+                        )
+                        metric_logs.append(ml)
+        # support old-style tensorboard metrics too
+        for tag in tags[SCALARS]:
+            for m in self.metric_names:
+                if _should_consider(tag, m, tfefile):
+                    for scalar in event_accumulator.Scalars(tag):
+                        ml = api_pb2.MetricLog(
+                            time_stamp=rfc3339.rfc3339(
+                                datetime.fromtimestamp(scalar.wall_time)
+                            ),
+                            metric=api_pb2.Metric(name=m, value=str(scalar.value)),
+                        )
+                        metric_logs.append(ml)
 
         return metric_logs
 
