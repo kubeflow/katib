@@ -132,7 +132,7 @@
             "$ref": "#/definitions/v1beta1.AlgorithmSetting"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -148,7 +148,7 @@
             "$ref": "#/definitions/.v1beta1.SuggestionCondition"
           },
           "x-kubernetes-list-map-keys": [
-            "Type"
+            "type"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -173,7 +173,7 @@
             "$ref": "#/definitions/.v1beta1.TrialAssignment"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         }
@@ -217,7 +217,7 @@
             "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -241,7 +241,7 @@
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         }
@@ -323,7 +323,7 @@
             "$ref": "#/definitions/v1beta1.EarlyStoppingRule"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -356,7 +356,7 @@
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -402,7 +402,7 @@
             "$ref": "#/definitions/.v1beta1.TrialCondition"
           },
           "x-kubernetes-list-map-keys": [
-            "Type"
+            "type"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -450,7 +450,7 @@
             "$ref": "#/definitions/v1beta1.AlgorithmSetting"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         }
@@ -539,7 +539,7 @@
             "$ref": "#/definitions/v1beta1.EarlyStoppingSetting"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         }
@@ -681,7 +681,7 @@
             "$ref": "#/definitions/v1beta1.ParameterSpec"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -711,7 +711,7 @@
             "$ref": "#/definitions/v1beta1.ExperimentCondition"
           },
           "x-kubernetes-list-map-keys": [
-            "Type"
+            "type"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -968,7 +968,7 @@
             "$ref": "#/definitions/v1beta1.Operation"
           },
           "x-kubernetes-list-map-keys": [
-            "OperationType"
+            "operationType"
           ],
           "x-kubernetes-list-type": "map"
         }
@@ -1000,7 +1000,7 @@
             "$ref": "#/definitions/v1beta1.MetricStrategy"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         },
@@ -1025,7 +1025,7 @@
             "$ref": "#/definitions/v1beta1.Metric"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         }
@@ -1045,7 +1045,7 @@
             "$ref": "#/definitions/v1beta1.ParameterSpec"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         }
@@ -1072,7 +1072,7 @@
             "$ref": "#/definitions/v1beta1.ParameterAssignment"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         }
@@ -1193,7 +1193,7 @@
             "$ref": "#/definitions/v1beta1.TrialParameterSpec"
           },
           "x-kubernetes-list-map-keys": [
-            "Name"
+            "name"
           ],
           "x-kubernetes-list-type": "map"
         },

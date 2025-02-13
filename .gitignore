@@ -78,3 +78,6 @@ $RECYCLE.BIN/
 
 ## Vendor dir
 vendor
+
+# Jupyter Notebooks.
+**/.ipynb_checkpoints

@@ -18,12 +18,14 @@ from kubeflow.katib import (
     V1beta1TrialTemplate,
 )
 from kubeflow.katib.constants import constants
+from kubeflow.katib.types import types
 from kubeflow.storage_initializer.hugging_face import (
     HuggingFaceDatasetParams,
     HuggingFaceModelParams,
     HuggingFaceTrainerParams,
 )
-from kubernetes.client import V1ObjectMeta
+from kubeflow.training.models import KubeflowOrgV1PyTorchJob
+from kubernetes.client import V1Job, V1ObjectMeta
 
 PVC_FAILED = "pvc creation failed"
 
@@ -476,16 +478,37 @@ test_tune_data = [
                     learning_rate=katib.search.double(min=1e-05, max=5e-05),
                 ),
             ),
+            "resources_per_trial": types.TrainerResources(
+                num_workers=2,
+                num_procs_per_worker=2,
+                resources_per_worker={"gpu": "2"},
+            ),
         },
         RuntimeError,
     ),
     (
-        "valid flow with custom objective tuning",
+        "valid flow with custom objective function and Job as Trial",
         {
             "name": "tune_test",
             "objective": lambda x: print(f"a={x}"),
             "parameters": {"a": katib.search.int(min=10, max=100)},
             "objective_metric_name": "a",
+            "resources_per_trial": {"gpu": "2"},
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+    (
+        "valid flow with custom objective function and PyTorchJob as Trial",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "resources_per_trial": types.TrainerResources(
+                num_workers=2,
+                num_procs_per_worker=2,
+                resources_per_worker={"gpu": "2"},
+            ),
         },
         TEST_RESULT_SUCCESS,
     ),
@@ -507,6 +530,11 @@ test_tune_data = [
                     output_dir="test_tune_api",
                     learning_rate=katib.search.double(min=1e-05, max=5e-05),
                 ),
+            ),
+            "resources_per_trial": types.TrainerResources(
+                num_workers=2,
+                num_procs_per_worker=2,
+                resources_per_worker={"gpu": "2"},
             ),
             "objective_metric_name": "train_loss",
             "objective_type": "minimize",
@@ -597,7 +625,10 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                 call_args = mock_create_experiment.call_args
                 experiment = call_args[0][0]
 
-                if test_name == "valid flow with custom objective tuning":
+                if (
+                    test_name
+                    == "valid flow with custom objective function and Job as Trial"
+                ):
                     # Verify input_params
                     args_content = "".join(
                         experiment.spec.trial_template.trial_spec.spec.template.spec.containers[
@@ -622,6 +653,18 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         type="maximize",
                         objective_metric_name="a",
                         additional_metric_names=[],
+                    )
+                    # Verity Trial spec
+                    assert isinstance(experiment.spec.trial_template.trial_spec, V1Job)
+
+                elif (
+                    test_name
+                    == "valid flow with custom objective function and PyTorchJob as Trial"
+                ):
+                    # Verity Trial spec
+                    assert isinstance(
+                        experiment.spec.trial_template.trial_spec,
+                        KubeflowOrgV1PyTorchJob,
                     )
 
                 elif test_name == "valid flow with external model tuning":
