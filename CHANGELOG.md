@@ -16,26 +16,29 @@
 - [GSoC] Update `tune` API for LLM hyperparameters optimization ([#2393](https://github.com/kubeflow/katib/pull/2393) by [@helenxie-bit](https://github.com/helenxie-bit))
 - [GSoC] Create LLM Hyperparameters Optimization API Proposal ([#2333](https://github.com/kubeflow/katib/pull/2333) by [@helenxie-bit](https://github.com/helenxie-bit))
 
-### Control Plane Updates
+### Support for Advanced Distributions for HPO
 
 - [GSOC] `optuna` suggestion service logic update ([#2446](https://github.com/kubeflow/katib/pull/2446) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
 - [GSOC] `hyperopt` suggestion service logic update ([#2412](https://github.com/kubeflow/katib/pull/2412) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
-- [GSoC] Provide a PyTorch MNIST Example for Push-based Metrics Collection ([#2437](https://github.com/kubeflow/katib/pull/2437) by [@Electronic-Waste](https://github.com/Electronic-Waste))
-- [GSoC] Compatibility Changes in Trial Controller ([#2394](https://github.com/kubeflow/katib/pull/2394) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 - [GSOC] Add validator for feasible space distribution ([#2404](https://github.com/kubeflow/katib/pull/2404) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
 - [GSOC] added Unknown distribution and convertDistribution in suggestion client ([#2403](https://github.com/kubeflow/katib/pull/2403) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
 - [GSOC] Support for various Parameter distributions in Katib ([#2334](https://github.com/kubeflow/katib/pull/2334) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
 - [GSoC] Added `DistributionType` to Experiment API ([#2377](https://github.com/kubeflow/katib/pull/2377) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
+
+### Push-based Metrics Collector
+
+- [GSoC] Provide a PyTorch MNIST Example for Push-based Metrics Collection ([#2437](https://github.com/kubeflow/katib/pull/2437) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+
+- [GSoC] Compatibility Changes in Trial Controller ([#2394](https://github.com/kubeflow/katib/pull/2394) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 - [GSoC] New Interface `report_metrics` in Python SDK ([#2371](https://github.com/kubeflow/katib/pull/2371) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 - [GSoC] KEP for Project 6: Push-based Metrics Collection for Katib ([#2328](https://github.com/kubeflow/katib/pull/2328) by [@Electronic-Waste](https://github.com/Electronic-Waste))
-- Migrate KatibCertGenerator to OPA CertController ([#2345](https://github.com/kubeflow/katib/pull/2345) by [@forsaken628](https://github.com/forsaken628))
+- [GSoC] Add New Parameter in `tune` ([#2369](https://github.com/kubeflow/katib/pull/2369) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 
 ### SDK Updates
 
 - [SDK] Support PyTorchJob as a Trial Worker ([#2512](https://github.com/kubeflow/katib/pull/2512) by [@andreyvelich](https://github.com/andreyvelich))
 - [SDK] test: Add e2e test for tune function. ([#2399](https://github.com/kubeflow/katib/pull/2399) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 - [SDK] improve PVC creation name error ([#2496](https://github.com/kubeflow/katib/pull/2496) by [@mahdikhashan](https://github.com/mahdikhashan))
-- [GSoC] Add New Parameter in `tune` ([#2369](https://github.com/kubeflow/katib/pull/2369) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 - [SDK] Fix empty list for env variables and numpy version ([#2360](https://github.com/kubeflow/katib/pull/2360) by [@andreyvelich](https://github.com/andreyvelich))
 - [SDK] Explain Python version support cycle ([#2354](https://github.com/kubeflow/katib/pull/2354) by [@andreyvelich](https://github.com/andreyvelich))
 
@@ -71,6 +74,7 @@
 - Ignore cache exporting errors in the image building workflows ([#2487](https://github.com/kubeflow/katib/pull/2487) by [@Doris-xm](https://github.com/Doris-xm))
 - Upgrade grpcio version to v1.64.1 ([#2483](https://github.com/kubeflow/katib/pull/2483) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 - docs: remove katib workflow ([#2443](https://github.com/kubeflow/katib/pull/2443) by [@gonmmarques](https://github.com/gonmmarques))
+- Migrate KatibCertGenerator to OPA CertController ([#2345](https://github.com/kubeflow/katib/pull/2345) by [@forsaken628](https://github.com/forsaken628))
 - Promote @Electronic-Waste and @helenxie-bit as Katib reviewers ([#2439](https://github.com/kubeflow/katib/pull/2439) by [@andreyvelich](https://github.com/andreyvelich))
 - Update README and out-of-date docs ([#2438](https://github.com/kubeflow/katib/pull/2438) by [@andreyvelich](https://github.com/andreyvelich))
 - Changes isort profile to black, to be fully compatible and adds 'pkg' dir for black and flake8 ([#2413](https://github.com/kubeflow/katib/pull/2413) by [@Ygnas](https://github.com/Ygnas))
