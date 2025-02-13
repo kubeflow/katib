@@ -56,7 +56,7 @@ spec:
               spec:
                 containers:
                   - name: tensorflow
-                    image: docker.io/kubeflowkatib/tf-mnist-with-summaries:latest
+                    image: docker.io/kubeflowkatib/tf-mnist-with-summaries:v0.18.0-rc.0
                     command:
                       - "python"
                       - "/opt/tf-mnist-with-summaries/mnist.py"
