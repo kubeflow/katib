@@ -28,7 +28,6 @@
 ### Push-based Metrics Collector
 
 - [GSoC] Provide a PyTorch MNIST Example for Push-based Metrics Collection ([#2437](https://github.com/kubeflow/katib/pull/2437) by [@Electronic-Waste](https://github.com/Electronic-Waste))
-
 - [GSoC] Compatibility Changes in Trial Controller ([#2394](https://github.com/kubeflow/katib/pull/2394) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 - [GSoC] New Interface `report_metrics` in Python SDK ([#2371](https://github.com/kubeflow/katib/pull/2371) by [@Electronic-Waste](https://github.com/Electronic-Waste))
 - [GSoC] KEP for Project 6: Push-based Metrics Collection for Katib ([#2328](https://github.com/kubeflow/katib/pull/2328) by [@Electronic-Waste](https://github.com/Electronic-Waste))
