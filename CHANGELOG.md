@@ -1,5 +1,112 @@
 # Changelog
 
+# [v0.18.0-rc.0](https://github.com/kubeflow/katib/tree/v0.18.0-rc.0) (2025-02-13)
+
+## Breaking Changes
+
+- Upgrade Kubernetes to v1.31.3 ([#2478](https://github.com/kubeflow/katib/pull/2478) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- Upgrade Kubernetes to v1.30.7 ([#2463](https://github.com/kubeflow/katib/pull/2463) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- Drop Python 3.7 and Support Python 3.11 in the SDK ([#2337](https://github.com/kubeflow/katib/pull/2337) by [@tenzen-y](https://github.com/tenzen-y))
+
+## New Features
+
+### Hyperparameter Optimization for LLMs
+
+- [DOCS] move llm hyperparameter optimisation design image to the proposal directory and rename it ([#2472](https://github.com/kubeflow/katib/pull/2472) by [@mahdikhashan](https://github.com/mahdikhashan))
+- [GSoC] Update `tune` API for LLM hyperparameters optimization ([#2393](https://github.com/kubeflow/katib/pull/2393) by [@helenxie-bit](https://github.com/helenxie-bit))
+- [GSoC] Create LLM Hyperparameters Optimization API Proposal ([#2333](https://github.com/kubeflow/katib/pull/2333) by [@helenxie-bit](https://github.com/helenxie-bit))
+
+### Support for Advanced Distributions for HPO
+
+- [GSOC] `optuna` suggestion service logic update ([#2446](https://github.com/kubeflow/katib/pull/2446) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
+- [GSOC] `hyperopt` suggestion service logic update ([#2412](https://github.com/kubeflow/katib/pull/2412) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
+- [GSOC] Add validator for feasible space distribution ([#2404](https://github.com/kubeflow/katib/pull/2404) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
+- [GSOC] added Unknown distribution and convertDistribution in suggestion client ([#2403](https://github.com/kubeflow/katib/pull/2403) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
+- [GSOC] Support for various Parameter distributions in Katib ([#2334](https://github.com/kubeflow/katib/pull/2334) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
+- [GSoC] Added `DistributionType` to Experiment API ([#2377](https://github.com/kubeflow/katib/pull/2377) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
+
+### Push-based Metrics Collector
+
+- [GSoC] Provide a PyTorch MNIST Example for Push-based Metrics Collection ([#2437](https://github.com/kubeflow/katib/pull/2437) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- [GSoC] Compatibility Changes in Trial Controller ([#2394](https://github.com/kubeflow/katib/pull/2394) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- [GSoC] New Interface `report_metrics` in Python SDK ([#2371](https://github.com/kubeflow/katib/pull/2371) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- [GSoC] KEP for Project 6: Push-based Metrics Collection for Katib ([#2328](https://github.com/kubeflow/katib/pull/2328) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- [GSoC] Add New Parameter in `tune` ([#2369](https://github.com/kubeflow/katib/pull/2369) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+
+### SDK Updates
+
+- [SDK] Support PyTorchJob as a Trial Worker ([#2512](https://github.com/kubeflow/katib/pull/2512) by [@andreyvelich](https://github.com/andreyvelich))
+- [SDK] test: Add e2e test for tune function. ([#2399](https://github.com/kubeflow/katib/pull/2399) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- [SDK] improve PVC creation name error ([#2496](https://github.com/kubeflow/katib/pull/2496) by [@mahdikhashan](https://github.com/mahdikhashan))
+- [SDK] Fix empty list for env variables and numpy version ([#2360](https://github.com/kubeflow/katib/pull/2360) by [@andreyvelich](https://github.com/andreyvelich))
+- [SDK] Explain Python version support cycle ([#2354](https://github.com/kubeflow/katib/pull/2354) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Bug Fixes
+
+- fix(webhook): fix validation message in experiment webhook ([#2507](https://github.com/kubeflow/katib/pull/2507) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- Install typing-extensions v4.10.0 to fix Python test error ([#2504](https://github.com/kubeflow/katib/pull/2504) by [@helenxie-bit](https://github.com/helenxie-bit))
+- [SDK] Update `tune` API ([#2497](https://github.com/kubeflow/katib/pull/2497) by [@helenxie-bit](https://github.com/helenxie-bit))
+- fix(api): resolve all api voilation exceptions in katib api ([#2482](https://github.com/kubeflow/katib/pull/2482) by [@truc0](https://github.com/truc0))
+- fix(trial): use propagated gomega to improve debuggability. ([#2432](https://github.com/kubeflow/katib/pull/2432) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- fix(ui): update None Collector with Push Collector. ([#2418](https://github.com/kubeflow/katib/pull/2418) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- fix: Resolve errors in e2e tests for cypress in Katib UI ([#2384](https://github.com/kubeflow/katib/pull/2384) by [@tariq-hasan](https://github.com/tariq-hasan))
+- doc(example): fix the broken link. ([#2433](https://github.com/kubeflow/katib/pull/2433) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- fix: remove remaining MXNet dependency. ([#2456](https://github.com/kubeflow/katib/pull/2456) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- Remove Dropout layer from ENAS Trial container to fix E2E tests ([#2455](https://github.com/kubeflow/katib/pull/2455) by [@andreyvelich](https://github.com/andreyvelich))
+- [SDK] fix grpc related bugs in Python SDK ([#2398](https://github.com/kubeflow/katib/pull/2398) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- [SDK] Fix types error ([#2424](https://github.com/kubeflow/katib/pull/2424) by [@helenxie-bit](https://github.com/helenxie-bit))
+- fix: remove the dependency of `protocmp` in `google.golang.org/protobuf/testing/protocmp`. ([#2391](https://github.com/kubeflow/katib/pull/2391) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- Fix TestReconcileBatchJob ([#2350](https://github.com/kubeflow/katib/pull/2350) by [@forsaken628](https://github.com/forsaken628))
+- Fix apple silicon rosetta error when building images from the source code ([#2342](https://github.com/kubeflow/katib/pull/2342) by [@helenxie-bit](https://github.com/helenxie-bit))
+- fix katib use crds token pipeline trail template guide ([#2330](https://github.com/kubeflow/katib/pull/2330) by [@Jerry-yz](https://github.com/Jerry-yz))
+- Fix Scikit-Learn Version for Skopt Tests ([#2336](https://github.com/kubeflow/katib/pull/2336) by [@andreyvelich](https://github.com/andreyvelich))
+
+## Misc
+
+- Set experiment names at a max of 40 characters. ([#2468](https://github.com/kubeflow/katib/pull/2468) by [@AydanPirani](https://github.com/AydanPirani))
+- [CI] optimize katib ui dockerfile ([#2505](https://github.com/kubeflow/katib/pull/2505) by [@mahdikhashan](https://github.com/mahdikhashan))
+- Sort experiments by descending creation date by default in katib-ui ([#2498](https://github.com/kubeflow/katib/pull/2498) by [@Doris-xm](https://github.com/Doris-xm))
+- [GSoC] Add unit tests for `tune` API ([#2423](https://github.com/kubeflow/katib/pull/2423) by [@helenxie-bit](https://github.com/helenxie-bit))
+- Update MutatingWebhookConfiguration: Switch from objectSelector to AdmissionWebhookMatchConditions ([#2241](https://github.com/kubeflow/katib/pull/2241) by [@lianghao208](https://github.com/lianghao208))
+- chore: supporting the listen-address parameter on db-manager ([#2465](https://github.com/kubeflow/katib/pull/2465) by [@caiofralmeida](https://github.com/caiofralmeida))
+- Upgrade klog to v2 ([#2470](https://github.com/kubeflow/katib/pull/2470) by [@Doris-xm](https://github.com/Doris-xm))
+- Ignore cache exporting errors in the image building workflows ([#2487](https://github.com/kubeflow/katib/pull/2487) by [@Doris-xm](https://github.com/Doris-xm))
+- Upgrade grpcio version to v1.64.1 ([#2483](https://github.com/kubeflow/katib/pull/2483) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- docs: remove katib workflow ([#2443](https://github.com/kubeflow/katib/pull/2443) by [@gonmmarques](https://github.com/gonmmarques))
+- Migrate KatibCertGenerator to OPA CertController ([#2345](https://github.com/kubeflow/katib/pull/2345) by [@forsaken628](https://github.com/forsaken628))
+- Promote @Electronic-Waste and @helenxie-bit as Katib reviewers ([#2439](https://github.com/kubeflow/katib/pull/2439) by [@andreyvelich](https://github.com/andreyvelich))
+- Update README and out-of-date docs ([#2438](https://github.com/kubeflow/katib/pull/2438) by [@andreyvelich](https://github.com/andreyvelich))
+- Changes isort profile to black, to be fully compatible and adds 'pkg' dir for black and flake8 ([#2413](https://github.com/kubeflow/katib/pull/2413) by [@Ygnas](https://github.com/Ygnas))
+- Introduced error constants and replaced reflect with cmp ([#2289](https://github.com/kubeflow/katib/pull/2289) by [@tariq-hasan](https://github.com/tariq-hasan))
+- [Test] Refactor `inject_webhook_test.go` according to the Developer Guide ([#2401](https://github.com/kubeflow/katib/pull/2401) by [@Electronic-Waste](https://github.com/Electronic-Waste))
+- Enhance pre-commit hooks with flake8 and black ([#2407](https://github.com/kubeflow/katib/pull/2407) by [@Ygnas](https://github.com/Ygnas))
+- added `Distribution` field to feasibleSpace in `api.proto` ([#2397](https://github.com/kubeflow/katib/pull/2397) by [@shashank-iitbhu](https://github.com/shashank-iitbhu))
+- Begin enabling pre-commit hooks ([#2242](https://github.com/kubeflow/katib/pull/2242) by [@droctothorpe](https://github.com/droctothorpe))
+- Update Instructions for Argo Workflows ([#2382](https://github.com/kubeflow/katib/pull/2382) by [@jaffe-fly](https://github.com/jaffe-fly))
+- docs: update suggestion.md ([#2387](https://github.com/kubeflow/katib/pull/2387) by [@eltociear](https://github.com/eltociear))
+- Add command to re-run GitHub Actions tests ([#2385](https://github.com/kubeflow/katib/pull/2385) by [@andreyvelich](https://github.com/andreyvelich))
+- Bump Katib Python SDK to 0.17.0 version ([#2379](https://github.com/kubeflow/katib/pull/2379) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Changelog for Katib v0.17.0 ([#2380](https://github.com/kubeflow/katib/pull/2380) by [@andreyvelich](https://github.com/andreyvelich))
+- Replaced hpcloud with nxadm for tail package in Go ([#2375](https://github.com/kubeflow/katib/pull/2375) by [@tariq-hasan](https://github.com/tariq-hasan))
+- Use ErrorList for experiment validator ([#2329](https://github.com/kubeflow/katib/pull/2329) by [@ckcd](https://github.com/ckcd))
+- Add Changelog for Katib v0.17.0-rc.1 ([#2370](https://github.com/kubeflow/katib/pull/2370) by [@andreyvelich](https://github.com/andreyvelich))
+- Remove default caBundle value ([#2368](https://github.com/kubeflow/katib/pull/2368) by [@vihangm](https://github.com/vihangm))
+- Bump Katib Python SDK to 0.17.0rc1 version ([#2365](https://github.com/kubeflow/katib/pull/2365) by [@andreyvelich](https://github.com/andreyvelich))
+- Add unit test for `create_experiment` in the `katib_client` module ([#2325](https://github.com/kubeflow/katib/pull/2325) by [@tariq-hasan](https://github.com/tariq-hasan))
+- Remove code generation from release script ([#2363](https://github.com/kubeflow/katib/pull/2363) by [@andreyvelich](https://github.com/andreyvelich))
+- Upgrade the protobuf version to >=4.21.12,<5 ([#2358](https://github.com/kubeflow/katib/pull/2358) by [@tenzen-y](https://github.com/tenzen-y))
+- Replace gRPC code generation tool from Znly/protoc to Buf ([#2344](https://github.com/kubeflow/katib/pull/2344) by [@forsaken628](https://github.com/forsaken628))
+- Replace already closed github.com/golang/mock with go.uber.org/mock ([#2357](https://github.com/kubeflow/katib/pull/2357) by [@forsaken628](https://github.com/forsaken628))
+- Use cache-dependency-path in actions/setup-go for CI workflow ([#2355](https://github.com/kubeflow/katib/pull/2355) by [@forsaken628](https://github.com/forsaken628))
+- Update Slack Invitation ([#2349](https://github.com/kubeflow/katib/pull/2349) by [@andreyvelich](https://github.com/andreyvelich))
+- Update GitHub template to better triage Issues ([#2335](https://github.com/kubeflow/katib/pull/2335) by [@andreyvelich](https://github.com/andreyvelich))
+- Add Changelog for Katib v0.17.0-rc.0 ([#2319](https://github.com/kubeflow/katib/pull/2319) by [@andreyvelich](https://github.com/andreyvelich))
+- Update outdated actions ([#2324](https://github.com/kubeflow/katib/pull/2324) by [@Mersho](https://github.com/Mersho))
+- Make test fields private in Go unit tests ([#2316](https://github.com/kubeflow/katib/pull/2316) by [@tariq-hasan](https://github.com/tariq-hasan))
+- Bump Katib Python SDK to 0.17.0rc0 Version ([#2318](https://github.com/kubeflow/katib/pull/2318) by [@andreyvelich](https://github.com/andreyvelich))
+
+[Full Changelog](https://github.com/kubeflow/katib/compare/v0.17.0...v0.18.0-rc.0)
+
 # [v0.17.0](https://github.com/kubeflow/katib/tree/v0.17.0) (2024-07-12)
 
 ## Breaking Changes
