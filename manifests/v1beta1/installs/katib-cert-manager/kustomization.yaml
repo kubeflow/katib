@@ -30,32 +30,115 @@ images:
     newName: docker.io/kubeflowkatib/katib-ui
     newTag: latest
 
-patchesStrategicMerge:
-  - patches/katib-cert-injection.yaml
-
-vars:
-  - fieldref:
-      fieldPath: metadata.namespace
-    name: KATIB_NAMESPACE
-    objref:
-      apiVersion: v1
-      kind: Service
-      name: katib-controller
-  - fieldref:
-      fieldPath: metadata.name
-    name: KATIB_SERVICE_NAME
-    objref:
-      apiVersion: v1
-      kind: Service
-      name: katib-controller
-  - name: KATIB_CERT_NAME
-    objref:
-      kind: Certificate
+patches:
+- path: patches/katib-cert-injection.yaml
+replacements:
+- source:
+    fieldPath: metadata.namespace
+    kind: Service
+    name: katib-controller
+    version: v1
+  targets:
+  - fieldPaths:
+    - spec.commonName
+    options:
+      delimiter: .
+      index: 1
+    select:
       group: cert-manager.io
-      version: v1
+      kind: Certificate
       name: katib-webhook-cert
-    fieldref:
-      fieldpath: metadata.name
+      version: v1
+  - fieldPaths:
+    - spec.dnsNames.0
+    options:
+      delimiter: .
+      index: 1
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - spec.dnsNames.1
+    options:
+      delimiter: .
+      index: 1
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - metadata.annotations.[cert-manager.io/inject-ca-from]
+    options:
+      delimiter: /
+      index: 1
+    select:
+      kind: ValidatingWebhookConfiguration
+      name: katib.kubeflow.org
+  - fieldPaths:
+    - metadata.annotations.[cert-manager.io/inject-ca-from]
+    options:
+      delimiter: /
+      index: 1
+    select:
+      kind: MutatingWebhookConfiguration
+      name: katib.kubeflow.org
+- source:
+    fieldPath: metadata.name
+    kind: Service
+    name: katib-controller
+    version: v1
+  targets:
+  - fieldPaths:
+    - spec.commonName
+    options:
+      delimiter: .
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - spec.dnsNames.0
+    options:
+      delimiter: .
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - spec.dnsNames.1
+    options:
+      delimiter: .
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+- source:
+    fieldPath: metadata.name
+    kind: Certificate
+    name: katib-webhook-cert
+  targets:
+  - fieldPaths:
+    - metadata.annotations.[cert-manager.io/inject-ca-from]
+    options:
+      delimiter: /
+      index: 1
+    select:
+      kind: ValidatingWebhookConfiguration
+      name: katib.kubeflow.org
+  - fieldPaths:
+    - metadata.annotations.[cert-manager.io/inject-ca-from]
+    options:
+      delimiter: /
+      index: 1
+    select:
+      kind: MutatingWebhookConfiguration
+      name: katib.kubeflow.org
 
 configurations:
   - params.yaml

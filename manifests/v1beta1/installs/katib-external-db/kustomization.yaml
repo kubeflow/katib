@@ -25,8 +25,8 @@ images:
   - name: docker.io/kubeflowkatib/katib-ui
     newName: docker.io/kubeflowkatib/katib-ui
     newTag: latest
-patchesStrategicMerge:
-  - patches/db-manager.yaml
+patches:
+- path: patches/db-manager.yaml
 # Modify katib-mysql-secrets with parameters for the DB.
 secretGenerator:
   - name: katib-mysql-secrets
