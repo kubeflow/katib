@@ -25,6 +25,7 @@ REQUIRES = [
     "kubernetes>=27.2.0",
     "grpcio>=1.64.1",
     "protobuf>=4.21.12,<5",
+    "kubeflow-training==1.9.0",
 ]
 
 katib_grpc_api_file = "../../../pkg/apis/manager/v1beta1/python/api_pb2.py"
@@ -86,6 +87,6 @@ setuptools.setup(
     ],
     install_requires=REQUIRES,
     extras_require={
-        "huggingface": ["kubeflow-training[huggingface]==1.8.1"],
+        "huggingface": ["kubeflow-training[huggingface]==1.9.0"],
     },
 )

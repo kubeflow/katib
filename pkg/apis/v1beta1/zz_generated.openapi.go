@@ -117,7 +117,7 @@ func schema_apis_controller_common_v1beta1_AlgorithmSpec(ref common.ReferenceCal
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -255,7 +255,7 @@ func schema_apis_controller_common_v1beta1_EarlyStoppingSpec(ref common.Referenc
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -479,7 +479,7 @@ func schema_apis_controller_common_v1beta1_ObjectiveSpec(ref common.ReferenceCal
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -515,7 +515,7 @@ func schema_apis_controller_common_v1beta1_Observation(ref common.ReferenceCallb
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -796,7 +796,7 @@ func schema_apis_controller_experiments_v1beta1_ExperimentSpec(ref common.Refere
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -914,7 +914,7 @@ func schema_apis_controller_experiments_v1beta1_ExperimentStatus(ref common.Refe
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Type",
+									"type",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1272,7 +1272,7 @@ func schema_apis_controller_experiments_v1beta1_NasConfig(ref common.ReferenceCa
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"OperationType",
+									"operationType",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1314,7 +1314,7 @@ func schema_apis_controller_experiments_v1beta1_Operation(ref common.ReferenceCa
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1357,7 +1357,7 @@ func schema_apis_controller_experiments_v1beta1_OptimalTrial(ref common.Referenc
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1513,7 +1513,7 @@ func schema_apis_controller_experiments_v1beta1_TrialTemplate(ref common.Referen
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1782,7 +1782,7 @@ func schema_apis_controller_suggestions_v1beta1_SuggestionStatus(ref common.Refe
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1811,7 +1811,7 @@ func schema_apis_controller_suggestions_v1beta1_SuggestionStatus(ref common.Refe
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1851,7 +1851,7 @@ func schema_apis_controller_suggestions_v1beta1_SuggestionStatus(ref common.Refe
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Type",
+									"type",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1888,7 +1888,7 @@ func schema_apis_controller_suggestions_v1beta1_TrialAssignment(ref common.Refer
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -1917,7 +1917,7 @@ func schema_apis_controller_suggestions_v1beta1_TrialAssignment(ref common.Refer
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -2130,7 +2130,7 @@ func schema_apis_controller_trials_v1beta1_TrialSpec(ref common.ReferenceCallbac
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -2152,7 +2152,7 @@ func schema_apis_controller_trials_v1beta1_TrialSpec(ref common.ReferenceCallbac
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Name",
+									"name",
 								},
 								"x-kubernetes-list-type": "map",
 							},
@@ -2280,7 +2280,7 @@ func schema_apis_controller_trials_v1beta1_TrialStatus(ref common.ReferenceCallb
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-map-keys": []interface{}{
-									"Type",
+									"type",
 								},
 								"x-kubernetes-list-type": "map",
 							},
