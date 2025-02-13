@@ -292,7 +292,7 @@ def get_trial_template_with_job(
     # Restart policy must be set for the Job.
     pod_template_spec.spec.restart_policy = "Never"  # type: ignore
 
-    # Use PyTorchJob as a Trial spec.
+    # Use Job as a Trial spec.
     job = client.V1Job(
         api_version="batch/v1",
         kind="Job",
