@@ -1,3 +1,4 @@
 grpcio-testing==1.64.1
 pytest==7.2.0
+tensorboardX==2.6.2.2
 kubeflow-training[huggingface]==1.9.0
