@@ -1,14 +1,11 @@
 name: E2E Tests with Notebooks
-
 on:
   push: {}
   pull_request: {}
   workflow_dispatch: {}
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   e2e:
     runs-on: ubuntu-22.04
@@ -16,13 +13,24 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        kubernetes-version: [ "v1.29.2", "v1.30.7", "v1.31.3" ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Test Notebook
-        uses: ./.github/workflows/template-e2e-notebook-test
+      - name: Setup Test Env
+        uses: ./.github/workflows/template-setup-e2e-test
         with:
-          python-version: ${{ matrix.python-version }}
+          kubernetes-version: ${{ matrix.kubernetes-version }}
+
+      - name: Run e2e test for notebooks with papermill
+        uses: ./.github/workflows/template-e2e-test
+        with:
           notebook-input: "examples/v1beta1/sdk/cmaes-and-resume-policies.ipynb,examples/v1beta1/sdk/tune-train-from-func.ipynb"
+          tune-api: true
+          katib-ui: true
+          training-operator: true
+          algorithms: cmaes
+          trial-images: '""'
+          experiments: '""'
+          database-type: postgres

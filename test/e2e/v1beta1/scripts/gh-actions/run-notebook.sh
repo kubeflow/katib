@@ -23,14 +23,12 @@ set -o pipefail
 NOTEBOOK_INPUT=""
 NOTEBOOK_OUTPUT="-" # outputs to console
 NAMESPACE="default"
-TRAINING_PYTHON_SDK="./sdk/python"
 
 usage() {
   echo "Usage: $0 -i <input_notebook> -o <output_notebook> [-p \"<param> <value>\"...] [-y <params.yaml>]"
   echo "Options:"
   echo "  -i  Input notebook (required)"
   echo "  -o  Output notebook (required)"
-  echo "  -k  Kubeflow Training Operator Python SDK (optional)"
   echo "  -n  Kubernetes namespace used by tests (optional)"
   echo "  -h  Show this help message"
   echo "NOTE: papermill, jupyter and ipykernel are required Python dependencies to run Notebooks"
@@ -41,7 +39,6 @@ while getopts "i:o:p:k:n:r:d:h:" opt; do
   case "$opt" in
     i) NOTEBOOK_INPUT="$OPTARG" ;;            # -i for notebook input path
     o) NOTEBOOK_OUTPUT="$OPTARG" ;;           # -o for notebook output path
-    k) TRAINING_PYTHON_SDK="$OPTARG" ;;       # -k for training operator python sdk
     n) NAMESPACE="$OPTARG" ;;                 # -n for kubernetes namespace used by tests
     h) usage ;;                               # -h for help (usage)
     *) usage; exit 1 ;;
@@ -53,7 +50,7 @@ if [ -z "$NOTEBOOK_INPUT" ]; then
   exit 1
 fi
 
-papermill_cmd="papermill $NOTEBOOK_INPUT $NOTEBOOK_OUTPUT -p training_python_sdk $TRAINING_PYTHON_SDK -p namespace $NAMESPACE"
+papermill_cmd="papermill $NOTEBOOK_INPUT $NOTEBOOK_OUTPUT -p namespace $NAMESPACE"
 
 if ! command -v papermill &> /dev/null; then
   echo "Error: papermill is not installed. Please install papermill to proceed."
