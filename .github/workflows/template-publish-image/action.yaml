@@ -56,7 +56,7 @@ runs:
         context: .
         file: ${{ inputs.dockerfile }}
         push: ${{ inputs.push }}
-        tags: ${{ env.tags }}
+        tags: ${{ steps.meta.outputs.tags }}
         cache-from: type=gha
         cache-to: type=gha,mode=max,ignore-error=true
         platforms: ${{ inputs.platforms }}
