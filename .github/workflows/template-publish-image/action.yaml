@@ -44,18 +44,11 @@ runs:
     - name: Set Up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Authenticate
-      if: ${{ inputs.push == 'true' }}
-      shell: bash
-      run: |
-        echo "${{ inputs.token }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-
     - name: Add Docker Tags
       id: meta
       shell: bash
       run: |
-        IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${{ inputs.image }}"
-        echo "tags=$IMAGE_NAME:latest,$IMAGE_NAME:v1beta1-${GITHUB_SHA::7}" >> $GITHUB_ENV
+        echo "tags=${{ inputs.image  }}:latest,${{ inputs.image }}:v1beta1-${GITHUB_SHA::7}" >> $GITHUB_ENV
 
     - name: Build and Push
       uses: docker/build-push-action@v5
