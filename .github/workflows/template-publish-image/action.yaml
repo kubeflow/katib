@@ -15,6 +15,9 @@ inputs:
   push:
     required: true
     description: whether to push container images or not
+  token:
+    required: true
+    description: Github token
 
 runs:
   using: composite
@@ -45,7 +48,7 @@ runs:
       if: ${{ inputs.push == 'true' }}
       shell: bash
       run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+        echo "${{ inputs.token }}" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
     - name: Add Docker Tags
       id: meta
