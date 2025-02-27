@@ -15,9 +15,6 @@ inputs:
   push:
     required: true
     description: whether to push container images or not
-  token:
-    required: true
-    description: Github token
 
 runs:
   using: composite
@@ -48,7 +45,7 @@ runs:
       id: meta
       shell: bash
       run: |
-        echo "tags=${{ inputs.image  }}:latest,${{ inputs.image }}:v1beta1-${GITHUB_SHA::7}" >> $GITHUB_ENV
+        echo "tags=${{ inputs.image }}:latest,${{ inputs.image }}:v1beta1-${GITHUB_SHA::7}" >> $GITHUB_ENV
 
     - name: Build and Push
       uses: docker/build-push-action@v5
