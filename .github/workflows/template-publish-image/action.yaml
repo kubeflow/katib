@@ -43,9 +43,12 @@ runs:
 
     - name: Add Docker Tags
       id: meta
-      shell: bash
-      run: |
-        echo "tags=${{ inputs.image }}:latest,${{ inputs.image }}:v1beta1-${GITHUB_SHA::7}" >> $GITHUB_ENV
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ inputs.image }}
+        tags: |
+          type=raw,latest
+          type=sha,prefix=v1beta1-
 
     - name: Build and Push
       uses: docker/build-push-action@v5
