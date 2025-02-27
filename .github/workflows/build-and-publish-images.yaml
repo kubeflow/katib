@@ -13,9 +13,6 @@ on:
       dockerfile:
         required: true
         type: string
-    secrets:
-      GITHUB_TOKEN:
-        required: false
 
 jobs:
   build-and-publish:
