@@ -57,6 +57,7 @@ const (
 
 var (
 	startTime               = time.Now()
+	completionTime          = time.Now().Add(time.Second)
 	batchJobKey             = types.NamespacedName{Name: batchJobName, Namespace: namespace}
 	observationLogAvailable = &api_pb.GetObservationLogReply{
 		ObservationLog: &api_pb.ObservationLog{
@@ -218,7 +219,8 @@ func TestReconcileBatchJob(t *testing.T) {
 					Reason:  batchJobCompleteReason,
 				},
 			},
-			StartTime: &metav1.Time{Time: startTime},
+			StartTime:      &metav1.Time{Time: startTime},
+			CompletionTime: &metav1.Time{Time: completionTime},
 		}
 		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
 
@@ -465,6 +467,17 @@ func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind, trialName string) 
 			Namespace: namespace,
 		},
 		Spec: batchv1.JobSpec{
+			CompletionMode: ptr.To(batchv1.IndexedCompletion),
+			Completions:    ptr.To(int32(1)),
+			Parallelism:    ptr.To(int32(1)),
+			SuccessPolicy: &batchv1.SuccessPolicy{
+				Rules: []batchv1.SuccessPolicyRule{
+					{
+						SucceededIndexes: ptr.To("0"),
+						SucceededCount:   ptr.To(int32(1)),
+					},
+				},
+			},
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
