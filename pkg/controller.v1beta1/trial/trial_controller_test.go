@@ -209,12 +209,19 @@ func TestReconcileBatchJob(t *testing.T) {
 			batchJob.Status = batchv1.JobStatus{
 				Conditions: []batchv1.JobCondition{
 					{
+						Type:    batchv1.JobFailureTarget,
+						Status:  corev1.ConditionTrue,
+						Message: "BatchJob failed test message",
+						Reason:  "BatchJob failed test reason",
+					},
+					{
 						Type:    batchv1.JobFailed,
 						Status:  corev1.ConditionTrue,
 						Message: "BatchJob failed test message",
 						Reason:  "BatchJob failed test reason",
 					},
 				},
+				StartTime: &metav1.Time{Time: time.Now()},
 			}
 			g.Expect(c.Status().Update(ctx, batchJob)).Should(gomega.Succeed())
 			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
