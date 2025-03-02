@@ -253,6 +253,12 @@ func TestReconcileBatchJob(t *testing.T) {
 		batchJob.Status = batchv1.JobStatus{
 			Conditions: []batchv1.JobCondition{
 				{
+					Type: batchv1.JobSuccessCriteriaMet,
+					Status: corev1.ConditionTrue,
+					Message: batchJobCompleteMessage,
+					Reason: batchv1.JobReasonSuccessPolicy,
+				},
+				{
 					Type:    batchv1.JobComplete,
 					Status:  corev1.ConditionTrue,
 					Message: batchJobCompleteMessage,
