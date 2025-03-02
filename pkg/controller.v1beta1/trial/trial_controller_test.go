@@ -253,10 +253,10 @@ func TestReconcileBatchJob(t *testing.T) {
 		batchJob.Status = batchv1.JobStatus{
 			Conditions: []batchv1.JobCondition{
 				{
-					Type: batchv1.JobSuccessCriteriaMet,
-					Status: corev1.ConditionTrue,
+					Type:    batchv1.JobSuccessCriteriaMet,
+					Status:  corev1.ConditionTrue,
 					Message: batchJobCompleteMessage,
-					Reason: batchv1.JobReasonSuccessPolicy,
+					Reason:  batchv1.JobReasonSuccessPolicy,
 				},
 				{
 					Type:    batchv1.JobComplete,
@@ -265,6 +265,7 @@ func TestReconcileBatchJob(t *testing.T) {
 					Reason:  batchJobCompleteReason,
 				},
 			},
+			StartTime: &metav1.Time{Time: time.Now()},
 		}
 		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
 
