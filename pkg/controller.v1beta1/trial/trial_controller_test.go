@@ -228,14 +228,16 @@ func TestReconcileBatchJob(t *testing.T) {
 			g.Expect(trial.IsFailed()).Should(gomega.BeTrue())
 		}, timeout).Should(gomega.Succeed())
 
-		// Delete the Trial
+		// Delete the Trial and Job
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
+		g.Expect(c.Delete(ctx, batchJob)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial is deleted
 		// BatchJob can't be deleted because GC doesn't work in envtest and BatchJob stuck in termination phase.
 		// Ref: https://book.kubebuilder.io/reference/testing/envtest.html#testing-considerations.
 		g.Eventually(func(g gomega.Gomega) {
 			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+			g.Expect(errors.IsNotFound(c.Get(ctx, batchJobKey, &batchv1.Job{}))).Should(gomega.BeTrue())
 		}, timeout).Should(gomega.Succeed())
 	})
 
@@ -245,10 +247,21 @@ func TestReconcileBatchJob(t *testing.T) {
 			mockManagerClient.EXPECT().GetTrialObservationLog(gomock.Any()).Return(observationLogAvailable, nil).MinTimes(1),
 			mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil),
 		)
+
+		// Create the Trial with StdOut MC
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-available-stdout")
+		trialKey := types.NamespacedName{Name: "test-available-stdout", Namespace: namespace}
 		batchJob := &batchv1.Job{}
+		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
+
+		// Expect that BatchJob with appropriate name is created
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, batchJobKey, batchJob)).Should(gomega.Succeed())
+		}, timeout).Should(gomega.Succeed())
+		
+		// Update BatchJob status to Complete.
 		batchJobCompleteMessage := "BatchJob completed test message"
 		batchJobCompleteReason := "BatchJob completed test reason"
-		// Update BatchJob status to Complete.
 		g.Expect(c.Get(ctx, batchJobKey, batchJob)).NotTo(gomega.HaveOccurred())
 		batchJob.Status = batchv1.JobStatus{
 			Conditions: []batchv1.JobCondition{
@@ -268,11 +281,6 @@ func TestReconcileBatchJob(t *testing.T) {
 			StartTime: &metav1.Time{Time: time.Now()},
 		}
 		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
-
-		// Create the Trial with StdOut MC
-		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-available-stdout")
-		trialKey := types.NamespacedName{Name: "test-available-stdout", Namespace: namespace}
-		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial status is succeeded and metrics are properly populated
 		// Metrics available because GetTrialObservationLog returns values
