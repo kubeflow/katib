@@ -29,7 +29,7 @@ type FakeTrialV1beta1 struct {
 }
 
 func (c *FakeTrialV1beta1) Trials(namespace string) v1beta1.TrialInterface {
-	return &FakeTrials{c, namespace}
+	return newFakeTrials(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate
