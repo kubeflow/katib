@@ -52,7 +52,7 @@ func (b *TrialTemplateApplyConfiguration) WithRetain(value bool) *TrialTemplateA
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the TrialSpec field is set to the value of the last call.
 func (b *TrialTemplateApplyConfiguration) WithTrialSpec(value unstructured.Unstructured) *TrialTemplateApplyConfiguration {
-	b.TrialSpec = &value
+	b.TrialSourceApplyConfiguration.TrialSpec = &value
 	return b
 }
 
@@ -60,7 +60,7 @@ func (b *TrialTemplateApplyConfiguration) WithTrialSpec(value unstructured.Unstr
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ConfigMap field is set to the value of the last call.
 func (b *TrialTemplateApplyConfiguration) WithConfigMap(value *ConfigMapSourceApplyConfiguration) *TrialTemplateApplyConfiguration {
-	b.ConfigMap = value
+	b.TrialSourceApplyConfiguration.ConfigMap = value
 	return b
 }
 
