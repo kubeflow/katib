@@ -32,4 +32,4 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes-version: ["v1.29.2", "v1.30.7", "v1.31.3"]
+        kubernetes-version: ["v1.30.7", "v1.31.3", "v1.32.2"]

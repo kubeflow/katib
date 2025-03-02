@@ -33,6 +33,6 @@ jobs:
       fail-fast: false
       matrix:
         # Detail: https://hub.docker.com/r/kindest/node
-        kubernetes-version: ["v1.29.2", "v1.30.7", "v1.31.3"]
+        kubernetes-version: ["v1.30.7", "v1.31.3", "v1.32.2"]
         # Comma Delimited
         experiments: ["simple-pbt"]
