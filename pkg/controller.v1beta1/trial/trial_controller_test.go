@@ -18,6 +18,8 @@ package trial
 
 import (
 	"context"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -263,29 +265,56 @@ func TestReconcileBatchJob(t *testing.T) {
 			g.Expect(c.Get(ctx, succeededBatchJobKey, batchJob)).Should(gomega.Succeed())
 		}, timeout).Should(gomega.Succeed())
 
+		// Expect that Trial status is running
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsRunning()).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
+
 		// Update BatchJob status to Complete.
 		batchJobCompleteMessage := "BatchJob completed test message"
 		batchJobCompleteReason := "BatchJob completed test reason"
-		g.Expect(c.Get(ctx, succeededBatchJobKey, batchJob)).NotTo(gomega.HaveOccurred())
-		batchJob.Status = batchv1.JobStatus{
-			Conditions: []batchv1.JobCondition{
-				{
-					Type:    batchv1.JobSuccessCriteriaMet,
-					Status:  corev1.ConditionTrue,
-					Message: batchJobCompleteMessage,
-					Reason:  batchJobCompleteReason,
-				},
-				{
-					Type:    batchv1.JobComplete,
-					Status:  corev1.ConditionTrue,
-					Message: batchJobCompleteMessage,
-					Reason:  batchJobCompleteReason,
-				},
-			},
-			StartTime:      &metav1.Time{Time: startTime},
-			CompletionTime: &metav1.Time{Time: completionTime},
-		}
-		g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, succeededBatchJobKey, batchJob)).Should(gomega.Succeed())
+			// TODO(Electronic-Waste): Remove this condition when K8s 1.30 is no longer supported.
+			// SuccessPolicy is available in K8s 1.31 and later. If we set it in K8s 1.30, it will be ignored.
+			// And when we set the status with `SuccessCriteriaMet`, it will report error:
+			// "Invalid value: cannot set SuccessCriteriaMet=True for Job without SuccessPolicy".
+			// REF: https://kubernetes.io/docs/concepts/workloads/controllers/job/#success-policy
+			isK8sVersion130 := strings.Contains(os.Getenv("KUBEBUILDER_ASSETS"), "1.30")
+			if isK8sVersion130 {
+				batchJob.Status = batchv1.JobStatus{
+					Conditions: []batchv1.JobCondition{
+						{
+							Type:    batchv1.JobComplete,
+							Status:  corev1.ConditionTrue,
+							Message: batchJobCompleteMessage,
+							Reason:  batchJobCompleteReason,
+						},
+					},
+				}
+			} else {
+				batchJob.Status = batchv1.JobStatus{
+					Conditions: []batchv1.JobCondition{
+						{
+							Type:    batchv1.JobSuccessCriteriaMet,
+							Status:  corev1.ConditionTrue,
+							Message: batchJobCompleteMessage,
+							Reason:  batchJobCompleteReason,
+						},
+						{
+							Type:    batchv1.JobComplete,
+							Status:  corev1.ConditionTrue,
+							Message: batchJobCompleteMessage,
+							Reason:  batchJobCompleteReason,
+						},
+					},
+					StartTime:      &metav1.Time{Time: startTime},
+					CompletionTime: &metav1.Time{Time: completionTime},
+				}
+			}
+			g.Expect(c.Status().Update(ctx, batchJob)).NotTo(gomega.HaveOccurred())
+		}, timeout).Should(gomega.Succeed())
 
 		// Expect that Trial status is succeeded and metrics are properly populated
 		// Metrics available because GetTrialObservationLog returns values
