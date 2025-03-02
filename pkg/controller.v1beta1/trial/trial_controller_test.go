@@ -492,9 +492,6 @@ func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind, trialName, jobName
 			Namespace: namespace,
 		},
 		Spec: batchv1.JobSpec{
-			CompletionMode: ptr.To(batchv1.IndexedCompletion),
-			Completions:    ptr.To(int32(1)),
-			Parallelism:    ptr.To(int32(1)),
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
