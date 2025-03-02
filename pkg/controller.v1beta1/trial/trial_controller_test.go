@@ -466,14 +466,6 @@ func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind, trialName, jobName
 			CompletionMode: ptr.To(batchv1.IndexedCompletion),
 			Completions:    ptr.To(int32(1)),
 			Parallelism:    ptr.To(int32(1)),
-			SuccessPolicy: &batchv1.SuccessPolicy{
-				Rules: []batchv1.SuccessPolicyRule{
-					{
-						SucceededIndexes: ptr.To("0"),
-						SucceededCount:   ptr.To(int32(1)),
-					},
-				},
-			},
 			Template: corev1.PodTemplateSpec{
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
