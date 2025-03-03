@@ -280,7 +280,7 @@ func TestReconcileBatchJob(t *testing.T) {
 			// SuccessPolicy is available in K8s 1.31 and later. If we set it in K8s 1.30, it will be ignored.
 			// And when we set the status with `SuccessCriteriaMet`, it will report error:
 			// "Invalid value: cannot set SuccessCriteriaMet=True for Job without SuccessPolicy".
-			// Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/#success-policy
+			// Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/#success-policy.
 			isK8sVersion130 := strings.Contains(os.Getenv("KUBEBUILDER_ASSETS"), "1.30")
 			if isK8sVersion130 {
 				batchJob.Status = batchv1.JobStatus{
