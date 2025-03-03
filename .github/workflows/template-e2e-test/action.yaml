@@ -61,7 +61,7 @@ runs:
           IFS=',' read -r -a NOTEBOOK_ARRAY <<< "${{ inputs.notebook-input }}"
           for NOTEBOOK in "${NOTEBOOK_ARRAY[@]}"; do
             echo "Running notebook: $NOTEBOOK"
-            ./test/e2e/v1beta1/scripts/gh-actions/run-notebook.sh -i "$NOTEBOOK" -n kubeflow
+            ./test/e2e/v1beta1/scripts/gh-actions/run-notebook.sh -i "$NOTEBOOK" -k kubeflow-katib -n kubeflow
           done
         elif "${{ inputs.tune-api }}"; then
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-tune-api.sh
