@@ -23,7 +23,7 @@ set -o pipefail
 NOTEBOOK_INPUT=""
 NOTEBOOK_OUTPUT="-" # outputs to console
 NAMESPACE="default"
-KATIB_PYTHON_SDK="../../../sdk/python"
+KATIB_PYTHON_SDK="./sdk/python"
 
 usage() {
   echo "Usage: $0 -i <input_notebook> -o <output_notebook> [-p \"<param> <value>\"...] [-y <params.yaml>]"
