@@ -276,13 +276,14 @@ func TestReconcileBatchJob(t *testing.T) {
 		batchJobCompleteReason := "BatchJob completed test reason"
 		g.Eventually(func(g gomega.Gomega) {
 			g.Expect(c.Get(ctx, succeededBatchJobKey, batchJob)).Should(gomega.Succeed())
-			// TODO(Electronic-Waste): Remove this condition when K8s 1.30 is no longer supported.
+			// TODO(Electronic-Waste): Remove this condition when K8s v1.29 & v1.30 is no longer supported.
 			// SuccessPolicy is available in K8s 1.31 and later. If we set it in K8s 1.30, it will be ignored.
 			// And when we set the status with `SuccessCriteriaMet`, it will report error:
 			// "Invalid value: cannot set SuccessCriteriaMet=True for Job without SuccessPolicy".
 			// Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/#success-policy.
-			isK8sVersion130 := strings.Contains(os.Getenv("KUBEBUILDER_ASSETS"), "1.30")
-			if isK8sVersion130 {
+			isK8sVersionUnder130 := strings.Contains(os.Getenv("KUBEBUILDER_ASSETS"), "1.30") ||
+				strings.Contains(os.Getenv("KUBEBUILDER_ASSETS"), "1.29")
+			if isK8sVersionUnder130 {
 				batchJob.Status = batchv1.JobStatus{
 					Conditions: []batchv1.JobCondition{
 						{
