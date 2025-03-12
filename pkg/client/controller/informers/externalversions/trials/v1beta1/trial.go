@@ -19,13 +19,13 @@ limitations under the License.
 package v1beta1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	controllertrialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	versioned "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned"
 	internalinterfaces "github.com/kubeflow/katib/pkg/client/controller/informers/externalversions/internalinterfaces"
-	v1beta1 "github.com/kubeflow/katib/pkg/client/controller/listers/trials/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/listers/trials/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -36,7 +36,7 @@ import (
 // Trials.
 type TrialInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1beta1.TrialLister
+	Lister() trialsv1beta1.TrialLister
 }
 
 type trialInformer struct {
@@ -71,7 +71,7 @@ func NewFilteredTrialInformer(client versioned.Interface, namespace string, resy
 				return client.TrialV1beta1().Trials(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&trialsv1beta1.Trial{},
+		&controllertrialsv1beta1.Trial{},
 		resyncPeriod,
 		indexers,
 	)
@@ -82,9 +82,9 @@ func (f *trialInformer) defaultInformer(client versioned.Interface, resyncPeriod
 }
 
 func (f *trialInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&trialsv1beta1.Trial{}, f.defaultInformer)
+	return f.factory.InformerFor(&controllertrialsv1beta1.Trial{}, f.defaultInformer)
 }
 
-func (f *trialInformer) Lister() v1beta1.TrialLister {
-	return v1beta1.NewTrialLister(f.Informer().GetIndexer())
+func (f *trialInformer) Lister() trialsv1beta1.TrialLister {
+	return trialsv1beta1.NewTrialLister(f.Informer().GetIndexer())
 }

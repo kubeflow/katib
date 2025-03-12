@@ -19,10 +19,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/listers"
-	"k8s.io/client-go/tools/cache"
+	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // SuggestionLister helps list Suggestions.
@@ -30,7 +30,7 @@ import (
 type SuggestionLister interface {
 	// List lists all Suggestions in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1beta1.Suggestion, err error)
+	List(selector labels.Selector) (ret []*suggestionsv1beta1.Suggestion, err error)
 	// Suggestions returns an object that can list and get Suggestions.
 	Suggestions(namespace string) SuggestionNamespaceLister
 	SuggestionListerExpansion
@@ -38,17 +38,17 @@ type SuggestionLister interface {
 
 // suggestionLister implements the SuggestionLister interface.
 type suggestionLister struct {
-	listers.ResourceIndexer[*v1beta1.Suggestion]
+	listers.ResourceIndexer[*suggestionsv1beta1.Suggestion]
 }
 
 // NewSuggestionLister returns a new SuggestionLister.
 func NewSuggestionLister(indexer cache.Indexer) SuggestionLister {
-	return &suggestionLister{listers.New[*v1beta1.Suggestion](indexer, v1beta1.Resource("suggestion"))}
+	return &suggestionLister{listers.New[*suggestionsv1beta1.Suggestion](indexer, suggestionsv1beta1.Resource("suggestion"))}
 }
 
 // Suggestions returns an object that can list and get Suggestions.
 func (s *suggestionLister) Suggestions(namespace string) SuggestionNamespaceLister {
-	return suggestionNamespaceLister{listers.NewNamespaced[*v1beta1.Suggestion](s.ResourceIndexer, namespace)}
+	return suggestionNamespaceLister{listers.NewNamespaced[*suggestionsv1beta1.Suggestion](s.ResourceIndexer, namespace)}
 }
 
 // SuggestionNamespaceLister helps list and get Suggestions.
@@ -56,15 +56,15 @@ func (s *suggestionLister) Suggestions(namespace string) SuggestionNamespaceList
 type SuggestionNamespaceLister interface {
 	// List lists all Suggestions in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1beta1.Suggestion, err error)
+	List(selector labels.Selector) (ret []*suggestionsv1beta1.Suggestion, err error)
 	// Get retrieves the Suggestion from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1beta1.Suggestion, error)
+	Get(name string) (*suggestionsv1beta1.Suggestion, error)
 	SuggestionNamespaceListerExpansion
 }
 
 // suggestionNamespaceLister implements the SuggestionNamespaceLister
 // interface.
 type suggestionNamespaceLister struct {
-	listers.ResourceIndexer[*v1beta1.Suggestion]
+	listers.ResourceIndexer[*suggestionsv1beta1.Suggestion]
 }

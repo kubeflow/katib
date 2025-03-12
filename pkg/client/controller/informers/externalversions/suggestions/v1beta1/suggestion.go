@@ -19,13 +19,13 @@ limitations under the License.
 package v1beta1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	controllersuggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	versioned "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned"
 	internalinterfaces "github.com/kubeflow/katib/pkg/client/controller/informers/externalversions/internalinterfaces"
-	v1beta1 "github.com/kubeflow/katib/pkg/client/controller/listers/suggestions/v1beta1"
+	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/listers/suggestions/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -36,7 +36,7 @@ import (
 // Suggestions.
 type SuggestionInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1beta1.SuggestionLister
+	Lister() suggestionsv1beta1.SuggestionLister
 }
 
 type suggestionInformer struct {
@@ -71,7 +71,7 @@ func NewFilteredSuggestionInformer(client versioned.Interface, namespace string,
 				return client.SuggestionV1beta1().Suggestions(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&suggestionsv1beta1.Suggestion{},
+		&controllersuggestionsv1beta1.Suggestion{},
 		resyncPeriod,
 		indexers,
 	)
@@ -82,9 +82,9 @@ func (f *suggestionInformer) defaultInformer(client versioned.Interface, resyncP
 }
 
 func (f *suggestionInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&suggestionsv1beta1.Suggestion{}, f.defaultInformer)
+	return f.factory.InformerFor(&controllersuggestionsv1beta1.Suggestion{}, f.defaultInformer)
 }
 
-func (f *suggestionInformer) Lister() v1beta1.SuggestionLister {
-	return v1beta1.NewSuggestionLister(f.Informer().GetIndexer())
+func (f *suggestionInformer) Lister() suggestionsv1beta1.SuggestionLister {
+	return suggestionsv1beta1.NewSuggestionLister(f.Informer().GetIndexer())
 }
