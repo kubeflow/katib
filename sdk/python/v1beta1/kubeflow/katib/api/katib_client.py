@@ -302,12 +302,12 @@ class KatibClient(object):
                 - volume: Either a kubernetes.client.V1Volume object or a dictionary
                   containing volume configuration with required fields:
                   - name: Name of the volume
-                  - type: One of "pvc", "secret", "config_map", or "empty_dir"
+                  - type: One of "pvc", "secret", "configmap", or "empty_dir"
                   Additional fields based on volume type:
                   - For pvc: claim_name, read_only (optional)
                   - For secret: secret_name, items (optional), default_mode (optional),
                     optional (optional)
-                  - For config_map: config_map_name, items (optional), default_mode
+                  - For configmap: configmap_name, items (optional), default_mode
                     (optional), optional (optional)
                   - For empty_dir: medium (optional), size_limit (optional)
                 - mount_path: Either a kubernetes.client.V1VolumeMount object or a string
@@ -533,7 +533,6 @@ class KatibClient(object):
                 if isinstance(storage_per_trial, dict):
                     storage_per_trial = [storage_per_trial]
                 for storage in storage_per_trial:
-                    print(f"storage: {storage}")
                     volume = None
                     if isinstance(storage["volume"], client.V1Volume):
                         volume = storage["volume"]
@@ -576,11 +575,11 @@ class KatibClient(object):
                                     optional=storage["volume"].get("optional", False),
                                 ),
                             )
-                        elif volume_type == "config_map":
+                        elif volume_type == "configmap":
                             volume = client.V1Volume(
                                 name=volume_name,
-                                config_map=client.V1ConfigMapVolumeSource(
-                                    name=storage["volume"].get("config_map_name"),
+                                configmap=client.V1ConfigMapVolumeSource(
+                                    name=storage["volume"].get("configmap_name"),
                                     items=storage["volume"].get("items", []),
                                     default_mode=storage["volume"].get(
                                         "default_mode", None
@@ -624,36 +623,12 @@ class KatibClient(object):
                             "client.V1VolumeMount or a str"
                         )
 
-            # Create Trial specification.
-            trial_spec = client.V1Job(
-                api_version="batch/v1",
-                kind="Job",
-                spec=client.V1JobSpec(
-                    template=client.V1PodTemplateSpec(
-                        metadata=models.V1ObjectMeta(
-                            annotations={"sidecar.istio.io/inject": "false"}
-                        ),
-                        spec=client.V1PodSpec(
-                            restart_policy="Never",
-                            containers=[
-                                client.V1Container(
-                                    name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                                    image=base_image,
-                                    command=["bash", "-c"],
-                                    args=[exec_script],
-                                    env=env if env else None,
-                                    env_from=env_from if env_from else None,
-                                    resources=resources_per_trial,
-                                    volume_mounts=(
-                                        volume_mounts if volume_mounts else None
-                                    ),
-                                )
-                            ],
-                            volumes=volumes if volumes else None,
-                        ),
-                    )
-                ),
-            )
+                # inject volume mounts to the container spec, do nothing if volume_mounts is empty
+                if volume_mounts:
+                    if isinstance(container_spec.volume_mounts, list):
+                        container_spec.volume_mounts.extend(volume_mounts)
+                    else:
+                        container_spec.volume_mounts = volume_mounts
 
             # Trial uses PyTorchJob for distributed training if TrainerResources is set.
             if isinstance(resources_per_trial, TrainerResources):
@@ -661,15 +636,24 @@ class KatibClient(object):
                     retain_trials,
                     trial_parameters,
                     resources_per_trial,
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                    training_utils.get_pod_template_spec(
+                        containers=[container_spec],
+                        volumes=volumes if volumes else None,
+                    ),
+                    training_utils.get_pod_template_spec(
+                        containers=[container_spec],
+                        volumes=volumes if volumes else None,
+                    ),
                 )
             # Otherwise, Trial uses Job for model training.
             else:
                 trial_template = utils.get_trial_template_with_job(
                     retain_trials,
                     trial_parameters,
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                    training_utils.get_pod_template_spec(
+                        containers=[container_spec],
+                        volumes=volumes if volumes else None,
+                    ),
                 )
 
         # If users choose to use external models and datasets.
