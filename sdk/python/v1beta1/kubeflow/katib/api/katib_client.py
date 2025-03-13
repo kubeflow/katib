@@ -532,6 +532,8 @@ class KatibClient(object):
             if storage_per_trial:
                 if isinstance(storage_per_trial, dict):
                     storage_per_trial = [storage_per_trial]
+                elif not isinstance(storage_per_trial, list):
+                    raise ValueError("storage_per_trial must be a list of dictionaries")
                 for storage in storage_per_trial:
                     volume = None
                     if isinstance(storage["volume"], client.V1Volume):
