@@ -15,10 +15,10 @@ spec:
     metadata:
       labels:
         katib.kubeflow.org/component: controller
+        sidecar.istio.io/inject: "false"
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
-        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: katib-controller
       containers:
