@@ -68,6 +68,15 @@ spec:
           volumeMounts:
             - name: katib-mysql
               mountPath: /var/lib/mysql
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+              - ALL
       volumes:
         - name: katib-mysql
           persistentVolumeClaim:

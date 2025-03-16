@@ -33,4 +33,13 @@ spec:
           ports:
             - name: ui
               containerPort: 8080
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+              - ALL
       serviceAccountName: katib-ui
