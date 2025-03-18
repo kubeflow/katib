@@ -5,6 +5,7 @@ import kubeflow.katib as katib
 from kubeflow.katib import KatibClient, search
 from kubernetes import client
 from verify import verify_experiment_results
+from pprint import pformat
 
 # Experiment timeout is 40 min.
 EXPERIMENT_TIMEOUT = 60 * 40
@@ -55,8 +56,8 @@ def run_e2e_experiment_create_by_tune_with_custom_objective(
     verify_experiment_results(katib_client, experiment, exp_name, exp_namespace)
 
     # Print the Experiment and Suggestion.
-    logging.debug(katib_client.get_experiment(exp_name, exp_namespace))
-    logging.debug(katib_client.get_suggestion(exp_name, exp_namespace))
+    logging.debug("Experiment:\n%s", pformat(katib_client.get_experiment(exp_name, exp_namespace)))
+    logging.debug("Suggestion:\n%s", pformat(katib_client.get_suggestion(exp_name, exp_namespace)))
 
 # Test for Experiment created with external models and datasets.
 def run_e2e_experiment_create_by_tune_with_llm_optimization(
@@ -133,8 +134,8 @@ def run_e2e_experiment_create_by_tune_with_llm_optimization(
     verify_experiment_results(katib_client, experiment, exp_name, exp_namespace)
 
     # Print the Experiment and Suggestion.
-    logging.debug(katib_client.get_experiment(exp_name, exp_namespace))
-    logging.debug(katib_client.get_suggestion(exp_name, exp_namespace))
+    logging.debug("Experiment:\n%s", pformat(katib_client.get_experiment(exp_name, exp_namespace)))
+    logging.debug("Suggestion:\n%s", pformat(katib_client.get_suggestion(exp_name, exp_namespace)))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
