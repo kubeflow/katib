@@ -1,12 +1,12 @@
 import argparse
 import logging
+from pprint import pformat
 
 import kubeflow.katib as katib
 from kubeflow.katib import KatibClient, search
 from kubeflow.katib.types.types import TrainerResources
 from kubernetes import client
 from verify import verify_experiment_results
-from pprint import pformat
 
 # Experiment timeout is 40 min.
 EXPERIMENT_TIMEOUT = 60 * 40
@@ -225,10 +225,10 @@ if __name__ == "__main__":
         )
 
     # Test with run_e2e_experiment_create_by_tune
-    exp_name = "tune-with-custom-objective"
+    exp_name = "tune-example"
     exp_namespace = args.namespace
     try:
-        run_e2e_experiment_create_by_tune(katib_client, exp_name_custom_objective, exp_namespace)
+        run_e2e_experiment_create_by_tune(katib_client, exp_name, exp_namespace)
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}")
     except Exception as e:
@@ -239,7 +239,7 @@ if __name__ == "__main__":
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
-        katib_client.delete_experiment(exp_name_custom_objective, exp_namespace)
+        katib_client.delete_experiment(exp_name, exp_namespace)
     
     # Test with run_e2e_experiment_create_by_tune_pytorchjob
     exp_name = "tune-example-pytorchjob"
@@ -264,7 +264,7 @@ if __name__ == "__main__":
         logging.info("---------------------------------------------------------------")
         katib_client.delete_experiment(exp_name, exp_namespace)
 
-    exp_name = "tune-with-llm-optimization"
+    exp_name = "tune-example-llm-optimization"
     exp_namespace = args.namespace
     try:
         run_e2e_experiment_create_by_tune_with_llm_optimization(katib_client, exp_name, exp_namespace)
