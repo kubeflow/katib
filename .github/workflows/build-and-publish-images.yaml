@@ -57,25 +57,25 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Publish Component ${{ matrix.component-name }}
+      - name: Publish Component ${{ inputs.component-name }}
         if: steps.publish-condition.outputs.should_publish == 'true'
         id: publish
         uses: ./.github/workflows/template-publish-image
         with:
           image: |
-            ghcr.io/kubeflow/katib/${{ matrix.component-name }}
-            docker.io/kubeflow/katib/${{ matrix.component-name }}
-          dockerfile: ${{ matrix.dockerfile }}
-          platforms: ${{ matrix.platforms }}
+            ghcr.io/kubeflow/katib/${{ inputs.component-name }}
+            docker.io/kubeflow/katib/${{ inputs.component-name }}
+          dockerfile: ${{ inputs.dockerfile }}
+          platforms: ${{ inputs.platforms }}
           push: true
 
-      - name: Test Build For Component ${{ matrix.component-name }}
+      - name: Test Build For Component ${{ inputs.component-name }}
         if: steps.publish.outcome == 'skipped'
         uses: ./.github/workflows/template-publish-image
         with:
           image: |
-            ghcr.io/kubeflow/katib/${{ matrix.component-name }}
-            docker.io/kubeflow/katib/${{ matrix.component-name }}
-          dockerfile: ${{ matrix.dockerfile }}
-          platforms: ${{ matrix.platforms }}
+            ghcr.io/kubeflow/katib/${{ inputs.component-name }}
+            docker.io/kubeflow/katib/${{ inputs.component-name }}
+          dockerfile: ${{ inputs.dockerfile }}
+          platforms: ${{ inputs.platforms }}
           push: false
