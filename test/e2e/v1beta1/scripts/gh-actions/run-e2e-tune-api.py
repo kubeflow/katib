@@ -14,7 +14,6 @@ EXPERIMENT_TIMEOUT = 60 * 40
 # The default logging config.
 logging.basicConfig(level=logging.INFO)
 
-# Test for Experiment created with custom objective function.
 def run_e2e_experiment_create_by_tune(
     katib_client: KatibClient,
     exp_name: str,
@@ -119,7 +118,6 @@ def run_e2e_experiment_create_by_tune_pytorchjob(
     logging.debug("Experiment:\n%s", pformat(katib_client.get_experiment(exp_name, exp_namespace)))
     logging.debug("Suggestion:\n%s", pformat(katib_client.get_suggestion(exp_name, exp_namespace)))
 
-# Test for Experiment created with external models and datasets.
 def run_e2e_experiment_create_by_tune_with_llm_optimization(
     katib_client: KatibClient,
     exp_name: str,
@@ -230,17 +228,21 @@ if __name__ == "__main__":
     try:
         run_e2e_experiment_create_by_tune(katib_client, exp_name, exp_namespace)
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}")
+        logging.info(
+            f"E2E is succeeded for Experiment created by tune: {exp_namespace}/{exp_name}"
+        )
     except Exception as e:
         logging.info("---------------------------------------------------------------")
-        logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}")
+        logging.info(
+            f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}"
+        )
         raise e
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
         logging.info("---------------------------------------------------------------")
         katib_client.delete_experiment(exp_name, exp_namespace)
-    
+
     # Test with run_e2e_experiment_create_by_tune_pytorchjob
     exp_name = "tune-example-pytorchjob"
     exp_namespace = args.namespace
