@@ -158,8 +158,8 @@ if __name__ == "__main__":
         client.CoreV1Api().patch_namespace(args.namespace, {'metadata': {'labels': namespace_labels}})
 
     # Test with run_e2e_experiment_create_by_tune
-    exp_name_custom_objective = "tune-example-1"
-    exp_name_llm_optimization = "tune-example-2"
+    exp_name_custom_objective = "tune-with-custom-objective"
+    exp_name_llm_optimization = "tune-with-llm-optimization"
     exp_namespace = args.namespace
     try:
         run_e2e_experiment_create_by_tune_with_custom_objective(katib_client, exp_name_custom_objective, exp_namespace)
