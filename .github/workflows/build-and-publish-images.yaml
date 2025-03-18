@@ -64,7 +64,7 @@ jobs:
         with:
           image: |
             ghcr.io/kubeflow/katib/${{ inputs.component-name }}
-            docker.io/kubeflow/katib/${{ inputs.component-name }}
+            docker.io/kubeflowkatib/${{ inputs.component-name }}
           dockerfile: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           push: true
@@ -75,7 +75,7 @@ jobs:
         with:
           image: |
             ghcr.io/kubeflow/katib/${{ inputs.component-name }}
-            docker.io/kubeflow/katib/${{ inputs.component-name }}
+            docker.io/kubeflowkatib/${{ inputs.component-name }}
           dockerfile: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           push: false
