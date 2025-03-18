@@ -2,15 +2,8 @@ import argparse
 import logging
 
 import kubeflow.katib as katib
-import transformers
 from kubeflow.katib import KatibClient, search
-from kubeflow.storage_initializer.hugging_face import (
-    HuggingFaceDatasetParams,
-    HuggingFaceModelParams,
-    HuggingFaceTrainerParams,
-)
 from kubernetes import client
-from peft import LoraConfig
 from verify import verify_experiment_results
 
 # Experiment timeout is 40 min.
@@ -71,6 +64,14 @@ def run_e2e_experiment_create_by_tune_with_llm_optimization(
     exp_name: str,
     exp_namespace: str,
 ):
+    import transformers
+    from kubeflow.storage_initializer.hugging_face import (
+        HuggingFaceDatasetParams,
+        HuggingFaceModelParams,
+        HuggingFaceTrainerParams,
+    )
+    from peft import LoraConfig
+
     # Create Katib Experiment and wait until it is finished.
     logging.debug("Creating Experiment: {}/{}".format(exp_namespace, exp_name))
     
