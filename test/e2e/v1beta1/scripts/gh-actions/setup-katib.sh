@@ -25,7 +25,7 @@ DEPLOY_TRAINING_OPERATOR=${2:-false}
 WITH_DATABASE_TYPE=${3:-mysql}
 
 E2E_TEST_IMAGE_TAG="e2e-test"
-TRAINING_OPERATOR_VERSION="v1.6.0-rc.0"
+TRAINING_OPERATOR_VERSION="v1.9.0"
 
 echo "Start to install Katib"
 
@@ -58,7 +58,7 @@ cat ../../../../../manifests/v1beta1/installs/katib-standalone/katib-config.yaml
 # If the user wants to deploy training operator, then use the kustomization file for training operator.
 if "$DEPLOY_TRAINING_OPERATOR"; then
   echo "Deploying Training Operator $TRAINING_OPERATOR_VERSION"
-  kustomize build "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION" | kubectl apply -f -
+  kubectl apply --server-side -k "github.com/kubeflow/training-operator/manifests/overlays/standalone?ref=$TRAINING_OPERATOR_VERSION"
 fi
 
 echo "Deploying Katib"

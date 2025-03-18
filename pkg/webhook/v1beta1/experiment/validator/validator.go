@@ -82,10 +82,11 @@ func (g *DefaultValidator) ValidateExperiment(instance, oldInst *experimentsv1be
 	var allErrs field.ErrorList
 
 	namingConvention, _ := regexp.Compile("^[a-z]([-a-z0-9]*[a-z0-9])?")
-	if !namingConvention.MatchString(instance.Name) {
+	if !namingConvention.MatchString(instance.Name) || len(instance.Name) > 40 {
 		msg := "name must consist of lower case alphanumeric characters or '-'," +
 			" start with an alphabetic character, and end with an alphanumeric character" +
-			" (e.g. 'my-name', or 'abc-123', regex used for validation is '^[a-z]([-a-z0-9]*[a-z0-9])?)'"
+			" (e.g. 'my-name', or 'abc-123', regex used for validation is '^[a-z]([-a-z0-9]*[a-z0-9])?)')" +
+			" and may not be longer than 40 characters. "
 
 		allErrs = append(allErrs, field.Invalid(field.NewPath("metadata").Child("name"), instance.Name, msg))
 	}
@@ -284,7 +285,7 @@ func (g *DefaultValidator) validateParameters(parameters []experimentsv1beta1.Pa
 					allErrs = append(allErrs, field.Invalid(parametersPath.Index(i).Child("feasibleSpace").Child("list"),
 						param.FeasibleSpace.List, fmt.Sprintf("feasibleSpace.list is not supported for parameterType: %v", param.ParameterType)))
 				}
-				if param.FeasibleSpace.Max == "" && param.FeasibleSpace.Min == "" {
+				if param.FeasibleSpace.Max == "" || param.FeasibleSpace.Min == "" {
 					allErrs = append(allErrs, field.Required(parametersPath.Index(i).Child("feasibleSpace").Child("max"),
 						fmt.Sprintf("feasibleSpace.max or feasibleSpace.min must be specified for parameterType: %v", param.ParameterType)))
 				}

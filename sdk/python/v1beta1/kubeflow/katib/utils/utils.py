@@ -22,6 +22,14 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from kubeflow.katib import models
 from kubeflow.katib.constants import constants
+from kubeflow.katib.types import types
+from kubeflow.training import models as training_models
+from kubeflow.training.constants.constants import (
+    API_VERSION,
+    JOB_PARAMETERS,
+    PYTORCHJOB_KIND,
+)
+from kubernetes import client
 
 logger = logging.getLogger(__name__)
 
@@ -145,8 +153,8 @@ class SetEncoder(json.JSONEncoder):
 
 def get_trial_substitutions_from_dict(
     parameters: Dict[str, Any],
-    experiment_params: List[models.V1beta1ParameterSpec],
-    trial_params: List[models.V1beta1TrialParameterSpec],
+    experiment_parameters: List[models.V1beta1ParameterSpec],
+    trial_parameters: List[models.V1beta1TrialParameterSpec],
 ) -> Dict[str, str]:
     for p_name, p_value in parameters.items():
         # If input parameter value is Katib Experiment parameter sample.
@@ -156,10 +164,10 @@ def get_trial_substitutions_from_dict(
 
             # Add value to the Katib Experiment parameters.
             p_value.name = p_name
-            experiment_params.append(p_value)
+            experiment_parameters.append(p_value)
 
             # Add value to the Katib Experiment's Trial parameters.
-            trial_params.append(
+            trial_parameters.append(
                 models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
             )
         else:
@@ -217,7 +225,8 @@ def get_trial_substitutions_from_trainer(
 
 def get_exec_script_from_objective(
     objective: Callable,
-    input_params: Dict[str, Any] = None,
+    entrypoint: str,
+    input_params: Dict[str, Any],
     packages_to_install: Optional[List[str]] = None,
     pip_index_url: str = "https://pypi.org/simple",
 ) -> str:
@@ -247,16 +256,18 @@ def get_exec_script_from_objective(
     # Prepare execute script template.
     exec_script = textwrap.dedent(
         """
-        program_path=$(mktemp -d)
-        read -r -d '' SCRIPT << EOM\n
-        {objective_code}
-        EOM
-        printf "%s" "$SCRIPT" > $program_path/ephemeral_objective.py
-        python3 -u $program_path/ephemeral_objective.py"""
+                program_path=$(mktemp -d)
+                read -r -d '' SCRIPT << EOM\n
+                {objective_code}
+                EOM
+                printf "%s" \"$SCRIPT\" > \"$program_path/ephemeral_script.py\"
+                {entrypoint} \"$program_path/ephemeral_script.py\""""
     )
 
     # Add objective code to the execute script.
-    exec_script = exec_script.format(objective_code=objective_code)
+    exec_script = exec_script.format(
+        objective_code=objective_code, entrypoint=entrypoint
+    )
 
     # Install Python packages if that is required.
     if packages_to_install is not None:
@@ -267,3 +278,76 @@ def get_exec_script_from_objective(
 
     # Return executable script to execute objective function.
     return exec_script
+
+
+def get_trial_template_with_job(
+    retain_trials: bool,
+    trial_parameters: List[models.V1beta1TrialParameterSpec],
+    pod_template_spec: client.V1PodTemplateSpec,
+) -> models.V1beta1TrialTemplate:
+    """
+    Get Trial template with Job as a Trial's Worker
+    """
+
+    # Restart policy must be set for the Job.
+    pod_template_spec.spec.restart_policy = "Never"  # type: ignore
+
+    # Use Job as a Trial spec.
+    job = client.V1Job(
+        api_version="batch/v1",
+        kind="Job",
+        spec=client.V1JobSpec(template=pod_template_spec),
+    )
+
+    trial_template = models.V1beta1TrialTemplate(
+        primary_container_name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
+        retain=retain_trials,
+        trial_parameters=trial_parameters,
+        trial_spec=job,
+    )
+    return trial_template
+
+
+def get_trial_template_with_pytorchjob(
+    retain_trials: bool,
+    trial_parameters: List[models.V1beta1TrialParameterSpec],
+    resources_per_trial: types.TrainerResources,
+    master_pod_template_spec: models.V1PodTemplateSpec,
+    worker_pod_template_spec: models.V1PodTemplateSpec,
+) -> models.V1beta1TrialTemplate:
+    """
+    Get Trial template with PyTorchJob as a Trial's Worker
+    """
+
+    # Use PyTorchJob as a Trial spec.
+    pytorchjob = training_models.KubeflowOrgV1PyTorchJob(
+        api_version=API_VERSION,
+        kind=PYTORCHJOB_KIND,
+        spec=training_models.KubeflowOrgV1PyTorchJobSpec(
+            run_policy=training_models.KubeflowOrgV1RunPolicy(clean_pod_policy=None),
+            nproc_per_node=str(resources_per_trial.num_procs_per_worker),
+            pytorch_replica_specs={
+                "Master": training_models.KubeflowOrgV1ReplicaSpec(
+                    replicas=1,
+                    template=master_pod_template_spec,
+                )
+            },
+        ),
+    )
+
+    # Add Worker replica if number of workers > 1
+    if resources_per_trial.num_workers > 1:
+        pytorchjob.spec.pytorch_replica_specs["Worker"] = (
+            training_models.KubeflowOrgV1ReplicaSpec(
+                replicas=resources_per_trial.num_workers - 1,
+                template=worker_pod_template_spec,
+            )
+        )
+
+    trial_template = models.V1beta1TrialTemplate(
+        primary_container_name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
+        retain=retain_trials,
+        trial_parameters=trial_parameters,
+        trial_spec=pytorchjob,
+    )
+    return trial_template

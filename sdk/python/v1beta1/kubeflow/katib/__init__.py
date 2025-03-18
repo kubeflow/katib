@@ -72,7 +72,7 @@ from kubeflow.katib.models.v1beta1_trial_template import V1beta1TrialTemplate
 # Import Katib API client.
 from kubeflow.katib.api.katib_client import KatibClient
 # Import Katib TrainerResources class.
-from kubeflow.katib.types.trainer_resources import TrainerResources
+from kubeflow.katib.types.types import TrainerResources
 # Import Katib report metrics functions
 from kubeflow.katib.api.report_metrics import report_metrics
 # Import Katib helper functions.

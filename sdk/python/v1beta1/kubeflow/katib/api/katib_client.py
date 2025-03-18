@@ -24,8 +24,20 @@ import kubeflow.katib.katib_api_pb2_grpc as katib_api_pb2_grpc
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
-from kubeflow.katib.types.trainer_resources import TrainerResources
+from kubeflow.katib.types.types import TrainerResources
 from kubeflow.katib.utils import utils
+from kubeflow.training.constants.constants import (
+    DEFAULT_COMMAND,
+    ENTRYPOINT_PYTHON,
+    ENTRYPOINT_TORCH,
+    JOB_PARAMETERS,
+    PYTORCHJOB_KIND,
+    STORAGE_INITIALIZER,
+    STORAGE_INITIALIZER_IMAGE,
+    STORAGE_INITIALIZER_VOLUME_MOUNT,
+    TRAINER_TRANSFORMER_IMAGE,
+)
+from kubeflow.training.utils import utils as training_utils
 from kubernetes import client, config
 
 logger = logging.getLogger(__name__)
@@ -180,7 +192,7 @@ class KatibClient(object):
             "access_modes": constants.PVC_DEFAULT_ACCESS_MODES,
         },
         objective: Optional[Callable] = None,
-        base_image: Optional[str] = constants.BASE_IMAGE_TENSORFLOW,
+        base_image: str = constants.BASE_IMAGE_PYTORCH,
         parameters: Optional[Dict[str, Any]] = None,
         namespace: Optional[str] = None,
         env_per_trial: Optional[
@@ -311,8 +323,10 @@ class KatibClient(object):
                 GPU, pass in a V1ResourceRequirement instance instead, since it's more
                 flexible. This parameter is optional and defaults to None.
 
-                For external models and datasets, you can specify a TrainerResources object,
-                which includes `num_workers`, `num_procs_per_worker`, and `resources_per_worker`.
+                You should specify a TrainerResources as Trial resources if you use PyTorchJob as
+                Katib Trial for distributed training. This is mandatory parameter if you use
+                LLM `trainer_parameters`. The TrainerResources includes `num_workers`,
+                `num_procs_per_worker`, and `resources_per_worker`.
                 For example:
                 ```
                 resources_per_trial = TrainerResources(
@@ -428,28 +442,46 @@ class KatibClient(object):
             )
 
             # Iterate over input parameters and do substitutions.
-            experiment_params = []
-            trial_params = []
+            experiment_parameters = []
+            trial_parameters = []
             input_params = utils.get_trial_substitutions_from_dict(
-                parameters, experiment_params, trial_params
+                parameters, experiment_parameters, trial_parameters
             )
 
+            # For the distributed training the entrypoint is `torchrun`, else is `python -u`
+            if isinstance(resources_per_trial, TrainerResources) and (
+                resources_per_trial.num_workers > 1
+                or resources_per_trial.num_procs_per_worker > 1
+            ):
+                entrypoint = ENTRYPOINT_TORCH
+            else:
+                entrypoint = ENTRYPOINT_PYTHON
             # Get the execution script from the objective function.
             exec_script = utils.get_exec_script_from_objective(
-                objective, input_params, packages_to_install, pip_index_url
+                objective,
+                entrypoint,
+                input_params,
+                packages_to_install,
+                pip_index_url,
             )
 
-            if isinstance(resources_per_trial, dict):
-                if "gpu" in resources_per_trial:
-                    resources_per_trial["nvidia.com/gpu"] = resources_per_trial.pop(
-                        "gpu"
-                    )
-
-                resources_per_trial = client.V1ResourceRequirements(
-                    requests=resources_per_trial,
-                    limits=resources_per_trial,
-                )
-
+            # Generate container spec for PyTorchJob or Job.
+            container_spec = training_utils.get_container_spec(
+                name=(
+                    JOB_PARAMETERS[PYTORCHJOB_KIND]["container"]
+                    if isinstance(resources_per_trial, TrainerResources)
+                    else constants.DEFAULT_PRIMARY_CONTAINER_NAME
+                ),
+                base_image=base_image,
+                command=DEFAULT_COMMAND,
+                args=[exec_script],
+                resources=(
+                    resources_per_trial.resources_per_worker
+                    if isinstance(resources_per_trial, TrainerResources)
+                    else resources_per_trial
+                ),
+            )
+            # TODO (andreyvelich): get_container_spec should support EnvFromSource envs.
             env = []
             env_from = []
             if isinstance(env_per_trial, dict):
@@ -468,40 +500,25 @@ class KatibClient(object):
                             f"Incorrect value for env_per_trial: {env_per_trial}"
                         )
 
-            # Create Trial specification.
-            trial_spec = client.V1Job(
-                api_version="batch/v1",
-                kind="Job",
-                spec=client.V1JobSpec(
-                    template=client.V1PodTemplateSpec(
-                        metadata=models.V1ObjectMeta(
-                            annotations={"sidecar.istio.io/inject": "false"}
-                        ),
-                        spec=client.V1PodSpec(
-                            restart_policy="Never",
-                            containers=[
-                                client.V1Container(
-                                    name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                                    image=base_image,
-                                    command=["bash", "-c"],
-                                    args=[exec_script],
-                                    env=env if env else None,
-                                    env_from=env_from if env_from else None,
-                                    resources=resources_per_trial,
-                                )
-                            ],
-                        ),
-                    )
-                ),
-            )
+            container_spec.env = env if env else None
+            container_spec.env_from = env_from if env_from else None
 
-            # Create Trial template.
-            trial_template = models.V1beta1TrialTemplate(
-                primary_container_name=constants.DEFAULT_PRIMARY_CONTAINER_NAME,
-                retain=retain_trials,
-                trial_parameters=trial_params,
-                trial_spec=trial_spec,
-            )
+            # Trial uses PyTorchJob for distributed training if TrainerResources is set.
+            if isinstance(resources_per_trial, TrainerResources):
+                trial_template = utils.get_trial_template_with_pytorchjob(
+                    retain_trials,
+                    trial_parameters,
+                    resources_per_trial,
+                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                )
+            # Otherwise, Trial uses Job for model training.
+            else:
+                trial_template = utils.get_trial_template_with_job(
+                    retain_trials,
+                    trial_parameters,
+                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                )
 
         # If users choose to use external models and datasets.
         else:
@@ -509,6 +526,7 @@ class KatibClient(object):
                 not model_provider_parameters
                 or not dataset_provider_parameters
                 or not trainer_parameters
+                or not isinstance(resources_per_trial, TrainerResources)
             ):
                 raise ValueError("One of the required parameters is None")
 
@@ -523,16 +541,6 @@ class KatibClient(object):
                     HuggingFaceTrainerParams,
                 )
                 from kubeflow.storage_initializer.s3 import S3DatasetParams
-                from kubeflow.training import models as training_models
-                from kubeflow.training.constants.constants import (
-                    JOB_PARAMETERS,
-                    PYTORCHJOB_KIND,
-                    STORAGE_INITIALIZER,
-                    STORAGE_INITIALIZER_IMAGE,
-                    STORAGE_INITIALIZER_VOLUME_MOUNT,
-                    TRAINER_TRANSFORMER_IMAGE,
-                )
-                from kubeflow.training.utils import utils as training_utils
             except ImportError:
                 raise ImportError(
                     "LLM dependencies for Tune API are not installed. "
@@ -569,16 +577,14 @@ class KatibClient(object):
                     ),
                 )
             except Exception as e:
-                pvc_list = self.core_api.list_namespaced_persistent_volume_claim(
-                    namespace=namespace
-                )
-                # Check if the PVC with the specified name exists.
-                for pvc in pvc_list.items:
-                    if pvc.metadata.name == name:
-                        print(
-                            f"PVC '{name}' already exists in namespace " f"{namespace}."
-                        )
-                        break
+                if hasattr(e, "status") and e.status == 422:
+                    raise ValueError(
+                        f"The Experiment name '{name}' is invalid. It must use only lowercase "
+                        f"alphanumeric characters ('a-z', '0-9'), hyphens ('-'), or periods ('.'). "
+                        f"It must also start and end with an alphanumeric character."
+                    )
+                elif hasattr(e, "status") and e.status == 409:
+                    print(f"PVC '{name}' already exists in namespace " f"{namespace}.")
                 else:
                     raise RuntimeError(f"failed to create PVC. Error: {e}")
 
@@ -605,13 +611,15 @@ class KatibClient(object):
                 )
 
             # Iterate over input parameters and do substitutions.
-            experiment_params = []
-            trial_params = []
+            experiment_parameters = []
+            trial_parameters = []
             training_args = utils.get_trial_substitutions_from_trainer(
-                trainer_parameters.training_parameters, experiment_params, trial_params
+                trainer_parameters.training_parameters,
+                experiment_parameters,
+                trial_parameters,
             )
             lora_config = utils.get_trial_substitutions_from_trainer(
-                trainer_parameters.lora_config, experiment_params, trial_params
+                trainer_parameters.lora_config, experiment_parameters, trial_parameters
             )
 
             # Create the init and the primary container.
@@ -655,7 +663,7 @@ class KatibClient(object):
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
                 resources=(
                     resources_per_trial.resources_per_worker
-                    if resources_per_trial
+                    if isinstance(resources_per_trial, TrainerResources)
                     else None
                 ),
             )
@@ -679,51 +687,17 @@ class KatibClient(object):
                 volumes=[storage_initializer_volume],
             )
 
-            # Create PyTorchJob.
-            pytorchjob = training_models.KubeflowOrgV1PyTorchJob(
-                api_version="kubeflow.org/v1",
-                kind="PyTorchJob",
-                spec=training_models.KubeflowOrgV1PyTorchJobSpec(
-                    run_policy=training_models.KubeflowOrgV1RunPolicy(
-                        clean_pod_policy=None
-                    ),
-                    pytorch_replica_specs={},
-                ),
-            )
-
-            if (
-                resources_per_trial is not None
-                and resources_per_trial.num_procs_per_worker
-            ):
-                pytorchjob.spec.nproc_per_node = str(
-                    resources_per_trial.num_procs_per_worker
-                )
-
-            pytorchjob.spec.pytorch_replica_specs["Master"] = (
-                training_models.KubeflowOrgV1ReplicaSpec(
-                    replicas=1,
-                    template=master_pod_template_spec,
-                )
-            )
-
-            if resources_per_trial is not None and resources_per_trial.num_workers > 1:
-                pytorchjob.spec.pytorch_replica_specs["Worker"] = (
-                    training_models.KubeflowOrgV1ReplicaSpec(
-                        replicas=resources_per_trial.num_workers - 1,
-                        template=worker_pod_template_spec,
-                    )
-                )
-
-            # Create Trial template.
-            trial_template = models.V1beta1TrialTemplate(
-                primary_container_name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
-                retain=retain_trials,
-                trial_parameters=trial_params,
-                trial_spec=pytorchjob,
+            # Generate Trial template using the PyTorchJob.
+            trial_template = utils.get_trial_template_with_pytorchjob(
+                retain_trials,
+                trial_parameters,
+                resources_per_trial,
+                worker_pod_template_spec,
+                master_pod_template_spec,
             )
 
         # Add parameters to the Katib Experiment.
-        experiment.spec.parameters = experiment_params
+        experiment.spec.parameters = experiment_parameters
 
         # Add Trial template to the Katib Experiment.
         experiment.spec.trial_template = trial_template
