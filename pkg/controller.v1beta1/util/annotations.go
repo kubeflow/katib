@@ -21,20 +21,20 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
-// SuggestionAnnotations returns the expected suggestion annotations.
-func SuggestionAnnotations(instance *suggestionsv1beta1.Suggestion) map[string]string {
-	return appendAnnotation(
-		instance.Annotations,
-		consts.AnnotationIstioSidecarInjectName,
-		consts.AnnotationIstioSidecarInjectValue)
+// SuggestionLabels returns the expected suggestion labels.
+func SuggestionLabels(instance *suggestionsv1beta1.Suggestion) map[string]string {
+	return appendLabel(
+		instance.Labels,
+		consts.LabelIstioSidecarInjectName,
+		consts.LabelIstioSidecarInjectValue)
 }
 
-func appendAnnotation(annotations map[string]string, newAnnotationName string, newAnnotationValue string) map[string]string {
+func appendLabel(labels map[string]string, newLabelName string, newLabelValue string) map[string]string {
 	res := make(map[string]string)
-	for k, v := range annotations {
+	for k, v := range labels {
 		res[k] = v
 	}
-	res[newAnnotationName] = newAnnotationValue
+	res[newLabelName] = newLabelValue
 
 	return res
 }

@@ -119,11 +119,11 @@ const (
 	// JobKindJob is the kind of the Kubernetes Job.
 	JobKindJob = "Job"
 
-	// AnnotationIstioSidecarInjectName is the annotation of Istio Sidecar
-	AnnotationIstioSidecarInjectName = "sidecar.istio.io/inject"
+	// LabelIstioSidecarInjectName is the label of Istio Sidecar
+	LabelIstioSidecarInjectName = "sidecar.istio.io/inject"
 
-	// AnnotationIstioSidecarInjectValue is the value of Istio Sidecar annotation
-	AnnotationIstioSidecarInjectValue = "false"
+	// LabelIstioSidecarInjectValue is the value of Istio Sidecar label
+	LabelIstioSidecarInjectValue = "false"
 
 	// LabelTrialTemplateConfigMapName is the label name for the Trial templates configMap
 	LabelTrialTemplateConfigMapName = "katib.kubeflow.org/component"

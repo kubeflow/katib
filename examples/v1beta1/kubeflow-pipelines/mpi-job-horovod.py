@@ -97,7 +97,7 @@ def horovod_mnist_hpo(
                     "replicas": 1,
                     "template": {
                         "metadata": {
-                            "annotations": {"sidecar.istio.io/inject": "false"}
+                            "labels": {"sidecar.istio.io/inject": "false"}
                         },
                         "spec": {
                             "containers": [
@@ -142,7 +142,7 @@ def horovod_mnist_hpo(
                     "replicas": 2,
                     "template": {
                         "metadata": {
-                            "annotations": {"sidecar.istio.io/inject": "false"}
+                            "labels": {"sidecar.istio.io/inject": "false"}
                         },
                         "spec": {
                             "containers": [

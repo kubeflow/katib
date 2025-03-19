@@ -180,7 +180,7 @@ SucceededCondition: Succeeded
 Previously, we had problems with Istio sidecar containers,
 check [kubeflow/issue#1081](https://github.com/kubeflow/kubeflow/issues/4742).
 In some cases, it is unable to properly download datasets in training pod.
-It was fixed by adding annotation `sidecar.istio.io/inject: false` to appropriate Trial job in Katib controller.
+It was fixed by adding label `sidecar.istio.io/inject: false` to appropriate Trial job in Katib controller.
 
 Various CRD can have unified design and it is hard to understand where annotation must be specified
 to disable Istio injection for the running pods.
