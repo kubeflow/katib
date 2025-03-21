@@ -1,5 +1,5 @@
 # Reusable workflows for publishing Katib images.
-name: Build And Publish Images
+name: Build and Publish Images
 
 on:
   workflow_call:
@@ -21,31 +21,50 @@ on:
 
 jobs:
   build-and-publish:
-    name: Publish Image
+    name: Build and Publish Images
     runs-on: ubuntu-22.04
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Docker Login
-        # Trigger workflow only for kubeflow/katib repository with specific branch (master, release-.*) or tag (v.*).
-        if: >-
-          github.repository == 'kubeflow/katib' &&
-          (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-') || startsWith(github.ref, 'refs/tags/v'))
+      - name: Set Publish Condition
+        id: publish-condition
+        shell: bash
+        run: |
+          if [[ "${{ github.repository }}" == 'kubeflow/katib' && \
+                ( "${{ github.ref }}" == 'refs/heads/master' || \
+                  "${{ github.ref }}" =~ ^refs/heads/release- || \
+                  "${{ github.ref }}" =~ ^refs/tags/v ) ]]; then
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: GHCR Login
+        if: steps.publish-condition.outputs.should_publish == 'true'
         uses: docker/login-action@v3
         with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: DockerHub Login
+        if: steps.publish-condition.outputs.should_publish == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Publish Component ${{ inputs.component-name }}
-        # Trigger workflow only for kubeflow/katib repository with specific branch (master, release-.*) or tag (v.*).
-        if: >-
-          github.repository == 'kubeflow/katib' &&
-          (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-') || startsWith(github.ref, 'refs/tags/v'))
+        if: steps.publish-condition.outputs.should_publish == 'true'
         id: publish
         uses: ./.github/workflows/template-publish-image
         with:
-          image: ghcr.io/kubeflow/katib/${{ inputs.component-name }}
+          image: |
+            ghcr.io/kubeflow/katib/${{ inputs.component-name }}
+            docker.io/kubeflowkatib/${{ inputs.component-name }}
           dockerfile: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           push: true
@@ -54,7 +73,9 @@ jobs:
         if: steps.publish.outcome == 'skipped'
         uses: ./.github/workflows/template-publish-image
         with:
-          image: ghcr.io/kubeflow/katib/${{ inputs.component-name }}
+          image: |
+            ghcr.io/kubeflow/katib/${{ inputs.component-name }}
+            docker.io/kubeflowkatib/${{ inputs.component-name }}
           dockerfile: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           push: false
