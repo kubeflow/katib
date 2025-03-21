@@ -28,8 +28,8 @@
 # 5. Katib Trial training containers
 #
 # Run ./scripts/v1beta1/update-images.sh <OLD_PREFIX> <NEW_PREFIX> <TAG> to execute it.
-# For example, to update images from: docker.io/kubeflowkatib/ to: docker.io/private/ registry with tag: v0.12.0, run:
-# ./scripts/v1beta1/update-images.sh docker.io/kubeflowkatib/ docker.io/private/ v0.12.0
+# For example, to update images from: ghcr.io/kubeflow/katib/ to: docker.io/private/ registry with tag: v0.12.0, run:
+# ./scripts/v1beta1/update-images.sh ghcr.io/kubeflow/katib/ docker.io/private/ v0.12.0
 
 set -o errexit
 set -o pipefail
@@ -42,8 +42,8 @@ TAG=${3:-""}
 if [[ -z "$OLD_PREFIX" || -z "$NEW_PREFIX" || -z "$TAG" ]]; then
   echo "Image old prefix, new prefix, and tag must be set"
   echo -e "Usage: $0 <OLD_PREFIX> <NEW_PREFIX> <TAG>\n" 1>&2
-  echo "For example, to update images from: docker.io/kubeflowkatib/ to: docker.io/private/ registry with tag: v0.12.0, run:"
-  echo "$0 docker.io/kubeflowkatib/ docker.io/private/ v0.12.0"
+  echo "For example, to update images from: ghcr.io/kubeflow/katib/ to: docker.io/private/ registry with tag: v0.12.0, run:"
+  echo "$0 ghcr.io/kubeflow/katib/ docker.io/private/ v0.12.0"
   exit 1
 fi
 

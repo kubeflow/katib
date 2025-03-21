@@ -483,7 +483,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					Containers: []corev1.Container{
 						{
 							Name:  primaryContainer,
-							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
+							Image: "ghcr.io/kubeflow/katib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
 								"/opt/pytorch-mnist/mnist.py",
@@ -619,7 +619,7 @@ func newFakeBatchJob() *batchv1.Job {
 					Containers: []corev1.Container{
 						{
 							Name:  primaryContainer,
-							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
+							Image: "ghcr.io/kubeflow/katib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
 								"/opt/pytorch-mnist/mnist.py",
