@@ -26,7 +26,7 @@ spec:
           - katib-db-manager.kubeflow:6789
           - -path
           - /katib/mnist.log
-        image: kubeflowkatib/custom-metrics-collector:latest
+        image: ghcr.io/kubeflow/katib/custom-metrics-collector:latest
         imagePullPolicy: Always
         name: custom-metrics-logger-and-collector
         env:

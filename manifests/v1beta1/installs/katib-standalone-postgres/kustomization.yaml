@@ -21,7 +21,7 @@ images:
   - name: ghcr.io/kubeflow/katib/katib-controller
     newName: ghcr.io/kubeflow/katib/katib-controller
     newTag: latest
-  - name: ghcr.io/kubeflowkatib/katib-db-manager
+  - name: ghcr.io/kubeflow/katib/katib-db-manager
     newName: ghcr.io/kubeflow/katib/katib-db-manager
     newTag: latest
   - name: ghcr.io/kubeflow/katib/katib-ui
