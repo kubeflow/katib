@@ -839,7 +839,7 @@
 - Check if parameter references exist in Experiment parameters ([#1726](https://github.com/kubeflow/katib/pull/1726) by [@henrysecond1](https://github.com/henrysecond1))
 - Fix same set for HyperParameters in Bayesian Optimization algorithm ([#1701](https://github.com/kubeflow/katib/pull/1701) by [@fabianvdW](https://github.com/fabianvdW))
 - Close MySQL statement and rows resources when SQL exec ends ([#1720](https://github.com/kubeflow/katib/pull/1720) by [@chenwenjun-github](https://github.com/chenwenjun-github))
-- Fix Cluster Role of Katib Controller to access image pull secrets ([#1725](https://github.com/kubeflow/katib/pull/1725) by [@henrysecond1](https://github.com/henrysecond1)):w
+- Fix Cluster Role of Katib Controller to access image pull secrets ([#1725](https://github.com/kubeflow/katib/pull/1725) by [@henrysecond1](https://github.com/henrysecond1))
 - Emit events when fails to reconcile all Trials ([#1706](https://github.com/kubeflow/katib/pull/1706) by [@henrysecond1](https://github.com/henrysecond1))
 - Missing metrics port annotation ([#1715](https://github.com/kubeflow/katib/pull/1715) by [@alexeykaplin](https://github.com/alexeykaplin))
 - Fix absolute value in Katib UI ([#1676](https://github.com/kubeflow/katib/pull/1676) by [@anencore94](https://github.com/anencore94))
@@ -1766,4 +1766,3 @@
 - doc: Refactor [\#9](https://github.com/kubeflow/katib/pull/9) ([gaocegege](https://github.com/gaocegege))
 - add katib code [\#4](https://github.com/kubeflow/katib/pull/4) ([YujiOshima](https://github.com/YujiOshima))
 - add OWNERS file [\#3](https://github.com/kubeflow/katib/pull/3) ([YujiOshima](https://github.com/YujiOshima))
-
