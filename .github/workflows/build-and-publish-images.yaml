@@ -45,7 +45,7 @@ jobs:
         id: publish
         uses: ./.github/workflows/template-publish-image
         with:
-          image: docker.io/kubeflowkatib/${{ inputs.component-name }}
+          image: ghcr.io/kubeflow/katib/${{ inputs.component-name }}
           dockerfile: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           push: true
@@ -54,7 +54,7 @@ jobs:
         if: steps.publish.outcome == 'skipped'
         uses: ./.github/workflows/template-publish-image
         with:
-          image: docker.io/kubeflowkatib/${{ inputs.component-name }}
+          image: ghcr.io/kubeflow/katib/${{ inputs.component-name }}
           dockerfile: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           push: false

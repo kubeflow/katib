@@ -1126,7 +1126,7 @@
 ## Misc
 
 - Switch the test infra to the AWS ([#1356](https://github.com/kubeflow/katib/pull/1356) by [@andreyvelich](https://github.com/andreyvelich))
-- Use the `docker.io/kubeflowkatib` registry to release images ([#1372](https://github.com/kubeflow/katib/pull/1372) by [@andreyvelich](https://github.com/andreyvelich))
+- Use the `ghcr.io/kubeflow/katib` registry to release images ([#1372](https://github.com/kubeflow/katib/pull/1372) by [@andreyvelich](https://github.com/andreyvelich))
 
 [Full Changelog](https://github.com/kubeflow/katib/compare/v0.9.0...v0.10.0)
 
