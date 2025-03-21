@@ -30,7 +30,7 @@ TUNE_API=${2:-false}
 TRIAL_IMAGES=${3:-""}
 EXPERIMENTS=${4:-""}
 
-REGISTRY="docker.io/kubeflowkatib"
+REGISTRY="ghcr.io/kubeflow/katib"
 TAG="e2e-test"
 VERSION="v1beta1"
 CMD_PREFIX="cmd"

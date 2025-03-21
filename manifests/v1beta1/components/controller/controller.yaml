@@ -23,7 +23,7 @@ spec:
       serviceAccountName: katib-controller
       containers:
         - name: katib-controller
-          image: docker.io/kubeflowkatib/katib-controller
+          image: ghcr.io/kubeflow/katib/katib-controller
           command: ["./katib-controller"]
           args:
             - --katib-config=/katib-config.yaml

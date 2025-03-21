@@ -407,7 +407,7 @@ init:
 runtime:
   suggestions:
   - algorithmName: random
-    image: docker.io/kubeflowkatib/suggestion-hyperopt:latest
+    image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
 `), os.FileMode(0600)); err != nil {
 		t.Fatal(err)
 	}

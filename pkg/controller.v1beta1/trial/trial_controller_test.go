@@ -440,7 +440,7 @@ func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind, trialName string) 
 					Containers: []corev1.Container{
 						{
 							Name:  primaryContainer,
-							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
+							Image: "ghcr.io/kubeflow/katib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
 								"/opt/pytorch-mnist/mnist.py",

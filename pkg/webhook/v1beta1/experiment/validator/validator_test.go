@@ -1433,7 +1433,7 @@ func newFakeBatchJob() *batchv1.Job {
 					Containers: []v1.Container{
 						{
 							Name:  "training-container",
-							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
+							Image: "ghcr.io/kubeflow/katib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
 								"--epochs=1",

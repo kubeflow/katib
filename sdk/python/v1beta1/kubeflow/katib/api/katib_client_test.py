@@ -100,7 +100,7 @@ def generate_trial_template() -> V1beta1TrialTemplate:
                     "containers": [
                         {
                             "name": "training-container",
-                            "image": "docker.io/kubeflowkatib/pytorch-mnist-cpu:v0.14.0",
+                            "image": "ghcr.io/kubeflow/katib/pytorch-mnist-cpu:v0.14.0",
                             "command": [
                                 "python3",
                                 "/opt/pytorch-mnist/mnist.py",
