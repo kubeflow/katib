@@ -30,7 +30,7 @@ TRAINING_OPERATOR_VERSION="v1.9.0"
 echo "Start to install Katib"
 
 # Update Katib images with `e2e-test`.
-cd ../../../../../ && make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib/" TAG="$E2E_TEST_IMAGE_TAG" && cd -
+cd ../../../../../ && make update-images OLD_PREFIX="ghcr.io/kubeflow/katib/" NEW_PREFIX="ghcr.io/kubeflow/katib/" TAG="$E2E_TEST_IMAGE_TAG" && cd -
 
 # first declare the which kustomization file to use, by default use mysql.
 KUSTOMIZATION_FILE="../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml"

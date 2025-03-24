@@ -16,15 +16,15 @@ resources:
   # Katib webhooks.
   - ../../components/webhook/
 images:
-  - name: docker.io/kubeflowkatib/katib-controller
-    newName: docker.io/kubeflowkatib/katib-controller
-    newTag: v0.18.0-rc.0
-  - name: docker.io/kubeflowkatib/katib-db-manager
-    newName: docker.io/kubeflowkatib/katib-db-manager
-    newTag: v0.18.0-rc.0
-  - name: docker.io/kubeflowkatib/katib-ui
-    newName: docker.io/kubeflowkatib/katib-ui
-    newTag: v0.18.0-rc.0
+  - name: ghcr.io/kubeflow/katib/katib-controller
+    newName: ghcr.io/kubeflow/katib/katib-controller
+    newTag: latest
+  - name: ghcr.io/kubeflow/katib/katib-db-manager
+    newName: ghcr.io/kubeflow/katib/katib-db-manager
+    newTag: latest
+  - name: ghcr.io/kubeflow/katib/katib-ui
+    newName: ghcr.io/kubeflow/katib/katib-ui
+    newTag: latest
 patchesStrategicMerge:
   - patches/db-manager.yaml
 # Modify katib-mysql-secrets with parameters for the DB.

@@ -43,7 +43,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: docker.io/kubeflowkatib/simple-pbt:v0.18.0-rc.0
+                image: ghcr.io/kubeflow/katib/simple-pbt:latest
                 command:
                   - "python3"
                   - "/opt/pbt/pbt_test.py"
