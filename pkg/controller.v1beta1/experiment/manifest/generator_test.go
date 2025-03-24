@@ -61,7 +61,7 @@ func TestGetRunSpecWithHP(t *testing.T) {
 					Containers: []v1.Container{
 						{
 							Name:  "training-container",
-							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
+							Image: "ghcr.io/kubeflow/katib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
 								"/opt/pytorch-mnist/mnist.py",
@@ -170,7 +170,7 @@ spec:
     spec:
       containers:
         - name: training-container
-          image: docker.io/kubeflowkatib/pytorch-mnist-cpu
+          image: ghcr.io/kubeflow/katib/pytorch-mnist-cpu
           command:
             - "python3"
             - "/opt/pytorch-mnist/mnist.py"
@@ -186,7 +186,7 @@ spec:
     spec:
       containers:
         - name: training-container
-          image: docker.io/kubeflowkatib/pytorch-mnist-cpu
+          image: ghcr.io/kubeflow/katib/pytorch-mnist-cpu
           command:
             - python3
             - /opt/pytorch-mnist/mnist.py
@@ -207,7 +207,7 @@ spec:
     spec:
       containers:
         - name: training-container
-          image: docker.io/kubeflowkatib/pytorch-mnist-cpu
+          image: ghcr.io/kubeflow/katib/pytorch-mnist-cpu
           command:
             - "python3"
             - "/opt/pytorch-mnist/mnist.py"
@@ -337,7 +337,7 @@ func newFakeInstance() *experimentsv1beta1.Experiment {
 					Containers: []v1.Container{
 						{
 							Name:  "training-container",
-							Image: "docker.io/kubeflowkatib/pytorch-mnist-cpu",
+							Image: "ghcr.io/kubeflow/katib/pytorch-mnist-cpu",
 							Command: []string{
 								"python3",
 								"/opt/pytorch-mnist/mnist.py",

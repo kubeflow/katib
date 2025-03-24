@@ -30,13 +30,13 @@ set this `nop` image to Metrics Collector image.
 
 For example, if you are using
 [StdOut](https://www.kubeflow.org/docs/components/katib/experiment/#metrics-collector) Metrics Collector,
-`nop` image must be equal to `docker.io/kubeflowkatib/file-metrics-collector`.
+`nop` image must be equal to `ghcr.io/kubeflow/katib/file-metrics-collector`.
 
 Run the following command to modify the `nop` image:
 
 ```bash
 kubectl patch deploy tekton-pipelines-controller -n tekton-pipelines --type='json' \
-  -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args/9", "value": "docker.io/kubeflowkatib/file-metrics-collector"}]'
+  -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/args/9", "value": "ghcr.io/kubeflow/katib/file-metrics-collector"}]'
 ```
 
 Check that Tekton Pipelines Controller's pod was restarted:
@@ -54,7 +54,7 @@ Verify that `nop` image was modified:
 ```bash
 $ kubectl get $(kubectl get pods -o name -n tekton-pipelines | grep tekton-pipelines-controller) -n tekton-pipelines -o yaml | grep katib
 
-   - docker.io/kubeflowkatib/file-metrics-collector
+   - ghcr.io/kubeflow/katib/file-metrics-collector
 ```
 
 ### Katib Controller
