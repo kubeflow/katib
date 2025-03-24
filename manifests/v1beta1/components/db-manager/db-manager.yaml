@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: katib-db-manager
-          image: docker.io/kubeflowkatib/katib-db-manager
+          image: ghcr.io/kubeflow/katib/katib-db-manager
           env:
             - name: DB_NAME
               value: "mysql"

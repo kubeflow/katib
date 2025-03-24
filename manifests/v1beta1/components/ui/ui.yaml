@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: katib-ui
-          image: docker.io/kubeflowkatib/katib-ui
+          image: ghcr.io/kubeflow/katib/katib-ui
           command:
             - "./katib-ui"
           args:

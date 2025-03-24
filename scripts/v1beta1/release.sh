@@ -68,7 +68,7 @@ fi
 
 # ------------------ Change image tag ------------------
 # Change Katib image tags to the new release tag.
-make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib/" TAG="${TAG}"
+make update-images OLD_PREFIX="ghcr.io/kubeflow/katib/" NEW_PREFIX="ghcr.io/kubeflow/katib/" TAG="${TAG}"
 
 # ------------------ Publish Katib SDK ------------------
 # Remove first "v" for the SDK version.
