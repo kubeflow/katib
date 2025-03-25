@@ -77,7 +77,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: ghcr.io/kubeflow/katib/darts-cnn-cifar10-gpu:latest
+                image: ghcr.io/kubeflow/katib/darts-cnn-cifar10-gpu:v0.18.0
                 command:
                   - python3
                   - run_trial.py

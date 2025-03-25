@@ -74,7 +74,7 @@ spec:
                 - name: epochs
             container:
               name: model-training
-              image: ghcr.io/kubeflow/katib/pytorch-mnist-cpu:latest
+              image: ghcr.io/kubeflow/katib/pytorch-mnist-cpu:v0.18.0
               command:
                 - "python3"
                 - "/opt/pytorch-mnist/mnist.py"
