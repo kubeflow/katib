@@ -6,9 +6,9 @@ varReference:
     kind: Certificate
   - path: spec/issuerRef/name
     kind: Certificate
-  - path: metadata/annotations
+  - path: metadata.annotations.cert-manager.io/inject-ca-from
     kind: MutatingWebhookConfiguration
-  - path: metadata/annotations
+  - path: metadata.annotations.cert-manager.io/inject-ca-from
     kind: ValidatingWebhookConfiguration
 nameReference:
   - kind: Issuer

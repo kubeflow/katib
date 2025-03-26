@@ -3,6 +3,8 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: katib.kubeflow.org
+  annotations:
+    cert-manager.io/inject-ca-from: KATIB_NAMESPACE_PLACEHOLDER/KATIB_CERT_NAME_PLACEHOLDER
 webhooks:
   - name: validator.experiment.katib.kubeflow.org
     sideEffects: None
@@ -28,6 +30,8 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: katib.kubeflow.org
+  annotations:
+    cert-manager.io/inject-ca-from: KATIB_NAMESPACE_PLACEHOLDER/KATIB_CERT_NAME_PLACEHOLDER
 webhooks:
   - name: defaulter.experiment.katib.kubeflow.org
     sideEffects: None
