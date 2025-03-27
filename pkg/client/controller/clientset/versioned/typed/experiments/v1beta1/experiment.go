@@ -19,10 +19,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"context"
+	context "context"
 
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	experimentsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/experiments/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	applyconfigurationexperimentsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/experiments/v1beta1"
 	scheme "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -38,36 +38,37 @@ type ExperimentsGetter interface {
 
 // ExperimentInterface has methods to work with Experiment resources.
 type ExperimentInterface interface {
-	Create(ctx context.Context, experiment *v1beta1.Experiment, opts v1.CreateOptions) (*v1beta1.Experiment, error)
-	Update(ctx context.Context, experiment *v1beta1.Experiment, opts v1.UpdateOptions) (*v1beta1.Experiment, error)
+	Create(ctx context.Context, experiment *experimentsv1beta1.Experiment, opts v1.CreateOptions) (*experimentsv1beta1.Experiment, error)
+	Update(ctx context.Context, experiment *experimentsv1beta1.Experiment, opts v1.UpdateOptions) (*experimentsv1beta1.Experiment, error)
 	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-	UpdateStatus(ctx context.Context, experiment *v1beta1.Experiment, opts v1.UpdateOptions) (*v1beta1.Experiment, error)
+	UpdateStatus(ctx context.Context, experiment *experimentsv1beta1.Experiment, opts v1.UpdateOptions) (*experimentsv1beta1.Experiment, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.Experiment, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.ExperimentList, error)
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*experimentsv1beta1.Experiment, error)
+	List(ctx context.Context, opts v1.ListOptions) (*experimentsv1beta1.ExperimentList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Experiment, err error)
-	Apply(ctx context.Context, experiment *experimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Experiment, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *experimentsv1beta1.Experiment, err error)
+	Apply(ctx context.Context, experiment *applyconfigurationexperimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *experimentsv1beta1.Experiment, err error)
 	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-	ApplyStatus(ctx context.Context, experiment *experimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Experiment, err error)
+	ApplyStatus(ctx context.Context, experiment *applyconfigurationexperimentsv1beta1.ExperimentApplyConfiguration, opts v1.ApplyOptions) (result *experimentsv1beta1.Experiment, err error)
 	ExperimentExpansion
 }
 
 // experiments implements ExperimentInterface
 type experiments struct {
-	*gentype.ClientWithListAndApply[*v1beta1.Experiment, *v1beta1.ExperimentList, *experimentsv1beta1.ExperimentApplyConfiguration]
+	*gentype.ClientWithListAndApply[*experimentsv1beta1.Experiment, *experimentsv1beta1.ExperimentList, *applyconfigurationexperimentsv1beta1.ExperimentApplyConfiguration]
 }
 
 // newExperiments returns a Experiments
 func newExperiments(c *ExperimentV1beta1Client, namespace string) *experiments {
 	return &experiments{
-		gentype.NewClientWithListAndApply[*v1beta1.Experiment, *v1beta1.ExperimentList, *experimentsv1beta1.ExperimentApplyConfiguration](
+		gentype.NewClientWithListAndApply[*experimentsv1beta1.Experiment, *experimentsv1beta1.ExperimentList, *applyconfigurationexperimentsv1beta1.ExperimentApplyConfiguration](
 			"experiments",
 			c.RESTClient(),
 			scheme.ParameterCodec,
 			namespace,
-			func() *v1beta1.Experiment { return &v1beta1.Experiment{} },
-			func() *v1beta1.ExperimentList { return &v1beta1.ExperimentList{} }),
+			func() *experimentsv1beta1.Experiment { return &experimentsv1beta1.Experiment{} },
+			func() *experimentsv1beta1.ExperimentList { return &experimentsv1beta1.ExperimentList{} },
+		),
 	}
 }

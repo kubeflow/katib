@@ -19,7 +19,7 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -27,12 +27,12 @@ import (
 // SuggestionConditionApplyConfiguration represents a declarative configuration of the SuggestionCondition type for use
 // with apply.
 type SuggestionConditionApplyConfiguration struct {
-	Type               *v1beta1.SuggestionConditionType `json:"type,omitempty"`
-	Status             *v1.ConditionStatus              `json:"status,omitempty"`
-	Reason             *string                          `json:"reason,omitempty"`
-	Message            *string                          `json:"message,omitempty"`
-	LastUpdateTime     *metav1.Time                     `json:"lastUpdateTime,omitempty"`
-	LastTransitionTime *metav1.Time                     `json:"lastTransitionTime,omitempty"`
+	Type               *suggestionsv1beta1.SuggestionConditionType `json:"type,omitempty"`
+	Status             *v1.ConditionStatus                         `json:"status,omitempty"`
+	Reason             *string                                     `json:"reason,omitempty"`
+	Message            *string                                     `json:"message,omitempty"`
+	LastUpdateTime     *metav1.Time                                `json:"lastUpdateTime,omitempty"`
+	LastTransitionTime *metav1.Time                                `json:"lastTransitionTime,omitempty"`
 }
 
 // SuggestionConditionApplyConfiguration constructs a declarative configuration of the SuggestionCondition type for use with
@@ -44,7 +44,7 @@ func SuggestionCondition() *SuggestionConditionApplyConfiguration {
 // WithType sets the Type field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
-func (b *SuggestionConditionApplyConfiguration) WithType(value v1beta1.SuggestionConditionType) *SuggestionConditionApplyConfiguration {
+func (b *SuggestionConditionApplyConfiguration) WithType(value suggestionsv1beta1.SuggestionConditionType) *SuggestionConditionApplyConfiguration {
 	b.Type = &value
 	return b
 }

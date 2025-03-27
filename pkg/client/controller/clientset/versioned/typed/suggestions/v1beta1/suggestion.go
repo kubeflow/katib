@@ -19,10 +19,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"context"
+	context "context"
 
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
-	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/suggestions/v1beta1"
+	suggestionsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/suggestions/v1beta1"
+	applyconfigurationsuggestionsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/suggestions/v1beta1"
 	scheme "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -38,36 +38,37 @@ type SuggestionsGetter interface {
 
 // SuggestionInterface has methods to work with Suggestion resources.
 type SuggestionInterface interface {
-	Create(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.CreateOptions) (*v1beta1.Suggestion, error)
-	Update(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (*v1beta1.Suggestion, error)
+	Create(ctx context.Context, suggestion *suggestionsv1beta1.Suggestion, opts v1.CreateOptions) (*suggestionsv1beta1.Suggestion, error)
+	Update(ctx context.Context, suggestion *suggestionsv1beta1.Suggestion, opts v1.UpdateOptions) (*suggestionsv1beta1.Suggestion, error)
 	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-	UpdateStatus(ctx context.Context, suggestion *v1beta1.Suggestion, opts v1.UpdateOptions) (*v1beta1.Suggestion, error)
+	UpdateStatus(ctx context.Context, suggestion *suggestionsv1beta1.Suggestion, opts v1.UpdateOptions) (*suggestionsv1beta1.Suggestion, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.Suggestion, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.SuggestionList, error)
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*suggestionsv1beta1.Suggestion, error)
+	List(ctx context.Context, opts v1.ListOptions) (*suggestionsv1beta1.SuggestionList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Suggestion, err error)
-	Apply(ctx context.Context, suggestion *suggestionsv1beta1.SuggestionApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Suggestion, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *suggestionsv1beta1.Suggestion, err error)
+	Apply(ctx context.Context, suggestion *applyconfigurationsuggestionsv1beta1.SuggestionApplyConfiguration, opts v1.ApplyOptions) (result *suggestionsv1beta1.Suggestion, err error)
 	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-	ApplyStatus(ctx context.Context, suggestion *suggestionsv1beta1.SuggestionApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Suggestion, err error)
+	ApplyStatus(ctx context.Context, suggestion *applyconfigurationsuggestionsv1beta1.SuggestionApplyConfiguration, opts v1.ApplyOptions) (result *suggestionsv1beta1.Suggestion, err error)
 	SuggestionExpansion
 }
 
 // suggestions implements SuggestionInterface
 type suggestions struct {
-	*gentype.ClientWithListAndApply[*v1beta1.Suggestion, *v1beta1.SuggestionList, *suggestionsv1beta1.SuggestionApplyConfiguration]
+	*gentype.ClientWithListAndApply[*suggestionsv1beta1.Suggestion, *suggestionsv1beta1.SuggestionList, *applyconfigurationsuggestionsv1beta1.SuggestionApplyConfiguration]
 }
 
 // newSuggestions returns a Suggestions
 func newSuggestions(c *SuggestionV1beta1Client, namespace string) *suggestions {
 	return &suggestions{
-		gentype.NewClientWithListAndApply[*v1beta1.Suggestion, *v1beta1.SuggestionList, *suggestionsv1beta1.SuggestionApplyConfiguration](
+		gentype.NewClientWithListAndApply[*suggestionsv1beta1.Suggestion, *suggestionsv1beta1.SuggestionList, *applyconfigurationsuggestionsv1beta1.SuggestionApplyConfiguration](
 			"suggestions",
 			c.RESTClient(),
 			scheme.ParameterCodec,
 			namespace,
-			func() *v1beta1.Suggestion { return &v1beta1.Suggestion{} },
-			func() *v1beta1.SuggestionList { return &v1beta1.SuggestionList{} }),
+			func() *suggestionsv1beta1.Suggestion { return &suggestionsv1beta1.Suggestion{} },
+			func() *suggestionsv1beta1.SuggestionList { return &suggestionsv1beta1.SuggestionList{} },
+		),
 	}
 }
