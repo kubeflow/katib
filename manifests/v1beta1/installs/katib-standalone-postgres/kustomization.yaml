@@ -17,22 +17,15 @@ resources:
 - ../../components/ui/
 - ../../components/webhook/
 images:
-  - name: ghcr.io/kubeflow/katib/katib-controller
-    newName: ghcr.io/kubeflow/katib/katib-controller
-    newTag: latest
-  - name: ghcr.io/kubeflow/katib/katib-db-manager
-    newName: ghcr.io/kubeflow/katib/katib-db-manager
-    newTag: latest
-  - name: ghcr.io/kubeflow/katib/katib-ui
-    newName: ghcr.io/kubeflow/katib/katib-ui
-    newTag: latest
-patchesJson6902:
-  - target:
-      group: apps
-      version: v1
-      kind: Deployment
-      name: katib-db-manager
-    path: ./patches/db-manager.yaml
+- name: ghcr.io/kubeflow/katib/katib-controller
+  newName: ghcr.io/kubeflow/katib/katib-controller
+  newTag: latest
+- name: ghcr.io/kubeflow/katib/katib-db-manager
+  newName: ghcr.io/kubeflow/katib/katib-db-manager
+  newTag: latest
+- name: ghcr.io/kubeflow/katib/katib-ui
+  newName: ghcr.io/kubeflow/katib/katib-ui
+  newTag: latest
 configMapGenerator:
 - behavior: create
   files:
@@ -46,6 +39,12 @@ secretGenerator:
   options:
     disableNameSuffixHash: true
 patches:
+- path: ./patches/db-manager.yaml
+  target:
+    group: apps
+    kind: Deployment
+    name: katib-db-manager
+    version: v1
 - path: ./patches/db-manager.yaml
   target:
     group: apps
