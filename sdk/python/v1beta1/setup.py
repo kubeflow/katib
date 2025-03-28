@@ -88,7 +88,7 @@ setuptools.setup(
     install_requires=REQUIRES,
     extras_require={
         "huggingface": [
-            "kubeflow-training[huggingface]==1.9.0",
+            "kubeflow-training==1.9.0",
             "transformers==4.50.2",
             "peft==0.15.1",
         ],
