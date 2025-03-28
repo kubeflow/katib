@@ -625,7 +625,7 @@ class KatibClient(object):
             # Create the init and the primary container.
             init_container_spec = training_utils.get_container_spec(
                 name=STORAGE_INITIALIZER,
-                base_image=STORAGE_INITIALIZER_IMAGE,
+                base_image="docker.io/helenxiehz428/storage-initializer:test3",
                 args=[
                     "--model_provider",
                     mp,
@@ -643,7 +643,7 @@ class KatibClient(object):
 
             container_spec = training_utils.get_container_spec(
                 name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
-                base_image=TRAINER_TRANSFORMER_IMAGE,
+                base_image="docker.io/helenxiehz428/trainer:test12",
                 args=[
                     "--model_uri",
                     model_provider_parameters.model_uri,

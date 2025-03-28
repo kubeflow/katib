@@ -7,6 +7,7 @@ from kubeflow.katib import KatibClient, search
 from kubeflow.katib.types.types import TrainerResources
 from kubernetes import client
 from verify import verify_experiment_results
+import os
 
 # Experiment timeout is 40 min.
 EXPERIMENT_TIMEOUT = 60 * 40
@@ -143,13 +144,14 @@ def run_e2e_experiment_create_by_tune_with_llm_optimization(
         namespace=exp_namespace,
         # BERT model URI and type of Transformer to train it.
         model_provider_parameters=HuggingFaceModelParams(
-            model_uri="hf://google-bert/bert-base-cased",
+            model_uri="hf://meta-llama/Llama-3.2-1B",
             transformer_type=transformers.AutoModelForSequenceClassification,
-            num_labels=5,
+            #num_labels=5,
+            access_token=os.getenv("HF_ACCESS_TOKEN"),
         ),
         # In order to save test time, use 8 samples from Yelp dataset.
         dataset_provider_parameters=HuggingFaceDatasetParams(
-            repo_id="yelp_review_full",
+            repo_id="imdb",
             split="train[:8]",
         ),
         # Specify HuggingFace Trainer parameters.
@@ -176,10 +178,10 @@ def run_e2e_experiment_create_by_tune_with_llm_optimization(
         resources_per_trial=katib.TrainerResources(
             num_workers=1,
             num_procs_per_worker=1,
-            resources_per_worker={"cpu": "2", "memory": "10G",},
+            resources_per_worker={"cpu": "2", "memory": "20G",},
         ),
         storage_config={
-            "size": "10Gi",
+            "size": "20Gi",
             "access_modes": ["ReadWriteOnce"],
         },
         retain_trials=True,

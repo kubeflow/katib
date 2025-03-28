@@ -41,6 +41,8 @@ runs:
 
     - name: Run E2E Experiment
       shell: bash
+      env:
+        HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
       run: |
         if "${{ inputs.tune-api }}"; then
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-tune-api.sh
