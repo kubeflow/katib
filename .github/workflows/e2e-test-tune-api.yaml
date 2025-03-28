@@ -32,7 +32,6 @@ jobs:
         with:
           tune-api: true
           training-operator: true
-          hf-access-token: ${{ secrets.HF_ACCESS_TOKEN }}
 
     strategy:
       fail-fast: false

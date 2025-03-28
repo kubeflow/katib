@@ -27,9 +27,6 @@ inputs:
     required: true
     description: whether to execute tune-api test or not
     default: false
-  hf-access-token:
-    required: true
-    description: Hugging Face access token to access Hugging Face Hub
 
 runs:
   using: composite
@@ -44,8 +41,6 @@ runs:
 
     - name: Run E2E Experiment
       shell: bash
-      env:
-        HF_ACCESS_TOKEN: ${{ inputs.hf-access-token }}
       run: |
         if "${{ inputs.tune-api }}"; then
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-tune-api.sh

@@ -144,14 +144,13 @@ def run_e2e_experiment_create_by_tune_with_llm_optimization(
         namespace=exp_namespace,
         # BERT model URI and type of Transformer to train it.
         model_provider_parameters=HuggingFaceModelParams(
-            model_uri="hf://meta-llama/Llama-3.2-1B",
+            model_uri="hf://google-bert/bert-base-cased",
             transformer_type=transformers.AutoModelForSequenceClassification,
-            #num_labels=5,
-            access_token=os.getenv("HF_ACCESS_TOKEN"),
+            num_labels=5,
         ),
         # In order to save test time, use 8 samples from Yelp dataset.
         dataset_provider_parameters=HuggingFaceDatasetParams(
-            repo_id="imdb",
+            repo_id="yelp_review_full",
             split="train[:8]",
         ),
         # Specify HuggingFace Trainer parameters.
@@ -178,10 +177,10 @@ def run_e2e_experiment_create_by_tune_with_llm_optimization(
         resources_per_trial=katib.TrainerResources(
             num_workers=1,
             num_procs_per_worker=1,
-            resources_per_worker={"cpu": "2", "memory": "20G",},
+            resources_per_worker={"cpu": "2", "memory": "10G",},
         ),
         storage_config={
-            "size": "20Gi",
+            "size": "10Gi",
             "access_modes": ["ReadWriteOnce"],
         },
         retain_trials=True,
