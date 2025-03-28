@@ -7,7 +7,6 @@ from kubeflow.katib import KatibClient, search
 from kubeflow.katib.types.types import TrainerResources
 from kubernetes import client
 from verify import verify_experiment_results
-import os
 
 # Experiment timeout is 40 min.
 EXPERIMENT_TIMEOUT = 60 * 40
