@@ -34,7 +34,7 @@ kubectl get pvc -n kubeflow
 echo "Available CRDs"
 kubectl get crd
 
-# check if the katib pods are running
+# check if the katib pods are running.
 if ! kubectl get pods -n kubeflow | grep -q "katib-controller"; then
     echo "katib is not available. Exiting test."
     exit 1 
