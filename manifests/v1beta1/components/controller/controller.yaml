@@ -58,6 +58,15 @@ spec:
               name: katib-config
               subPath: katib-config.yaml
               readOnly: true
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+              - ALL
       volumes:
         - name: cert
           secret:
