@@ -10,13 +10,21 @@ namespace: kubeflow
   # Katib webhooks.
   # Cert-manager certificate for webhooks
 resources:
+# Namespace.
 - ../../components/namespace
+# Katib controller.
 - ../../components/controller/
+# Katib CRDs.
 - ../../components/crd/
+# Katib DB manager.
 - ../../components/db-manager/
+# Katib DB mysql.
 - ../../components/mysql/
+# Katib UI.
 - ../../components/ui/
+# Katib webhooks.
 - ../../components/webhook/
+# Cert-manager certificate for webhooks
 - certificate.yaml
 images:
   - name: ghcr.io/kubeflow/katib/katib-controller
