@@ -8,11 +8,17 @@ namespace: kubeflow
   # Katib UI.
   # Katib webhooks.
 resources:
+# Namespace
 - ../../components/namespace/
+# Katib controller.
 - ../../components/controller/
+# Katib CRDs.
 - ../../components/crd/
+# Katib DB manager.
 - ../../components/db-manager/
+# Katib UI.
 - ../../components/ui/
+# Katib webhooks.
 - ../../components/webhook/
 images:
   - name: ghcr.io/kubeflow/katib/katib-controller
