@@ -2,7 +2,7 @@
 
 # Run conformance test and generate test report.
 python test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.py --experiment-path examples/v1beta1/hp-tuning/random.yaml --namespace kf-conformance \
---trial-pod-annotations '{"sidecar.istio.io/inject": "false"}' | tee /tmp/katib-conformance.log
+--trial-pod-labels '{"sidecar.istio.io/inject": "false"}' | tee /tmp/katib-conformance.log
 
 
 # Create the done file.

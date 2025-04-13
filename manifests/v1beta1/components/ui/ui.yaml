@@ -15,7 +15,6 @@ spec:
     metadata:
       labels:
         katib.kubeflow.org/component: ui
-      annotations:
         sidecar.istio.io/inject: "false"
     spec:
       containers:
