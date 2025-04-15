@@ -692,8 +692,8 @@ class KatibClient(object):
                 retain_trials,
                 trial_parameters,
                 resources_per_trial,
-                worker_pod_template_spec,
                 master_pod_template_spec,
+                worker_pod_template_spec,
             )
 
         # Add parameters to the Katib Experiment.
