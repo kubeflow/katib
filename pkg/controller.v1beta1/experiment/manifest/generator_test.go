@@ -22,11 +22,13 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"go.uber.org/mock/gomock"
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -37,13 +39,12 @@ import (
 
 func TestGetRunSpecWithHP(t *testing.T) {
 
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	c := katibclientmock.NewMockClient(mockCtrl)
-
+	scheme := runtime.NewScheme()
+	v1.AddToScheme(scheme)
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+	katibClient := katibclientmock.NewFakeClient(fakeClient)
 	p := &DefaultGenerator{
-		client: c,
+		client: katibClient,
 	}
 
 	expectedJob := batchv1.Job{
@@ -152,15 +153,7 @@ func TestGetRunSpecWithHP(t *testing.T) {
 }
 
 func TestGetRunSpecWithHPConfigMap(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-
-	c := katibclientmock.NewMockClient(mockCtrl)
-
-	p := &DefaultGenerator{
-		client: c,
-	}
-
+	// Mocking the ConfigMap
 	templatePath := "trial-template-path"
 
 	trialSpec := `apiVersion: batch/v1
@@ -222,17 +215,23 @@ spec:
 	}
 
 	cases := map[string]struct {
-		mockConfigMapGetter            func() *gomock.Call
+		objects                        []runtime.Object
 		instance                       *experimentsv1beta1.Experiment
 		parameterAssignments           []commonapiv1beta1.ParameterAssignment
 		wantRunSpecWithHyperParameters *unstructured.Unstructured
 		wantError                      error
 	}{
 		"Run with valid parameters": {
-			mockConfigMapGetter: func() *gomock.Call {
-				return c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-					map[string]string{templatePath: trialSpec}, nil,
-				)
+			objects: []runtime.Object{
+				&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "config-map-name",
+						Namespace: "config-map-namespace",
+					},
+					Data: map[string]string{
+						templatePath: trialSpec,
+					},
+				},
 			},
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -249,10 +248,16 @@ spec:
 			wantRunSpecWithHyperParameters: expectedRunSpec,
 		},
 		"Invalid ConfigMap name": {
-			mockConfigMapGetter: func() *gomock.Call {
-				return c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-					nil, errConfigMapNotFound,
-				)
+			objects: []runtime.Object{
+				&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "config-map-name",
+						Namespace: "config-map-namespace",
+					},
+					Data: map[string]string{
+						templatePath: trialSpec,
+					},
+				},
 			},
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -267,10 +272,16 @@ spec:
 			wantError:            errConfigMapNotFound,
 		},
 		"Invalid template path in ConfigMap name": {
-			mockConfigMapGetter: func() *gomock.Call {
-				return c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-					map[string]string{templatePath: trialSpec}, nil,
-				)
+			objects: []runtime.Object{
+				&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "config-map-name",
+						Namespace: "config-map-namespace",
+					},
+					Data: map[string]string{
+						templatePath: trialSpec, //No templatePath
+					},
+				},
 			},
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -289,10 +300,16 @@ spec:
 		// Trial template is a string in ConfigMap
 		// Because of that, user can specify not valid unstructured template
 		"Invalid trial spec in ConfigMap": {
-			mockConfigMapGetter: func() *gomock.Call {
-				return c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-					map[string]string{templatePath: invalidTrialSpec}, nil,
-				)
+			objects: []runtime.Object{
+				&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "config-map-name",
+						Namespace: "config-map-namespace",
+					},
+					Data: map[string]string{
+						templatePath: invalidTrialSpec,
+					},
+				},
 			},
 			instance: func() *experimentsv1beta1.Experiment {
 				i := newFakeInstance()
@@ -312,7 +329,13 @@ spec:
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			tc.mockConfigMapGetter()
+			scheme := runtime.NewScheme()
+			v1.AddToScheme(scheme)
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithRuntimeObjects(tc.objects...).Build()
+			katibClient := katibclientmock.NewFakeClient(fakeClient)
+			p := &DefaultGenerator{
+				client: katibClient,
+			}
 			got, err := p.GetRunSpecWithHyperParameters(tc.instance, "trial-name", "trial-namespace", tc.parameterAssignments)
 			if diff := cmp.Diff(tc.wantError, err, cmpopts.EquateErrors()); len(diff) != 0 {
 				t.Errorf("Unexpected error from GetRunSpecWithHyperParameters (-want,+got):\n%s", diff)
