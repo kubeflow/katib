@@ -1094,6 +1094,14 @@ func TestMutatePodEnv(t *testing.T) {
 										},
 									},
 								},
+								{
+									Name: consts.EnvExperimentName,
+									ValueFrom: &v1.EnvVarSource{
+										FieldRef: &v1.ObjectFieldSelector{
+											FieldPath: fmt.Sprintf("metadata.labels['%s']", consts.LabelExperimentName),
+										},
+									},
+								},
 							},
 						},
 					},

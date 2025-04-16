@@ -62,6 +62,8 @@ const (
 
 	// EnvTrialName is the env variable of Trial name
 	EnvTrialName = "KATIB_TRIAL_NAME"
+	// EnvExperimentName is the env variable of Experiment name
+	EnvExperimentName = "KATIB_EXPERIMENT_NAME"
 
 	// LabelExperimentName is the label of experiment name.
 	LabelExperimentName = "katib.kubeflow.org/experiment"
