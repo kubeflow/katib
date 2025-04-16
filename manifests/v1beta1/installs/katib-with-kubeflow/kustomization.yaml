@@ -19,10 +19,8 @@ images:
     newName: ghcr.io/kubeflow/katib/katib-ui
     newTag: latest
 
-patchesStrategicMerge:
-  - patches/remove-namespace.yaml
-
 patches:
+  - path: patches/remove-namespace.yaml
   # Extend RBAC permission list of katib-ui so it can
   # create SubjectAccessReview resources.
   - target:
@@ -43,14 +41,24 @@ patches:
       name: katib-ui
     path: patches/istio-sidecar-injection.yaml
 
-vars:
-  - fieldref:
-      fieldPath: metadata.namespace
-    name: KATIB_UI_NAMESPACE
-    objref:
-      apiVersion: apps/v1
-      kind: Deployment
+replacements:
+- source:
+    fieldPath: metadata.namespace
+    group: apps
+    kind: Deployment
+    name: katib-ui
+    version: v1
+  targets:
+  - fieldPaths:
+    - spec.http.0.route.0.destination.host
+    options:
+      delimiter: .
+      index: 1
+    select:
+      group: networking.istio.io
+      kind: VirtualService
       name: katib-ui
+      version: v1alpha3
 
 configurations:
   - params.yaml
