@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use Katib in your scientific publication, please cite it as below."
+authors:
+  - family-names: "George"
+    given-names: "Johnu"
+  - family-names: "Gao"
+    given-names: "Ce"
+  - family-names: "Liu"
+    given-names: "Richard"
+  - family-names: "Liu"
+    given-names: "Hou Gang"
+  - family-names: "Tang"
+    given-names: "Yuan"
+  - family-names: "Pydipaty"
+    given-names: "Ramdoot"
+  - family-names: "Saha"
+    given-names: "Amit Kumar"
+title: "Katib"
+type: software
+repository-code: "https://github.com/kubeflow/katib"
+preferred-citation:
+  type: misc
+  title: "A Scalable and Cloud-Native Hyperparameter Tuning System"
+  authors:
+    - family-names: "George"
+      given-names: "Johnu"
+    - family-names: "Gao"
+      given-names: "Ce"
+    - family-names: "Liu"
+      given-names: "Richard"
+    - family-names: "Liu"
+      given-names: "Hou Gang"
+    - family-names: "Tang"
+      given-names: "Yuan"
+    - family-names: "Pydipaty"
+      given-names: "Ramdoot"
+    - family-names: "Saha"
+      given-names: "Amit Kumar"
+  year: 2020
+  url: "https://arxiv.org/abs/2006.02085"
+  identifiers:
+    - type: "other"
+      value: "arXiv:2006.02085"
