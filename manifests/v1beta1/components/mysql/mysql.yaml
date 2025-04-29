@@ -20,6 +20,9 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: katib-mysql
           image: mysql:8.0.29
@@ -68,6 +71,16 @@ spec:
           volumeMounts:
             - name: katib-mysql
               mountPath: /var/lib/mysql
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            capabilities:
+              drop:
+              - ALL
       volumes:
         - name: katib-mysql
           persistentVolumeClaim:
