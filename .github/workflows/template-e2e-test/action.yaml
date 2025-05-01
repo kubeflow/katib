@@ -27,22 +27,43 @@ inputs:
     required: true
     description: whether to execute tune-api test or not
     default: false
+  notebook-input:
+    description: List of paths to the input notebooks, separated by commas
+    required: false
+    default: ""
+  algorithms:
+    description: algorythm for image suggestion
+    required: false
+    default: ""
 
 runs:
   using: composite
   steps:
     - name: Setup Minikube Cluster
       shell: bash
-      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.tune-api }} ${{ inputs.trial-images }} ${{ inputs.experiments }}
+      run: ./test/e2e/v1beta1/scripts/gh-actions/setup-minikube.sh ${{ inputs.katib-ui }} ${{ inputs.tune-api }} ${{ inputs.trial-images }} ${{ inputs.experiments }} ${{ inputs.algorithms }}
 
     - name: Setup Katib
       shell: bash
       run: ./test/e2e/v1beta1/scripts/gh-actions/setup-katib.sh ${{ inputs.katib-ui }} ${{ inputs.training-operator }} ${{ inputs.database-type }}
 
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install papermill jupyter ipykernel
+        python -m ipykernel install --user --name python3 --display-name "Python 3"
+
     - name: Run E2E Experiment
       shell: bash
       run: |
-        if "${{ inputs.tune-api }}"; then
+        if [[ -n "${{ inputs.notebook-input }}" ]]; then
+          IFS=',' read -r -a NOTEBOOK_ARRAY <<< "${{ inputs.notebook-input }}"
+          for NOTEBOOK in "${NOTEBOOK_ARRAY[@]}"; do
+            echo "Running notebook: $NOTEBOOK"
+            ./test/e2e/v1beta1/scripts/gh-actions/run-notebook.sh -i "$NOTEBOOK" -n kubeflow
+          done
+        elif "${{ inputs.tune-api }}"; then
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-tune-api.sh
         else
           ./test/e2e/v1beta1/scripts/gh-actions/run-e2e-experiment.sh ${{ inputs.experiments }}
