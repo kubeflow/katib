@@ -17,6 +17,8 @@ RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     rm -rf /var/lib/apt/lists/*; \
     fi
 
+RUN python -m pip install --upgrade pip \
+    && pip install wheel
 RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
 RUN chgrp -R 0 ${TARGET_DIR} \
   && chmod -R g+rwX ${TARGET_DIR}
