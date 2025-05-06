@@ -46,3 +46,13 @@ func TrialLabels(instance *experimentsv1beta1.Experiment) map[string]string {
 
 	return res
 }
+
+// AppendIstioSidecarLabel adds the Istio sidecar injection label to a labels map
+func AppendIstioSidecarLabel(labels map[string]string) map[string]string {
+	res := make(map[string]string)
+	for k, v := range labels {
+		res[k] = v
+	}
+	res[consts.LabelIstioSidecarInjectName] = consts.LabelIstioSidecarInjectValue
+	return res
+}
