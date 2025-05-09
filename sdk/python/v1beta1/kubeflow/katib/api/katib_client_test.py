@@ -95,7 +95,7 @@ def generate_trial_template() -> V1beta1TrialTemplate:
         "kind": "Job",
         "spec": {
             "template": {
-                "metadata": {"annotations": {"sidecar.istio.io/inject": "false"}},
+                "metadata": {"labels": {"sidecar.istio.io/inject": "false"}},
                 "spec": {
                     "containers": [
                         {

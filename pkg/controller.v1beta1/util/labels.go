@@ -23,6 +23,7 @@ import (
 )
 
 // SuggestionLabels returns the expected suggestion labels.
+// SuggestionLabels returns the expected suggestion labels.
 func SuggestionLabels(instance *suggestionsv1beta1.Suggestion) map[string]string {
 	res := make(map[string]string)
 	for k, v := range instance.Labels {
@@ -31,7 +32,7 @@ func SuggestionLabels(instance *suggestionsv1beta1.Suggestion) map[string]string
 	res[consts.LabelDeploymentName] = GetSuggestionDeploymentName(instance)
 	res[consts.LabelExperimentName] = instance.Name
 	res[consts.LabelSuggestionName] = instance.Name
-
+	res[consts.LabelIstioSidecarInjectName] = consts.LabelIstioSidecarInjectValue
 	return res
 }
 
@@ -43,5 +44,15 @@ func TrialLabels(instance *experimentsv1beta1.Experiment) map[string]string {
 	}
 	res[consts.LabelExperimentName] = instance.Name
 
+	return res
+}
+
+// AppendIstioSidecarLabel adds the Istio sidecar injection label to a labels map
+func AppendIstioSidecarLabel(labels map[string]string) map[string]string {
+	res := make(map[string]string)
+	for k, v := range labels {
+		res[k] = v
+	}
+	res[consts.LabelIstioSidecarInjectName] = consts.LabelIstioSidecarInjectValue
 	return res
 }

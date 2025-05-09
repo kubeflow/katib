@@ -72,15 +72,15 @@ var (
 	}
 
 	deploymentLabels = map[string]string{
-		"custom-label":             "test",
-		consts.LabelDeploymentName: suggestionName + "-" + suggestionAlgorithm,
-		consts.LabelExperimentName: suggestionName,
-		consts.LabelSuggestionName: suggestionName,
+		"custom-label":                     "test",
+		consts.LabelDeploymentName:         suggestionName + "-" + suggestionAlgorithm,
+		consts.LabelExperimentName:         suggestionName,
+		consts.LabelSuggestionName:         suggestionName,
+		consts.LabelIstioSidecarInjectName: consts.LabelIstioSidecarInjectValue,
 	}
 
 	podAnnotations = map[string]string{
-		"custom-annotation":       "test",
-		"sidecar.istio.io/inject": "false",
+		"custom-annotation": "test",
 	}
 
 	namespace       = "kubeflow"
