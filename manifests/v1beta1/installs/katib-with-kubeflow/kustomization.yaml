@@ -1,56 +1,64 @@
----
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kubeflow
-resources:
-  - ../katib-cert-manager
   # Kubeflow Katib components.
-  - kubeflow-katib-roles.yaml
-  - ui-virtual-service.yaml
-  - istio-authorizationpolicy.yaml
+resources:
+- ../katib-cert-manager
+- kubeflow-katib-roles.yaml
+- ui-virtual-service.yaml
+- istio-authorizationpolicy.yaml
 images:
-  - name: ghcr.io/kubeflow/katib/katib-controller
-    newName: ghcr.io/kubeflow/katib/katib-controller
-    newTag: latest
-  - name: ghcr.io/kubeflow/katib/katib-db-manager
-    newName: ghcr.io/kubeflow/katib/katib-db-manager
-    newTag: latest
-  - name: ghcr.io/kubeflow/katib/katib-ui
-    newName: ghcr.io/kubeflow/katib/katib-ui
-    newTag: latest
+- name: ghcr.io/kubeflow/katib/katib-controller
+  newName: ghcr.io/kubeflow/katib/katib-controller
+  newTag: latest
+- name: ghcr.io/kubeflow/katib/katib-db-manager
+  newName: ghcr.io/kubeflow/katib/katib-db-manager
+  newTag: latest
+- name: ghcr.io/kubeflow/katib/katib-ui
+  newName: ghcr.io/kubeflow/katib/katib-ui
+  newTag: latest
 
-patchesStrategicMerge:
-  - patches/remove-namespace.yaml
 
-patches:
   # Extend RBAC permission list of katib-ui so it can
   # create SubjectAccessReview resources.
-  - target:
-      kind: ClusterRole
-      name: katib-ui
-      group: rbac.authorization.k8s.io
-      version: v1
-    path: patches/ui-rbac.yaml
   # Enable RBAC authz checks in UI's backend.
-  - target:
-      version: v1
-      kind: Deployment
-      name: katib-ui
-    path: patches/enable-ui-authz-checks.yaml
   # Allow istio sidecar injection in katib-UI Pod.
-  - target:
-      kind: Deployment
-      name: katib-ui
-    path: patches/istio-sidecar-injection.yaml
+patches:
+- path: patches/ui-rbac.yaml
+  target:
+    group: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: katib-ui
+    version: v1
+- path: patches/enable-ui-authz-checks.yaml
+  target:
+    kind: Deployment
+    name: katib-ui
+    version: v1
+- path: patches/istio-sidecar-injection.yaml
+  target:
+    kind: Deployment
+    name: katib-ui
+- path: patches/remove-namespace.yaml
 
-vars:
-  - fieldref:
-      fieldPath: metadata.namespace
-    name: KATIB_UI_NAMESPACE
-    objref:
-      apiVersion: apps/v1
-      kind: Deployment
-      name: katib-ui
 
 configurations:
-  - params.yaml
+- params.yaml
+replacements:
+- source:
+    fieldPath: metadata.namespace
+    group: apps
+    kind: Deployment
+    name: katib-ui
+    version: v1
+  targets:
+  - fieldPaths:
+    - spec.http.0.route.0.destination.host
+    options:
+      delimiter: .
+      index: 1
+    select:
+      group: networking.istio.io
+      kind: VirtualService
+      name: katib-ui
+      version: v1alpha3
