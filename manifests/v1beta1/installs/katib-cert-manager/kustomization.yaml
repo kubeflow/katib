@@ -84,11 +84,13 @@ replacements:
     - metadata.annotations.[cert-manager.io/inject-ca-from]
     options:
       delimiter: /
+      create: true
     select: {}
   - fieldPaths:
     - metadata.annotations.[cert-manager.io/inject-ca-from]
     options:
       delimiter: /
+      create: true
     select: {}
 - source:
     fieldPath: metadata.name
@@ -133,10 +135,12 @@ replacements:
     options:
       delimiter: /
       index: 1
+      create: true
     select: {}
   - fieldPaths:
     - metadata.annotations.[cert-manager.io/inject-ca-from]
     options:
       delimiter: /
       index: 1
+      create: true
     select: {}
