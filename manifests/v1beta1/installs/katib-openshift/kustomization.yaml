@@ -11,20 +11,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kubeflow
-  # Namespace.
-  # Katib controller.
-  # Katib CRDs.
-  # Katib DB manager.
-  # Katib DB mysql.
-  # Katib UI.
-  # Katib webhooks.
 resources:
+# Namespace.
 - ../../components/namespace/
+# Katib controller.
 - ../../components/controller/
+# Katib CRDs.
 - ../../components/crd/
+# Katib DB manager.
 - ../../components/db-manager/
+# Katib DB mysql.
 - ../../components/mysql/
+# Katib UI.
 - ../../components/ui/
+# Katib webhooks.
 - ../../components/webhook/
 images:
 - name: ghcr.io/kubeflow/katib/katib-controller
@@ -37,11 +37,6 @@ images:
   newName: ghcr.io/kubeflow/katib/katib-ui
   newTag: latest
 
-  # Annotate Service to delegate TLS-secret generation to OpenShift service controller
-  # https://docs.openshift.com/container-platform/4.6/security/certificates/service-serving-certificate.html#add-service-certificate_service-serving-certificate
-  # Annotate WebhookConfigurations to delegate `caBundle` population to OpenShift service controller
-  # https://docs.openshift.com/container-platform/4.6/security/certificates/service-serving-certificate.html#add-service-certificate-mutating-webhook_service-serving-certificate
-
 configMapGenerator:
 - behavior: create
   files:
@@ -50,12 +45,16 @@ configMapGenerator:
   options:
     disableNameSuffixHash: true
 patches:
+# Annotate Service to delegate TLS-secret generation to OpenShift service controller
+# https://docs.openshift.com/container-platform/4.6/security/certificates/service-serving-certificate.html#add-service-certificate_service-serving-certificate
 - path: patches/service-serving-cert.yaml
   target:
     kind: Service
     name: katib-controller
     namespace: kubeflow
     version: v1
+ # Annotate WebhookConfigurations to delegate `caBundle` population to OpenShift service controller
+# https://docs.openshift.com/container-platform/4.6/security/certificates/service-serving-certificate.html#add-service-certificate-mutating-webhook_service-serving-certificate
 - path: patches/webhook-inject-cabundle.yaml
   target:
     group: admissionregistration.k8s.io

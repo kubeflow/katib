@@ -1,9 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kubeflow
-  # Kubeflow Katib components.
 resources:
 - ../katib-cert-manager
+# Kubeflow Katib components.
 - kubeflow-katib-roles.yaml
 - ui-virtual-service.yaml
 - istio-authorizationpolicy.yaml
@@ -17,24 +17,23 @@ images:
 - name: ghcr.io/kubeflow/katib/katib-ui
   newName: ghcr.io/kubeflow/katib/katib-ui
   newTag: latest
-
-
-  # Extend RBAC permission list of katib-ui so it can
-  # create SubjectAccessReview resources.
-  # Enable RBAC authz checks in UI's backend.
-  # Allow istio sidecar injection in katib-UI Pod.
+  
 patches:
+# Extend RBAC permission list of katib-ui so it can
+# create SubjectAccessReview resources.
 - path: patches/ui-rbac.yaml
   target:
     group: rbac.authorization.k8s.io
     kind: ClusterRole
     name: katib-ui
     version: v1
+# Enable RBAC authz checks in UI's backend.
 - path: patches/enable-ui-authz-checks.yaml
   target:
     kind: Deployment
     name: katib-ui
     version: v1
+# Allow istio sidecar injection in katib-UI Pod.
 - path: patches/istio-sidecar-injection.yaml
   target:
     kind: Deployment
