@@ -1,22 +1,22 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kubeflow
-  # Namespace.
-  # Katib controller.
-  # Katib CRDs.
-  # Katib DB manager.
-  # Katib DB mysql.
-  # Katib UI.
-  # Katib webhooks.
-  # Cert-manager certificate for webhooks
 resources:
+# Namespace.
 - ../../components/namespace
+# Katib controller.
 - ../../components/controller/
+# Katib CRDs.
 - ../../components/crd/
+# Katib DB manager.
 - ../../components/db-manager/
+# Katib DB mysql.
 - ../../components/mysql/
+# Katib UI.
 - ../../components/ui/
+ # Katib webhooks.
 - ../../components/webhook/
+# Cert-manager certificate for webhooks
 - certificate.yaml
 images:
 - name: ghcr.io/kubeflow/katib/katib-controller
