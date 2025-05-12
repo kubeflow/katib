@@ -85,13 +85,19 @@ replacements:
     options:
       delimiter: /
       create: true
-    select: {}
+    select: 
+      group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      version: v1
   - fieldPaths:
     - metadata.annotations.[cert-manager.io/inject-ca-from]
     options:
       delimiter: /
       create: true
-    select: {}
+    select:
+      group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      version: v1
 - source:
     fieldPath: metadata.name
     kind: Service
@@ -136,11 +142,17 @@ replacements:
       delimiter: /
       index: 1
       create: true
-    select: {}
+    select:
+      group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      version: v1
   - fieldPaths:
     - metadata.annotations.[cert-manager.io/inject-ca-from]
     options:
       delimiter: /
       index: 1
       create: true
-    select: {}
+    select:
+      group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      version: v1
