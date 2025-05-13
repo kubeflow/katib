@@ -1,69 +1,158 @@
----
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kubeflow
 resources:
-  # Namespace.
-  - ../../components/namespace
-  # Katib controller.
-  - ../../components/controller/
-  # Katib CRDs.
-  - ../../components/crd/
-  # Katib DB manager.
-  - ../../components/db-manager/
-  # Katib DB mysql.
-  - ../../components/mysql/
-  # Katib UI.
-  - ../../components/ui/
-  # Katib webhooks.
-  - ../../components/webhook/
-  # Cert-manager certificate for webhooks
-  - certificate.yaml
+# Namespace.
+- ../../components/namespace
+# Katib controller.
+- ../../components/controller/
+# Katib CRDs.
+- ../../components/crd/
+# Katib DB manager.
+- ../../components/db-manager/
+# Katib DB mysql.
+- ../../components/mysql/
+# Katib UI.
+- ../../components/ui/
+ # Katib webhooks.
+- ../../components/webhook/
+# Cert-manager certificate for webhooks
+- certificate.yaml
 images:
-  - name: ghcr.io/kubeflow/katib/katib-controller
-    newName: ghcr.io/kubeflow/katib/katib-controller
-    newTag: latest
-  - name: ghcr.io/kubeflow/katib/katib-db-manager
-    newName: ghcr.io/kubeflow/katib/katib-db-manager
-    newTag: latest
-  - name: ghcr.io/kubeflow/katib/katib-ui
-    newName: ghcr.io/kubeflow/katib/katib-ui
-    newTag: latest
+- name: ghcr.io/kubeflow/katib/katib-controller
+  newName: ghcr.io/kubeflow/katib/katib-controller
+  newTag: latest
+- name: ghcr.io/kubeflow/katib/katib-db-manager
+  newName: ghcr.io/kubeflow/katib/katib-db-manager
+  newTag: latest
+- name: ghcr.io/kubeflow/katib/katib-ui
+  newName: ghcr.io/kubeflow/katib/katib-ui
+  newTag: latest
 
-patchesStrategicMerge:
-  - patches/katib-cert-injection.yaml
 
-vars:
-  - fieldref:
-      fieldPath: metadata.namespace
-    name: KATIB_NAMESPACE
-    objref:
-      apiVersion: v1
-      kind: Service
-      name: katib-controller
-  - fieldref:
-      fieldPath: metadata.name
-    name: KATIB_SERVICE_NAME
-    objref:
-      apiVersion: v1
-      kind: Service
-      name: katib-controller
-  - name: KATIB_CERT_NAME
-    objref:
-      kind: Certificate
-      group: cert-manager.io
-      version: v1
-      name: katib-webhook-cert
-    fieldref:
-      fieldpath: metadata.name
 
 configurations:
-  - params.yaml
+- params.yaml
 
 configMapGenerator:
-  - name: katib-config
-    behavior: create
-    files:
-      - katib-config.yaml
+- behavior: create
+  files:
+  - katib-config.yaml
+  name: katib-config
+  options:
+    disableNameSuffixHash: true
+patches:
+- path: patches/katib-cert-injection.yaml
+replacements:
+- source:
+    fieldPath: metadata.namespace
+    kind: Service
+    name: katib-controller
+    version: v1
+  targets:
+  - fieldPaths:
+    - spec.commonName
     options:
-      disableNameSuffixHash: true
+      delimiter: .
+      index: 1
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - spec.dnsNames.0
+    options:
+      delimiter: .
+      index: 1
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - spec.dnsNames.1
+    options:
+      delimiter: .
+      index: 1
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - metadata.annotations.[cert-manager.io/inject-ca-from]
+    options:
+      delimiter: /
+      create: true
+    select: 
+      group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      version: v1
+  - fieldPaths:
+    - metadata.annotations.[cert-manager.io/inject-ca-from]
+    options:
+      delimiter: /
+      create: true
+    select:
+      group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      version: v1
+- source:
+    fieldPath: metadata.name
+    kind: Service
+    name: katib-controller
+    version: v1
+  targets:
+  - fieldPaths:
+    - spec.commonName
+    options:
+      delimiter: .
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - spec.dnsNames.0
+    options:
+      delimiter: .
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+  - fieldPaths:
+    - spec.dnsNames.1
+    options:
+      delimiter: .
+    select:
+      group: cert-manager.io
+      kind: Certificate
+      name: katib-webhook-cert
+      version: v1
+- source:
+    fieldPath: metadata.name
+    kind: Certificate
+    name: katib-webhook-cert
+  targets:
+  - fieldPaths:
+    - metadata.annotations.[cert-manager.io/inject-ca-from]
+    options:
+      delimiter: /
+      index: 1
+      create: true
+    select:
+      group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      version: v1
+  - fieldPaths:
+    - metadata.annotations.[cert-manager.io/inject-ca-from]
+    options:
+      delimiter: /
+      index: 1
+      create: true
+    select:
+      group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      version: v1

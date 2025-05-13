@@ -4,11 +4,11 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: katib.kubeflow.org
   annotations:
-    cert-manager.io/inject-ca-from: $(KATIB_NAMESPACE)/$(KATIB_CERT_NAME)
+    cert-manager.io/inject-ca-from: KATIB_NAMESPACE_PLACEHOLDER/KATIB_CERT_NAME_PLACEHOLDER
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: katib.kubeflow.org
   annotations:
-    cert-manager.io/inject-ca-from: $(KATIB_NAMESPACE)/$(KATIB_CERT_NAME)
+    cert-manager.io/inject-ca-from: KATIB_NAMESPACE_PLACEHOLDER/KATIB_CERT_NAME_PLACEHOLDER

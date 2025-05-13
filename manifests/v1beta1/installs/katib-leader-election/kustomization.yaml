@@ -1,18 +1,17 @@
----
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: kubeflow
-resources:
-  - ../katib-standalone
   # rbac for leader-election
-  - leader-election-rbac.yaml
+resources:
+- ../katib-standalone
+- leader-election-rbac.yaml
 replicas:
-  - name: katib-controller
-    count: 2
+- count: 2
+  name: katib-controller
 configMapGenerator:
-  - name: katib-config
-    behavior: replace
-    files:
-      - katib-config.yaml
-    options:
-      disableNameSuffixHash: true
+- behavior: replace
+  files:
+  - katib-config.yaml
+  name: katib-config
+  options:
+    disableNameSuffixHash: true
