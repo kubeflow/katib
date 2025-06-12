@@ -405,6 +405,50 @@ test_tune_data = [
         ValueError,
     ),
     (
+        "invalid storage_per_trial - type mismatch",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "storage_per_trial": "invalid",
+        },
+        ValueError,
+    ),
+    (
+        "invalid storage_per_trial - volume has no name",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "storage_per_trial": [
+                {
+                    "volume": {
+                        # do not provide name
+                        "type": "pvc",
+                    }
+                }
+            ],
+        },
+        ValueError,
+    ),
+    (
+        "invalid storage_per_trial - volume has no type",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "storage_per_trial": [
+                {
+                    "volume": {
+                        "name": "test-pvc",
+                        # do not provide type
+                    }
+                }
+            ],
+        },
+        ValueError,
+    ),
+    (
         "invalid model_provider_parameters",
         {
             "name": "tune_test",
