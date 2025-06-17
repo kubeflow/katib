@@ -1,0 +1,55 @@
+# OpenShift Installation Profile
+# This profile enables OpenShift-specific features
+
+# Standard components
+controller:
+  enabled: true
+
+ui:
+  enabled: true
+
+dbManager:
+  enabled: true
+
+# MySQL database
+mysql:
+  enabled: true
+
+# OpenShift features
+openshift:
+  enabled: true
+  serviceCertificates: true
+
+# Pod Security Standards
+podSecurityStandards:
+  enforced: true
+
+# Webhook with OpenShift service certificates
+webhook:
+  enabled: true
+  
+  # Disable cert-manager since we're using OpenShift
+  certManager:
+    enabled: false
+  
+  validating:
+    enabled: true
+    annotations:
+      service.beta.openshift.io/inject-cabundle: "true"
+  
+  mutating:
+    enabled: true
+    annotations:
+      service.beta.openshift.io/inject-cabundle: "true"
+
+# Security policies
+networkPolicy:
+  enabled: true
+
+# Namespace creation with security labels
+namespaceCreate:
+  enabled: true
+  labels:
+    security.openshift.io/scc.podSecurityLabelSync: "false"
+  annotations:
+    openshift.io/node-selector: "" 

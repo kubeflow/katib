@@ -1,0 +1,95 @@
+# External Database Installation Profile
+# This profile is for connecting Katib to an external MySQL/PostgreSQL database
+
+# Disable built-in databases
+mysql:
+  enabled: false
+
+postgres:
+  enabled: false
+
+# Enable external database
+db:
+  external:
+    enabled: true
+    createSecret: true
+    host: "external-mysql.database.svc.cluster.local"
+    port: 3306
+    database: "katib"
+    user: "katib"
+    password: "katib-password"
+
+# Controller configuration with external DB
+controller:
+  enabled: true
+  env:
+    - name: DB_NAME
+      value: "mysql"
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: DB_USER
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: DB_PASSWORD
+    - name: KATIB_MYSQL_DB_DATABASE
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_DATABASE
+    - name: KATIB_MYSQL_DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_HOST
+    - name: KATIB_MYSQL_DB_PORT
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_PORT
+
+# DB Manager configuration with external DB
+dbManager:
+  enabled: true
+  env:
+    - name: DB_NAME
+      value: "mysql"
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: DB_USER
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: DB_PASSWORD
+    - name: KATIB_MYSQL_DB_DATABASE
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_DATABASE
+    - name: KATIB_MYSQL_DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_HOST
+    - name: KATIB_MYSQL_DB_PORT
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_PORT
+
+# Standard components
+ui:
+  enabled: true
+
+webhook:
+  enabled: true
+
+# Namespace creation
+namespaceCreate:
+  enabled: true 
