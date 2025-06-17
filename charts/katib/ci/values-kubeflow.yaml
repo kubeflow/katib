@@ -1,0 +1,101 @@
+# CI values for Kubeflow integration
+# This corresponds to the katib-with-kubeflow installation profile
+
+global:
+  namespace: kubeflow
+  imageTag: latest
+
+# Controller configuration
+controller:
+  enabled: true
+  replicas: 1
+  leaderElection:
+    enabled: false
+
+# Database configuration - MySQL
+database:
+  type: mysql
+  mysql:
+    enabled: true
+    persistence:
+      enabled: true
+      size: 1Gi  # Smaller for CI
+  postgres:
+    enabled: false
+  external:
+    enabled: false
+
+# DB Manager
+dbManager:
+  enabled: true
+
+# UI configuration
+ui:
+  enabled: true
+
+# Webhook configuration
+webhook:
+  enabled: true
+  certManager:
+    enabled: false  # Use self-signed for CI
+  validating:
+    enabled: true
+  mutating:
+    enabled: true
+    podMutator:
+      enabled: true
+
+# CRDs
+crds:
+  install: true
+
+# RBAC
+rbac:
+  create: true
+
+# Monitoring - disabled for CI
+monitoring:
+  prometheus:
+    enabled: false
+
+# Istio - enabled for Kubeflow
+istio:
+  enabled: true
+  authorizationPolicy:
+    enabled: true
+    action: ALLOW
+    rules:
+      - from:
+          - source:
+              principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+  virtualService:
+    enabled: true
+    gateways:
+      - kubeflow-gateway
+    hosts:
+      - "*"
+    http:
+      - match:
+          - uri:
+              prefix: /katib/
+        rewrite:
+          uri: /katib/
+        route:
+          - destination:
+              host: katib-ui
+              port:
+                number: 80
+
+# Security features - disabled for CI simplicity
+networkPolicy:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+# Namespace creation
+namespaceCreate:
+  enabled: true 

@@ -1,0 +1,80 @@
+# CI values for installation with leader election
+# This corresponds to the katib-leader-election installation profile
+
+global:
+  namespace: kubeflow
+  imageTag: latest
+
+# Controller configuration - with leader election enabled
+controller:
+  enabled: true
+  replicas: 2  # Multiple replicas for leader election
+  leaderElection:
+    enabled: true
+  env:
+    - name: ENABLE_LEADER_ELECTION
+      value: "true"
+
+# Database configuration - MySQL
+database:
+  type: mysql
+  mysql:
+    enabled: true
+    persistence:
+      enabled: true
+      size: 1Gi  # Smaller for CI
+  postgres:
+    enabled: false
+  external:
+    enabled: false
+
+# DB Manager
+dbManager:
+  enabled: true
+
+# UI configuration
+ui:
+  enabled: true
+
+# Webhook configuration
+webhook:
+  enabled: true
+  certManager:
+    enabled: false  # Use self-signed for CI
+  validating:
+    enabled: true
+  mutating:
+    enabled: true
+    podMutator:
+      enabled: true
+
+# CRDs
+crds:
+  install: true
+
+# RBAC
+rbac:
+  create: true
+
+# Monitoring - disabled for CI
+monitoring:
+  prometheus:
+    enabled: false
+
+# Istio - disabled for standalone
+istio:
+  enabled: false
+
+# Security features - disabled for CI simplicity
+networkPolicy:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+# Namespace creation
+namespaceCreate:
+  enabled: true 

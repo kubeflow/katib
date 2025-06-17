@@ -1,0 +1,252 @@
+{{- if .Values.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "katib.fullname" . }}-controller
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.controller.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "katib.controller.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow webhook traffic
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8443
+    # Allow metrics scraping
+    {{- if .Values.monitoring.prometheus.enabled }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: {{ .Values.monitoring.prometheus.namespace | default "monitoring" }}
+      ports:
+        - protocol: TCP
+          port: 8080
+    {{- end }}
+  egress:
+    # Allow database connections
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- if eq .Values.database.type "mysql" }}
+              {{- include "katib.mysql.selectorLabels" . | nindent 14 }}
+              {{- else if eq .Values.database.type "postgres" }}
+              {{- include "katib.postgres.selectorLabels" . | nindent 14 }}
+              {{- end }}
+      ports:
+        - protocol: TCP
+          {{- if eq .Values.database.type "mysql" }}
+          port: 3306
+          {{- else if eq .Values.database.type "postgres" }}
+          port: 5432
+          {{- end }}
+    # Allow Kubernetes API access
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow DB Manager connections
+    {{- if .Values.dbManager.enabled }}
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "katib.dbManager.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 6789
+    {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "katib.fullname" . }}-ui
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.ui.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "katib.ui.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow HTTP traffic
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow Istio sidecar traffic
+    {{- if .Values.istio.enabled }}
+    - from:
+        - podSelector:
+            matchLabels:
+              app: istio-proxy
+      ports:
+        - protocol: TCP
+          port: 15000
+        - protocol: TCP
+          port: 15001
+        - protocol: TCP
+          port: 15006
+        - protocol: TCP
+          port: 15020
+        - protocol: TCP
+          port: 15021
+        - protocol: TCP
+          port: 15090
+    {{- end }}
+  egress:
+    # Allow controller connections
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "katib.controller.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow Istio control plane
+    {{- if .Values.istio.enabled }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15010
+        - protocol: TCP
+          port: 15011
+        - protocol: TCP
+          port: 15014
+    {{- end }}
+{{- if .Values.dbManager.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "katib.fullname" . }}-db-manager
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.dbManager.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "katib.dbManager.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow controller connections
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "katib.controller.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 6789
+  egress:
+    # Allow database connections
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- if eq .Values.database.type "mysql" }}
+              {{- include "katib.mysql.selectorLabels" . | nindent 14 }}
+              {{- else if eq .Values.database.type "postgres" }}
+              {{- include "katib.postgres.selectorLabels" . | nindent 14 }}
+              {{- end }}
+      ports:
+        - protocol: TCP
+          {{- if eq .Values.database.type "mysql" }}
+          port: 3306
+          {{- else if eq .Values.database.type "postgres" }}
+          port: 5432
+          {{- end }}
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+{{- end }}
+{{- if and .Values.database.mysql.enabled (eq .Values.database.type "mysql") }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "katib.fullname" . }}-mysql
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.mysql.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "katib.mysql.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow controller and db-manager connections
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "katib.controller.selectorLabels" . | nindent 14 }}
+        - podSelector:
+            matchLabels:
+              {{- include "katib.dbManager.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 3306
+{{- end }}
+{{- if and .Values.database.postgres.enabled (eq .Values.database.type "postgres") }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "katib.fullname" . }}-postgres
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.postgres.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "katib.postgres.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow controller and db-manager connections
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "katib.controller.selectorLabels" . | nindent 14 }}
+        - podSelector:
+            matchLabels:
+              {{- include "katib.dbManager.selectorLabels" . | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 5432
+{{- end }}
+{{- end }} 

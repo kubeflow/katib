@@ -1,0 +1,49 @@
+# Cert-Manager Installation Profile
+# This profile enables cert-manager for automated certificate management
+
+# Standard components
+controller:
+  enabled: true
+
+ui:
+  enabled: true
+
+dbManager:
+  enabled: true
+
+# MySQL database
+mysql:
+  enabled: true
+
+# Webhook with cert-manager
+webhook:
+  enabled: true
+  
+  certManager:
+    enabled: true
+    injectCaFrom: true
+    
+    issuerRef:
+      createSelfSigned: true
+      kind: Issuer
+      name: ""
+      group: ""
+    
+    certificate:
+      subject: {}
+      privateKey: {}
+      usages: []
+  
+  validating:
+    enabled: true
+    annotations:
+      cert-manager.io/inject-ca-from: kubeflow/katib-webhook-cert
+  
+  mutating:
+    enabled: true
+    annotations:
+      cert-manager.io/inject-ca-from: kubeflow/katib-webhook-cert
+
+# Namespace creation
+namespaceCreate:
+  enabled: true 
