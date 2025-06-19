@@ -100,6 +100,8 @@ crds:
 # RBAC
 rbac:
   create: true
+  kubeflow:
+    enabled: false
 
 # Monitoring - enabled for production
 monitoring:

@@ -25,7 +25,7 @@ spec:
       containers:
         - name: katib-mysql
           image: {{ .Values.database.mysql.image.repository }}:{{ .Values.database.mysql.image.tag }}
-          imagePullPolicy: {{ .Values.database.mysql.image.pullPolicy }}
+          {{- include "katib.imagePullPolicy" (dict "pullPolicy" .Values.database.mysql.image.pullPolicy "Values" .Values) | nindent 10 }}
           args:
             - --datadir
             - /var/lib/mysql/datadir

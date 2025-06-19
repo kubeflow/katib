@@ -14,7 +14,9 @@ spec:
   type: {{ .Values.dbManager.service.type }}
   ports:
     - port: {{ .Values.dbManager.service.port }}
-      targetPort: api
+      {{- if .Values.dbManager.service.targetPort }}
+      targetPort: {{ .Values.dbManager.service.targetPort }}
+      {{- end }}
       protocol: TCP
       name: api
   selector:

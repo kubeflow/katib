@@ -58,10 +58,98 @@ Create the name of the controller service account to use
 */}}
 {{- define "katib.controller.serviceAccountName" -}}
 {{- if .Values.controller.serviceAccount.create }}
-{{- default (printf "%s-controller" (include "katib.fullname" .)) .Values.controller.serviceAccount.name }}
+{{- default "katib-controller" .Values.controller.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.controller.serviceAccount.name }}
 {{- end }}
+{{- end }}
+
+{{/*
+Controller service name - matches Kustomize
+*/}}
+{{- define "katib.controller.serviceName" -}}
+katib-controller
+{{- end }}
+
+{{/*
+UI service account name - matches Kustomize  
+*/}}
+{{- define "katib.ui.serviceAccountName" -}}
+{{- if .Values.ui.serviceAccount.create }}
+{{- default "katib-ui" .Values.ui.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.ui.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+UI service name - matches Kustomize
+*/}}
+{{- define "katib.ui.serviceName" -}}
+katib-ui
+{{- end }}
+
+{{/*
+DB Manager service name - matches Kustomize
+*/}}
+{{- define "katib.dbManager.serviceName" -}}
+katib-db-manager
+{{- end }}
+
+{{/*
+MySQL service name - matches Kustomize
+*/}}
+{{- define "katib.mysql.serviceName" -}}
+katib-mysql
+{{- end }}
+
+{{/*
+PostgreSQL service name - matches Kustomize
+*/}}
+{{- define "katib.postgres.serviceName" -}}
+katib-postgres
+{{- end }}
+
+{{/*
+Validating webhook configuration name - matches Kustomize
+*/}}
+{{- define "katib.webhook.validatingName" -}}
+katib.kubeflow.org
+{{- end }}
+
+{{/*
+Mutating webhook configuration name - matches Kustomize
+*/}}
+{{- define "katib.webhook.mutatingName" -}}
+katib.kubeflow.org
+{{- end }}
+
+{{/*
+Trial templates ConfigMap name - matches Kustomize
+*/}}
+{{- define "katib.trialTemplates.configMapName" -}}
+trial-templates
+{{- end }}
+
+{{/*
+Katib config ConfigMap name - matches Kustomize
+*/}}
+{{- define "katib.config.configMapName" -}}
+katib-config
+{{- end }}
+
+{{/*
+MySQL secret name - matches Kustomize
+*/}}
+{{- define "katib.mysql.secretName" -}}
+katib-mysql-secrets
+{{- end }}
+
+{{/*
+Webhook secret name - matches Kustomize
+*/}}
+{{- define "katib.webhook.secretName" -}}
+katib-webhook-cert
 {{- end }}
 
 {{/*
@@ -70,17 +158,17 @@ Controller labels
 {{- define "katib.controller.labels" -}}
 {{ include "katib.labels" . }}
 app.kubernetes.io/component: controller
+katib.kubeflow.org/component: controller
 {{- with .Values.controller.labels }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
 
 {{/*
-Controller selector labels
+Controller selector labels - Kustomize compatible
 */}}
 {{- define "katib.controller.selectorLabels" -}}
-{{ include "katib.selectorLabels" . }}
-app.kubernetes.io/component: controller
+katib.kubeflow.org/component: controller
 {{- end }}
 
 {{/*
@@ -89,17 +177,17 @@ UI labels
 {{- define "katib.ui.labels" -}}
 {{ include "katib.labels" . }}
 app.kubernetes.io/component: ui
+katib.kubeflow.org/component: ui
 {{- with .Values.ui.labels }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
 
 {{/*
-UI selector labels
+UI selector labels - Kustomize compatible
 */}}
 {{- define "katib.ui.selectorLabels" -}}
-{{ include "katib.selectorLabels" . }}
-app.kubernetes.io/component: ui
+katib.kubeflow.org/component: ui
 {{- end }}
 
 {{/*
@@ -108,17 +196,17 @@ DB Manager labels
 {{- define "katib.dbManager.labels" -}}
 {{ include "katib.labels" . }}
 app.kubernetes.io/component: db-manager
+katib.kubeflow.org/component: db-manager
 {{- with .Values.dbManager.labels }}
 {{ toYaml . }}
 {{- end }}
 {{- end }}
 
 {{/*
-DB Manager selector labels
+DB Manager selector labels - Kustomize compatible
 */}}
 {{- define "katib.dbManager.selectorLabels" -}}
-{{ include "katib.selectorLabels" . }}
-app.kubernetes.io/component: db-manager
+katib.kubeflow.org/component: db-manager
 {{- end }}
 
 {{/*
@@ -127,14 +215,14 @@ MySQL labels
 {{- define "katib.mysql.labels" -}}
 {{ include "katib.labels" . }}
 app.kubernetes.io/component: mysql
+katib.kubeflow.org/component: mysql
 {{- end }}
 
 {{/*
-MySQL selector labels
+MySQL selector labels - Kustomize compatible
 */}}
 {{- define "katib.mysql.selectorLabels" -}}
-{{ include "katib.selectorLabels" . }}
-app.kubernetes.io/component: mysql
+katib.kubeflow.org/component: mysql
 {{- end }}
 
 {{/*
@@ -143,14 +231,14 @@ PostgreSQL labels
 {{- define "katib.postgres.labels" -}}
 {{ include "katib.labels" . }}
 app.kubernetes.io/component: postgres
+katib.kubeflow.org/component: postgres
 {{- end }}
 
 {{/*
-PostgreSQL selector labels
+PostgreSQL selector labels - Kustomize compatible
 */}}
 {{- define "katib.postgres.selectorLabels" -}}
-{{ include "katib.selectorLabels" . }}
-app.kubernetes.io/component: postgres
+katib.kubeflow.org/component: postgres
 {{- end }}
 
 {{/*
@@ -173,14 +261,7 @@ app.kubernetes.io/component: webhook
 Webhook service name
 */}}
 {{- define "katib.webhook.serviceName" -}}
-{{ include "katib.fullname" . }}-controller
-{{- end }}
-
-{{/*
-Webhook secret name
-*/}}
-{{- define "katib.webhook.secretName" -}}
-{{ include "katib.fullname" . }}-webhook-cert
+{{ include "katib.controller.serviceName" . }}
 {{- end }}
 
 {{/*
@@ -219,13 +300,13 @@ Database host helper
 {{- define "katib.database.host" -}}
 {{- if eq .Values.database.type "mysql" -}}
 {{- if .Values.database.mysql.enabled -}}
-{{ printf "%s-mysql" (include "katib.fullname" .) }}
+{{ include "katib.mysql.serviceName" . }}
 {{- else -}}
 {{ .Values.database.external.host }}
 {{- end -}}
 {{- else if eq .Values.database.type "postgres" -}}
 {{- if .Values.database.postgres.enabled -}}
-{{ printf "%s-postgres" (include "katib.fullname" .) }}
+{{ include "katib.postgres.serviceName" . }}
 {{- else -}}
 {{ .Values.database.external.host }}
 {{- end -}}
@@ -298,26 +379,26 @@ Database username helper
 {{- end -}}
 
 {{/*
-Database secret name helper
+Database secret name helper - matches Kustomize
 */}}
 {{- define "katib.database.secretName" -}}
 {{- if eq .Values.database.type "mysql" -}}
 {{- if .Values.database.mysql.auth.existingSecret -}}
 {{ .Values.database.mysql.auth.existingSecret }}
 {{- else -}}
-{{ printf "%s-mysql" (include "katib.fullname" .) }}
+{{ include "katib.mysql.secretName" . }}
 {{- end -}}
 {{- else if eq .Values.database.type "postgres" -}}
 {{- if .Values.database.postgres.auth.existingSecret -}}
 {{ .Values.database.postgres.auth.existingSecret }}
 {{- else -}}
-{{ printf "%s-postgres" (include "katib.fullname" .) }}
+katib-postgres-secrets
 {{- end -}}
 {{- else -}}
 {{- if .Values.database.external.existingSecret -}}
 {{ .Values.database.external.existingSecret }}
 {{- else -}}
-{{ printf "%s-external-db" (include "katib.fullname" .) }}
+katib-mysql-secrets
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -338,18 +419,35 @@ Database environment variables helper
 - name: DB_NAME
   value: "postgres"
 - name: DB_PASSWORD
-  valueFrom:
-    secretKeyRef:
-      name: {{ include "katib.database.secretName" . }}
-      key: POSTGRES_PASSWORD
+  value: "katib"
 {{- else }}
 - name: DB_NAME
   value: {{ .Values.database.external.type | default "mysql" | quote }}
+- name: DB_USER
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "katib.database.secretName" . }}
+      key: DB_USER
 - name: DB_PASSWORD
   valueFrom:
     secretKeyRef:
       name: {{ include "katib.database.secretName" . }}
       key: DB_PASSWORD
+- name: KATIB_MYSQL_DB_DATABASE
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "katib.database.secretName" . }}
+      key: KATIB_MYSQL_DB_DATABASE
+- name: KATIB_MYSQL_DB_HOST
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "katib.database.secretName" . }}
+      key: KATIB_MYSQL_DB_HOST
+- name: KATIB_MYSQL_DB_PORT
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "katib.database.secretName" . }}
+      key: KATIB_MYSQL_DB_PORT
 {{- end }}
 {{- end -}}
 
@@ -384,4 +482,103 @@ Namespace helper
 */}}
 {{- define "katib.namespace" -}}
 {{- .Values.global.namespace | default .Release.Namespace -}}
+{{- end -}}
+
+{{/*
+Image pull policy helper
+*/}}
+{{- define "katib.imagePullPolicy" -}}
+{{- $policy := .pullPolicy | default .Values.global.imagePullPolicy -}}
+{{- if and .Values.global.kustomizeMode.omitDefaultImagePullPolicy (eq $policy "IfNotPresent") -}}
+{{- else -}}
+imagePullPolicy: {{ $policy }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Protocol helper
+*/}}
+{{- define "katib.protocol" -}}
+{{- $protocol := .protocol | default "TCP" -}}
+{{- if and .Values.global.kustomizeMode.omitDefaultProtocol (eq $protocol "TCP") -}}
+{{- else -}}
+protocol: {{ $protocol }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Service type helper
+*/}}
+{{- define "katib.serviceType" -}}
+{{- $type := .type | default "ClusterIP" -}}
+{{- if and .Values.global.kustomizeMode.omitDefaultServiceType (eq $type "ClusterIP") -}}
+{{- else -}}
+type: {{ $type }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Failure policy helper
+*/}}
+{{- define "katib.failurePolicy" -}}
+{{- $policy := .failurePolicy | default "Fail" -}}
+{{- if and .Values.global.kustomizeMode.omitDefaultFailurePolicy (eq $policy "Fail") -}}
+{{- else -}}
+failurePolicy: {{ $policy }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Controller labels for ClusterRole (conditionally omit component labels)
+*/}}
+{{- define "katib.controller.clusterRoleLabels" -}}
+{{- if .Values.global.kustomizeMode.omitComponentLabels -}}
+{{ include "katib.labels" . }}
+{{- else -}}
+{{ include "katib.controller.labels" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+UI labels for ClusterRole (conditionally omit component labels)
+*/}}
+{{- define "katib.ui.clusterRoleLabels" -}}
+{{- if .Values.global.kustomizeMode.omitComponentLabels -}}
+{{ include "katib.labels" . }}
+{{- else -}}
+{{ include "katib.ui.labels" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Controller labels for ServiceAccount (conditionally omit component labels)
+*/}}
+{{- define "katib.controller.serviceAccountLabels" -}}
+{{- if .Values.global.kustomizeMode.omitComponentLabels -}}
+{{ include "katib.labels" . }}
+{{- else -}}
+{{ include "katib.controller.labels" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+UI labels for ServiceAccount (conditionally omit component labels)
+*/}}
+{{- define "katib.ui.serviceAccountLabels" -}}
+{{- if .Values.global.kustomizeMode.omitComponentLabels -}}
+{{ include "katib.labels" . }}
+{{- else -}}
+{{ include "katib.ui.labels" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+MySQL labels for PVC (conditionally omit component labels)
+*/}}
+{{- define "katib.mysql.pvcLabels" -}}
+{{- if .Values.global.kustomizeMode.omitComponentLabels -}}
+{{ include "katib.labels" . }}
+{{- else -}}
+{{ include "katib.mysql.labels" . }}
+{{- end -}}
 {{- end -}} 

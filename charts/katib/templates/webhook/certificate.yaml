@@ -1,69 +1,42 @@
 {{- if and .Values.webhook.enabled .Values.webhook.certManager.enabled }}
-{{- if .Values.webhook.certManager.issuerRef.createSelfSigned }}
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: {{ include "katib.fullname" . }}-selfsigned-issuer
-  namespace: {{ include "katib.namespace" . }}
-  labels:
-    {{- include "katib.webhook.labels" . | nindent 4 }}
-spec:
-  selfSigned: {}
-{{- end }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ include "katib.fullname" . }}-webhook-cert
+  name: katib-webhook-cert
   namespace: {{ include "katib.namespace" . }}
-  labels:
-    {{- include "katib.webhook.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.webhook.certManager.issuerRef.createSelfSigned }}
   isCA: true
-  {{- end }}
-  commonName: {{ include "katib.webhook.serviceName" . }}.{{ include "katib.namespace" . }}.svc
+  commonName: {{ include "katib.controller.serviceName" . }}.{{ include "katib.namespace" . }}.svc
   dnsNames:
-    - {{ include "katib.webhook.serviceName" . }}.{{ include "katib.namespace" . }}.svc
-    - {{ include "katib.webhook.serviceName" . }}.{{ include "katib.namespace" . }}.svc.cluster.local
-  duration: {{ .Values.webhook.certificate.duration }}
-  renewBefore: {{ .Values.webhook.certificate.renewBefore }}
+  - {{ include "katib.controller.serviceName" . }}.{{ include "katib.namespace" . }}.svc
+  - {{ include "katib.controller.serviceName" . }}.{{ include "katib.namespace" . }}.svc.cluster.local
   issuerRef:
-    {{- if .Values.webhook.certManager.issuerRef.createSelfSigned }}
     kind: Issuer
-    name: {{ include "katib.fullname" . }}-selfsigned-issuer
-    {{- else }}
-    kind: {{ .Values.webhook.certManager.issuerRef.kind }}
-    name: {{ .Values.webhook.certManager.issuerRef.name }}
-    {{- if .Values.webhook.certManager.issuerRef.group }}
-    group: {{ .Values.webhook.certManager.issuerRef.group }}
-    {{- end }}
-    {{- end }}
-  secretName: {{ include "katib.webhook.secretName" . }}
-  {{- with .Values.webhook.certManager.certificate }}
-  {{- if .subject }}
-  subject:
-    {{- toYaml .subject | nindent 4 }}
-  {{- end }}
-  {{- if .privateKey }}
-  privateKey:
-    {{- toYaml .privateKey | nindent 4 }}
-  {{- end }}
-  {{- if .usages }}
-  usages:
-    {{- toYaml .usages | nindent 4 }}
-  {{- end }}
-  {{- end }}
+    name: katib-selfsigned-issuer
+  secretName: katib-webhook-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: katib-selfsigned-issuer
+  namespace: {{ include "katib.namespace" . }}
+spec:
+  selfSigned: {}
 {{- else if .Values.webhook.enabled }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ include "katib.fullname" . }}-webhook-cert
+  name: {{ include "katib.webhook.secretName" . }}
   namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitLabelsFromSecrets }}
   labels:
     {{- include "katib.webhook.labels" . | nindent 4 }}
+  {{- end }}
+{{- if .Values.global.kustomizeMode.omitWebhookSecretData }}
+type: Opaque
+{{- else }}
 type: kubernetes.io/tls
 data:
   {{- if and .Values.webhook.certificate.crt .Values.webhook.certificate.key }}
@@ -75,4 +48,5 @@ data:
   tls.crt: {{ include "katib.webhook.selfSignedCert" . }}
   tls.key: {{ include "katib.webhook.selfSignedKey" . }}
   {{- end }}
+{{- end }}
 {{- end }} 

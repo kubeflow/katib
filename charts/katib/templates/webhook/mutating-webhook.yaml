@@ -2,12 +2,17 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: {{ include "katib.fullname" . }}
+  name: {{ include "katib.webhook.mutatingName" . }}
   labels:
     {{- include "katib.webhook.labels" . | nindent 4 }}
-  {{- with .Values.webhook.mutating.annotations }}
+  {{- if or .Values.webhook.mutating.annotations .Values.webhook.certManager.enabled }}
   annotations:
+    {{- with .Values.webhook.mutating.annotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- if .Values.webhook.certManager.enabled }}
+    cert-manager.io/inject-ca-from: {{ include "katib.namespace" . }}/katib-webhook-cert
+    {{- end }}
   {{- end }}
 webhooks:
   - name: defaulter.experiment.katib.kubeflow.org
@@ -16,7 +21,7 @@ webhooks:
       - v1
     clientConfig:
       service:
-        name: {{ include "katib.fullname" . }}-controller
+        name: {{ include "katib.controller.serviceName" . }}
         namespace: {{ include "katib.namespace" . }}
         path: /mutate-experiment
       {{- if not .Values.webhook.certManager.enabled }}
@@ -42,7 +47,7 @@ webhooks:
       - v1
     clientConfig:
       service:
-        name: {{ include "katib.fullname" . }}-controller
+        name: {{ include "katib.controller.serviceName" . }}
         namespace: {{ include "katib.namespace" . }}
         path: /mutate-pod
       {{- if not .Values.webhook.certManager.enabled }}
@@ -67,4 +72,4 @@ webhooks:
     failurePolicy: {{ . }}
     {{- end }}
   {{- end }}
-{{- end }} 
+{{- end }}

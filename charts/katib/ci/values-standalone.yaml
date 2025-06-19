@@ -4,6 +4,17 @@
 global:
   namespace: kubeflow
   imageTag: latest
+  
+  # Enable kustomize compatibility mode
+  kustomizeMode:
+    omitDefaultImagePullPolicy: true
+    omitDefaultProtocol: true
+    omitDefaultServiceType: true
+    omitDefaultFailurePolicy: true
+    omitLabelsFromSecrets: true
+    omitExtraSecretFields: true
+    omitWebhookSecretData: true
+    omitComponentLabels: true
 
 # Controller configuration
 controller:
@@ -18,8 +29,9 @@ database:
   mysql:
     enabled: true
     persistence:
-      enabled: true
-      size: 1Gi  # Smaller for CI
+      size: 10Gi
+    service:
+      targetPort: ""
   postgres:
     enabled: false
   external:
@@ -44,6 +56,7 @@ webhook:
     enabled: true
     podMutator:
       enabled: true
+  failurePolicy: ""
 
 # CRDs
 crds:
@@ -52,6 +65,8 @@ crds:
 # RBAC
 rbac:
   create: true
+  kubeflow:
+    enabled: false
 
 # Monitoring - disabled for CI
 monitoring:

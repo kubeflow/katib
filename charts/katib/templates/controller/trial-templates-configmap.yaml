@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "katib.fullname" . }}-trial-templates
+  name: {{ include "katib.trialTemplates.configMapName" . }}
   namespace: {{ include "katib.namespace" . }}
   labels:
     {{- include "katib.controller.labels" . | nindent 4 }}
