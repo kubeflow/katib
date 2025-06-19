@@ -1,0 +1,18 @@
+{{- if and (eq .Values.database.type "mysql") .Values.database.mysql.enabled .Values.database.mysql.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: katib-mysql
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.mysql.pvcLabels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.database.mysql.persistence.size }}
+  {{- if .Values.database.mysql.persistence.storageClass }}
+  storageClassName: {{ .Values.database.mysql.persistence.storageClass }}
+  {{- end }}
+{{- end }} 

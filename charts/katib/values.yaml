@@ -1,0 +1,778 @@
+# Default values for katib.
+
+# -- String to partially override release name.
+nameOverride: ""
+
+# -- String to fully override release name.
+fullnameOverride: ""
+
+# -- Common labels to add to the resources.
+commonLabels: {}
+
+# Global settings
+global:
+  # -- Namespace to install Katib
+  namespace: kubeflow
+  # -- Image registry for Katib images
+  imageRegistry: ghcr.io/kubeflow/katib
+  # -- Global image tag for all Katib components
+  imageTag: latest
+  # -- Global image pull policy
+  imagePullPolicy: IfNotPresent
+  # -- Global image pull secrets
+  imagePullSecrets: []
+  
+  # Kustomize compatibility options
+  kustomizeMode:
+    omitDefaultImagePullPolicy: false
+    omitDefaultProtocol: false
+    omitDefaultServiceType: false
+    omitDefaultFailurePolicy: false
+    omitLabelsFromSecrets: false
+    omitExtraSecretFields: false
+    omitWebhookSecretData: false
+    omitComponentLabels: false
+
+# Controller configuration
+controller:
+  # -- Enable the Katib controller
+  enabled: true
+  # -- Number of controller replicas
+  replicas: 1
+  
+  leaderElection:
+    # -- Enable leader election for high availability
+    enabled: false
+  
+  image:
+    # -- Controller image repository
+    repository: katib-controller
+    # -- Controller image tag (overrides global.imageTag if set)
+    tag: ""
+    # -- Controller image pull policy (overrides global.imagePullPolicy if set)
+    pullPolicy: IfNotPresent
+    
+  # -- Controller resource requests and limits
+  resources: {}
+    
+  # -- Node selector for controller pods
+  nodeSelector: {}
+  
+  # -- Tolerations for controller pods
+  tolerations: []
+  
+  # -- Affinity rules for controller pods
+  affinity: {}
+  
+  # -- Security context for controller pods
+  podSecurityContext: {}
+  
+  # -- Security context for controller containers
+  securityContext: {}
+  
+  # -- Extra labels for controller pods
+  labels: {}
+  
+  # -- Extra annotations for controller pods
+  annotations: {}
+  
+  # -- Environment variables for controller containers
+  env: []
+  
+  # -- Volume mounts for controller containers
+  volumeMounts: []
+  
+  # -- Volumes for controller pods
+  volumes: []
+  
+  serviceAccount:
+    # -- Create service account for controller
+    create: true
+    # -- Service account name for controller
+    name: ""
+    # -- Annotations for controller service account
+    annotations: {}
+    
+  service:
+    # -- Enable controller service
+    enabled: true
+    # -- Controller service type
+    type: ClusterIP
+    # -- Controller service port
+    port: 8080
+    # -- Controller service target port
+    targetPort: 8080
+    # -- Controller service protocol
+    protocol: TCP
+    # -- Controller service annotations
+    annotations: {}
+
+# Database configuration
+database:
+  # -- Database type: mysql, postgres, or external
+  type: mysql
+  
+  mysql:
+    # -- Enable MySQL database
+    enabled: true
+    
+    image:
+      # -- MySQL image repository
+      repository: mysql
+      # -- MySQL image tag
+      tag: "8.0.29"
+      # -- MySQL image pull policy
+      pullPolicy: IfNotPresent
+      
+    # -- MySQL resource requests and limits
+    resources: {}
+      
+    persistence:
+      # -- Enable MySQL persistence
+      enabled: true
+      # -- MySQL persistence size
+      size: 10Gi
+      # -- MySQL storage class
+      storageClass: ""
+      
+    auth:
+      # -- MySQL root password
+      rootPassword: ""
+      # -- MySQL database name
+      database: katib
+      # -- MySQL username
+      username: katib
+      # -- MySQL password
+      password: ""
+      # -- Use existing secret for MySQL credentials
+      existingSecret: ""
+      
+    service:
+      # -- MySQL service type
+      type: ClusterIP
+      # -- MySQL service port
+      port: 3306
+      # -- MySQL service target port
+      targetPort: ""
+      # -- MySQL service protocol
+      protocol: TCP
+      
+  postgres:
+    # -- Enable PostgreSQL database
+    enabled: false
+    
+    image:
+      # -- PostgreSQL image repository
+      repository: postgres
+      # -- PostgreSQL image tag
+      tag: "14.10"
+      # -- PostgreSQL image pull policy
+      pullPolicy: IfNotPresent
+      
+    # -- PostgreSQL resource requests and limits
+    resources: {}
+      
+    auth:
+      # -- PostgreSQL database name
+      database: katib
+      # -- PostgreSQL username
+      username: katib
+      # -- PostgreSQL password
+      password: ""
+      # -- Use existing secret for PostgreSQL credentials
+      existingSecret: ""
+      
+    # -- PostgreSQL liveness probe configuration
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      
+    # -- PostgreSQL readiness probe configuration
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 6
+      
+    # -- PostgreSQL persistence configuration
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      annotations: {}
+      selector: {}
+      
+    # -- PostgreSQL pod security context
+    podSecurityContext: {}
+    
+    # -- PostgreSQL container security context
+    securityContext: {}
+    
+    # -- PostgreSQL annotations
+    annotations: {}
+    
+    # -- PostgreSQL environment variables
+    env: []
+    
+    # -- PostgreSQL volume mounts
+    volumeMounts: []
+    
+    # -- PostgreSQL volumes
+    volumes: []
+    
+    # -- PostgreSQL node selector
+    nodeSelector: {}
+    
+    # -- PostgreSQL tolerations
+    tolerations: []
+    
+    # -- PostgreSQL affinity
+    affinity: {}
+      
+    service:
+      # -- PostgreSQL service type
+      type: ClusterIP
+      # -- PostgreSQL service port
+      port: 5432
+      # -- PostgreSQL service target port
+      targetPort: 5432
+      # -- PostgreSQL service protocol
+      protocol: TCP
+      
+  external:
+    # -- Enable external database
+    enabled: false
+    # -- External database host
+    host: ""
+    # -- External database port
+    port: 3306
+    # -- External database name
+    database: katib
+    # -- External database username
+    username: katib
+    # -- External database password
+    password: ""
+    # -- Use existing secret for external database credentials
+    existingSecret: ""
+
+# DB Manager configuration
+dbManager:
+  # -- Enable DB Manager
+  enabled: true
+  
+  image:
+    # -- DB Manager image repository
+    repository: katib-db-manager
+    # -- DB Manager image tag (overrides global.imageTag if set)
+    tag: ""
+    # -- DB Manager image pull policy (overrides global.imagePullPolicy if set)
+    pullPolicy: IfNotPresent
+    
+  # -- DB Manager resource requests and limits
+  resources: {}
+    
+  # -- Node selector for DB Manager pods
+  nodeSelector: {}
+  
+  # -- Tolerations for DB Manager pods
+  tolerations: []
+  
+  # -- Affinity rules for DB Manager pods
+  affinity: {}
+  
+  # -- Security context for DB Manager pods
+  podSecurityContext: {}
+  
+  # -- Security context for DB Manager containers
+  securityContext: {}
+  
+  # -- Extra labels for DB Manager pods
+  labels: {}
+  
+  # -- Extra annotations for DB Manager pods
+  annotations: {}
+  
+  service:
+    # -- DB Manager service type
+    type: ClusterIP
+    # -- DB Manager service port
+    port: 6789
+    # -- DB Manager service target port
+    targetPort: ""
+    # -- DB Manager service protocol
+    protocol: TCP
+
+# UI configuration
+ui:
+  # -- Enable Katib UI
+  enabled: true
+  
+  image:
+    # -- UI image repository
+    repository: katib-ui
+    # -- UI image tag (overrides global.imageTag if set)
+    tag: ""
+    # -- UI image pull policy (overrides global.imagePullPolicy if set)
+    pullPolicy: IfNotPresent
+    
+  # -- UI resource requests and limits
+  resources: {}
+    
+  # -- Node selector for UI pods
+  nodeSelector: {}
+  
+  # -- Tolerations for UI pods
+  tolerations: []
+  
+  # -- Affinity rules for UI pods
+  affinity: {}
+  
+  # -- Security context for UI pods
+  podSecurityContext: {}
+  
+  # -- Security context for UI containers
+  securityContext: {}
+  
+  # -- Extra labels for UI pods
+  labels: {}
+  
+  # -- Extra annotations for UI pods
+  annotations: {}
+  
+  serviceAccount:
+    # -- Create service account for UI
+    create: true
+    # -- Service account name for UI
+    name: ""
+    annotations: {}
+    
+  service:
+    # -- UI service type
+    type: ClusterIP
+    # -- UI service port
+    port: 80
+    # -- UI service target port
+    targetPort: 8080
+    # -- UI service annotations
+    annotations: {}
+    
+  ingress:
+    # -- Enable UI ingress
+    enabled: false
+    # -- Ingress class name
+    className: ""
+    # -- Ingress annotations
+    annotations: {}
+
+    hosts: []
+
+    # -- Ingress TLS configuration
+    tls: []
+
+
+# Webhook configuration
+webhook:
+  # -- Enable admission webhooks
+  enabled: true
+  # -- Webhook port
+  port: 8443
+  
+  image:
+    # -- Webhook image repository (usually same as controller)
+    repository: katib-controller
+    # -- Webhook image tag (overrides global.imageTag if set)
+    tag: ""
+    # -- Webhook image pull policy (overrides global.imagePullPolicy if set)
+    pullPolicy: IfNotPresent
+    
+  # -- Webhook resource requests and limits
+  resources: {}
+    
+  service:
+    # -- Webhook service port
+    port: 443
+    # -- Webhook service target port
+    targetPort: 8443
+    
+  certManager:
+    # -- Enable cert-manager for certificate management
+    enabled: false
+    # -- Inject CA bundle from cert-manager Certificate
+    injectCaFrom: true
+    
+    # Certificate configuration
+    certificate:
+      # -- Certificate subject
+      subject: {}
+      # -- Certificate private key configuration
+      privateKey: {}
+      # -- Certificate usages
+      usages: []
+    
+    # Issuer configuration
+    issuerRef:
+      # -- Create self-signed issuer
+      createSelfSigned: true
+      # -- Issuer kind (Issuer or ClusterIssuer)
+      kind: Issuer
+      # -- Issuer name
+      name: ""
+      # -- Issuer group
+      group: ""
+  
+  certificate:
+    # -- Certificate duration
+    duration: 8760h  # 1 year
+    # -- Certificate renewal time before expiry
+    renewBefore: 720h  # 30 days
+    # -- Custom certificate (base64 encoded PEM)
+    crt: ""
+    # -- Custom private key (base64 encoded PEM)
+    key: ""
+    
+  # -- CA bundle for webhook certificates (base64 encoded)
+  caBundle: ""
+  
+  validating:
+    # -- Enable validating webhook
+    enabled: true
+    # -- Validating webhook annotations
+    annotations: {}
+    # -- Validating webhook failure policy
+    failurePolicy: ""
+    # -- Validating webhook namespace selector
+    namespaceSelector: {}
+    
+  mutating:
+    # -- Enable mutating webhook
+    enabled: true
+    # -- Mutating webhook annotations
+    annotations: {}
+    # -- Mutating webhook failure policy (omit to use Kubernetes default)
+    failurePolicy: ""
+    
+    podMutator:
+      # -- Enable pod mutation webhook for metrics collection
+      enabled: true
+
+# CRDs configuration
+crds:
+  install: true
+
+# Katib configuration
+config:
+  # -- Katib configuration content
+  katibConfig: |
+    apiVersion: config.kubeflow.org/v1beta1
+    kind: KatibConfig
+    init:
+      certGenerator:
+        enable: true
+      controller:
+        webhookPort: 8443
+        trialResources:
+          - Job.v1.batch
+          - TFJob.v1.kubeflow.org
+          - PyTorchJob.v1.kubeflow.org
+          - MPIJob.v1.kubeflow.org
+          - XGBoostJob.v1.kubeflow.org
+    runtime:
+      metricsCollectors:
+        - kind: StdOut
+          image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+        - kind: File
+          image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+        - kind: TensorFlowEvent
+          image: ghcr.io/kubeflow/katib/tfevent-metrics-collector:latest
+          resources:
+            limits:
+              memory: 1Gi
+      suggestions:
+        - algorithmName: random
+          image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+        - algorithmName: tpe
+          image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+        - algorithmName: grid
+          image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+        - algorithmName: hyperband
+          image: ghcr.io/kubeflow/katib/suggestion-hyperband:latest
+        - algorithmName: bayesianoptimization
+          image: ghcr.io/kubeflow/katib/suggestion-skopt:latest
+        - algorithmName: cmaes
+          image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+        - algorithmName: sobol
+          image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+        - algorithmName: multivariate-tpe
+          image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+        - algorithmName: enas
+          image: ghcr.io/kubeflow/katib/suggestion-enas:latest
+          resources:
+            limits:
+              memory: 400Mi
+        - algorithmName: darts
+          image: ghcr.io/kubeflow/katib/suggestion-darts:latest
+        - algorithmName: pbt
+          image: ghcr.io/kubeflow/katib/suggestion-pbt:latest
+          persistentVolumeClaimSpec:
+            accessModes:
+              - ReadWriteMany
+            resources:
+              requests:
+                storage: 5Gi
+      earlyStoppings:
+        - algorithmName: medianstop
+          image: ghcr.io/kubeflow/katib/earlystopping-medianstop:latest
+
+  # Trial templates configuration
+  trialTemplates:
+    # Default trial template configuration
+    defaultTrialTemplate:
+      # -- Default trial template container image
+      image: "ghcr.io/kubeflow/katib/pytorch-mnist-cpu:latest"
+    
+    # ENAS CPU template configuration
+    enasCPUTemplate:
+      # -- ENAS CPU template container image
+      image: "ghcr.io/kubeflow/katib/enas-cnn-cifar10-cpu:latest"
+    
+    # PyTorch Job template configuration
+    pytorchJobTemplate:
+      # -- PyTorch Job template container image
+      image: "ghcr.io/kubeflow/katib/pytorch-mnist-cpu:latest"
+      # -- Number of worker replicas for PyTorch Job
+      workerReplicas: 2
+    
+    # Custom trial templates
+    customTemplates: {}
+
+# RBAC configuration
+rbac:
+  create: true
+  kubeflow:
+    enabled: false
+
+# Monitoring configuration
+monitoring:
+  prometheus:
+    # -- Enable Prometheus monitoring
+    enabled: false
+    # -- Prometheus metrics port
+    port: 8080
+    # -- Prometheus metrics path
+    path: /metrics
+    # -- Prometheus namespace for monitoring
+    namespace: monitoring
+    
+    serviceMonitor:
+      # -- Create ServiceMonitor for Prometheus
+      enabled: false
+      # -- ServiceMonitor namespace (defaults to release namespace)
+      namespace: ""
+      # -- ServiceMonitor labels
+      labels: {}
+      # -- ServiceMonitor annotations
+      annotations: {}
+      # -- Scrape interval
+      interval: "30s"
+      # -- Scrape timeout
+      scrapeTimeout: "10s"
+      # -- Target labels to add to metrics
+      targetLabels: []
+      # -- Pod target labels to add to metrics
+      podTargetLabels: []
+      # -- Metric relabelings
+      metricRelabelings: []
+      # -- Relabelings
+      relabelings: []
+
+# Istio configuration
+istio:
+  # -- Enable Istio integration
+  enabled: false
+  
+  authorizationPolicy:
+    # -- Enable Istio AuthorizationPolicy
+    enabled: false
+    # -- AuthorizationPolicy action (ALLOW/DENY)
+    action: ALLOW
+    # -- AuthorizationPolicy annotations
+    annotations: {}
+    # -- AuthorizationPolicy rules
+    rules:
+      - from:
+          - source:
+              principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+  
+  virtualService:
+    # -- Enable Istio VirtualService
+    enabled: false
+    # -- VirtualService annotations
+    annotations: {}
+    # -- VirtualService gateways
+    gateways:
+      - kubeflow-gateway
+    # -- VirtualService hosts
+    hosts:
+      - "*"
+    # -- VirtualService HTTP rules
+    http:
+      - match:
+          - uri:
+              prefix: /katib/
+        rewrite:
+          uri: /katib/
+        route:
+          - destination:
+              host: katib-ui
+              port:
+                number: 80
+
+# Network Policy configuration
+networkPolicy:
+  # -- Enable Network Policies for enhanced security
+  enabled: false
+
+# Pod Disruption Budget configuration
+podDisruptionBudget:
+  # -- Enable Pod Disruption Budgets
+  enabled: false
+  
+  controller:
+    # -- Minimum available controller pods
+    minAvailable: 1
+    # -- Maximum unavailable controller pods (alternative to minAvailable)
+    maxUnavailable: ""
+    
+  ui:
+    # -- Minimum available UI pods
+    minAvailable: 1
+    # -- Maximum unavailable UI pods (alternative to minAvailable)
+    maxUnavailable: ""
+    
+  dbManager:
+    # -- Minimum available DB Manager pods
+    minAvailable: 1
+    # -- Maximum unavailable DB Manager pods (alternative to minAvailable)
+    maxUnavailable: ""
+
+# Horizontal Pod Autoscaler configuration
+autoscaling:
+  # -- Enable Horizontal Pod Autoscaling
+  enabled: false
+  
+  controller:
+    # -- Enable HPA for controller
+    enabled: false
+    # -- Minimum number of controller replicas
+    minReplicas: 1
+    # -- Maximum number of controller replicas
+    maxReplicas: 10
+    # -- Target CPU utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage
+    targetMemoryUtilizationPercentage: 80
+    # -- Custom metrics for HPA
+    customMetrics: []
+    # -- HPA behavior configuration
+    behavior: {}
+    
+  ui:
+    # -- Enable HPA for UI
+    enabled: false
+    # -- Minimum number of UI replicas
+    minReplicas: 1
+    # -- Maximum number of UI replicas
+    maxReplicas: 5
+    # -- Target CPU utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage
+    targetMemoryUtilizationPercentage: 80
+    # -- Custom metrics for HPA
+    customMetrics: []
+    # -- HPA behavior configuration
+    behavior: {}
+    
+  dbManager:
+    # -- Enable HPA for DB Manager
+    enabled: false
+    # -- Minimum number of DB Manager replicas
+    minReplicas: 1
+    # -- Maximum number of DB Manager replicas
+    maxReplicas: 3
+    # -- Target CPU utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage
+    targetMemoryUtilizationPercentage: 80
+    # -- Custom metrics for HPA
+    customMetrics: []
+    # -- HPA behavior configuration
+    behavior: {}
+
+# OpenShift configuration
+openshift:
+  # -- Enable OpenShift specific features
+  enabled: false
+  # -- Use OpenShift service serving certificates
+  serviceCertificates: false
+
+# Pod Security Standards
+podSecurityStandards:
+  # -- Enforce Pod Security Standards
+  enforced: false
+
+# Namespace configuration
+namespaceCreate:
+  # -- Create namespace
+  enabled: true
+
+db:
+  # -- Database type (mysql, postgres)
+  type: mysql
+  
+  # -- Database name
+  name: katib
+  
+  # -- Database user
+  user: katib
+  
+  # -- Database password (used for built-in databases)
+  password: katib
+  
+  # -- Database host (only for external databases)
+  host: ""
+  
+  # -- Database port (only for external databases)
+  port: 3306
+
+  # External database configuration
+  external:
+    # -- Use external database instead of built-in
+    enabled: false
+    # -- Create secret for external database credentials
+    createSecret: true
+    # -- External database host
+    host: ""
+    # -- External database port
+    port: 3306
+    # -- External database name
+    database: "katib"
+    # -- External database user
+    user: "katib"
+    # -- External database password
+    password: ""
+    # -- Existing secret name for database credentials
+    existingSecret: ""
+    # -- Secret keys for database credentials
+    secretKeys:
+      host: "KATIB_MYSQL_DB_HOST"
+      port: "KATIB_MYSQL_DB_PORT"
+      database: "KATIB_MYSQL_DB_DATABASE"
+      user: "DB_USER"
+      password: "DB_PASSWORD" 

@@ -1,0 +1,22 @@
+{{- if .Values.ui.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "katib.fullname" . }}-ui
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.ui.labels" . | nindent 4 }}
+  {{- with .Values.ui.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.ui.service.type }}
+  ports:
+    - name: ui
+      port: {{ .Values.ui.service.port }}
+      targetPort: {{ .Values.ui.service.targetPort }}
+      protocol: TCP
+  selector:
+    {{- include "katib.ui.selectorLabels" . | nindent 4 }}
+{{- end }} 

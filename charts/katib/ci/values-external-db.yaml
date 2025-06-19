@@ -1,0 +1,60 @@
+# External Database Installation Profile
+# This profile is for connecting Katib to an external MySQL/PostgreSQL database
+
+global:
+  namespace: kubeflow
+  imageTag: latest
+  
+  # Enable kustomize compatibility mode
+  kustomizeMode:
+    omitDefaultImagePullPolicy: true
+    omitDefaultProtocol: true
+    omitDefaultServiceType: true
+    omitDefaultFailurePolicy: true
+    omitLabelsFromSecrets: true
+    omitExtraSecretFields: true
+    omitWebhookSecretData: true
+    omitComponentLabels: true
+
+# Disable built-in databases
+database:
+  type: external
+  mysql:
+    enabled: false
+  postgres:
+    enabled: false
+  external:
+    enabled: true
+    existingSecret: ""
+    host: ""
+    port: ""
+    database: ""
+    username: ""
+    password: ""
+
+# Controller configuration with external DB
+controller:
+  enabled: true
+  env: []
+
+# DB Manager configuration with external DB
+dbManager:
+  enabled: true
+  env: []
+
+# Standard components
+ui:
+  enabled: true
+
+webhook:
+  enabled: true
+
+# Namespace creation
+namespaceCreate:
+  enabled: true
+
+# RBAC
+rbac:
+  create: true
+  kubeflow:
+    enabled: false
