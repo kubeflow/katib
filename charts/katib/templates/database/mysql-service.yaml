@@ -11,7 +11,7 @@ spec:
   ports:
     - name: dbapi
       port: {{ .Values.database.mysql.service.port }}
-      targetPort: dbapi
+      protocol: TCP
   selector:
     {{- include "katib.mysql.selectorLabels" . | nindent 4 }}
 {{- end }} 

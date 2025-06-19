@@ -183,4 +183,10 @@ istio:
 
 # Pod Security Standards
 podSecurityStandards:
-  enforced: true 
+  enforced: true
+
+# RBAC
+rbac:
+  create: true
+  kubeflow:
+    enabled: false

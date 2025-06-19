@@ -2,17 +2,17 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "katib.fullname" . }}-mysql
+  name: katib-mysql
   namespace: {{ include "katib.namespace" . }}
   labels:
-    {{- include "katib.mysql.labels" . | nindent 4 }}
+    {{- include "katib.mysql.pvcLabels" . | nindent 4 }}
 spec:
   accessModes:
     - ReadWriteOnce
-  {{- if .Values.database.mysql.persistence.storageClass }}
-  storageClassName: {{ .Values.database.mysql.persistence.storageClass }}
-  {{- end }}
   resources:
     requests:
       storage: {{ .Values.database.mysql.persistence.size }}
+  {{- if .Values.database.mysql.persistence.storageClass }}
+  storageClassName: {{ .Values.database.mysql.persistence.storageClass }}
+  {{- end }}
 {{- end }} 

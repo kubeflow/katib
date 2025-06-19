@@ -4,6 +4,17 @@
 global:
   namespace: kubeflow
   imageTag: latest
+  
+  # Enable kustomize compatibility mode
+  kustomizeMode:
+    omitDefaultImagePullPolicy: true
+    omitDefaultProtocol: true
+    omitDefaultServiceType: true
+    omitDefaultFailurePolicy: true
+    omitLabelsFromSecrets: true
+    omitExtraSecretFields: true
+    omitWebhookSecretData: true
+    omitComponentLabels: true
 
 # Controller configuration
 controller:
@@ -19,22 +30,17 @@ database:
     enabled: false
   postgres:
     enabled: true
+    auth:
+      username: katib
+      password: katib
+      database: katib
     persistence:
       enabled: true
-      size: 1Gi  # Smaller for CI
+      size: 3Gi
     livenessProbe:
-      enabled: true
-      initialDelaySeconds: 30
-      periodSeconds: 10
-      timeoutSeconds: 5
-      failureThreshold: 6
+      enabled: false
     readinessProbe:
-      enabled: true
-      initialDelaySeconds: 5
-      periodSeconds: 10
-      timeoutSeconds: 5
-      successThreshold: 1
-      failureThreshold: 6
+      enabled: false
   external:
     enabled: false
 
@@ -65,6 +71,8 @@ crds:
 # RBAC
 rbac:
   create: true
+  kubeflow:
+    enabled: false
 
 # Monitoring - disabled for CI
 monitoring:

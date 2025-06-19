@@ -38,7 +38,7 @@ spec:
       containers:
         - name: katib-controller
           image: {{ include "katib.image" (dict "registry" .Values.global.imageRegistry "repository" .Values.controller.image.repository "tag" (.Values.controller.image.tag | default .Values.global.imageTag) "global" .Values.global) }}
-          imagePullPolicy: {{ .Values.controller.image.pullPolicy | default .Values.global.imagePullPolicy }}
+          {{- include "katib.imagePullPolicy" (dict "pullPolicy" .Values.controller.image.pullPolicy "Values" .Values) | nindent 10 }}
           command: ["./katib-controller"]
           args:
             - --katib-config=/katib-config.yaml

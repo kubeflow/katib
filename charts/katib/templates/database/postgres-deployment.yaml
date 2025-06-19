@@ -18,9 +18,7 @@ spec:
     metadata:
       labels:
         {{- include "katib.postgres.selectorLabels" . | nindent 8 }}
-        {{- if .Values.istio.enabled }}
         sidecar.istio.io/inject: "false"
-        {{- end }}
       annotations:
         {{- with .Values.database.postgres.annotations }}
         {{- toYaml . | nindent 8 }}
@@ -36,8 +34,7 @@ spec:
       {{- end }}
       containers:
         - name: katib-postgres
-          image: {{ include "katib.image" (dict "registry" .Values.global.imageRegistry "repository" .Values.database.postgres.image.repository "tag" .Values.database.postgres.image.tag "global" .Values.global) }}
-          imagePullPolicy: {{ .Values.database.postgres.image.pullPolicy | default .Values.global.imagePullPolicy }}
+          image: postgres:14.5-alpine
           {{- with .Values.database.postgres.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
@@ -55,34 +52,6 @@ spec:
             - name: postgres
               containerPort: 5432
               protocol: TCP
-          {{- if .Values.database.postgres.livenessProbe.enabled }}
-          livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - exec pg_isready -U "{{ .Values.database.postgres.auth.username }}" -h 127.0.0.1 -p 5432
-            initialDelaySeconds: {{ .Values.database.postgres.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.database.postgres.livenessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.database.postgres.livenessProbe.timeoutSeconds }}
-            failureThreshold: {{ .Values.database.postgres.livenessProbe.failureThreshold }}
-          {{- end }}
-          {{- if .Values.database.postgres.readinessProbe.enabled }}
-          readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - -e
-                - |
-                  exec pg_isready -U "{{ .Values.database.postgres.auth.username }}" -h 127.0.0.1 -p 5432
-                  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
-            initialDelaySeconds: {{ .Values.database.postgres.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.database.postgres.readinessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.database.postgres.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.database.postgres.readinessProbe.successThreshold }}
-            failureThreshold: {{ .Values.database.postgres.readinessProbe.failureThreshold }}
-          {{- end }}
           volumeMounts:
             - name: katib-postgres
               mountPath: /var/lib/postgresql/data
@@ -116,4 +85,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-{{- end }} 
+{{- end }}

@@ -5,8 +5,6 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "katib.fullname" . }}-postgres
   namespace: {{ include "katib.namespace" . }}
-  labels:
-    {{- include "katib.postgres.labels" . | nindent 4 }}
   {{- with .Values.database.postgres.persistence.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -30,4 +28,4 @@ spec:
   selector:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-{{- end }} 
+{{- end }}

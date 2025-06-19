@@ -5,8 +5,10 @@ kind: AuthorizationPolicy
 metadata:
   name: {{ include "katib.fullname" . }}-ui
   namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitComponentLabels }}
   labels:
     {{- include "katib.ui.labels" . | nindent 4 }}
+  {{- end }}
   {{- with .Values.istio.authorizationPolicy.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -20,4 +22,4 @@ spec:
     {{- range .Values.istio.authorizationPolicy.rules }}
     - {{- toYaml . | nindent 6 }}
     {{- end }}
-{{- end }} 
+{{- end }}
