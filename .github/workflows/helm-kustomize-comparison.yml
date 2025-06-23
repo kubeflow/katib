@@ -46,6 +46,5 @@ jobs:
       env:
         VERBOSE: "true"
       run: |
-        cd kubeflow-katib
         chmod +x scripts/compare_all_scenarios.sh
         ./scripts/compare_all_scenarios.sh 
