@@ -21,7 +21,12 @@ jobs:
         uses: ./.github/workflows/template-setup-e2e-test
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
-
+      
+      - name: Install Katib SDK with extra requires
+        shell: bash
+        run: |
+          pip install --prefer-binary -e 'sdk/python/v1beta1[huggingface]'
+      
       - name: Run e2e test with tune API
         uses: ./.github/workflows/template-e2e-test
         with:
