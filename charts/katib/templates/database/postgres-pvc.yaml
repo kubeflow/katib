@@ -1,0 +1,31 @@
+{{- if and .Values.database.postgres.enabled .Values.database.postgres.persistence.enabled (eq .Values.database.type "postgres") }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "katib.fullname" . }}-postgres
+  namespace: {{ include "katib.namespace" . }}
+  {{- with .Values.database.postgres.persistence.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.database.postgres.persistence.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.database.postgres.persistence.size | quote }}
+  {{- if .Values.database.postgres.persistence.storageClass }}
+  {{- if (eq "-" .Values.database.postgres.persistence.storageClass) }}
+  storageClassName: ""
+  {{- else }}
+  storageClassName: {{ .Values.database.postgres.persistence.storageClass | quote }}
+  {{- end }}
+  {{- end }}
+  {{- with .Values.database.postgres.persistence.selector }}
+  selector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

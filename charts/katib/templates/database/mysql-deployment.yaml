@@ -1,0 +1,96 @@
+{{- if and (eq .Values.database.type "mysql") .Values.database.mysql.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "katib.fullname" . }}-mysql
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.mysql.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "katib.mysql.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "katib.mysql.selectorLabels" . | nindent 8 }}
+        sidecar.istio.io/inject: "false"
+    spec:
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: katib-mysql
+          image: {{ .Values.database.mysql.image.repository }}:{{ .Values.database.mysql.image.tag }}
+          {{- include "katib.imagePullPolicy" (dict "pullPolicy" .Values.database.mysql.image.pullPolicy "Values" .Values) | nindent 10 }}
+          args:
+            - --datadir
+            - /var/lib/mysql/datadir
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "katib.database.secretName" . }}
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD
+              value: "true"
+            - name: MYSQL_DATABASE
+              value: {{ .Values.database.mysql.auth.database | quote }}
+          ports:
+            - name: dbapi
+              containerPort: 3306
+          readinessProbe:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "mysql -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+          startupProbe:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+            periodSeconds: 15
+            failureThreshold: 60
+          volumeMounts:
+            - name: katib-mysql
+              mountPath: /var/lib/mysql
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            capabilities:
+              drop:
+              - ALL
+          {{- with .Values.database.mysql.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: katib-mysql
+          {{- if .Values.database.mysql.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "katib.fullname" . }}-mysql
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }} 

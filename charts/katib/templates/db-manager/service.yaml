@@ -1,0 +1,24 @@
+{{- if .Values.dbManager.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "katib.fullname" . }}-db-manager
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.dbManager.labels" . | nindent 4 }}
+  {{- with .Values.dbManager.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.dbManager.service.type }}
+  ports:
+    - port: {{ .Values.dbManager.service.port }}
+      {{- if .Values.dbManager.service.targetPort }}
+      targetPort: {{ .Values.dbManager.service.targetPort }}
+      {{- end }}
+      protocol: TCP
+      name: api
+  selector:
+    {{- include "katib.dbManager.selectorLabels" . | nindent 4 }}
+{{- end }} 

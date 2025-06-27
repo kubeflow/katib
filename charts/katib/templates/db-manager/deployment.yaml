@@ -1,0 +1,86 @@
+{{- if .Values.dbManager.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "katib.fullname" . }}-db-manager
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.dbManager.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "katib.dbManager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "katib.dbManager.selectorLabels" . | nindent 8 }}
+        sidecar.istio.io/inject: "false"
+        {{- with .Values.dbManager.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.dbManager.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dbManager.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: katib-db-manager
+          image: {{ include "katib.image" (dict "registry" .Values.global.imageRegistry "repository" .Values.dbManager.image.repository "tag" (.Values.dbManager.image.tag | default .Values.global.imageTag) "global" .Values.global) }}
+          {{- include "katib.imagePullPolicy" (dict "pullPolicy" .Values.dbManager.image.pullPolicy "Values" .Values) | nindent 10 }}
+          command:
+            - "./katib-db-manager"
+          env:
+            {{- include "katib.database.env" . | nindent 12 }}
+            {{- with .Values.dbManager.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: api
+              containerPort: 6789
+              {{- include "katib.protocol" (dict "protocol" "TCP" "Values" .Values) | nindent 14 }}
+          livenessProbe:
+            grpc:
+              port: 6789
+            initialDelaySeconds: 10
+            periodSeconds: 60
+            failureThreshold: 5
+          {{- with .Values.dbManager.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- else }}
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+              - ALL
+          {{- end }}
+          {{- with .Values.dbManager.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.dbManager.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dbManager.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dbManager.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }} 
