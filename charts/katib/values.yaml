@@ -51,6 +51,36 @@ controller:
     tag: ""
     # -- Controller image pull policy (overrides global.imagePullPolicy if set)
     pullPolicy: IfNotPresent
+  
+  # Port configuration
+  ports:
+    # -- Webhook port
+    webhook: 8443
+    # -- Metrics port
+    metrics: 8080
+    # -- Health check port
+    healthz: 18080
+  
+  # Probe configuration
+  probes:
+    readiness:
+      # -- Readiness probe path
+      path: /readyz
+      # -- Readiness probe port
+      port: healthz
+    liveness:
+      # -- Liveness probe path
+      path: /healthz
+      # -- Liveness probe port
+      port: healthz
+  
+  # Command and arguments
+  command:
+    # -- Controller command
+    command: ["./katib-controller"]
+    # -- Controller arguments
+    args:
+      - --katib-config=/katib-config.yaml
     
   # -- Controller resource requests and limits
   resources: {}
@@ -98,14 +128,40 @@ controller:
     enabled: true
     # -- Controller service type
     type: ClusterIP
-    # -- Controller service port
-    port: 8080
-    # -- Controller service target port
-    targetPort: 8080
-    # -- Controller service protocol
-    protocol: TCP
+    # -- Controller service ports configuration
+    ports:
+      webhook:
+        # -- Webhook service port
+        port: 443
+        # -- Webhook service target port
+        targetPort: 8443
+        # -- Webhook service protocol
+        protocol: TCP
+        # -- Webhook service name
+        name: webhook
+      metrics:
+        # -- Metrics service port
+        port: 8080
+        # -- Metrics service target port
+        targetPort: 8080
+        # -- Metrics service protocol
+        protocol: TCP
+        # -- Metrics service name
+        name: metrics
+      healthz:
+        # -- Health check service port
+        port: 18080
+        # -- Health check service target port
+        targetPort: 18080
+        # -- Health check service protocol
+        protocol: TCP
+        # -- Health check service name
+        name: healthz
     # -- Controller service annotations
-    annotations: {}
+    annotations:
+      prometheus.io/port: "8080"
+      prometheus.io/scheme: http
+      prometheus.io/scrape: "true"
 
 # Database configuration
 database:
@@ -115,6 +171,8 @@ database:
   mysql:
     # -- Enable MySQL database
     enabled: true
+    # -- Number of MySQL replicas
+    replicas: 1
     
     image:
       # -- MySQL image repository
@@ -123,6 +181,71 @@ database:
       tag: "8.0.29"
       # -- MySQL image pull policy
       pullPolicy: IfNotPresent
+    
+    # Deployment strategy
+    strategy:
+      # -- MySQL deployment strategy type
+      type: Recreate
+    
+    # Port configuration
+    port:
+      # -- MySQL container port
+      containerPort: 3306
+      # -- MySQL port name
+      name: dbapi
+    
+    # Command and arguments
+    args:
+      - --datadir
+      - /var/lib/mysql/datadir
+    
+    # Probe configuration
+    probes:
+      readiness:
+        # -- Readiness probe initial delay
+        initialDelaySeconds: 10
+        # -- Readiness probe period
+        periodSeconds: 5
+        # -- Readiness probe failure threshold
+        failureThreshold: 10
+      liveness:
+        # -- Liveness probe initial delay
+        initialDelaySeconds: 10
+        # -- Liveness probe period
+        periodSeconds: 5
+        # -- Liveness probe failure threshold
+        failureThreshold: 10
+      startup:
+        # -- Startup probe period
+        periodSeconds: 15
+        # -- Startup probe failure threshold
+        failureThreshold: 60
+    
+    # Security context
+    podSecurityContext:
+      # -- MySQL pod security context fsGroup
+      fsGroup: 999
+      # -- MySQL pod security context fsGroupChangePolicy
+      fsGroupChangePolicy: OnRootMismatch
+    
+    securityContext:
+      # -- MySQL container security context
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 999
+      runAsGroup: 999
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+        - ALL
+    
+    # Volume configuration
+    volumes:
+      # -- MySQL data volume mount path
+      dataPath: "/var/lib/mysql"
+      # -- MySQL volume name
+      volumeName: "katib-mysql"
       
     # -- MySQL resource requests and limits
     resources: {}
@@ -134,6 +257,9 @@ database:
       size: 10Gi
       # -- MySQL storage class
       storageClass: ""
+      # -- MySQL persistence access modes
+      accessModes:
+        - ReadWriteOnce
       
     auth:
       # -- MySQL root password
@@ -153,21 +279,47 @@ database:
       # -- MySQL service port
       port: 3306
       # -- MySQL service target port
-      targetPort: ""
+      targetPort: 3306
       # -- MySQL service protocol
       protocol: TCP
       
   postgres:
     # -- Enable PostgreSQL database
     enabled: false
+    # -- Number of PostgreSQL replicas
+    replicas: 1
     
     image:
       # -- PostgreSQL image repository
       repository: postgres
       # -- PostgreSQL image tag
-      tag: "14.10"
+      tag: "14.5-alpine"
       # -- PostgreSQL image pull policy
       pullPolicy: IfNotPresent
+    
+    # Deployment strategy
+    strategy:
+      # -- PostgreSQL deployment strategy type
+      type: Recreate
+    
+    # Port configuration
+    port:
+      # -- PostgreSQL container port
+      containerPort: 5432
+      # -- PostgreSQL port name
+      name: postgres
+    
+    # Environment configuration
+    envConfig:
+      # -- PGDATA path
+      pgData: "/var/lib/postgresql/data/pgdata"
+    
+    # Volume configuration
+    volumes:
+      # -- PostgreSQL data volume mount path
+      dataPath: "/var/lib/postgresql/data"
+      # -- PostgreSQL volume name
+      volumeName: "katib-postgres"
       
     # -- PostgreSQL resource requests and limits
     resources: {}
@@ -224,9 +376,6 @@ database:
     # -- PostgreSQL volume mounts
     volumeMounts: []
     
-    # -- PostgreSQL volumes
-    volumes: []
-    
     # -- PostgreSQL node selector
     nodeSelector: {}
     
@@ -266,6 +415,8 @@ database:
 dbManager:
   # -- Enable DB Manager
   enabled: true
+  # -- Number of DB Manager replicas
+  replicas: 1
   
   image:
     # -- DB Manager image repository
@@ -274,9 +425,38 @@ dbManager:
     tag: ""
     # -- DB Manager image pull policy (overrides global.imagePullPolicy if set)
     pullPolicy: IfNotPresent
+  
+  # Port configuration
+  port:
+    # -- API container port
+    containerPort: 6789
+    # -- API port name
+    name: api
+  
+  # Command configuration
+  command:
+    # -- DB Manager command
+    command: ["./katib-db-manager"]
+  
+  # Probe configuration
+  probes:
+    liveness:
+      # -- Liveness probe type
+      type: grpc
+      # -- Liveness probe port
+      port: 6789
+      # -- Liveness probe initial delay
+      initialDelaySeconds: 10
+      # -- Liveness probe period
+      periodSeconds: 60
+      # -- Liveness probe failure threshold
+      failureThreshold: 5
     
   # -- DB Manager resource requests and limits
   resources: {}
+  
+  # -- Environment variables for DB Manager containers
+  env: []
     
   # -- Node selector for DB Manager pods
   nodeSelector: {}
@@ -304,8 +484,6 @@ dbManager:
     type: ClusterIP
     # -- DB Manager service port
     port: 6789
-    # -- DB Manager service target port
-    targetPort: ""
     # -- DB Manager service protocol
     protocol: TCP
 
@@ -313,6 +491,8 @@ dbManager:
 ui:
   # -- Enable Katib UI
   enabled: true
+  # -- Number of UI replicas
+  replicas: 1
   
   image:
     # -- UI image repository
@@ -321,6 +501,15 @@ ui:
     tag: ""
     # -- UI image pull policy (overrides global.imagePullPolicy if set)
     pullPolicy: IfNotPresent
+  
+  # Port configuration
+  port:
+    # -- Container port for the UI
+    containerPort: 8080
+    # -- Port argument for the UI command
+    arg: "8080"
+    # -- UI port name
+    name: ui
     
   # -- UI resource requests and limits
   resources: {}
@@ -345,6 +534,9 @@ ui:
   
   # -- Extra annotations for UI pods
   annotations: {}
+  
+  # -- Environment variables for UI containers
+  env: []
   
   serviceAccount:
     # -- Create service account for UI
@@ -383,6 +575,86 @@ webhook:
   enabled: true
   # -- Webhook port
   port: 8443
+  
+  # Webhook configuration details
+  webhooks:
+    validating:
+      # -- Validating webhook name
+      name: "validator.experiment.katib.kubeflow.org"
+      # -- Validating webhook side effects
+      sideEffects: None
+      # -- Admission review versions
+      admissionReviewVersions:
+        - v1
+      # -- Webhook path
+      path: "/validate-experiment"
+      # -- API groups
+      apiGroups:
+        - kubeflow.org
+      # -- API versions
+      apiVersions:
+        - v1beta1
+      # -- Operations
+      operations:
+        - CREATE
+        - UPDATE
+      # -- Resources
+      resources:
+        - experiments
+    
+    mutating:
+      experiment:
+        # -- Mutating webhook name for experiments
+        name: "defaulter.experiment.katib.kubeflow.org"
+        # -- Mutating webhook side effects
+        sideEffects: None
+        # -- Admission review versions
+        admissionReviewVersions:
+          - v1
+        # -- Webhook path
+        path: "/mutate-experiment"
+        # -- API groups
+        apiGroups:
+          - kubeflow.org
+        # -- API versions
+        apiVersions:
+          - v1beta1
+        # -- Operations
+        operations:
+          - CREATE
+          - UPDATE
+        # -- Resources
+        resources:
+          - experiments
+      
+      pod:
+        # -- Mutating webhook name for pods
+        name: "mutator.pod.katib.kubeflow.org"
+        # -- Mutating webhook side effects
+        sideEffects: None
+        # -- Admission review versions
+        admissionReviewVersions:
+          - v1
+        # -- Webhook path
+        path: "/mutate-pod"
+        # -- Namespace selector label
+        namespaceSelectorLabel: "katib.kubeflow.org/metrics-collector-injection"
+        # -- Namespace selector value
+        namespaceSelectorValue: "enabled"
+        # -- Match condition name
+        matchConditionName: "exclude-katib-controller"
+        # -- API groups
+        apiGroups:
+          - ""
+        # -- API versions
+        apiVersions:
+          - v1
+        # -- Operations
+        operations:
+          - CREATE
+        # -- Resources
+        resources:
+          - pods
   
   image:
     # -- Webhook image repository (usually same as controller)

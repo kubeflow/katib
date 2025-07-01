@@ -581,4 +581,45 @@ MySQL labels for PVC (conditionally omit component labels)
 {{- else -}}
 {{ include "katib.mysql.labels" . }}
 {{- end -}}
-{{- end -}} 
+{{- end -}}
+
+{{/*
+Default security context helper
+*/}}
+{{- define "katib.defaultSecurityContext" -}}
+runAsNonRoot: true
+allowPrivilegeEscalation: false
+runAsUser: 1000
+seccompProfile:
+  type: RuntimeDefault
+capabilities:
+  drop:
+  - ALL
+{{- end -}}
+
+{{/*
+Pod annotations helper with sidecar injection
+*/}}
+{{- define "katib.podAnnotations" -}}
+{{- $annotations := dict -}}
+{{- if .sidecarInject -}}
+{{- $_ := set $annotations "sidecar.istio.io/inject" (.sidecarInject | quote) -}}
+{{- end -}}
+{{- if .prometheusAnnotations -}}
+{{- $_ := set $annotations "prometheus.io/scrape" "true" -}}
+{{- $_ := set $annotations "prometheus.io/port" (.prometheusAnnotations.port | quote) -}}
+{{- if .prometheusAnnotations.scheme -}}
+{{- $_ := set $annotations "prometheus.io/scheme" .prometheusAnnotations.scheme -}}
+{{- end -}}
+{{- end -}}
+{{- if .customAnnotations -}}
+{{- range $key, $value := .customAnnotations -}}
+{{- $_ := set $annotations $key $value -}}
+{{- end -}}
+{{- end -}}
+{{- if $annotations -}}
+{{- range $key, $value := $annotations }}
+{{ $key }}: {{ $value }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

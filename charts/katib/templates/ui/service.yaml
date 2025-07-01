@@ -13,7 +13,7 @@ metadata:
 spec:
   type: {{ .Values.ui.service.type }}
   ports:
-    - name: ui
+    - name: {{ .Values.ui.port.name }}
       port: {{ .Values.ui.service.port }}
       targetPort: {{ .Values.ui.service.targetPort }}
       protocol: TCP

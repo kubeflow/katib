@@ -7,28 +7,32 @@ metadata:
   labels:
     {{- include "katib.mysql.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.database.mysql.replicas }}
   selector:
     matchLabels:
       {{- include "katib.mysql.selectorLabels" . | nindent 6 }}
   strategy:
-    type: Recreate
+    type: {{ .Values.database.mysql.strategy.type }}
   template:
     metadata:
       labels:
         {{- include "katib.mysql.selectorLabels" . | nindent 8 }}
         sidecar.istio.io/inject: "false"
     spec:
+      {{- with .Values.database.mysql.podSecurityContext }}
       securityContext:
-        fsGroup: 999
+        {{- toYaml . | nindent 8 }}
+      {{- else }}
+      securityContext:
+        fsGroup: {{ .Values.database.mysql.securityContext.runAsGroup }}
         fsGroupChangePolicy: OnRootMismatch
+      {{- end }}
       containers:
         - name: katib-mysql
           image: {{ .Values.database.mysql.image.repository }}:{{ .Values.database.mysql.image.tag }}
           {{- include "katib.imagePullPolicy" (dict "pullPolicy" .Values.database.mysql.image.pullPolicy "Values" .Values) | nindent 10 }}
           args:
-            - --datadir
-            - /var/lib/mysql/datadir
+            {{- toYaml .Values.database.mysql.args | nindent 12 }}
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
@@ -40,34 +44,34 @@ spec:
             - name: MYSQL_DATABASE
               value: {{ .Values.database.mysql.auth.database | quote }}
           ports:
-            - name: dbapi
-              containerPort: 3306
+            - name: {{ .Values.database.mysql.port.name }}
+              containerPort: {{ .Values.database.mysql.port.containerPort }}
           readinessProbe:
             exec:
               command:
                 - "/bin/bash"
                 - "-c"
                 - "mysql -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 10
+            initialDelaySeconds: {{ .Values.database.mysql.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.database.mysql.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.database.mysql.probes.readiness.failureThreshold }}
           livenessProbe:
             exec:
               command:
                 - "/bin/bash"
                 - "-c"
                 - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            failureThreshold: 10
+            initialDelaySeconds: {{ .Values.database.mysql.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.database.mysql.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.database.mysql.probes.liveness.failureThreshold }}
           startupProbe:
             exec:
               command:
                 - "/bin/bash"
                 - "-c"
                 - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-            periodSeconds: 15
-            failureThreshold: 60
+            periodSeconds: {{ .Values.database.mysql.probes.startup.periodSeconds }}
+            failureThreshold: {{ .Values.database.mysql.probes.startup.failureThreshold }}
           volumeMounts:
             - name: katib-mysql
               mountPath: /var/lib/mysql

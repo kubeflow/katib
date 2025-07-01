@@ -10,8 +10,8 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 5432
-      protocol: TCP
+    - port: {{ .Values.database.postgres.service.port }}
+      protocol: {{ .Values.database.postgres.service.protocol }}
       name: dbapi
   selector:
     {{- include "katib.postgres.selectorLabels" . | nindent 4 }}
