@@ -12,7 +12,7 @@ metadata:
     katib.kubeflow.org/component: controller
   {{- end }}
   annotations:
-    prometheus.io/port: "8080"
+    prometheus.io/port: "{{ .Values.controller.service.ports.metrics.port }}"
     prometheus.io/scheme: http
     prometheus.io/scrape: "true"
     {{- if and .Values.openshift.enabled .Values.openshift.serviceCertificates }}
@@ -24,16 +24,16 @@ metadata:
 spec:
   {{- include "katib.serviceType" (dict "type" .Values.controller.service.type "Values" .Values) | nindent 2 }}
   ports:
-    - port: 443
-      protocol: TCP
-      targetPort: 8443
-      name: webhook
-    - name: metrics
-      port: 8080
-      targetPort: 8080
-    - name: healthz
-      port: 18080
-      targetPort: 18080
+    - port: {{ .Values.controller.service.ports.webhook.port }}
+      protocol: {{ .Values.controller.service.ports.webhook.protocol }}
+      targetPort: {{ .Values.controller.service.ports.webhook.targetPort }}
+      name: {{ .Values.controller.service.ports.webhook.name }}
+    - name: {{ .Values.controller.service.ports.metrics.name }}
+      port: {{ .Values.controller.service.ports.metrics.port }}
+      targetPort: {{ .Values.controller.service.ports.metrics.targetPort }}
+    - name: {{ .Values.controller.service.ports.healthz.name }}
+      port: {{ .Values.controller.service.ports.healthz.port }}
+      targetPort: {{ .Values.controller.service.ports.healthz.targetPort }}
   selector:
     {{- include "katib.controller.selectorLabels" . | nindent 4 }}
 {{- end }} 

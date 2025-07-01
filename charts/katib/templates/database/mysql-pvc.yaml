@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: katib-mysql
+  name: {{ include "katib.fullname" . }}-mysql
   namespace: {{ include "katib.namespace" . }}
   labels:
     {{- include "katib.mysql.pvcLabels" . | nindent 4 }}

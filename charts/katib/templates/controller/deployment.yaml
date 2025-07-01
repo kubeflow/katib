@@ -21,7 +21,7 @@ spec:
         {{- end }}
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
+        prometheus.io/port: "{{ .Values.controller.ports.metrics }}"
         {{- with .Values.controller.annotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -39,27 +39,27 @@ spec:
         - name: katib-controller
           image: {{ include "katib.image" (dict "registry" .Values.global.imageRegistry "repository" .Values.controller.image.repository "tag" (.Values.controller.image.tag | default .Values.global.imageTag) "global" .Values.global) }}
           {{- include "katib.imagePullPolicy" (dict "pullPolicy" .Values.controller.image.pullPolicy "Values" .Values) | nindent 10 }}
-          command: ["./katib-controller"]
+          command: {{ toYaml .Values.controller.command.command | nindent 12 }}
           args:
-            - --katib-config=/katib-config.yaml
+            {{- toYaml .Values.controller.command.args | nindent 12 }}
           ports:
-            - containerPort: 8443
-              name: webhook
+            - containerPort: {{ .Values.controller.ports.webhook }}
+              name: {{ .Values.controller.service.ports.webhook.name }}
               protocol: TCP
-            - containerPort: 8080
-              name: metrics
+            - containerPort: {{ .Values.controller.ports.metrics }}
+              name: {{ .Values.controller.service.ports.metrics.name }}
               protocol: TCP
-            - containerPort: 18080
-              name: healthz
+            - containerPort: {{ .Values.controller.ports.healthz }}
+              name: {{ .Values.controller.service.ports.healthz.name }}
               protocol: TCP
           readinessProbe:
             httpGet:
-              path: /readyz
-              port: healthz
+              path: {{ .Values.controller.probes.readiness.path }}
+              port: {{ .Values.controller.probes.readiness.port }}
           livenessProbe:
             httpGet:
-              path: /healthz
-              port: healthz
+              path: {{ .Values.controller.probes.liveness.path }}
+              port: {{ .Values.controller.probes.liveness.port }}
           env:
             - name: KATIB_CORE_NAMESPACE
               valueFrom:

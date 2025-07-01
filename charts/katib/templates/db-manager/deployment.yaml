@@ -7,7 +7,7 @@ metadata:
   labels:
     {{- include "katib.dbManager.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.dbManager.replicas }}
   selector:
     matchLabels:
       {{- include "katib.dbManager.selectorLabels" . | nindent 6 }}
@@ -44,15 +44,15 @@ spec:
             {{- toYaml . | nindent 12 }}
             {{- end }}
           ports:
-            - name: api
-              containerPort: 6789
+            - name: {{ .Values.dbManager.port.name }}
+              containerPort: {{ .Values.dbManager.port.containerPort }}
               {{- include "katib.protocol" (dict "protocol" "TCP" "Values" .Values) | nindent 14 }}
           livenessProbe:
             grpc:
-              port: 6789
-            initialDelaySeconds: 10
-            periodSeconds: 60
-            failureThreshold: 5
+              port: {{ .Values.dbManager.probes.liveness.port }}
+            initialDelaySeconds: {{ .Values.dbManager.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.dbManager.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.dbManager.probes.liveness.failureThreshold }}
           {{- with .Values.dbManager.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
