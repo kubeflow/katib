@@ -1,0 +1,136 @@
+# Cert-Manager Installation Profile
+# This profile enables cert-manager for automated certificate management
+
+global:
+  namespace: kubeflow
+  imageTag: latest
+  
+  # Enable kustomize compatibility mode
+  kustomizeMode:
+    omitDefaultImagePullPolicy: true
+    omitDefaultProtocol: true
+    omitDefaultServiceType: true
+    omitDefaultFailurePolicy: true
+    omitLabelsFromSecrets: true
+    omitExtraSecretFields: true
+    omitWebhookSecretData: true
+    omitComponentLabels: true
+
+# Standard components
+controller:
+  enabled: true
+
+ui:
+  enabled: true
+
+dbManager:
+  enabled: true
+
+# MySQL database
+mysql:
+  enabled: true
+
+# Webhook with cert-manager
+webhook:
+  enabled: true
+  
+  certManager:
+    enabled: true
+    injectCaFrom: true
+    
+    issuerRef:
+      createSelfSigned: true
+      kind: Issuer
+      name: ""
+      group: ""
+    
+    certificate:
+      subject: {}
+      privateKey: {}
+      usages: []
+
+  certificate:
+    # Match Kustomize Certificate settings
+    duration: 8760h  # 1 year
+    renewBefore: 720h  # 30 days
+  
+  validating:
+    enabled: true
+    annotations:
+      cert-manager.io/inject-ca-from: kubeflow/katib-webhook-cert
+  
+  mutating:
+    enabled: true
+    annotations:
+      cert-manager.io/inject-ca-from: kubeflow/katib-webhook-cert
+
+# Namespace creation
+namespaceCreate:
+  enabled: true
+
+# Override config for cert-manager scenario
+config:
+  katibConfig: |
+    apiVersion: config.kubeflow.org/v1beta1
+    kind: KatibConfig
+    init:
+      controller:
+        webhookPort: 8443
+        trialResources:
+          - Job.v1.batch
+          - TFJob.v1.kubeflow.org
+          - PyTorchJob.v1.kubeflow.org
+          - MPIJob.v1.kubeflow.org
+          - XGBoostJob.v1.kubeflow.org
+    runtime:
+      metricsCollectors:
+        - kind: StdOut
+          image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+        - kind: File
+          image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+        - kind: TensorFlowEvent
+          image: ghcr.io/kubeflow/katib/tfevent-metrics-collector:latest
+          resources:
+            limits:
+              memory: 1Gi
+      suggestions:
+        - algorithmName: random
+          image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+        - algorithmName: tpe
+          image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+        - algorithmName: grid
+          image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+        - algorithmName: hyperband
+          image: ghcr.io/kubeflow/katib/suggestion-hyperband:latest
+        - algorithmName: bayesianoptimization
+          image: ghcr.io/kubeflow/katib/suggestion-skopt:latest
+        - algorithmName: cmaes
+          image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+        - algorithmName: sobol
+          image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+        - algorithmName: multivariate-tpe
+          image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+        - algorithmName: enas
+          image: ghcr.io/kubeflow/katib/suggestion-enas:latest
+          resources:
+            limits:
+              memory: 400Mi
+        - algorithmName: darts
+          image: ghcr.io/kubeflow/katib/suggestion-darts:latest
+        - algorithmName: pbt
+          image: ghcr.io/kubeflow/katib/suggestion-pbt:latest
+          persistentVolumeClaimSpec:
+            accessModes:
+              - ReadWriteMany
+            resources:
+              requests:
+                storage: 5Gi
+      earlyStoppings:
+        - algorithmName: medianstop
+          image: ghcr.io/kubeflow/katib/earlystopping-medianstop:latest
+
+# RBAC
+rbac:
+  create: true
+  kubeflow:
+    enabled: false  # Disable Kubeflow-specific RBAC for cert-manager scenario 

@@ -1,0 +1,50 @@
+{{- if and .Values.webhook.enabled .Values.webhook.validating.enabled }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ include "katib.webhook.validatingName" . }}
+  labels:
+    {{- include "katib.webhook.labels" . | nindent 4 }}
+  {{- if or .Values.webhook.validating.annotations .Values.webhook.certManager.enabled .Values.openshift.serviceCertificates }}
+  annotations:
+    {{- with .Values.webhook.validating.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- if .Values.webhook.certManager.enabled }}
+    cert-manager.io/inject-ca-from: {{ include "katib.namespace" . }}/katib-webhook-cert
+    {{- end }}
+    {{- if and .Values.openshift.enabled .Values.openshift.serviceCertificates }}
+    service.beta.openshift.io/inject-cabundle: "true"
+    {{- end }}
+  {{- end }}
+webhooks:
+  - name: validator.experiment.katib.kubeflow.org
+    sideEffects: None
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ include "katib.controller.serviceName" . }}
+        namespace: {{ include "katib.namespace" . }}
+        path: /validate-experiment
+      {{- if and (not .Values.webhook.certManager.enabled) (not .Values.openshift.serviceCertificates) }}
+      caBundle: {{ .Values.webhook.caBundle | b64enc }}
+      {{- end }}
+    rules:
+      - apiGroups:
+          - kubeflow.org
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - experiments
+    {{- with .Values.webhook.validating.failurePolicy }}
+    failurePolicy: {{ . }}
+    {{- end }}
+    {{- with .Values.webhook.validating.namespaceSelector }}
+    namespaceSelector:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+{{- end }}
