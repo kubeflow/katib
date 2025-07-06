@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 
-import yaml
-import sys
 import json
-from typing import Dict, List, Tuple, Any
 import re
+import sys
+from typing import Any, Dict, List, Tuple
+
+import yaml
+
 
 def load_manifests(file_path: str) -> List[Dict]:
     """Load YAML manifests from file."""
