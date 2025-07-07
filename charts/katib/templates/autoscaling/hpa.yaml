@@ -1,0 +1,125 @@
+{{- if .Values.autoscaling.enabled }}
+{{- if and .Values.controller.enabled .Values.autoscaling.controller.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "katib.fullname" . }}-controller
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.controller.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "katib.fullname" . }}-controller
+  minReplicas: {{ .Values.autoscaling.controller.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.controller.maxReplicas }}
+  metrics:
+    {{- if .Values.autoscaling.controller.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.controller.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.autoscaling.controller.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.controller.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    {{- with .Values.autoscaling.controller.customMetrics }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if .Values.autoscaling.controller.behavior }}
+  behavior:
+    {{- toYaml .Values.autoscaling.controller.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- if and .Values.ui.enabled .Values.autoscaling.ui.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "katib.fullname" . }}-ui
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.ui.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "katib.fullname" . }}-ui
+  minReplicas: {{ .Values.autoscaling.ui.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.ui.maxReplicas }}
+  metrics:
+    {{- if .Values.autoscaling.ui.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.ui.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.autoscaling.ui.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.ui.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    {{- with .Values.autoscaling.ui.customMetrics }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if .Values.autoscaling.ui.behavior }}
+  behavior:
+    {{- toYaml .Values.autoscaling.ui.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- if and .Values.dbManager.enabled .Values.autoscaling.dbManager.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "katib.fullname" . }}-db-manager
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.dbManager.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "katib.fullname" . }}-db-manager
+  minReplicas: {{ .Values.autoscaling.dbManager.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.dbManager.maxReplicas }}
+  metrics:
+    {{- if .Values.autoscaling.dbManager.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.dbManager.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.autoscaling.dbManager.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.dbManager.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    {{- with .Values.autoscaling.dbManager.customMetrics }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- if .Values.autoscaling.dbManager.behavior }}
+  behavior:
+    {{- toYaml .Values.autoscaling.dbManager.behavior | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }} 

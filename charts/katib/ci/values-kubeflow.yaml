@@ -1,0 +1,178 @@
+# CI values for Kubeflow integration
+# This corresponds to the katib-with-kubeflow installation profile
+
+global:
+  namespace: kubeflow
+  imageTag: latest
+  
+  # Enable kustomize compatibility mode
+  kustomizeMode:
+    omitDefaultImagePullPolicy: true
+    omitDefaultProtocol: true
+    omitDefaultServiceType: true
+    omitDefaultFailurePolicy: true
+    omitLabelsFromSecrets: true
+    omitExtraSecretFields: true
+    omitWebhookSecretData: true
+    omitComponentLabels: true
+
+# Controller configuration
+controller:
+  enabled: true
+  replicas: 1
+  leaderElection:
+    enabled: false
+
+# Database configuration - MySQL
+database:
+  type: mysql
+  mysql:
+    enabled: true
+    persistence:
+      enabled: true
+      size: 10Gi
+  postgres:
+    enabled: false
+  external:
+    enabled: false
+
+# DB Manager
+dbManager:
+  enabled: true
+
+# UI configuration
+ui:
+  enabled: true
+  env:
+    - name: APP_DISABLE_AUTH
+      value: "false"
+
+# Webhook configuration
+webhook:
+  enabled: true
+  certManager:
+    enabled: true
+  validating:
+    enabled: true
+  mutating:
+    enabled: true
+    podMutator:
+      enabled: true
+
+# CRDs
+crds:
+  install: true
+
+# RBAC
+rbac:
+  create: true
+  kubeflow:
+    enabled: true
+
+# Monitoring - disabled for CI
+monitoring:
+  prometheus:
+    enabled: false
+
+# Istio - enabled for Kubeflow
+istio:
+  enabled: true
+  authorizationPolicy:
+    enabled: true
+    action: ALLOW
+    rules:
+      - from:
+          - source:
+              principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+  virtualService:
+    enabled: true
+    gateways:
+      - kubeflow-gateway
+    hosts:
+      - "*"
+    http:
+      - match:
+          - uri:
+              prefix: /katib/
+        rewrite:
+          uri: /katib/
+        route:
+          - destination:
+              host: katib-ui.kubeflow.svc.cluster.local
+              port:
+                number: 80
+
+# Katib configuration
+config:
+  katibConfig: |
+    apiVersion: config.kubeflow.org/v1beta1
+    kind: KatibConfig
+    init:
+      controller:
+        webhookPort: 8443
+        trialResources:
+          - Job.v1.batch
+          - TFJob.v1.kubeflow.org
+          - PyTorchJob.v1.kubeflow.org
+          - MPIJob.v1.kubeflow.org
+          - XGBoostJob.v1.kubeflow.org
+    runtime:
+      metricsCollectors:
+        - kind: StdOut
+          image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+        - kind: File
+          image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+        - kind: TensorFlowEvent
+          image: ghcr.io/kubeflow/katib/tfevent-metrics-collector:latest
+          resources:
+            limits:
+              memory: 1Gi
+      suggestions:
+        - algorithmName: random
+          image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+        - algorithmName: tpe
+          image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+        - algorithmName: grid
+          image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+        - algorithmName: hyperband
+          image: ghcr.io/kubeflow/katib/suggestion-hyperband:latest
+        - algorithmName: bayesianoptimization
+          image: ghcr.io/kubeflow/katib/suggestion-skopt:latest
+        - algorithmName: cmaes
+          image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+        - algorithmName: sobol
+          image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+        - algorithmName: multivariate-tpe
+          image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+        - algorithmName: enas
+          image: ghcr.io/kubeflow/katib/suggestion-enas:latest
+          resources:
+            limits:
+              memory: 400Mi
+        - algorithmName: darts
+          image: ghcr.io/kubeflow/katib/suggestion-darts:latest
+        - algorithmName: pbt
+          image: ghcr.io/kubeflow/katib/suggestion-pbt:latest
+          persistentVolumeClaimSpec:
+            accessModes:
+              - ReadWriteMany
+            resources:
+              requests:
+                storage: 5Gi
+      earlyStoppings:
+        - algorithmName: medianstop
+          image: ghcr.io/kubeflow/katib/earlystopping-medianstop:latest
+
+# Security features - disabled for CI simplicity
+networkPolicy:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+# Namespace creation
+namespaceCreate:
+  enabled: false

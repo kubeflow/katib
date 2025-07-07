@@ -1,0 +1,47 @@
+{{- if and .Values.database.postgres.enabled (eq .Values.database.type "postgres") }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "katib.fullname" . }}-postgres
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.postgres.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.database.postgres.replicas }}
+  selector:
+    matchLabels:
+      {{- include "katib.postgres.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: {{ .Values.database.postgres.strategy.type }}
+  template:
+    metadata:
+      labels:
+        {{- include "katib.postgres.selectorLabels" . | nindent 8 }}
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: katib-postgres
+          image: {{ .Values.database.postgres.image.repository }}:{{ .Values.database.postgres.image.tag }}
+          envFrom:
+            - secretRef:
+                name: {{ include "katib.database.secretName" . }}
+          env:
+            - name: PGDATA
+              value: {{ .Values.database.postgres.envConfig.pgData | quote }}
+          ports:
+            - name: {{ .Values.database.postgres.port.name }}
+              containerPort: {{ .Values.database.postgres.port.containerPort }}
+              protocol: TCP
+          volumeMounts:
+            - name: {{ .Values.database.postgres.volumes.volumeName }}
+              mountPath: {{ .Values.database.postgres.volumes.dataPath }}
+      volumes:
+        - name: {{ .Values.database.postgres.volumes.volumeName }}
+          {{- if .Values.database.postgres.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "katib.fullname" . }}-postgres
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}
