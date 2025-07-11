@@ -1,15 +1,18 @@
-<h1 align="center">
-    <img src="./docs/images/logo-title.png" alt="logo" width="200">
-  <br>
-</h1>
+# Kubeflow Katib
 
 [![Build Status](https://github.com/kubeflow/katib/actions/workflows/test-go.yaml/badge.svg?branch=master)](https://github.com/kubeflow/katib/actions/workflows/test-go.yaml?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/kubeflow/katib/badge.svg?branch=master)](https://coveralls.io/github/kubeflow/katib?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubeflow/katib)](https://goreportcard.com/report/github.com/kubeflow/katib)
 [![Releases](https://img.shields.io/github/release-pre/kubeflow/katib.svg?sort=semver)](https://github.com/kubeflow/katib/releases)
 [![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9941/badge)](https://www.bestpractices.dev/projects/9941)
 
-Katib is a Kubernetes-native project for automated machine learning (AutoML).
+<h1 align="center">
+    <img src="./docs/images/logo-title.png" alt="logo" width="200">
+  <br>
+</h1>
+
+Kubeflow Katib is a Kubernetes-native project for automated machine learning (AutoML).
 Katib supports
 [Hyperparameter Tuning](https://en.wikipedia.org/wiki/Hyperparameter_optimization),
 [Early Stopping](https://en.wikipedia.org/wiki/Early_stopping) and
