@@ -1,0 +1,148 @@
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: katib-controller
+  labels:
+    {{- include "katib.controller.clusterRoleLabels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - "create"
+  - "patch"
+  - "update"
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  - persistentvolumes
+  - persistentvolumeclaims
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - configmaps
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/status
+  verbs:
+  - "get"
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "patch"
+  - "update"
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - roles
+  - rolebindings
+  verbs:
+  - "get"
+  - "create"
+  - "list"
+  - "watch"
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  - cronjobs
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"
+- apiGroups:
+  - kubeflow.org
+  resources:
+  - tfjobs
+  - pytorchjobs
+  - mpijobs
+  - xgboostjobs
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+  - "create"
+  - "delete"
+- apiGroups:
+  - kubeflow.org
+  resources:
+  - experiments
+  - experiments/status
+  - experiments/finalizers
+  - trials
+  - trials/status
+  - trials/finalizers
+  - suggestions
+  - suggestions/status
+  - suggestions/finalizers
+  verbs:
+  - "*"
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  - mutatingwebhookconfigurations
+  verbs:
+  - "get"
+  - "watch"
+  - "list"
+  - "patch"
+  - "update"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: katib-controller
+  labels:
+    {{- include "katib.controller.clusterRoleLabels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: katib-controller
+subjects:
+- kind: ServiceAccount
+  name: {{ include "katib.controller.serviceAccountName" . }}
+  namespace: {{ include "katib.namespace" . }}
+{{- end }} 

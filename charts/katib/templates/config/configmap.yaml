@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "katib.config.configMapName" . }}
+  namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitComponentLabels }}
+  labels:
+    {{- include "katib.labels" . | nindent 4 }}
+  {{- end }}
+data:
+  katib-config.yaml: |
+{{ .Values.config.katibConfig | indent 4 }} 
