@@ -1,9 +1,10 @@
 approvers:
   - andreyvelich
   - gaocegege
-  - tenzen-y
   - johnugeorge
 reviewers:
   - anencore94
   - c-bata
   - Electronic-Waste
+emeritus_approvers:
+  - tenzen-y
