@@ -43,7 +43,7 @@ spec:
         description: An additional argument for the training model
         reference: arg
     trialSpec:
-      apiVersion: kubeflow.org/v1alpha1
+      apiVersion: trainer.kubeflow.org/v1alpha1
       kind: TrainJob
       spec:
         runtimeRef:
