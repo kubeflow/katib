@@ -25,11 +25,6 @@ spec:
       feasibleSpace:
         min: "0.5"
         max: "0.9"
-    #- name: arg
-    #  parameterType: int
-    #  feasibleSpace:
-    #    min: 1
-    #    max: 5
   trialTemplate:
     primaryContainerName: pytorch
     trialParameters:
@@ -39,9 +34,6 @@ spec:
       - name: momentum
         description: Momentum for the training model
         reference: momentum
-      - name: arg
-        description: An additional argument for the training model
-        reference: arg
     trialSpec:
       apiVersion: trainer.kubeflow.org/v1alpha1
       kind: TrainJob
@@ -57,9 +49,4 @@ spec:
             - "--epochs=1"
             - "--lr=${trialParameters.learningRate}"
             - "--momentum=${trialParameters.momentum}"
-          #image: docker.io/kubeflowkatib/pytorch-deepspeed_train_t5:latest
-          #command:
-          #  - "python3"
-          #  - "/opt/pytorch-deepspeed/t5_llm.py"
-          #  - "--arg=${trialParameters.arg}"
 
