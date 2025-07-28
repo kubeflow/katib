@@ -26,7 +26,7 @@ spec:
         min: "0.5"
         max: "0.9"
   trialTemplate:
-    primaryContainerName: pytorch
+    primaryContainerName: node
     trialParameters:
       - name: learningRate
         description: Learning rate for the training model
