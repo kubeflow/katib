@@ -1,0 +1,92 @@
+# CI values for standalone installation with MySQL
+# This corresponds to the katib-standalone installation profile
+
+global:
+  namespace: kubeflow
+  imageTag: latest
+  
+  # Enable kustomize compatibility mode
+  kustomizeMode:
+    omitDefaultImagePullPolicy: true
+    omitDefaultProtocol: true
+    omitDefaultServiceType: true
+    omitDefaultFailurePolicy: true
+    omitLabelsFromSecrets: true
+    omitExtraSecretFields: true
+    omitWebhookSecretData: true
+    omitComponentLabels: true
+
+# Controller configuration
+controller:
+  enabled: true
+  replicas: 1
+  leaderElection:
+    enabled: false
+
+# Database configuration - MySQL
+database:
+  type: mysql
+  mysql:
+    enabled: true
+    persistence:
+      size: 10Gi
+    service:
+      targetPort: ""
+  postgres:
+    enabled: false
+  external:
+    enabled: false
+
+# DB Manager
+dbManager:
+  enabled: true
+
+# UI configuration
+ui:
+  enabled: true
+
+# Webhook configuration
+webhook:
+  enabled: true
+  certManager:
+    enabled: false  # Use self-signed for CI
+  validating:
+    enabled: true
+  mutating:
+    enabled: true
+    podMutator:
+      enabled: true
+  failurePolicy: ""
+
+# CRDs
+crds:
+  install: true
+
+# RBAC
+rbac:
+  create: true
+  kubeflow:
+    enabled: false
+
+# Monitoring - disabled for CI
+monitoring:
+  prometheus:
+    enabled: false
+
+# Istio - disabled for standalone
+istio:
+  enabled: false
+
+# Security features - disabled for CI simplicity
+networkPolicy:
+  enabled: false
+
+podDisruptionBudget:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+# Namespace creation
+namespaceCreate:
+  enabled: true 
