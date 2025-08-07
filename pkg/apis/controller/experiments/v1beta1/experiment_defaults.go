@@ -118,7 +118,17 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			if len(t.PrimaryPodLabels) == 0 {
 				t.PrimaryPodLabels = DefaultKubeflowJobPrimaryPodLabels
 			}
-		}
+		} else if jobKind == "TrainJob" {
+            if t.SuccessCondition == "" {
+                t.SuccessCondition = DefaultTrainJobSuccessCondition
+            }
+            if t.FailureCondition == "" {
+                t.FailureCondition = DefaultTrainJobFailureCondition
+            }
+            if len(t.PrimaryPodLabels) == 0 {
+				t.PrimaryPodLabels = DefaultTrainJobPrimaryPodLabels
+			}
+        }
 	}
 	e.Spec.TrialTemplate = t
 }
