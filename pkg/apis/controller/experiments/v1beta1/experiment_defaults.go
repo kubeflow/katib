@@ -109,26 +109,28 @@ func (e *Experiment) setDefaultTrialTemplate() {
 			}
 		} else if _, ok := KubeflowJobKinds[jobKind]; ok {
 			if t.SuccessCondition == "" {
-				t.SuccessCondition = DefaultKubeflowJobSuccessCondition
+				if jobKind == "TrainJob" {
+					t.SuccessCondition = DefaultTrainJobSuccessCondition
+				} else {
+					t.SuccessCondition = DefaultKubeflowJobSuccessCondition		
 			}
 			if t.FailureCondition == "" {
-				t.FailureCondition = DefaultKubeflowJobFailureCondition
+				if jobKind == "TrainJob" {
+					t.FailureCondition = DefaultTrainJobFailureCondition
+				} else {
+					t.FailureCondition = DefaultKubeflowJobFailureCondition
+				}
 			}
 			// For Kubeflow Job also set default PrimaryPodLabels
 			if len(t.PrimaryPodLabels) == 0 {
-				t.PrimaryPodLabels = DefaultKubeflowJobPrimaryPodLabels
+				if jobKind == "TrainJob" {
+					t.PrimaryPodLabels = DefaultTrainJobPrimaryPodLabels
+				} else {
+					t.PrimaryPodLabels = DefaultKubeflowJobPrimaryPodLabels
+				}
+
 			}
-		} else if jobKind == "TrainJob" {
-            if t.SuccessCondition == "" {
-                t.SuccessCondition = DefaultTrainJobSuccessCondition
-            }
-            if t.FailureCondition == "" {
-                t.FailureCondition = DefaultTrainJobFailureCondition
-            }
-            if len(t.PrimaryPodLabels) == 0 {
-				t.PrimaryPodLabels = DefaultTrainJobPrimaryPodLabels
-			}
-        }
+		} 
 	}
 	e.Spec.TrialTemplate = t
 }
