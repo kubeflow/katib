@@ -113,6 +113,7 @@ func (e *Experiment) setDefaultTrialTemplate() {
 					t.SuccessCondition = DefaultTrainJobSuccessCondition
 				} else {
 					t.SuccessCondition = DefaultKubeflowJobSuccessCondition		
+				}
 			}
 			if t.FailureCondition == "" {
 				if jobKind == "TrainJob" {
