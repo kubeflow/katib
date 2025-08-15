@@ -91,6 +91,16 @@ rules:
       - "create"
       - "delete"
   - apiGroups:
+      - trainer.kubeflow.org
+    resources:
+      - trainjobs
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+  - apiGroups:
       - kubeflow.org
     resources:
       - tfjobs
