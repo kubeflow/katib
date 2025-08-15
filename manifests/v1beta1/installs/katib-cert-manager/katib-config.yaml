@@ -5,6 +5,7 @@ init:
   controller:
     webhookPort: 8443
     trialResources:
+      - TrainJob.v1alpha1.trainer.kubeflow.org
       - Job.v1.batch
       - TFJob.v1.kubeflow.org
       - PyTorchJob.v1.kubeflow.org
