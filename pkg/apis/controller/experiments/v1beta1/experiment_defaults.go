@@ -112,7 +112,7 @@ func (e *Experiment) setDefaultTrialTemplate() {
 				if jobKind == "TrainJob" {
 					t.SuccessCondition = DefaultTrainJobSuccessCondition
 				} else {
-					t.SuccessCondition = DefaultKubeflowJobSuccessCondition		
+					t.SuccessCondition = DefaultKubeflowJobSuccessCondition
 				}
 			}
 			if t.FailureCondition == "" {
@@ -131,7 +131,7 @@ func (e *Experiment) setDefaultTrialTemplate() {
 				}
 
 			}
-		} 
+		}
 	}
 	e.Spec.TrialTemplate = t
 }
