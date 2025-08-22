@@ -49,4 +49,3 @@ spec:
             - "--epochs=1"
             - "--lr=${trialParameters.learningRate}"
             - "--momentum=${trialParameters.momentum}"
-

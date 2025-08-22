@@ -47,7 +47,7 @@ var (
 	DefaultKubeflowJobPrimaryPodLabels = map[string]string{"training.kubeflow.org/job-role": "master"}
 
 	// DefaultKubeflowJobPrimaryPodLabels is the default value of spec.trialTemplate.primaryPodLabels for Training Operator Job.
-	DefaultTrainJobPrimaryPodLabels = map[string]string{"jobset.sigs.k8s.io/replicatedjob-name": "node"}
+	DefaultTrainJobPrimaryPodLabels = map[string]string{"jobset.sigs.k8s.io/replicatedjob-name": "node", "batch.kubernetes.io/job-completion-index": "0"}
 
 	// KubeflowJobKinds is the list of Kubeflow Training Job kinds.
 	KubeflowJobKinds = map[string]bool{
