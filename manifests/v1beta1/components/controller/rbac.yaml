@@ -106,8 +106,6 @@ rules:
       - "get"
       - "list"
       - "watch"
-      - "create"
-      - "delete"
   - apiGroups:
       - kubeflow.org
     resources:
