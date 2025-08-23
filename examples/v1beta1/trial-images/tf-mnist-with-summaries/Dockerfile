@@ -8,7 +8,7 @@ WORKDIR /opt/tf-mnist-with-summaries
 
 RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     apt-get -y update && \
-    apt-get -y install gfortran libpcre3 libpcre3-dev && \
+    apt-get -y install gfortran libpcre2-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*; \
     fi
