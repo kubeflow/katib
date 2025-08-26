@@ -234,7 +234,7 @@ def get_exec_script_from_objective(
     entrypoint: str,
     input_params: Dict[str, Any],
     packages_to_install: Optional[List[str]] = None,
-    pip_index_urls: Optiona[List[str]] = ["https://pypi.org/simple"],
+    pip_index_urls: Optional[List[str]] = ["https://pypi.org/simple"],
 ) -> str:
     """
     Get executable script for container args from the given objective function and parameters.
