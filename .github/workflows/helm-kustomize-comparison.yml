@@ -45,6 +45,4 @@ jobs:
     - name: Run all scenarios comparison
       env:
         VERBOSE: "true"
-      run: |
-        chmod +x scripts/compare_all_scenarios.sh
-        ./scripts/compare_all_scenarios.sh 
+      run: ./scripts/compare_all_scenarios.sh 
