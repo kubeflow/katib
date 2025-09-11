@@ -6,6 +6,7 @@
 [![Releases](https://img.shields.io/github/release-pre/kubeflow/katib.svg?sort=semver)](https://github.com/kubeflow/katib/releases)
 [![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://www.kubeflow.org/docs/about/community/#kubeflow-slack-channels)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9941/badge)](https://www.bestpractices.dev/projects/9941)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkubeflow%2Fkatib.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkubeflow%2Fkatib?ref=badge_shield)
 
 <h1 align="center">
     <img src="./docs/images/logo-title.png" alt="logo" width="200">
@@ -221,3 +222,7 @@ Bibtex entry:
     primaryClass={cs.DC}
 }
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkubeflow%2Fkatib.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkubeflow%2Fkatib?ref=badge_large)
