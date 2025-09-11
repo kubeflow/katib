@@ -214,7 +214,7 @@ class KatibClient(object):
         ] = None,
         retain_trials: bool = False,
         packages_to_install: List[str] = None,
-        pip_index_url: str = "https://pypi.org/simple",
+        pip_index_urls : Optional[List[str]] = ["https://pypi.org/simple"],
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
     ):
         """
@@ -351,7 +351,7 @@ class KatibClient(object):
             packages_to_install: List of Python packages to install in addition
                 to the base image packages. These packages are installed before
                 executing the objective function.
-            pip_index_url: The PyPI url from which to install Python packages.
+            pip_index_urls: List of PyPI urls from which to install Python packages.
             metrics_collector_config: Specify the config of metrics collector,
                 for example, `metrics_collector_config = {"kind": "Push"}`.
                 Currently, we only support `StdOut` and `Push` metrics collector.
@@ -462,7 +462,7 @@ class KatibClient(object):
                 entrypoint,
                 input_params,
                 packages_to_install,
-                pip_index_url,
+                pip_index_urls,
             )
 
             # Generate container spec for PyTorchJob or Job.

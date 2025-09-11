@@ -114,8 +114,14 @@ def validate_objective_function(objective: Callable):
             f"Current Objective arguments: {objective_signature}"
         )
 
+def format_pip_index_urls(pip_index_urls: List[str] = ["https://pypi.org/simple"]) -> str:
+    index_url = f'--index-url {pip_index_urls[0]}'
+    for url in pip_index_urls[1:]:
+        index_url += f' --extra-index-url {url}'
+    return index_url
 
-def get_script_for_python_packages(packages_to_install, pip_index_url):
+
+def get_script_for_python_packages(packages_to_install, pip_index_urls=["https://pypi.org/simple"]):
     packages_str = " ".join([str(package) for package in packages_to_install])
 
     script_for_python_packages = textwrap.dedent(
@@ -125,7 +131,7 @@ def get_script_for_python_packages(packages_to_install, pip_index_url):
         fi
 
         PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --prefer-binary --quiet \
-        --no-warn-script-location --index-url {pip_index_url} {packages_str}
+        --no-warn-script-location {format_pip_index_urls(pip_index_urls)} {packages_str}
         """
     )
 
@@ -233,7 +239,7 @@ def get_exec_script_from_objective(
     entrypoint: str,
     input_params: Dict[str, Any],
     packages_to_install: Optional[List[str]] = None,
-    pip_index_url: str = "https://pypi.org/simple",
+    pip_index_urls: Optional[List[str]] = ["https://pypi.org/simple"],
 ) -> str:
     """
     Get executable script for container args from the given objective function and parameters.
@@ -277,7 +283,7 @@ def get_exec_script_from_objective(
     # Install Python packages if that is required.
     if packages_to_install is not None:
         exec_script = (
-            get_script_for_python_packages(packages_to_install, pip_index_url)
+            get_script_for_python_packages(packages_to_install, pip_index_urls)
             + exec_script
         )
 
