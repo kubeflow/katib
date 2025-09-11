@@ -188,8 +188,9 @@ def get_trial_substitutions_from_trainer(
     if isinstance(parameters, TrainingArguments):
         parameters_dict = parameters.to_dict()
     else:
-        parameters_dict = parameters.__dict__
-
+        parameters_dict = (
+            parameters.to_dict() if hasattr(parameters, "to_dict") else vars(parameters)
+        )
     for p_name, p_value in parameters_dict.items():
         if not hasattr(parameters, p_name):
             logger.warning(f"Training parameter {p_name} is not supported.")
@@ -218,7 +219,11 @@ def get_trial_substitutions_from_trainer(
     if isinstance(parameters, TrainingArguments):
         parameters = json.dumps(parameters.to_dict())
     else:
-        parameters = json.dumps(parameters.__dict__, cls=SetEncoder)
+        parameters = (
+            json.dumps(parameters.to_dict(), cls=SetEncoder)
+            if hasattr(parameters, "to_dict")
+            else json.dumps(vars(parameters), cls=SetEncoder)
+        )
 
     return parameters
 
