@@ -19,10 +19,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	"context"
+	context "context"
 
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
-	trialsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/trials/v1beta1"
+	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
+	applyconfigurationtrialsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/trials/v1beta1"
 	scheme "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -38,36 +38,37 @@ type TrialsGetter interface {
 
 // TrialInterface has methods to work with Trial resources.
 type TrialInterface interface {
-	Create(ctx context.Context, trial *v1beta1.Trial, opts v1.CreateOptions) (*v1beta1.Trial, error)
-	Update(ctx context.Context, trial *v1beta1.Trial, opts v1.UpdateOptions) (*v1beta1.Trial, error)
+	Create(ctx context.Context, trial *trialsv1beta1.Trial, opts v1.CreateOptions) (*trialsv1beta1.Trial, error)
+	Update(ctx context.Context, trial *trialsv1beta1.Trial, opts v1.UpdateOptions) (*trialsv1beta1.Trial, error)
 	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-	UpdateStatus(ctx context.Context, trial *v1beta1.Trial, opts v1.UpdateOptions) (*v1beta1.Trial, error)
+	UpdateStatus(ctx context.Context, trial *trialsv1beta1.Trial, opts v1.UpdateOptions) (*trialsv1beta1.Trial, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.Trial, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.TrialList, error)
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*trialsv1beta1.Trial, error)
+	List(ctx context.Context, opts v1.ListOptions) (*trialsv1beta1.TrialList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Trial, err error)
-	Apply(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *trialsv1beta1.Trial, err error)
+	Apply(ctx context.Context, trial *applyconfigurationtrialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *trialsv1beta1.Trial, err error)
 	// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-	ApplyStatus(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error)
+	ApplyStatus(ctx context.Context, trial *applyconfigurationtrialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *trialsv1beta1.Trial, err error)
 	TrialExpansion
 }
 
 // trials implements TrialInterface
 type trials struct {
-	*gentype.ClientWithListAndApply[*v1beta1.Trial, *v1beta1.TrialList, *trialsv1beta1.TrialApplyConfiguration]
+	*gentype.ClientWithListAndApply[*trialsv1beta1.Trial, *trialsv1beta1.TrialList, *applyconfigurationtrialsv1beta1.TrialApplyConfiguration]
 }
 
 // newTrials returns a Trials
 func newTrials(c *TrialV1beta1Client, namespace string) *trials {
 	return &trials{
-		gentype.NewClientWithListAndApply[*v1beta1.Trial, *v1beta1.TrialList, *trialsv1beta1.TrialApplyConfiguration](
+		gentype.NewClientWithListAndApply[*trialsv1beta1.Trial, *trialsv1beta1.TrialList, *applyconfigurationtrialsv1beta1.TrialApplyConfiguration](
 			"trials",
 			c.RESTClient(),
 			scheme.ParameterCodec,
 			namespace,
-			func() *v1beta1.Trial { return &v1beta1.Trial{} },
-			func() *v1beta1.TrialList { return &v1beta1.TrialList{} }),
+			func() *trialsv1beta1.Trial { return &trialsv1beta1.Trial{} },
+			func() *trialsv1beta1.TrialList { return &trialsv1beta1.TrialList{} },
+		),
 	}
 }

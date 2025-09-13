@@ -29,7 +29,7 @@ type FakeExperimentV1beta1 struct {
 }
 
 func (c *FakeExperimentV1beta1) Experiments(namespace string) v1beta1.ExperimentInterface {
-	return &FakeExperiments{c, namespace}
+	return newFakeExperiments(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

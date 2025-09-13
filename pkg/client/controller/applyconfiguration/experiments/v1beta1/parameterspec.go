@@ -19,15 +19,15 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
 // ParameterSpecApplyConfiguration represents a declarative configuration of the ParameterSpec type for use
 // with apply.
 type ParameterSpecApplyConfiguration struct {
-	Name          *string                          `json:"name,omitempty"`
-	ParameterType *v1beta1.ParameterType           `json:"parameterType,omitempty"`
-	FeasibleSpace *FeasibleSpaceApplyConfiguration `json:"feasibleSpace,omitempty"`
+	Name          *string                           `json:"name,omitempty"`
+	ParameterType *experimentsv1beta1.ParameterType `json:"parameterType,omitempty"`
+	FeasibleSpace *FeasibleSpaceApplyConfiguration  `json:"feasibleSpace,omitempty"`
 }
 
 // ParameterSpecApplyConfiguration constructs a declarative configuration of the ParameterSpec type for use with
@@ -47,7 +47,7 @@ func (b *ParameterSpecApplyConfiguration) WithName(value string) *ParameterSpecA
 // WithParameterType sets the ParameterType field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ParameterType field is set to the value of the last call.
-func (b *ParameterSpecApplyConfiguration) WithParameterType(value v1beta1.ParameterType) *ParameterSpecApplyConfiguration {
+func (b *ParameterSpecApplyConfiguration) WithParameterType(value experimentsv1beta1.ParameterType) *ParameterSpecApplyConfiguration {
 	b.ParameterType = &value
 	return b
 }

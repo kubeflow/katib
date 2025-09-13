@@ -19,7 +19,7 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -27,12 +27,12 @@ import (
 // ExperimentConditionApplyConfiguration represents a declarative configuration of the ExperimentCondition type for use
 // with apply.
 type ExperimentConditionApplyConfiguration struct {
-	Type               *v1beta1.ExperimentConditionType `json:"type,omitempty"`
-	Status             *v1.ConditionStatus              `json:"status,omitempty"`
-	Reason             *string                          `json:"reason,omitempty"`
-	Message            *string                          `json:"message,omitempty"`
-	LastUpdateTime     *metav1.Time                     `json:"lastUpdateTime,omitempty"`
-	LastTransitionTime *metav1.Time                     `json:"lastTransitionTime,omitempty"`
+	Type               *experimentsv1beta1.ExperimentConditionType `json:"type,omitempty"`
+	Status             *v1.ConditionStatus                         `json:"status,omitempty"`
+	Reason             *string                                     `json:"reason,omitempty"`
+	Message            *string                                     `json:"message,omitempty"`
+	LastUpdateTime     *metav1.Time                                `json:"lastUpdateTime,omitempty"`
+	LastTransitionTime *metav1.Time                                `json:"lastTransitionTime,omitempty"`
 }
 
 // ExperimentConditionApplyConfiguration constructs a declarative configuration of the ExperimentCondition type for use with
@@ -44,7 +44,7 @@ func ExperimentCondition() *ExperimentConditionApplyConfiguration {
 // WithType sets the Type field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
-func (b *ExperimentConditionApplyConfiguration) WithType(value v1beta1.ExperimentConditionType) *ExperimentConditionApplyConfiguration {
+func (b *ExperimentConditionApplyConfiguration) WithType(value experimentsv1beta1.ExperimentConditionType) *ExperimentConditionApplyConfiguration {
 	b.Type = &value
 	return b
 }

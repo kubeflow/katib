@@ -19,10 +19,10 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/listers"
-	"k8s.io/client-go/tools/cache"
+	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // ExperimentLister helps list Experiments.
@@ -30,7 +30,7 @@ import (
 type ExperimentLister interface {
 	// List lists all Experiments in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1beta1.Experiment, err error)
+	List(selector labels.Selector) (ret []*experimentsv1beta1.Experiment, err error)
 	// Experiments returns an object that can list and get Experiments.
 	Experiments(namespace string) ExperimentNamespaceLister
 	ExperimentListerExpansion
@@ -38,17 +38,17 @@ type ExperimentLister interface {
 
 // experimentLister implements the ExperimentLister interface.
 type experimentLister struct {
-	listers.ResourceIndexer[*v1beta1.Experiment]
+	listers.ResourceIndexer[*experimentsv1beta1.Experiment]
 }
 
 // NewExperimentLister returns a new ExperimentLister.
 func NewExperimentLister(indexer cache.Indexer) ExperimentLister {
-	return &experimentLister{listers.New[*v1beta1.Experiment](indexer, v1beta1.Resource("experiment"))}
+	return &experimentLister{listers.New[*experimentsv1beta1.Experiment](indexer, experimentsv1beta1.Resource("experiment"))}
 }
 
 // Experiments returns an object that can list and get Experiments.
 func (s *experimentLister) Experiments(namespace string) ExperimentNamespaceLister {
-	return experimentNamespaceLister{listers.NewNamespaced[*v1beta1.Experiment](s.ResourceIndexer, namespace)}
+	return experimentNamespaceLister{listers.NewNamespaced[*experimentsv1beta1.Experiment](s.ResourceIndexer, namespace)}
 }
 
 // ExperimentNamespaceLister helps list and get Experiments.
@@ -56,15 +56,15 @@ func (s *experimentLister) Experiments(namespace string) ExperimentNamespaceList
 type ExperimentNamespaceLister interface {
 	// List lists all Experiments in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1beta1.Experiment, err error)
+	List(selector labels.Selector) (ret []*experimentsv1beta1.Experiment, err error)
 	// Get retrieves the Experiment from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1beta1.Experiment, error)
+	Get(name string) (*experimentsv1beta1.Experiment, error)
 	ExperimentNamespaceListerExpansion
 }
 
 // experimentNamespaceLister implements the ExperimentNamespaceLister
 // interface.
 type experimentNamespaceLister struct {
-	listers.ResourceIndexer[*v1beta1.Experiment]
+	listers.ResourceIndexer[*experimentsv1beta1.Experiment]
 }

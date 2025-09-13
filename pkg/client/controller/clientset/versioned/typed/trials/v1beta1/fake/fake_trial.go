@@ -19,179 +19,31 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-	json "encoding/json"
-	"fmt"
-
 	v1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/applyconfiguration/trials/v1beta1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	typedtrialsv1beta1 "github.com/kubeflow/katib/pkg/client/controller/clientset/versioned/typed/trials/v1beta1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeTrials implements TrialInterface
-type FakeTrials struct {
+// fakeTrials implements TrialInterface
+type fakeTrials struct {
+	*gentype.FakeClientWithListAndApply[*v1beta1.Trial, *v1beta1.TrialList, *trialsv1beta1.TrialApplyConfiguration]
 	Fake *FakeTrialV1beta1
-	ns   string
 }
 
-var trialsResource = v1beta1.SchemeGroupVersion.WithResource("trials")
-
-var trialsKind = v1beta1.SchemeGroupVersion.WithKind("Trial")
-
-// Get takes name of the trial, and returns the corresponding trial object, and an error if there is any.
-func (c *FakeTrials) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Trial, err error) {
-	emptyResult := &v1beta1.Trial{}
-	obj, err := c.Fake.
-		Invokes(testing.NewGetActionWithOptions(trialsResource, c.ns, name, options), emptyResult)
-
-	if obj == nil {
-		return emptyResult, err
+func newFakeTrials(fake *FakeTrialV1beta1, namespace string) typedtrialsv1beta1.TrialInterface {
+	return &fakeTrials{
+		gentype.NewFakeClientWithListAndApply[*v1beta1.Trial, *v1beta1.TrialList, *trialsv1beta1.TrialApplyConfiguration](
+			fake.Fake,
+			namespace,
+			v1beta1.SchemeGroupVersion.WithResource("trials"),
+			v1beta1.SchemeGroupVersion.WithKind("Trial"),
+			func() *v1beta1.Trial { return &v1beta1.Trial{} },
+			func() *v1beta1.TrialList { return &v1beta1.TrialList{} },
+			func(dst, src *v1beta1.TrialList) { dst.ListMeta = src.ListMeta },
+			func(list *v1beta1.TrialList) []*v1beta1.Trial { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1beta1.TrialList, items []*v1beta1.Trial) { list.Items = gentype.FromPointerSlice(items) },
+		),
+		fake,
 	}
-	return obj.(*v1beta1.Trial), err
-}
-
-// List takes label and field selectors, and returns the list of Trials that match those selectors.
-func (c *FakeTrials) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.TrialList, err error) {
-	emptyResult := &v1beta1.TrialList{}
-	obj, err := c.Fake.
-		Invokes(testing.NewListActionWithOptions(trialsResource, trialsKind, c.ns, opts), emptyResult)
-
-	if obj == nil {
-		return emptyResult, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1beta1.TrialList{ListMeta: obj.(*v1beta1.TrialList).ListMeta}
-	for _, item := range obj.(*v1beta1.TrialList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested trials.
-func (c *FakeTrials) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchActionWithOptions(trialsResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a trial and creates it.  Returns the server's representation of the trial, and an error, if there is any.
-func (c *FakeTrials) Create(ctx context.Context, trial *v1beta1.Trial, opts v1.CreateOptions) (result *v1beta1.Trial, err error) {
-	emptyResult := &v1beta1.Trial{}
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateActionWithOptions(trialsResource, c.ns, trial, opts), emptyResult)
-
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1beta1.Trial), err
-}
-
-// Update takes the representation of a trial and updates it. Returns the server's representation of the trial, and an error, if there is any.
-func (c *FakeTrials) Update(ctx context.Context, trial *v1beta1.Trial, opts v1.UpdateOptions) (result *v1beta1.Trial, err error) {
-	emptyResult := &v1beta1.Trial{}
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateActionWithOptions(trialsResource, c.ns, trial, opts), emptyResult)
-
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1beta1.Trial), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeTrials) UpdateStatus(ctx context.Context, trial *v1beta1.Trial, opts v1.UpdateOptions) (result *v1beta1.Trial, err error) {
-	emptyResult := &v1beta1.Trial{}
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceActionWithOptions(trialsResource, "status", c.ns, trial, opts), emptyResult)
-
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1beta1.Trial), err
-}
-
-// Delete takes name of the trial and deletes it. Returns an error if one occurs.
-func (c *FakeTrials) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(trialsResource, c.ns, name, opts), &v1beta1.Trial{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeTrials) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionActionWithOptions(trialsResource, c.ns, opts, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1beta1.TrialList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched trial.
-func (c *FakeTrials) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Trial, err error) {
-	emptyResult := &v1beta1.Trial{}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceActionWithOptions(trialsResource, c.ns, name, pt, data, opts, subresources...), emptyResult)
-
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1beta1.Trial), err
-}
-
-// Apply takes the given apply declarative configuration, applies it and returns the applied trial.
-func (c *FakeTrials) Apply(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error) {
-	if trial == nil {
-		return nil, fmt.Errorf("trial provided to Apply must not be nil")
-	}
-	data, err := json.Marshal(trial)
-	if err != nil {
-		return nil, err
-	}
-	name := trial.Name
-	if name == nil {
-		return nil, fmt.Errorf("trial.Name must be provided to Apply")
-	}
-	emptyResult := &v1beta1.Trial{}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceActionWithOptions(trialsResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions()), emptyResult)
-
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1beta1.Trial), err
-}
-
-// ApplyStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *FakeTrials) ApplyStatus(ctx context.Context, trial *trialsv1beta1.TrialApplyConfiguration, opts v1.ApplyOptions) (result *v1beta1.Trial, err error) {
-	if trial == nil {
-		return nil, fmt.Errorf("trial provided to Apply must not be nil")
-	}
-	data, err := json.Marshal(trial)
-	if err != nil {
-		return nil, err
-	}
-	name := trial.Name
-	if name == nil {
-		return nil, fmt.Errorf("trial.Name must be provided to Apply")
-	}
-	emptyResult := &v1beta1.Trial{}
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceActionWithOptions(trialsResource, c.ns, *name, types.ApplyPatchType, data, opts.ToPatchOptions(), "status"), emptyResult)
-
-	if obj == nil {
-		return emptyResult, err
-	}
-	return obj.(*v1beta1.Trial), err
 }
