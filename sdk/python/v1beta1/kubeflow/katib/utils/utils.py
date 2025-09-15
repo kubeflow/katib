@@ -297,7 +297,9 @@ def get_trial_template_with_job(
     job = client.V1Job(
         api_version="batch/v1",
         kind="Job",
-        spec=client.V1JobSpec(template=pod_template_spec, active_deadline_seconds=trial_timeout),
+        spec=client.V1JobSpec(
+            template=pod_template_spec, active_deadline_seconds=trial_timeout
+        ),
     )
 
     trial_template = models.V1beta1TrialTemplate(
