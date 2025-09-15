@@ -695,10 +695,7 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         KubeflowOrgV1PyTorchJob,
                     )
 
-                elif (
-                    test_name
-                    == "valid flow with trial_timeout for Job-based trials"
-                ):
+                elif test_name == "valid flow with trial_timeout for Job-based trials":
                     # Verify trial_timeout is set on Job spec
                     job_spec = experiment.spec.trial_template.trial_spec.spec
                     assert job_spec.active_deadline_seconds == 3600
