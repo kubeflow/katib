@@ -62,13 +62,25 @@ func NewFilteredSuggestionInformer(client versioned.Interface, namespace string,
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SuggestionV1beta1().Suggestions(namespace).List(context.TODO(), options)
+				return client.SuggestionV1beta1().Suggestions(namespace).List(context.Background(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SuggestionV1beta1().Suggestions(namespace).Watch(context.TODO(), options)
+				return client.SuggestionV1beta1().Suggestions(namespace).Watch(context.Background(), options)
+			},
+			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.SuggestionV1beta1().Suggestions(namespace).List(ctx, options)
+			},
+			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.SuggestionV1beta1().Suggestions(namespace).Watch(ctx, options)
 			},
 		},
 		&controllersuggestionsv1beta1.Suggestion{},

@@ -62,13 +62,25 @@ func NewFilteredTrialInformer(client versioned.Interface, namespace string, resy
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.TrialV1beta1().Trials(namespace).List(context.TODO(), options)
+				return client.TrialV1beta1().Trials(namespace).List(context.Background(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.TrialV1beta1().Trials(namespace).Watch(context.TODO(), options)
+				return client.TrialV1beta1().Trials(namespace).Watch(context.Background(), options)
+			},
+			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.TrialV1beta1().Trials(namespace).List(ctx, options)
+			},
+			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.TrialV1beta1().Trials(namespace).Watch(ctx, options)
 			},
 		},
 		&controllertrialsv1beta1.Trial{},
