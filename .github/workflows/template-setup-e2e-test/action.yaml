@@ -26,13 +26,13 @@ runs:
         version: ${{ inputs.kubernetes-version }}
 
     - name: Setup Minikube Cluster
-      uses: medyagh/setup-minikube@v0.0.18
+      uses: medyagh/setup-minikube@v0.0.20
       with:
         network-plugin: cni
         cni: flannel
         driver: none
         kubernetes-version: ${{ inputs.kubernetes-version }}
-        minikube-version: 1.34.0
+        minikube-version: 1.37.0
         start-args: --wait-timeout=120s
 
     - name: Setup Docker Buildx

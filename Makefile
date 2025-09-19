@@ -8,8 +8,8 @@ COMMIT := v1beta1-$(shell git rev-parse --short=7 HEAD)
 KATIB_REGISTRY := ghcr.io/kubeflow/katib
 CPU_ARCH ?= linux/amd64,linux/arm64
 CONTROLLER_GEN_VERSION ?= v0.18.0
-ENVTEST_K8S_VERSION ?= 1.33.1
-ENVTEST_VERSION ?= release-0.21
+ENVTEST_K8S_VERSION ?= 1.34.0
+ENVTEST_VERSION ?= release-0.22
 MOCKGEN_VERSION ?= $(shell grep 'go.uber.org/mock' go.mod | cut -d ' ' -f 2)
 GO_VERSION=$(shell grep '^go' go.mod | cut -d ' ' -f 2)
 GOPATH ?= $(shell go env GOPATH)
