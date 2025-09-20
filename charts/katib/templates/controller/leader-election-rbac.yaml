@@ -1,0 +1,37 @@
+{{- if .Values.controller.leaderElection.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: leader-election
+  namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitComponentLabels }}
+  labels:
+    {{- include "katib.controller.labels" . | nindent 4 }}
+  {{- end }}
+rules:
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: leader-election
+  namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitComponentLabels }}
+  labels:
+    {{- include "katib.controller.labels" . | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: leader-election
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "katib.controller.serviceAccountName" . }}
+    namespace: {{ include "katib.namespace" . }}
+{{- end }}
