@@ -541,6 +541,20 @@ test_tune_data = [
         },
         TEST_RESULT_SUCCESS,
     ),
+    (
+        "valid flow with pip_index_urls",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "packages_to_install": ["pandas", "numpy"],
+            "pip_index_urls": [
+                "https://pypi.org/simple",
+                "https://private-repo.com/simple",
+            ],
+        },
+        TEST_RESULT_SUCCESS,
+    ),
 ]
 
 
@@ -701,6 +715,18 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         type="minimize",
                         objective_metric_name="train_loss",
                         additional_metric_names=[],
+                    )
+
+                elif test_name == "valid flow with pip_index_urls":
+                    # Verify pip install command in container args.
+                    args_content = "".join(
+                        experiment.spec.trial_template.trial_spec.spec.template.spec.containers[
+                            0
+                        ].args
+                    )
+                    assert (
+                        "--index-url https://pypi.org/simple --extra-index-url https://private-repo.com/simple pandas numpy"
+                        in args_content
                     )
 
         except Exception as e:
