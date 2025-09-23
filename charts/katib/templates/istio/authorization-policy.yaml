@@ -1,0 +1,25 @@
+{{- if and .Values.istio.enabled .Values.istio.authorizationPolicy.enabled }}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ include "katib.fullname" . }}-ui
+  namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitComponentLabels }}
+  labels:
+    {{- include "katib.ui.labels" . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.istio.authorizationPolicy.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  action: {{ .Values.istio.authorizationPolicy.action }}
+  selector:
+    matchLabels:
+      {{- include "katib.ui.selectorLabels" . | nindent 6 }}
+  rules:
+    {{- range .Values.istio.authorizationPolicy.rules }}
+    - {{- toYaml . | nindent 6 }}
+    {{- end }}
+{{- end }}

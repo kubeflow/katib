@@ -1,0 +1,39 @@
+{{- if .Values.controller.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "katib.controller.serviceName" . }}
+  namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitComponentLabels }}
+  labels:
+    {{- include "katib.controller.labels" . | nindent 4 }}
+  {{- else }}
+  labels:
+    katib.kubeflow.org/component: controller
+  {{- end }}
+  annotations:
+    prometheus.io/port: "{{ .Values.controller.service.ports.metrics.port }}"
+    prometheus.io/scheme: http
+    prometheus.io/scrape: "true"
+    {{- if and .Values.openshift.enabled .Values.openshift.serviceCertificates }}
+    service.beta.openshift.io/serving-cert-secret-name: katib-webhook-cert
+    {{- end }}
+    {{- with .Values.controller.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- include "katib.serviceType" (dict "type" .Values.controller.service.type "Values" .Values) | nindent 2 }}
+  ports:
+    - port: {{ .Values.controller.service.ports.webhook.port }}
+      protocol: {{ .Values.controller.service.ports.webhook.protocol }}
+      targetPort: {{ .Values.controller.service.ports.webhook.targetPort }}
+      name: {{ .Values.controller.service.ports.webhook.name }}
+    - name: {{ .Values.controller.service.ports.metrics.name }}
+      port: {{ .Values.controller.service.ports.metrics.port }}
+      targetPort: {{ .Values.controller.service.ports.metrics.targetPort }}
+    - name: {{ .Values.controller.service.ports.healthz.name }}
+      port: {{ .Values.controller.service.ports.healthz.port }}
+      targetPort: {{ .Values.controller.service.ports.healthz.targetPort }}
+  selector:
+    {{- include "katib.controller.selectorLabels" . | nindent 4 }}
+{{- end }} 
