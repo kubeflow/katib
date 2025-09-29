@@ -284,7 +284,7 @@ def get_trial_template_with_job(
     retain_trials: bool,
     trial_parameters: List[models.V1beta1TrialParameterSpec],
     pod_template_spec: client.V1PodTemplateSpec,
-    trial_timeout: Optional[int] = None,
+    trial_active_deadline_seconds: Optional[int] = None,
 ) -> models.V1beta1TrialTemplate:
     """
     Get Trial template with Job as a Trial's Worker
@@ -298,7 +298,7 @@ def get_trial_template_with_job(
         api_version="batch/v1",
         kind="Job",
         spec=client.V1JobSpec(
-            template=pod_template_spec, active_deadline_seconds=trial_timeout
+            template=pod_template_spec, active_deadline_seconds=trial_active_deadline_seconds
         ),
     )
 
@@ -317,7 +317,7 @@ def get_trial_template_with_pytorchjob(
     resources_per_trial: types.TrainerResources,
     master_pod_template_spec: models.V1PodTemplateSpec,
     worker_pod_template_spec: models.V1PodTemplateSpec,
-    trial_timeout: Optional[int] = None,
+    trial_active_deadline_seconds: Optional[int] = None,
 ) -> models.V1beta1TrialTemplate:
     """
     Get Trial template with PyTorchJob as a Trial's Worker
@@ -330,7 +330,7 @@ def get_trial_template_with_pytorchjob(
         spec=training_models.KubeflowOrgV1PyTorchJobSpec(
             run_policy=training_models.KubeflowOrgV1RunPolicy(
                 clean_pod_policy=None,
-                active_deadline_seconds=trial_timeout,
+                active_deadline_seconds=trial_active_deadline_seconds,
             ),
             nproc_per_node=str(resources_per_trial.num_procs_per_worker),
             pytorch_replica_specs={

@@ -216,7 +216,7 @@ class KatibClient(object):
         packages_to_install: List[str] = None,
         pip_index_url: str = "https://pypi.org/simple",
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
-        trial_timeout: Optional[int] = None,
+        trial_active_deadline_seconds: Optional[int] = None,
     ):
         """
         Create HyperParameter Tuning Katib Experiment using one of the following
@@ -356,7 +356,8 @@ class KatibClient(object):
             metrics_collector_config: Specify the config of metrics collector,
                 for example, `metrics_collector_config = {"kind": "Push"}`.
                 Currently, we only support `StdOut` and `Push` metrics collector.
-            trial_timeout: Optional timeout in seconds for each trial. If None, no timeout is
+            trial_active_deadline_seconds: Optional timeout in seconds for each trial.
+                If None, no timeout is
                 applied. For Job-based trials, this sets the activeDeadlineSeconds field.
                 For PyTorchJob-based trials, this sets the activeDeadlineSeconds field on the
                 Master replica. This prevents individual trials from running indefinitely and
@@ -517,7 +518,7 @@ class KatibClient(object):
                     resources_per_trial,
                     training_utils.get_pod_template_spec(containers=[container_spec]),
                     training_utils.get_pod_template_spec(containers=[container_spec]),
-                    trial_timeout,
+                    trial_active_deadline_seconds,
                 )
             # Otherwise, Trial uses Job for model training.
             else:
@@ -525,7 +526,7 @@ class KatibClient(object):
                     retain_trials,
                     trial_parameters,
                     training_utils.get_pod_template_spec(containers=[container_spec]),
-                    trial_timeout,
+                    trial_active_deadline_seconds,
                 )
 
         # If users choose to use external models and datasets.
@@ -702,7 +703,7 @@ class KatibClient(object):
                 resources_per_trial,
                 master_pod_template_spec,
                 worker_pod_template_spec,
-                trial_timeout,
+                trial_active_deadline_seconds,
             )
 
         # Add parameters to the Katib Experiment.

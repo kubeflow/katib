@@ -542,19 +542,19 @@ test_tune_data = [
         TEST_RESULT_SUCCESS,
     ),
     (
-        "valid flow with trial_timeout for Job-based trials",
+        "valid flow with trial_active_deadline_seconds for Job-based trials",
         {
             "name": "tune_test",
             "objective": lambda x: print(f"a={x}"),
             "parameters": {"a": katib.search.int(min=10, max=100)},
             "objective_metric_name": "a",
             "resources_per_trial": {"gpu": "2"},
-            "trial_timeout": 3600,  # 1 hour timeout
+            "trial_active_deadline_seconds": 3600,  # 1 hour timeout
         },
         TEST_RESULT_SUCCESS,
     ),
     (
-        "valid flow with trial_timeout for PyTorchJob-based trials",
+        "valid flow with trial_active_deadline_seconds for PyTorchJob-based trials",
         {
             "name": "tune_test",
             "objective": lambda x: print(f"a={x}"),
@@ -565,7 +565,7 @@ test_tune_data = [
                 num_procs_per_worker=2,
                 resources_per_worker={"gpu": "2"},
             ),
-            "trial_timeout": 7200,  # 2 hours timeout
+            "trial_active_deadline_seconds": 7200,  # 2 hours timeout
         },
         TEST_RESULT_SUCCESS,
     ),
@@ -695,8 +695,10 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         KubeflowOrgV1PyTorchJob,
                     )
 
-                elif test_name == "valid flow with trial_timeout for Job-based trials":
-                    # Verify trial_timeout is set on Job spec
+                elif test_name == (
+                    "valid flow with trial_active_deadline_seconds for Job-based trials"
+                ):
+                    # Verify trial_active_deadline_seconds is set on Job spec
                     job_spec = experiment.spec.trial_template.trial_spec.spec
                     assert job_spec.active_deadline_seconds == 3600
                     # Verify other Job-specific fields
@@ -710,9 +712,9 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
 
                 elif (
                     test_name
-                    == "valid flow with trial_timeout for PyTorchJob-based trials"
+                    == "valid flow with trial_active_deadline_seconds for PyTorchJob-based trials"
                 ):
-                    # Verify trial_timeout is set on PyTorchJob run_policy
+                    # Verify trial_active_deadline_seconds is set on PyTorchJob run_policy
                     pytorch_spec = experiment.spec.trial_template.trial_spec.spec
                     assert pytorch_spec.run_policy.active_deadline_seconds == 7200
                     # Verify PyTorchJob type
