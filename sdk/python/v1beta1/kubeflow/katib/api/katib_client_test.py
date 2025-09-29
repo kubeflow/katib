@@ -541,6 +541,34 @@ test_tune_data = [
         },
         TEST_RESULT_SUCCESS,
     ),
+    (
+        "valid flow with trial_active_deadline_seconds for Job-based trials",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "resources_per_trial": {"gpu": "2"},
+            "trial_active_deadline_seconds": 3600,  # 1 hour timeout
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+    (
+        "valid flow with trial_active_deadline_seconds for PyTorchJob-based trials",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "resources_per_trial": types.TrainerResources(
+                num_workers=2,
+                num_procs_per_worker=2,
+                resources_per_worker={"gpu": "2"},
+            ),
+            "trial_active_deadline_seconds": 7200,  # 2 hours timeout
+        },
+        TEST_RESULT_SUCCESS,
+    ),
 ]
 
 
@@ -666,6 +694,32 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         experiment.spec.trial_template.trial_spec,
                         KubeflowOrgV1PyTorchJob,
                     )
+
+                elif test_name == (
+                    "valid flow with trial_active_deadline_seconds for Job-based trials"
+                ):
+                    # Verify trial_active_deadline_seconds is set on Job spec
+                    job_spec = experiment.spec.trial_template.trial_spec.spec
+                    assert job_spec.active_deadline_seconds == 3600
+                    # Verify other Job-specific fields
+                    assert isinstance(experiment.spec.trial_template.trial_spec, V1Job)
+                    args_content = "".join(
+                        experiment.spec.trial_template.trial_spec.spec.template.spec.containers[
+                            0
+                        ].args
+                    )
+                    assert "'a': '${trialParameters.a}'" in args_content
+
+                elif (
+                    test_name
+                    == "valid flow with trial_active_deadline_seconds for PyTorchJob-based trials"
+                ):
+                    # Verify trial_active_deadline_seconds is set on PyTorchJob run_policy
+                    pytorch_spec = experiment.spec.trial_template.trial_spec.spec
+                    assert pytorch_spec.run_policy.active_deadline_seconds == 7200
+                    # Verify PyTorchJob type
+                    trial_spec = experiment.spec.trial_template.trial_spec
+                    assert isinstance(trial_spec, KubeflowOrgV1PyTorchJob)
 
                 elif test_name == "valid flow with external model tuning":
                     # Verify input_params
