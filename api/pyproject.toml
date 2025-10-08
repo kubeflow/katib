@@ -1,0 +1,47 @@
+[project]
+name = "kubeflow_katib_api"
+dynamic = ["version"]
+requires-python = ">=3.8"
+authors = [
+  { name = "The Kubeflow Authors", email = "kubeflow-discuss@googlegroups.com" },
+]
+license = "Apache-2.0"
+description = "Kubeflow Katib API models for Kubernetes resources to interact with Kubeflow Katib APIs."
+readme = "README.md"
+keywords = ["kubeflow", "katib", "hyperparameter", "optimization", "automl", "ai", "api"]
+classifiers = [
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+  "kubernetes>=27.2.0",
+  "urllib3>=1.15.1",
+  "certifi>=14.05.14",
+  "six>=1.10",
+  "python-dateutil>=2.8.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/kubeflow/katib"
+Documentation = "https://www.kubeflow.org/docs/components/katib/"
+Source = "https://github.com/kubeflow/katib"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "kubeflow_katib_api/__init__.py"
