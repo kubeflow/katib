@@ -19,14 +19,14 @@ set -o nounset
 set -o pipefail
 
 SWAGGER_JAR_URL="https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/4.3.1/openapi-generator-cli-4.3.1.jar"
-SWAGGER_CODEGEN_JAR="hack/python-api/openapi-generator-cli.jar"
+SWAGGER_CODEGEN_JAR="hack/gen-python-api/openapi-generator-cli.jar"
 
-SWAGGER_CODEGEN_CONF="hack/python-api/swagger_config.json"
+SWAGGER_CODEGEN_CONF="hack/gen-python-api/swagger_config.json"
 SWAGGER_CODEGEN_FILE="pkg/apis/KATIB_VERSION/swagger.json"
 
 TMP_CODEGEN_PATH="api/tmp/KATIB_VERSION"
 API_OUTPUT_PATH="api"
-POST_GEN_PYTHON_HANDLER="hack/python-api/post_gen.py"
+POST_GEN_PYTHON_HANDLER="hack/gen-python-api/post_gen.py"
 KATIB_VERSIONS=(v1beta1)
 
 # Download JAR package if file doesn't exist.
