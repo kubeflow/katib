@@ -10,6 +10,7 @@ test/unit/v1beta1/metricscollector/testdata
 
 # SDK generator JAR file
 hack/gen-python-sdk/openapi-generator-cli.jar
+hack/python-api/openapi-generator-cli.jar
 
 # Project specific ignore files
 *.swp
