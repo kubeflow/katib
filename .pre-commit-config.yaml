@@ -25,12 +25,7 @@ exclude: |
   (?x)^(
     .*zz_generated.deepcopy.*|
     .*pb.go|
-    api/kubeflow_katib_api/models/.*|
-    api/kubeflow_katib_api/configuration.py|
-    api/kubeflow_katib_api/rest.py|
-    api/kubeflow_katib_api/__init__.py|
-    api/kubeflow_katib_api/exceptions.py|
-    api/kubeflow_katib_api/api_client.py|
+    api/python_api/.*|
     pkg/apis/manager/.*pb2(?:_grpc)?.py(?:i)?|
     pkg/apis/v1beta1/openapi_generated.go|
     pkg/mock/.*|
