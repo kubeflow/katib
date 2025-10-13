@@ -52,3 +52,33 @@ for VERSION in "${VERSION_LIST[@]}"; do
   echo "Generating OpenAPI Swagger for ${VERSION} ..."
   go run "${KATIB_ROOT}/hack/swagger/main.go" "${VERSION}-${SWAGGER_VERSION}" "${VERSION}" >"${SWAGGER_CODEGEN_FILE}"
 done
+
+
+# This list needs to cover all of the types used transitively from the Kubeflow Katib APIs.
+# Update this list if Kubeflow Katib depends on new external APIs.
+EXTRA_PACKAGES=(
+  k8s.io/apimachinery/pkg/apis/meta/v1
+  k8s.io/apimachinery/pkg/apis/meta/v1/unstructured
+  k8s.io/apimachinery/pkg/api/resource
+  k8s.io/apimachinery/pkg/runtime
+  k8s.io/apimachinery/pkg/util/intstr
+  k8s.io/api/core/v1
+)
+
+# Generating OpenAPI Swagger for Kubeflow Katib.
+# TODO (andreyvelich): This is needed for Kubeflow SDK for now.
+# TODO (andreyvelich): temporally, we store zz_generated.openapi.go in pkg/apis/kubeflowsdk dir
+echo "Generate OpenAPI Swagger for Kubeflow SDK"
+go run "${OPENAPI_PKG}/cmd/openapi-gen" \
+  --go-header-file "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
+  --output-pkg "${KATIB_PKG}/pkg/apis/kubeflowsdk" \
+  --output-dir "${KATIB_ROOT}/pkg/apis/kubeflowsdk" \
+  --output-file "zz_generated.openapi.go" \
+  --report-filename "${KATIB_ROOT}/hack/violation_exception_v1beta1.list" \
+  "${EXTRA_PACKAGES[@]}" \
+  "${KATIB_ROOT}/pkg/apis/controller/common/v1beta1" \
+  "${KATIB_ROOT}/pkg/apis/controller/experiments/v1beta1" \
+  "${KATIB_ROOT}/pkg/apis/controller/suggestions/v1beta1" \
+  "${KATIB_ROOT}/pkg/apis/controller/trials/v1beta1"
+
+go run hack/swagger_kubeflow_sdk/main.go >api/openapi-spec/swagger.json

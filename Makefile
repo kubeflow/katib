@@ -103,6 +103,7 @@ ifndef HAS_MOCKGEN
 endif
 	go generate ./pkg/... ./cmd/...
 	hack/gen-python-sdk/gen-sdk.sh
+	CONTAINER_RUNTIME=$(CONTAINER_RUNTIME) hack/python-api/gen-api.sh
 	hack/update-proto.sh
 	hack/update-mockgen.sh
 
