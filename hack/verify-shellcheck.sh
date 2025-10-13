@@ -33,4 +33,4 @@ done < <(find . -name "*.sh" \
 )
 
 echo 'Running shellcheck'
-shellcheck "${shell_scripts[@]}"
+shellcheck --external-sources --source-path=SCRIPTDIR "${shell_scripts[@]}"
