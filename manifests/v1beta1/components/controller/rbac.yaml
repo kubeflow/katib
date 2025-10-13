@@ -103,9 +103,11 @@ rules:
     resources:
       - trainjobs
     verbs:
+      - "create"
       - "get"
       - "list"
       - "watch"
+      - "delete"
   - apiGroups:
       - kubeflow.org
     resources:
