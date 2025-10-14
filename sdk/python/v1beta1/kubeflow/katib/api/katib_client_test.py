@@ -700,7 +700,6 @@ def katib_client():
         client = KatibClient()
         yield client
 
-
 @pytest.mark.parametrize(
     "test_name,kwargs,expected_output", test_create_experiment_data
 )
