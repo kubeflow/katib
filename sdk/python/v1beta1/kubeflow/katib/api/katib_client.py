@@ -1639,7 +1639,7 @@ class KatibClient(object):
             job_name = trial_name
 
             # Get logs from the job's pod
-            core_api = CoreV1Api()
+            core_api = self.core_api 
 
             # Find pods associated with the job
             label_selector = f"katib.kubeflow.org/trial={trial_name}"
@@ -1686,16 +1686,7 @@ class KatibClient(object):
                     container = "metrics-logger-and-collector"
                 elif metrics_collector_kind == "Push":
                     # For Push metrics collector, logs are in the primary container
-                    if trial.get("spec", {}).get("primaryContainerName"):
-                        container = trial["spec"]["primaryContainerName"]
-                    elif pod.spec.containers:
-                        container = pod.spec.containers[0].name
-                else:
-                    # Fallback: use primaryContainerName if available, otherwise first container
-                    if trial.get("spec", {}).get("primaryContainerName"):
-                        container = trial["spec"]["primaryContainerName"]
-                    elif pod.spec.containers:
-                        container = pod.spec.containers[0].name
+                    container = trial["spec"]["primaryContainerName"]
 
             # Stream logs
             if follow:
