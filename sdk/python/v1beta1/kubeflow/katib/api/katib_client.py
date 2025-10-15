@@ -1605,7 +1605,7 @@ class KatibClient(object):
         container: Optional[str] = None,
     ) -> Iterator[str]:
         """
-        Get logs from a trial Job.
+        Get logs from a Trial.
 
         Args:
             name: Name of the Katib experiment
@@ -1651,21 +1651,60 @@ class KatibClient(object):
             core_api = CoreV1Api()
 
             # Find pods associated with the job
-            label_selector = f"job-name={job_name}"
+            label_selector = f"katib.kubeflow.org/trial={trial_name}"
+            
+            # Check if trial has primaryPodLabels to identify the primary pod
+            primary_pod_labels = None
+            if (trial.get("status", {}).get("primaryPodLabels")):
+                primary_pod_labels = trial["status"]["primaryPodLabels"]
+                # Build label selector from primaryPodLabels
+                primary_selectors = [f"{k}={v}" for k, v in primary_pod_labels.items()]
+                label_selector = ",".join([label_selector] + primary_selectors)
+            
             pods = core_api.list_namespaced_pod(
                 namespace=namespace, label_selector=label_selector
             )
 
             if not pods.items:
-                raise RuntimeError(f"No pods found for trial job {job_name}")
+                # Fallback: try without primaryPodLabels if no pods found
+                if primary_pod_labels:
+                    label_selector = f"katib.kubeflow.org/trial={trial_name}"
+                    pods = core_api.list_namespaced_pod(
+                        namespace=namespace, label_selector=label_selector
+                    )
+                
+                if not pods.items:
+                    raise RuntimeError(f"No pods found for trial {trial_name}")
 
-            # Get the first pod (jobs typically have one pod)
+            # Get the primary pod (should be the only one if primaryPodLabels worked correctly)
             pod = pods.items[0]
             pod_name = pod.metadata.name
 
-            # If container is not specified, use the first container
-            if container is None and pod.spec.containers:
-                container = pod.spec.containers[0].name
+            # Determine container name based on metrics collector and trial spec
+            if container is None:
+                # Get the experiment to check metrics collector type
+                experiment = self.get_experiment(name, namespace)
+                metrics_collector_kind = None
+                if (experiment.spec.metrics_collector_spec and 
+                    experiment.spec.metrics_collector_spec.collector):
+                    metrics_collector_kind = experiment.spec.metrics_collector_spec.collector.kind
+                
+                # Determine container based on metrics collector type
+                if metrics_collector_kind == "StdOut":
+                    # For StdOut metrics collector, logs are in the sidecar container
+                    container = "metrics-logger-and-collector"
+                elif metrics_collector_kind == "Push":
+                    # For Push metrics collector, logs are in the primary container
+                    if trial.get("spec", {}).get("primaryContainerName"):
+                        container = trial["spec"]["primaryContainerName"]
+                    elif pod.spec.containers:
+                        container = pod.spec.containers[0].name
+                else:
+                    # Fallback: use primaryContainerName if available, otherwise first container
+                    if trial.get("spec", {}).get("primaryContainerName"):
+                        container = trial["spec"]["primaryContainerName"]
+                    elif pod.spec.containers:
+                        container = pod.spec.containers[0].name
 
             # Stream logs
             if follow:
