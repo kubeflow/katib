@@ -1708,21 +1708,15 @@ class KatibClient(object):
 
             # Stream logs
             if follow:
-                # For following logs, we need to handle the stream
-                log_stream = core_api.read_namespaced_pod_log(
-                    name=pod_name,
-                    namespace=namespace,
-                    container=container,
-                    follow=True,
-                    _preload_content=False,
-                )
-
-                try:
-                    for line in log_stream.stream():
-                        if line:
-                            yield line.decode("utf-8").rstrip("\n")
-                finally:
-                    log_stream.close()
+                 log_stream = watch.Watch().stream(
+                   self.core_api.read_namespaced_pod_log,
+                   name=pod_name,
+                   namespace=namespace,
+                   container=container,
+                   follow=True,
+                 )
+             # Stream logs incrementally.
+                 yield from log_stream
             else:
                 # For non-following logs, get all at once and split by lines
                 logs = core_api.read_namespaced_pod_log(
