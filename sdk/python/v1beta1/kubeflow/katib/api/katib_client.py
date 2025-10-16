@@ -16,11 +16,12 @@ import json
 import logging
 import multiprocessing
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Union
 
 import grpc
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import kubeflow.katib.katib_api_pb2_grpc as katib_api_pb2_grpc
+
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
@@ -39,6 +40,8 @@ from kubeflow.training.constants.constants import (
 )
 from kubeflow.training.utils import utils as training_utils
 from kubernetes import client, config
+from kubernetes.client import CoreV1Api
+from kubernetes.client.rest import ApiException
 
 logger = logging.getLogger(__name__)
 
@@ -1592,3 +1595,104 @@ class KatibClient(object):
             )
 
         return observation_logs.observation_log.metric_logs
+
+    def get_job_logs(
+        self,
+        name: str,  # Experiment Name
+        trial_name: str,  # Trial Name
+        follow: Optional[bool] = False,
+        namespace: Optional[str] = None,
+    ) -> Iterator[str]:
+        """
+        Get logs from a Trial.
+
+        Args:
+            name: Name of the Katib experiment
+            trial_name: Name of the trial
+            follow: Whether to follow the log stream (similar to kubectl logs -f)
+            namespace: Kubernetes namespace. If None, uses the client's namespace
+            container: Container name. If None, uses the first container
+
+        Returns:
+            Iterator of log lines as strings
+
+        Raises:
+            RuntimeError: If the trial or job is not found, or if there's an API error
+            ValueError: If required parameters are missing or invalid
+        """
+        if not name:
+            raise ValueError("Experiment name is required")
+
+        if not trial_name:
+            raise ValueError("Trial name is required")
+
+        if namespace is None:
+            namespace = self.namespace
+
+        try:
+            # Get the trial to find the associated job
+            trial = self.custom_api.get_namespaced_custom_object(
+                group=constants.KUBEFLOW_GROUP,
+                version=constants.KATIB_VERSION,
+                namespace=namespace,
+                plural=constants.TRIAL_PLURAL,
+                name=trial_name,
+            )
+
+            # Extract job name from trial status
+            if "status" not in trial or "conditions" not in trial["status"]:
+                raise RuntimeError(f"Trial {trial_name} not found or has no status")
+
+            # The job name is typically the same as trial name for batch/Job trials
+            job_name = trial_name
+
+            # Get logs from the job's pod
+            core_api = self.core_api 
+
+            # Find pods associated with the job
+            label_selector = f"katib.kubeflow.org/trial={trial_name}"
+            
+            # Check if trial has primaryPodLabels to identify the primary pod
+            primary_pod_labels = None
+            if (trial.get("status", {}).get("primaryPodLabels")):
+                primary_pod_labels = trial["status"]["primaryPodLabels"]
+                # Build label selector from primaryPodLabels
+                primary_selectors = [f"{k}={v}" for k, v in primary_pod_labels.items()]
+                label_selector = ",".join([label_selector] + primary_selectors)
+            
+            pods = core_api.list_namespaced_pod(
+                namespace=namespace, label_selector=label_selector
+            )
+
+            # Get the primary pod (should be the only one if primaryPodLabels worked correctly)
+            pod = pods.items[0]
+            pod_name = pod.metadata.name
+
+            # Stream logs
+            if follow:
+                 log_stream = watch.Watch().stream(
+                   self.core_api.read_namespaced_pod_log,
+                   name=pod_name,
+                   namespace=namespace,
+                   container=container,
+                   follow=True,
+                 )
+             # Stream logs incrementally.
+                 yield from log_stream
+            else:
+                # For non-following logs, get all at once and split by lines
+                logs = core_api.read_namespaced_pod_log(
+                    name=pod_name,
+                    namespace=namespace,
+                    container=container
+                )
+
+                yield from logs.splitlines()
+
+        except ApiException as e:
+            if e.status == 404:
+                raise RuntimeError(f"Trial {trial_name} or associated job not found")
+            else:
+                raise RuntimeError(f"Kubernetes API error: {e}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to get job logs: {str(e)}")
