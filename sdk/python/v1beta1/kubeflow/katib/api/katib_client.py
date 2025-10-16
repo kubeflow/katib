@@ -1599,10 +1599,6 @@ class KatibClient(object):
     def get_job_logs(
         self,
         name: str,  # Experiment Name
-        trial_name: str,  # Trial Name
-        follow: Optional[bool] = False,
-        namespace: Optional[str] = None,
-        container: Optional[str] = None,
     ) -> Iterator[str]:
         """
         Get logs from a Trial.
@@ -1665,37 +1661,9 @@ class KatibClient(object):
                 namespace=namespace, label_selector=label_selector
             )
 
-            if not pods.items:
-                # Fallback: try without primaryPodLabels if no pods found
-                if primary_pod_labels:
-                    label_selector = f"katib.kubeflow.org/trial={trial_name}"
-                    pods = core_api.list_namespaced_pod(
-                        namespace=namespace, label_selector=label_selector
-                    )
-                
-                if not pods.items:
-                    raise RuntimeError(f"No pods found for trial {trial_name}")
-
             # Get the primary pod (should be the only one if primaryPodLabels worked correctly)
             pod = pods.items[0]
             pod_name = pod.metadata.name
-
-            # Determine container name based on metrics collector and trial spec
-            if container is None:
-                # Get the experiment to check metrics collector type
-                experiment = self.get_experiment(name, namespace)
-                metrics_collector_kind = None
-                if (experiment.spec.metrics_collector_spec and 
-                    experiment.spec.metrics_collector_spec.collector):
-                    metrics_collector_kind = experiment.spec.metrics_collector_spec.collector.kind
-                
-                # Determine container based on metrics collector type
-                if metrics_collector_kind == "StdOut":
-                    # For StdOut metrics collector, logs are in the sidecar container
-                    container = "metrics-logger-and-collector"
-                elif metrics_collector_kind == "Push":
-                    # For Push metrics collector, logs are in the primary container
-                    container = trial["spec"]["primaryContainerName"]
 
             # Stream logs
             if follow:
@@ -1713,13 +1681,10 @@ class KatibClient(object):
                 logs = core_api.read_namespaced_pod_log(
                     name=pod_name,
                     namespace=namespace,
-                    container=container,
-                    follow=False,
+                    container=container
                 )
 
-                for line in logs.split("\n"):
-                    if line:  # Skip empty lines
-                        yield line
+                yield from logs.splitlines()
 
         except ApiException as e:
             if e.status == 404:
