@@ -1599,6 +1599,9 @@ class KatibClient(object):
     def get_job_logs(
         self,
         name: str,  # Experiment Name
+        trial_name: str,  # Trial Name
+        follow: Optional[bool] = False,
+        namespace: Optional[str] = None,
     ) -> Iterator[str]:
         """
         Get logs from a Trial.
