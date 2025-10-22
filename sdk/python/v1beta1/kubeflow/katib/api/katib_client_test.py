@@ -581,11 +581,7 @@ def get_namespaced_custom_object_response(*args, **kwargs):
     else:
         return {
             "metadata": {"name": args[4]},
-            "status": {
-                "conditions": [
-                    {"type": "Running", "status": "True"}
-                ]
-            }
+            "status": {"conditions": [{"type": "Running", "status": "True"}]},
         }
 
 
@@ -600,7 +596,7 @@ def list_namespaced_pod_response(*args, **kwargs):
         mock_pod.metadata.name = "test-job-pod-12345"
         mock_pod.spec.containers = [Mock()]
         mock_pod.spec.containers[0].name = "training-container"
-        
+
         mock_list = Mock()
         mock_list.items = [mock_pod]
         return mock_list
@@ -613,9 +609,9 @@ def read_namespaced_pod_log_response(*args, **kwargs):
         mock_stream = Mock()
         mock_stream.stream.return_value = [
             b"Starting training...\n",
-            b"Epoch 1/10\n", 
+            b"Epoch 1/10\n",
             b"Loss: 0.5\n",
-            b"Training completed\n"
+            b"Training completed\n",
         ]
         mock_stream.close = Mock()
         return mock_stream
@@ -634,7 +630,7 @@ test_get_job_logs_data = [
         ValueError,
     ),
     (
-        "missing trial name", 
+        "missing trial name",
         {
             "name": "test-experiment",
             "trial_name": "",
@@ -653,7 +649,7 @@ test_get_job_logs_data = [
     (
         "trial with no status",
         {
-            "name": "test-experiment", 
+            "name": "test-experiment",
             "trial_name": "no-status-trial",
             "namespace": "test",
         },
@@ -663,7 +659,7 @@ test_get_job_logs_data = [
         "no pods found for trial job",
         {
             "name": "test-experiment",
-            "trial_name": "no-pods-trial", 
+            "trial_name": "no-pods-trial",
             "namespace": "test",
         },
         RuntimeError,
@@ -681,7 +677,7 @@ test_get_job_logs_data = [
     (
         "valid flow - follow logs",
         {
-            "name": "test-experiment", 
+            "name": "test-experiment",
             "trial_name": "valid-trial",
             "namespace": "test",
             "follow": True,
@@ -717,16 +713,13 @@ def katib_client():
             list_namespaced_persistent_volume_claim=Mock(
                 side_effect=list_namespaced_persistent_volume_claim_response
             ),
-            list_namespaced_pod=Mock(
-                side_effect=list_namespaced_pod_response
-            ),
-            read_namespaced_pod_log=Mock(
-                side_effect=read_namespaced_pod_log_response
-            ),
+            list_namespaced_pod=Mock(side_effect=list_namespaced_pod_response),
+            read_namespaced_pod_log=Mock(side_effect=read_namespaced_pod_log_response),
         ),
     ):
         client = KatibClient()
         yield client
+
 
 @pytest.mark.parametrize(
     "test_name,kwargs,expected_output", test_create_experiment_data
@@ -895,23 +888,25 @@ def test_get_job_logs(katib_client, test_name, kwargs, expected_output):
     Test get_job_logs function of katib client
     """
     print(f"\n\nExecuting test: {test_name}")
-    
+
     with patch.object(
-        katib_client.custom_api, 
+        katib_client.custom_api,
         "get_namespaced_custom_object",
-        side_effect=get_namespaced_custom_object_response
-    ), patch(
-        "kubernetes.client.CoreV1Api"
-    ) as mock_core_api:
-        
+        side_effect=get_namespaced_custom_object_response,
+    ), patch("kubernetes.client.CoreV1Api") as mock_core_api:
+
         mock_core_instance = Mock()
-        mock_core_instance.list_namespaced_pod.side_effect = list_namespaced_pod_response
-        mock_core_instance.read_namespaced_pod_log.side_effect = read_namespaced_pod_log_response
+        mock_core_instance.list_namespaced_pod.side_effect = (
+            list_namespaced_pod_response
+        )
+        mock_core_instance.read_namespaced_pod_log.side_effect = (
+            read_namespaced_pod_log_response
+        )
         mock_core_api.return_value = mock_core_instance
-        
+
         try:
             logs = katib_client.get_job_logs(**kwargs)
-            
+
             if isinstance(expected_output, list):
                 # Collect all log lines
                 log_lines = list(logs)
@@ -920,11 +915,13 @@ def test_get_job_logs(katib_client, test_name, kwargs, expected_output):
             else:
                 # Should not reach here for successful cases
                 assert False, "Expected exception but got success"
-                
+
         except Exception as e:
-            if isinstance(expected_output, type) and issubclass(expected_output, Exception):
+            if isinstance(expected_output, type) and issubclass(
+                expected_output, Exception
+            ):
                 assert type(e) is expected_output
             else:
                 raise e
-                
+
     print("Test execution complete")

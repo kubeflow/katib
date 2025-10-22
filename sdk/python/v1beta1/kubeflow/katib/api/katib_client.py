@@ -21,7 +21,6 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Union
 import grpc
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
 import kubeflow.katib.katib_api_pb2_grpc as katib_api_pb2_grpc
-
 from kubeflow.katib import models
 from kubeflow.katib.api_client import ApiClient
 from kubeflow.katib.constants import constants
@@ -39,8 +38,7 @@ from kubeflow.training.constants.constants import (
     TRAINER_TRANSFORMER_IMAGE,
 )
 from kubeflow.training.utils import utils as training_utils
-from kubernetes import client, config
-from kubernetes.client import CoreV1Api
+from kubernetes import client, config, watch
 from kubernetes.client.rest import ApiException
 
 logger = logging.getLogger(__name__)
@@ -1602,6 +1600,7 @@ class KatibClient(object):
         trial_name: str,  # Trial Name
         follow: Optional[bool] = False,
         namespace: Optional[str] = None,
+        container: Optional[str] = None,
     ) -> Iterator[str]:
         """
         Get logs from a Trial.
@@ -1611,7 +1610,7 @@ class KatibClient(object):
             trial_name: Name of the trial
             follow: Whether to follow the log stream (similar to kubectl logs -f)
             namespace: Kubernetes namespace. If None, uses the client's namespace
-            container: Container name. If None, uses the first container
+            container: Optional container name. If None, gets logs from the first container
 
         Returns:
             Iterator of log lines as strings
@@ -1643,48 +1642,47 @@ class KatibClient(object):
             if "status" not in trial or "conditions" not in trial["status"]:
                 raise RuntimeError(f"Trial {trial_name} not found or has no status")
 
-            # The job name is typically the same as trial name for batch/Job trials
-            job_name = trial_name
-
-            # Get logs from the job's pod
-            core_api = self.core_api 
-
             # Find pods associated with the job
             label_selector = f"katib.kubeflow.org/trial={trial_name}"
-            
+
             # Check if trial has primaryPodLabels to identify the primary pod
             primary_pod_labels = None
-            if (trial.get("status", {}).get("primaryPodLabels")):
-                primary_pod_labels = trial["status"]["primaryPodLabels"]
+            if trial.get("spec", {}).get("primaryPodLabels"):
+                primary_pod_labels = trial["spec"]["primaryPodLabels"]
                 # Build label selector from primaryPodLabels
                 primary_selectors = [f"{k}={v}" for k, v in primary_pod_labels.items()]
                 label_selector = ",".join([label_selector] + primary_selectors)
-            
-            pods = core_api.list_namespaced_pod(
+
+            pods = self.core_api.list_namespaced_pod(
                 namespace=namespace, label_selector=label_selector
             )
+
+            if not pods.items:
+                raise RuntimeError(f"No pods found for trial {trial_name}")
 
             # Get the primary pod (should be the only one if primaryPodLabels worked correctly)
             pod = pods.items[0]
             pod_name = pod.metadata.name
 
+            # Determine container name if not provided
+            if container is None and pod.spec.containers:
+                container = pod.spec.containers[0].name
+
             # Stream logs
             if follow:
-                 log_stream = watch.Watch().stream(
-                   self.core_api.read_namespaced_pod_log,
-                   name=pod_name,
-                   namespace=namespace,
-                   container=container,
-                   follow=True,
-                 )
-             # Stream logs incrementally.
-                 yield from log_stream
-            else:
-                # For non-following logs, get all at once and split by lines
-                logs = core_api.read_namespaced_pod_log(
+                log_stream = watch.Watch().stream(
+                    self.core_api.read_namespaced_pod_log,
                     name=pod_name,
                     namespace=namespace,
-                    container=container
+                    container=container,
+                    follow=True,
+                )
+                # Stream logs incrementally.
+                yield from log_stream
+            else:
+                # For non-following logs, get all at once and split by lines
+                logs = self.core_api.read_namespaced_pod_log(
+                    name=pod_name, namespace=namespace, container=container
                 )
 
                 yield from logs.splitlines()
