@@ -1600,7 +1600,6 @@ class KatibClient(object):
         trial_name: str,  # Trial Name
         follow: Optional[bool] = False,
         namespace: Optional[str] = None,
-        container: Optional[str] = None,
     ) -> Iterator[str]:
         """
         Get logs from a Trial.
@@ -1664,7 +1663,20 @@ class KatibClient(object):
             pod = pods.items[0]
             pod_name = pod.metadata.name
 
-            # Determine container name if not provided
+            # Determine container name based on metrics collector kind
+            container = None
+            if (
+                trial.get("spec", {})
+                .get("metricsCollector", {})
+                .get("collector", {})
+                .get("kind")
+                == "StdOut"
+            ):
+                container = "metrics-logger-and-collector"
+            elif trial.get("spec", {}).get("primaryContainerName"):
+                container = trial["spec"]["primaryContainerName"]
+
+            # Fallback to first container if container is still None
             if container is None and pod.spec.containers:
                 container = pod.spec.containers[0].name
 
