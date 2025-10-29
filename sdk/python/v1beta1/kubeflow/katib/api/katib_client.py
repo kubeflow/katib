@@ -1676,10 +1676,6 @@ class KatibClient(object):
             elif trial.get("spec", {}).get("primaryContainerName"):
                 container = trial["spec"]["primaryContainerName"]
 
-            # Fallback to first container if container is still None
-            if container is None and pod.spec.containers:
-                container = pod.spec.containers[0].name
-
             # Stream logs
             if follow:
                 log_stream = watch.Watch().stream(
