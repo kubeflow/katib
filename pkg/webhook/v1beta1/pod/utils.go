@@ -66,7 +66,7 @@ func getPrimaryContainerIndex(containers []v1.Container, primaryContainerName st
 func getRemoteImage(pod *v1.Pod, namespace string, containerIndex int) (crv1.Image, error) {
 	// verify the image name, then download the remote config file
 	c := pod.Spec.Containers[containerIndex]
-	ref, err := name.ParseReference(c.Image, name.WeakValidation)
+	ref, err := name.ParseReference(c.Image, name.StrictValidation)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse image %q: %v", c.Image, err)
 	}
