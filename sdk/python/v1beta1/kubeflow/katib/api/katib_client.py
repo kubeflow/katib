@@ -358,9 +358,9 @@ class KatibClient(object):
                 for example, `metrics_collector_config = {"kind": "Push"}`.
                 Currently, we only support `StdOut` and `Push` metrics collector.
             trial_active_deadline_seconds: Optional timeout in seconds for each trial.
-                If None, no timeout is applied. For Job-based trials, this sets the 
-                activeDeadlineSeconds field. For PyTorchJob-based trials, this sets the 
-                activeDeadlineSeconds field on the Master replica. This prevents individual 
+                If None, no timeout is applied. For Job-based trials, this sets the
+                activeDeadlineSeconds field. For PyTorchJob-based trials, this sets the
+                activeDeadlineSeconds field on the Master replica. This prevents individual
                 trials from running indefinitely and consuming resources.
 
         Raises:
@@ -593,7 +593,7 @@ class KatibClient(object):
                         f"It must also start and end with an alphanumeric character."
                     )
                 elif hasattr(e, "status") and e.status == 409:
-                    print(f"PVC '{name}' already exists in namespace " f"{namespace}.")
+                    print(f"PVC '{name}' already exists in namespace {namespace}.")
                 else:
                     raise RuntimeError(f"failed to create PVC. Error: {e}")
 
