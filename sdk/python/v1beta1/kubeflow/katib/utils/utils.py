@@ -303,7 +303,8 @@ def get_trial_template_with_job(
         api_version="batch/v1",
         kind="Job",
         spec=client.V1JobSpec(
-            template=pod_template_spec, active_deadline_seconds=trial_active_deadline_seconds
+            template=pod_template_spec,
+            active_deadline_seconds=trial_active_deadline_seconds,
         ),
     )
 

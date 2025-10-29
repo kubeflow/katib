@@ -1,6 +1,6 @@
 import multiprocessing
 from typing import List, Optional
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import kubeflow.katib as katib
 import kubeflow.katib.katib_api_pb2 as katib_api_pb2
@@ -572,6 +572,114 @@ test_tune_data = [
 ]
 
 
+def get_namespaced_custom_object_response(*args, **kwargs):
+    """Mock response for getting trial objects"""
+    trial_name = (
+        kwargs.get("name") if "name" in kwargs else (args[4] if len(args) > 4 else None)
+    )
+
+    if trial_name == "invalid-trial":
+        raise Exception("Trial not found")
+    elif trial_name == "no-status-trial":
+        return {"metadata": {"name": "no-status-trial"}}
+    else:
+        return {
+            "metadata": {"name": trial_name},
+            "status": {"conditions": [{"type": "Running", "status": "True"}]},
+        }
+
+
+def list_namespaced_pod_response(*args, **kwargs):
+    """Mock response for listing pods"""
+    label_selector = kwargs.get("label_selector", "")
+
+    if "no-pods-trial" in label_selector:
+        mock_list = Mock()
+        mock_list.items = []
+        return mock_list
+    else:
+        mock_pod = Mock()
+        mock_pod.metadata.name = "test-job-pod-12345"
+        mock_pod.spec.containers = [Mock()]
+        mock_pod.spec.containers[0].name = "training-container"
+
+        mock_list = Mock()
+        mock_list.items = [mock_pod]
+        return mock_list
+
+
+def read_namespaced_pod_log_response(*args, **kwargs):
+    """Mock response for reading pod logs"""
+    if kwargs.get("follow"):
+        # For follow mode, create a mock HTTP response object with stream() and close() methods
+        mock_response = MagicMock()
+        log_data = b"Starting training...\nEpoch 1/10\nLoss: 0.5\nTraining completed\n"
+        mock_response.stream.return_value = [log_data]
+        mock_response.close.return_value = None
+        mock_response._preload_content = False
+        return mock_response
+    else:
+        # Mock static logs
+        return "Starting training...\nEpoch 1/10\nLoss: 0.5\nTraining completed"
+
+
+test_get_job_logs_data = [
+    (
+        "missing experiment name",
+        {
+            "name": "",
+            "trial_name": "test-trial",
+        },
+        ValueError,
+    ),
+    (
+        "missing trial name",
+        {
+            "name": "test-experiment",
+            "trial_name": "",
+        },
+        ValueError,
+    ),
+    (
+        "invalid trial name",
+        {
+            "name": "test-experiment",
+            "trial_name": "invalid-trial",
+            "namespace": "test",
+        },
+        RuntimeError,
+    ),
+    (
+        "trial with no status",
+        {
+            "name": "test-experiment",
+            "trial_name": "no-status-trial",
+            "namespace": "test",
+        },
+        RuntimeError,
+    ),
+    (
+        "no pods found for trial job",
+        {
+            "name": "test-experiment",
+            "trial_name": "no-pods-trial",
+            "namespace": "test",
+        },
+        RuntimeError,
+    ),
+    (
+        "valid flow - static logs",
+        {
+            "name": "test-experiment",
+            "trial_name": "valid-trial",
+            "namespace": "test",
+            "follow": False,
+        },
+        ["Starting training...", "Epoch 1/10", "Loss: 0.5", "Training completed"],
+    ),
+]
+
+
 @pytest.fixture
 def katib_client():
     with patch(
@@ -579,7 +687,10 @@ def katib_client():
         return_value=Mock(
             create_namespaced_custom_object=Mock(
                 side_effect=create_namespaced_custom_object_response
-            )
+            ),
+            get_namespaced_custom_object=Mock(
+                side_effect=get_namespaced_custom_object_response
+            ),
         ),
     ), patch("kubernetes.config.load_kube_config", return_value=Mock()), patch(
         "kubeflow.katib.katib_api_pb2_grpc.DBManagerStub",
@@ -595,6 +706,8 @@ def katib_client():
             list_namespaced_persistent_volume_claim=Mock(
                 side_effect=list_namespaced_persistent_volume_claim_response
             ),
+            list_namespaced_pod=Mock(side_effect=list_namespaced_pod_response),
+            read_namespaced_pod_log=Mock(side_effect=read_namespaced_pod_log_response),
         ),
     ):
         client = KatibClient()
@@ -657,18 +770,15 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                     test_name
                     == "valid flow with custom objective function and Job as Trial"
                 ):
-                    # Verify input_params
                     args_content = "".join(
                         experiment.spec.trial_template.trial_spec.spec.template.spec.containers[
                             0
                         ].args
                     )
                     assert "'a': '${trialParameters.a}'" in args_content
-                    # Verify trial_params
                     assert experiment.spec.trial_template.trial_parameters == [
                         V1beta1TrialParameterSpec(name="a", reference="a"),
                     ]
-                    # Verify experiment_params
                     assert experiment.spec.parameters == [
                         V1beta1ParameterSpec(
                             name="a",
@@ -676,20 +786,17 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                             feasible_space=V1beta1FeasibleSpace(min="10", max="100"),
                         ),
                     ]
-                    # Verify objective_spec
                     assert experiment.spec.objective == V1beta1ObjectiveSpec(
                         type="maximize",
                         objective_metric_name="a",
                         additional_metric_names=[],
                     )
-                    # Verity Trial spec
                     assert isinstance(experiment.spec.trial_template.trial_spec, V1Job)
 
                 elif (
                     test_name
                     == "valid flow with custom objective function and PyTorchJob as Trial"
                 ):
-                    # Verity Trial spec
                     assert isinstance(
                         experiment.spec.trial_template.trial_spec,
                         KubeflowOrgV1PyTorchJob,
@@ -722,7 +829,6 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                     assert isinstance(trial_spec, KubeflowOrgV1PyTorchJob)
 
                 elif test_name == "valid flow with external model tuning":
-                    # Verify input_params
                     args_content = "".join(
                         experiment.spec.trial_template.trial_spec.spec.pytorch_replica_specs[
                             "Master"
@@ -734,13 +840,11 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         '"learning_rate": "${trialParameters.learning_rate}"'
                         in args_content
                     )
-                    # Verify trial_params
                     assert experiment.spec.trial_template.trial_parameters == [
                         V1beta1TrialParameterSpec(
                             name="learning_rate", reference="learning_rate"
                         ),
                     ]
-                    # Verify experiment_params
                     assert experiment.spec.parameters == [
                         V1beta1ParameterSpec(
                             name="learning_rate",
@@ -750,7 +854,6 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                             ),
                         ),
                     ]
-                    # Verify objective_spec
                     assert experiment.spec.objective == V1beta1ObjectiveSpec(
                         type="minimize",
                         objective_metric_name="train_loss",
@@ -760,3 +863,33 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
         except Exception as e:
             assert type(e) is expected_output
         print("test execution complete")
+
+
+@pytest.mark.parametrize("test_name,kwargs,expected_output", test_get_job_logs_data)
+def test_get_job_logs(katib_client, test_name, kwargs, expected_output):
+    """
+    Test get_job_logs function of katib client
+    """
+    print(f"\n\nExecuting test: {test_name}")
+
+    try:
+        logs = katib_client.get_job_logs(**kwargs)
+
+        if isinstance(expected_output, list):
+            # Collect all log lines
+            log_lines = list(logs)
+            assert log_lines == expected_output
+            assert len(log_lines) > 0
+        else:
+            # If we expect an exception but got here, the test should fail
+            # Try to consume the iterator to trigger any lazy exceptions
+            list(logs)
+            assert False, f"Expected {expected_output.__name__} but got success"
+
+    except Exception as e:
+        if isinstance(expected_output, type) and issubclass(expected_output, Exception):
+            assert type(e) is expected_output
+        else:
+            raise e
+
+    print("Test execution complete")
