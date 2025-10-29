@@ -1609,7 +1609,6 @@ class KatibClient(object):
             trial_name: Name of the trial
             follow: Whether to follow the log stream (similar to kubectl logs -f)
             namespace: Kubernetes namespace. If None, uses the client's namespace
-            container: Optional container name. If None, gets logs from the first container
 
         Returns:
             Iterator of log lines as strings
