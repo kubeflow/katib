@@ -103,7 +103,7 @@ if [[ $(uname) == "Darwin" ]]; then
 else
   sed -i -e "s@API_VERSION=\".*\"@API_VERSION=\"${sdk_version}\"@" hack/python-api/gen-api.sh
 fi
-make generate
+./hack/python-api/gen-api.sh
 
 # Upload Katib models to PyPI.
 cd api/python_api
