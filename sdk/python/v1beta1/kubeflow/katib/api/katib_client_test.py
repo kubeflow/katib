@@ -569,6 +569,20 @@ test_tune_data = [
         },
         TEST_RESULT_SUCCESS,
     ),
+    (
+        "valid flow with pip_index_urls",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "packages_to_install": ["pandas", "numpy"],
+            "pip_index_urls": [
+                "https://pypi.org/simple",
+                "https://private-repo.com/simple",
+            ],
+        },
+        TEST_RESULT_SUCCESS,
+    ),
 ]
 
 
@@ -682,32 +696,39 @@ test_get_job_logs_data = [
 
 @pytest.fixture
 def katib_client():
-    with patch(
-        "kubernetes.client.CustomObjectsApi",
-        return_value=Mock(
-            create_namespaced_custom_object=Mock(
-                side_effect=create_namespaced_custom_object_response
-            ),
-            get_namespaced_custom_object=Mock(
-                side_effect=get_namespaced_custom_object_response
+    with (
+        patch(
+            "kubernetes.client.CustomObjectsApi",
+            return_value=Mock(
+                create_namespaced_custom_object=Mock(
+                    side_effect=create_namespaced_custom_object_response
+                ),
+                get_namespaced_custom_object=Mock(
+                    side_effect=get_namespaced_custom_object_response
+                ),
             ),
         ),
-    ), patch("kubernetes.config.load_kube_config", return_value=Mock()), patch(
-        "kubeflow.katib.katib_api_pb2_grpc.DBManagerStub",
-        return_value=Mock(
-            GetObservationLog=Mock(side_effect=get_observation_log_response)
+        patch("kubernetes.config.load_kube_config", return_value=Mock()),
+        patch(
+            "kubeflow.katib.katib_api_pb2_grpc.DBManagerStub",
+            return_value=Mock(
+                GetObservationLog=Mock(side_effect=get_observation_log_response)
+            ),
         ),
-    ), patch(
-        "kubernetes.client.CoreV1Api",
-        return_value=Mock(
-            create_namespaced_persistent_volume_claim=Mock(
-                side_effect=create_namespaced_persistent_volume_claim_response
+        patch(
+            "kubernetes.client.CoreV1Api",
+            return_value=Mock(
+                create_namespaced_persistent_volume_claim=Mock(
+                    side_effect=create_namespaced_persistent_volume_claim_response
+                ),
+                list_namespaced_persistent_volume_claim=Mock(
+                    side_effect=list_namespaced_persistent_volume_claim_response
+                ),
+                list_namespaced_pod=Mock(side_effect=list_namespaced_pod_response),
+                read_namespaced_pod_log=Mock(
+                    side_effect=read_namespaced_pod_log_response
+                ),
             ),
-            list_namespaced_persistent_volume_claim=Mock(
-                side_effect=list_namespaced_persistent_volume_claim_response
-            ),
-            list_namespaced_pod=Mock(side_effect=list_namespaced_pod_response),
-            read_namespaced_pod_log=Mock(side_effect=read_namespaced_pod_log_response),
         ),
     ):
         client = KatibClient()
@@ -858,6 +879,18 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         type="minimize",
                         objective_metric_name="train_loss",
                         additional_metric_names=[],
+                    )
+
+                elif test_name == "valid flow with pip_index_urls":
+                    # Verify pip install command in container args.
+                    args_content = "".join(
+                        experiment.spec.trial_template.trial_spec.spec.template.spec.containers[
+                            0
+                        ].args
+                    )
+                    assert (
+                        "--index-url https://pypi.org/simple --extra-index-url "
+                        "https://private-repo.com/simple pandas numpy" in args_content
                     )
 
         except Exception as e:
