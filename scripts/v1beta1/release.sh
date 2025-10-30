@@ -97,7 +97,7 @@ echo -e "\nKatib Python SDK ${sdk_version} has been published\n"
 # ------------------ Publish Katib Models for Kubeflow SDK ------------------
 echo -e "\nPublishing Katib Python models for Kubeflow SDK, version: ${sdk_version}\n"
 
-# Change version in setup.py
+# Change version in __init__.py
 cd api/python_api
 if [[ $(uname) == "Darwin" ]]; then
   sed -i '' -e "s@__version__ = \".*\"@__version__ = \"${sdk_version}\"@" kubeflow_katib_api/__init__.py
