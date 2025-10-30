@@ -136,7 +136,7 @@ spec:
           spec:
             containers:
               - name: training-container
-                image: ghcr.io/kubeflow/katib/enas-cnn-cifar10-gpu:latest
+                image: ghcr.io/kubeflow/katib/enas-cnn-cifar10-gpu:v0.19.0
                 command:
                   - python3
                   - -u

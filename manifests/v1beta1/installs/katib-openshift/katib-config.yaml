@@ -13,40 +13,40 @@ init:
 runtime:
   metricsCollectors:
     - kind: StdOut
-      image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+      image: ghcr.io/kubeflow/katib/file-metrics-collector:v0.19.0
     - kind: File
-      image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+      image: ghcr.io/kubeflow/katib/file-metrics-collector:v0.19.0
     - kind: TensorFlowEvent
-      image: ghcr.io/kubeflow/katib/tfevent-metrics-collector:latest
+      image: ghcr.io/kubeflow/katib/tfevent-metrics-collector:v0.19.0
       resources:
         limits:
           memory: 1Gi
   suggestions:
     - algorithmName: random
-      image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+      image: ghcr.io/kubeflow/katib/suggestion-hyperopt:v0.19.0
     - algorithmName: tpe
-      image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+      image: ghcr.io/kubeflow/katib/suggestion-hyperopt:v0.19.0
     - algorithmName: grid
-      image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+      image: ghcr.io/kubeflow/katib/suggestion-optuna:v0.19.0
     - algorithmName: hyperband
-      image: ghcr.io/kubeflow/katib/suggestion-hyperband:latest
+      image: ghcr.io/kubeflow/katib/suggestion-hyperband:v0.19.0
     - algorithmName: bayesianoptimization
-      image: ghcr.io/kubeflow/katib/suggestion-skopt:latest
+      image: ghcr.io/kubeflow/katib/suggestion-skopt:v0.19.0
     - algorithmName: cmaes
-      image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+      image: ghcr.io/kubeflow/katib/suggestion-goptuna:v0.19.0
     - algorithmName: sobol
-      image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+      image: ghcr.io/kubeflow/katib/suggestion-goptuna:v0.19.0
     - algorithmName: multivariate-tpe
-      image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+      image: ghcr.io/kubeflow/katib/suggestion-optuna:v0.19.0
     - algorithmName: enas
-      image: ghcr.io/kubeflow/katib/suggestion-enas:latest
+      image: ghcr.io/kubeflow/katib/suggestion-enas:v0.19.0
       resources:
         limits:
           memory: 400Mi
     - algorithmName: darts
-      image: ghcr.io/kubeflow/katib/suggestion-darts:latest
+      image: ghcr.io/kubeflow/katib/suggestion-darts:v0.19.0
     - algorithmName: pbt
-      image: ghcr.io/kubeflow/katib/suggestion-pbt:latest
+      image: ghcr.io/kubeflow/katib/suggestion-pbt:v0.19.0
       persistentVolumeClaimSpec:
         accessModes:
           - ReadWriteMany
@@ -55,4 +55,4 @@ runtime:
             storage: 5Gi
   earlyStoppings:
     - algorithmName: medianstop
-      image: ghcr.io/kubeflow/katib/earlystopping-medianstop:latest
+      image: ghcr.io/kubeflow/katib/earlystopping-medianstop:v0.19.0

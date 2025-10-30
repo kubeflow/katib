@@ -19,13 +19,13 @@ resources:
 images:
 - name: ghcr.io/kubeflow/katib/katib-controller
   newName: ghcr.io/kubeflow/katib/katib-controller
-  newTag: latest
+  newTag: v0.19.0
 - name: ghcr.io/kubeflow/katib/katib-db-manager
   newName: ghcr.io/kubeflow/katib/katib-db-manager
-  newTag: latest
+  newTag: v0.19.0
 - name: ghcr.io/kubeflow/katib/katib-ui
   newName: ghcr.io/kubeflow/katib/katib-ui
-  newTag: latest
+  newTag: v0.19.0
 configMapGenerator:
 - behavior: create
   files:
