@@ -1,0 +1,52 @@
+{{- if and .Values.webhook.enabled .Values.webhook.certManager.enabled }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: katib-webhook-cert
+  namespace: {{ include "katib.namespace" . }}
+spec:
+  isCA: true
+  commonName: {{ include "katib.controller.serviceName" . }}.{{ include "katib.namespace" . }}.svc
+  dnsNames:
+  - {{ include "katib.controller.serviceName" . }}.{{ include "katib.namespace" . }}.svc
+  - {{ include "katib.controller.serviceName" . }}.{{ include "katib.namespace" . }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: katib-selfsigned-issuer
+  secretName: katib-webhook-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: katib-selfsigned-issuer
+  namespace: {{ include "katib.namespace" . }}
+spec:
+  selfSigned: {}
+{{- else if .Values.webhook.enabled }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "katib.webhook.secretName" . }}
+  namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitLabelsFromSecrets }}
+  labels:
+    {{- include "katib.webhook.labels" . | nindent 4 }}
+  {{- end }}
+{{- if .Values.global.kustomizeMode.omitWebhookSecretData }}
+type: Opaque
+{{- else }}
+type: kubernetes.io/tls
+data:
+  {{- if and .Values.webhook.certificate.crt .Values.webhook.certificate.key }}
+  tls.crt: {{ .Values.webhook.certificate.crt | b64enc }}
+  tls.key: {{ .Values.webhook.certificate.key | b64enc }}
+  {{- else }}
+  # Self-signed certificate for development/testing purposes
+  # In production, please provide proper certificates or use cert-manager
+  tls.crt: {{ include "katib.webhook.selfSignedCert" . }}
+  tls.key: {{ include "katib.webhook.selfSignedKey" . }}
+  {{- end }}
+{{- end }}
+{{- end }} 
