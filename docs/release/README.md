@@ -17,6 +17,8 @@ This is the instruction on how to make a new release for the Katib project.
 
 - Install `PyGithub` to generate the [Changelog](./../../CHANGELOG.md): `pip install PyGithub==1.55`
 
+- Install `build` to publish the Katib models: `pip install build`
+
 - Install `twine` to publish the SDK package: `pip install twine==3.4.1`
 
   - Create a [PyPI Token](https://pypi.org/help/#apitoken) to publish Katib SDK.
@@ -99,6 +101,8 @@ Follow these steps to cut a new Katib release:
    - Publish Katib images with the tag: `vX.Y.Z` and update manifests.
 
    - Publish Katib Python SDK with the version: `X.Y.Z`.
+
+   - Publish Katib models with the version: `X.Y.Z` for Kubeflow SDK.
 
    - Push above changes to the Katib upstream `release-X.Y` branch with this commit:
      `Katib official release vX.Y.Z`
