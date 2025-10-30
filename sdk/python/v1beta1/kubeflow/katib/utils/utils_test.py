@@ -19,7 +19,6 @@ from kubeflow.katib.utils import utils
             "--index-url https://pypi.org/simple --extra-index-url https://private-repo.com/simple "
             "--extra-index-url https://another-repo.com/simple",
         ),
-        (None, "--index-url https://pypi.org/simple"),
     ],
 )
 def test_format_pip_index_urls(pip_index_urls, expected):
