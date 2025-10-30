@@ -94,6 +94,24 @@ rm -r dist/ build/
 cd ../../..
 echo -e "\nKatib Python SDK ${sdk_version} has been published\n"
 
+# ------------------ Publish Katib Models for Kubeflow SDK ------------------
+echo -e "\nPublishing Katib Python models for Kubeflow SDK, version: ${sdk_version}\n"
+
+# Change version in setup.py
+cd api/python_api
+if [[ $(uname) == "Darwin" ]]; then
+  sed -i '' -e "s@__version__ = \".*\"@__version__ = \"${sdk_version}\"@" kubeflow_katib_api/__init__.py
+else
+  sed -i -e "s@__version__ = \".*\"@__version__ = \"${sdk_version}\"@" kubeflow_katib_api/__init__.py
+fi
+# Upload Katib models to PyPI.
+python -m build
+twine upload dist/*
+rm -r dist/
+cd ../..
+echo -e "\nKatib Python API models for Kubeflow SDK have been published"
+
+
 # ------------------ Commit changes ------------------
 git commit -a -m "Katib official release ${TAG}"
 # Create a new tag.

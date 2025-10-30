@@ -7,6 +7,7 @@ __pycache__/
 build/
 *.charm
 test/unit/v1beta1/metricscollector/testdata
+dist/
 
 # SDK generator JAR file
 hack/gen-python-sdk/openapi-generator-cli.jar
