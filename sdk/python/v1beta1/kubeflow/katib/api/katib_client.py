@@ -665,9 +665,9 @@ class KatibClient(object):
                     "--dataset_dir",
                     VOLUME_PATH_DATASET,
                     "--lora_config",
-                    f"'{lora_config}'",
+                    lora_config,
                     "--training_parameters",
-                    f"'{training_args}'",
+                    training_args,
                 ],
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
                 resources=(

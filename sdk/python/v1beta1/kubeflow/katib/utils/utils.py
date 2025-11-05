@@ -192,7 +192,7 @@ def get_trial_substitutions_from_trainer(
     parameters: Union["TrainingArguments", "LoraConfig"],  # noqa: F821
     experiment_params: List[models.V1beta1ParameterSpec],
     trial_params: List[models.V1beta1TrialParameterSpec],
-) -> Dict[str, str]:
+) -> str:
     from peft import LoraConfig  # noqa: F401
     from transformers import TrainingArguments  # noqa: F401
 
@@ -208,9 +208,7 @@ def get_trial_substitutions_from_trainer(
             continue
 
         if isinstance(p_value, models.V1beta1ParameterSpec):
-            old_attr = getattr(parameters, p_name, None)
-            if old_attr is not None:
-                value = f"${{trialParameters.{p_name}}}"
+            value = f"${{trialParameters.{p_name}}}"
             setattr(parameters, p_name, value)
             p_value.name = p_name
             experiment_params.append(p_value)
@@ -219,12 +217,13 @@ def get_trial_substitutions_from_trainer(
             )
         elif p_value is not None:
             old_attr = getattr(parameters, p_name, None)
-            if old_attr is not None:
-                if isinstance(p_value, dict):
-                    # Update the existing dictionary without nesting
-                    value = copy.deepcopy(p_value)
-                else:
-                    value = type(old_attr)(p_value)
+            if isinstance(p_value, dict):
+                # Update the existing dictionary without nesting
+                value = copy.deepcopy(p_value)
+            elif old_attr is not None:
+                value = type(old_attr)(p_value)
+            else:
+                value = p_value
             setattr(parameters, p_name, value)
 
     if isinstance(parameters, TrainingArguments):
