@@ -7,6 +7,9 @@ metadata:
   labels:
     katib.kubeflow.org/component: ui
 spec:
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
   replicas: 1
   selector:
     matchLabels:
