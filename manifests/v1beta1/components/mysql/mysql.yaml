@@ -24,7 +24,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: katib-mysql
-          image: mysql:8.0
+          image: mysql:8.0.29
           args:
             - --datadir
             - /var/lib/mysql/datadir
