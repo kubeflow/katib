@@ -24,7 +24,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: katib-mysql
-          image: mysql:8.0.29
+          image: mysql:8.0
           args:
             - --datadir
             - /var/lib/mysql/datadir
@@ -46,27 +46,19 @@ spec:
               command:
                 - "/bin/bash"
                 - "-c"
-                - "mysql -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
+                - "mysql -h 127.0.0.1 -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 10
           livenessProbe:
             exec:
               command:
-                - "/bin/bash"
-                - "-c"
-                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
+              - "/bin/bash"
+              - "-c"
+              - "mysql -h 127.0.0.1 -D ${MYSQL_DATABASE} -u root -p${MYSQL_ROOT_PASSWORD} -e 'SELECT 1'"
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 10
-          startupProbe:
-            exec:
-              command:
-                - "/bin/bash"
-                - "-c"
-                - "mysqladmin ping -u root -p${MYSQL_ROOT_PASSWORD}"
-            periodSeconds: 15
-            failureThreshold: 60
           volumeMounts:
             - name: katib-mysql
               mountPath: /var/lib/mysql
