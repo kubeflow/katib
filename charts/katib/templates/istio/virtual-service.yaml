@@ -1,0 +1,29 @@
+{{- if and .Values.istio.enabled .Values.istio.virtualService.enabled }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ include "katib.fullname" . }}-ui
+  namespace: {{ include "katib.namespace" . }}
+  {{- if not .Values.global.kustomizeMode.omitComponentLabels }}
+  labels:
+    {{- include "katib.ui.labels" . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.istio.virtualService.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.istio.virtualService.gateways }}
+  gateways:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.istio.virtualService.hosts }}
+  hosts:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  http:
+    {{- range .Values.istio.virtualService.http }}
+    - {{- toYaml . | nindent 6 }}
+    {{- end }}
+{{- end }}

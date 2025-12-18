@@ -1,0 +1,192 @@
+# Enterprise Production Installation Profile
+# This profile includes all advanced features for production deployment
+
+# Namespace configuration
+namespaceCreate:
+  enabled: true
+  labels:
+    katib.kubeflow.org/metrics-collector-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+
+# External database for production
+db:
+  external:
+    enabled: true
+    createSecret: true
+    host: "mysql-primary.database.svc.cluster.local"
+    port: 3306
+    database: "katib"
+    user: "katib"
+
+# Disable built-in databases
+mysql:
+  enabled: false
+
+postgres:
+  enabled: false
+
+# Controller with HA and leader election
+controller:
+  enabled: true
+  replicaCount: 3
+  leaderElection:
+    enabled: true
+  
+  env:
+    - name: DB_NAME
+      value: "mysql"
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: DB_USER
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: DB_PASSWORD
+    - name: KATIB_MYSQL_DB_DATABASE
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_DATABASE
+    - name: KATIB_MYSQL_DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_HOST
+    - name: KATIB_MYSQL_DB_PORT
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_PORT
+
+# UI with HA
+ui:
+  enabled: true
+  replicaCount: 2
+
+# DB Manager with HA
+dbManager:
+  enabled: true
+  replicaCount: 2
+  
+  env:
+    - name: DB_NAME
+      value: "mysql"
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: DB_USER
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: DB_PASSWORD
+    - name: KATIB_MYSQL_DB_DATABASE
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_DATABASE
+    - name: KATIB_MYSQL_DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_HOST
+    - name: KATIB_MYSQL_DB_PORT
+      valueFrom:
+        secretKeyRef:
+          name: katib-mysql-secrets
+          key: KATIB_MYSQL_DB_PORT
+
+# Webhook with cert-manager
+webhook:
+  enabled: true
+  
+  certManager:
+    enabled: true
+    injectCaFrom: true
+    
+    issuerRef:
+      createSelfSigned: false
+      kind: ClusterIssuer
+      name: "letsencrypt-prod"
+
+# Security features
+networkPolicy:
+  enabled: true
+
+podDisruptionBudget:
+  enabled: true
+  controller:
+    minAvailable: 2
+  ui:
+    minAvailable: 1
+  dbManager:
+    minAvailable: 1
+
+# Autoscaling
+autoscaling:
+  enabled: true
+  
+  controller:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    
+  ui:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    
+  dbManager:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+# Monitoring
+monitoring:
+  prometheus:
+    enabled: true
+    
+    serviceMonitor:
+      enabled: true
+      namespace: "monitoring"
+      interval: "30s"
+      labels:
+        prometheus: "kube-prometheus"
+
+# Istio integration
+istio:
+  enabled: true
+  
+  authorizationPolicy:
+    enabled: true
+    action: ALLOW
+    rules:
+      - from:
+          - source:
+              principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+  
+  virtualService:
+    enabled: true
+    gateways:
+      - kubeflow-gateway
+    hosts:
+      - "katib.example.com"
+
+# Pod Security Standards
+podSecurityStandards:
+  enforced: true
+
+# RBAC
+rbac:
+  create: true
+  kubeflow:
+    enabled: false

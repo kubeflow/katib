@@ -1,0 +1,17 @@
+{{- if and (eq .Values.database.type "mysql") .Values.database.mysql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "katib.fullname" . }}-mysql
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.mysql.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.database.mysql.service.type }}
+  ports:
+    - name: dbapi
+      port: {{ .Values.database.mysql.service.port }}
+      protocol: TCP
+  selector:
+    {{- include "katib.mysql.selectorLabels" . | nindent 4 }}
+{{- end }} 

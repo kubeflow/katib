@@ -1,0 +1,140 @@
+# OpenShift Installation Profile
+# This profile enables OpenShift-specific features
+
+global:
+  namespace: kubeflow
+  imageTag: latest
+  
+  # Enable kustomize compatibility mode
+  kustomizeMode:
+    omitDefaultImagePullPolicy: true
+    omitDefaultProtocol: true
+    omitDefaultServiceType: true
+    omitDefaultFailurePolicy: true
+    omitLabelsFromSecrets: true
+    omitExtraSecretFields: true
+    omitWebhookSecretData: true
+    omitComponentLabels: true
+
+# Standard components
+controller:
+  enabled: true
+
+ui:
+  enabled: true
+
+dbManager:
+  enabled: true
+
+# MySQL database
+mysql:
+  enabled: true
+
+# OpenShift features
+openshift:
+  enabled: true
+  serviceCertificates: true
+
+# Pod Security Standards
+podSecurityStandards:
+  enforced: false 
+
+# Webhook with OpenShift service certificates
+webhook:
+  enabled: true
+  
+  # Disable cert-manager since we're using OpenShift
+  certManager:
+    enabled: false
+  
+  validating:
+    enabled: true
+    annotations:
+      service.beta.openshift.io/inject-cabundle: "true"
+  
+  mutating:
+    enabled: true
+    annotations:
+      service.beta.openshift.io/inject-cabundle: "true"
+
+# Security policies
+networkPolicy:
+  enabled: false  
+
+monitoring:
+  prometheus:
+    enabled: true
+
+# Override config for OpenShift scenario 
+config:
+  katibConfig: |
+    apiVersion: config.kubeflow.org/v1beta1
+    kind: KatibConfig
+    init:
+      controller:
+        webhookPort: 8443
+        trialResources:
+          - Job.v1.batch
+          - TFJob.v1.kubeflow.org
+          - PyTorchJob.v1.kubeflow.org
+          - MPIJob.v1.kubeflow.org
+          - XGBoostJob.v1.kubeflow.org
+    runtime:
+      metricsCollectors:
+        - kind: StdOut
+          image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+        - kind: File
+          image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+        - kind: TensorFlowEvent
+          image: ghcr.io/kubeflow/katib/tfevent-metrics-collector:latest
+          resources:
+            limits:
+              memory: 1Gi
+      suggestions:
+        - algorithmName: random
+          image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+        - algorithmName: tpe
+          image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+        - algorithmName: grid
+          image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+        - algorithmName: hyperband
+          image: ghcr.io/kubeflow/katib/suggestion-hyperband:latest
+        - algorithmName: bayesianoptimization
+          image: ghcr.io/kubeflow/katib/suggestion-skopt:latest
+        - algorithmName: cmaes
+          image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+        - algorithmName: sobol
+          image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+        - algorithmName: multivariate-tpe
+          image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+        - algorithmName: enas
+          image: ghcr.io/kubeflow/katib/suggestion-enas:latest
+          resources:
+            limits:
+              memory: 400Mi
+        - algorithmName: darts
+          image: ghcr.io/kubeflow/katib/suggestion-darts:latest
+        - algorithmName: pbt
+          image: ghcr.io/kubeflow/katib/suggestion-pbt:latest
+          persistentVolumeClaimSpec:
+            accessModes:
+              - ReadWriteMany
+            resources:
+              requests:
+                storage: 5Gi
+      earlyStoppings:
+        - algorithmName: medianstop
+          image: ghcr.io/kubeflow/katib/earlystopping-medianstop:latest
+
+# Namespace creation with security labels
+namespaceCreate:
+  enabled: true
+  labels:
+    katib.kubeflow.org/metrics-collector-injection: enabled
+  annotations: {}
+
+# RBAC
+rbac:
+  create: true
+  kubeflow:
+    enabled: false

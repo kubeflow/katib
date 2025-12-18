@@ -1,0 +1,27 @@
+apiVersion: v2
+
+name: katib
+
+description: A Helm chart for Katib - AutoML on Kubernetes
+
+version: 0.16.0
+
+appVersion: 0.16.0
+
+keywords:
+- automl
+- hyperparameter-tuning
+- machine-learning
+- kubeflow
+- katib
+
+home: https://github.com/kubeflow/katib
+
+icon: https://github.com/kubeflow/katib/blob/master/docs/images/logo.png
+
+sources:
+- https://github.com/kubeflow/katib
+
+annotations:
+  category: Machine Learning
+  licenses: Apache-2.0 

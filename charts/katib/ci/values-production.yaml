@@ -1,0 +1,169 @@
+# CI values for production deployment
+# This includes all security and monitoring features
+
+global:
+  namespace: kubeflow
+  imageTag: latest
+
+# Controller configuration - with leader election for HA
+controller:
+  enabled: true
+  replicas: 2
+  leaderElection:
+    enabled: true
+  env:
+    - name: ENABLE_LEADER_ELECTION
+      value: "true"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Database configuration - PostgreSQL for production
+database:
+  type: postgres
+  mysql:
+    enabled: false
+  postgres:
+    enabled: true
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: "fast-ssd"  # Use fast storage for production
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 6
+  external:
+    enabled: false
+
+# DB Manager
+dbManager:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# UI configuration
+ui:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+# Webhook configuration
+webhook:
+  enabled: true
+  certManager:
+    enabled: true
+    issuerRef:
+      name: "production-ca-issuer"
+      kind: "ClusterIssuer"
+  validating:
+    enabled: true
+  mutating:
+    enabled: true
+    podMutator:
+      enabled: true
+
+# CRDs
+crds:
+  install: true
+
+# RBAC
+rbac:
+  create: true
+  kubeflow:
+    enabled: false
+
+# Monitoring - enabled for production
+monitoring:
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      interval: "30s"
+      scrapeTimeout: "10s"
+
+# Istio - enabled for production
+istio:
+  enabled: true
+  authorizationPolicy:
+    enabled: true
+    action: ALLOW
+    rules:
+      - from:
+          - source:
+              principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+  virtualService:
+    enabled: true
+
+# Security features - enabled for production
+networkPolicy:
+  enabled: true
+
+podDisruptionBudget:
+  enabled: true
+  controller:
+    minAvailable: 1
+  ui:
+    minAvailable: 1
+  dbManager:
+    minAvailable: 1
+
+# Autoscaling - enabled for production
+autoscaling:
+  enabled: true
+  controller:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  ui:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  dbManager:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# Pod Security Standards
+podSecurityStandards:
+  enforced: true
+
+# Namespace creation
+namespaceCreate:
+  enabled: true 

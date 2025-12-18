@@ -1,0 +1,85 @@
+{{- if .Values.controller.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "katib.trialTemplates.configMapName" . }}
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.controller.labels" . | nindent 4 }}
+    katib.kubeflow.org/component: trial-templates
+data:
+  defaultTrialTemplate.yaml: |-
+    apiVersion: batch/v1
+    kind: Job
+    spec:
+      template:
+        spec:
+          containers:
+            - name: training-container
+              image: {{ .Values.config.trialTemplates.defaultTrialTemplate.image | default "ghcr.io/kubeflow/katib/pytorch-mnist-cpu:latest" }}
+              command:
+                - "python3"
+                - "/opt/pytorch-mnist/mnist.py"
+                - "--epochs=1"
+                - "--batch-size=16"
+                - "--lr=${trialParameters.learningRate}"
+                - "--momentum=${trialParameters.momentum}"
+          restartPolicy: Never
+  enasCPUTemplate: |-
+    apiVersion: batch/v1
+    kind: Job
+    spec:
+      template:
+        spec:
+          containers:
+            - name: training-container
+              image: {{ .Values.config.trialTemplates.enasCPUTemplate.image | default "ghcr.io/kubeflow/katib/enas-cnn-cifar10-cpu:latest" }}
+              command:
+                - python3
+                - -u
+                - RunTrial.py
+                - --num_epochs=1
+                - "--architecture=\"${trialParameters.neuralNetworkArchitecture}\""
+                - "--nn_config=\"${trialParameters.neuralNetworkConfig}\""
+          restartPolicy: Never
+  pytorchJobTemplate: |-
+    apiVersion: kubeflow.org/v1
+    kind: PyTorchJob
+    spec:
+      pytorchReplicaSpecs:
+        Master:
+          replicas: 1
+          restartPolicy: OnFailure
+          template:
+            spec:
+              containers:
+                - name: pytorch
+                  image: {{ .Values.config.trialTemplates.pytorchJobTemplate.image | default "ghcr.io/kubeflow/katib/pytorch-mnist-cpu:latest" }}
+                  command:
+                    - "python3"
+                    - "/opt/pytorch-mnist/mnist.py"
+                    - "--epochs=1"
+                    - "--lr=${trialParameters.learningRate}"
+                    - "--momentum=${trialParameters.momentum}"
+        Worker:
+          replicas: {{ .Values.config.trialTemplates.pytorchJobTemplate.workerReplicas | default 2 }}
+          restartPolicy: OnFailure
+          template:
+            spec:
+              containers:
+                - name: pytorch
+                  image: {{ .Values.config.trialTemplates.pytorchJobTemplate.image | default "ghcr.io/kubeflow/katib/pytorch-mnist-cpu:latest" }}
+                  command:
+                    - "python3"
+                    - "/opt/pytorch-mnist/mnist.py"
+                    - "--epochs=1"
+                    - "--lr=${trialParameters.learningRate}"
+                    - "--momentum=${trialParameters.momentum}"
+{{- with .Values.config.trialTemplates.customTemplates }}
+{{- range $name, $template := . }}
+  {{ $name }}: |-
+{{ $template | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }} 

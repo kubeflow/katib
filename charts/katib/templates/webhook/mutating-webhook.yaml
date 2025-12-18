@@ -1,0 +1,75 @@
+{{- if and .Values.webhook.enabled .Values.webhook.mutating.enabled }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "katib.webhook.mutatingName" . }}
+  labels:
+    {{- include "katib.webhook.labels" . | nindent 4 }}
+  {{- if or .Values.webhook.mutating.annotations .Values.webhook.certManager.enabled }}
+  annotations:
+    {{- with .Values.webhook.mutating.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- if .Values.webhook.certManager.enabled }}
+    cert-manager.io/inject-ca-from: {{ include "katib.namespace" . }}/katib-webhook-cert
+    {{- end }}
+  {{- end }}
+webhooks:
+  - name: defaulter.experiment.katib.kubeflow.org
+    sideEffects: None
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ include "katib.controller.serviceName" . }}
+        namespace: {{ include "katib.namespace" . }}
+        path: /mutate-experiment
+      {{- if not .Values.webhook.certManager.enabled }}
+      caBundle: {{ .Values.webhook.caBundle | b64enc }}
+      {{- end }}
+    rules:
+      - apiGroups:
+          - kubeflow.org
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - experiments
+    {{- with .Values.webhook.mutating.failurePolicy }}
+    failurePolicy: {{ . }}
+    {{- end }}
+  {{- if .Values.webhook.mutating.podMutator.enabled }}
+  - name: mutator.pod.katib.kubeflow.org
+    sideEffects: None
+    admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: {{ include "katib.controller.serviceName" . }}
+        namespace: {{ include "katib.namespace" . }}
+        path: /mutate-pod
+      {{- if not .Values.webhook.certManager.enabled }}
+      caBundle: {{ .Values.webhook.caBundle | b64enc }}
+      {{- end }}
+    namespaceSelector:
+      matchLabels:
+        katib.kubeflow.org/metrics-collector-injection: enabled
+    matchConditions:
+      - name: 'exclude-katib-controller'
+        expression: 'request.userInfo.username != "system:serviceaccount:{{ include "katib.namespace" . }}:{{ include "katib.controller.serviceAccountName" . }}"'
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+        resources:
+          - pods
+    {{- with .Values.webhook.mutating.failurePolicy }}
+    failurePolicy: {{ . }}
+    {{- end }}
+  {{- end }}
+{{- end }}

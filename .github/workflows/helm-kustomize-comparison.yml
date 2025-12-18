@@ -1,0 +1,48 @@
+name: Helm vs Kustomize Comparison
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'charts/**'
+      - 'manifests/**'
+      - 'scripts/compare_all_scenarios.sh'
+      - '.github/workflows/helm-kustomize-comparison.yml'
+  workflow_dispatch:
+
+jobs:
+  compare-all-scenarios:
+    runs-on: ubuntu-latest
+    name: Compare All Scenarios    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml
+
+    - name: Install Helm
+      run: |
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+        rm get_helm.sh
+
+    - name: Install Kustomize
+      run: |
+        curl --silent --location --remote-name "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz"
+        tar -xzvf kustomize_v5.4.3_linux_amd64.tar.gz
+        chmod a+x kustomize
+        sudo mv kustomize /usr/local/bin/kustomize
+
+    - name: Run all scenarios comparison
+      env:
+        VERBOSE: "true"
+      run: ./scripts/compare_all_scenarios.sh 

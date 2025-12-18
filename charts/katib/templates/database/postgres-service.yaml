@@ -1,0 +1,18 @@
+{{- if and .Values.database.postgres.enabled (eq .Values.database.type "postgres") }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "katib.fullname" . }}-postgres
+  namespace: {{ include "katib.namespace" . }}
+  labels:
+    {{- include "katib.postgres.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.database.postgres.service.port }}
+      protocol: {{ .Values.database.postgres.service.protocol }}
+      name: dbapi
+  selector:
+    {{- include "katib.postgres.selectorLabels" . | nindent 4 }}
+{{- end }}

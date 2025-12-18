@@ -1,0 +1,137 @@
+{{- if and .Values.monitoring.prometheus.enabled .Values.monitoring.prometheus.serviceMonitor.enabled }}
+{{- if .Values.controller.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "katib.fullname" . }}-controller
+  namespace: {{ .Values.monitoring.prometheus.serviceMonitor.namespace | default (include "katib.namespace" .) }}
+  labels:
+    {{- include "katib.controller.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.prometheus.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.monitoring.prometheus.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "katib.controller.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: metrics
+      path: {{ .Values.monitoring.prometheus.path }}
+      interval: {{ .Values.monitoring.prometheus.serviceMonitor.interval | default "30s" }}
+      scrapeTimeout: {{ .Values.monitoring.prometheus.serviceMonitor.scrapeTimeout | default "10s" }}
+      {{- with .Values.monitoring.prometheus.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.monitoring.prometheus.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if .Values.monitoring.prometheus.serviceMonitor.targetLabels }}
+  targetLabels:
+    {{- toYaml .Values.monitoring.prometheus.serviceMonitor.targetLabels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.monitoring.prometheus.serviceMonitor.podTargetLabels }}
+  podTargetLabels:
+    {{- toYaml .Values.monitoring.prometheus.serviceMonitor.podTargetLabels | nindent 4 }}
+  {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "katib.namespace" . }}
+{{- end }}
+{{- if .Values.ui.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "katib.fullname" . }}-ui
+  namespace: {{ .Values.monitoring.prometheus.serviceMonitor.namespace | default (include "katib.namespace" .) }}
+  labels:
+    {{- include "katib.ui.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.prometheus.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.monitoring.prometheus.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "katib.ui.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: {{ .Values.monitoring.prometheus.path }}
+      interval: {{ .Values.monitoring.prometheus.serviceMonitor.interval | default "30s" }}
+      scrapeTimeout: {{ .Values.monitoring.prometheus.serviceMonitor.scrapeTimeout | default "10s" }}
+      {{- with .Values.monitoring.prometheus.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.monitoring.prometheus.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if .Values.monitoring.prometheus.serviceMonitor.targetLabels }}
+  targetLabels:
+    {{- toYaml .Values.monitoring.prometheus.serviceMonitor.targetLabels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.monitoring.prometheus.serviceMonitor.podTargetLabels }}
+  podTargetLabels:
+    {{- toYaml .Values.monitoring.prometheus.serviceMonitor.podTargetLabels | nindent 4 }}
+  {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "katib.namespace" . }}
+{{- end }}
+{{- if .Values.dbManager.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "katib.fullname" . }}-db-manager
+  namespace: {{ .Values.monitoring.prometheus.serviceMonitor.namespace | default (include "katib.namespace" .) }}
+  labels:
+    {{- include "katib.dbManager.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.prometheus.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.monitoring.prometheus.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "katib.dbManager.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: grpc
+      path: {{ .Values.monitoring.prometheus.path }}
+      interval: {{ .Values.monitoring.prometheus.serviceMonitor.interval | default "30s" }}
+      scrapeTimeout: {{ .Values.monitoring.prometheus.serviceMonitor.scrapeTimeout | default "10s" }}
+      {{- with .Values.monitoring.prometheus.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.monitoring.prometheus.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if .Values.monitoring.prometheus.serviceMonitor.targetLabels }}
+  targetLabels:
+    {{- toYaml .Values.monitoring.prometheus.serviceMonitor.targetLabels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.monitoring.prometheus.serviceMonitor.podTargetLabels }}
+  podTargetLabels:
+    {{- toYaml .Values.monitoring.prometheus.serviceMonitor.podTargetLabels | nindent 4 }}
+  {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "katib.namespace" . }}
+{{- end }}
+{{- end }} 
