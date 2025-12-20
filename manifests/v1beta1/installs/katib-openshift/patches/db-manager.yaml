@@ -1,0 +1,8 @@
+---
+- op: replace
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: DB_NAME
+      value: "postgres"
+    - name: DB_PASSWORD
+      value: "katib"

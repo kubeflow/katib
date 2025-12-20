@@ -20,8 +20,8 @@ resources:
 - ../../components/crd/
 # Katib DB manager.
 - ../../components/db-manager/
-# Katib DB mysql.
-- ../../components/mysql/
+# Katib DB postgres.
+- ../../components/postgres/
 # Katib UI.
 - ../../components/ui/
 # Katib webhooks.
@@ -66,4 +66,10 @@ patches:
     group: admissionregistration.k8s.io
     kind: MutatingWebhookConfiguration
     name: katib.kubeflow.org
+    version: v1
+- path: ./patches/db-manager.yaml
+  target:
+    group: apps
+    kind: Deployment
+    name: katib-db-manager
     version: v1
