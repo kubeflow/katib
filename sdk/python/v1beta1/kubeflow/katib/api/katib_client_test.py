@@ -583,6 +583,54 @@ test_tune_data = [
         },
         TEST_RESULT_SUCCESS,
     ),
+    (
+        "invalid node_selector type",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "node_selector": ["invalid"],
+        },
+        ValueError,
+    ),
+    (
+        "invalid node_selector values",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "node_selector": {"disktype": 123},
+        },
+        ValueError,
+    ),
+    (
+        "valid flow with node_selector for Job-based trials",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "resources_per_trial": {"gpu": "2"},
+            "node_selector": {"disktype": "ssd"},
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+    (
+        "valid flow with node_selector for PyTorchJob-based trials",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "resources_per_trial": types.TrainerResources(
+                num_workers=2,
+                num_procs_per_worker=2,
+                resources_per_worker={"gpu": "2"},
+            ),
+            "node_selector": {"gpu-vendor": "nvidia"},
+        },
+        TEST_RESULT_SUCCESS,
+    ),
 ]
 
 
@@ -848,6 +896,27 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                     # Verify PyTorchJob type
                     trial_spec = experiment.spec.trial_template.trial_spec
                     assert isinstance(trial_spec, KubeflowOrgV1PyTorchJob)
+
+                elif test_name == "valid flow with node_selector for Job-based trials":
+                    # Verify node_selector is set on Job pod template spec
+                    pod_spec = experiment.spec.trial_template.trial_spec.spec.template.spec
+                    assert pod_spec.node_selector == {"disktype": "ssd"}
+
+                elif (
+                    test_name
+                    == "valid flow with node_selector for PyTorchJob-based trials"
+                ):
+                    # Verify node_selector is set on PyTorchJob pod template specs
+                    # Master replica
+                    master_spec = experiment.spec.trial_template.trial_spec.spec.pytorch_replica_specs[
+                        "Master"
+                    ].template.spec
+                    assert master_spec.node_selector == {"gpu-vendor": "nvidia"}
+                    # Worker replica
+                    worker_spec = experiment.spec.trial_template.trial_spec.spec.pytorch_replica_specs[
+                        "Worker"
+                    ].template.spec
+                    assert worker_spec.node_selector == {"gpu-vendor": "nvidia"}
 
                 elif test_name == "valid flow with external model tuning":
                     args_content = "".join(

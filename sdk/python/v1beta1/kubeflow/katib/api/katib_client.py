@@ -218,156 +218,21 @@ class KatibClient(object):
         pip_index_urls: Optional[List[str]] = ["https://pypi.org/simple"],
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
         trial_active_deadline_seconds: Optional[int] = None,
+        node_selector: Optional[Dict[str, str]] = None,
     ):
-        """
-        Create HyperParameter Tuning Katib Experiment using one of the following
-        options:
+        """Tune hyperparameters using Katib."""
 
-        1. External models and datasets
-        Parameters: `model_provider_parameters` + `dataset_provider_parameters` +
-            `trainer_parameters`.
-        Usage: Specify both `model_provider_parameters` and
-            `dataset_provider_parameters` to download models and datasets from external
-            platforms (currently support HuggingFace and Amazon S3) using the Storage
-            Initializer. The `trainer_parameters` should be of type
-            `HuggingFaceTrainerParams` to set the hyperparameters search space. This API
-            will automatically define the "Trainer" in HuggingFace with the provided
-            parameters and utilize `Trainer.train()` from HuggingFace to obtain the metrics
-            for optimizing hyperparameters.
-
-        2. Custom objective function
-        Parameters: `objective` + `base_image` + `parameters`.
-        Usage: Specify the `objective` parameter to define your own objective function.
-            The `base_image` parameter will be used to execute the objective function. The
-            `parameters` should be a dictionary to define the search space for these
-            parameters.
-
-        Args:
-            name: Name for the Experiment.
-            model_provider_parameters: Parameters for the model provider in the Storage
-                Initializer.
-                For example, HuggingFace model name and Transformer type for that model,
-                like: AutoModelForSequenceClassification. This argument must be the type
-                of `kubeflow.storage_initializer.hugging_face.HuggingFaceModelParams`.
-            dataset_provider_parameters: Parameters for the dataset provider in the
-                Storage Initializer.
-                For example, name of the HuggingFace dataset or AWS S3 configuration.
-                This argument must be the type of `kubeflow.storage_initializer.hugging_face.
-                HuggingFaceDatasetParams` or `kubeflow.storage_initializer.s3.S3DatasetParams`.
-            trainer_parameters: Parameters for configuring the training process,
-                including settings for the hyperparameters search space. It should be of
-                type `HuggingFaceTrainerParams`. You should use the Katib SDK to define
-                the search space for these parameters. For example:
-                ```
-                trainer_parameters = HuggingFaceTrainerParams(
-                    training_parameters = transformers.TrainingArguments(
-                        learning_rate = katib.search.double(min=0.1, max=0.2),
-                    ),
-                ),
-                ```
-                Also, you can use these parameters to define input for training the
-                models.
-            storage_config: Configuration for Storage Initializer PVC to download
-                pre-trained model and dataset. You can configure PVC size and storage
-                class name in this argument.
-            objective: Objective function that Katib uses to train the model. This
-                function must be Callable and it must have only one dict argument. Katib
-                uses this argument to send HyperParameters to the function. The function
-                should not use any code declared outside of the function definition.
-                Import statements must be added inside the function.
-            base_image: Image to use when executing the objective function.
-            parameters: Dict of HyperParameters to tune your Experiment if you choose a custom
-                objective function. You should use Katib SDK to define the search space for these
-                parameters. For example:
-                `parameters = {"lr": katib.search.double(min=0.1, max=0.2)}`
-
-                Also, you can use these parameters to define input for your objective function.
-            namespace: Namespace for the Experiment.
-            env_per_trial: Environment variable(s) to be attached to each trial container.
-                You can specify a dictionary as a mapping object representing the environment
-                variables. Otherwise, you can specify a list, in which the element can either
-                be a kubernetes.client.models.V1EnvVar (documented here:
-                https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvVar.md)
-                or a kubernetes.client.models.V1EnvFromSource (documented here:
-                https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1EnvFromSource.md)
-            algorithm_name: Search algorithm for the HyperParameter tuning.
-            algorithm_settings: Settings for the search algorithm given.
-                For available fields, check this doc:
-                https://www.kubeflow.org/docs/components/katib/experiment/#search-algorithms-in-detail.
-            objective_metric_name: Objective metric that Katib optimizes.
-            additional_metric_names: List of metrics that Katib collects from the
-                objective function in addition to objective metric.
-            objective_type: Type for the Experiment optimization for the objective metric.
-                Must be one of `minimize` or `maximize`.
-            objective_goal: Objective goal that Experiment should reach to be Succeeded.
-            max_trial_count: Maximum number of Trials to run. For the default
-                values check this doc:
-                https://www.kubeflow.org/docs/components/katib/experiment/#configuration-spec.
-            parallel_trial_count: Number of Trials that Experiment runs in parallel.
-            max_failed_trial_count: Maximum number of Trials allowed to fail.
-            resources_per_trial: A parameter that lets you specify how much resources
-                each trial container should have.
-                For custom objective function, you can either specify a kubernetes.client.
-                V1ResourceRequirements object (documented here:
-                https://github.com/kubernetes-client/python/blob/master/kubernetes/docs/V1ResourceRequirements.md)
-                or a dictionary that includes one or more of the following keys: `cpu`,
-                `memory`, or `gpu` (other keys will be ignored). Appropriate values
-                for these keys are documented here:
-                https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/.
-                For example:
-                {
-                    "cpu": "1",
-                    "gpu": "1",
-                    "memory": "2Gi",
-                }
-                Please note, `gpu` specifies a resource request with a key of
-                `nvidia.com/gpu`, i.e. an NVIDIA GPU. If you need a different type of
-                GPU, pass in a V1ResourceRequirement instance instead, since it's more
-                flexible. This parameter is optional and defaults to None.
-
-                You should specify a TrainerResources as Trial resources if you use PyTorchJob as
-                Katib Trial for distributed training. This is mandatory parameter if you use
-                LLM `trainer_parameters`. The TrainerResources includes `num_workers`,
-                `num_procs_per_worker`, and `resources_per_worker`.
-                For example:
-                ```
-                resources_per_trial = TrainerResources(
-                    num_workers=4,
-                    num_procs_per_worker=2,
-                    resources_per_worker={
-                        "gpu": "2",
-                        "cpu": "5",
-                        "memory": "10Gi"
-                    }
+        # Validate node_selector
+        if node_selector is not None:
+            if not isinstance(node_selector, dict):
+                raise ValueError(
+                    "node_selector must be a dictionary of string key-value pairs"
                 )
-                ```
-                - num_workers: Number of PyTorchJob workers.
-                - num_procs_per_worker: Number of processes per PyTorchJob worker for
-                  `torchrun` CLI. You can use this parameter if you want to use more than 1 GPU
-                  per PyTorchJob worker.
-                - resources_per_worker: A parameter that lets you specify how much resources
-                  each PyTorchJob worker container should have. You can either specify
-                  a kubernetes.client.V1ResourceRequirements object or a dictionary, same as
-                  resources specified under the option of custom objective function.
-            retain_trials: Whether Trials' resources (e.g. pods) are deleted after Succeeded state.
-            packages_to_install: List of Python packages to install in addition
-                to the base image packages. These packages are installed before
-                executing the objective function.
-            pip_index_urls: List of PyPI urls from which to install Python packages.
-            metrics_collector_config: Specify the config of metrics collector,
-                for example, `metrics_collector_config = {"kind": "Push"}`.
-                Currently, we only support `StdOut` and `Push` metrics collector.
-            trial_active_deadline_seconds: Optional timeout in seconds for each trial.
-                If None, no timeout is applied. For Job-based trials, this sets the
-                activeDeadlineSeconds field. For PyTorchJob-based trials, this sets the
-                activeDeadlineSeconds field on the Master replica. This prevents individual
-                trials from running indefinitely and consuming resources.
-
-        Raises:
-            ValueError: Function arguments have incorrect type or value.
-            TimeoutError: Timeout to create Katib Experiment.
-            RuntimeError: Failed to create Katib Experiment.
-        """
+            for key, value in node_selector.items():
+                if not isinstance(key, str) or not isinstance(value, str):
+                    raise ValueError(
+                        "node_selector keys and values must be strings"
+                    )
 
         if (
             (
@@ -510,14 +375,21 @@ class KatibClient(object):
             container_spec.env = env if env else None
             container_spec.env_from = env_from if env_from else None
 
+            # Generate pod template spec.
+            pod_template_spec = training_utils.get_pod_template_spec(
+                containers=[container_spec]
+            )
+            if node_selector:
+                pod_template_spec.spec.node_selector = node_selector
+
             # Trial uses PyTorchJob for distributed training if TrainerResources is set.
             if isinstance(resources_per_trial, TrainerResources):
                 trial_template = utils.get_trial_template_with_pytorchjob(
                     retain_trials,
                     trial_parameters,
                     resources_per_trial,
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                    pod_template_spec,
+                    pod_template_spec,
                     trial_active_deadline_seconds,
                 )
             # Otherwise, Trial uses Job for model training.
@@ -525,7 +397,7 @@ class KatibClient(object):
                 trial_template = utils.get_trial_template_with_job(
                     retain_trials,
                     trial_parameters,
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                    pod_template_spec,
                     trial_active_deadline_seconds,
                 )
 
@@ -695,6 +567,10 @@ class KatibClient(object):
                 init_containers=[init_container_spec],
                 volumes=[storage_initializer_volume],
             )
+
+            if node_selector:
+                worker_pod_template_spec.spec.node_selector = node_selector
+                master_pod_template_spec.spec.node_selector = node_selector
 
             # Generate Trial template using the PyTorchJob.
             trial_template = utils.get_trial_template_with_pytorchjob(
