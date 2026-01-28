@@ -15,6 +15,10 @@ inputs:
   push:
     required: true
     description: whether to push container images or not
+  scan-image:
+    required: false
+    default: 'true'
+    description: whether to scan container images for vulnerabilities
 
 runs:
   using: composite
@@ -49,6 +53,34 @@ runs:
         tags: |
           type=raw,latest
           type=sha,prefix=v1beta1-
+
+    - name: Build Image for Scanning
+      if: inputs.scan-image == 'true'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ${{ inputs.dockerfile }}
+        push: false
+        load: true
+        tags: ${{ steps.meta.outputs.tags }}
+        platforms: linux/amd64
+
+    - name: Run Trivy Vulnerability Scanner
+      if: inputs.scan-image == 'true'
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+        format: 'sarif'
+        output: 'trivy-image-results.sarif'
+        severity: 'CRITICAL,HIGH'
+        ignore-unfixed: true
+
+    - name: Upload Trivy Scan Results
+      if: inputs.scan-image == 'true'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-image-results.sarif'
+        category: 'container-image-scan'
 
     - name: Build and Push
       uses: docker/build-push-action@v5
