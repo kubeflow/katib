@@ -487,6 +487,28 @@ test_tune_data = [
         RuntimeError,
     ),
     (
+        "invalid node_selector - not a dict",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "node_selector": "invalid",
+        },
+        ValueError,
+    ),
+    (
+        "invalid node_selector - non-string values",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "node_selector": {"key": 123},
+        },
+        ValueError,
+    ),
+    (
         "valid flow with custom objective function and Job as Trial",
         {
             "name": "tune_test",
@@ -580,6 +602,34 @@ test_tune_data = [
                 "https://pypi.org/simple",
                 "https://private-repo.com/simple",
             ],
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+    (
+        "valid flow with node_selector for Job-based trials",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "resources_per_trial": {"gpu": "2"},
+            "node_selector": {"nvidia.com/gpu.product": "NVIDIA-H100-NVL"},
+        },
+        TEST_RESULT_SUCCESS,
+    ),
+    (
+        "valid flow with node_selector for PyTorchJob-based trials",
+        {
+            "name": "tune_test",
+            "objective": lambda x: print(f"a={x}"),
+            "parameters": {"a": katib.search.int(min=10, max=100)},
+            "objective_metric_name": "a",
+            "resources_per_trial": types.TrainerResources(
+                num_workers=2,
+                num_procs_per_worker=2,
+                resources_per_worker={"gpu": "2"},
+            ),
+            "node_selector": {"nvidia.com/gpu.product": "NVIDIA-H100-NVL"},
         },
         TEST_RESULT_SUCCESS,
     ),
@@ -891,6 +941,39 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                     assert (
                         "--index-url https://pypi.org/simple --extra-index-url "
                         "https://private-repo.com/simple pandas numpy" in args_content
+                    )
+
+                elif test_name == "valid flow with node_selector for Job-based trials":
+                    # Verify node_selector is set on Job's pod template spec
+                    pod_spec = (
+                        experiment.spec.trial_template.trial_spec.spec.template.spec
+                    )
+                    assert pod_spec.node_selector == {
+                        "nvidia.com/gpu.product": "NVIDIA-H100-NVL"
+                    }
+                    assert isinstance(experiment.spec.trial_template.trial_spec, V1Job)
+
+                elif (
+                    test_name
+                    == "valid flow with node_selector for PyTorchJob-based trials"
+                ):
+                    # Verify node_selector is set on PyTorchJob's Master and Worker pod specs
+                    pytorch_spec = experiment.spec.trial_template.trial_spec.spec
+                    master_pod_spec = pytorch_spec.pytorch_replica_specs[
+                        "Master"
+                    ].template.spec
+                    worker_pod_spec = pytorch_spec.pytorch_replica_specs[
+                        "Worker"
+                    ].template.spec
+                    assert master_pod_spec.node_selector == {
+                        "nvidia.com/gpu.product": "NVIDIA-H100-NVL"
+                    }
+                    assert worker_pod_spec.node_selector == {
+                        "nvidia.com/gpu.product": "NVIDIA-H100-NVL"
+                    }
+                    assert isinstance(
+                        experiment.spec.trial_template.trial_spec,
+                        KubeflowOrgV1PyTorchJob,
                     )
 
         except Exception as e:
