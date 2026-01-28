@@ -64,6 +64,8 @@ runs:
         load: true
         tags: ${{ steps.meta.outputs.tags }}
         platforms: linux/amd64
+        cache-from: type=gha,scope=${{ inputs.dockerfile }}
+        cache-to: type=gha,mode=max,scope=${{ inputs.dockerfile }}
 
     - name: Run Trivy Vulnerability Scanner
       if: inputs.scan-image == 'true'
@@ -76,7 +78,7 @@ runs:
         ignore-unfixed: true
 
     - name: Upload Trivy Scan Results
-      if: inputs.scan-image == 'true'
+      if: inputs.scan-image == 'true' && always()
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-image-results.sarif'
@@ -89,6 +91,6 @@ runs:
         file: ${{ inputs.dockerfile }}
         push: ${{ inputs.push }}
         tags: ${{ steps.meta.outputs.tags }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max,ignore-error=true
+        cache-from: type=gha,scope=${{ inputs.dockerfile }}
+        cache-to: type=gha,mode=max,scope=${{ inputs.dockerfile }},ignore-error=true
         platforms: ${{ inputs.platforms }}
