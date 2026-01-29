@@ -459,6 +459,30 @@ test_tune_data = [
         ValueError,
     ),
     (
+        "missing training_parameters in HuggingFaceTrainerParams - issue #2587",
+        {
+            "name": "tune_test",
+            "model_provider_parameters": HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            "dataset_provider_parameters": HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:3000]",
+            ),
+            "trainer_parameters": HuggingFaceTrainerParams(
+                training_parameters=None,
+            ),
+            "resources_per_trial": types.TrainerResources(
+                num_workers=2,
+                num_procs_per_worker=2,
+                resources_per_worker={"gpu": "2"},
+            ),
+        },
+        ValueError,
+    ),
+    (
         "pvc creation failed",
         {
             "name": "tune_test",
@@ -880,6 +904,29 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         objective_metric_name="train_loss",
                         additional_metric_names=[],
                     )
+
+                    # Verify JSON serialization fix (issue #2587)
+                    # Container args should NOT have extra shell quotes like '{"key": "value"}'
+                    container_args = (
+                        experiment.spec.trial_template.trial_spec.spec.pytorch_replica_specs[
+                            "Master"
+                        ]
+                        .template.spec.containers[0]
+                        .args
+                    )
+                    for i, arg in enumerate(container_args):
+                        if arg in ("--training_parameters", "--lora_config"):
+                            assert i + 1 < len(container_args), (
+                                f"Missing value for {arg} in container args"
+                            )
+                            next_arg = container_args[i + 1]
+                            # Should NOT start/end with extra single quotes
+                            assert not (
+                                next_arg.startswith("'") and next_arg.endswith("'")
+                            ), (
+                                f"{arg} value should not be wrapped with extra quotes. "
+                                f"Got: {next_arg[:50]}..."
+                            )
 
                 elif test_name == "valid flow with pip_index_urls":
                     # Verify pip install command in container args.
