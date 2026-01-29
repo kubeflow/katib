@@ -619,7 +619,6 @@ class KatibClient(object):
                     "Trainer parameters must be an instance of HuggingFaceTrainerParams."
                 )
 
-            # Validate that training_parameters is provided (fixes issue #2587)
             if not trainer_parameters.training_parameters:
                 raise ValueError(
                     "trainer_parameters.training_parameters must be provided. "
