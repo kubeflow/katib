@@ -905,7 +905,7 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                         additional_metric_names=[],
                     )
 
-                    # Verify JSON serialization fix (issue #2587)
+                    # Verify JSON serialization fix
                     # Container args should NOT have extra shell quotes like '{"key": "value"}'
                     container_args = (
                         experiment.spec.trial_template.trial_spec.spec.pytorch_replica_specs[
@@ -916,9 +916,9 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
                     )
                     for i, arg in enumerate(container_args):
                         if arg in ("--training_parameters", "--lora_config"):
-                            assert i + 1 < len(container_args), (
-                                f"Missing value for {arg} in container args"
-                            )
+                            assert i + 1 < len(
+                                container_args
+                            ), f"Missing value for {arg} in container args"
                             next_arg = container_args[i + 1]
                             # Should NOT start/end with extra single quotes
                             assert not (

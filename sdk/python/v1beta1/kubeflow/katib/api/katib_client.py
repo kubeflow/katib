@@ -622,8 +622,9 @@ class KatibClient(object):
             if not trainer_parameters.training_parameters:
                 raise ValueError(
                     "trainer_parameters.training_parameters must be provided. "
-                    "Please use transformers.TrainingArguments(...) to configure training. "
-                    "See: https://www.kubeflow.org/docs/components/katib/user-guides/hp-tuning/configure-experiment/#tune-api"
+                    "Please use transformers.TrainingArguments(...) to configure "
+                    "training. See: https://www.kubeflow.org/docs/components/katib/"
+                    "user-guides/hp-tuning/configure-experiment/#tune-api"
                 )
 
             # Iterate over input parameters and do substitutions.
@@ -672,9 +673,17 @@ class KatibClient(object):
                     "--dataset_dir",
                     VOLUME_PATH_DATASET,
                     "--lora_config",
-                    json.dumps(lora_config) if isinstance(lora_config, dict) else lora_config,
+                    (
+                        json.dumps(lora_config)
+                        if isinstance(lora_config, dict)
+                        else lora_config
+                    ),
                     "--training_parameters",
-                    json.dumps(training_args) if isinstance(training_args, dict) else training_args,
+                    (
+                        json.dumps(training_args)
+                        if isinstance(training_args, dict)
+                        else training_args
+                    ),
                 ],
                 volume_mounts=[STORAGE_INITIALIZER_VOLUME_MOUNT],
                 resources=(
