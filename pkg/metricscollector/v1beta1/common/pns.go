@@ -44,11 +44,54 @@ func WaitMainProcesses(opts WaitPidsOpts) error {
 	}
 
 	pids, mainPid, err := GetMainProcesses(opts.CompletedMarkedDirPath)
-	if err != nil {
-		return err
+
+	// Fallback: If main process not found (race condition where training
+	// exits before we can detect it), check for existing completion marker
+	if err != nil || mainPid == 0 {
+		klog.Infof("Main process not found, checking for existing completion marker")
+		if isAlreadyCompleted(opts.CompletedMarkedDirPath) {
+			klog.Info("Training already completed (detected via marker file)")
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("unable to find main process or completion marker")
 	}
 
 	return WaitPIDs(pids, mainPid, opts)
+}
+
+// isAlreadyCompleted checks if training has already finished by scanning
+// for existing .pid marker files with "completed" content.
+// This handles the race condition where training exits before the collector
+// can detect it via /proc.
+func isAlreadyCompleted(completedMarkedDirPath string) bool {
+	if completedMarkedDirPath == "" {
+		return false
+	}
+
+	pattern := filepath.Join(completedMarkedDirPath, "*.pid")
+	files, err := filepath.Glob(pattern)
+	if err != nil {
+		klog.Warningf("Failed to glob for pid files: %v", err)
+		return false
+	}
+
+	for _, f := range files {
+		contents, err := os.ReadFile(f)
+		if err != nil {
+			klog.Warningf("Failed to read marker file %s: %v", f, err)
+			continue
+		}
+
+		marker := strings.TrimSpace(string(contents))
+		if marker == TrainingCompleted {
+			klog.Infof("Found existing completion marker in %s", f)
+			return true
+		}
+	}
+	return false
 }
 
 // GetMainProcesses returns array with all running processes pids
