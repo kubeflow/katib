@@ -31,6 +31,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -39,6 +40,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+	"sigs.k8s.io/yaml"
 
 	configv1beta1 "github.com/kubeflow/katib/pkg/apis/config/v1beta1"
 	apis "github.com/kubeflow/katib/pkg/apis/controller"
@@ -229,6 +231,228 @@ func TestWrapWorkerContainer(t *testing.T) {
 			if diff := cmp.Diff(tc.wantPod.Spec.Containers, tc.pod.Spec.Containers); len(diff) != 0 {
 				t.Errorf("Unexpected pod from wrapWorkerContainer (-want,+got):\n%s", diff)
 			}
+		})
+	}
+}
+
+func TestGetMetricsCollectorContainerSecurityContext(t *testing.T) {
+	// Start test k8s server
+	envTest := &envtest.Environment{
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "components", "crd"),
+		},
+	}
+	if err := apis.AddToScheme(scheme.Scheme); err != nil {
+		t.Error(err)
+	}
+
+	cfg, err := envTest.Start()
+	if err != nil {
+		t.Error(err)
+	}
+
+	g := gomega.NewGomegaWithT(t)
+
+	mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(configv1beta1.AddToScheme(mgr.GetScheme())).NotTo(gomega.HaveOccurred())
+
+	// Start test manager.
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		g.Expect(mgr.Start(context.TODO())).NotTo(gomega.HaveOccurred())
+	}()
+
+	c := mgr.GetClient()
+
+	testNamespace := consts.DefaultKatibNamespace
+	testTrialName := "sc-test-trial"
+	testSuggestionName := "sc-test-suggestion"
+	testAlgorithm := "random"
+	configMapName := "katib-config"
+
+	// Create namespace if needed.
+	ns := &corev1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testNamespace,
+		},
+	}
+	if err := c.Create(context.TODO(), ns); err != nil && !errors.IsAlreadyExists(err) {
+		t.Fatalf("Unable to create namespace %q: %v", testNamespace, err)
+	}
+
+	// Create Suggestion for early stopping args resolution.
+	testSuggestion := &suggestionsv1beta1.Suggestion{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      testSuggestionName,
+			Namespace: testNamespace,
+		},
+		Spec: suggestionsv1beta1.SuggestionSpec{
+			Algorithm: &common.AlgorithmSpec{
+				AlgorithmName: testAlgorithm,
+			},
+		},
+	}
+	g.Expect(c.Create(context.TODO(), testSuggestion)).NotTo(gomega.HaveOccurred())
+	g.Eventually(func() error {
+		return c.Get(context.TODO(), types.NamespacedName{Namespace: testNamespace, Name: testSuggestionName}, testSuggestion)
+	}, timeout).ShouldNot(gomega.HaveOccurred())
+
+	trial := &trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      testTrialName,
+			Namespace: testNamespace,
+			Labels: map[string]string{
+				consts.LabelExperimentName: testSuggestionName,
+			},
+		},
+		Spec: trialsv1beta1.TrialSpec{
+			Objective: &common.ObjectiveSpec{
+				ObjectiveMetricName: "accuracy",
+				Type:                common.ObjectiveTypeMaximize,
+			},
+			MetricsCollector: common.MetricsCollectorSpec{
+				Collector: &common.CollectorSpec{
+					Kind: common.StdOutCollector,
+				},
+			},
+			PrimaryContainerName: "training",
+		},
+	}
+
+	runAsNonRoot := true
+	configSC := &corev1.SecurityContext{
+		RunAsNonRoot: &runAsNonRoot,
+	}
+
+	originalPod := &v1.Pod{
+		Spec: v1.PodSpec{
+			Containers: []v1.Container{
+				{
+					Name:  "training",
+					Image: "training:latest",
+					SecurityContext: &v1.SecurityContext{
+						Privileged: func() *bool { b := true; return &b }(),
+					},
+				},
+			},
+		},
+	}
+
+	cases := map[string]struct {
+		katibConfigData        string
+		injectSecurityContext   bool
+		wantSecurityContext     *v1.SecurityContext
+	}{
+		"Config SecurityContext takes precedence over InjectSecurityContext flag": {
+			katibConfigData: func() string {
+				kc := configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
+							{
+								CollectorKind:   string(common.StdOutCollector),
+								Image:           "metrics-image:latest",
+								SecurityContext: configSC,
+							},
+						},
+					},
+				}
+				b, _ := yaml.Marshal(kc)
+				return string(b)
+			}(),
+			injectSecurityContext: true,
+			wantSecurityContext:   configSC,
+		},
+		"Fallback to InjectSecurityContext when config SecurityContext is nil": {
+			katibConfigData: func() string {
+				kc := configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
+							{
+								CollectorKind: string(common.StdOutCollector),
+								Image:         "metrics-image:latest",
+							},
+						},
+					},
+				}
+				b, _ := yaml.Marshal(kc)
+				return string(b)
+			}(),
+			injectSecurityContext: true,
+			wantSecurityContext:   originalPod.Spec.Containers[0].SecurityContext,
+		},
+		"No SecurityContext when both config and flag are unset": {
+			katibConfigData: func() string {
+				kc := configv1beta1.KatibConfig{
+					RuntimeConfig: configv1beta1.RuntimeConfig{
+						MetricsCollectorConfigs: []configv1beta1.MetricsCollectorConfig{
+							{
+								CollectorKind: string(common.StdOutCollector),
+								Image:         "metrics-image:latest",
+							},
+						},
+					},
+				}
+				b, _ := yaml.Marshal(kc)
+				return string(b)
+			}(),
+			injectSecurityContext: false,
+			wantSecurityContext:   nil,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			// Create or update ConfigMap.
+			cm := &corev1.ConfigMap{}
+			key := types.NamespacedName{Namespace: testNamespace, Name: configMapName}
+			err := c.Get(context.TODO(), key, cm)
+			if errors.IsNotFound(err) {
+				cm = &corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      configMapName,
+						Namespace: testNamespace,
+					},
+					Data: map[string]string{
+						consts.LabelKatibConfigTag: tc.katibConfigData,
+					},
+				}
+				g.Expect(c.Create(context.TODO(), cm)).NotTo(gomega.HaveOccurred())
+			} else {
+				g.Expect(err).NotTo(gomega.HaveOccurred())
+				if cm.Data == nil {
+					cm.Data = map[string]string{}
+				}
+				cm.Data[consts.LabelKatibConfigTag] = tc.katibConfigData
+				g.Expect(c.Update(context.TODO(), cm)).NotTo(gomega.HaveOccurred())
+			}
+			g.Eventually(func() error {
+				return c.Get(context.TODO(), types.NamespacedName{Namespace: testNamespace, Name: configMapName}, &corev1.ConfigMap{})
+			}, timeout).ShouldNot(gomega.HaveOccurred())
+
+			si := &SidecarInjector{
+				client:                c,
+				decoder:               admission.NewDecoder(mgr.GetScheme()),
+				injectSecurityContext: tc.injectSecurityContext,
+			}
+
+			container, err := si.getMetricsCollectorContainer(trial, originalPod)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if diff := cmp.Diff(tc.wantSecurityContext, container.SecurityContext); len(diff) != 0 {
+				t.Errorf("Unexpected SecurityContext (-want,+got):\n%s", diff)
+			}
+
+			// Delete ConfigMap
+			g.Expect(c.Delete(context.TODO(), cm)).NotTo(gomega.HaveOccurred())
+			g.Eventually(func() bool {
+				return errors.IsNotFound(
+					c.Get(context.TODO(), types.NamespacedName{Namespace: testNamespace, Name: configMapName}, &corev1.ConfigMap{}))
+			}, timeout).Should(gomega.BeTrue())
 		})
 	}
 }

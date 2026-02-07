@@ -76,6 +76,24 @@ func TestSetSuggestionConfigs(t *testing.T) {
 				return []SuggestionConfig{*c}
 			}(),
 		},
+		"PodSecurityContext survives defaulting unchanged": {
+			config: func() []SuggestionConfig {
+				suggestion := newFakeSuggestionConfig(testAlgorithmName)
+				runAsNonRoot := true
+				suggestion.PodSecurityContext = &corev1.PodSecurityContext{
+					RunAsNonRoot: &runAsNonRoot,
+				}
+				return []SuggestionConfig{*suggestion}
+			}(),
+			wantConfig: func() []SuggestionConfig {
+				c := newFakeSuggestionConfig(testAlgorithmName)
+				runAsNonRoot := true
+				c.PodSecurityContext = &corev1.PodSecurityContext{
+					RunAsNonRoot: &runAsNonRoot,
+				}
+				return []SuggestionConfig{*c}
+			}(),
+		},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -118,6 +136,24 @@ func TestSetEarlyStoppingConfigs(t *testing.T) {
 				return []EarlyStoppingConfig{*c}
 			}(),
 			wantConfig: []EarlyStoppingConfig{*newFakeEarlyStoppingConfig(testAlgorithmName)},
+		},
+		"SecurityContext survives defaulting unchanged": {
+			config: func() []EarlyStoppingConfig {
+				c := newFakeEarlyStoppingConfig(testAlgorithmName)
+				runAsNonRoot := true
+				c.SecurityContext = &corev1.SecurityContext{
+					RunAsNonRoot: &runAsNonRoot,
+				}
+				return []EarlyStoppingConfig{*c}
+			}(),
+			wantConfig: func() []EarlyStoppingConfig {
+				c := newFakeEarlyStoppingConfig(testAlgorithmName)
+				runAsNonRoot := true
+				c.SecurityContext = &corev1.SecurityContext{
+					RunAsNonRoot: &runAsNonRoot,
+				}
+				return []EarlyStoppingConfig{*c}
+			}(),
 		},
 	}
 	for name, tc := range cases {
@@ -166,6 +202,24 @@ func TestSetMetricsCollectorConfigs(t *testing.T) {
 				return []MetricsCollectorConfig{*c}
 			}(),
 			wantConfig: []MetricsCollectorConfig{*newFakeMetricsCollectorConfig(testCollectorKind)},
+		},
+		"SecurityContext survives defaulting unchanged for metrics collector": {
+			config: func() []MetricsCollectorConfig {
+				c := newFakeMetricsCollectorConfig(testCollectorKind)
+				runAsNonRoot := true
+				c.SecurityContext = &corev1.SecurityContext{
+					RunAsNonRoot: &runAsNonRoot,
+				}
+				return []MetricsCollectorConfig{*c}
+			}(),
+			wantConfig: func() []MetricsCollectorConfig {
+				c := newFakeMetricsCollectorConfig(testCollectorKind)
+				runAsNonRoot := true
+				c.SecurityContext = &corev1.SecurityContext{
+					RunAsNonRoot: &runAsNonRoot,
+				}
+				return []MetricsCollectorConfig{*c}
+			}(),
 		},
 		"GetMetricsConfigData nukes resource.requests and resource.limits for the metrics collector": {
 			config: func() []MetricsCollectorConfig {

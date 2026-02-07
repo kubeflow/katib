@@ -242,6 +242,37 @@ func TestDesiredDeployment(t *testing.T) {
 			err:             true,
 			testDescription: "Get early stopping config error, image is missed",
 		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
+				sc := newFakeSuggestionConfig()
+				runAsNonRoot := true
+				sc.PodSecurityContext = &corev1.PodSecurityContext{
+					RunAsNonRoot: &runAsNonRoot,
+				}
+				esC := newFakeEarlyStoppingConfig()
+				runAsNonRootContainer := true
+				esC.SecurityContext = &corev1.SecurityContext{
+					RunAsNonRoot: &runAsNonRootContainer,
+				}
+				cm := newFakeKatibConfig(sc, esC)
+				return cm
+			}(),
+			expectedDeployment: func() *appsv1.Deployment {
+				deploy := newFakeDeployment()
+				runAsNonRoot := true
+				deploy.Spec.Template.Spec.SecurityContext = &corev1.PodSecurityContext{
+					RunAsNonRoot: &runAsNonRoot,
+				}
+				runAsNonRootContainer := true
+				deploy.Spec.Template.Spec.Containers[1].SecurityContext = &corev1.SecurityContext{
+					RunAsNonRoot: &runAsNonRootContainer,
+				}
+				return deploy
+			}(),
+			err:             false,
+			testDescription: "Deployment with PodSecurityContext and EarlyStopping SecurityContext",
+		},
 	}
 
 	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, true)

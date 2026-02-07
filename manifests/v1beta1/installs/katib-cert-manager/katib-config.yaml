@@ -15,37 +15,101 @@ runtime:
   metricsCollectors:
     - kind: StdOut
       image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
     - kind: File
       image: ghcr.io/kubeflow/katib/file-metrics-collector:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
     - kind: TensorFlowEvent
       image: ghcr.io/kubeflow/katib/tfevent-metrics-collector:latest
       resources:
         limits:
           memory: 1Gi
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
   suggestions:
     - algorithmName: random
       image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: tpe
       image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: grid
       image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: hyperband
       image: ghcr.io/kubeflow/katib/suggestion-hyperband:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: bayesianoptimization
       image: ghcr.io/kubeflow/katib/suggestion-skopt:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: cmaes
       image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: sobol
       image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: multivariate-tpe
       image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: enas
       image: ghcr.io/kubeflow/katib/suggestion-enas:latest
       resources:
         limits:
           memory: 400Mi
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: darts
       image: ghcr.io/kubeflow/katib/suggestion-darts:latest
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: pbt
       image: ghcr.io/kubeflow/katib/suggestion-pbt:latest
       persistentVolumeClaimSpec:
@@ -54,6 +118,18 @@ runtime:
         resources:
           requests:
             storage: 5Gi
+      podSecurityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
   earlyStoppings:
     - algorithmName: medianstop
       image: ghcr.io/kubeflow/katib/earlystopping-medianstop:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault

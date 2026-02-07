@@ -106,6 +106,8 @@ type SuggestionConfig struct {
 	PersistentVolumeClaimSpec corev1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
 	PersistentVolumeSpec      corev1.PersistentVolumeSpec      `json:"persistentVolumeSpec,omitempty"`
 	PersistentVolumeLabels    map[string]string                `json:"persistentVolumeLabels,omitempty"`
+	// PodSecurityContext specifies the PodSecurityContext for the suggestion pod.
+	PodSecurityContext *corev1.PodSecurityContext `json:"podSecurityContext,omitempty"`
 }
 
 // EarlyStoppingConfig is the early stopping structure in Katib config.
@@ -114,6 +116,8 @@ type EarlyStoppingConfig struct {
 	Image           string                      `json:"image"`
 	ImagePullPolicy corev1.PullPolicy           `json:"imagePullPolicy,omitempty"`
 	Resource        corev1.ResourceRequirements `json:"resources,omitempty"`
+	// SecurityContext specifies the SecurityContext for the early stopping container.
+	SecurityContext *corev1.SecurityContext `json:"securityContext,omitempty"`
 }
 
 // MetricsCollectorConfig is the metrics collector structure in Katib config.
@@ -123,4 +127,6 @@ type MetricsCollectorConfig struct {
 	ImagePullPolicy  corev1.PullPolicy           `json:"imagePullPolicy,omitempty"`
 	Resource         corev1.ResourceRequirements `json:"resources,omitempty"`
 	WaitAllProcesses *bool                       `json:"waitAllProcesses,omitempty"`
+	// SecurityContext specifies the SecurityContext for the metrics collector container.
+	SecurityContext *corev1.SecurityContext `json:"securityContext,omitempty"`
 }

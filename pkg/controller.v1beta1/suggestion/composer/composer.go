@@ -113,6 +113,11 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 		},
 	}
 
+	// Set PodSecurityContext if specified in the config.
+	if suggestionConfigData.PodSecurityContext != nil {
+		d.Spec.Template.Spec.SecurityContext = suggestionConfigData.PodSecurityContext.DeepCopy()
+	}
+
 	// Get Suggestion Service Account Name from config
 	if suggestionConfigData.ServiceAccountName != "" {
 		d.Spec.Template.Spec.ServiceAccountName = suggestionConfigData.ServiceAccountName
@@ -254,6 +259,10 @@ func (g *General) desiredContainers(s *suggestionsv1beta1.Suggestion,
 				},
 			},
 			Resources: earlyStoppingConfigData.Resource,
+		}
+
+		if earlyStoppingConfigData.SecurityContext != nil {
+			earlyStoppingContainer.SecurityContext = earlyStoppingConfigData.SecurityContext.DeepCopy()
 		}
 
 		containers = append(containers, earlyStoppingContainer)

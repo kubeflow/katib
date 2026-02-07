@@ -241,8 +241,11 @@ func (s *SidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 		Resources:       metricsCollectorConfigData.Resource,
 	}
 
-	// Inject the security context when the flag is enabled.
-	if s.injectSecurityContext {
+	// Apply security context from the metrics collector config if set.
+	// Otherwise, fall back to the legacy InjectSecurityContext flag behavior.
+	if metricsCollectorConfigData.SecurityContext != nil {
+		injectContainer.SecurityContext = metricsCollectorConfigData.SecurityContext.DeepCopy()
+	} else if s.injectSecurityContext {
 		if len(originalPod.Spec.Containers) != 0 &&
 			originalPod.Spec.Containers[0].SecurityContext != nil {
 			injectContainer.SecurityContext = originalPod.Spec.Containers[0].SecurityContext.DeepCopy()
