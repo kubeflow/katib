@@ -21,4 +21,11 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build -a -o file-metricscol
 FROM alpine:3.15
 WORKDIR /app
 COPY --from=build-env /go/src/github.com/kubeflow/katib/file-metricscollector .
+
+RUN adduser -S -u 1000 katib \
+  && chgrp -R 0 /app \
+  && chmod -R g+rwX /app
+
+USER 1000
+
 ENTRYPOINT ["./file-metricscollector"]

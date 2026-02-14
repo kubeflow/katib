@@ -26,7 +26,10 @@ WORKDIR ${TARGET_DIR}
 
 COPY --from=build-env /go/src/github.com/kubeflow/katib/goptuna-suggestion ${TARGET_DIR}/
 
-RUN chgrp -R 0 ${TARGET_DIR} \
+RUN adduser -S -u 1000 katib \
+  && chgrp -R 0 ${TARGET_DIR} \
   && chmod -R g+rwX ${TARGET_DIR}
+
+USER 1000
 
 ENTRYPOINT ["./goptuna-suggestion"]

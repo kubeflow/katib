@@ -342,9 +342,9 @@ func TestGetMetricsCollectorContainerSecurityContext(t *testing.T) {
 	}
 
 	cases := map[string]struct {
-		katibConfigData        string
-		injectSecurityContext   bool
-		wantSecurityContext     *v1.SecurityContext
+		katibConfigData       string
+		injectSecurityContext bool
+		wantSecurityContext   *v1.SecurityContext
 	}{
 		"Config SecurityContext takes precedence over InjectSecurityContext flag": {
 			katibConfigData: func() string {

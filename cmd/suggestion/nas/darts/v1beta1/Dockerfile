@@ -18,7 +18,10 @@ ADD ./${SUGGESTION_DIR}/ ${TARGET_DIR}/${SUGGESTION_DIR}/
 WORKDIR  ${TARGET_DIR}/${SUGGESTION_DIR}
 
 RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
-RUN chgrp -R 0 ${TARGET_DIR} \
+RUN useradd -m -u 1000 katib \
+  && chgrp -R 0 ${TARGET_DIR} \
   && chmod -R g+rwX ${TARGET_DIR}
+
+USER 1000
 
 ENTRYPOINT ["python", "main.py"]
