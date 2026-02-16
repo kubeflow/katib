@@ -103,6 +103,11 @@ func (g *DefaultGenerator) GetRunSpecWithHyperParameters(experiment *experiments
 	runSpec.SetName(trialName)
 	runSpec.SetNamespace(trialNamespace)
 
+	// Inject Experiment labels into the RunSpec's Pod template.
+	if err := util.InjectLabelsToPodTemplate(runSpec, util.TrialLabels(experiment)); err != nil {
+		return nil, err
+	}
+
 	return runSpec, nil
 }
 

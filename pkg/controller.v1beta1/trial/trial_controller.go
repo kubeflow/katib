@@ -48,6 +48,7 @@ import (
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 	"github.com/kubeflow/katib/pkg/controller.v1beta1/trial/managerclient"
 	trialutil "github.com/kubeflow/katib/pkg/controller.v1beta1/trial/util"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/util"
 )
 
 const (
@@ -331,6 +332,17 @@ func (r *ReconcileTrial) getDesiredJobSpec(instance *trialsv1beta1.Trial) (*unst
 
 	if err := controllerutil.SetControllerReference(instance, desiredJobSpec, r.scheme); err != nil {
 		logger.Error(err, "Set controller reference error")
+		return nil, err
+	}
+
+	// Inject Trial labels into the RunSpec's Pod template.
+	labels := make(map[string]string)
+	for k, v := range instance.Labels {
+		labels[k] = v
+	}
+	labels[consts.LabelTrialName] = instance.GetName()
+	if err := util.InjectLabelsToPodTemplate(desiredJobSpec, labels); err != nil {
+		logger.Error(err, "Inject labels to pod template error")
 		return nil, err
 	}
 

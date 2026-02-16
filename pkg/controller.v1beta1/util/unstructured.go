@@ -71,3 +71,74 @@ func ConvertObjectToUnstructured(in interface{}) (*unstructured.Unstructured, er
 
 	return out, nil
 }
+
+// InjectLabelsToPodTemplate injects labels into the Pod template for a given unstructured object.
+func InjectLabelsToPodTemplate(obj *unstructured.Unstructured, labels map[string]string) error {
+	if len(labels) == 0 {
+		return nil
+	}
+
+	currentLabels, _, _ := unstructured.NestedStringMap(obj.Object, "metadata", "labels")
+	if currentLabels == nil {
+		currentLabels = make(map[string]string)
+	}
+	for k, v := range labels {
+		currentLabels[k] = v
+	}
+	if err := unstructured.SetNestedStringMap(obj.Object, currentLabels, "metadata", "labels"); err != nil {
+		return err
+	}
+
+	templateLabels, found, err := unstructured.NestedStringMap(obj.Object, "spec", "template", "metadata", "labels")
+	if err == nil {
+		if !found || templateLabels == nil {
+			templateLabels = make(map[string]string)
+		}
+		for k, v := range labels {
+			templateLabels[k] = v
+		}
+		if err := unstructured.SetNestedStringMap(obj.Object, templateLabels, "spec", "template", "metadata", "labels"); err != nil {
+			return err
+		}
+	}
+
+	templateLabels, found, err = unstructured.NestedStringMap(obj.Object, "spec", "jobTemplate", "spec", "template", "metadata", "labels")
+	if err == nil {
+		if !found || templateLabels == nil {
+			templateLabels = make(map[string]string)
+		}
+		for k, v := range labels {
+			templateLabels[k] = v
+		}
+		if err := unstructured.SetNestedStringMap(obj.Object, templateLabels, "spec", "jobTemplate", "spec", "template", "metadata", "labels"); err != nil {
+			return err
+		}
+	}
+
+	replicaSpecs, found, err := unstructured.NestedMap(obj.Object, "spec", "replicaSpecs")
+	if err == nil && found {
+		for _, replicaSpec := range replicaSpecs {
+			rs, ok := replicaSpec.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			templateLabels, found, err = unstructured.NestedStringMap(rs, "template", "metadata", "labels")
+			if err == nil {
+				if !found || templateLabels == nil {
+					templateLabels = make(map[string]string)
+				}
+				for k, v := range labels {
+					templateLabels[k] = v
+				}
+				if err := unstructured.SetNestedStringMap(rs, templateLabels, "template", "metadata", "labels"); err != nil {
+					return err
+				}
+			}
+		}
+		if err := unstructured.SetNestedMap(obj.Object, replicaSpecs, "spec", "replicaSpecs"); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
