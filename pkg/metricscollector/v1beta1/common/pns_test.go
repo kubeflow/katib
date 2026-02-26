@@ -175,3 +175,65 @@ func TestWaitMainProcesses(t *testing.T) {
 		})
 	}
 }
+
+func TestWaitPIDsWithMarkerCheck(t *testing.T) {
+	tests := []struct {
+		name        string
+		files       map[string]string
+		expectError bool
+	}{
+		{
+			name:        "Non-existent PID with completed marker exits immediately",
+			files:       map[string]string{"99999.pid": "completed"},
+			expectError: false,
+		},
+		{
+			name:        "Non-existent PID without marker times out",
+			files:       map[string]string{},
+			expectError: true,
+		},
+		{
+			name:        "Non-existent PID with early-stopped marker times out",
+			files:       map[string]string{"99999.pid": "early-stopped"},
+			expectError: true,
+		},
+		{
+			name: "Non-existent PID with sidecar and completed marker exits",
+			files: map[string]string{
+				"99999.pid": "completed",
+				"88888.pid": "early-stopped",
+			},
+			expectError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+
+			for name, content := range tt.files {
+				err := os.WriteFile(filepath.Join(tmpDir, name), []byte(content), 0644)
+				if err != nil {
+					t.Fatalf("Failed to write test file: %v", err)
+				}
+			}
+
+			fakePids := map[int]bool{99999: true}
+			opts := WaitPidsOpts{
+				PollInterval:           100 * time.Millisecond,
+				Timeout:                1 * time.Second,
+				WaitAll:                false,
+				CompletedMarkedDirPath: tmpDir,
+			}
+
+			err := WaitPIDs(fakePids, 99999, opts)
+
+			if tt.expectError && err == nil {
+				t.Errorf("WaitPIDs() expected error but got nil")
+			}
+			if !tt.expectError && err != nil {
+				t.Errorf("WaitPIDs() unexpected error: %v", err)
+			}
+		})
+	}
+}

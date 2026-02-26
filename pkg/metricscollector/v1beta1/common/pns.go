@@ -168,6 +168,13 @@ func WaitPIDs(pids map[int]bool, mainPid int, opts WaitPidsOpts) error {
 	// Start main wait loop
 	// We should exit when timeout is out or notFinishedPids is empty
 	for (timeout == 0 || time.Now().Before(endTime)) && len(notFinishedPids) > 0 {
+		// Check completion marker each iteration.
+		if opts.CompletedMarkedDirPath != "" {
+			if completed, _ := isAlreadyCompleted(opts.CompletedMarkedDirPath); completed {
+				klog.Info("Training completed detected via marker during wait loop")
+				return nil
+			}
+		}
 		// Start loop over not finished pids
 		for pid := range notFinishedPids {
 			// If pid is completed /proc/<pid> dir doesn't exist
