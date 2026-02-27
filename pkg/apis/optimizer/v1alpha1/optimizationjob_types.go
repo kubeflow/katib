@@ -5,6 +5,7 @@ package v1alpha1
 import (
 	trainerv1alpha1 "github.com/kubeflow/trainer/pkg/apis/trainer/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
 // Objective defines the metric and goal for the HPO job.
@@ -33,6 +34,12 @@ type TrialConfig struct {
 	MaxFailedTrials *int32 `json:"max_failed_trials,omitempty"`
 }
 
+// BestTrial tracks the best performing trial and its metrics.
+type BestTrial struct {
+	Name  string  `json:"name"`
+	Value float64 `json:"value"`
+}
+
 // OptimizationJobSpec defines the desired state of OptimizationJob.
 type OptimizationJobSpec struct {
 	Objectives []Objective `json:"objectives"`
@@ -43,13 +50,30 @@ type OptimizationJobSpec struct {
 
 	TrialConfig TrialConfig `json:"trialConfig"`
 
+	Initializer *trainerv1alpha1.Initializer `json:"initializer,omitempty"`
+
 	// Tighter TrainJob Integration: Strongly typed to TrainJob rather than arbitrary CRDs.
-	TrialTemplate trainerv1alpha1.TrainJob `json:"trialTemplate"`
+	// runtime.RawExtension allows embedding the raw TrainJob Kubernetes object.
+	// +kubebuilder:pruning:PreserveUnknownFields
+	TrialTemplate runtime.RawExtension `json:"trialTemplate"`
 }
 
 // OptimizationJobStatus defines the observed state of OptimizationJob.
 type OptimizationJobStatus struct {
-	// Add status fields here (e.g., Conditions, BestTrial, etc.) as the controller matures.
+	// Conditions track the overall lifecycle of the OptimizationJob (e.g., Created, Running, Succeeded, Failed).
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
+
+	// Active is the number of currently running trials.
+	Active int32 `json:"active,omitempty"`
+
+	// Succeeded is the number of trials that successfully completed.
+	Succeeded int32 `json:"succeeded,omitempty"`
+
+	// Failed is the number of trials that failed.
+	Failed int32 `json:"failed,omitempty"`
+
+	// BestTrial holds the information about the best performing trial so far.
+	BestTrial *BestTrial `json:"bestTrial,omitempty"`
 }
 
 // +genclient
