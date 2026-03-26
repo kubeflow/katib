@@ -62,5 +62,5 @@ def categorical(list: List):
 
     return models.V1beta1ParameterSpec(
         parameter_type="categorical",
-        feasible_space=models.V1beta1FeasibleSpace(list),
+        feasible_space=models.V1beta1FeasibleSpace(list=list),
     )
