@@ -65,6 +65,7 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 	sts.KilledTrialList = nil
 	sts.EarlyStoppedTrialList = nil
 	sts.MetricsUnavailableTrialList = nil
+	sts.TrialsProgress = nil
 	bestTrialIndex := -1
 	isObjectiveGoalReached := false
 	var objectiveValueGoal float64
@@ -75,6 +76,19 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 
 	for index, trial := range trials.Items {
 		sts.Trials++
+
+		if trial.Status.TrainerStatus != nil || trial.Spec.MetricsCollector.Collector.Kind == commonv1beta1.TrainerStatusCollector {
+			sts.TrialsProgress = append(sts.TrialsProgress, experimentsv1beta1.TrialProgress{
+				TrialName:                 trial.Name,
+				ProgressPercentage:        getTrainerStatusProgressPercentage(&trial),
+				EstimatedRemainingSeconds: getTrainerStatusEstimatedRemainingSeconds(&trial),
+				CurrentLoss:               getTrainerStatusLossValue(instance, &trial),
+				Status:                    getTrialStatusString(&trial),
+				EarlyStopReason:           getTrialEarlyStopReason(&trial),
+				LastUpdatedTime:           getTrainerStatusLastUpdatedTime(&trial),
+			})
+		}
+
 		if trial.IsKilled() {
 			sts.KilledTrialList = append(sts.KilledTrialList, trial.Name)
 		} else if trial.IsFailed() {
@@ -148,6 +162,89 @@ func updateTrialsSummary(instance *experimentsv1beta1.Experiment, trials *trials
 		sts.CurrentOptimalTrial.Observation.Metrics = append(sts.CurrentOptimalTrial.Observation.Metrics, bestTrial.Status.Observation.Metrics...)
 	}
 	return isObjectiveGoalReached
+}
+
+func getTrainerStatusProgressPercentage(trial *trialsv1beta1.Trial) *int32 {
+	if trial.Status.TrainerStatus == nil {
+		return nil
+	}
+	return trial.Status.TrainerStatus.ProgressPercentage
+}
+
+func getTrainerStatusEstimatedRemainingSeconds(trial *trialsv1beta1.Trial) *int32 {
+	if trial.Status.TrainerStatus == nil {
+		return nil
+	}
+	return trial.Status.TrainerStatus.EstimatedRemainingSeconds
+}
+
+func getTrainerStatusLastUpdatedTime(trial *trialsv1beta1.Trial) *metav1.Time {
+	if trial.Status.TrainerStatus == nil {
+		return nil
+	}
+	return trial.Status.TrainerStatus.LastUpdatedTime
+}
+
+func getTrainerStatusLossValue(exp *experimentsv1beta1.Experiment, trial *trialsv1beta1.Trial) string {
+	if trial.Status.TrainerStatus == nil {
+		return ""
+	}
+	// Prefer conventional name "loss", then fall back to objective metric name.
+	if v, ok := findTrainerMetricValue(trial.Status.TrainerStatus.Metrics, "loss"); ok {
+		return v
+	}
+	if exp != nil && exp.Spec.Objective != nil {
+		if v, ok := findTrainerMetricValue(trial.Status.TrainerStatus.Metrics, exp.Spec.Objective.ObjectiveMetricName); ok {
+			return v
+		}
+	}
+	return ""
+}
+
+func findTrainerMetricValue(metrics []trialsv1beta1.TrainerMetric, name string) (string, bool) {
+	for _, m := range metrics {
+		if m.Name == name {
+			return m.Value, true
+		}
+	}
+	return "", false
+}
+
+func getTrialStatusString(trial *trialsv1beta1.Trial) string {
+	if trial.IsSucceeded() {
+		return string(trialsv1beta1.TrialSucceeded)
+	}
+	if trial.IsFailed() {
+		return string(trialsv1beta1.TrialFailed)
+	}
+	if trial.IsKilled() {
+		return string(trialsv1beta1.TrialKilled)
+	}
+	if trial.IsEarlyStopped() {
+		return string(trialsv1beta1.TrialEarlyStopped)
+	}
+	if trial.IsMetricsUnavailable() {
+		return string(trialsv1beta1.TrialMetricsUnavailable)
+	}
+	if trial.IsRunning() {
+		return string(trialsv1beta1.TrialRunning)
+	}
+	if trial.IsCreated() {
+		return string(trialsv1beta1.TrialCreated)
+	}
+	return ""
+}
+
+func getTrialEarlyStopReason(trial *trialsv1beta1.Trial) string {
+	if !trial.IsEarlyStopped() {
+		return ""
+	}
+	for _, c := range trial.Status.Conditions {
+		if c.Type == trialsv1beta1.TrialEarlyStopped {
+			return c.Reason
+		}
+	}
+	return ""
 }
 
 func getObjectiveMetricValue(trial trialsv1beta1.Trial) string {

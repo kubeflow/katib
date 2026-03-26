@@ -233,6 +233,10 @@ const (
 	// directly, sidecar container isn't in need, and its kind is "pushCollector"
 	PushCollector CollectorKind = "Push"
 
+	// TrainerStatusCollector collects progress and metrics from the Trainer TrainJob
+	// status field (TrainJob.status.trainerStatus). It does not require sidecar injection.
+	TrainerStatusCollector CollectorKind = "TrainerStatus"
+
 	MetricsVolume = "metrics-volume"
 )
 
