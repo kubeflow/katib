@@ -43,12 +43,54 @@ func WaitMainProcesses(opts WaitPidsOpts) error {
 		return fmt.Errorf("platform '%s' unsupported", runtime.GOOS)
 	}
 
+	// Check for existing completion marker before PID detection.
+	// This handles the race condition where training exits before
+	// the collector can detect it via /proc.
+	completed, err := isAlreadyCompleted(opts.CompletedMarkedDirPath)
+	if err != nil {
+		return fmt.Errorf("failed to check completion marker: %v", err)
+	}
+	if completed {
+		klog.Info("Training already completed (detected via marker file)")
+		return nil
+	}
+
 	pids, mainPid, err := GetMainProcesses(opts.CompletedMarkedDirPath)
 	if err != nil {
 		return err
 	}
 
 	return WaitPIDs(pids, mainPid, opts)
+}
+
+// isAlreadyCompleted checks if training has already finished by scanning
+// for existing .pid marker files with "completed" content.
+// This handles the race condition where training exits before the collector
+// can detect it via /proc.
+func isAlreadyCompleted(completedMarkedDirPath string) (bool, error) {
+	if completedMarkedDirPath == "" {
+		return false, nil
+	}
+
+	pattern := filepath.Join(completedMarkedDirPath, "*.pid")
+	files, err := filepath.Glob(pattern)
+	if err != nil {
+		return false, fmt.Errorf("failed to glob for pid files in %s: %v", completedMarkedDirPath, err)
+	}
+
+	for _, f := range files {
+		contents, err := os.ReadFile(f)
+		if err != nil {
+			return false, fmt.Errorf("failed to read marker file %s: %v", f, err)
+		}
+
+		marker := strings.TrimSpace(string(contents))
+		if marker == TrainingCompleted {
+			klog.Infof("Found existing completion marker in %s", f)
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // GetMainProcesses returns array with all running processes pids
@@ -126,6 +168,13 @@ func WaitPIDs(pids map[int]bool, mainPid int, opts WaitPidsOpts) error {
 	// Start main wait loop
 	// We should exit when timeout is out or notFinishedPids is empty
 	for (timeout == 0 || time.Now().Before(endTime)) && len(notFinishedPids) > 0 {
+		// Check completion marker each iteration.
+		if opts.CompletedMarkedDirPath != "" {
+			if completed, _ := isAlreadyCompleted(opts.CompletedMarkedDirPath); completed {
+				klog.Info("Training completed detected via marker during wait loop")
+				return nil
+			}
+		}
 		// Start loop over not finished pids
 		for pid := range notFinishedPids {
 			// If pid is completed /proc/<pid> dir doesn't exist
