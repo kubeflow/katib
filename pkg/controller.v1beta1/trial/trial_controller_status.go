@@ -39,10 +39,10 @@ const (
 	JobRunningReason            = "JobRunning"
 )
 
-type updateStatusFunc func(instance *trialsv1beta1.Trial) error
+type updateStatusFunc func(ctx context.Context, instance *trialsv1beta1.Trial) error
 
-func (r *ReconcileTrial) updateStatus(instance *trialsv1beta1.Trial) error {
-	err := r.Status().Update(context.TODO(), instance)
+func (r *ReconcileTrial) updateStatus(ctx context.Context, instance *trialsv1beta1.Trial) error {
+	err := r.Status().Update(ctx, instance)
 	if err != nil {
 		return err
 	}
