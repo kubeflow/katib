@@ -174,7 +174,7 @@ func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Reques
 	instance := original.DeepCopy()
 
 	if needUpdate, finalizers := needUpdateFinalizers(instance); needUpdate {
-		return r.updateFinalizers(instance, finalizers)
+		return r.updateFinalizers(ctx, instance, finalizers)
 	}
 
 	if !instance.IsCreated() {
@@ -188,7 +188,7 @@ func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Reques
 		msg := "Trial is created"
 		instance.MarkTrialStatusCreated(TrialCreatedReason, msg)
 	} else {
-		err := r.reconcileTrial(instance)
+		err := r.reconcileTrial(ctx, instance)
 		if err != nil {
 			if errors.Is(err, errMetricsNotReported) || errors.Is(err, errReportMetricsFailed) {
 				return reconcile.Result{
@@ -205,7 +205,7 @@ func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Reques
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = r.updateStatusHandler(instance)
+		err = r.updateStatusHandler(ctx, instance)
 		if err != nil {
 			logger.Info("Update trial instance status failed, reconcile requeued", "err", err)
 			return reconcile.Result{
@@ -217,7 +217,7 @@ func (r *ReconcileTrial) Reconcile(ctx context.Context, request reconcile.Reques
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
+func (r *ReconcileTrial) reconcileTrial(ctx context.Context, instance *trialsv1beta1.Trial) error {
 
 	var err error
 	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
@@ -227,7 +227,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 		return err
 	}
 
-	deployedJob, err := r.reconcileJob(instance, desiredJob)
+	deployedJob, err := r.reconcileJob(ctx, instance, desiredJob)
 	if err != nil {
 		logger.Error(err, "Reconcile job error")
 		return err
@@ -274,7 +274,7 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 	return nil
 }
 
-func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob *unstructured.Unstructured) (*unstructured.Unstructured, error) {
+func (r *ReconcileTrial) reconcileJob(ctx context.Context, instance *trialsv1beta1.Trial, desiredJob *unstructured.Unstructured) (*unstructured.Unstructured, error) {
 	var err error
 	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	apiVersion := desiredJob.GetAPIVersion()
@@ -283,7 +283,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 
 	deployedJob := &unstructured.Unstructured{}
 	deployedJob.SetGroupVersionKind(gvk)
-	err = r.Get(context.TODO(), types.NamespacedName{Name: desiredJob.GetName(), Namespace: desiredJob.GetNamespace()}, deployedJob)
+	err = r.Get(ctx, types.NamespacedName{Name: desiredJob.GetName(), Namespace: desiredJob.GetNamespace()}, deployedJob)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			if instance.IsCompleted() {
@@ -292,7 +292,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 
 			logger.Info("Creating Job", "kind", kind,
 				"name", desiredJob.GetName())
-			err = r.Create(context.TODO(), desiredJob)
+			err = r.Create(ctx, desiredJob)
 			if err != nil {
 				logger.Error(err, "Create job error")
 				return nil, err
@@ -309,7 +309,7 @@ func (r *ReconcileTrial) reconcileJob(instance *trialsv1beta1.Trial, desiredJob 
 		}
 	} else {
 		if instance.IsCompleted() && !instance.Spec.RetainRun {
-			if err = r.Delete(context.TODO(), desiredJob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
+			if err = r.Delete(ctx, desiredJob, client.PropagationPolicy(metav1.DeletePropagationForeground)); err != nil {
 				logger.Error(err, "Delete job error")
 				return nil, err
 			} else {

@@ -31,21 +31,21 @@ const (
 	SuggestionFailedReason       = "SuggestionFailed"
 )
 
-func (r *ReconcileSuggestion) updateStatus(s *suggestionsv1beta1.Suggestion, oldS *suggestionsv1beta1.Suggestion) error {
+func (r *ReconcileSuggestion) updateStatus(ctx context.Context, s *suggestionsv1beta1.Suggestion, oldS *suggestionsv1beta1.Suggestion) error {
 	if !equality.Semantic.DeepEqual(s.Status, oldS.Status) {
-		if err := r.Status().Update(context.TODO(), s); err != nil {
+		if err := r.Status().Update(ctx, s); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (r *ReconcileSuggestion) updateStatusCondition(s *suggestionsv1beta1.Suggestion, oldS *suggestionsv1beta1.Suggestion) error {
+func (r *ReconcileSuggestion) updateStatusCondition(ctx context.Context, s *suggestionsv1beta1.Suggestion, oldS *suggestionsv1beta1.Suggestion) error {
 	if !equality.Semantic.DeepEqual(s.Status.Conditions, oldS.Status.Conditions) {
 		newConditions := s.Status.Conditions
 		s.Status = oldS.Status
 		s.Status.Conditions = newConditions
-		if err := r.Status().Update(context.TODO(), s); err != nil {
+		if err := r.Status().Update(ctx, s); err != nil {
 			return err
 		}
 	}

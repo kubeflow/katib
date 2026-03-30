@@ -234,7 +234,7 @@ func (r *ReconcileExperiment) Reconcile(ctx context.Context, request reconcile.R
 		msg := "Experiment is created"
 		instance.MarkExperimentStatusCreated(util.ExperimentCreatedReason, msg)
 	} else {
-		err := r.ReconcileExperiment(instance)
+		err := r.ReconcileExperiment(ctx, instance)
 		if err != nil {
 			logger.Error(err, "Reconcile experiment error")
 			r.recorder.Eventf(instance,
@@ -246,7 +246,7 @@ func (r *ReconcileExperiment) Reconcile(ctx context.Context, request reconcile.R
 
 	if !equality.Semantic.DeepEqual(original.Status, instance.Status) {
 		//assuming that only status change
-		err = r.updateStatusHandler(instance)
+		err = r.updateStatusHandler(ctx, instance)
 		if err != nil {
 			logger.Info("Update experiment instance status failed, reconciler requeued", "err", err)
 			return reconcile.Result{
@@ -259,12 +259,12 @@ func (r *ReconcileExperiment) Reconcile(ctx context.Context, request reconcile.R
 }
 
 // ReconcileExperiment is the main reconcile loop.
-func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1beta1.Experiment) error {
+func (r *ReconcileExperiment) ReconcileExperiment(ctx context.Context, instance *experimentsv1beta1.Experiment) error {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	trials := &trialsv1beta1.TrialList{}
 	labels := map[string]string{consts.LabelExperimentName: instance.Name}
 
-	if err := r.List(context.TODO(), trials, client.InNamespace(instance.Namespace), client.MatchingLabels(labels)); err != nil {
+	if err := r.List(ctx, trials, client.InNamespace(instance.Namespace), client.MatchingLabels(labels)); err != nil {
 		logger.Error(err, "Trial List error")
 		return err
 	}
@@ -276,14 +276,14 @@ func (r *ReconcileExperiment) ReconcileExperiment(instance *experimentsv1beta1.E
 	}
 	reconcileRequired := !instance.IsCompleted()
 	if reconcileRequired {
-		return r.ReconcileTrials(instance, trials.Items)
+		return r.ReconcileTrials(ctx, instance, trials.Items)
 	}
 
 	return nil
 }
 
 // ReconcileTrials syncs trials.
-func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1beta1.Experiment, trials []trialsv1beta1.Trial) error {
+func (r *ReconcileExperiment) ReconcileTrials(ctx context.Context, instance *experimentsv1beta1.Experiment, trials []trialsv1beta1.Trial) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
@@ -296,7 +296,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1beta1.Exper
 		if deleteCount > 0 {
 			//delete 'deleteCount' number of trails. Sort them?
 			logger.Info("DeleteTrials", "deleteCount", deleteCount)
-			if err := r.deleteTrials(instance, trials, deleteCount); err != nil {
+			if err := r.deleteTrials(ctx, instance, trials, deleteCount); err != nil {
 				logger.Error(err, "Delete trials error")
 				return err
 			}
@@ -330,7 +330,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1beta1.Exper
 		//skip if no trials need to be created
 		if addCount > 0 {
 			//create "addCount" number of trials
-			if err := r.createTrials(instance, trials, addCount); err != nil {
+			if err := r.createTrials(ctx, instance, trials, addCount); err != nil {
 				logger.Error(err, "Create trials error")
 				return err
 			}
@@ -341,7 +341,7 @@ func (r *ReconcileExperiment) ReconcileTrials(instance *experimentsv1beta1.Exper
 
 }
 
-func (r *ReconcileExperiment) createTrials(instance *experimentsv1beta1.Experiment, trialList []trialsv1beta1.Trial, addCount int32) error {
+func (r *ReconcileExperiment) createTrials(ctx context.Context, instance *experimentsv1beta1.Experiment, trialList []trialsv1beta1.Trial, addCount int32) error {
 
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 	logger.Info("Reconcile Suggestion", "addCount", addCount)
@@ -358,7 +358,7 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1beta1.Experime
 			return err
 		}
 		// Due to unsynchronised policy of Kubernetes controllers, trial creation can fail.
-		if err = r.Create(context.TODO(), trialInstance); err != nil {
+		if err = r.Create(ctx, trialInstance); err != nil {
 			logger.Error(err, "Trial create error", "Trial name", trial.Name)
 			continue
 		}
@@ -371,7 +371,7 @@ func (r *ReconcileExperiment) createTrials(instance *experimentsv1beta1.Experime
 	return nil
 }
 
-func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1beta1.Experiment,
+func (r *ReconcileExperiment) deleteTrials(ctx context.Context, instance *experimentsv1beta1.Experiment,
 	trials []trialsv1beta1.Trial,
 	expectedDeletions int32) error {
 	logger := log.WithValues("Experiment", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
@@ -392,7 +392,7 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1beta1.Experime
 	}
 	deletedNames := []string{}
 	for i := 0; i < expected; i++ {
-		if err := r.Delete(context.TODO(), &trialSlice[i]); err != nil {
+		if err := r.Delete(ctx, &trialSlice[i]); err != nil {
 			logger.Error(err, "Trial Delete error")
 			return err
 		}
@@ -406,7 +406,7 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1beta1.Experime
 	for _, name := range deletedNames {
 		var err error
 		for !errors.IsNotFound(err) && time.Now().Before(endTime) {
-			err = r.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: instance.GetNamespace()}, &trialsv1beta1.Trial{})
+			err = r.Get(ctx, types.NamespacedName{Name: name, Namespace: instance.GetNamespace()}, &trialsv1beta1.Trial{})
 		}
 		// If trials were deleted, err == IsNotFound, return error if timeout is out
 		if !errors.IsNotFound(err) {
@@ -416,7 +416,7 @@ func (r *ReconcileExperiment) deleteTrials(instance *experimentsv1beta1.Experime
 
 	// We have to delete trials from suggestion status and update SuggestionCount
 	suggestion := &suggestionsv1beta1.Suggestion{}
-	err := r.Get(context.TODO(), types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, suggestion)
+	err := r.Get(ctx, types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}, suggestion)
 	if err != nil {
 		logger.Error(err, "Suggestion Get error")
 		return err

@@ -149,7 +149,7 @@ func (r *ReconcileTrial) UpdateTrialStatusObservation(instance *trialsv1beta1.Tr
 	return nil
 }
 
-func (r *ReconcileTrial) updateFinalizers(instance *trialsv1beta1.Trial, finalizers []string) (reconcile.Result, error) {
+func (r *ReconcileTrial) updateFinalizers(ctx context.Context, instance *trialsv1beta1.Trial, finalizers []string) (reconcile.Result, error) {
 	isDelete := true
 	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		if _, err := r.DeleteTrialObservationLog(instance); err != nil {
@@ -159,7 +159,7 @@ func (r *ReconcileTrial) updateFinalizers(instance *trialsv1beta1.Trial, finaliz
 		isDelete = false
 	}
 	instance.SetFinalizers(finalizers)
-	if err := r.Update(context.TODO(), instance); err != nil {
+	if err := r.Update(ctx, instance); err != nil {
 		return reconcile.Result{}, err
 	} else {
 		if isDelete {

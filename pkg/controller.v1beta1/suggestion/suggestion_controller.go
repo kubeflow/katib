@@ -148,11 +148,11 @@ func (r *ReconcileSuggestion) Reconcile(ctx context.Context, request reconcile.R
 	instance := oldS.DeepCopy()
 	// Suggestion will be succeeded if ResumePolicy = Never or ResumePolicy = FromVolume
 	if instance.IsSucceeded() {
-		err = r.deleteDeployment(instance, request.NamespacedName)
+		err = r.deleteDeployment(ctx, instance, request.NamespacedName)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		err = r.deleteService(instance, request.NamespacedName)
+		err = r.deleteService(ctx, instance, request.NamespacedName)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -166,7 +166,7 @@ func (r *ReconcileSuggestion) Reconcile(ctx context.Context, request reconcile.R
 		msg := "Suggestion is created"
 		instance.MarkSuggestionStatusCreated(SuggestionCreatedReason, msg)
 	} else {
-		err := r.ReconcileSuggestion(instance)
+		err := r.ReconcileSuggestion(ctx, instance)
 		if err != nil {
 			r.recorder.Eventf(instance, corev1.EventTypeWarning,
 				consts.ReconcileErrorReason, err.Error())
@@ -174,13 +174,13 @@ func (r *ReconcileSuggestion) Reconcile(ctx context.Context, request reconcile.R
 			// Try updating just the status condition when possible
 			// Status conditions might need to be updated even in error
 			// Ignore all other status fields else it will be inconsistent during retry
-			_ = r.updateStatusCondition(instance, oldS)
+			_ = r.updateStatusCondition(ctx, instance, oldS)
 			logger.Error(err, "Reconcile Suggestion error")
 			return reconcile.Result{}, err
 		}
 	}
 
-	if err := r.updateStatus(instance, oldS); err != nil {
+	if err := r.updateStatus(ctx, instance, oldS); err != nil {
 		logger.Info("Update suggestion instance status failed, reconciler requeued", "err", err)
 		return reconcile.Result{
 			Requeue: true,
@@ -190,7 +190,7 @@ func (r *ReconcileSuggestion) Reconcile(ctx context.Context, request reconcile.R
 }
 
 // ReconcileSuggestion is the main reconcile loop for suggestion CR.
-func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.Suggestion) error {
+func (r *ReconcileSuggestion) ReconcileSuggestion(ctx context.Context, instance *suggestionsv1beta1.Suggestion) error {
 	suggestionNsName := types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}
 	logger := log.WithValues("Suggestion", suggestionNsName)
 
@@ -202,7 +202,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 		}
 
 		// Reconcile PVC and PV
-		_, _, err = r.reconcileVolume(pvc, pv, suggestionNsName)
+		_, _, err = r.reconcileVolume(ctx, pvc, pv, suggestionNsName)
 		if err != nil {
 			return err
 		}
@@ -213,7 +213,7 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	if err != nil {
 		return err
 	}
-	_, err = r.reconcileService(service, suggestionNsName)
+	_, err = r.reconcileService(ctx, service, suggestionNsName)
 	if err != nil {
 		return err
 	}
@@ -234,13 +234,13 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 		}
 
 		// Reconcile ServiceAccount, Role and RoleBinding
-		err = r.reconcileRBAC(serviceAccount, role, roleBinding, suggestionNsName)
+		err = r.reconcileRBAC(ctx, serviceAccount, role, roleBinding, suggestionNsName)
 		if err != nil {
 			return err
 		}
 	}
 
-	if foundDeploy, err := r.reconcileDeployment(deploy, suggestionNsName); err != nil {
+	if foundDeploy, err := r.reconcileDeployment(ctx, deploy, suggestionNsName); err != nil {
 		return err
 	} else {
 		if !r.checkDeploymentReady(foundDeploy) {
@@ -257,14 +257,14 @@ func (r *ReconcileSuggestion) ReconcileSuggestion(instance *suggestionsv1beta1.S
 	experiment := &experimentsv1beta1.Experiment{}
 	trials := &trialsv1beta1.TrialList{}
 
-	if err := r.Get(context.TODO(), types.NamespacedName{
+	if err := r.Get(ctx, types.NamespacedName{
 		Name:      instance.Name,
 		Namespace: instance.Namespace,
 	}, experiment); err != nil {
 		return err
 	}
 
-	if err := r.List(context.TODO(), trials, client.MatchingLabels(util.TrialLabels(experiment))); err != nil {
+	if err := r.List(ctx, trials, client.MatchingLabels(util.TrialLabels(experiment))); err != nil {
 		return err
 	}
 	// TODO (andreyvelich): Do we want to run ValidateAlgorithmSettings when Experiment is restarting?

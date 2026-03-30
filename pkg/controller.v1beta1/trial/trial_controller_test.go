@@ -149,7 +149,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		collector:     trialutil.NewTrialsCollector(mgr.GetCache(), prometheus.NewRegistry()),
 	}
 
-	r.updateStatusHandler = func(instance *trialsv1beta1.Trial) error {
+	r.updateStatusHandler = func(ctx context.Context, instance *trialsv1beta1.Trial) error {
 		var err error = errors.NewBadRequest("fake-error")
 		// Try to update status until it be succeeded
 		for err != nil {
@@ -159,7 +159,7 @@ func TestReconcileBatchJob(t *testing.T) {
 				continue
 			}
 			updatedInstance.Status = instance.Status
-			err = r.updateStatus(updatedInstance)
+			err = r.updateStatus(ctx, updatedInstance)
 		}
 		return err
 	}
@@ -395,7 +395,7 @@ func TestReconcileBatchJob(t *testing.T) {
 
 	t.Run("Update status for empty Trial", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		g.Expect(r.updateStatus(&trialsv1beta1.Trial{})).To(gomega.HaveOccurred())
+		g.Expect(r.updateStatus(context.TODO(), &trialsv1beta1.Trial{})).To(gomega.HaveOccurred())
 	})
 
 }
