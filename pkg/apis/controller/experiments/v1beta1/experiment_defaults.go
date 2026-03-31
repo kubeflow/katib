@@ -141,8 +141,16 @@ func (e *Experiment) setDefaultMetricsCollector() {
 		e.Spec.MetricsCollectorSpec = &common.MetricsCollectorSpec{}
 	}
 	if e.Spec.MetricsCollectorSpec.Collector == nil {
+		// Default to Push collector for TrainJob trials to support push-based
+		// metrics reporting via the Kubeflow Training SDK.
+		defaultCollector := common.StdOutCollector
+		if e.Spec.TrialTemplate != nil &&
+			e.Spec.TrialTemplate.TrialSource.TrialSpec != nil &&
+			e.Spec.TrialTemplate.TrialSource.TrialSpec.GetKind() == "TrainJob" {
+			defaultCollector = common.PushCollector
+		}
 		e.Spec.MetricsCollectorSpec.Collector = &common.CollectorSpec{
-			Kind: common.StdOutCollector,
+			Kind: defaultCollector,
 		}
 	}
 	switch e.Spec.MetricsCollectorSpec.Collector.Kind {
