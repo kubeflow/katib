@@ -1,11 +1,11 @@
-# --- Clone the kubeflow/kubeflow code ---
-FROM alpine/git AS fetch-kubeflow-kubeflow
+# --- Clone the kubeflow/notebooks code ---
+FROM alpine/git AS fetch-kubeflow-notebooks
 
 WORKDIR /kf
 COPY ./pkg/ui/v1beta1/frontend/COMMIT ./
-RUN git clone https://github.com/kubeflow/kubeflow.git && \
+RUN git clone https://github.com/kubeflow/notebooks.git && \
     COMMIT=$(cat ./COMMIT) && \
-    cd kubeflow && \
+    cd notebooks && \
     git checkout $COMMIT
 
 # --- Build the frontend kubeflow library ---
@@ -13,8 +13,8 @@ FROM node:16-alpine AS frontend-kubeflow-lib
 
 WORKDIR /src
 
-ARG LIB=/kf/kubeflow/components/crud-web-apps/common/frontend/kubeflow-common-lib
-COPY --from=fetch-kubeflow-kubeflow $LIB/package*.json ./
+ARG LIB=/kf/notebooks/components/crud-web-apps/common/frontend/kubeflow-common-lib
+COPY --from=fetch-kubeflow-notebooks $LIB/package*.json ./
 RUN npm config set fetch-retry-mintimeout 200000 && \
     npm config set fetch-retry-maxtimeout 1200000 && \
     npm config get registry && \
@@ -24,7 +24,7 @@ RUN npm config set fetch-retry-mintimeout 200000 && \
     npm cache clean --force && \
     npm ci --force --prefer-offline --no-audit
 
-COPY --from=fetch-kubeflow-kubeflow $LIB/ ./
+COPY --from=fetch-kubeflow-notebooks $LIB/ ./
 RUN npm run build
 
 # --- Build the frontend ---

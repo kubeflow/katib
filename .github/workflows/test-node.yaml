@@ -46,11 +46,11 @@ jobs:
         with:
           node-version: 16.20.2
 
-      - name: Fetch Kubeflow and install common code dependencies
+      - name: Fetch kubeflow/notebooks and install common code dependencies
         run: |
           COMMIT=$(cat pkg/ui/v1beta1/frontend/COMMIT)
-          cd /tmp && git clone https://github.com/kubeflow/kubeflow.git
-          cd kubeflow
+          cd /tmp && git clone https://github.com/kubeflow/notebooks.git
+          cd notebooks
           git checkout $COMMIT
           cd components/crud-web-apps/common/frontend/kubeflow-common-lib
           npm i
@@ -79,11 +79,11 @@ jobs:
         with:
           node-version: 16
 
-      - name: Fetch Kubeflow and install common code dependencies
+      - name: Fetch kubeflow/notebooks and install common code dependencies
         run: |
           COMMIT=$(cat pkg/ui/v1beta1/frontend/COMMIT)
-          cd /tmp && git clone https://github.com/kubeflow/kubeflow.git
-          cd kubeflow
+          cd /tmp && git clone https://github.com/kubeflow/notebooks.git
+          cd notebooks
           git checkout $COMMIT
           cd components/crud-web-apps/common/frontend/kubeflow-common-lib
           npm i
