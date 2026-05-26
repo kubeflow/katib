@@ -129,6 +129,13 @@ class BaseOptunaService(object):
                         log=True,
                         step=1,
                     )
+                else:
+                    raise ValueError(
+                        f"Unsupported distribution "
+                        f"{api_pb2.Distribution.Name(param.distribution)} for parameter "
+                        f"{param.name}. The Optuna suggestion service supports only UNIFORM "
+                        f"and LOG_UNIFORM for int parameters."
+                    )
 
             elif param.type == DOUBLE:
                 if param.distribution in [api_pb2.UNIFORM, None]:
@@ -147,6 +154,13 @@ class BaseOptunaService(object):
                         high=float(param.max),
                         log=True,
                         step=None,
+                    )
+                else:
+                    raise ValueError(
+                        f"Unsupported distribution "
+                        f"{api_pb2.Distribution.Name(param.distribution)} for parameter "
+                        f"{param.name}. The Optuna suggestion service supports only UNIFORM "
+                        f"and LOG_UNIFORM for double parameters."
                     )
 
             elif param.type in [CATEGORICAL, DISCRETE]:
