@@ -18,6 +18,12 @@ import pytest
 import utils
 
 from pkg.apis.manager.v1beta1.python import api_pb2
+from pkg.suggestion.v1beta1.internal import constant
+from pkg.suggestion.v1beta1.internal.search_space import (
+    HyperParameter,
+    HyperParameterSearchSpace,
+)
+from pkg.suggestion.v1beta1.optuna.base_service import BaseOptunaService
 from pkg.suggestion.v1beta1.optuna.service import OptunaService
 
 
@@ -113,7 +119,10 @@ class TestOptuna:
                             name="param-7",
                             parameter_type=api_pb2.INT,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="5", min="1", step="2", distribution=api_pb2.LOG_UNIFORM
+                                max="5",
+                                min="1",
+                                step="2",
+                                distribution=api_pb2.LOG_UNIFORM,
                             ),
                         ),
                         api_pb2.ParameterSpec(
@@ -127,14 +136,20 @@ class TestOptuna:
                             name="param-9",
                             parameter_type=api_pb2.DOUBLE,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="11", min="1", step="2.5", distribution=api_pb2.UNIFORM
+                                max="11",
+                                min="1",
+                                step="2.5",
+                                distribution=api_pb2.UNIFORM,
                             ),
                         ),
                         api_pb2.ParameterSpec(
                             name="param-10",
                             parameter_type=api_pb2.DOUBLE,
                             feasible_space=api_pb2.FeasibleSpace(
-                                max="11", min="1", step="2.5", distribution=api_pb2.LOG_UNIFORM
+                                max="11",
+                                min="1",
+                                step="2.5",
+                                distribution=api_pb2.LOG_UNIFORM,
                             ),
                         ),
                         api_pb2.ParameterSpec(
@@ -550,6 +565,39 @@ class TestOptuna:
         )
         _, _, code, _ = utils.call_validate(self.test_server, experiment_spec)
         assert code == result
+
+
+class TestOptunaUnsupportedDistribution:
+    @pytest.mark.parametrize(
+        ["param_type", "distribution"],
+        [
+            ["double", api_pb2.NORMAL],
+            ["double", api_pb2.LOG_NORMAL],
+            ["int", api_pb2.NORMAL],
+            ["int", api_pb2.LOG_NORMAL],
+        ],
+    )
+    def test_unsupported_distribution_raises(self, param_type, distribution):
+        # The Optuna suggestion service only maps UNIFORM and LOG_UNIFORM. A param
+        # with NORMAL or LOG_NORMAL used to be dropped from the search space without
+        # any error, so the hyperparameter was silently never tuned (#2665). It must
+        # now fail loudly instead.
+        search_space = HyperParameterSearchSpace()
+        search_space.goal = constant.MAX_GOAL
+        if param_type == "double":
+            param = HyperParameter.double("x", "0.1", "0.9", "", distribution)
+        else:
+            param = HyperParameter.int("x", "1", "9", "1", distribution)
+        search_space.params = [param]
+
+        service = BaseOptunaService(
+            algorithm_name="random",
+            algorithm_config={},
+            search_space=search_space,
+        )
+
+        with pytest.raises(ValueError, match="Unsupported distribution"):
+            service.get_suggestions([], 1)
 
 
 if __name__ == "__main__":
