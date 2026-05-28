@@ -129,10 +129,27 @@ endif
 	bash scripts/v1beta1/build.sh $(KATIB_REGISTRY) $(TAG) $(CPU_ARCH)
 	bash scripts/v1beta1/push.sh $(KATIB_REGISTRY) $(TAG)
 
-# Release a new version of Katib.
+# Prepare a new Katib release locally before opening a PR.
 release:
+ifeq ($(VERSION),)
+	$(error VERSION must be set. Usage: make release VERSION=X.Y.Z)
+endif
+	bash scripts/v1beta1/prepare-release.sh $(VERSION)
+	@if echo "$(VERSION)" | grep -E -q 'rc[0-9]+$$'; then \
+		echo "Skipping changelog generation for RC release $(VERSION)"; \
+	elif command -v git-cliff >/dev/null 2>&1; then \
+		bash -c 'VERSION="$(VERSION)"; \
+		if echo "$$VERSION" | grep -E -q "rc[0-9]+$$"; then TAG="v$${VERSION/rc/-rc.}"; else TAG="v$$VERSION"; fi; \
+		git-cliff --unreleased --tag "$$TAG" --prepend CHANGELOG.md'; \
+		echo "Changelog generated at CHANGELOG.md"; \
+	else \
+		echo "Install git-cliff to auto-generate changelog, or update CHANGELOG.md manually"; \
+	fi
+
+# Legacy manual release that builds and publishes locally.
+release-manual:
 ifeq ($(and $(BRANCH),$(TAG)),)
-	$(error BRANCH and TAG must be set. Usage: make release BRANCH=<branch> TAG=<tag>)
+	$(error BRANCH and TAG must be set. Usage: make release-manual BRANCH=<branch> TAG=<tag>)
 endif
 	bash scripts/v1beta1/release.sh $(BRANCH) $(TAG)
 

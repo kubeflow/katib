@@ -15,6 +15,10 @@ inputs:
   push:
     required: true
     description: whether to push container images or not
+  image-tag:
+    required: false
+    description: explicit release tag (e.g. v0.19.0) to apply to images
+    default: ""
 
 runs:
   using: composite
@@ -47,7 +51,9 @@ runs:
       with:
         images: ${{ inputs.image }}
         tags: |
-          type=raw,latest
+          type=raw,value=${{ inputs.image-tag }},enable=${{ inputs.image-tag != '' }}
+          type=ref,event=tag
+          type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' && inputs.image-tag == '' }}
           type=sha,prefix=v1beta1-
 
     - name: Build and Push

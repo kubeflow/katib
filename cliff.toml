@@ -1,0 +1,58 @@
+[remote.github]
+owner = "kubeflow"
+repo = "katib"
+
+[changelog]
+header = """
+# Changelog
+"""
+
+body = """
+{%- if version %}
+# [{{ version }}](https://github.com/kubeflow/katib/tree/{{ version }}) ({{ timestamp | date(format="%Y-%m-%d") }})
+{% else %}
+# [Unreleased]
+{%- endif %}
+
+{%- set group_order = ["New Features", "Bug Fixes", "Misc", "Documentation"] -%}
+
+{%- for group_name in group_order %}
+{%- set group_commits = commits | filter(attribute="group", value=group_name) -%}
+{%- if group_commits | length > 0 %}
+## {{ group_name }}
+
+{% for commit in group_commits | reverse -%}
+{%- set message = commit.message | split(pat="\n") | first | trim -%}
+{%- set parts = message | split(pat=" (#") -%}
+   {% if parts | length > 1 and parts | last | trim | split(pat=")") | length > 1 -%}
+      {%- set pr_part = parts | last | trim -%}
+      {%- set pr_number = pr_part | replace(from=")", to="") -%}
+      - {{ parts | slice(end=-1) | join(sep=" (#") }} ([#{{ pr_number }}](https://github.com/kubeflow/katib/pull/{{ pr_number }}) by @{{ commit.remote.username }})
+   {% else -%}
+      - {{ message }} (@{{ commit.remote.username }})
+   {% endif -%}
+{% endfor %}
+
+{%- endif %}
+{%- endfor %}
+"""
+
+trim = true
+
+footer = ""
+
+[git]
+conventional_commits = false
+filter_unconventional = false
+split_commits = false
+
+tag_pattern = "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+ignore_tags = ".*-rc\\..*"
+
+commit_parsers = [
+   { message = "^feat(\\(.*\\))?:", group = "New Features" },
+   { message = "^fix(\\(.*\\))?:", group = "Bug Fixes" },
+   { message = "^docs(\\(.*\\))?:", group = "Documentation" },
+   { message = "^chore(\\(.*\\))?:", group = "Misc" },
+   { message = ".*", skip = true },
+]

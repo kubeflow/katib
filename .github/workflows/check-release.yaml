@@ -1,0 +1,65 @@
+# Validate release PRs before merge, aligned with kubeflow/sdk release checks.
+name: Check Release
+
+on:
+  pull_request:
+    branches:
+      - master
+      - "release-*"
+    paths:
+      - "manifests/**"
+      - "sdk/python/v1beta1/setup.py"
+      - "hack/python-api/gen-api.sh"
+      - "api/python_api/kubeflow_katib_api/__init__.py"
+
+concurrency:
+  group: check-release-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Validate Release Consistency
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse version
+        shell: bash
+        run: |
+          VERSION=$(grep -E 'version="[^"]+"' sdk/python/v1beta1/setup.py | head -1 | sed -E 's/.*version="([^"]+)".*/\1/')
+          if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(rc[0-9]+)?$ ]]; then
+            echo "Invalid version format: ${VERSION}"
+            exit 1
+          fi
+          if [[ "${VERSION}" =~ rc[0-9]+$ ]]; then
+            TAG="v${VERSION/rc/-rc.}"
+          else
+            TAG="v${VERSION}"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+
+      - name: Check if tag exists
+        shell: bash
+        run: |
+          git fetch --tags
+          if git tag -l | grep -q "^${TAG}$"; then
+            echo "Tag '${TAG}' already exists."
+            exit 1
+          fi
+          echo "Tag '${TAG}' does not exist."
+
+      - name: Validate version consistency
+        shell: bash
+        run: |
+          SDK_VERSION=$(grep -E 'version="[^"]+"' sdk/python/v1beta1/setup.py | head -1 | sed -E 's/.*version="([^"]+)".*/\1/')
+          API_VERSION=$(grep 'API_VERSION=' hack/python-api/gen-api.sh | head -1 | sed -E 's/.*API_VERSION="([^"]+)".*/\1/')
+          MODELS_VERSION=$(grep '__version__' api/python_api/kubeflow_katib_api/__init__.py | sed -E 's/.*"([^"]+)".*/\1/')
+
+          if [[ "${SDK_VERSION}" != "${API_VERSION}" || "${SDK_VERSION}" != "${MODELS_VERSION}" ]]; then
+            echo "Version mismatch between SDK, gen-api.sh, and models"
+            exit 1
+          fi

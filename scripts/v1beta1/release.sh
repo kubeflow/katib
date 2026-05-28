@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script is used to release Katib project.
-# Run ./scripts/v1beta1/release.sh <BRANCH> <TAG> to execute it.
+# This script is used to release Katib project locally.
+# For automated releases, use the GitHub Actions "Release" workflow instead.
+# Run ./scripts/v1beta1/release.sh <BRANCH> <TAG> to execute it locally.
 # For example: ./scripts/v1beta1/release.sh release-0.11 v0.11.1 or
 # ./scripts/v1beta1/release.sh release-0.11 v0.11.0-rc.0
 # You must follow this format, Branch: release-X.Y, Tag: vX.Y.Z.
@@ -66,28 +67,16 @@ else
   fi
 fi
 
-# ------------------ Change image tag ------------------
-# Change Katib image tags to the new release tag.
-make update-images OLD_PREFIX="ghcr.io/kubeflow/katib/" NEW_PREFIX="ghcr.io/kubeflow/katib/" TAG="${TAG}"
-
-# ------------------ Publish Katib SDK ------------------
-# Remove first "v" for the SDK version.
+# Prepare release artifacts (manifests and Python package versions).
 sdk_version=${TAG:1}
-# Check if this is pre-release.
 if [[ ${sdk_version} == *"-rc."* ]]; then
-  # Replace "-rc." with "rc" for the SDK version.
   sdk_version=${sdk_version//-rc./rc}
 fi
-echo -e "\nPublishing Katib Python SDK, version: ${sdk_version}\n"
+bash scripts/v1beta1/prepare-release.sh "${sdk_version}"
 
-# Change version in setup.py
+# ------------------ Publish Katib SDK ------------------
+echo -e "\nPublishing Katib Python SDK, version: ${sdk_version}\n"
 cd sdk/python/v1beta1
-if [[ $(uname) == "Darwin" ]]; then
-  sed -i '' -e "s@version=\".*\"@version=\"${sdk_version}\"@" setup.py
-else
-  sed -i -e "s@version=\".*\"@version=\"${sdk_version}\"@" setup.py
-fi
-# Generate SDK and upload new version to PyPi.
 python3 setup.py sdist bdist_wheel
 twine upload dist/*
 rm -r dist/ build/
@@ -96,16 +85,7 @@ echo -e "\nKatib Python SDK ${sdk_version} has been published\n"
 
 # ------------------ Publish Katib Models for Kubeflow SDK ------------------
 echo -e "\nPublishing Katib Python models for Kubeflow SDK, version: ${sdk_version}\n"
-
-# Change version in gen-api.sh file.
-if [[ $(uname) == "Darwin" ]]; then
-  sed -i '' -e "s@API_VERSION=\".*\"@API_VERSION=\"${sdk_version}\"@" hack/python-api/gen-api.sh
-else
-  sed -i -e "s@API_VERSION=\".*\"@API_VERSION=\"${sdk_version}\"@" hack/python-api/gen-api.sh
-fi
 ./hack/python-api/gen-api.sh
-
-# Upload Katib models to PyPI.
 cd api/python_api
 python -m build
 twine upload dist/*
@@ -113,14 +93,11 @@ rm -r dist/
 cd ../..
 echo -e "\nKatib Python API models for Kubeflow SDK have been published"
 
-
 # ------------------ Commit changes ------------------
 git commit -a -m "Katib official release ${TAG}"
-# Create a new tag.
 git tag "${TAG}"
 
 # ------------------ Publish Katib images ------------------
-# Publish images to the registry with 2 tags: ${TAG} and v1beta1-<commit-sha>
 echo -e "\nPublishing Katib images\n"
 make push-tag TAG="${TAG}"
 echo -e "Katib images have been published\n"
@@ -130,9 +107,8 @@ read -rp "Do you want to push Katib ${TAG} version to the upstream? [y|n] "
 if [ "$REPLY" != "y" ]; then
   exit 1
 fi
-# Push a new Branch and Tag.
 git push -u origin "${BRANCH}"
 git push -u origin "${TAG}"
 
 echo -e "\nKatib ${TAG} release has been published"
-echo "To finish the release process, follow these steps: https://github.com/kubeflow/katib/tree/master/docs/release#create-a-new-katib-release"
+echo "To finish the release process, follow RELEASE.md: https://github.com/kubeflow/katib/blob/master/RELEASE.md"

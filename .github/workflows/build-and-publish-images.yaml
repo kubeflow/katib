@@ -13,6 +13,18 @@ on:
       dockerfile:
         required: true
         type: string
+      image-tag:
+        required: false
+        type: string
+        default: ""
+      force-publish:
+        required: false
+        type: boolean
+        default: false
+      ref:
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -27,12 +39,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: ${{ inputs.ref != '' && 0 || 1 }}
 
       - name: Set Publish Condition
         id: publish-condition
         shell: bash
         run: |
-          if [[ "${{ github.repository }}" == 'kubeflow/katib' && \
+          if [[ "${{ inputs.force-publish }}" == "true" ]]; then
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.repository }}" == 'kubeflow/katib' && \
                 ( "${{ github.ref }}" == 'refs/heads/master' || \
                   "${{ github.ref }}" =~ ^refs/heads/release- || \
                   "${{ github.ref }}" =~ ^refs/tags/v ) ]]; then
@@ -67,6 +84,7 @@ jobs:
             docker.io/kubeflowkatib/${{ inputs.component-name }}
           dockerfile: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
+          image-tag: ${{ inputs.image-tag }}
           push: true
 
       - name: Test Build For Component ${{ inputs.component-name }}
@@ -78,4 +96,5 @@ jobs:
             docker.io/kubeflowkatib/${{ inputs.component-name }}
           dockerfile: ${{ inputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
+          image-tag: ${{ inputs.image-tag }}
           push: false

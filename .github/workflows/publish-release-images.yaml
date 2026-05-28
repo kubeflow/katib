@@ -1,0 +1,100 @@
+# Build and publish all Katib release images with multi-arch support.
+name: Publish Release Images
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+
+jobs:
+  publish:
+    name: Publish ${{ matrix.component-name }}
+    uses: ./.github/workflows/build-and-publish-images.yaml
+    with:
+      component-name: ${{ matrix.component-name }}
+      platforms: ${{ matrix.platforms }}
+      dockerfile: ${{ matrix.dockerfile }}
+      image-tag: ${{ inputs.tag }}
+      force-publish: true
+      ref: ${{ inputs.tag }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component-name: katib-controller
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/katib-controller/v1beta1/Dockerfile
+          - component-name: katib-db-manager
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/db-manager/v1beta1/Dockerfile
+          - component-name: katib-ui
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/ui/v1beta1/Dockerfile
+          - component-name: file-metrics-collector
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile
+          - component-name: tfevent-metrics-collector
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile
+          - component-name: suggestion-hyperopt
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/suggestion/hyperopt/v1beta1/Dockerfile
+          - component-name: suggestion-hyperband
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/suggestion/hyperband/v1beta1/Dockerfile
+          - component-name: suggestion-skopt
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/suggestion/skopt/v1beta1/Dockerfile
+          - component-name: suggestion-goptuna
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/suggestion/goptuna/v1beta1/Dockerfile
+          - component-name: suggestion-optuna
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/suggestion/optuna/v1beta1/Dockerfile
+          - component-name: suggestion-pbt
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/suggestion/pbt/v1beta1/Dockerfile
+          - component-name: suggestion-enas
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/suggestion/nas/enas/v1beta1/Dockerfile
+          - component-name: suggestion-darts
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/suggestion/nas/darts/v1beta1/Dockerfile
+          - component-name: earlystopping-medianstop
+            platforms: linux/amd64,linux/arm64
+            dockerfile: cmd/earlystopping/medianstop/v1beta1/Dockerfile
+          - component-name: pytorch-mnist-cpu
+            platforms: linux/amd64,linux/arm64
+            dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile.cpu
+          - component-name: pytorch-mnist-gpu
+            platforms: linux/amd64
+            dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile.gpu
+          - component-name: tf-mnist-with-summaries
+            platforms: linux/amd64,linux/arm64
+            dockerfile: examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile
+          - component-name: enas-cnn-cifar10-gpu
+            platforms: linux/amd64
+            dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu
+          - component-name: enas-cnn-cifar10-cpu
+            platforms: linux/amd64,linux/arm64
+            dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu
+          - component-name: darts-cnn-cifar10-cpu
+            platforms: linux/amd64,linux/arm64
+            dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.cpu
+          - component-name: darts-cnn-cifar10-gpu
+            platforms: linux/amd64
+            dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.gpu
+          - component-name: simple-pbt
+            platforms: linux/amd64,linux/arm64
+            dockerfile: examples/v1beta1/trial-images/simple-pbt/Dockerfile
