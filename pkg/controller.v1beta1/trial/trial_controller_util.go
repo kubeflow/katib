@@ -226,7 +226,7 @@ func getMetrics(metricLogs []*api_pb.MetricLog, strategies []commonv1beta1.Metri
 		}
 		currentTime, err := time.Parse(time.RFC3339Nano, metricLog.TimeStamp)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse timestamps %s: %e", metricLog.TimeStamp, err)
+			return nil, fmt.Errorf("failed to parse timestamps %s: %w", metricLog.TimeStamp, err)
 		}
 		timestamp := timestamps[metricLog.Metric.Name]
 		if timestamp == nil || !timestamp.After(currentTime) {

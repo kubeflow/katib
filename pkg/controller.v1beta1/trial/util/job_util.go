@@ -79,7 +79,7 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 		// Unmarshal condition to Trial Job representation to get message and reason if it exists
 		err := json.Unmarshal([]byte(strCondition), &trialJobStatus)
 		if err != nil {
-			return nil, fmt.Errorf("unmarshal failure condition to Trial Job status failed %v", err)
+			return nil, fmt.Errorf("unmarshal failure condition to Trial Job status failed: %w", err)
 		}
 
 		// Job condition is failed
@@ -100,7 +100,7 @@ func GetDeployedJobStatus(trial *trialsv1beta1.Trial, deployedJob *unstructured.
 
 		err := json.Unmarshal([]byte(strCondition), &trialJobStatus)
 		if err != nil {
-			return nil, fmt.Errorf("unmarshal success condition to Trial Job status failed %v", err)
+			return nil, fmt.Errorf("unmarshal success condition to Trial Job status failed: %w", err)
 		}
 
 		// Job condition is succeeded
