@@ -217,17 +217,23 @@ func parseTimestamp(timestamp interface{}) string {
 		}
 
 		stringTimestamp = strconv.FormatFloat(floatTimestamp, 'f', -1, 64)
-		t := strings.Split(stringTimestamp, ".")
+		secPart, fracPart, hasFrac := strings.Cut(stringTimestamp, ".")
 
-		sec, err := strconv.ParseInt(t[0], 10, 64)
+		sec, err := strconv.ParseInt(secPart, 10, 64)
 		if err != nil {
 			klog.Warningf("Failed to parse timestamp; %v", err)
 			return ""
 		}
 
-		var nanoSec int64 = 0
-		if len(t) == 2 {
-			nanoSec, err = strconv.ParseInt(t[1], 10, 64)
+		var nanoSec int64
+		if hasFrac && fracPart != "" {
+			if len(fracPart) > 9 {
+				fracPart = fracPart[:9]
+			} else if len(fracPart) < 9 {
+				fracPart += strings.Repeat("0", 9-len(fracPart))
+			}
+
+			nanoSec, err = strconv.ParseInt(fracPart, 10, 64)
 			if err != nil {
 				klog.Warningf("Failed to parse timestamp; %v", err)
 				return ""

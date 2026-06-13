@@ -51,14 +51,14 @@ func TestCollectObservationLog(t *testing.T) {
 			expected: &v1beta1.ObservationLog{
 				MetricLogs: []*v1beta1.MetricLog{
 					{
-						TimeStamp: "2021-12-02T05:27:27.000028721Z",
+						TimeStamp: "2021-12-02T05:27:27.28721Z",
 						Metric: &v1beta1.Metric{
 							Name:  "loss",
 							Value: "0.22082142531871796",
 						},
 					},
 					{
-						TimeStamp: "2021-12-02T05:27:27.000287801Z",
+						TimeStamp: "2021-12-02T05:27:27.287801Z",
 						Metric: &v1beta1.Metric{
 							Name:  "acc",
 							Value: "0.9349666833877563",
@@ -325,5 +325,14 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 				t.Errorf("Unexpected parsed result (-want,+got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestParseTimestampUnixFloat(t *testing.T) {
+	got := parseTimestamp(1638422847.28721)
+	want := "2021-12-02T05:27:27.28721Z"
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Fatalf("Unexpected timestamp (-want,+got):\n%s", diff)
 	}
 }
