@@ -43,3 +43,8 @@ kube::codegen::gen_client \
     --with-watch \
     --with-applyconfig \
     "${KATIB_ROOT}/pkg/apis/controller"
+
+echo "Generating deepcopy and defaults for optimizer.kubeflow.org ..."
+kube::codegen::gen_helpers \
+    --boilerplate "${KATIB_ROOT}/hack/boilerplate/boilerplate.go.txt" \
+    "${KATIB_ROOT}/pkg/apis/optimizer"
