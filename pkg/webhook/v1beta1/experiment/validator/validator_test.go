@@ -478,6 +478,18 @@ func TestValidateParameters(t *testing.T) {
 			testDescription: "Invalid distribution type",
 		},
 		{
+			parameters: func() []experimentsv1beta1.ParameterSpec {
+				ps := newFakeInstance().Spec.Parameters
+				ps[0].FeasibleSpace.Min = "0"
+				ps[0].FeasibleSpace.Distribution = experimentsv1beta1.DistributionLogUniform
+				return ps
+			}(),
+			wantErr: field.ErrorList{
+				field.Invalid(field.NewPath("spec").Child("parameters").Index(0).Child("feasibleSpace").Child("min"), "", ""),
+			},
+			testDescription: "Non-positive min for logUniform distribution",
+		},
+		{
 			parameters:      newFakeInstance().Spec.Parameters,
 			wantErr:         nil,
 			testDescription: "Valid parameters case",

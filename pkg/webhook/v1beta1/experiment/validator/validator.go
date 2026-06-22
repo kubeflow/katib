@@ -289,6 +289,19 @@ func (g *DefaultValidator) validateParameters(parameters []experimentsv1beta1.Pa
 					allErrs = append(allErrs, field.Required(parametersPath.Index(i).Child("feasibleSpace").Child("max"),
 						fmt.Sprintf("feasibleSpace.max or feasibleSpace.min must be specified for parameterType: %v", param.ParameterType)))
 				}
+				if param.FeasibleSpace.Distribution == experimentsv1beta1.DistributionLogUniform ||
+					param.FeasibleSpace.Distribution == experimentsv1beta1.DistributionLogNormal {
+					// Log-scale distributions are only defined for a strictly positive range,
+					// so a non-positive min or max would crash the suggestion service at math.log.
+					if v, err := strconv.ParseFloat(param.FeasibleSpace.Min, 64); err == nil && v <= 0 {
+						allErrs = append(allErrs, field.Invalid(parametersPath.Index(i).Child("feasibleSpace").Child("min"),
+							param.FeasibleSpace.Min, fmt.Sprintf("feasibleSpace.min must be greater than 0 for distribution: %v", param.FeasibleSpace.Distribution)))
+					}
+					if v, err := strconv.ParseFloat(param.FeasibleSpace.Max, 64); err == nil && v <= 0 {
+						allErrs = append(allErrs, field.Invalid(parametersPath.Index(i).Child("feasibleSpace").Child("max"),
+							param.FeasibleSpace.Max, fmt.Sprintf("feasibleSpace.max must be greater than 0 for distribution: %v", param.FeasibleSpace.Distribution)))
+					}
+				}
 
 			} else if param.ParameterType == experimentsv1beta1.ParameterTypeCategorical || param.ParameterType == experimentsv1beta1.ParameterTypeDiscrete {
 				if param.FeasibleSpace.Max != "" || param.FeasibleSpace.Min != "" || param.FeasibleSpace.Step != "" {
