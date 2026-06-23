@@ -34,15 +34,15 @@ You can run a webpack dev server that only exposes the frontend files, which can
 
 In order to build the UI locally, and expose it with a webpack dev server you will need to:
 
-1. Create a module from the [common library](https://github.com/kubeflow/kubeflow/tree/master/components/crud-web-apps/common/frontend/kubeflow-common-lib)
+1. Create a module from the [common library](https://github.com/kubeflow/notebooks/tree/notebooks-v1/components/crud-web-apps/common/frontend/kubeflow-common-lib)
 2. Install the node modules of the app and also link the common-library module
 
 You can build the common library with:
 
 ```bash
 COMMIT=$(cat ./frontend/COMMIT) \
-  && cd /tmp && git clone https://github.com/kubeflow/kubeflow.git \
-  && cd kubeflow \
+  && cd /tmp && git clone https://github.com/kubeflow/notebooks.git \
+  && cd notebooks \
   && git checkout $COMMIT \
   && cd components/crud-web-apps/common/frontend/kubeflow-common-lib
 
