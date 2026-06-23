@@ -218,6 +218,7 @@ class KatibClient(object):
         pip_index_urls: Optional[List[str]] = ["https://pypi.org/simple"],
         metrics_collector_config: Dict[str, Any] = {"kind": "StdOut"},
         trial_active_deadline_seconds: Optional[int] = None,
+        node_selector: Optional[Dict[str, str]] = None,
     ):
         """
         Create HyperParameter Tuning Katib Experiment using one of the following
@@ -362,6 +363,15 @@ class KatibClient(object):
                 activeDeadlineSeconds field. For PyTorchJob-based trials, this sets the
                 activeDeadlineSeconds field on the Master replica. This prevents individual
                 trials from running indefinitely and consuming resources.
+            node_selector: Optional dictionary of node labels that trial pods must match
+                to be scheduled on a node. This is useful for heterogeneous clusters where
+                you want to ensure trials run on specific node types (e.g., nodes with
+                specific GPU models). For example:
+                ```
+                node_selector = {"nvidia.com/gpu.product": "NVIDIA-H100-NVL"}
+                ```
+                For more info, see:
+                https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
 
         Raises:
             ValueError: Function arguments have incorrect type or value.
@@ -395,6 +405,13 @@ class KatibClient(object):
 
         if not name:
             raise ValueError("Please specify name for the Experiment.")
+
+        if node_selector is not None:
+            if not isinstance(node_selector, dict):
+                raise ValueError("node_selector must be a dict")
+            for k, v in node_selector.items():
+                if not isinstance(k, str) or not isinstance(v, str):
+                    raise ValueError("node_selector keys and values must be strings")
 
         namespace = namespace or self.namespace
 
@@ -512,20 +529,36 @@ class KatibClient(object):
 
             # Trial uses PyTorchJob for distributed training if TrainerResources is set.
             if isinstance(resources_per_trial, TrainerResources):
+                master_pod_spec = training_utils.get_pod_template_spec(
+                    containers=[container_spec]
+                )
+                worker_pod_spec = training_utils.get_pod_template_spec(
+                    containers=[container_spec]
+                )
+                if node_selector:
+                    master_pod_spec.spec.node_selector = node_selector
+                    worker_pod_spec.spec.node_selector = node_selector
+
                 trial_template = utils.get_trial_template_with_pytorchjob(
                     retain_trials,
                     trial_parameters,
                     resources_per_trial,
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                    master_pod_spec,
+                    worker_pod_spec,
                     trial_active_deadline_seconds,
                 )
             # Otherwise, Trial uses Job for model training.
             else:
+                pod_template_spec = training_utils.get_pod_template_spec(
+                    containers=[container_spec]
+                )
+                if node_selector:
+                    pod_template_spec.spec.node_selector = node_selector
+
                 trial_template = utils.get_trial_template_with_job(
                     retain_trials,
                     trial_parameters,
-                    training_utils.get_pod_template_spec(containers=[container_spec]),
+                    pod_template_spec,
                     trial_active_deadline_seconds,
                 )
 
@@ -695,6 +728,10 @@ class KatibClient(object):
                 init_containers=[init_container_spec],
                 volumes=[storage_initializer_volume],
             )
+
+            if node_selector:
+                worker_pod_template_spec.spec.node_selector = node_selector
+                master_pod_template_spec.spec.node_selector = node_selector
 
             # Generate Trial template using the PyTorchJob.
             trial_template = utils.get_trial_template_with_pytorchjob(
