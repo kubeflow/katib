@@ -118,6 +118,12 @@ type ExperimentStatus struct {
 	// Trials is the total number of trials owned by the experiment.
 	Trials int32 `json:"trials,omitempty"`
 
+	// TrialsProgress provides lightweight, real-time progress snapshots for Trials.
+	// This is primarily used with the TrainerStatus metrics collector.
+	// +listType=map
+	// +listMapKey=trialName
+	TrialsProgress []TrialProgress `json:"trialsProgress,omitempty"`
+
 	// How many trials have succeeded.
 	TrialsSucceeded int32 `json:"trialsSucceeded,omitempty"`
 
@@ -138,6 +144,18 @@ type ExperimentStatus struct {
 
 	// How many trials are currently metrics unavailable.
 	TrialMetricsUnavailable int32 `json:"trialMetricsUnavailable,omitempty"`
+}
+
+// +k8s:deepcopy-gen=true
+// TrialProgress contains real-time progress information for a Trial.
+type TrialProgress struct {
+	TrialName                 string       `json:"trialName,omitempty"`
+	ProgressPercentage        *int32       `json:"progressPercentage,omitempty"`
+	EstimatedRemainingSeconds *int32       `json:"estimatedRemainingSeconds,omitempty"`
+	CurrentLoss               string       `json:"currentLoss,omitempty"`
+	Status                    string       `json:"status,omitempty"`
+	EarlyStopReason           string       `json:"earlyStopReason,omitempty"`
+	LastUpdatedTime           *metav1.Time `json:"lastUpdatedTime,omitempty"`
 }
 
 // OptimalTrial is the metrics and assignments of the best trial.

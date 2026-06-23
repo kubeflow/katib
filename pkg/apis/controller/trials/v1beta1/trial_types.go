@@ -94,6 +94,29 @@ type TrialStatus struct {
 
 	// Results of the Trial - objectives and other metrics values.
 	Observation *common.Observation `json:"observation,omitempty"`
+
+	// TrainerStatus contains the latest progress and metrics snapshot reported by
+	// Kubeflow Trainer TrainJob (TrainJob.status.trainerStatus).
+	TrainerStatus *TrainerStatus `json:"trainerStatus,omitempty"`
+
+	// TrainerStatusLastReportedTime represents last time when Katib reported TrainerStatus
+	// metrics to Katib DB and updated Trial.status.trainerStatus.
+	TrainerStatusLastReportedTime *metav1.Time `json:"trainerStatusLastReportedTime,omitempty"`
+}
+
+// +k8s:deepcopy-gen=true
+// TrainerStatus mirrors the latest progress/metrics snapshot from Kubeflow Trainer.
+type TrainerStatus struct {
+	ProgressPercentage        *int32          `json:"progressPercentage,omitempty"`
+	EstimatedRemainingSeconds *int32          `json:"estimatedRemainingSeconds,omitempty"`
+	Metrics                   []TrainerMetric `json:"metrics,omitempty"`
+	LastUpdatedTime           *metav1.Time    `json:"lastUpdatedTime,omitempty"`
+}
+
+// +k8s:deepcopy-gen=true
+type TrainerMetric struct {
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true

@@ -247,6 +247,14 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 			return nil
 		}
 
+		// Update Trial.status.trainerStatus and report metrics to Katib DB for Trainer TrainJobs.
+		if instance.Spec.MetricsCollector.Collector.Kind == commonapiv1beta1.TrainerStatusCollector {
+			if err := r.UpdateTrialStatusTrainerStatus(instance, deployedJob); err != nil {
+				logger.Error(err, "Update trial status trainerStatus error")
+				return err
+			}
+		}
+
 		// If Job status is succeeded or Trial is early stopped, update Trial observation.
 		if jobStatus.Condition == trialutil.JobSucceeded || instance.IsEarlyStopped() {
 			if err = r.UpdateTrialStatusObservation(instance); err != nil {
@@ -260,7 +268,8 @@ func (r *ReconcileTrial) reconcileTrial(instance *trialsv1beta1.Trial) error {
 		// We need to requeue reconcile when the Trial is succeeded, metrics collector's type is not `Push`, and metrics are not reported.
 		if jobStatus.Condition == trialutil.JobSucceeded &&
 			instance.Status.Observation == nil &&
-			instance.Spec.MetricsCollector.Collector.Kind != commonapiv1beta1.PushCollector {
+			instance.Spec.MetricsCollector.Collector.Kind != commonapiv1beta1.PushCollector &&
+			instance.Spec.MetricsCollector.Collector.Kind != commonapiv1beta1.TrainerStatusCollector {
 			logger.Info("Trial job is succeeded but metrics are not reported, reconcile requeued")
 			return errMetricsNotReported
 		}

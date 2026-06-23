@@ -502,6 +502,18 @@ func (g *DefaultValidator) validateMetricsCollector(inst *experimentsv1beta1.Exp
 	switch mcKind {
 	case commonapiv1beta1.PushCollector, commonapiv1beta1.StdOutCollector:
 		return allErrs
+	case commonapiv1beta1.TrainerStatusCollector:
+		if inst.Spec.TrialTemplate.TrialSpec == nil {
+			allErrs = append(allErrs, field.Required(trialTemplatePath.Child("trialSpec"),
+				"trialSpec is required for TrainerStatus metrics collector"))
+			return allErrs
+		}
+		gvk := inst.Spec.TrialTemplate.TrialSpec.GroupVersionKind()
+		if gvk.Group != "trainer.kubeflow.org" || gvk.Kind != "TrainJob" {
+			allErrs = append(allErrs, field.Invalid(trialTemplatePath.Child("trialSpec"),
+				gvk.String(), "TrainerStatus metrics collector is supported only for trainer.kubeflow.org/TrainJob"))
+		}
+		return allErrs
 	case commonapiv1beta1.FileCollector:
 		if mcSpec.Source == nil || mcSpec.Source.FileSystemPath == nil ||
 			mcSpec.Source.FileSystemPath.Kind != commonapiv1beta1.FileKind || !filepath.IsAbs(mcSpec.Source.FileSystemPath.Path) {
