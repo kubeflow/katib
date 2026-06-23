@@ -18,6 +18,7 @@ package trial
 
 import (
 	"context"
+	stderrors "errors"
 	"testing"
 	"time"
 
@@ -27,7 +28,7 @@ import (
 	"go.uber.org/mock/gomock"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -150,7 +151,7 @@ func TestReconcileBatchJob(t *testing.T) {
 	}
 
 	r.updateStatusHandler = func(instance *trialsv1beta1.Trial) error {
-		var err error = errors.NewBadRequest("fake-error")
+		var err error = apierrors.NewBadRequest("fake-error")
 		// Try to update status until it be succeeded
 		for err != nil {
 			updatedInstance := &trialsv1beta1.Trial{}
@@ -241,7 +242,7 @@ func TestReconcileBatchJob(t *testing.T) {
 		// BatchJob can't be deleted because GC doesn't work in envtest and BatchJob stuck in termination phase.
 		// Ref: https://book.kubebuilder.io/reference/testing/envtest.html#testing-considerations.
 		g.Eventually(func(g gomega.Gomega) {
-			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+			g.Expect(apierrors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
 		}, timeout).Should(gomega.Succeed())
 	})
 
@@ -314,7 +315,7 @@ func TestReconcileBatchJob(t *testing.T) {
 
 		// Expect that Trial is deleted
 		g.Eventually(func(g gomega.Gomega) {
-			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+			g.Expect(apierrors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
 		}, timeout).Should(gomega.Succeed())
 	})
 
@@ -348,7 +349,7 @@ func TestReconcileBatchJob(t *testing.T) {
 
 		// Expect that Trial is deleted
 		g.Eventually(func(g gomega.Gomega) {
-			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+			g.Expect(apierrors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
 		}, timeout).Should(gomega.Succeed())
 	})
 
@@ -389,7 +390,7 @@ func TestReconcileBatchJob(t *testing.T) {
 
 		// Expect that Trial is deleted
 		g.Eventually(func(g gomega.Gomega) {
-			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+			g.Expect(apierrors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
 		}, timeout).Should(gomega.Succeed())
 	})
 
@@ -456,6 +457,8 @@ func TestGetObjectiveMetricValue(t *testing.T) {
 	}
 	_, err = getMetrics(invalidLogs, metricStrategies)
 	g.Expect(err).To(gomega.HaveOccurred())
+	var parseErr *time.ParseError
+	g.Expect(stderrors.As(err, &parseErr)).To(gomega.BeTrue())
 }
 
 func newFakeTrialBatchJob(mcType commonv1beta1.CollectorKind, trialName, jobName string) *trialsv1beta1.Trial {

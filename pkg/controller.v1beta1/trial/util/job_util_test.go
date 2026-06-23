@@ -17,6 +17,8 @@ limitations under the License.
 package util
 
 import (
+	"encoding/json"
+	"errors"
 	"testing"
 
 	batchv1 "k8s.io/api/batch/v1"
@@ -149,4 +151,56 @@ func newFakeDeployedJob(job interface{}) *unstructured.Unstructured {
 
 	jobUnstructured, _ := util.ConvertObjectToUnstructured(job)
 	return jobUnstructured
+}
+
+func TestGetDeployedJobStatusWrapsFailureConditionUnmarshalError(t *testing.T) {
+	trial := &trialsv1beta1.Trial{}
+	trial.Spec.FailureCondition = "status.failed"
+	deployedJob := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"name": "trial-job",
+			},
+			"status": map[string]interface{}{
+				"failed": map[string]interface{}{
+					"message": 1,
+				},
+			},
+		},
+	}
+
+	_, err := GetDeployedJobStatus(trial, deployedJob)
+	if err == nil {
+		t.Fatal("expected unmarshal error")
+	}
+	var unmarshalTypeErr *json.UnmarshalTypeError
+	if !errors.As(err, &unmarshalTypeErr) {
+		t.Fatalf("expected wrapped *json.UnmarshalTypeError, got %T: %v", err, err)
+	}
+}
+
+func TestGetDeployedJobStatusWrapsSuccessConditionUnmarshalError(t *testing.T) {
+	trial := &trialsv1beta1.Trial{}
+	trial.Spec.SuccessCondition = "status.succeeded"
+	deployedJob := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"name": "trial-job",
+			},
+			"status": map[string]interface{}{
+				"succeeded": map[string]interface{}{
+					"reason": true,
+				},
+			},
+		},
+	}
+
+	_, err := GetDeployedJobStatus(trial, deployedJob)
+	if err == nil {
+		t.Fatal("expected unmarshal error")
+	}
+	var unmarshalTypeErr *json.UnmarshalTypeError
+	if !errors.As(err, &unmarshalTypeErr) {
+		t.Fatalf("expected wrapped *json.UnmarshalTypeError, got %T: %v", err, err)
+	}
 }
