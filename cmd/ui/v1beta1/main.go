@@ -69,7 +69,7 @@ func main() {
 	http.HandleFunc("/katib/fetch_namespaces", kuh.FetchNamespaces)
 	http.HandleFunc("/katib/fetch_trial_logs/", kuh.FetchTrialLogs)
 
-	log.Printf("Serving at %s:%s", *host, *port)
+	log.Printf("Serving Katib UI at %s:%s/katib/", *host, *port)
 	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", *host, *port), nil); err != nil {
 		panic(err)
 	}
