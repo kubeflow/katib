@@ -22,10 +22,10 @@ import (
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 )
 
-type updateStatusFunc func(instance *experimentsv1beta1.Experiment) error
+type updateStatusFunc func(ctx context.Context, instance *experimentsv1beta1.Experiment) error
 
-func (r *ReconcileExperiment) updateStatus(instance *experimentsv1beta1.Experiment) error {
-	err := r.Status().Update(context.TODO(), instance)
+func (r *ReconcileExperiment) updateStatus(ctx context.Context, instance *experimentsv1beta1.Experiment) error {
+	err := r.Status().Update(ctx, instance)
 	if err != nil {
 		return err
 	}

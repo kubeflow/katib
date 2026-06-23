@@ -84,7 +84,7 @@ func (s *SidecarInjector) Handle(ctx context.Context, req admission.Request) adm
 	}
 
 	// Check whether the pod need to be mutated
-	needMutate, err := s.MutationRequired(pod, namespace)
+	needMutate, err := s.MutationRequired(ctx, pod, namespace)
 	if err != nil {
 		log.Info("Unable to run MutationRequired", "Error", err)
 		return admission.Errored(http.StatusInternalServerError, err)
@@ -93,7 +93,7 @@ func (s *SidecarInjector) Handle(ctx context.Context, req admission.Request) adm
 	}
 
 	// Do mutation
-	mutatedPod, err := s.Mutate(pod, namespace)
+	mutatedPod, err := s.Mutate(ctx, pod, namespace)
 	if err != nil {
 		log.Error(err, "Failed to mutate Trial's pod")
 		return admission.Errored(http.StatusBadRequest, err)
@@ -107,28 +107,28 @@ func (s *SidecarInjector) Handle(ctx context.Context, req admission.Request) adm
 	return admission.PatchResponseFromRaw(req.AdmissionRequest.Object.Raw, marshaledPod)
 }
 
-func (s *SidecarInjector) MutationRequired(pod *v1.Pod, ns string) (bool, error) {
+func (s *SidecarInjector) MutationRequired(ctx context.Context, pod *v1.Pod, ns string) (bool, error) {
 	object, err := util.ConvertObjectToUnstructured(pod)
 	if err != nil {
 		return false, err
 	}
 
 	// Try to get Katib Job name from mutating pod
-	_, jobName, err := s.getKatibJob(object, ns)
+	_, jobName, err := s.getKatibJob(ctx, object, ns)
 	if err != nil {
 		return false, nil
 	}
 
 	trial := &trialsv1beta1.Trial{}
 	// Job name and Trial name is equal
-	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: jobName, Namespace: ns}, trial); err != nil {
+	if err := s.client.Get(ctx, apitypes.NamespacedName{Name: jobName, Namespace: ns}, trial); err != nil {
 		return false, err
 	}
 
 	return true, nil
 }
 
-func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error) {
+func (s *SidecarInjector) Mutate(ctx context.Context, pod *v1.Pod, namespace string) (*v1.Pod, error) {
 	mutatedPod := pod.DeepCopy()
 
 	object, err := util.ConvertObjectToUnstructured(pod)
@@ -137,11 +137,11 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	}
 
 	// Try to get Katib job kind and job name from mutating pod
-	_, jobName, _ := s.getKatibJob(object, namespace)
+	_, jobName, _ := s.getKatibJob(ctx, object, namespace)
 
 	trial := &trialsv1beta1.Trial{}
 	// jobName and Trial name is equal
-	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: jobName, Namespace: namespace}, trial); err != nil {
+	if err := s.client.Get(ctx, apitypes.NamespacedName{Name: jobName, Namespace: namespace}, trial); err != nil {
 		return nil, err
 	}
 
@@ -168,14 +168,14 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	}
 
 	// Create metrics sidecar container spec
-	injectContainer, err := s.getMetricsCollectorContainer(trial, pod)
+	injectContainer, err := s.getMetricsCollectorContainer(ctx, trial, pod)
 	if err != nil {
 		return nil, err
 	}
 	mutatedPod.Spec.Containers = append(mutatedPod.Spec.Containers, *injectContainer)
 
 	// Enable shared volume between suggestion <> trial
-	if err = s.mutateSuggestionVolume(mutatedPod, injectContainer.Name, trial); err != nil {
+	if err = s.mutateSuggestionVolume(ctx, mutatedPod, injectContainer.Name, trial); err != nil {
 		return nil, err
 	}
 
@@ -203,7 +203,7 @@ func (s *SidecarInjector) Mutate(pod *v1.Pod, namespace string) (*v1.Pod, error)
 	return mutatedPod, nil
 }
 
-func (s *SidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Trial, originalPod *v1.Pod) (*v1.Container, error) {
+func (s *SidecarInjector) getMetricsCollectorContainer(ctx context.Context, trial *trialsv1beta1.Trial, originalPod *v1.Pod) (*v1.Container, error) {
 	mc := trial.Spec.MetricsCollector
 	if mc.Collector.Kind == common.CustomCollector {
 		return mc.Collector.CustomCollector, nil
@@ -226,7 +226,7 @@ func (s *SidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 		return nil, err
 	}
 
-	args, err := s.getMetricsCollectorArgs(trial, metricNames, mc, metricsCollectorConfigData, earlyStoppingRules)
+	args, err := s.getMetricsCollectorArgs(ctx, trial, metricNames, mc, metricsCollectorConfigData, earlyStoppingRules)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +252,7 @@ func (s *SidecarInjector) getMetricsCollectorContainer(trial *trialsv1beta1.Tria
 	return &injectContainer, nil
 }
 
-func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespace string) (string, string, error) {
+func (s *SidecarInjector) getKatibJob(ctx context.Context, object *unstructured.Unstructured, namespace string) (string, string, error) {
 	owners := object.GetOwnerReferences()
 	// jobKind and jobName points to the object kind and name that Trial is created
 	jobKind := ""
@@ -285,12 +285,12 @@ func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 			nestedJob.SetGroupVersionKind(gvk)
 			// Get nested object from cluster.
 			// Nested object namespace must be equal to object namespace
-			err = s.client.Get(context.TODO(), apitypes.NamespacedName{Name: owners[i].Name, Namespace: namespace}, nestedJob)
+			err = s.client.Get(ctx, apitypes.NamespacedName{Name: owners[i].Name, Namespace: namespace}, nestedJob)
 			if err != nil {
 				return "", "", fmt.Errorf("%w: %w", errFailedToGetTrialTemplateJob, err)
 			}
 			// Recursively search for Trial ownership in nested object
-			jobKind, jobName, err = s.getKatibJob(nestedJob, namespace)
+			jobKind, jobName, err = s.getKatibJob(ctx, nestedJob, namespace)
 			if err != nil && jobKind != "" {
 				return "", "", err
 			}
@@ -306,7 +306,7 @@ func (s *SidecarInjector) getKatibJob(object *unstructured.Unstructured, namespa
 	return jobKind, jobName, nil
 }
 
-func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, metricsCollectorConfigData configv1beta1.MetricsCollectorConfig, esRules []string) ([]string, error) {
+func (s *SidecarInjector) getMetricsCollectorArgs(ctx context.Context, trial *trialsv1beta1.Trial, metricNames string, mc common.MetricsCollectorSpec, metricsCollectorConfigData configv1beta1.MetricsCollectorConfig, esRules []string) ([]string, error) {
 	args := []string{"-t", trial.Name, "-m", metricNames, "-o-type", string(trial.Spec.Objective.Type), "-s-db", katibmanagerv1beta1.GetDBManagerAddr()}
 	if mountPath, _ := getMountPath(mc); mountPath != "" {
 		args = append(args, "-path", mountPath)
@@ -335,7 +335,7 @@ func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, me
 		// Get suggestion to set early stopping service endpoint
 		suggestionName := trial.ObjectMeta.Labels[consts.LabelExperimentName]
 		suggestion := &suggestionsv1beta1.Suggestion{}
-		err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: suggestionName, Namespace: trial.Namespace}, suggestion)
+		err := s.client.Get(ctx, apitypes.NamespacedName{Name: suggestionName, Namespace: trial.Namespace}, suggestion)
 		if err != nil {
 			return nil, fmt.Errorf("%w: %w", errInvalidSuggestionName, err)
 		}
@@ -346,16 +346,16 @@ func (s *SidecarInjector) getMetricsCollectorArgs(trial *trialsv1beta1.Trial, me
 }
 
 // Mutate trial container with shared Suggestions PVC when algorithm settings contains suggestion_trial_dir
-func (s *SidecarInjector) mutateSuggestionVolume(pod *v1.Pod, primaryContainerName string, trial *trialsv1beta1.Trial) error {
+func (s *SidecarInjector) mutateSuggestionVolume(ctx context.Context, pod *v1.Pod, primaryContainerName string, trial *trialsv1beta1.Trial) error {
 	// Suggestion name == Experiment name
 	// Suggestion namespace == Trial namespace
 	experimentName := trial.ObjectMeta.Labels[consts.LabelExperimentName]
 	experiment := &experimentsv1beta1.Experiment{}
-	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: experimentName, Namespace: trial.Namespace}, experiment); err != nil {
+	if err := s.client.Get(ctx, apitypes.NamespacedName{Name: experimentName, Namespace: trial.Namespace}, experiment); err != nil {
 		return err
 	}
 	suggestion := &suggestionsv1beta1.Suggestion{}
-	if err := s.client.Get(context.TODO(), apitypes.NamespacedName{Name: experimentName, Namespace: trial.Namespace}, suggestion); err != nil {
+	if err := s.client.Get(ctx, apitypes.NamespacedName{Name: experimentName, Namespace: trial.Namespace}, suggestion); err != nil {
 		return err
 	}
 
