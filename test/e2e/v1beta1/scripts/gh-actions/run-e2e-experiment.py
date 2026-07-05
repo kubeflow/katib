@@ -2,6 +2,7 @@ import argparse
 import logging
 
 import yaml
+from diagnostics import dump_e2e_diagnostics
 from kubeflow.katib import ApiClient, KatibClient, models
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils.utils import FakeResponse
@@ -154,7 +155,11 @@ if __name__ == "__main__":
     except Exception as e:
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment: {exp_namespace}/{exp_name}")
-        raise e
+        try:
+            dump_e2e_diagnostics(exp_name, exp_namespace)
+        except Exception:
+            logging.exception("Failed to dump E2E diagnostics")
+        raise
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
