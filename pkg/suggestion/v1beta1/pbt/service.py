@@ -66,7 +66,7 @@ class PbtService(api_pb2_grpc.SuggestionServicer, HealthServicer):
             )
         if (
             "resample_probability" in settings
-            and not 0 <= settings["resample_probability"] <= 1
+            and not 0 <= float(settings["resample_probability"]) <= 1
         ):
             return self._set_validate_context_error(
                 context,
