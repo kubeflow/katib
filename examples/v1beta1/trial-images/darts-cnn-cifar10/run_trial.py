@@ -72,9 +72,9 @@ def main():
 
     batch_size = int(algorithm_settings["batch_size"])
     num_workers = int(algorithm_settings["num_workers"])
-    use_synthetic_data = str(
-        algorithm_settings.get("use_synthetic_data", "false")
-    ).lower() == "true"
+    use_synthetic_data = (
+        str(algorithm_settings.get("use_synthetic_data", "false")).lower() == "true"
+    )
     number_of_examples = int(algorithm_settings.get("number_of_examples", 64))
 
     init_channels = int(algorithm_settings["init_channels"])
