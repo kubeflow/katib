@@ -14,6 +14,7 @@
 
 import argparse
 
+import numpy as np
 import tensorflow as tf
 from keras.datasets import cifar10
 from ModelConstructor import ModelConstructor
@@ -50,6 +51,18 @@ if __name__ == "__main__":
         default=1,
         metavar="N",
         help="number of GPU that used for training",
+    )
+    parser.add_argument(
+        "--use_synthetic_data",
+        action="store_true",
+        help="use generated training data instead of downloading CIFAR-10",
+    )
+    parser.add_argument(
+        "--number_of_examples",
+        type=int,
+        default=64,
+        metavar="N",
+        help="number of generated training examples",
     )
     args = parser.parse_args()
 
@@ -94,13 +107,25 @@ if __name__ == "__main__":
 
     print(">>> Model Constructed Successfully\n")
 
-    (x_train, y_train), (x_test, y_test) = cifar10.load_data()
-    x_train = x_train.astype("float32")
-    x_test = x_test.astype("float32")
-    x_train /= 255
-    x_test /= 255
-    y_train = to_categorical(y_train)
-    y_test = to_categorical(y_test)
+    if args.use_synthetic_data:
+        rng = np.random.default_rng(seed=1)
+        number_of_examples = max(2, args.number_of_examples)
+        x_train = rng.random(
+            (number_of_examples, *constructor.input_sizes), dtype=np.float32
+        )
+        x_test = rng.random(
+            (number_of_examples, *constructor.input_sizes), dtype=np.float32
+        )
+        y_train = rng.integers(constructor.output_size, size=(number_of_examples, 1))
+        y_test = rng.integers(constructor.output_size, size=(number_of_examples, 1))
+    else:
+        (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+        x_train = x_train.astype("float32")
+        x_test = x_test.astype("float32")
+        x_train /= 255
+        x_test /= 255
+    y_train = to_categorical(y_train, num_classes=constructor.output_size)
+    y_test = to_categorical(y_test, num_classes=constructor.output_size)
 
     augmentation = tf.keras.Sequential(
         [

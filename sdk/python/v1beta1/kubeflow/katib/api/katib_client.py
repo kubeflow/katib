@@ -44,6 +44,17 @@ from kubernetes.client.rest import ApiException
 logger = logging.getLogger(__name__)
 
 
+def _ensure_image_has_tag_or_digest(image: str) -> str:
+    if "@" in image:
+        return image
+
+    last_path_component = image.rsplit("/", 1)[-1]
+    if ":" in last_path_component:
+        return image
+
+    return f"{image}:latest"
+
+
 class KatibClient(object):
     def __init__(
         self,
@@ -634,7 +645,7 @@ class KatibClient(object):
             # Create the init and the primary container.
             init_container_spec = training_utils.get_container_spec(
                 name=STORAGE_INITIALIZER,
-                base_image=STORAGE_INITIALIZER_IMAGE,
+                base_image=_ensure_image_has_tag_or_digest(STORAGE_INITIALIZER_IMAGE),
                 args=[
                     "--model_provider",
                     mp,
@@ -652,7 +663,7 @@ class KatibClient(object):
 
             container_spec = training_utils.get_container_spec(
                 name=JOB_PARAMETERS[PYTORCHJOB_KIND]["container"],
-                base_image=TRAINER_TRANSFORMER_IMAGE,
+                base_image=_ensure_image_has_tag_or_digest(TRAINER_TRANSFORMER_IMAGE),
                 args=[
                     "--model_uri",
                     model_provider_parameters.model_uri,

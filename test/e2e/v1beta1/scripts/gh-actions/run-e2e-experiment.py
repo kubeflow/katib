@@ -3,6 +3,7 @@ import logging
 
 import yaml
 from diagnostics import dump_e2e_diagnostics
+from experiment_overrides import apply_e2e_experiment_overrides
 from kubeflow.katib import ApiClient, KatibClient, models
 from kubeflow.katib.constants import constants
 from kubeflow.katib.utils.utils import FakeResponse
@@ -100,7 +101,10 @@ if __name__ == "__main__":
 
     # Read Experiment YAML to Fake Response object.
     with open(args.experiment_path, "r") as file:
-        experiment = FakeResponse(yaml.safe_load(file))
+        experiment_manifest = yaml.safe_load(file)
+
+    apply_e2e_experiment_overrides(experiment_manifest)
+    experiment = FakeResponse(experiment_manifest)
 
     # Replace batch size to number of epochs for faster execution.
     experiment.data = experiment.data.replace("--batch-size=64", "--num-epochs=2")

@@ -898,6 +898,63 @@ def test_tune(katib_client, test_name, kwargs, expected_output):
         print("test execution complete")
 
 
+def test_tune_external_model_uses_tagged_trainer_images(katib_client):
+    with (
+        patch(
+            "kubeflow.katib.api.katib_client.TRAINER_TRANSFORMER_IMAGE",
+            "docker.io/kubeflow/trainer-huggingface",
+        ),
+        patch(
+            "kubeflow.katib.api.katib_client.STORAGE_INITIALIZER_IMAGE",
+            "docker.io/kubeflow/storage-initializer",
+        ),
+        patch.object(
+            katib_client, "create_experiment", return_value=Mock()
+        ) as mock_create_experiment,
+    ):
+        katib_client.tune(
+            name="tune_test",
+            model_provider_parameters=HuggingFaceModelParams(
+                model_uri="hf://google-bert/bert-base-cased",
+                transformer_type=transformers.AutoModelForSequenceClassification,
+                num_labels=5,
+            ),
+            dataset_provider_parameters=HuggingFaceDatasetParams(
+                repo_id="yelp_review_full",
+                split="train[:8]",
+            ),
+            trainer_parameters=HuggingFaceTrainerParams(
+                training_parameters=transformers.TrainingArguments(
+                    output_dir="test_tune_api",
+                    learning_rate=katib.search.double(min=1e-05, max=5e-05),
+                ),
+            ),
+            resources_per_trial=types.TrainerResources(
+                num_workers=1,
+                num_procs_per_worker=1,
+                resources_per_worker={"cpu": "2"},
+            ),
+            objective_metric_name="train_loss",
+            objective_type="minimize",
+        )
+
+    experiment = mock_create_experiment.call_args[0][0]
+    replica_specs = experiment.spec.trial_template.trial_spec.spec.pytorch_replica_specs
+
+    assert (
+        replica_specs["Master"].template.spec.init_containers[0].image
+        == "docker.io/kubeflow/storage-initializer:latest"
+    )
+    assert (
+        replica_specs["Master"].template.spec.containers[0].image
+        == "docker.io/kubeflow/trainer-huggingface:latest"
+    )
+    assert (
+        replica_specs["Worker"].template.spec.containers[0].image
+        == "docker.io/kubeflow/trainer-huggingface:latest"
+    )
+
+
 @pytest.mark.parametrize("test_name,kwargs,expected_output", test_get_job_logs_data)
 def test_get_job_logs(katib_client, test_name, kwargs, expected_output):
     """
