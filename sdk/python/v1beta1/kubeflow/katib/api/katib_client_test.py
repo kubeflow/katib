@@ -930,7 +930,7 @@ def test_tune_external_model_uses_tagged_trainer_images(katib_client):
                 ),
             ),
             resources_per_trial=types.TrainerResources(
-                num_workers=1,
+                num_workers=2,
                 num_procs_per_worker=1,
                 resources_per_worker={"cpu": "2"},
             ),
