@@ -16,9 +16,16 @@ import unittest
 
 import grpc
 import grpc_testing
+import pytest
 import utils
 
 from pkg.apis.manager.v1beta1.python import api_pb2
+from pkg.suggestion.v1beta1.internal import constant
+from pkg.suggestion.v1beta1.internal.search_space import (
+    HyperParameter,
+    HyperParameterSearchSpace,
+)
+from pkg.suggestion.v1beta1.skopt.base_service import BaseSkoptService
 from pkg.suggestion.v1beta1.skopt.service import SkoptService
 
 
@@ -308,6 +315,56 @@ class TestSkopt(unittest.TestCase):
         _, _, code, details = utils.call_validate(self.test_server, experiment_spec)
         self.assertEqual(code, grpc.StatusCode.INVALID_ARGUMENT)
         self.assertEqual(details, "{name} should be great or equal than zero".format(name=wrong_algorithm_setting.name))
+
+
+class TestSkoptDistribution:
+    @pytest.mark.parametrize(
+        ["param_type", "distribution", "want_prior"],
+        [
+            ["double", api_pb2.UNIFORM, "uniform"],
+            ["double", api_pb2.LOG_UNIFORM, "log-uniform"],
+            ["int", api_pb2.UNIFORM, "uniform"],
+            ["int", api_pb2.LOG_UNIFORM, "log-uniform"],
+        ],
+    )
+    def test_distribution_maps_to_prior(self, param_type, distribution, want_prior):
+        # The declared distribution used to be discarded: double parameters were always
+        # built with a hardcoded "log-uniform" prior and int parameters were always
+        # uniform (#2688). The prior must now follow the requested distribution.
+        search_space = HyperParameterSearchSpace()
+        search_space.goal = constant.MAX_GOAL
+        if param_type == "double":
+            param = HyperParameter.double("x", "0.1", "0.9", "", distribution)
+        else:
+            param = HyperParameter.int("x", "1", "9", "", distribution)
+        search_space.params = [param]
+
+        service = BaseSkoptService(search_space=search_space)
+        dimension = service.skopt_optimizer.space.dimensions[0]
+        assert dimension.prior == want_prior
+
+    @pytest.mark.parametrize(
+        ["param_type", "distribution"],
+        [
+            ["double", api_pb2.NORMAL],
+            ["double", api_pb2.LOG_NORMAL],
+            ["int", api_pb2.NORMAL],
+            ["int", api_pb2.LOG_NORMAL],
+        ],
+    )
+    def test_unsupported_distribution_raises(self, param_type, distribution):
+        # NORMAL and LOG_NORMAL have no skopt prior, so they must fail loudly instead of
+        # being silently substituted with a different distribution.
+        search_space = HyperParameterSearchSpace()
+        search_space.goal = constant.MAX_GOAL
+        if param_type == "double":
+            param = HyperParameter.double("x", "0.1", "0.9", "", distribution)
+        else:
+            param = HyperParameter.int("x", "1", "9", "1", distribution)
+        search_space.params = [param]
+
+        with pytest.raises(ValueError, match="Unsupported distribution"):
+            BaseSkoptService(search_space=search_space)
 
 
 if __name__ == "__main__":

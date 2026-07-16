@@ -162,6 +162,53 @@ func Test_toGoptunaSearchSpace(t *testing.T) {
 				},
 			},
 		},
+		"Double parameter type with log-uniform distribution": {
+			parameters: []*api_v1_beta1.ParameterSpec{
+				{
+					Name:          "param-double",
+					ParameterType: api_v1_beta1.ParameterType_DOUBLE,
+					FeasibleSpace: &api_v1_beta1.FeasibleSpace{
+						Max:          "5.5",
+						Min:          "1.5",
+						Distribution: api_v1_beta1.Distribution_LOG_UNIFORM,
+					},
+				},
+			},
+			wantSearchSpace: map[string]interface{}{
+				"param-double": goptuna.LogUniformDistribution{
+					High: 5.5,
+					Low:  1.5,
+				},
+			},
+		},
+		"Double parameter type with unsupported normal distribution": {
+			parameters: []*api_v1_beta1.ParameterSpec{
+				{
+					Name:          "param-double",
+					ParameterType: api_v1_beta1.ParameterType_DOUBLE,
+					FeasibleSpace: &api_v1_beta1.FeasibleSpace{
+						Max:          "5.5",
+						Min:          "1.5",
+						Distribution: api_v1_beta1.Distribution_NORMAL,
+					},
+				},
+			},
+			wantError: cmpopts.AnyError,
+		},
+		"Int parameter type with unsupported log-uniform distribution": {
+			parameters: []*api_v1_beta1.ParameterSpec{
+				{
+					Name:          "param-int",
+					ParameterType: api_v1_beta1.ParameterType_INT,
+					FeasibleSpace: &api_v1_beta1.FeasibleSpace{
+						Max:          "5",
+						Min:          "1",
+						Distribution: api_v1_beta1.Distribution_LOG_UNIFORM,
+					},
+				},
+			},
+			wantError: cmpopts.AnyError,
+		},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {

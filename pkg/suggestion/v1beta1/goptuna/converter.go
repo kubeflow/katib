@@ -120,22 +120,37 @@ func toGoptunaSearchSpace(parameters []*api_v1_beta1.ParameterSpec) (map[string]
 				return nil, err
 			}
 
+			distribution := p.GetFeasibleSpace().GetDistribution()
 			stepstr := p.GetFeasibleSpace().GetStep()
-			if stepstr == "" {
-				searchSpace[p.Name] = goptuna.UniformDistribution{
+			switch distribution {
+			case api_v1_beta1.Distribution_UNIFORM,
+				api_v1_beta1.Distribution_DISTRIBUTION_UNSPECIFIED:
+				if stepstr == "" {
+					searchSpace[p.Name] = goptuna.UniformDistribution{
+						High: high,
+						Low:  low,
+					}
+				} else {
+					step, err := strconv.ParseFloat(stepstr, 64)
+					if err != nil {
+						return nil, err
+					}
+					searchSpace[p.Name] = goptuna.DiscreteUniformDistribution{
+						High: high,
+						Low:  low,
+						Q:    step,
+					}
+				}
+			case api_v1_beta1.Distribution_LOG_UNIFORM:
+				searchSpace[p.Name] = goptuna.LogUniformDistribution{
 					High: high,
 					Low:  low,
 				}
-			} else {
-				step, err := strconv.ParseFloat(stepstr, 64)
-				if err != nil {
-					return nil, err
-				}
-				searchSpace[p.Name] = goptuna.DiscreteUniformDistribution{
-					High: high,
-					Low:  low,
-					Q:    step,
-				}
+			default:
+				return nil, fmt.Errorf(
+					"unsupported distribution %v for parameter %s; the goptuna "+
+						"suggestion service supports only UNIFORM and LOG_UNIFORM "+
+						"distributions", distribution, p.Name)
 			}
 		} else if p.ParameterType == api_v1_beta1.ParameterType_INT {
 			high, err := strconv.Atoi(p.GetFeasibleSpace().GetMax())
@@ -145,6 +160,14 @@ func toGoptunaSearchSpace(parameters []*api_v1_beta1.ParameterSpec) (map[string]
 			low, err := strconv.Atoi(p.GetFeasibleSpace().GetMin())
 			if err != nil {
 				return nil, err
+			}
+			distribution := p.GetFeasibleSpace().GetDistribution()
+			if distribution != api_v1_beta1.Distribution_UNIFORM &&
+				distribution != api_v1_beta1.Distribution_DISTRIBUTION_UNSPECIFIED {
+				return nil, fmt.Errorf(
+					"unsupported distribution %v for int parameter %s; the goptuna "+
+						"suggestion service supports only UNIFORM for int parameters",
+					distribution, p.Name)
 			}
 			stepstr := p.GetFeasibleSpace().GetStep()
 			if stepstr == "" {

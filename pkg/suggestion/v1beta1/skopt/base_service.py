@@ -17,6 +17,7 @@ import logging
 
 import skopt
 
+from pkg.apis.manager.v1beta1.python import api_pb2
 from pkg.suggestion.v1beta1.internal.constant import (
     CATEGORICAL,
     DISCRETE,
@@ -59,19 +60,30 @@ class BaseSkoptService(object):
         skopt_search_space = []
 
         for param in self.search_space.params:
-            if param.type == INTEGER:
-                skopt_search_space.append(
-                    skopt.space.Integer(int(param.min), int(param.max), name=param.name)
-                )
-            elif param.type == DOUBLE:
-                skopt_search_space.append(
-                    skopt.space.Real(
-                        float(param.min),
-                        float(param.max),
-                        "log-uniform",
-                        name=param.name,
+            if param.type == INTEGER or param.type == DOUBLE:
+                if param.distribution in [api_pb2.UNIFORM, None]:
+                    prior = "uniform"
+                elif param.distribution == api_pb2.LOG_UNIFORM:
+                    prior = "log-uniform"
+                else:
+                    raise ValueError(
+                        f"Unsupported distribution "
+                        f"{api_pb2.Distribution.Name(param.distribution)} for parameter "
+                        f"{param.name}. The Skopt suggestion service supports only "
+                        f"UNIFORM and LOG_UNIFORM distributions."
                     )
-                )
+                if param.type == INTEGER:
+                    skopt_search_space.append(
+                        skopt.space.Integer(
+                            int(param.min), int(param.max), prior, name=param.name
+                        )
+                    )
+                else:
+                    skopt_search_space.append(
+                        skopt.space.Real(
+                            float(param.min), float(param.max), prior, name=param.name
+                        )
+                    )
             elif param.type == CATEGORICAL or param.type == DISCRETE:
                 skopt_search_space.append(
                     skopt.space.Categorical(param.list, name=param.name)
