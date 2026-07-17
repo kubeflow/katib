@@ -144,7 +144,7 @@ def run_e2e_experiment_create_by_tune_with_llm_optimization(
         namespace=exp_namespace,
         # BERT model URI and type of Transformer to train it.
         model_provider_parameters=HuggingFaceModelParams(
-            model_uri="hf://hf-internal-testing/tiny-random-bert",
+            model_uri="hf://google/bert_uncased_L-2_H-128_A-2",
             transformer_type=transformers.AutoModelForSequenceClassification,
             num_labels=5,
         ),
