@@ -82,6 +82,7 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 		values = append(values, trialName, sqlTimeStr, mlog.Metric.Name, mlog.Metric.Value)
 	}
 	if len(values) == 0 {
+		// No valid metric logs to insert, skip Prepare/Exec.
 		return nil
 	}
 	sqlQuery = sqlQuery[0 : len(sqlQuery)-1]

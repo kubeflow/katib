@@ -107,6 +107,17 @@ func TestRegisterObservationLogNoValidEntries(t *testing.T) {
 	}
 }
 
+func TestRegisterObservationLogEmptyMetricLogs(t *testing.T) {
+	obsLog := &api_pb.ObservationLog{
+		MetricLogs: []*api_pb.MetricLog{},
+	}
+
+	err := dbInterface.RegisterObservationLog("test1_trial1", obsLog)
+	if err != nil {
+		t.Errorf("RegisterObservationLog failed: %v", err)
+	}
+}
+
 func TestGetObservationLog(t *testing.T) {
 	mock.ExpectQuery("SELECT").WillReturnRows(
 		sqlmock.NewRows([]string{"time", "metric_name", "value"}).AddRow(

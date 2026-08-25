@@ -89,6 +89,7 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 	}
 
 	if len(values) == 0 {
+		// No valid metric logs to insert, skip Prepare/Exec.
 		return nil
 	}
 
