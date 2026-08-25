@@ -81,6 +81,9 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 		sqlQuery += "(?, ?, ?, ?),"
 		values = append(values, trialName, sqlTimeStr, mlog.Metric.Name, mlog.Metric.Value)
 	}
+	if len(values) == 0 {
+		return nil
+	}
 	sqlQuery = sqlQuery[0 : len(sqlQuery)-1]
 
 	// Prepare the statement

@@ -88,6 +88,10 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 		index_of_qparam += 4
 	}
 
+	if len(values) == 0 {
+		return nil
+	}
+
 	statement = statement[:len(statement)-1]
 
 	// Prepare the statement
