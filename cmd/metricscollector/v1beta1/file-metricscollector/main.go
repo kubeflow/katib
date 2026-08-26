@@ -44,7 +44,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -175,6 +174,12 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 		klog.Fatalf("Failed to create new Process from pid %v, error: %v", mainProcPid, err)
 	}
 
+	// Get list of regural expressions from filters.
+	metricRegList, err := filemc.GetFilterRegexpList(filters)
+	if err != nil {
+		klog.Fatalf("Invalid metric filter: %v", err)
+	}
+
 	// Start watch log lines.
 	t, _ := tail.TailFile(mFile, tail.Config{Follow: true})
 	for line := range t.Lines {
@@ -184,9 +189,6 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 
 		switch fileFormat {
 		case commonv1beta1.TextFormat:
-			// Get list of regural expressions from filters.
-			var metricRegList []*regexp.Regexp
-			metricRegList = filemc.GetFilterRegexpList(filters)
 
 			// Check if log line contains metric from stop rules.
 			isRuleLine := false
