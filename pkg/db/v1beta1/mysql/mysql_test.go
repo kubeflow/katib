@@ -118,6 +118,13 @@ func TestRegisterObservationLogEmptyMetricLogs(t *testing.T) {
 	}
 }
 
+func TestRegisterObservationLogNilObservationLog(t *testing.T) {
+	err := dbInterface.RegisterObservationLog("test1_trial1", nil)
+	if err != nil {
+		t.Errorf("RegisterObservationLog failed: %v", err)
+	}
+}
+
 func TestGetObservationLog(t *testing.T) {
 	mock.ExpectQuery("SELECT").WillReturnRows(
 		sqlmock.NewRows([]string{"time", "metric_name", "value"}).AddRow(

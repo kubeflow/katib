@@ -67,6 +67,9 @@ func NewDBInterface(connectTimeout time.Duration) (common.KatibDBInterface, erro
 }
 
 func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta1.ObservationLog) error {
+	if observationLog == nil {
+		return nil
+	}
 	statement := "INSERT INTO observation_logs (trial_name, time, metric_name, value) VALUES "
 	values := []interface{}{}
 
