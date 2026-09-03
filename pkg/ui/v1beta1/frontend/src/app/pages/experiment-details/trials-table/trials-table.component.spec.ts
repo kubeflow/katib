@@ -167,6 +167,7 @@ describe('TrialsTableComponent', () => {
             field: lowerCase(component.displayedColumns[2]),
           }),
           sort: true,
+          sortingPreprocessorFn: jasmine.any(Function),
         },
         {
           matColumnDef: 'Lr',
@@ -175,6 +176,7 @@ describe('TrialsTableComponent', () => {
             field: lowerCase(component.displayedColumns[3]),
           }),
           sort: true,
+          sortingPreprocessorFn: jasmine.any(Function),
         },
         {
           matColumnDef: 'Batch size',
@@ -183,6 +185,7 @@ describe('TrialsTableComponent', () => {
             field: lowerCase(component.displayedColumns[4]),
           }),
           sort: true,
+          sortingPreprocessorFn: jasmine.any(Function),
         },
         {
           matColumnDef: 'Embed dim',
@@ -191,6 +194,7 @@ describe('TrialsTableComponent', () => {
             field: lowerCase(component.displayedColumns[5]),
           }),
           sort: true,
+          sortingPreprocessorFn: jasmine.any(Function),
         },
         {
           matColumnDef: 'Dropout',
@@ -199,6 +203,7 @@ describe('TrialsTableComponent', () => {
             field: lowerCase(component.displayedColumns[6]),
           }),
           sort: true,
+          sortingPreprocessorFn: jasmine.any(Function),
         },
         {
           matColumnDef: 'Sp dropout',
@@ -207,6 +212,7 @@ describe('TrialsTableComponent', () => {
             field: lowerCase(component.displayedColumns[7]),
           }),
           sort: true,
+          sortingPreprocessorFn: jasmine.any(Function),
         },
         {
           matHeaderCellDef: '',
@@ -217,5 +223,39 @@ describe('TrialsTableComponent', () => {
         },
       ],
     });
+  });
+
+  it('should sort numeric metric columns by value, not lexicographically', () => {
+    const metricColumn = component.config.columns.find(
+      col => col.matColumnDef === 'Validation loss',
+    );
+
+    // Values formatted in scientific notation (e.g. by numberToExponential)
+    // must sort as numbers: 0.0049713 < 0.070573 < 0.70573.
+    const sorted = ['0.70573', '4.9713e-3', '7.0573e-2']
+      .map(metricColumn.sortingPreprocessorFn)
+      .sort((a, b) => a - b);
+
+    expect(sorted).toEqual([0.0049713, 0.070573, 0.70573]);
+  });
+
+  it('should keep a missing metric value as an empty string when sorting', () => {
+    const metricColumn = component.config.columns.find(
+      col => col.matColumnDef === 'Validation loss',
+    );
+
+    // An empty string must stay '' rather than becoming 0 (Number('') === 0),
+    // otherwise trials with a missing metric would sort as if it were zero.
+    expect(metricColumn.sortingPreprocessorFn('')).toEqual('');
+  });
+
+  it('should fall back to the raw value when sorting non-numeric properties', () => {
+    const metricColumn = component.config.columns.find(
+      col => col.matColumnDef === 'Validation loss',
+    );
+
+    expect(metricColumn.sortingPreprocessorFn('not-a-number')).toEqual(
+      'not-a-number',
+    );
   });
 });
