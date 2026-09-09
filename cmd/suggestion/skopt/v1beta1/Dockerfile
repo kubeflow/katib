@@ -9,6 +9,7 @@ ENV PYTHONPATH ${TARGET_DIR}:${TARGET_DIR}/pkg/apis/manager/v1beta1/python:${TAR
 # core, which is throttled by the Suggestion CPU limit and slows down GetSuggestions.
 ENV OPENBLAS_NUM_THREADS 1
 ENV OMP_NUM_THREADS 1
+ENV MKL_NUM_THREADS 1
 
 RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
     apt-get -y update && \
