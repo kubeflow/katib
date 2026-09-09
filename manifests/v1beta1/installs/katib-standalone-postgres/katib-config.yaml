@@ -34,6 +34,9 @@ runtime:
       image: ghcr.io/kubeflow/katib/suggestion-hyperband:latest
     - algorithmName: bayesianoptimization
       image: ghcr.io/kubeflow/katib/suggestion-skopt:latest
+      resources:
+        limits:
+          memory: 512Mi
     - algorithmName: cmaes
       image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
     - algorithmName: sobol
