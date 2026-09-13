@@ -182,6 +182,43 @@ func TestCollectObservationLog(t *testing.T) {
 				},
 			},
 		},
+		"Non-numeric metric value in TEXT logs": {
+			fileName: "non-numeric-value.log",
+			testData: `2024-03-04T17:55:08Z INFO     epoch 1 loss=0.5
+2024-03-04T17:55:08Z INFO     epoch 2 loss=nan
+2024-03-04T17:55:08Z INFO     epoch 3 loss=`,
+			metrics:    []string{"loss"},
+			fileFormat: commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.5",
+						},
+					},
+				},
+			},
+		},
+		"Only non-numeric objective metric values in TEXT logs": {
+			fileName: "non-numeric-objective.log",
+			testData: `2024-03-04T17:55:08Z INFO     epoch 1 loss=nan
+2024-03-04T17:55:08Z INFO     epoch 2 loss=nan`,
+			metrics:    []string{"loss"},
+			fileFormat: commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: consts.UnavailableMetricValue,
+						},
+					},
+				},
+			},
+		},
 		"Invalid file name": {
 			fileName:   "invalid",
 			fileFormat: commonv1beta1.JsonFormat,

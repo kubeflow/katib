@@ -106,6 +106,10 @@ func parseLogsInTextFormat(logs []string, metrics []string, filters []string) (*
 				}
 				name := strings.TrimSpace(kevList[1])
 				value := strings.TrimSpace(kevList[2])
+				if _, err := strconv.ParseFloat(value, 64); err != nil {
+					klog.Warningf("Skipping metric %s with non-numeric value %q in log line %s", name, value, logline)
+					continue
+				}
 				for _, m := range metrics {
 					if name != m {
 						continue

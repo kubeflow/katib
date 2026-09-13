@@ -210,9 +210,11 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 					}
 					// Submatch must have metric name and float value
 					metricName := strings.TrimSpace(subMatchList[1])
-					metricValue, err := strconv.ParseFloat(strings.TrimSpace(subMatchList[2]), 64)
+					metricValueString := strings.TrimSpace(subMatchList[2])
+					metricValue, err := strconv.ParseFloat(metricValueString, 64)
 					if err != nil {
-						klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, metricName)
+						klog.Warningf("Skipping metric %s with non-numeric value %q in log line %s", metricName, metricValueString, logText)
+						continue
 					}
 
 					// stopRules contains array of EarlyStoppingRules that has not been reached yet.
