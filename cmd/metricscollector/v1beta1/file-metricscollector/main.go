@@ -211,9 +211,9 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 					// Submatch must have metric name and float value
 					metricName := strings.TrimSpace(subMatchList[1])
 					metricValueString := strings.TrimSpace(subMatchList[2])
-					metricValue, err := strconv.ParseFloat(metricValueString, 64)
+					metricValue, err := filemc.ParseMetricValue(metricValueString)
 					if err != nil {
-						klog.Warningf("Skipping metric %s with non-numeric value %q in log line %s", metricName, metricValueString, logText)
+						klog.Warningf("Skipping metric %s with non-numeric value %q in log line %s: %v", metricName, metricValueString, logText, err)
 						continue
 					}
 
@@ -252,9 +252,10 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 				if !exist {
 					continue
 				}
-				metricValue, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+				metricValue, err := filemc.ParseMetricValue(strings.TrimSpace(value))
 				if err != nil {
-					klog.Fatalf("Unable to parse value %v to float for metric %v", metricValue, rule.Name)
+					klog.Warningf("Skipping metric %s with non-numeric value %q in log line %s: %v", rule.Name, value, logText, err)
+					continue
 				}
 				stopRules, optimalObjValue = updateStopRules(stopRules, optimalObjValue, metricValue, metricStartStep, rule, idx)
 			}
