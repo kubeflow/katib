@@ -65,6 +65,9 @@ func NewDBInterface(connectTimeout time.Duration) (common.KatibDBInterface, erro
 }
 
 func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta1.ObservationLog) error {
+	if observationLog == nil {
+		return nil
+	}
 	sqlQuery := "INSERT INTO observation_logs (trial_name, time, metric_name, value) VALUES "
 	values := []interface{}{}
 
@@ -80,6 +83,10 @@ func (d *dbConn) RegisterObservationLog(trialName string, observationLog *v1beta
 
 		sqlQuery += "(?, ?, ?, ?),"
 		values = append(values, trialName, sqlTimeStr, mlog.Metric.Name, mlog.Metric.Value)
+	}
+	if len(values) == 0 {
+		// No valid metric logs to insert, skip Prepare/Exec.
+		return nil
 	}
 	sqlQuery = sqlQuery[0 : len(sqlQuery)-1]
 
