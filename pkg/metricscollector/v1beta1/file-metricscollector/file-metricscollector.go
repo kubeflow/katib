@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -106,6 +107,10 @@ func parseLogsInTextFormat(logs []string, metrics []string, filters []string) (*
 				}
 				name := strings.TrimSpace(kevList[1])
 				value := strings.TrimSpace(kevList[2])
+				if _, err := ParseMetricValue(value); err != nil {
+					klog.Warningf("Skipping metric %s with non-numeric value %q in log line %s: %v", name, value, logline, err)
+					continue
+				}
 				for _, m := range metrics {
 					if name != m {
 						continue
@@ -154,6 +159,10 @@ func parseLogsInJsonFormat(logs []string, metrics []string) (*v1beta1.Observatio
 			if !exist {
 				continue
 			}
+			if _, err := ParseMetricValue(strings.TrimSpace(value)); err != nil {
+				klog.Warningf("Skipping metric %s with non-numeric value %q in log line %s: %v", m, value, logline, err)
+				continue
+			}
 			mlogs = append(mlogs, &v1beta1.MetricLog{
 				TimeStamp: timestamp,
 				Metric: &v1beta1.Metric{
@@ -164,6 +173,20 @@ func parseLogsInJsonFormat(logs []string, metrics []string) (*v1beta1.Observatio
 		}
 	}
 	return newObservationLog(mlogs, metrics), nil
+}
+
+// ParseMetricValue parses a metric value reported in the training logs.
+// NaN and Inf parse without an error but are not usable objective values, so
+// they are rejected along with values that are not numbers at all.
+func ParseMetricValue(value string) (float64, error) {
+	parsed, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return 0, err
+	}
+	if math.IsNaN(parsed) || math.IsInf(parsed, 0) {
+		return 0, fmt.Errorf("value %q is not a finite number", value)
+	}
+	return parsed, nil
 }
 
 func newObservationLog(mlogs []*v1beta1.MetricLog, metrics []string) *v1beta1.ObservationLog {
