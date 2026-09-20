@@ -13,7 +13,12 @@ RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     rm -rf /var/lib/apt/lists/*; \
     fi
 
-RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
+RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
+      pip install --prefer-binary --no-cache-dir -r requirements.txt \
+        --extra-index-url https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/; \
+    else \
+      pip install --prefer-binary --no-cache-dir -r requirements.txt; \
+    fi
 RUN chgrp -R 0 /opt/tf-mnist-with-summaries \
   && chmod -R g+rwX /opt/tf-mnist-with-summaries
 

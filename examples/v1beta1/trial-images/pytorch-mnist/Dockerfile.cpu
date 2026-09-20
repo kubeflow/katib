@@ -1,5 +1,6 @@
 FROM python:3.11-slim
 
+ARG TARGETARCH
 ADD examples/v1beta1/trial-images/pytorch-mnist /opt/pytorch-mnist
 
 WORKDIR /opt/pytorch-mnist
@@ -8,9 +9,12 @@ WORKDIR /opt/pytorch-mnist
 RUN mkdir /katib
 
 # TODO (andreyvelich): This is required since torchvision==0.17.1 is incompatible with numpy 2.0
-RUN pip install numpy==1.26.0
-RUN pip install --prefer-binary --no-cache-dir torch==2.2.1 torchvision==0.17.1
-RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
+RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
+      pip install --prefer-binary --no-cache-dir numpy==1.26.0 torch==2.1.2 torchvision==0.16.2 \
+        --extra-index-url https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/; \
+    else \
+      pip install --prefer-binary --no-cache-dir numpy==1.26.0 torch==2.2.1 torchvision==0.17.1; \
+    fi
 
 RUN chgrp -R 0 /opt/pytorch-mnist \
   && chmod -R g+rwX /opt/pytorch-mnist \

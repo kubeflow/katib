@@ -15,6 +15,7 @@
 # Dockerfile for building the source code of conformance tests
 FROM python:3.10-slim
 
+ARG TARGETARCH
 WORKDIR /kubeflow/katib
 
 COPY sdk/ /kubeflow/katib/sdk/
@@ -27,6 +28,12 @@ COPY conformance/run.sh .
 # Add test script.
 RUN chmod +x run.sh
 
-RUN pip install --prefer-binary -e sdk/python/v1beta1
+
+RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
+      pip install --prefer-binary -e sdk/python/v1beta1 \
+        --extra-index-url https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/; \
+    else \
+      pip install --prefer-binary -e sdk/python/v1beta1; \
+    fi
 
 ENTRYPOINT [ "./run.sh" ]
