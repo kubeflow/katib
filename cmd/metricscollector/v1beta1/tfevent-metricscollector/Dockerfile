@@ -14,9 +14,19 @@ RUN if [ "${TARGETARCH}" = "arm64" ]; then \
     apt-get -y update && apt-get -y install gfortran libpcre2-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*; \
+    elif [ "${TARGETARCH}" = "ppc64le" ]; then \
+    apt-get -y update && \
+    apt-get -y install g++ gfortran libopenblas-dev liblapack-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*; \
     fi
 
-RUN pip install --prefer-binary --no-cache-dir -r requirements.txt
+RUN if [ "${TARGETARCH}" = "ppc64le" ]; then \
+      pip install --prefer-binary --no-cache-dir -r requirements.txt \
+        --extra-index-url https://wheels.developerfirst.ibm.com/ppc64le/linux/+simple/; \
+    else \
+      pip install --prefer-binary --no-cache-dir -r requirements.txt; \
+    fi
 RUN chgrp -R 0 ${TARGET_DIR} \
   && chmod -R g+rwX ${TARGET_DIR}
 

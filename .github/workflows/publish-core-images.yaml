@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/build-and-publish-images.yaml
     with:
       component-name: ${{ matrix.component-name }}
-      platforms: linux/amd64,linux/arm64
+      platforms: linux/amd64,linux/arm64,linux/ppc64le
       dockerfile: ${{ matrix.dockerfile }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

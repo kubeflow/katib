@@ -1,5 +1,8 @@
 grpcio>=1.64.1
 googleapis-common-protos==1.6.0
 cython>=0.29.24
-tensorflow==2.16.1
+# For ppc64le
+tensorflow==2.18.1; platform_machine == "ppc64le"
+#All other Architectures
+tensorflow==2.16.1; platform_machine != "ppc64le"
 protobuf>=4.21.12,<5
