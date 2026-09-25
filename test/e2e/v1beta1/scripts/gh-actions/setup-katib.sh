@@ -26,6 +26,78 @@ WITH_DATABASE_TYPE=${3:-mysql}
 
 E2E_TEST_IMAGE_TAG="e2e-test"
 TRAINING_OPERATOR_VERSION="v1.9.0"
+KUBECTL_REQUEST_TIMEOUT="30s"
+WEBHOOK_TIMEOUT_SECONDS=120
+WEBHOOK_TIMEOUT="${WEBHOOK_TIMEOUT_SECONDS}s"
+
+dump_katib_webhook_diagnostics() {
+  echo "Katib controller readiness diagnostics"
+  echo "Katib controller deployment"
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get deploy/katib-controller -o wide || true
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow describe deploy/katib-controller || true
+
+  echo "Katib controller service"
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get service/katib-controller -o wide || true
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow describe service/katib-controller || true
+
+  echo "Katib controller endpoints"
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get endpoints/katib-controller -o wide || true
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow describe endpoints/katib-controller || true
+
+  echo "Katib controller EndpointSlices"
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get endpointslice -l kubernetes.io/service-name=katib-controller -o wide --show-labels || true
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get endpointslice -l kubernetes.io/service-name=katib-controller -o yaml || true
+
+  echo "Katib webhook configurations"
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" get mutatingwebhookconfiguration,validatingwebhookconfiguration -o yaml || true
+
+  echo "Katib controller logs"
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow logs deploy/katib-controller --all-containers --tail=500 || true
+
+  echo "Kubeflow namespace events"
+  kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get events --sort-by=.lastTimestamp || true
+}
+
+wait_for_katib_webhook_endpoint() {
+  echo "Waiting for Katib controller rollout and webhook endpoint readiness."
+
+  if ! kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow rollout status deployment/katib-controller --timeout="${WEBHOOK_TIMEOUT}"; then
+    echo "Katib controller deployment did not finish rollout."
+    dump_katib_webhook_diagnostics
+    exit 1
+  fi
+
+  if ! kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get service/katib-controller -o wide; then
+    echo "Katib controller service is not available."
+    dump_katib_webhook_diagnostics
+    exit 1
+  fi
+
+  local deadline
+  deadline=$((SECONDS + WEBHOOK_TIMEOUT_SECONDS))
+  local endpoint_addresses
+  local endpointslice_addresses
+
+  while true; do
+    endpoint_addresses="$(kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get endpoints katib-controller -o jsonpath='{.subsets[*].addresses[*].ip}' || true)"
+    endpointslice_addresses="$(kubectl --request-timeout="${KUBECTL_REQUEST_TIMEOUT}" -n kubeflow get endpointslice -l kubernetes.io/service-name=katib-controller -o jsonpath='{.items[*].endpoints[*].addresses[*]}' || true)"
+
+    if [ -n "${endpoint_addresses}" ] && [ -n "${endpointslice_addresses}" ]; then
+      break
+    fi
+
+    if [ "${SECONDS}" -ge "${deadline}" ]; then
+      echo "Katib controller service endpoints were not populated before timeout."
+      dump_katib_webhook_diagnostics
+      exit 1
+    fi
+
+    echo "Waiting for katib-controller Endpoints and EndpointSlices to be populated."
+    sleep 5
+  done
+
+  echo "Katib controller webhook endpoint is ready."
+}
 
 echo "Start to install Katib"
 
@@ -69,6 +141,8 @@ TIMEOUT=120s
 
 kubectl wait --for=condition=ContainersReady=True --timeout=${TIMEOUT} -l "katib.kubeflow.org/component in ($WITH_DATABASE_TYPE,controller,db-manager,ui)" -n kubeflow pod ||
   (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && exit 1)
+
+wait_for_katib_webhook_endpoint
 
 echo "All Katib components are running."
 echo "Katib deployments"

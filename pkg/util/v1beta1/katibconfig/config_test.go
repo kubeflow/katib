@@ -476,6 +476,75 @@ runtime:
 	}
 }
 
+func TestInstallKatibConfigsSetRestrictedSecurityContext(t *testing.T) {
+	scm := runtime.NewScheme()
+	if err := configv1beta1.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
+
+	installConfigs := []string{
+		filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "installs", "katib-cert-manager", "katib-config.yaml"),
+		filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "installs", "katib-external-db", "katib-config.yaml"),
+		filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "installs", "katib-leader-election", "katib-config.yaml"),
+		filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "installs", "katib-openshift", "katib-config.yaml"),
+		filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "installs", "katib-standalone-postgres", "katib-config.yaml"),
+		filepath.Join("..", "..", "..", "..", "manifests", "v1beta1", "installs", "katib-standalone", "katib-config.yaml"),
+	}
+
+	for _, installConfig := range installConfigs {
+		t.Run(filepath.Base(filepath.Dir(installConfig)), func(t *testing.T) {
+			wantSecurityContext := restrictedSuggestionSecurityContextForInstall(installConfig)
+			got := &configv1beta1.KatibConfig{}
+			if err := fromFile(scm, got, installConfig); err != nil {
+				t.Fatal(err)
+			}
+			if !got.InitConfig.ControllerConfig.InjectSecurityContext {
+				t.Errorf("Expected init.controller.injectSecurityContext to be true")
+			}
+			if diff := cmp.Diff(wantSuggestionAlgorithms(), suggestionAlgorithms(got.RuntimeConfig.SuggestionConfigs)); len(diff) != 0 {
+				t.Fatalf("Unexpected runtime.suggestions algorithms (-want,+got):\n%s", diff)
+			}
+			for _, suggestion := range got.RuntimeConfig.SuggestionConfigs {
+				if diff := cmp.Diff(wantSecurityContext, suggestion.SecurityContext); len(diff) != 0 {
+					t.Errorf("Unexpected securityContext for suggestion %q (-want,+got):\n%s", suggestion.AlgorithmName, diff)
+				}
+			}
+		})
+	}
+}
+
+func restrictedSuggestionSecurityContextForInstall(installConfig string) *corev1.SecurityContext {
+	securityContext := restrictedSuggestionSecurityContext()
+	if filepath.Base(filepath.Dir(installConfig)) == "katib-openshift" {
+		securityContext.RunAsUser = nil
+	}
+	return securityContext
+}
+
+func wantSuggestionAlgorithms() []string {
+	return []string{
+		"random",
+		"tpe",
+		"grid",
+		"hyperband",
+		"bayesianoptimization",
+		"cmaes",
+		"sobol",
+		"multivariate-tpe",
+		"enas",
+		"darts",
+		"pbt",
+	}
+}
+
+func suggestionAlgorithms(suggestions []configv1beta1.SuggestionConfig) []string {
+	algorithms := make([]string, 0, len(suggestions))
+	for _, suggestion := range suggestions {
+		algorithms = append(algorithms, suggestion.AlgorithmName)
+	}
+	return algorithms
+}
+
 func newFakeKubeClient(scm *runtime.Scheme, katibConfigMap *corev1.ConfigMap) client.Client {
 	fakeClientBuilder := fake.NewClientBuilder().WithScheme(scm)
 	if katibConfigMap != nil {
@@ -597,6 +666,24 @@ func newFakeCustomResourceRequirements() *corev1.ResourceRequirements {
 			corev1.ResourceCPU:              customCPULimit,
 			corev1.ResourceMemory:           customMemoryLimit,
 			corev1.ResourceEphemeralStorage: customEphemeralStorageLimit,
+		},
+	}
+}
+
+func restrictedSuggestionSecurityContext() *corev1.SecurityContext {
+	allowPrivilegeEscalation := false
+	runAsNonRoot := true
+	runAsUser := int64(1000)
+
+	return &corev1.SecurityContext{
+		AllowPrivilegeEscalation: &allowPrivilegeEscalation,
+		Capabilities: &corev1.Capabilities{
+			Drop: []corev1.Capability{"ALL"},
+		},
+		RunAsNonRoot: &runAsNonRoot,
+		RunAsUser:    &runAsUser,
+		SeccompProfile: &corev1.SeccompProfile{
+			Type: corev1.SeccompProfileTypeRuntimeDefault,
 		},
 	}
 }

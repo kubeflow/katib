@@ -3,6 +3,7 @@ import logging
 from pprint import pformat
 
 import kubeflow.katib as katib
+from diagnostics import dump_e2e_diagnostics
 from kubeflow.katib import KatibClient, search
 from kubeflow.katib.types.types import TrainerResources
 from kubernetes import client
@@ -143,7 +144,7 @@ def run_e2e_experiment_create_by_tune_with_llm_optimization(
         namespace=exp_namespace,
         # BERT model URI and type of Transformer to train it.
         model_provider_parameters=HuggingFaceModelParams(
-            model_uri="hf://google-bert/bert-base-cased",
+            model_uri="hf://google/bert_uncased_L-2_H-128_A-2",
             transformer_type=transformers.AutoModelForSequenceClassification,
             num_labels=5,
         ),
@@ -236,7 +237,11 @@ if __name__ == "__main__":
         logging.info(
             f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}"
         )
-        raise e
+        try:
+            dump_e2e_diagnostics(exp_name, exp_namespace)
+        except Exception:
+            logging.exception("Failed to dump E2E diagnostics")
+        raise
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
@@ -259,7 +264,11 @@ if __name__ == "__main__":
         logging.info(
             f"E2E is failed for Experiment created by tune with PyTorchJob: {exp_namespace}/{exp_name}"
         )
-        raise e
+        try:
+            dump_e2e_diagnostics(exp_name, exp_namespace)
+        except Exception:
+            logging.exception("Failed to dump E2E diagnostics")
+        raise
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
@@ -275,7 +284,11 @@ if __name__ == "__main__":
     except Exception as e:
         logging.info("---------------------------------------------------------------")
         logging.info(f"E2E is failed for Experiment created by tune: {exp_namespace}/{exp_name}")
-        raise e
+        try:
+            dump_e2e_diagnostics(exp_name, exp_namespace)
+        except Exception:
+            logging.exception("Failed to dump E2E diagnostics")
+        raise
     finally:
         # Delete the Experiment.
         logging.info("---------------------------------------------------------------")
