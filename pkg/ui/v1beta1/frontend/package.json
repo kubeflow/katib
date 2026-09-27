@@ -38,7 +38,7 @@
     "@swimlane/ngx-charts": "^20.4.1",
     "@types/lodash-es": "~4.17.7",
     "date-fns": "1.29.0",
-    "echarts": "^5.3.2",
+    "echarts": "^6.1.0",
     "echarts-stat": "^1.2.0",
     "js-yaml": "^4.0.0",
     "lodash-es": "~4.17.21",
