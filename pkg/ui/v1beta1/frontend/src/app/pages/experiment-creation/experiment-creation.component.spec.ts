@@ -67,7 +67,7 @@ ExperimentFormServiceStub = {
   createHyperParametersForm: () => new FormArray([]),
   createNasGraphForm: () =>
     new FormGroup({
-      layers: new FormControl(),
+      numLayers: new FormControl(),
       inputSizes: new FormControl([]),
       outputSizes: new FormControl([]),
     }),
