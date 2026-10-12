@@ -186,6 +186,9 @@ func TestReconcileSuggestionsEarlyStoppedTrialWithoutObservation(t *testing.T) {
 			Status: corev1.ConditionTrue,
 		},
 	}
+	if !trial.IsEarlyStopped() || trial.IsObservationAvailable() {
+		t.Fatal("test Trial must be early stopped without an available observation")
+	}
 
 	// An early-stopped Trial without an observation must not trigger a replacement
 	// suggestion request until its observation becomes available.
