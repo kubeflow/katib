@@ -159,6 +159,46 @@ func TestReconcileSuggestions(t *testing.T) {
 	g.Expect(assignments[0].Name).To(gomega.Equal(trialName + "-2"))
 }
 
+func TestReconcileSuggestionsEarlyStoppedTrialWithoutObservation(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockSuggestion := suggestionmock.NewMockSuggestion(mockCtrl)
+
+	r := &ReconcileExperiment{
+		Suggestion: mockSuggestion,
+	}
+
+	instance := newFakeInstance()
+	trial := trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      trialName + "-early-stopped",
+			Namespace: namespace,
+		},
+		Spec: trialsv1beta1.TrialSpec{
+			Objective: &commonapiv1beta1.ObjectiveSpec{
+				ObjectiveMetricName: "accuracy",
+			},
+		},
+	}
+	trial.MarkTrialStatusRunning("TrialRunning", "Trial is running")
+	trial.MarkTrialStatusRunning(v1.ConditionFalse, "TrialRunning", "Trial is running")
+	trial.MarkTrialStatusMetricsUnavailable("TrialEarlyStopped", "Trial was early stopped before observation was available")
+
+	// An early-stopped Trial without an observation must not trigger a replacement
+	// suggestion request until its observation becomes available.
+	mockSuggestion.EXPECT().GetOrCreateSuggestion(gomock.Any(), int32(1)).Return(&suggestionsv1beta1.Suggestion{
+		Spec: suggestionsv1beta1.SuggestionSpec{Requests: 1},
+	}, nil)
+
+	assignments, err := r.ReconcileSuggestions(instance, []trialsv1beta1.Trial{trial}, 1)
+	if err != nil {
+		t.Fatalf("ReconcileSuggestions() error = %v", err)
+	}
+	if len(assignments) != 0 {
+		t.Fatalf("ReconcileSuggestions() returned %d assignments, want 0", len(assignments))
+	}
+}
+
 func TestReconcile(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
