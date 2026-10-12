@@ -180,9 +180,12 @@ func TestReconcileSuggestionsEarlyStoppedTrialWithoutObservation(t *testing.T) {
 			},
 		},
 	}
-	trial.MarkTrialStatusRunning("TrialRunning", "Trial is running")
-	trial.MarkTrialStatusRunning(v1.ConditionFalse, "TrialRunning", "Trial is running")
-	trial.MarkTrialStatusMetricsUnavailable("TrialEarlyStopped", "Trial was early stopped before observation was available")
+	trial.Status.Conditions = []trialsv1beta1.TrialCondition{
+		{
+			Type:   trialsv1beta1.TrialEarlyStopped,
+			Status: corev1.ConditionTrue,
+		},
+	}
 
 	// An early-stopped Trial without an observation must not trigger a replacement
 	// suggestion request until its observation becomes available.
