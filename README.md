@@ -162,7 +162,7 @@ for the detailed instructions on how to install Katib.
 Run the following command to install the latest stable release of Katib control plane:
 
 ```
-kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.17.0"
+kubectl apply -k "github.com/kubeflow/katib.git/manifests/v1beta1/installs/katib-standalone?ref=v0.19.0"
 ```
 
 Run the following command to install the latest changes of Katib control plane:
