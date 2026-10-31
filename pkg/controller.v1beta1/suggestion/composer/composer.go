@@ -118,6 +118,12 @@ func (g *General) DesiredDeployment(s *suggestionsv1beta1.Suggestion) (*appsv1.D
 		d.Spec.Template.Spec.ServiceAccountName = suggestionConfigData.ServiceAccountName
 	}
 
+	// Get Suggestion pod scheduling and image pull settings from config
+	d.Spec.Template.Spec.ImagePullSecrets = suggestionConfigData.ImagePullSecrets
+	d.Spec.Template.Spec.NodeSelector = suggestionConfigData.NodeSelector
+	d.Spec.Template.Spec.Tolerations = suggestionConfigData.Tolerations
+	d.Spec.Template.Spec.Affinity = suggestionConfigData.Affinity
+
 	// Attach volume to the suggestion pod spec if ResumePolicy = FromVolume
 	if s.Spec.ResumePolicy == experimentsv1beta1.FromVolume {
 		d.Spec.Template.Spec.Volumes = []corev1.Volume{
