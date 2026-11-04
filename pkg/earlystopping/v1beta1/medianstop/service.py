@@ -14,6 +14,7 @@
 
 import logging
 import multiprocessing
+import statistics
 from datetime import datetime
 from typing import Iterable, Optional
 
@@ -229,9 +230,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
         # If count of succeeded Trials is greater than min_trials_required, calculate median.
         if len(self.trials_avg_history) >= self.min_trials_required:
-            median = sum(list(self.trials_avg_history.values())) / len(
-                self.trials_avg_history
-            )
+            median = statistics.median(self.trials_avg_history.values())
             logger.info("Generate new Median value: {}".format(median))
             return median
         # Else, return None.
