@@ -142,5 +142,75 @@ class TestMedianStop(unittest.TestCase):
         self.assertEqual(code, grpc.StatusCode.OK)
 
 
+    def test_get_earlystopping_rules_uses_median(self):
+        # Average of the first start_step metric values for each Trial.
+        metric_logs = {
+            "trial-1": ["0.1", "0.1", "0.5"],
+            "trial-2": ["0.2", "0.2", "0.5"],
+            "trial-3": ["0.9", "0.9", "0.5"],
+        }
+
+        def get_observation_log(request, timeout):
+            return api_pb2.GetObservationLogReply(
+                observation_log=api_pb2.ObservationLog(
+                    metric_logs=[
+                        api_pb2.MetricLog(
+                            metric=api_pb2.Metric(name=request.metric_name, value=value),
+                        )
+                        for value in metric_logs[request.trial_name]
+                    ]
+                )
+            )
+
+        experiment = api_pb2.Experiment(
+            name="test",
+            spec=api_pb2.ExperimentSpec(
+                objective=api_pb2.ObjectiveSpec(
+                    type=api_pb2.MAXIMIZE,
+                    objective_metric_name="accuracy",
+                ),
+                early_stopping=api_pb2.EarlyStoppingSpec(
+                    algorithm_name="medianstop",
+                    algorithm_settings=[
+                        api_pb2.EarlyStoppingSetting(name="min_trials_required", value="3"),
+                        api_pb2.EarlyStoppingSetting(name="start_step", value="2"),
+                    ],
+                ),
+            ),
+        )
+        trials = [
+            api_pb2.Trial(
+                name=name,
+                status=api_pb2.TrialStatus(condition=api_pb2.TrialStatus.SUCCEEDED),
+            )
+            for name in metric_logs
+        ]
+        request = api_pb2.GetEarlyStoppingRulesRequest(
+            experiment=experiment,
+            trials=trials,
+            db_manager_address="katib-db-manager.kubeflow:6789"
+        )
+
+        with patch("pkg.earlystopping.v1beta1.medianstop.service.api_pb2_grpc.DBManagerStub") as stub:
+            stub.return_value.GetObservationLog.side_effect = get_observation_log
+            get_earlystopping_rules = self.test_server.invoke_unary_unary(
+                method_descriptor=(api_pb2.DESCRIPTOR
+                    .services_by_name['EarlyStopping']
+                    .methods_by_name['GetEarlyStoppingRules']),
+                invocation_metadata={},
+                request=request, timeout=1)
+
+            response, _, code, _ = get_earlystopping_rules.termination()
+
+        self.assertEqual(code, grpc.StatusCode.OK)
+        self.assertEqual(len(response.early_stopping_rules), 1)
+        rule = response.early_stopping_rules[0]
+        self.assertEqual(rule.name, "accuracy")
+        self.assertEqual(rule.comparison, api_pb2.LESS)
+        self.assertEqual(rule.start_step, 2)
+        # Median of the Trial averages (0.1, 0.2, 0.9), not their mean (0.4).
+        self.assertAlmostEqual(float(rule.value), 0.2)
+
+
 if __name__ == '__main__':
     unittest.main()
