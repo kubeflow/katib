@@ -123,6 +123,17 @@ export class TrialsTableComponent implements OnChanges {
               field: lowerCase(displayedColumns[i]),
             }),
             sort: true,
+            // Metric and parameter values are displayed as formatted
+            // strings (e.g. "1.3923e-2"), so sort them numerically
+            // instead of lexicographically. Non-numeric values (e.g.
+            // categorical parameters) fall back to their string value.
+            sortingPreprocessorFn: (value: any) => {
+              if (value === '') {
+                return value;
+              }
+              const numericValue = Number(value);
+              return isNaN(numericValue) ? value : numericValue;
+            },
           });
         }
       }
