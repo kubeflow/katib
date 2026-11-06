@@ -13,6 +13,20 @@
   <br>
 </h1>
 
+> [!WARNING]
+> **The Katib project is deprecated.** Users should migrate to the
+> [OptimizationJob APIs](https://trainer.kubeflow.org/en/latest/user-guides/optimizationjob.html),
+> which are released as part of the [Kubeflow Trainer](https://github.com/kubeflow/trainer) project
+> under the alpha feature gate.
+>
+> OptimizationJob is the next step for hyperparameter optimization in Kubeflow. It is natively
+> integrated with the TrainJob API, so every trial can use Trainer runtimes and distributed
+> training features out of the box. Metrics are pushed through the Kubeflow SDK and Trainer status
+> server, so you no longer need a separate database or a metrics collector sidecar.
+>
+> Work on the remaining features is tracked in
+> [kubeflow/trainer#3562](https://github.com/kubeflow/trainer/issues/3562).
+
 Kubeflow Katib is a Kubernetes-native project for automated machine learning (AutoML).
 Katib supports
 [Hyperparameter Tuning](https://en.wikipedia.org/wiki/Hyperparameter_optimization),
