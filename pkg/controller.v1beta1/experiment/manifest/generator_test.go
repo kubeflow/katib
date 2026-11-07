@@ -18,6 +18,7 @@ package manifest
 
 import (
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -27,6 +28,8 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	commonapiv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
@@ -163,6 +166,17 @@ func TestGetRunSpecWithHPConfigMap(t *testing.T) {
 
 	templatePath := "trial-template-path"
 
+	newTemplatesList := func(name string, data map[string]string) *v1.ConfigMapList {
+		return &v1.ConfigMapList{
+			Items: []v1.ConfigMap{
+				{
+					ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: "config-map-namespace"},
+					Data:       data,
+				},
+			},
+		}
+	}
+
 	trialSpec := `apiVersion: batch/v1
 kind: Job
 spec:
@@ -230,8 +244,8 @@ spec:
 	}{
 		"Run with valid parameters": {
 			mockConfigMapGetter: func() *gomock.Call {
-				return c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-					map[string]string{templatePath: trialSpec}, nil,
+				return c.EXPECT().GetTrialTemplates(gomock.Any()).Return(
+					newTemplatesList("config-map-name", map[string]string{templatePath: trialSpec}), nil,
 				)
 			},
 			instance: func() *experimentsv1beta1.Experiment {
@@ -250,7 +264,7 @@ spec:
 		},
 		"Invalid ConfigMap name": {
 			mockConfigMapGetter: func() *gomock.Call {
-				return c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
+				return c.EXPECT().GetTrialTemplates(gomock.Any()).Return(
 					nil, errConfigMapNotFound,
 				)
 			},
@@ -268,8 +282,8 @@ spec:
 		},
 		"Invalid template path in ConfigMap name": {
 			mockConfigMapGetter: func() *gomock.Call {
-				return c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-					map[string]string{templatePath: trialSpec}, nil,
+				return c.EXPECT().GetTrialTemplates(gomock.Any()).Return(
+					newTemplatesList("config-map-name", map[string]string{templatePath: trialSpec}), nil,
 				)
 			},
 			instance: func() *experimentsv1beta1.Experiment {
@@ -290,8 +304,8 @@ spec:
 		// Because of that, user can specify not valid unstructured template
 		"Invalid trial spec in ConfigMap": {
 			mockConfigMapGetter: func() *gomock.Call {
-				return c.EXPECT().GetConfigMap(gomock.Any(), gomock.Any()).Return(
-					map[string]string{templatePath: invalidTrialSpec}, nil,
+				return c.EXPECT().GetTrialTemplates(gomock.Any()).Return(
+					newTemplatesList("config-map-name", map[string]string{templatePath: invalidTrialSpec}), nil,
 				)
 			},
 			instance: func() *experimentsv1beta1.Experiment {
@@ -319,6 +333,69 @@ spec:
 			}
 			if diff := cmp.Diff(tc.wantRunSpecWithHyperParameters, got); len(diff) != 0 {
 				t.Errorf("Unexpected run spec from GetRunSpecWithHyperParameters (-want,+got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestGetTrialTemplateConfigMapLabel(t *testing.T) {
+	templateLabel := map[string]string{consts.LabelTrialTemplateConfigMapName: consts.LabelTrialTemplateConfigMapValue}
+	c := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(
+		&v1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{Name: "trial-templates", Namespace: "kubeflow", Labels: templateLabel},
+			Data:       map[string]string{"template.yaml": "template-data"},
+		},
+		&v1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{Name: "other-config", Namespace: "kube-system"},
+			Data:       map[string]string{"config": "private-data"},
+		},
+	).Build()
+	p := New(c)
+
+	cases := map[string]struct {
+		configMapSource *experimentsv1beta1.ConfigMapSource
+		wantTemplate    string
+		wantError       error
+	}{
+		"Trial template ConfigMap": {
+			configMapSource: &experimentsv1beta1.ConfigMapSource{
+				ConfigMapName:      "trial-templates",
+				ConfigMapNamespace: "kubeflow",
+				TemplatePath:       "template.yaml",
+			},
+			wantTemplate: "template-data",
+		},
+		"ConfigMap without Trial template label": {
+			configMapSource: &experimentsv1beta1.ConfigMapSource{
+				ConfigMapName:      "other-config",
+				ConfigMapNamespace: "kube-system",
+				TemplatePath:       "config",
+			},
+			wantError: errConfigMapNotFound,
+		},
+		"Invalid template path doesn't return ConfigMap data": {
+			configMapSource: &experimentsv1beta1.ConfigMapSource{
+				ConfigMapName:      "trial-templates",
+				ConfigMapNamespace: "kubeflow",
+				TemplatePath:       "invalid-path",
+			},
+			wantError: errTrialTemplateNotFound,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			instance := newFakeInstance()
+			instance.Spec.TrialTemplate.TrialSource = experimentsv1beta1.TrialSource{ConfigMap: tc.configMapSource}
+			got, err := p.GetTrialTemplate(instance)
+			if diff := cmp.Diff(tc.wantError, err, cmpopts.EquateErrors()); len(diff) != 0 {
+				t.Errorf("Unexpected error from GetTrialTemplate (-want,+got):\n%s", diff)
+			}
+			if err != nil && (strings.Contains(err.Error(), "template-data") || strings.Contains(err.Error(), "private-data")) {
+				t.Errorf("GetTrialTemplate error exposes ConfigMap data: %v", err)
+			}
+			if got != tc.wantTemplate {
+				t.Errorf("Unexpected template from GetTrialTemplate, want: %q, got: %q", tc.wantTemplate, got)
 			}
 		})
 	}
