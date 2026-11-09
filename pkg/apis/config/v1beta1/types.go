@@ -106,6 +106,14 @@ type SuggestionConfig struct {
 	PersistentVolumeClaimSpec corev1.PersistentVolumeClaimSpec `json:"persistentVolumeClaimSpec,omitempty"`
 	PersistentVolumeSpec      corev1.PersistentVolumeSpec      `json:"persistentVolumeSpec,omitempty"`
 	PersistentVolumeLabels    map[string]string                `json:"persistentVolumeLabels,omitempty"`
+	// ImagePullSecrets is the list of secrets used to pull the Suggestion image.
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty"`
+	// NodeSelector is the node selector for the Suggestion pod.
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// Tolerations is the list of tolerations for the Suggestion pod.
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+	// Affinity is the scheduling constraints for the Suggestion pod.
+	Affinity *corev1.Affinity `json:"affinity,omitempty"`
 }
 
 // EarlyStoppingConfig is the early stopping structure in Katib config.
