@@ -228,12 +228,8 @@ func (k *KatibUIHandler) DeleteExperiment(w http.ResponseWriter, r *http.Request
 
 	// Waiting until experiment will be deleted
 	for !isExperimentDeleted {
-		// At first, try to list experiments in cluster scope
-		experiments, err = k.getExperiments([]string{""})
-		if err != nil {
-			// If failed, just try to list experiments from own namespace
-			experiments, err = k.getExperiments([]string{})
-		}
+		// List experiments only from the namespace the user is authorized for
+		experiments, err = k.getExperiments([]string{namespace})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
