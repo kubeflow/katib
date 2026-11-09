@@ -195,6 +195,61 @@ class TestSkopt(unittest.TestCase):
         self.assertEqual(code, grpc.StatusCode.OK)
         self.assertEqual(2, len(response.parameter_assignments))
 
+    def test_concurrent_get_suggestions(self):
+        import concurrent.futures
+
+        experiment = api_pb2.Experiment(
+            name="test-concurrent",
+            spec=api_pb2.ExperimentSpec(
+                algorithm=api_pb2.AlgorithmSpec(
+                    algorithm_name="bayesianoptimization",
+                    algorithm_settings=[
+                        api_pb2.AlgorithmSetting(
+                            name="random_state",
+                            value="42"
+                        )
+                    ],
+                ),
+                objective=api_pb2.ObjectiveSpec(
+                    type=api_pb2.MAXIMIZE,
+                    goal=0.9
+                ),
+                parameter_specs=api_pb2.ExperimentSpec.ParameterSpecs(
+                    parameters=[
+                        api_pb2.ParameterSpec(
+                            name="param-1",
+                            parameter_type=api_pb2.DOUBLE,
+                            feasible_space=api_pb2.FeasibleSpace(
+                                max="1.0", min="0.0", list=[])
+                        )
+                    ]
+                )
+            )
+        )
+
+        def invoke():
+            request = api_pb2.GetSuggestionsRequest(
+                experiment=experiment,
+                trials=[],
+                current_request_number=1,
+            )
+            call = self.test_server.invoke_unary_unary(
+                method_descriptor=(api_pb2.DESCRIPTOR
+                                   .services_by_name["Suggestion"]
+                                   .methods_by_name["GetSuggestions"]),
+                invocation_metadata={},
+                request=request, timeout=5)
+            response, _, code, _ = call.termination()
+            return code, len(response.parameter_assignments)
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(invoke) for _ in range(4)]
+            results = [f.result() for f in futures]
+
+        for code, count in results:
+            self.assertEqual(code, grpc.StatusCode.OK)
+            self.assertEqual(count, 1)
+
     def test_validate_algorithm_settings(self):
         # Valid cases.
         experiment_spec = api_pb2.ExperimentSpec(
