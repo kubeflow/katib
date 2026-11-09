@@ -2,7 +2,13 @@
   <div class="flex-column">
     <mat-form-field appearance="outline">
       <mat-label>Number of Layers</mat-label>
-      <input formControlName="layers" matInput type="number" step="1" min="1" />
+      <input
+        formControlName="numLayers"
+        matInput
+        type="number"
+        step="1"
+        min="1"
+      />
     </mat-form-field>
 
     <app-shared-list-input
