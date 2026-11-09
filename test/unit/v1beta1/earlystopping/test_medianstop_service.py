@@ -141,6 +141,36 @@ class TestMedianStop(unittest.TestCase):
 
         self.assertEqual(code, grpc.StatusCode.OK)
 
+    @patch('pkg.earlystopping.v1beta1.medianstop.service.api_pb2_grpc.DBManagerStub')
+    def test_get_median_value_empty_metric_logs(self, mock_db_stub):
+        service = MedianStopService()
+        service.db_manager_address = ["katib-db-manager.kubeflow", "6789"]
+        service.objective_metric = "loss"
+
+        mock_instance = mock_db_stub.return_value
+        mock_instance.GetObservationLog.return_value = api_pb2.GetObservationLogReply(
+            observation_log=api_pb2.ObservationLog(metric_logs=[])
+        )
+
+        trials = [
+            api_pb2.Trial(
+                name="trial-empty-metrics",
+                status=api_pb2.TrialStatus(
+                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED
+                ),
+            )
+        ]
+
+        median = service.get_median_value(trials)
+        self.assertIsNone(median)
+        self.assertIn("trial-empty-metrics", service.recorded_trial_names)
+        self.assertNotIn("trial-empty-metrics", service.trials_avg_history)
+
+        mock_instance.GetObservationLog.reset_mock()
+        median = service.get_median_value(trials)
+        self.assertIsNone(median)
+        mock_instance.GetObservationLog.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()

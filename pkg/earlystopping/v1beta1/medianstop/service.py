@@ -46,6 +46,8 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
         # trials_avg_history is the dict with succeeded Trials history where
         # key = Trial name, value = average value for "start_step" reported metrics.
         self.trials_avg_history = {}
+        # Set of recorded Trial names that have been evaluated.
+        self.recorded_trial_names = set()
 
         # Assume that Trial namespace = Suggestion namespace.
         try:
@@ -189,9 +191,10 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
         for trial in trials:
             # Get metrics only for the new succeeded Trials.
             if (
-                trial.name not in self.trials_avg_history
+                trial.name not in self.recorded_trial_names
                 and trial.status.condition == SUCCEEDED_TRIAL
             ):
+                self.recorded_trial_names.add(trial.name)
                 with grpc.insecure_channel(
                     f"{self.db_manager_address[0]}:{self.db_manager_address[1]}"
                 ) as channel:
@@ -211,6 +214,14 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
                 first_x_logs = get_log_response.observation_log.metric_logs[
                     : self.start_step
                 ]
+                if not first_x_logs:
+                    logger.warning(
+                        "Trial: {} has empty observation metric logs, skipping".format(
+                            trial.name
+                        )
+                    )
+                    continue
+
                 metric_sum = 0
                 for log in first_x_logs:
                     metric_sum += float(log.metric.value)
