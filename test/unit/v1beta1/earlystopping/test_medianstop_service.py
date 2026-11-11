@@ -141,6 +141,78 @@ class TestMedianStop(unittest.TestCase):
 
         self.assertEqual(code, grpc.StatusCode.OK)
 
+    @patch('pkg.earlystopping.v1beta1.medianstop.service.api_pb2_grpc.DBManagerStub')
+    def test_get_median_value_empty_metric_logs(self, mock_db_stub):
+        service = MedianStopService()
+        service.db_manager_address = ["katib-db-manager.kubeflow", "6789"]
+        service.objective_metric = "loss"
+
+        mock_instance = mock_db_stub.return_value
+        mock_instance.GetObservationLog.return_value = api_pb2.GetObservationLogReply(
+            observation_log=api_pb2.ObservationLog(metric_logs=[])
+        )
+
+        trials = [
+            api_pb2.Trial(
+                name="trial-empty-metrics",
+                status=api_pb2.TrialStatus(
+                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED
+                ),
+            )
+        ]
+
+        median = service.get_median_value(trials)
+        self.assertIsNone(median)
+        self.assertIn("trial-empty-metrics", service.recorded_trial_names)
+        self.assertNotIn("trial-empty-metrics", service.trials_avg_history)
+
+        mock_instance.GetObservationLog.reset_mock()
+        median = service.get_median_value(trials)
+        self.assertIsNone(median)
+        mock_instance.GetObservationLog.assert_not_called()
+
+    @patch('pkg.earlystopping.v1beta1.medianstop.service.api_pb2_grpc.DBManagerStub')
+    def test_get_median_value_retry_on_rpc_failure(self, mock_db_stub):
+        service = MedianStopService()
+        service.db_manager_address = ["katib-db-manager.kubeflow", "6789"]
+        service.objective_metric = "loss"
+        service.min_trials_required = 1
+
+        mock_instance = mock_db_stub.return_value
+        success_reply = api_pb2.GetObservationLogReply(
+            observation_log=api_pb2.ObservationLog(
+                metric_logs=[
+                    api_pb2.MetricLog(
+                        metric=api_pb2.Metric(name="loss", value="4.0")
+                    )
+                ]
+            )
+        )
+        mock_instance.GetObservationLog.side_effect = [
+            grpc.RpcError("Transient failure"),
+            success_reply,
+        ]
+
+        trials = [
+            api_pb2.Trial(
+                name="trial-retry",
+                status=api_pb2.TrialStatus(
+                    condition=api_pb2.TrialStatus.TrialConditionType.SUCCEEDED
+                ),
+            )
+        ]
+
+        # First invocation fails due to transient RPC error; trial must not be marked as recorded
+        with self.assertRaises(grpc.RpcError):
+            service.get_median_value(trials)
+        self.assertNotIn("trial-retry", service.recorded_trial_names)
+
+        # Second invocation retries after DB recovery, succeeds, and computes median
+        median = service.get_median_value(trials)
+        self.assertEqual(median, 4.0)
+        self.assertIn("trial-retry", service.recorded_trial_names)
+        self.assertEqual(service.trials_avg_history["trial-retry"], 4.0)
+
 
 if __name__ == '__main__':
     unittest.main()
