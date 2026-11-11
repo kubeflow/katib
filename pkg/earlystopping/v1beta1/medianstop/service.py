@@ -194,7 +194,6 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
                 trial.name not in self.recorded_trial_names
                 and trial.status.condition == SUCCEEDED_TRIAL
             ):
-                self.recorded_trial_names.add(trial.name)
                 with grpc.insecure_channel(
                     f"{self.db_manager_address[0]}:{self.db_manager_address[1]}"
                 ) as channel:
@@ -207,6 +206,8 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
                             timeout=APISERVER_TIMEOUT,
                         )
                     )
+
+                self.recorded_trial_names.add(trial.name)
 
                 # Get only first start_step metrics.
                 # Since metrics are collected consistently and ordered by time,
