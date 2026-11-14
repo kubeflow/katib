@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import multiprocessing
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import grpc
 import grpc_testing
@@ -30,9 +31,9 @@ class TestMedianStop(unittest.TestCase):
         self.mock_sum = patcher.start()
         self.addCleanup(patcher.stop)
 
+        self.service = MedianStopService()
         servicers = {
-            api_pb2.DESCRIPTOR.services_by_name['EarlyStopping']: MedianStopService(
-            )
+            api_pb2.DESCRIPTOR.services_by_name['EarlyStopping']: self.service
         }
 
         self.test_server = grpc_testing.server_from_dictionary(
@@ -140,6 +141,37 @@ class TestMedianStop(unittest.TestCase):
         _, _, code, _ = get_earlystopping_rules.termination()
 
         self.assertEqual(code, grpc.StatusCode.OK)
+
+    def test_set_trial_status(self):
+        trial = {"status": {"conditions": []}}
+        get_thread = MagicMock()
+        get_thread.get.return_value = trial
+        patch_thread = MagicMock()
+        api = MagicMock()
+        api.get_namespaced_custom_object.return_value = get_thread
+        api.patch_namespaced_custom_object_status.return_value = patch_thread
+        self.service.api_instance = api
+
+        def set_trial_status():
+            response = self.test_server.invoke_unary_unary(
+                method_descriptor=(api_pb2.DESCRIPTOR
+                    .services_by_name['EarlyStopping']
+                    .methods_by_name['SetTrialStatus']),
+                invocation_metadata={},
+                request=api_pb2.SetTrialStatusRequest(trial_name="test-trial"),
+                timeout=1)
+            _, _, code, _ = response.termination()
+            return code
+
+        # The status patch succeeds.
+        self.assertEqual(set_trial_status(), grpc.StatusCode.OK)
+        patch_thread.get.assert_called_once()
+        self.assertEqual(trial["status"]["conditions"][-1]["type"], "EarlyStopped")
+
+        # The status patch fails or times out, so the call must fail too.
+        for error in [Exception("patch failed"), multiprocessing.TimeoutError()]:
+            patch_thread.get.side_effect = error
+            self.assertNotEqual(set_trial_status(), grpc.StatusCode.OK)
 
 
 if __name__ == '__main__':

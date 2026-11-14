@@ -286,7 +286,7 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
 
         # Update Trial object with early stopped status
         try:
-            self.api_instance.patch_namespaced_custom_object_status(
+            thread = self.api_instance.patch_namespaced_custom_object_status(
                 KUBEFLOW_GROUP,
                 KATIB_VERSION,
                 self.namespace,
@@ -295,6 +295,9 @@ class MedianStopService(api_pb2_grpc.EarlyStoppingServicer):
                 trial,
                 async_req=True,
             )
+            thread.get(APISERVER_TIMEOUT)
+        except multiprocessing.TimeoutError:
+            raise Exception("Timeout trying to update Katib Trial status")
         except Exception as e:
             raise Exception(
                 "Update status for Trial: {} in namespace: {} failed. Exception: {}".format(
