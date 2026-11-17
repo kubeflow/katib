@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/spf13/viper"
@@ -61,6 +62,8 @@ var (
 	errMetricsNotReported = fmt.Errorf("metrics are not reported yet")
 	// errReportMetricsFailed is the error when `unavailable` metrics value can't be inserted to the Katib DB.
 	errReportMetricsFailed = fmt.Errorf("failed to report unavailable metrics")
+	// errRunSpecNotTrialResource is the error when Trial runSpec kind is not listed in trialResources.
+	errRunSpecNotTrialResource = errors.New("runSpec kind is not in trialResources")
 )
 
 // Add creates a new Trial Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
@@ -328,6 +331,13 @@ func (r *ReconcileTrial) getDesiredJobSpec(instance *trialsv1beta1.Trial) (*unst
 	logger := log.WithValues("Trial", types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()})
 
 	desiredJobSpec := instance.Spec.RunSpec
+
+	// Only create resources that are configured as trialResources.
+	gvk := desiredJobSpec.GroupVersionKind()
+	trialResources, _ := viper.Get(consts.ConfigTrialResources).([]schema.GroupVersionKind)
+	if !slices.Contains(trialResources, gvk) {
+		return nil, fmt.Errorf("%w: %v", errRunSpecNotTrialResource, gvk)
+	}
 
 	if err := controllerutil.SetControllerReference(instance, desiredJobSpec, r.scheme); err != nil {
 		logger.Error(err, "Set controller reference error")

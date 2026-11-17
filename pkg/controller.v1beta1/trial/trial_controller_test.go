@@ -27,6 +27,7 @@ import (
 	"go.uber.org/mock/gomock"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -388,6 +389,56 @@ func TestReconcileBatchJob(t *testing.T) {
 		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 
 		// Expect that Trial is deleted
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
+	})
+
+	t.Run("Trial with runSpec kind that is not in trialResources.", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		mockManagerClient.EXPECT().DeleteTrialObservationLog(gomock.Any()).Return(nil, nil)
+
+		roleBinding := &rbacv1.RoleBinding{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "rbac.authorization.k8s.io/v1",
+				Kind:       "RoleBinding",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-not-trial-resource",
+				Namespace: namespace,
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: rbacv1.GroupName,
+				Kind:     "ClusterRole",
+				Name:     "katib-controller",
+			},
+			Subjects: []rbacv1.Subject{
+				{
+					APIGroup: rbacv1.GroupName,
+					Kind:     rbacv1.UserKind,
+					Name:     "test-user",
+				},
+			},
+		}
+		runSpec, err := util.ConvertObjectToUnstructured(roleBinding)
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+
+		trial := newFakeTrialBatchJob(commonv1beta1.StdOutCollector, "test-not-trial-resource", "")
+		trial.Spec.RunSpec = runSpec
+		trialKey := types.NamespacedName{Name: "test-not-trial-resource", Namespace: namespace}
+		roleBindingKey := types.NamespacedName{Name: "test-not-trial-resource", Namespace: namespace}
+		g.Expect(c.Create(ctx, trial)).NotTo(gomega.HaveOccurred())
+
+		// Expect that Trial is created and the RoleBinding is never created
+		g.Eventually(func(g gomega.Gomega) {
+			g.Expect(c.Get(ctx, trialKey, trial)).Should(gomega.Succeed())
+			g.Expect(trial.IsCreated()).Should(gomega.BeTrue())
+		}, timeout).Should(gomega.Succeed())
+		g.Consistently(func(g gomega.Gomega) {
+			g.Expect(errors.IsNotFound(c.Get(ctx, roleBindingKey, &rbacv1.RoleBinding{}))).Should(gomega.BeTrue())
+		}, time.Second*3).Should(gomega.Succeed())
+
+		g.Expect(c.Delete(ctx, trial)).NotTo(gomega.HaveOccurred())
 		g.Eventually(func(g gomega.Gomega) {
 			g.Expect(errors.IsNotFound(c.Get(ctx, trialKey, &trialsv1beta1.Trial{}))).Should(gomega.BeTrue())
 		}, timeout).Should(gomega.Succeed())
