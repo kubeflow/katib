@@ -2,17 +2,21 @@ name: Welcome new contributors
 
 on:
  pull_request_target:
-   types: [opened]
+   types: [opened, review_requested]
  issues:
    types: [opened]
 
-permissions:
- contents: write
- issues: write
- pull-requests: write
+permissions: {}
 
 jobs:
  welcome:
+   if: >-
+     github.event_name == 'issues' ||
+     (github.event.action == 'opened' &&
+      (github.repository != 'kubeflow/katib' || vars.KATIB_TRANSITION_NOTICE == 'false'))
+   permissions:
+     issues: write
+     pull-requests: write
    runs-on: ubuntu-latest
    steps:
      - uses: actions/first-interaction@v3
@@ -44,3 +48,56 @@ jobs:
            - Join the AutoML & Training WG meetings: https://bit.ly/2PWVCkV
 
            Feel free to ask questions in the comments. Thanks again for contributing! 🙏
+
+ transition-notice:
+   # Set KATIB_TRANSITION_NOTICE to false to disable the notice in the upstream repository.
+   if: >-
+     github.event_name == 'pull_request_target' &&
+     github.repository == 'kubeflow/katib' &&
+     vars.KATIB_TRANSITION_NOTICE != 'false'
+   permissions:
+     pull-requests: write
+   concurrency:
+     group: katib-transition-notice-${{ github.event.number }}
+     cancel-in-progress: false
+   runs-on: ubuntu-latest
+   steps:
+     # Run only the base repository script. Keep PR code and text out of the write-token job.
+     - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+       with:
+         script: |
+           const params = { ...context.repo, issue_number: context.issue.number };
+           const { data: pr } = await github.rest.pulls.get({
+             ...context.repo, pull_number: context.issue.number,
+           });
+           if (pr.state !== 'open' || pr.locked || pr.user.type === 'Bot' ||
+               pr.labels.some(({ name }) => name === 'problems/security')) {
+             return;
+           }
+
+           const marker = '<!-- kubeflow-katib-transition-notice -->';
+           const pages = github.paginate.iterator(github.rest.issues.listComments, {
+             ...params, per_page: 100,
+           });
+           for await (const { data: comments } of pages) {
+             if (comments.some(({ user, body }) =>
+               user?.login === 'github-actions[bot]' && body?.startsWith(marker))) {
+               return;
+             }
+           }
+
+           await github.rest.issues.createComment({
+             ...params,
+             body: [
+               marker,
+               'Thanks for contributing. [Katib is deprecated](https://www.kubeflow.org/docs/started/installing-kubeflow/#deprecated-projects),',
+               'with archival scheduled for November 1, 2027.',
+               '',
+               'Katib accepts only security fixes and bug fixes. Please report vulnerabilities privately',
+               'through the [Katib security policy](https://github.com/kubeflow/katib/security/policy).',
+               '',
+               'For new TrainJob hyperparameter optimization features, see the',
+               '[Kubeflow Trainer contribution guide](https://github.com/kubeflow/trainer/blob/master/CONTRIBUTING.md)',
+               'and the [roadmap for the alpha OptimizationJob API](https://github.com/kubeflow/trainer/issues/3562).',
+             ].join('\n'),
+           });
