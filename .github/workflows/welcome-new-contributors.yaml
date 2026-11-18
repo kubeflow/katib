@@ -13,7 +13,7 @@ jobs:
    if: >-
      github.event_name == 'issues' ||
      (github.event.action == 'opened' &&
-      (github.repository != 'kubeflow/katib' || vars.KATIB_TRANSITION_NOTICE != 'true'))
+      (github.repository != 'kubeflow/katib' || vars.KATIB_TRANSITION_NOTICE == 'false'))
    permissions:
      issues: write
      pull-requests: write
@@ -50,11 +50,11 @@ jobs:
            Feel free to ask questions in the comments. Thanks again for contributing! 🙏
 
  transition-notice:
-   # Maintainers can opt in after agreeing on the wording and scope.
+   # Set KATIB_TRANSITION_NOTICE to false to disable the notice in the upstream repository.
    if: >-
      github.event_name == 'pull_request_target' &&
      github.repository == 'kubeflow/katib' &&
-     vars.KATIB_TRANSITION_NOTICE == 'true'
+     vars.KATIB_TRANSITION_NOTICE != 'false'
    permissions:
      pull-requests: write
    concurrency:
