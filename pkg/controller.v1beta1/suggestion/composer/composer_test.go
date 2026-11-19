@@ -234,6 +234,73 @@ func TestDesiredDeployment(t *testing.T) {
 		{
 			suggestion: newFakeSuggestion(),
 			configMap: func() *corev1.ConfigMap {
+				sc := newFakeSuggestionConfig()
+				sc.ImagePullSecrets = []corev1.LocalObjectReference{{Name: "suggestion-registry-secret"}}
+				sc.NodeSelector = map[string]string{"kubernetes.io/os": "linux"}
+				sc.Tolerations = []corev1.Toleration{
+					{
+						Key:      "dedicated",
+						Operator: corev1.TolerationOpEqual,
+						Value:    "katib",
+						Effect:   corev1.TaintEffectNoSchedule,
+					},
+				}
+				sc.Affinity = &corev1.Affinity{
+					NodeAffinity: &corev1.NodeAffinity{
+						RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+							NodeSelectorTerms: []corev1.NodeSelectorTerm{
+								{
+									MatchExpressions: []corev1.NodeSelectorRequirement{
+										{
+											Key:      "kubernetes.io/arch",
+											Operator: corev1.NodeSelectorOpIn,
+											Values:   []string{"amd64"},
+										},
+									},
+								},
+							},
+						},
+					},
+				}
+				return newFakeKatibConfig(sc, newFakeEarlyStoppingConfig())
+			}(),
+			expectedDeployment: func() *appsv1.Deployment {
+				deploy := newFakeDeployment()
+				deploy.Spec.Template.Spec.ImagePullSecrets = []corev1.LocalObjectReference{{Name: "suggestion-registry-secret"}}
+				deploy.Spec.Template.Spec.NodeSelector = map[string]string{"kubernetes.io/os": "linux"}
+				deploy.Spec.Template.Spec.Tolerations = []corev1.Toleration{
+					{
+						Key:      "dedicated",
+						Operator: corev1.TolerationOpEqual,
+						Value:    "katib",
+						Effect:   corev1.TaintEffectNoSchedule,
+					},
+				}
+				deploy.Spec.Template.Spec.Affinity = &corev1.Affinity{
+					NodeAffinity: &corev1.NodeAffinity{
+						RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+							NodeSelectorTerms: []corev1.NodeSelectorTerm{
+								{
+									MatchExpressions: []corev1.NodeSelectorRequirement{
+										{
+											Key:      "kubernetes.io/arch",
+											Operator: corev1.NodeSelectorOpIn,
+											Values:   []string{"amd64"},
+										},
+									},
+								},
+							},
+						},
+					},
+				}
+				return deploy
+			}(),
+			err:             false,
+			testDescription: "Desired Deployment with image pull secrets, node selector, tolerations and affinity",
+		},
+		{
+			suggestion: newFakeSuggestion(),
+			configMap: func() *corev1.ConfigMap {
 				esC := newFakeEarlyStoppingConfig()
 				esC.Image = ""
 				cm := newFakeKatibConfig(newFakeSuggestionConfig(), esC)
