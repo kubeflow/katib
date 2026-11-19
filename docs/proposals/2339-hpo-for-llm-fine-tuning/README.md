@@ -163,7 +163,7 @@ cl.tune(
 		"cpu": "4",
 		"memory": "10G",
 	},
-	# For distribued training, please specify `resources_per_trial` using `types.TrainerResources` (To be implemented).
+	# For distributed training, please specify `resources_per_trial` using `types.TrainerResources` (To be implemented).
 )
 
 # Wait until Katib Experiment is complete
