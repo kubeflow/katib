@@ -135,7 +135,7 @@ def dw_conv(x, config):
 
 
 def reduction(x, config):
-    # handle the exteme case where the input has the dimension 1 by 1 and is not reductible
+    # handle the extreme case where the input has the dimension 1 by 1 and is not reducible
     # we will just change the reduction layer to identity layer
     # such situation is very likely to appear though
     dim = K.int_shape(x)

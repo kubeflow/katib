@@ -74,7 +74,7 @@ def tune(
 
     Args:
         metrics: Dict of metrics pushed to Katib DB.
-            For examle, `metrics = {"loss": 0.01, "accuracy": 0.99}`.
+            For example, `metrics = {"loss": 0.01, "accuracy": 0.99}`.
         db-manager-address: Address for the Katib DB Manager in this format: `ip-address:port`.
         timeout: Optional, gRPC API Server timeout in seconds to report metrics.
 
@@ -139,7 +139,7 @@ As mentioned above, we decided to add `metrics_collector_config` to the tune fun
 
 ### New Interface `report_metrics` in Python SDK
 
-We decide to implement this funcion to push metrics directly to Katib DB with the help of grpc. Trial name should always be passed into Katib Trials (and then into this function) as env variable `KATIB_TRIAL_NAME`.
+We decide to implement this function to push metrics directly to Katib DB with the help of grpc. Trial name should always be passed into Katib Trials (and then into this function) as env variable `KATIB_TRIAL_NAME`.
 
 Also, the function is supposed to be implemented as **global function** because it is called in the user container.
 

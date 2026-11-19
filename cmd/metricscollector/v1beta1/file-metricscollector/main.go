@@ -281,7 +281,7 @@ func watchMetricsFile(mFile string, stopRules stopRulesFlag, filters []string, f
 			// Get child process from main PID.
 			childProc, err := mainProc.Children()
 			if err != nil {
-				klog.Fatalf("Get children proceses for main PID: %v failed: %v", mainProcPid, err)
+				klog.Fatalf("Get children processes for main PID: %v failed: %v", mainProcPid, err)
 			}
 
 			// TODO (andreyvelich): Currently support only single child process.
