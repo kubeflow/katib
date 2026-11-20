@@ -17,6 +17,7 @@ limitations under the License.
 package experiment
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"testing"
@@ -30,9 +31,11 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -635,3 +638,110 @@ func newFakeBatchJob() *batchv1.Job {
 		},
 	}
 }
+
+func TestDeleteTrialsOnlyActive(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	s := runtime.NewScheme()
+	_ = corev1.AddToScheme(s)
+	_ = experimentsv1beta1.AddToScheme(s)
+	_ = trialsv1beta1.AddToScheme(s)
+	_ = suggestionsv1beta1.AddToScheme(s)
+
+	exp := newFakeInstance()
+	exp.Spec.ParallelTrialCount = ptr.To(int32(1)) // Request scale-down to 1 active trial
+
+	now := time.Now()
+
+	// Trial 1: Succeeded (older)
+	succeededTrial := trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "succeeded-trial",
+			Namespace:         namespace,
+			CreationTimestamp: metav1.NewTime(now.Add(-2 * time.Minute)),
+		},
+		Status: trialsv1beta1.TrialStatus{
+			Conditions: []trialsv1beta1.TrialCondition{
+				{
+					Type:   trialsv1beta1.TrialSucceeded,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+
+	// Trial 2: Running (older active)
+	runningTrial1 := trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "running-trial-1",
+			Namespace:         namespace,
+			CreationTimestamp: metav1.NewTime(now.Add(-1 * time.Minute)),
+		},
+		Status: trialsv1beta1.TrialStatus{
+			Conditions: []trialsv1beta1.TrialCondition{
+				{
+					Type:   trialsv1beta1.TrialRunning,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+
+	// Trial 3: Running (newer active - should be deleted first among active trials)
+	runningTrial2 := trialsv1beta1.Trial{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              "running-trial-2",
+			Namespace:         namespace,
+			CreationTimestamp: metav1.NewTime(now),
+		},
+		Status: trialsv1beta1.TrialStatus{
+			Conditions: []trialsv1beta1.TrialCondition{
+				{
+					Type:   trialsv1beta1.TrialRunning,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+
+	sug := newFakeSuggestion()
+	sug.Status.Suggestions = []suggestionsv1beta1.TrialAssignment{
+		{Name: "succeeded-trial"},
+		{Name: "running-trial-1"},
+		{Name: "running-trial-2"},
+	}
+
+	fakeClient := fake.NewClientBuilder().WithScheme(s).WithObjects(exp, sug, &succeededTrial, &runningTrial1, &runningTrial2).Build()
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockSuggestion := suggestionmock.NewMockSuggestion(mockCtrl)
+	mockSuggestion.EXPECT().UpdateSuggestion(gomock.Any()).Return(nil).AnyTimes()
+	mockSuggestion.EXPECT().UpdateSuggestionStatus(gomock.Any()).Return(nil).AnyTimes()
+
+	rec := &ReconcileExperiment{
+		Client:     fakeClient,
+		Suggestion: mockSuggestion,
+	}
+
+	// Call deleteTrials to delete 1 active trial (activeCount = 2, parallelCount = 1)
+	allTrials := []trialsv1beta1.Trial{succeededTrial, runningTrial1, runningTrial2}
+	err := rec.deleteTrials(context.TODO(), exp, allTrials, 1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// Verify that succeeded-trial still exists
+	fetchedSucceeded := &trialsv1beta1.Trial{}
+	err = fakeClient.Get(context.TODO(), types.NamespacedName{Name: "succeeded-trial", Namespace: namespace}, fetchedSucceeded)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// Verify running-trial-1 still exists
+	fetchedRunning1 := &trialsv1beta1.Trial{}
+	err = fakeClient.Get(context.TODO(), types.NamespacedName{Name: "running-trial-1", Namespace: namespace}, fetchedRunning1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// Verify newest active trial (running-trial-2) was deleted
+	fetchedRunning2 := &trialsv1beta1.Trial{}
+	err = fakeClient.Get(context.TODO(), types.NamespacedName{Name: "running-trial-2", Namespace: namespace}, fetchedRunning2)
+	g.Expect(errors.IsNotFound(err)).To(gomega.BeTrue())
+}
+

@@ -59,13 +59,15 @@ func TestMain(m *testing.M) {
 	}
 
 	if cfg, err = t.Start(); err != nil {
-		stdlog.Fatal(err)
+		stdlog.Printf("Skipping envtest start: %v", err)
 	}
 
 	code := m.Run()
 	cancel()
-	if err = t.Stop(); err != nil {
-		stdlog.Fatal(err)
+	if cfg != nil {
+		if err = t.Stop(); err != nil {
+			stdlog.Printf("Error stopping envtest: %v", err)
+		}
 	}
 	os.Exit(code)
 }
