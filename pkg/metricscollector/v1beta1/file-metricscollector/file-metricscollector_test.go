@@ -19,6 +19,7 @@ package sidecarmetricscollector
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -325,5 +326,41 @@ invalid INFO     {metricName: loss, metricValue: 0.3634}`,
 				t.Errorf("Unexpected parsed result (-want,+got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestGetFilterRegexpList(t *testing.T) {
+	// Invalid filters must return a descriptive error instead of a nil regexp which panics later.
+	invalidFilter := `{metricName: ([\w|-]+, metricValue: (.*)}`
+	regList, err := GetFilterRegexpList([]string{invalidFilter})
+	if err == nil {
+		t.Errorf("Expected error for invalid metric filter %v", invalidFilter)
+	} else if !strings.Contains(err.Error(), "invalid metric filter") || !strings.Contains(err.Error(), invalidFilter) {
+		t.Errorf("Unexpected error for invalid metric filter: %v", err)
+	}
+	if regList != nil {
+		t.Errorf("Expected nil regexp list for invalid metric filter, got: %v", regList)
+	}
+
+	// Empty filters must fall back to the default filter.
+	regList, err = GetFilterRegexpList([]string{})
+	if err != nil {
+		t.Errorf("Unexpected error for empty filters: %v", err)
+	}
+	if len(regList) != 1 {
+		t.Errorf("Expected default filter regexp, got: %v", regList)
+	}
+
+	// Valid filters must compile without error.
+	validFilters := []string{
+		`{metricName: ([\w|-]+), metricValue: ((-?\d+)(\.\d+)?)}`,
+		"loss=([+-]?\\d*(\\.\\d+)?([Ee][+-]?\\d+)?)",
+	}
+	regList, err = GetFilterRegexpList(validFilters)
+	if err != nil {
+		t.Errorf("Unexpected error for valid filters: %v", err)
+	}
+	if len(regList) != len(validFilters) {
+		t.Errorf("Expected %v regexps, got: %v", len(validFilters), len(regList))
 	}
 }

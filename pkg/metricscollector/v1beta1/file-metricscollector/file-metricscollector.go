@@ -70,7 +70,10 @@ func CollectObservationLog(fileName string, metrics []string, filters []string, 
 }
 
 func parseLogsInTextFormat(logs []string, metrics []string, filters []string) (*v1beta1.ObservationLog, error) {
-	metricRegList := GetFilterRegexpList(filters)
+	metricRegList, err := GetFilterRegexpList(filters)
+	if err != nil {
+		return nil, err
+	}
 	mlogs := make([]*v1beta1.MetricLog, 0, len(logs))
 
 	for _, logline := range logs {
@@ -238,15 +241,19 @@ func parseTimestamp(timestamp interface{}) string {
 	}
 }
 
-// GetFilterRegexpList returns Regexp array from filters string array
-func GetFilterRegexpList(filters []string) []*regexp.Regexp {
+// GetFilterRegexpList returns Regexp array from filters string array.
+// Returns an error if any filter is not a valid regular expression.
+func GetFilterRegexpList(filters []string) ([]*regexp.Regexp, error) {
 	regexpList := make([]*regexp.Regexp, 0, len(filters))
 	if len(filters) == 0 {
 		filters = append(filters, common.DefaultFilter)
 	}
 	for _, filter := range filters {
-		reg, _ := regexp.Compile(filter)
+		reg, err := regexp.Compile(filter)
+		if err != nil {
+			return nil, fmt.Errorf("invalid metric filter %q: %v", filter, err)
+		}
 		regexpList = append(regexpList, reg)
 	}
-	return regexpList
+	return regexpList, nil
 }
