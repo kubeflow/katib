@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import threading
 
 import grpc
 
@@ -31,34 +32,48 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         super(SkoptService, self).__init__()
         self.base_service = None
         self.is_first_run = True
+        # The skopt Optimizer is not thread-safe, and the controller retries
+        # GetSuggestions after its gRPC deadline while the previous call may
+        # still be computing. Serialize the calls so they don't compute
+        # concurrently on the shared optimizer.
+        self.lock = threading.Lock()
 
     def GetSuggestions(self, request, context):
         """
         Main function to provide suggestion.
         """
-        algorithm_name, config = OptimizerConfiguration.convert_algorithm_spec(
-            request.experiment.spec.algorithm
-        )
+        with self.lock:
+            # A caller that queued behind a long call may already have hit its
+            # deadline and retried; don't spend CPU and memory on its behalf.
+            if not context.is_active():
+                context.abort(
+                    grpc.StatusCode.CANCELLED,
+                    "caller gave up while waiting for a previous GetSuggestions call",
+                )
 
-        if self.is_first_run:
-            search_space = HyperParameterSearchSpace.convert(request.experiment)
-            self.base_service = BaseSkoptService(
-                base_estimator=config.base_estimator,
-                n_initial_points=config.n_initial_points,
-                acq_func=config.acq_func,
-                acq_optimizer=config.acq_optimizer,
-                random_state=config.random_state,
-                search_space=search_space,
+            algorithm_name, config = OptimizerConfiguration.convert_algorithm_spec(
+                request.experiment.spec.algorithm
             )
-            self.is_first_run = False
 
-        trials = Trial.convert(request.trials)
-        new_trials = self.base_service.getSuggestions(
-            trials, request.current_request_number
-        )
-        return api_pb2.GetSuggestionsReply(
-            parameter_assignments=Assignment.generate(new_trials)
-        )
+            if self.is_first_run:
+                search_space = HyperParameterSearchSpace.convert(request.experiment)
+                self.base_service = BaseSkoptService(
+                    base_estimator=config.base_estimator,
+                    n_initial_points=config.n_initial_points,
+                    acq_func=config.acq_func,
+                    acq_optimizer=config.acq_optimizer,
+                    random_state=config.random_state,
+                    search_space=search_space,
+                )
+                self.is_first_run = False
+
+            trials = Trial.convert(request.trials)
+            new_trials = self.base_service.getSuggestions(
+                trials, request.current_request_number
+            )
+            return api_pb2.GetSuggestionsReply(
+                parameter_assignments=Assignment.generate(new_trials)
+            )
 
     def ValidateAlgorithmSettings(self, request, context):
         is_valid, message = OptimizerConfiguration.validate_algorithm_spec(

@@ -369,3 +369,86 @@ class TestSkoptDistribution:
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FakeContext:
+    """Minimal grpc.ServicerContext stand-in for calling the servicer directly."""
+
+    def __init__(self, active=True):
+        self._active = active
+        self.aborted = None
+
+    def is_active(self):
+        return self._active
+
+    def abort(self, code, details):
+        self.aborted = (code, details)
+        raise RuntimeError("aborted")
+
+
+def make_request(current_request_number=1):
+    experiment = api_pb2.Experiment(
+        name="test",
+        spec=api_pb2.ExperimentSpec(
+            algorithm=api_pb2.AlgorithmSpec(algorithm_name="bayesianoptimization"),
+            objective=api_pb2.ObjectiveSpec(type=api_pb2.MAXIMIZE, goal=0.9),
+            parameter_specs=api_pb2.ExperimentSpec.ParameterSpecs(
+                parameters=[
+                    api_pb2.ParameterSpec(
+                        name="param-1",
+                        parameter_type=api_pb2.DOUBLE,
+                        feasible_space=api_pb2.FeasibleSpace(max="5", min="1", list=[]),
+                    )
+                ]
+            ),
+        ),
+    )
+    return api_pb2.GetSuggestionsRequest(
+        experiment=experiment, trials=[], current_request_number=current_request_number
+    )
+
+
+class TestSkoptServiceConcurrency(unittest.TestCase):
+    def test_get_suggestions_calls_are_serialized(self):
+        import threading
+
+        service = SkoptService()
+        service.GetSuggestions(make_request(), FakeContext())  # creates base_service
+        in_flight, overlaps, lock = [0], [0], threading.Lock()
+        original = service.base_service.getSuggestions
+
+        def slow_get_suggestions(trials, current_request_number):
+            import time
+
+            with lock:
+                in_flight[0] += 1
+                if in_flight[0] > 1:
+                    overlaps[0] += 1
+            time.sleep(0.2)
+            result = original(trials, current_request_number)
+            with lock:
+                in_flight[0] -= 1
+            return result
+
+        service.base_service.getSuggestions = slow_get_suggestions
+        threads = [
+            threading.Thread(target=service.GetSuggestions, args=(make_request(), FakeContext()))
+            for _ in range(3)
+        ]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        self.assertEqual(0, overlaps[0], "GetSuggestions ran concurrently on the shared optimizer")
+
+    def test_abandoned_call_is_not_computed(self):
+        service = SkoptService()
+        service.GetSuggestions(make_request(), FakeContext())
+        calls = []
+        service.base_service.getSuggestions = lambda *a, **k: calls.append(a) or []
+
+        context = FakeContext(active=False)
+        with self.assertRaises(RuntimeError):
+            service.GetSuggestions(make_request(), context)
+        self.assertEqual(grpc.StatusCode.CANCELLED, context.aborted[0])
+        self.assertEqual([], calls, "suggestion was computed for a caller that already gave up")
