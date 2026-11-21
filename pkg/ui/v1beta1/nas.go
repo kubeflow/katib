@@ -25,12 +25,24 @@ import (
 
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	consts "github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
 	experimentName := r.URL.Query()["experimentName"][0]
 	namespace := r.URL.Query()["namespace"][0]
+
+	user, err := IsAuthorized(consts.ActionTypeList, namespace, consts.PluralTrial, "", "", trialsv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
+	if user == "" && err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		log.Printf("The user: %s is not authorized to list trials from namespace: %s \n", user, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
 	responseRaw := make([]NNView, 0)
 	var architecture string
