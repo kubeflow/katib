@@ -182,6 +182,84 @@ func TestCollectObservationLog(t *testing.T) {
 				},
 			},
 		},
+		"Non-numeric metric value in TEXT logs": {
+			fileName: "non-numeric-value.log",
+			testData: `2024-03-04T17:55:08Z INFO     epoch 1 loss=0.5
+2024-03-04T17:55:08Z INFO     epoch 2 loss=nan
+2024-03-04T17:55:08Z INFO     epoch 3 loss=`,
+			metrics:    []string{"loss"},
+			fileFormat: commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.5",
+						},
+					},
+				},
+			},
+		},
+		"Only non-numeric objective metric values in TEXT logs": {
+			fileName: "non-numeric-objective.log",
+			testData: `2024-03-04T17:55:08Z INFO     epoch 1 loss=nan
+2024-03-04T17:55:08Z INFO     epoch 2 loss=nan`,
+			metrics:    []string{"loss"},
+			fileFormat: commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: time.Time{}.UTC().Format(time.RFC3339),
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: consts.UnavailableMetricValue,
+						},
+					},
+				},
+			},
+		},
+		"Non-numeric metric value captured by a custom filter in TEXT logs": {
+			fileName: "non-numeric-custom-filter.log",
+			testData: `2024-03-04T17:55:08Z INFO     epoch 1 loss=0.5
+2024-03-04T17:55:08Z INFO     epoch 2 loss=nan
+2024-03-04T17:55:08Z INFO     epoch 3 loss=inf
+2024-03-04T17:55:08Z INFO     epoch 4 loss=-Inf`,
+			metrics:    []string{"loss"},
+			filters:    []string{"([\\w|-]+)\\s*=\\s*([\\w.+-]+)"},
+			fileFormat: commonv1beta1.TextFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: "2024-03-04T17:55:08Z",
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.5",
+						},
+					},
+				},
+			},
+		},
+		"Non-numeric metric value in JSON logs": {
+			fileName: "non-numeric-value.json",
+			testData: `{"loss": "0.5", "timestamp": "2021-12-02T14:27:50.000035161Z"}
+{"loss": "nan", "timestamp": "2021-12-02T14:27:51.000035161Z"}
+{"loss": "inf", "timestamp": "2021-12-02T14:27:52.000035161Z"}
+{"loss": "unavailable", "timestamp": "2021-12-02T14:27:53.000035161Z"}`,
+			metrics:    []string{"loss"},
+			fileFormat: commonv1beta1.JsonFormat,
+			expected: &v1beta1.ObservationLog{
+				MetricLogs: []*v1beta1.MetricLog{
+					{
+						TimeStamp: "2021-12-02T14:27:50.000035161Z",
+						Metric: &v1beta1.Metric{
+							Name:  "loss",
+							Value: "0.5",
+						},
+					},
+				},
+			},
+		},
 		"Invalid file name": {
 			fileName:   "invalid",
 			fileFormat: commonv1beta1.JsonFormat,
