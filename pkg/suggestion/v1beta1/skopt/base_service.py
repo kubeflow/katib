@@ -14,6 +14,7 @@
 
 import datetime
 import logging
+import threading
 
 import skopt
 
@@ -55,6 +56,7 @@ class BaseSkoptService(object):
         self.succeeded_trials = 0
         # List of recorded Trials names
         self.recorded_trials_names = []
+        self.lock = threading.Lock()
 
     def create_optimizer(self):
         skopt_search_space = []

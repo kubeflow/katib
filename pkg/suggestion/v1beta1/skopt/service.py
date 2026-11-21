@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import threading
 
 import grpc
 
@@ -29,6 +30,7 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
 
     def __init__(self):
         super(SkoptService, self).__init__()
+        self.lock = threading.Lock()
         self.base_service = None
         self.is_first_run = True
 
@@ -36,29 +38,30 @@ class SkoptService(api_pb2_grpc.SuggestionServicer, HealthServicer):
         """
         Main function to provide suggestion.
         """
-        algorithm_name, config = OptimizerConfiguration.convert_algorithm_spec(
-            request.experiment.spec.algorithm
-        )
-
-        if self.is_first_run:
-            search_space = HyperParameterSearchSpace.convert(request.experiment)
-            self.base_service = BaseSkoptService(
-                base_estimator=config.base_estimator,
-                n_initial_points=config.n_initial_points,
-                acq_func=config.acq_func,
-                acq_optimizer=config.acq_optimizer,
-                random_state=config.random_state,
-                search_space=search_space,
+        with self.lock:
+            algorithm_name, config = OptimizerConfiguration.convert_algorithm_spec(
+                request.experiment.spec.algorithm
             )
-            self.is_first_run = False
 
-        trials = Trial.convert(request.trials)
-        new_trials = self.base_service.getSuggestions(
-            trials, request.current_request_number
-        )
-        return api_pb2.GetSuggestionsReply(
-            parameter_assignments=Assignment.generate(new_trials)
-        )
+            if self.is_first_run:
+                search_space = HyperParameterSearchSpace.convert(request.experiment)
+                self.base_service = BaseSkoptService(
+                    base_estimator=config.base_estimator,
+                    n_initial_points=config.n_initial_points,
+                    acq_func=config.acq_func,
+                    acq_optimizer=config.acq_optimizer,
+                    random_state=config.random_state,
+                    search_space=search_space,
+                )
+                self.is_first_run = False
+
+            trials = Trial.convert(request.trials)
+            new_trials = self.base_service.getSuggestions(
+                trials, request.current_request_number
+            )
+            return api_pb2.GetSuggestionsReply(
+                parameter_assignments=Assignment.generate(new_trials)
+            )
 
     def ValidateAlgorithmSettings(self, request, context):
         is_valid, message = OptimizerConfiguration.validate_algorithm_spec(
