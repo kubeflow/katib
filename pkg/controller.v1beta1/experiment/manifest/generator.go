@@ -211,14 +211,29 @@ func (g *DefaultGenerator) GetTrialTemplate(instance *experimentsv1beta1.Experim
 		configMapNS := trialSource.ConfigMap.ConfigMapNamespace
 		configMapName := trialSource.ConfigMap.ConfigMapName
 		templatePath := trialSource.ConfigMap.TemplatePath
-		configMap, err := g.client.GetConfigMap(configMapName, configMapNS)
+		// Only ConfigMaps labeled as Trial templates can be used, so an Experiment
+		// can't make the controller read arbitrary ConfigMaps in other namespaces.
+		templates, err := g.client.GetTrialTemplates(configMapNS)
 		if err != nil {
 			return "", fmt.Errorf("%w: %w", errConfigMapNotFound, err)
+		}
+		var configMap map[string]string
+		found := false
+		for _, cm := range templates.Items {
+			if cm.Name == configMapName {
+				configMap = cm.Data
+				found = true
+				break
+			}
+		}
+		if !found {
+			return "", fmt.Errorf("%w: ConfigMap %v/%v with label %v=%v", errConfigMapNotFound, configMapNS, configMapName,
+				consts.LabelTrialTemplateConfigMapName, consts.LabelTrialTemplateConfigMapValue)
 		}
 		var ok bool
 		trialTemplateString, ok = configMap[templatePath]
 		if !ok {
-			return "", fmt.Errorf("%w: TemplatePath: %v, ConfigMap: %v", errTrialTemplateNotFound, templatePath, configMap)
+			return "", fmt.Errorf("%w: TemplatePath: %v, ConfigMap: %v/%v", errTrialTemplateNotFound, templatePath, configMapNS, configMapName)
 		}
 	}
 
