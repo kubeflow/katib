@@ -19,18 +19,53 @@ package v1beta1
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
 
+	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	trialsv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
 	api_pb_v1beta1 "github.com/kubeflow/katib/pkg/apis/manager/v1beta1"
+	"github.com/kubeflow/katib/pkg/controller.v1beta1/consts"
 )
 
 func (k *KatibUIHandler) FetchNASJobInfo(w http.ResponseWriter, r *http.Request) {
 	//enableCors(&w)
-	experimentName := r.URL.Query()["experimentName"][0]
-	namespace := r.URL.Query()["namespace"][0]
+	namespaces, ok := r.URL.Query()["namespace"]
+	if !ok {
+		log.Printf("No namespace provided in Query parameters! Provide a 'namespace' param")
+		err := errors.New("no 'namespace' provided")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	experimentNames, ok := r.URL.Query()["experimentName"]
+	if !ok {
+		log.Printf("No experimentName provided in Query parameters! Provide an 'experimentName' param")
+		err := errors.New("no experimentName provided")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	experimentName := experimentNames[0]
+	namespace := namespaces[0]
+
+	user, err := IsAuthorized(consts.ActionTypeGet, namespace, consts.PluralExperiment, "", experimentName, experimentv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
+	if user == "" && err != nil {
+		log.Printf("No user provided in kubeflow-userid header.")
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		log.Printf("The user: %s is not authorized to get experiment: %s in namespace: %s \n", user, experimentName, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	_, err = IsAuthorized(consts.ActionTypeList, namespace, consts.PluralTrial, "", "", trialsv1beta1.SchemeGroupVersion, k.katibClient.GetClient(), r)
+	if err != nil {
+		log.Printf("The user: %s is not authorized to list trials in namespace: %s \n", user, namespace)
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
 
 	responseRaw := make([]NNView, 0)
 	var architecture string
