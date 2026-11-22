@@ -37,7 +37,7 @@ describe('FormNasGraphComponent', () => {
     fixture = TestBed.createComponent(FormNasGraphComponent);
     component = fixture.componentInstance;
     component.formGroup = new FormGroup({
-      layers: new FormControl(),
+      numLayers: new FormControl(),
       inputSizes: new FormControl([]),
       outputSizes: new FormControl([]),
     });

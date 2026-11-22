@@ -97,7 +97,7 @@ export class ExperimentFormService {
 
   createNasGraphForm(): FormGroup {
     return this.builder.group({
-      layers: 8,
+      numLayers: 8,
       inputSizes: this.builder.array([32, 32, 3]),
       outputSizes: this.builder.array([10]),
     });
