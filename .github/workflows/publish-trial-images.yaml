@@ -23,26 +23,26 @@ jobs:
       matrix:
         include:
           - trial-name: pytorch-mnist-cpu
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64,linux/arm64,ppc64le
             dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile.cpu
           - trial-name: pytorch-mnist-gpu
             platforms: linux/amd64
             dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile.gpu
           - trial-name: tf-mnist-with-summaries
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64,linux/arm64,ppc64le
             dockerfile: examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile
           - trial-name: enas-cnn-cifar10-gpu
             platforms: linux/amd64
             dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu
           - trial-name: enas-cnn-cifar10-cpu
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64,linux/arm64,ppc64le
             dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu
           - trial-name: darts-cnn-cifar10-cpu
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64,linux/arm64,ppc64le
             dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.cpu
           - trial-name: darts-cnn-cifar10-gpu
             platforms: linux/amd64
             dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.gpu
           - trial-name: simple-pbt
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64,linux/arm64,ppc64le
             dockerfile: examples/v1beta1/trial-images/simple-pbt/Dockerfile
