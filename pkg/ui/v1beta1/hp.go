@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	commonv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/common/v1beta1"
 	experimentv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/experiments/v1beta1"
 	trialv1beta1 "github.com/kubeflow/katib/pkg/apis/controller/trials/v1beta1"
@@ -121,59 +123,36 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 
 	foundPipelineUID := false
 	for _, t := range trialList.Items {
-		runUid, ok := t.GetAnnotations()[kfpRunIDAnnotation]
-		if !ok {
-			log.Printf("Trial %s has no pipeline run.", t.Name)
-			runUid = ""
-		} else {
+		if _, ok := t.GetAnnotations()[kfpRunIDAnnotation]; ok {
 			foundPipelineUID = true
+			break
 		}
+	}
 
-		var lastTrialCondition string
-
-		// Take only the latest condition
-		if len(t.Status.Conditions) > 0 {
-			lastTrialCondition = string(t.Status.Conditions[len(t.Status.Conditions)-1].Type)
-		}
-
-		trialResText := make([]string, len(metricsList)+len(paramList))
-
-		if t.IsSucceeded() || t.IsEarlyStopped() {
-			obsLogResp, err := c.GetObservationLog(
-				context.Background(),
-				&api_pb_v1beta1.GetObservationLogRequest{
-					TrialName: t.Name,
-					StartTime: "",
-					EndTime:   "",
-				},
-			)
+	// Each row needs its own GetObservationLog call to the DB manager, so with a few
+	// hundred Trials this loop used to dominate the request; run rows concurrently,
+	// bounded so we do not open hundreds of gRPC streams at once.
+	rows := make([]string, len(trialList.Items))
+	g, ctx := errgroup.WithContext(r.Context())
+	g.SetLimit(10)
+	for i, t := range trialList.Items {
+		i, t := i, t
+		g.Go(func() error {
+			row, err := hpTrialRow(ctx, c, t, metricsList, paramList, foundPipelineUID)
 			if err != nil {
-				log.Printf("GetObservationLog from HP job failed: %v", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+				return err
 			}
-
-			for _, m := range obsLogResp.ObservationLog.MetricLogs {
-				if trialResText[metricsList[m.Metric.Name]] == "" {
-					trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
-				} else {
-					currentValue, _ := strconv.ParseFloat(m.Metric.Value, 64)
-					bestValue, _ := strconv.ParseFloat(trialResText[metricsList[m.Metric.Name]], 64)
-					if t.Spec.Objective.Type == commonv1beta1.ObjectiveTypeMinimize && currentValue < bestValue {
-						trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
-					} else if t.Spec.Objective.Type == commonv1beta1.ObjectiveTypeMaximize && currentValue > bestValue {
-						trialResText[metricsList[m.Metric.Name]] = m.Metric.Value
-					}
-				}
-			}
-		}
-		for _, trialParam := range t.Spec.ParameterAssignments {
-			trialResText[paramList[trialParam.Name]] = trialParam.Value
-		}
-		resultText += "\n" + lastTrialCondition + "," + t.Name + "," + strings.Join(trialResText, ",")
-		if foundPipelineUID {
-			resultText += "," + runUid
-		}
+			rows[i] = row
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		log.Printf("GetObservationLog from HP job failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, row := range rows {
+		resultText += "\n" + row
 	}
 	log.Printf("Logs parsed, results:\n %v", resultText)
 	response, err := json.Marshal(resultText)
@@ -187,6 +166,63 @@ func (k *KatibUIHandler) FetchHPJobInfo(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+// hpTrialRow builds one CSV row for a Trial, including its observation log lookup.
+func hpTrialRow(ctx context.Context, c api_pb_v1beta1.DBManagerClient, t trialv1beta1.Trial, metricsList, paramList map[string]int, foundPipelineUID bool) (string, error) {
+	runUid, ok := t.GetAnnotations()[kfpRunIDAnnotation]
+	if !ok {
+		log.Printf("Trial %s has no pipeline run.", t.Name)
+	}
+
+	var lastTrialCondition string
+	// Take only the latest condition
+	if len(t.Status.Conditions) > 0 {
+		lastTrialCondition = string(t.Status.Conditions[len(t.Status.Conditions)-1].Type)
+	}
+
+	trialResText := make([]string, len(metricsList)+len(paramList))
+
+	if t.IsSucceeded() || t.IsEarlyStopped() {
+		obsLogResp, err := c.GetObservationLog(
+			ctx,
+			&api_pb_v1beta1.GetObservationLogRequest{
+				TrialName: t.Name,
+				StartTime: "",
+				EndTime:   "",
+			},
+		)
+		if err != nil {
+			return "", err
+		}
+
+		for _, m := range obsLogResp.ObservationLog.MetricLogs {
+			idx, ok := metricsList[m.Metric.Name]
+			if !ok {
+				continue
+			}
+			if trialResText[idx] == "" {
+				trialResText[idx] = m.Metric.Value
+			} else {
+				currentValue, _ := strconv.ParseFloat(m.Metric.Value, 64)
+				bestValue, _ := strconv.ParseFloat(trialResText[idx], 64)
+				if t.Spec.Objective.Type == commonv1beta1.ObjectiveTypeMinimize && currentValue < bestValue {
+					trialResText[idx] = m.Metric.Value
+				} else if t.Spec.Objective.Type == commonv1beta1.ObjectiveTypeMaximize && currentValue > bestValue {
+					trialResText[idx] = m.Metric.Value
+				}
+			}
+		}
+	}
+	for _, trialParam := range t.Spec.ParameterAssignments {
+		trialResText[paramList[trialParam.Name]] = trialParam.Value
+	}
+
+	row := lastTrialCondition + "," + t.Name + "," + strings.Join(trialResText, ",")
+	if foundPipelineUID {
+		row += "," + runUid
+	}
+	return row, nil
 }
 
 // FetchHPJobTrialInfo returns all metrics for the HP Job Trial
