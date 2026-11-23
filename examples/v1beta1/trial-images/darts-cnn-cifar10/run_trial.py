@@ -72,6 +72,10 @@ def main():
 
     batch_size = int(algorithm_settings["batch_size"])
     num_workers = int(algorithm_settings["num_workers"])
+    use_synthetic_data = (
+        str(algorithm_settings.get("use_synthetic_data", "false")).lower() == "true"
+    )
+    number_of_examples = int(algorithm_settings.get("number_of_examples", 64))
 
     init_channels = int(algorithm_settings["init_channels"])
 
@@ -111,7 +115,10 @@ def main():
 
     # Get dataset with meta information
     # TODO: Add support for more dataset
-    input_channels, num_classes, train_data = utils.get_dataset()
+    input_channels, num_classes, train_data = utils.get_dataset(
+        use_synthetic_data=use_synthetic_data,
+        number_of_examples=number_of_examples,
+    )
 
     criterion = nn.CrossEntropyLoss().to(device)
 
@@ -170,6 +177,7 @@ def main():
 
     # Start training
     best_top1 = 0.0
+    best_genotype = None
 
     for epoch in range(num_epochs):
         lr = lr_scheduler.get_last_lr()
@@ -206,7 +214,7 @@ def main():
         print("\nModel genotype = {}".format(genotype))
 
         # Modify best top1
-        if top1 > best_top1:
+        if best_genotype is None or top1 > best_top1:
             best_top1 = top1
             best_genotype = genotype
 

@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/onsi/gomega"
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
@@ -41,6 +42,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
@@ -373,6 +375,42 @@ func TestDesiredService(t *testing.T) {
 		} else if !tc.err && !equality.Semantic.DeepEqual(tc.expectedService.Spec, actualService.Spec) {
 			t.Errorf("Case: %v failed. \nExpected service spec %v\n Got %v", tc.testDescription, tc.expectedService.Spec, actualService.Spec)
 		}
+	}
+}
+
+func TestDesiredDeploymentAppliesSecurityContextFromInstallConfig(t *testing.T) {
+	scm := runtime.NewScheme()
+	if err := scheme.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
+	if err := apis.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
+	if err := configv1beta1.AddToScheme(scm); err != nil {
+		t.Fatal(err)
+	}
+
+	configMap := newKatibConfigMapFromFile(t, filepath.Join(
+		"..", "..", "..", "..", "manifests", "v1beta1", "installs", "katib-standalone", "katib-config.yaml"))
+	c := fake.NewClientBuilder().WithScheme(scm).WithObjects(configMap).Build()
+	composer := &General{
+		scheme: scm,
+		Client: c,
+	}
+
+	viper.Set(consts.ConfigEnableGRPCProbeInSuggestion, true)
+	suggestion := newFakeSuggestion()
+	suggestion.Spec.EarlyStopping = nil
+
+	deployment, err := composer.DesiredDeployment(suggestion)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(deployment.Spec.Template.Spec.Containers) == 0 {
+		t.Fatal("Expected suggestion deployment to include at least one container")
+	}
+	if diff := cmp.Diff(restrictedSuggestionSecurityContext(), deployment.Spec.Template.Spec.Containers[0].SecurityContext); len(diff) != 0 {
+		t.Errorf("Unexpected suggestion container securityContext (-want,+got):\n%s", diff)
 	}
 }
 
@@ -721,6 +759,24 @@ func newFakeKatibConfig(suggestionConfig configv1beta1.SuggestionConfig, earlySt
 	}
 }
 
+func newKatibConfigMapFromFile(t *testing.T, path string) *corev1.ConfigMap {
+	t.Helper()
+
+	katibConfig, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      consts.KatibConfigMapName,
+			Namespace: consts.DefaultKatibNamespace,
+		},
+		Data: map[string]string{
+			consts.LabelKatibConfigTag: string(katibConfig),
+		},
+	}
+}
+
 func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 	return &suggestionsv1beta1.Suggestion{
 		ObjectMeta: metav1.ObjectMeta{
@@ -738,6 +794,24 @@ func newFakeSuggestion() *suggestionsv1beta1.Suggestion {
 				AlgorithmName: earlyStoppingAlgorithm,
 			},
 			ResumePolicy: experimentsv1beta1.FromVolume,
+		},
+	}
+}
+
+func restrictedSuggestionSecurityContext() *corev1.SecurityContext {
+	allowPrivilegeEscalation := false
+	runAsNonRoot := true
+	runAsUser := int64(1000)
+
+	return &corev1.SecurityContext{
+		AllowPrivilegeEscalation: &allowPrivilegeEscalation,
+		Capabilities: &corev1.Capabilities{
+			Drop: []corev1.Capability{"ALL"},
+		},
+		RunAsNonRoot: &runAsNonRoot,
+		RunAsUser:    &runAsUser,
+		SeccompProfile: &corev1.SeccompProfile{
+			Type: corev1.SeccompProfileTypeRuntimeDefault,
 		},
 	}
 }

@@ -59,7 +59,7 @@ def accuracy(output, target, topk=(1,)):
     return res
 
 
-def get_dataset():
+def get_dataset(use_synthetic_data=False, number_of_examples=64):
     dataset_cls = dset.CIFAR10
     num_classes = 10
     input_channels = 3
@@ -73,8 +73,16 @@ def get_dataset():
 
     train_transform = transforms.Compose(transf + normalize)
 
-    train_data = dataset_cls(
-        root="./data", train=True, download=True, transform=train_transform
-    )
+    if use_synthetic_data:
+        train_data = dset.FakeData(
+            size=max(2, int(number_of_examples)),
+            image_size=(input_channels, 32, 32),
+            num_classes=num_classes,
+            transform=train_transform,
+        )
+    else:
+        train_data = dataset_cls(
+            root="./data", train=True, download=True, transform=train_transform
+        )
 
     return input_channels, num_classes, train_data

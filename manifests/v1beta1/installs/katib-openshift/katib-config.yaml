@@ -4,6 +4,7 @@ kind: KatibConfig
 init:
   controller:
     webhookPort: 8443
+    injectSecurityContext: true
     trialResources:
       - Job.v1.batch
       - TFJob.v1.kubeflow.org
@@ -24,29 +25,117 @@ runtime:
   suggestions:
     - algorithmName: random
       image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: tpe
       image: ghcr.io/kubeflow/katib/suggestion-hyperopt:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: grid
       image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: hyperband
       image: ghcr.io/kubeflow/katib/suggestion-hyperband:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: bayesianoptimization
       image: ghcr.io/kubeflow/katib/suggestion-skopt:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: cmaes
       image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: sobol
       image: ghcr.io/kubeflow/katib/suggestion-goptuna:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: multivariate-tpe
       image: ghcr.io/kubeflow/katib/suggestion-optuna:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: enas
       image: ghcr.io/kubeflow/katib/suggestion-enas:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       resources:
         limits:
           memory: 400Mi
     - algorithmName: darts
       image: ghcr.io/kubeflow/katib/suggestion-darts:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
     - algorithmName: pbt
       image: ghcr.io/kubeflow/katib/suggestion-pbt:latest
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       persistentVolumeClaimSpec:
         accessModes:
           - ReadWriteMany
