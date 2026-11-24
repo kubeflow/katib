@@ -166,26 +166,25 @@ def get_trial_substitutions_from_dict(
     parameters: Dict[str, Any],
     experiment_parameters: List[models.V1beta1ParameterSpec],
     trial_parameters: List[models.V1beta1TrialParameterSpec],
-) -> Dict[str, str]:
+) -> Dict[str, Any]:
+    inputs = parameters.copy()
     for p_name, p_value in parameters.items():
         # If input parameter value is Katib Experiment parameter sample.
         if isinstance(p_value, models.V1beta1ParameterSpec):
             # Wrap value for the function input.
-            parameters[p_name] = f"${{trialParameters.{p_name}}}"
+            inputs[p_name] = f"${{trialParameters.{p_name}}}"
 
             # Add value to the Katib Experiment parameters.
-            p_value.name = p_name
-            experiment_parameters.append(p_value)
+            parameter = copy.copy(p_value)
+            parameter.name = p_name
+            experiment_parameters.append(parameter)
 
             # Add value to the Katib Experiment's Trial parameters.
             trial_parameters.append(
                 models.V1beta1TrialParameterSpec(name=p_name, reference=p_name)
             )
-        else:
-            # Otherwise, add value to the function input.
-            parameters[p_name] = p_value
 
-    return parameters
+    return inputs
 
 
 def get_trial_substitutions_from_trainer(
