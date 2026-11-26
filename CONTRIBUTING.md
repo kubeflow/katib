@@ -103,7 +103,7 @@ Katib uses three [Kubernetes admission webhooks](https://kubernetes.io/docs/refe
 
 1. `defaulter.experiment.katib.kubeflow.org` -
    [Mutating admission webhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook)
-   to set the [default values](../pkg/apis/controller/experiments/v1beta1/experiment_defaults.go)
+   to set the [default values](./pkg/apis/controller/experiments/v1beta1/experiment_defaults.go)
    in the Katib Experiment before the creation.
 
 1. `mutator.pod.katib.kubeflow.org` - Mutating admission webhook to inject the metrics
@@ -112,7 +112,7 @@ Katib uses three [Kubernetes admission webhooks](https://kubernetes.io/docs/refe
    [Kubeflow documentation](https://www.kubeflow.org/docs/components/katib/user-guides/metrics-collector/).
 
 You can find the YAMLs for the Katib webhooks
-[here](../manifests/v1beta1/components/webhook/webhooks.yaml).
+[here](./manifests/v1beta1/components/webhook/webhooks.yaml).
 
 **Note:** If you are using a private Kubernetes cluster, you have to allow traffic
 via `TCP:8443` by specifying the firewall rule and you have to update the master
@@ -131,22 +131,22 @@ Once Katib is deployed in the Kubernetes cluster, the `cert-generator` follows t
 
 Once the `cert-generator` finished, the Katib controller starts to register controllers such as `experiment-controller` to the manager.
 
-You can find the `cert-generator` source code [here](../pkg/certgenerator/v1beta1).
+You can find the `cert-generator` source code [here](./pkg/certgenerator/v1beta1).
 
 NOTE: the Katib also supports the [cert-manager](https://cert-manager.io/) to generate certs for the admission webhooks instead of using cert-generator.
-You can find the installation with the cert-manager [here](../manifests/v1beta1/installs/katib-cert-manager).
+You can find the installation with the cert-manager [here](./manifests/v1beta1/installs/katib-cert-manager).
 
 ## Implement a new algorithm and use it in Katib
 
-Please see [new-algorithm-service.md](./new-algorithm-service.md).
+Please see [Use Custom Algorithm in Katib](https://www.kubeflow.org/docs/components/katib/user-guides/hp-tuning/configure-algorithm/#use-custom-algorithm-in-katib).
 
 ## Katib UI documentation
 
-Please see [Katib UI README](../pkg/ui/v1beta1).
+Please see [Katib UI README](./pkg/ui/v1beta1).
 
 ## Design proposals
 
-Please see [proposals](./proposals).
+Please see [proposals](./docs/proposals).
 
 ## Code Style
 
@@ -156,12 +156,12 @@ Make sure to install [pre-commit](https://pre-commit.com/) (`pip install
 pre-commit`) and run `pre-commit install` from the root of the repository at
 least once before creating git commits.
 
-The pre-commit [hooks](../.pre-commit-config.yaml) ensure code quality and
+The pre-commit [hooks](./.pre-commit-config.yaml) ensure code quality and
 consistency. They are executed in CI. PRs that fail to comply with the hooks
 will not be able to pass the corresponding CI gate. The hooks are only executed
 against staged files unless you run `pre-commit run --all`, in which case,
 they'll be executed against every file in the repository.
 
 Specific programmatically generated files listed in the `exclude` field in
-[.pre-commit-config.yaml](../.pre-commit-config.yaml) are deliberately excluded
+[.pre-commit-config.yaml](./.pre-commit-config.yaml) are deliberately excluded
 from the hooks.

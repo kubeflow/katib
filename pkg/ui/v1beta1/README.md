@@ -17,7 +17,7 @@ We are using [Material UI](https://material.angular.io/) to design frontend. Try
 
 To make changes to the UI you need to install:
 
-- Tools, defined [here](https://github.com/kubeflow/katib/blob/master/docs/developer-guide.md#requirements).
+- Tools, defined [here](https://github.com/kubeflow/katib/blob/master/CONTRIBUTING.md#requirements).
 
 - `node` (v16.20.2) and `npm` (v8.19.4). Recommended to install `node` and `npm` using [`nvm`](https://github.com/nvm-sh/nvm). After installing `nvm`, you can run `nvm install 16.20.2` to install `node` version 16.20.2 and run `nvm use 16.20.2` to use that version.
 
